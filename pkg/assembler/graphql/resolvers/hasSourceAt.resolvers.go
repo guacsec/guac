@@ -13,11 +13,7 @@ import (
 
 // IngestHasSourceAt is the resolver for the ingestHasSourceAt field.
 func (r *mutationResolver) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
-	ingestedHasSourceAt, err := r.Backend.IngestHasSourceAt(ctx, pkg, pkgMatchType, source, hasSourceAt)
-	if err != nil {
-		return "", err
-	}
-	return ingestedHasSourceAt.ID, err
+	return r.Backend.IngestHasSourceAt(ctx, pkg, pkgMatchType, source, hasSourceAt)
 }
 
 // IngestHasSourceAts is the resolver for the ingestHasSourceAts field.

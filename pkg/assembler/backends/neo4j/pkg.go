@@ -355,11 +355,11 @@ func removeInvalidCharFromProperty(key string) string {
 	return strings.ReplaceAll(key, ".", "_")
 }
 
-func (c *neo4jClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
-	return []*model.Package{}, fmt.Errorf("not implemented: IngestPackages")
+func (c *neo4jClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
+	return []*model.PackageIDs{}, fmt.Errorf("not implemented: IngestPackages")
 }
 
-func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
+func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
@@ -429,7 +429,10 @@ RETURN type.type, ns.namespace, name.name, version.version, version.subpath, ver
 		return nil, err
 	}
 
-	return result.(*model.Package), nil
+	// TODO: this need to return all IDs for type, namespace, name and version
+	return &model.PackageIDs{
+		PackageVersionID: result.(*model.Package).ID,
+	}, nil
 }
 
 func getCollectedPackageQualifiers(qualifierList []interface{}) []*model.PackageQualifier {

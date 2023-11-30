@@ -257,10 +257,10 @@ func generateModelCertifyGood(subject model.PackageSourceOrArtifact, justificati
 
 // ingest certifyGood
 
-func (c *neo4jClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
+func (c *neo4jClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (string, error) {
 	panic(fmt.Errorf("not implemented: IngestCertifyGood - IngestCertifyGood"))
 }
 
-func (c *neo4jClient) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
-	return []*model.CertifyGood{}, fmt.Errorf("not implemented: IngestCertifyGoods")
+func (c *neo4jClient) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
+	return []string{}, fmt.Errorf("not implemented: IngestCertifyGoods")
 }

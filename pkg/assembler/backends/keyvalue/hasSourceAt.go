@@ -75,16 +75,16 @@ func (c *demoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgIn
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSourceAt failed with err: %v", err)
 		}
-		modelHasMetadataIDs = append(modelHasMetadataIDs, hasMetadata.ID)
+		modelHasMetadataIDs = append(modelHasMetadataIDs, hasMetadata)
 	}
 	return modelHasMetadataIDs, nil
 }
 
-func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
+func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	return c.ingestHasSourceAt(ctx, packageArg, pkgMatchType, source, hasSourceAt, true)
 }
 
-func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec, readOnly bool) (*model.HasSourceAt, error) {
+func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestHasSourceAt"
 
 	in := &srcMapLink{
@@ -99,22 +99,22 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.Pkg
 
 	srcName, err := c.getSourceNameFromInput(ctx, source)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	in.SourceID = srcName.ThisID
 
 	pkgNameOrVersionNode, err := c.getPackageNameOrVerFromInput(ctx, packageArg, pkgMatchType)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	in.PackageID = pkgNameOrVersionNode.ID()
 
 	out, err := byKeykv[*srcMapLink](ctx, hsaCol, in.Key(), c)
 	if err == nil {
-		return c.buildHasSourceAt(ctx, out, nil, true)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -127,20 +127,20 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	in.ThisID = c.getNextID()
 
 	if err := c.addToIndex(ctx, hsaCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	// set the backlinks
 	if err := pkgNameOrVersionNode.setSrcMapLinks(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := srcName.setSrcMapLinks(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := setkv(ctx, hsaCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.buildHasSourceAt(ctx, in, nil, true)
+	return in.ThisID, nil
 }
 
 // Query HasSourceAt

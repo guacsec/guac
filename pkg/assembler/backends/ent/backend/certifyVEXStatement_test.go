@@ -684,7 +684,7 @@ func (s *Suite) TestVEX() {
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 
 			if test.Query.ID != nil {

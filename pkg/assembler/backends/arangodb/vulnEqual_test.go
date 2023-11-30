@@ -30,12 +30,12 @@ import (
 
 func TestVulnEqual(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -228,12 +228,12 @@ func TestVulnEqual(t *testing.T) {
 				{
 					Vulnerabilities: []*model.Vulnerability{
 						{
-							Type:             "cve",
-							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
-						},
-						{
 							Type:             "osv",
 							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+						},
+						{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
 						},
 					},
 					Justification: "test justification",
@@ -595,13 +595,16 @@ func TestVulnEqual(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
+			var collectedVulnIDs []*model.VulnerabilityIDs
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if vulnIDs, err := b.IngestVulnerability(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
+				} else {
+					collectedVulnIDs = append(collectedVulnIDs, vulnIDs)
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
+				veID, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -610,17 +613,17 @@ func TestVulnEqual(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.VulnEqualSpec{
-						ID: ptrfrom.String(found.ID),
+						ID: ptrfrom.String(veID),
 					}
 				}
 				if test.QueryVulnID {
 					test.Query = &model.VulnEqualSpec{
 						Vulnerabilities: []*model.VulnerabilitySpec{
 							{
-								ID: ptrfrom.String(found.Vulnerabilities[0].ID),
+								ID: ptrfrom.String(collectedVulnIDs[1].VulnerabilityNodeID),
 							},
 							{
-								ID: ptrfrom.String(found.Vulnerabilities[1].ID),
+								ID: ptrfrom.String(collectedVulnIDs[2].VulnerabilityNodeID),
 							},
 						},
 					}
@@ -642,12 +645,12 @@ func TestVulnEqual(t *testing.T) {
 
 func TestIngestVulnEquals(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -838,12 +841,12 @@ func TestIngestVulnEquals(t *testing.T) {
 
 func Test_buildVulnEqualByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -957,14 +960,14 @@ func Test_buildVulnEqualByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
+				veID, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildVulnEqualByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildVulnEqualByID(ctx, veID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
@@ -978,96 +981,3 @@ func Test_buildVulnEqualByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestVulnerabilityEqualNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Vuln      *model.VulnerabilityInputSpec
-// 		OtherVuln *model.VulnerabilityInputSpec
-// 		In        *model.VulnEqualInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InVuln       []*model.VulnerabilityInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:   "HappyPath",
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1},
-// 			Calls: []call{
-// 				call{
-// 					Vuln:      testdata.O1,
-// 					OtherVuln: testdata.C1,
-// 					In: &model.VulnEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"2": []string{"1", "5"}, // osv to isVuln
-// 				"4": []string{"3", "5"}, // cve to isVuln
-// 				"5": []string{"1", "3"}, // isVuln to osv and cve
-// 			},
-// 		},
-// 		{
-// 			Name:   "Two IsVuln",
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1, testdata.G1},
-// 			Calls: []call{
-// 				call{
-// 					Vuln:      testdata.O1,
-// 					OtherVuln: testdata.C1,
-// 					In: &model.VulnEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				call{
-// 					Vuln:      testdata.O1,
-// 					OtherVuln: testdata.G1,
-// 					In: &model.VulnEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"2": []string{"1", "7", "8"}, // osv to both isVuln
-// 				"4": []string{"3", "7"},
-// 				"6": []string{"5", "8"},
-// 				"7": []string{"1", "3"},
-// 				"8": []string{"1", "5"},
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.GetBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, g := range test.InVuln {
-// 				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
-// 					t.Fatalf("Could not ingest vulnerability: %s", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestVulnEqual(ctx, *o.Vuln, *o.OtherVuln, *o.In); err != nil {
-// 					t.Fatalf("Could not ingest vuln Equal: %s", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

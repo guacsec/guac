@@ -187,17 +187,12 @@ func TestIngestLicenses(t *testing.T) {
 	tests := []struct {
 		name    string
 		ingests []*model.LicenseInputSpec
-		exp     []*model.License
 	}{
 		{
 			name:    "Multiple",
 			ingests: []*model.LicenseInputSpec{l1, l2, l3, l4},
-			exp:     []*model.License{l1out, l2out, l3out, l4out},
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	ctx := context.Background()
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -206,13 +201,8 @@ func TestIngestLicenses(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			got, err := b.IngestLicenses(ctx, test.ingests)
-			if err != nil {
-				t.Fatalf("ingest error: %v", err)
-				return
-			}
-			if diff := cmp.Diff(test.exp, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			if _, err := b.IngestLicenses(ctx, test.ingests); err != nil {
+				t.Errorf("ingest error: %v", err)
 			}
 		})
 	}

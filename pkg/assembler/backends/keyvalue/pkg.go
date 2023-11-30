@@ -351,8 +351,8 @@ func (n *pkgVersion) Key() string {
 
 // Ingest Package
 
-func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
-	var modelPkgs []*model.Package
+func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
+	var modelPkgs []*model.PackageIDs
 	for _, pkg := range pkgs {
 		modelPkg, err := c.IngestPackage(ctx, *pkg)
 		if err != nil {
@@ -363,7 +363,7 @@ func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputS
 	return modelPkgs, nil
 }
 
-func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.Package, error) {
+func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.PackageIDs, error) {
 	inType := &pkgType{
 		Type: input.Type,
 	}
@@ -472,10 +472,12 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 		c.m.Unlock()
 	}
 
-	// build return GraphQL type
-	c.m.RLock()
-	defer c.m.RUnlock()
-	return c.buildPackageResponse(ctx, outVersion.ThisID, nil)
+	return &model.PackageIDs{
+		PackageTypeID:      outType.ThisID,
+		PackageNamespaceID: outNamespace.ThisID,
+		PackageNameID:      outName.ThisID,
+		PackageVersionID:   outVersion.ThisID,
+	}, nil
 }
 
 func hashVersionHelper(version string, subpath string, qualifiers map[string]string) string {

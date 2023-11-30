@@ -582,7 +582,7 @@ func (s *Suite) TestIngestCertifyVulnerability() {
 				if err != nil {
 					return
 				}
-				recordIDs[i] = record.ID
+				recordIDs[i] = record
 			}
 
 			if test.Query.ID != nil {
@@ -1048,7 +1048,7 @@ func (s *Suite) TestIngestCertifyVulns() {
 				if err != nil {
 					return
 				}
-				recordIDs[i] = cvs[0].ID
+				recordIDs[i] = cvs[0]
 			}
 
 			if test.Query.ID != nil {

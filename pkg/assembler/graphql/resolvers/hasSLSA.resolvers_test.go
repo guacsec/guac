@@ -83,7 +83,7 @@ func TestIngestHasSLSA(t *testing.T) {
 				b.
 					EXPECT().
 					IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA).
-					Return(&model.HasSlsa{ID: "a"}, nil).
+					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestSlsa(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
@@ -183,7 +183,7 @@ func TestIngestHasSLSAs(t *testing.T) {
 				b.
 					EXPECT().
 					IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA).
-					Return([]*model.HasSlsa{{ID: "a"}}, nil).
+					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
 				if (err != nil) != test.ExpIngestErr {

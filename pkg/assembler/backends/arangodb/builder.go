@@ -64,8 +64,7 @@ func getBuilderQueryValues(builder *model.BuilderInputSpec) map[string]any {
 	return values
 }
 
-func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
-
+func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range builders {
@@ -93,15 +92,11 @@ func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.Bui
 		}
 	}
 	sb.WriteString("]")
-
 	query := `
 UPSERT { uri:doc.uri } 
 INSERT { uri:doc.uri } 
 UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
-RETURN {
-	"id": NEW._id,
-	"uri": NEW.uri,
-  }`
+RETURN { "id": NEW._id }`
 
 	sb.WriteString(query)
 
@@ -111,34 +106,39 @@ RETURN {
 	}
 	defer cursor.Close()
 
-	return getBuilders(ctx, cursor)
+	createdBuilders, err := getBuilders(ctx, cursor)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get builders from arango cursor: %w", err)
+	}
 
+	var builderIDs []string
+	for _, build := range createdBuilders {
+		builderIDs = append(builderIDs, build.ID)
+	}
+	return builderIDs, nil
 }
 
-func (c *arangoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+func (c *arangoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
 	query := `
 UPSERT { uri:@uri } 
 INSERT { uri:@uri } 
 UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
-RETURN {
-	"id": NEW._id,
-	"uri": NEW.uri,
-  }`
+RETURN { "id": NEW._id }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getBuilderQueryValues(builder), "IngestBuilder")
 	if err != nil {
-		return nil, fmt.Errorf("failed to ingest builder: %w", err)
+		return "", fmt.Errorf("failed to ingest builder: %w", err)
 	}
 	defer cursor.Close()
 
 	createdBuilders, err := getBuilders(ctx, cursor)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get builders from arango cursor: %w", err)
+		return "", fmt.Errorf("failed to get builders from arango cursor: %w", err)
 	}
 	if len(createdBuilders) == 1 {
-		return createdBuilders[0], nil
+		return createdBuilders[0].ID, nil
 	} else {
-		return nil, fmt.Errorf("number of builders ingested is greater than one")
+		return "", fmt.Errorf("number of builders ingested is greater than one")
 	}
 }
 

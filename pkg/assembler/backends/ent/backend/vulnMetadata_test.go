@@ -1054,7 +1054,6 @@ func (s *Suite) TestIngestVulnMetadatas() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-
 			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerabilities: %a", err)
 			}
@@ -1068,7 +1067,6 @@ func (s *Suite) TestIngestVulnMetadatas() {
 				}
 
 			}
-
 			got, err := b.VulnerabilityMetadata(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)

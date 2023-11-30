@@ -31,12 +31,12 @@ import (
 
 func TestPkgEqual(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -574,13 +574,16 @@ func TestPkgEqual(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
+			var collectedPkgIDs []*model.PackageIDs
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
+				} else {
+					collectedPkgIDs = append(collectedPkgIDs, pkgIDs)
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
+				peID, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -589,13 +592,13 @@ func TestPkgEqual(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.PkgEqualSpec{
-						ID: ptrfrom.String(found.ID),
+						ID: ptrfrom.String(peID),
 					}
 				}
 				if test.QueryPkgID {
 					test.Query = &model.PkgEqualSpec{
 						Packages: []*model.PkgSpec{{
-							ID: ptrfrom.String(found.Packages[0].Namespaces[0].Names[0].Versions[0].ID),
+							ID: ptrfrom.String(collectedPkgIDs[0].PackageVersionID),
 						}},
 					}
 				}
@@ -603,10 +606,10 @@ func TestPkgEqual(t *testing.T) {
 					test.Query = &model.PkgEqualSpec{
 						Packages: []*model.PkgSpec{
 							{
-								ID: ptrfrom.String(found.Packages[0].Namespaces[0].Names[0].Versions[0].ID),
+								ID: ptrfrom.String(collectedPkgIDs[0].PackageVersionID),
 							},
 							{
-								ID: ptrfrom.String(found.Packages[1].Namespaces[0].Names[0].Versions[0].ID),
+								ID: ptrfrom.String(collectedPkgIDs[1].PackageVersionID),
 							},
 						},
 					}
@@ -628,12 +631,12 @@ func TestPkgEqual(t *testing.T) {
 
 func TestIngestPkgEquals(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1030,12 +1033,12 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 
 func Test_buildPkgEqualByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1116,14 +1119,14 @@ func Test_buildPkgEqualByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
+				peID, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildPkgEqualByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildPkgEqualByID(ctx, peID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
@@ -1138,96 +1141,3 @@ func Test_buildPkgEqualByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestPkgEqualNeighbors(t *testing.T) {
-// 	type call struct {
-// 		P1 *model.PkgInputSpec
-// 		P2 *model.PkgInputSpec
-// 		HE *model.PkgEqualInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-// 			Calls: []call{
-// 				{
-// 					P1: testdata.P1,
-// 					P2: testdata.P2,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "6"}, // testdata.P1
-// 				"5": []string{"1", "6"}, // testdata.P2
-// 				"6": []string{"1", "1"}, // pkgequal
-// 			},
-// 		},
-// 		{
-// 			Name:  "Multiple",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
-// 			Calls: []call{
-// 				{
-// 					P1: testdata.P1,
-// 					P2: testdata.P2,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					P1: testdata.P1,
-// 					P2: testdata.P3,
-// 					HE: &model.PkgEqualInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "7", "8"}, // testdata.P1
-// 				"5": []string{"1", "7"},      // testdata.P2
-// 				"6": []string{"1", "8"},      // testdata.P3
-// 				"7": []string{"1", "1"},      // pkgequal 1
-// 				"8": []string{"1", "1"},      // pkgequal 2
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := backends.Get("inmem", nil, nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, a := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *a); err != nil {
-// 					t.Fatalf("Could not ingest pkg: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE); err != nil {
-// 					t.Fatalf("Could not ingest PkgEqual: %v", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

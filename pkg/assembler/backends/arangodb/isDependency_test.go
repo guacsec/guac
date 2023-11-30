@@ -35,12 +35,12 @@ var (
 
 func TestIsDependency(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -865,12 +865,27 @@ func TestIsDependency(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
+				} else {
+					if test.QueryPkgID {
+						test.Query = &model.IsDependencySpec{
+							Package: &model.PkgSpec{
+								ID: ptrfrom.String(pkgIDs.PackageVersionID),
+							},
+						}
+					}
+					if test.QueryDepPkgID {
+						test.Query = &model.IsDependencySpec{
+							DependencyPackage: &model.PkgSpec{
+								ID: ptrfrom.String(pkgIDs.PackageVersionID),
+							},
+						}
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
+				depID, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -879,21 +894,7 @@ func TestIsDependency(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.IsDependencySpec{
-						ID: ptrfrom.String(found.ID),
-					}
-				}
-				if test.QueryPkgID {
-					test.Query = &model.IsDependencySpec{
-						Package: &model.PkgSpec{
-							ID: ptrfrom.String(found.Package.Namespaces[0].Names[0].Versions[0].ID),
-						},
-					}
-				}
-				if test.QueryDepPkgID {
-					test.Query = &model.IsDependencySpec{
-						DependencyPackage: &model.PkgSpec{
-							ID: ptrfrom.String(found.DependencyPackage.Namespaces[0].Names[0].Versions[0].ID),
-						},
+						ID: ptrfrom.String(depID),
 					}
 				}
 			}
@@ -913,12 +914,12 @@ func TestIsDependency(t *testing.T) {
 
 func TestIsDependencies(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -958,11 +959,6 @@ func TestIsDependencies(t *testing.T) {
 					DependencyPackage: testdata.P2outName,
 					Justification:     "test justification",
 				},
-				{
-					Package:           testdata.P2out,
-					DependencyPackage: testdata.P4outName,
-					Justification:     "test justification",
-				},
 			},
 		},
 		{
@@ -987,11 +983,6 @@ func TestIsDependencies(t *testing.T) {
 					DependencyPackage: testdata.P2out,
 					Justification:     "test justification",
 				},
-				{
-					Package:           testdata.P2out,
-					DependencyPackage: testdata.P4out,
-					Justification:     "test justification",
-				},
 			},
 		},
 	}
@@ -1006,9 +997,16 @@ func TestIsDependencies(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				got, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
+				depID, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: ptrfrom.String(depID[0])})
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
 				if err != nil {
 					return
@@ -1017,19 +1015,18 @@ func TestIsDependencies(t *testing.T) {
 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}
-
 		})
 	}
 }
 
 func Test_buildIsDependencyByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1167,14 +1164,14 @@ func Test_buildIsDependencyByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
+				depID, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildIsDependencyByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildIsDependencyByID(ctx, depID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
@@ -1189,100 +1186,3 @@ func Test_buildIsDependencyByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestIsDependencyNeighbors(t *testing.T) {
-// 	type call struct {
-// 		P1 *model.PkgInputSpec
-// 		P2 *model.PkgInputSpec
-// 		MF model.MatchFlags
-// 		ID *model.IsDependencyInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-// 			Calls: []call{
-// 				{
-// 					P1: testdata.P1,
-// 					P2: testdata.P2,
-// 					MF: mAll,
-// 					ID: &model.IsDependencyInputSpec{},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"3": []string{"1", "1", "1", "6"}, // testdata.P1/testdata.P2 name
-// 				"4": []string{"1", "6"},           // testdata.P1 version
-// 				"5": []string{"1"},                // testdata.P2 version
-// 				"6": []string{"1", "1"},           // isDep
-// 			},
-// 		},
-// 		{
-// 			Name:  "Multiple",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
-// 			Calls: []call{
-// 				{
-// 					P1: testdata.P1,
-// 					P2: testdata.P4,
-// 					MF: mAll,
-// 					ID: &model.IsDependencyInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					P1: testdata.P2,
-// 					P2: testdata.P4,
-// 					MF: mAll,
-// 					ID: &model.IsDependencyInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"3":  []string{"1", "1", "1"},        // testdata.P1/testdata.P2 name, 1 up, 2 down
-// 				"4":  []string{"1", "10"},            // testdata.P1 version, 1 up, isdep
-// 				"5":  []string{"1", "11"},            // testdata.P2 version, 1 up, isdep
-// 				"8":  []string{"6", "6", "10", "11"}, // testdata.P4 name, 1 up, 1 down, 2 isdeps
-// 				"10": []string{"1", "6"},             // isdep 1
-// 				"11": []string{"1", "6"},             // isdep 2
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, a := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *a); err != nil {
-// 					t.Fatalf("Could not ingest pkg: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID); err != nil {
-// 					t.Fatalf("Could not ingest IsDependency: %v", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

@@ -78,7 +78,7 @@ func TestIngestCertifyLegal(t *testing.T) {
 			b.
 				EXPECT().
 				IngestCertifyLegal(ctx, test.Call.Sub, test.Call.Dec, test.Call.Dis, test.Call.CL).
-				Return(&model.CertifyLegal{ID: "123"}, nil).
+				Return("", nil).
 				Times(times)
 			_, err := r.Mutation().IngestCertifyLegal(ctx, test.Call.Sub, test.Call.Dec, test.Call.Dis, *test.Call.CL)
 			if (err != nil) != test.ExpIngestErr {

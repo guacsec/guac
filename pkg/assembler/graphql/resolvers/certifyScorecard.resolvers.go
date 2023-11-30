@@ -13,11 +13,7 @@ import (
 
 // IngestScorecard is the resolver for the ingestScorecard field.
 func (r *mutationResolver) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
-	ingestedScorecard, err := r.Backend.IngestScorecard(ctx, source, scorecard)
-	if err != nil {
-		return "", err
-	}
-	return ingestedScorecard.ID, err
+	return r.Backend.IngestScorecard(ctx, source, scorecard)
 }
 
 // IngestScorecards is the resolver for the ingestScorecards field.
@@ -27,13 +23,7 @@ func (r *mutationResolver) IngestScorecards(ctx context.Context, sources []*mode
 	if len(sources) != len(scorecards) {
 		return ingestedScorecardsIDS, fmt.Errorf("%v :: uneven source and scorecards for ingestion", funcName)
 	}
-	ingestedScorecards, err := r.Backend.IngestScorecards(ctx, sources, scorecards)
-	if err == nil {
-		for _, scorecard := range ingestedScorecards {
-			ingestedScorecardsIDS = append(ingestedScorecardsIDS, scorecard.ID)
-		}
-	}
-	return ingestedScorecardsIDS, err
+	return r.Backend.IngestScorecards(ctx, sources, scorecards)
 }
 
 // Scorecards is the resolver for the scorecards field.

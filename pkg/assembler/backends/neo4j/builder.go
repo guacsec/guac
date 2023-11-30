@@ -62,11 +62,11 @@ func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSp
 	return result.([]*model.Builder), nil
 }
 
-func (c *neo4jClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
-	return []*model.Builder{}, fmt.Errorf("not implemented: IngestBuilders")
+func (c *neo4jClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
+	return []string{}, fmt.Errorf("not implemented: IngestBuilders")
 }
 
-func (c *neo4jClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+func (c *neo4jClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
@@ -92,10 +92,10 @@ func (c *neo4jClient) IngestBuilder(ctx context.Context, builder *model.BuilderI
 			return builder, nil
 		})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return result.(*model.Builder), nil
+	return result.(*model.Builder).ID, nil
 }
 
 func generateModelBuilder(uri string) *model.Builder {

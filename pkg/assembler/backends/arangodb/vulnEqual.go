@@ -161,7 +161,7 @@ func getVulnEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuild
 	}
 	defer cursor.Close()
 
-	return getVulnEqualFromCursor(ctx, cursor)
+	return getVulnEqualFromCursor(ctx, cursor, false)
 }
 
 func setVulnEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, vulnEqualSpec *model.VulnEqualSpec, queryValues map[string]any) {
@@ -238,61 +238,35 @@ func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*
 	LET firstVuln = FIRST(
 		FOR vVulnID in vulnerabilities
 		  FILTER vVulnID.guacKey == doc.guacVulnKey
-		FOR vType in vulnTypes
-		  FILTER vType._id == vVulnID._parent
-
 		RETURN {
-		  "typeID": vType._id,
-		  "type": vType.type,
-		  "vuln_id": vVulnID._id,
-		  "vuln": vVulnID.vulnerabilityID,
-		  "vulnDoc": vVulnID
+			"vuln_id": vVulnID._id,
+			"vuln_key": vVulnID._key
 		}
 	)
 
 	LET equalVuln = FIRST(
 		FOR vVulnID in vulnerabilities
 		  FILTER vVulnID.guacKey == doc.equalGuacVulnKey
-		FOR vType in vulnTypes
-		  FILTER vType._id == vVulnID._parent
-
 		RETURN {
-		  "typeID": vType._id,
-		  "type": vType.type,
 		  "vuln_id": vVulnID._id,
-		  "vuln": vVulnID.vulnerabilityID,
-		  "vulnDoc": vVulnID
+		  "vuln_key": vVulnID._key
 		}
 	)
 	
 	LET vulnEqual = FIRST(
-		UPSERT { vulnerabilityID:firstVuln.vulnDoc._id, equalVulnerabilityID:equalVuln.vulnDoc._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-			INSERT { vulnerabilityID:firstVuln.vulnDoc._id, equalVulnerabilityID:equalVuln.vulnDoc._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+		UPSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			INSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 			UPDATE {} IN vulnEquals
-			RETURN NEW
+			RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			}
 	)
 	
-	INSERT { _key: CONCAT("vulnEqualSubjectVulnEdges", firstVuln.vulnDoc._key, vulnEqual._key), _from: firstVuln.vulnDoc._id, _to: vulnEqual._id} INTO vulnEqualSubjectVulnEdges OPTIONS { overwriteMode: "ignore" }
-	INSERT { _key: CONCAT("vulnEqualVulnEdges", vulnEqual._key, equalVuln.vulnDoc._key), _from: vulnEqual._id, _to: equalVuln.vulnDoc._id} INTO vulnEqualVulnEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("vulnEqualSubjectVulnEdges", firstVuln.vuln_key, vulnEqual._key), _from: firstVuln.vuln_id, _to: vulnEqual._id} INTO vulnEqualSubjectVulnEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("vulnEqualVulnEdges", vulnEqual._key, equalVuln.vuln_key), _from: vulnEqual._id, _to: equalVuln.vuln_id} INTO vulnEqualVulnEdges OPTIONS { overwriteMode: "ignore" }
 	
-	RETURN {
-		'vulnerability': {
-			'type_id': firstVuln.typeID,
-			'type': firstVuln.type,
-			'vuln_id': firstVuln.vuln_id,
-			'vuln': firstVuln.vuln
-		},
-		'equalVulnerability': {
-			'type_id': equalVuln.typeID,
-			'type': equalVuln.type,
-			'vuln_id': equalVuln.vuln_id,
-			'vuln': equalVuln.vuln
-		},
-		'vulnEqual_id': vulnEqual._id,
-		'justification': vulnEqual.justification,
-		'collector': vulnEqual.collector,
-		'origin': vulnEqual.origin
-	}`
+	RETURN { 'vulnEqual_id': vulnEqual._id }`
 
 	sb.WriteString(query)
 
@@ -302,7 +276,7 @@ func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*
 	}
 	defer cursor.Close()
 
-	vulnEqualList, err := getVulnEqualFromCursor(ctx, cursor)
+	vulnEqualList, err := getVulnEqualFromCursor(ctx, cursor, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get vulnEqual from arango cursor: %w", err)
 	}
@@ -315,86 +289,60 @@ func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*
 	return vulnEqualIDList, nil
 }
 
-func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
+func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	query := `
 	LET firstVuln = FIRST(
 		FOR vVulnID in vulnerabilities
 		  FILTER vVulnID.guacKey == @guacVulnKey
-		FOR vType in vulnTypes
-		  FILTER vType._id == vVulnID._parent
-
 		RETURN {
-		  "typeID": vType._id,
-		  "type": vType.type,
-		  "vuln_id": vVulnID._id,
-		  "vuln": vVulnID.vulnerabilityID,
-		  "vulnDoc": vVulnID
+			"vuln_id": vVulnID._id,
+			"vuln_key": vVulnID._key
 		}
 	)
 
 	LET equalVuln = FIRST(
 		FOR vVulnID in vulnerabilities
 		  FILTER vVulnID.guacKey == @equalGuacVulnKey
-		FOR vType in vulnTypes
-		  FILTER vType._id == vVulnID._parent
-
 		RETURN {
-		  "typeID": vType._id,
-		  "type": vType.type,
-		  "vuln_id": vVulnID._id,
-		  "vuln": vVulnID.vulnerabilityID,
-		  "vulnDoc": vVulnID
+			"vuln_id": vVulnID._id,
+			"vuln_key": vVulnID._key
 		}
 	)
 	
 	LET vulnEqual = FIRST(
-		UPSERT { vulnerabilityID:firstVuln.vulnDoc._id, equalVulnerabilityID:equalVuln.vulnDoc._id, justification:@justification, collector:@collector, origin:@origin } 
-			INSERT { vulnerabilityID:firstVuln.vulnDoc._id, equalVulnerabilityID:equalVuln.vulnDoc._id, justification:@justification, collector:@collector, origin:@origin } 
+		UPSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:@justification, collector:@collector, origin:@origin } 
+			INSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:@justification, collector:@collector, origin:@origin } 
 			UPDATE {} IN vulnEquals
-			RETURN NEW
+			RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			}
 	)
 	
-	INSERT { _key: CONCAT("vulnEqualSubjectVulnEdges", firstVuln.vulnDoc._key, vulnEqual._key), _from: firstVuln.vulnDoc._id, _to: vulnEqual._id} INTO vulnEqualSubjectVulnEdges OPTIONS { overwriteMode: "ignore" }
-	INSERT { _key: CONCAT("vulnEqualVulnEdges", vulnEqual._key, equalVuln.vulnDoc._key), _from: vulnEqual._id, _to: equalVuln.vulnDoc._id} INTO vulnEqualVulnEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("vulnEqualSubjectVulnEdges", firstVuln.vuln_key, vulnEqual._key), _from: firstVuln.vuln_id, _to: vulnEqual._id} INTO vulnEqualSubjectVulnEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("vulnEqualVulnEdges", vulnEqual._key, equalVuln.vuln_key), _from: vulnEqual._id, _to: equalVuln.vuln_id} INTO vulnEqualVulnEdges OPTIONS { overwriteMode: "ignore" }
 	
-	RETURN {
-		'vulnerability': {
-			'type_id': firstVuln.typeID,
-			'type': firstVuln.type,
-			'vuln_id': firstVuln.vuln_id,
-			'vuln': firstVuln.vuln
-		},
-		'equalVulnerability': {
-			'type_id': equalVuln.typeID,
-			'type': equalVuln.type,
-			'vuln_id': equalVuln.vuln_id,
-			'vuln': equalVuln.vuln
-		},
-		'vulnEqual_id': vulnEqual._id,
-		'justification': vulnEqual.justification,
-		'collector': vulnEqual.collector,
-		'origin': vulnEqual.origin
-	}`
+	RETURN { 'vulnEqual_id': vulnEqual._id }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getVulnEqualQueryValues(&vulnerability, &otherVulnerability, &vulnEqual), "IngestVulnEqual")
 	if err != nil {
-		return nil, fmt.Errorf("failed to ingest vulnEqual: %w", err)
+		return "", fmt.Errorf("failed to ingest vulnEqual: %w", err)
 	}
 	defer cursor.Close()
 
-	vulnEqualList, err := getVulnEqualFromCursor(ctx, cursor)
+	vulnEqualList, err := getVulnEqualFromCursor(ctx, cursor, true)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get vulnEqual from arango cursor: %w", err)
+		return "", fmt.Errorf("failed to get vulnEqual from arango cursor: %w", err)
 	}
 
 	if len(vulnEqualList) == 1 {
-		return vulnEqualList[0], nil
+		return vulnEqualList[0].ID, nil
 	} else {
-		return nil, fmt.Errorf("number of vulnEqual ingested is greater than one")
+		return "", fmt.Errorf("number of vulnEqual ingested is greater than one")
 	}
 }
 
-func getVulnEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.VulnEqual, error) {
+func getVulnEqualFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.VulnEqual, error) {
 	type collectedData struct {
 		Vulnerability      *dbVulnID `json:"vulnerability"`
 		EqualVulnerability *dbVulnID `json:"equalVulnerability"`
@@ -421,35 +369,39 @@ func getVulnEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model
 
 	var vulnEqualList []*model.VulnEqual
 	for _, createdValue := range createdValues {
-
-		vuln := &model.Vulnerability{
-			ID:   createdValue.Vulnerability.VulnID,
-			Type: createdValue.Vulnerability.VulnType,
-			VulnerabilityIDs: []*model.VulnerabilityID{
-				{
-					ID:              createdValue.Vulnerability.VulnID,
-					VulnerabilityID: createdValue.Vulnerability.Vuln,
+		var vulnEqual *model.VulnEqual
+		if !ingestion {
+			vuln := &model.Vulnerability{
+				ID:   createdValue.Vulnerability.TypeID,
+				Type: createdValue.Vulnerability.VulnType,
+				VulnerabilityIDs: []*model.VulnerabilityID{
+					{
+						ID:              createdValue.Vulnerability.VulnID,
+						VulnerabilityID: createdValue.Vulnerability.Vuln,
+					},
 				},
-			},
-		}
+			}
 
-		equalVuln := &model.Vulnerability{
-			ID:   createdValue.EqualVulnerability.VulnID,
-			Type: createdValue.EqualVulnerability.VulnType,
-			VulnerabilityIDs: []*model.VulnerabilityID{
-				{
-					ID:              createdValue.EqualVulnerability.VulnID,
-					VulnerabilityID: createdValue.EqualVulnerability.Vuln,
+			equalVuln := &model.Vulnerability{
+				ID:   createdValue.EqualVulnerability.TypeID,
+				Type: createdValue.EqualVulnerability.VulnType,
+				VulnerabilityIDs: []*model.VulnerabilityID{
+					{
+						ID:              createdValue.EqualVulnerability.VulnID,
+						VulnerabilityID: createdValue.EqualVulnerability.Vuln,
+					},
 				},
-			},
-		}
+			}
 
-		vulnEqual := &model.VulnEqual{
-			ID:              createdValue.VulnEqualId,
-			Vulnerabilities: []*model.Vulnerability{vuln, equalVuln},
-			Justification:   createdValue.Justification,
-			Origin:          createdValue.Origin,
-			Collector:       createdValue.Collector,
+			vulnEqual = &model.VulnEqual{
+				ID:              createdValue.VulnEqualId,
+				Vulnerabilities: []*model.Vulnerability{vuln, equalVuln},
+				Justification:   createdValue.Justification,
+				Origin:          createdValue.Origin,
+				Collector:       createdValue.Collector,
+			}
+		} else {
+			vulnEqual = &model.VulnEqual{ID: createdValue.VulnEqualId}
 		}
 		vulnEqualList = append(vulnEqualList, vulnEqual)
 	}

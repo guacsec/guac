@@ -6,37 +6,19 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/helpers"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // IngestSource is the resolver for the ingestSource field.
 func (r *mutationResolver) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
-	ingestedSource, err := r.Backend.IngestSource(ctx, source)
-	if err != nil {
-		return nil, err
-	}
-	results := helpers.GetSourceAsIds([]*model.Source{ingestedSource})
-	if len(results) != 1 {
-		return nil, fmt.Errorf("could no derive correct source ID information for ingested sources, expected to return 1 but have %d", len(results))
-	}
-	return results[0], nil
+	return r.Backend.IngestSource(ctx, source)
 }
 
 // IngestSources is the resolver for the ingestSources field.
 func (r *mutationResolver) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
-	ingestedSources, err := r.Backend.IngestSources(ctx, sources)
-	if err == nil {
-		results := helpers.GetSourceAsIds(ingestedSources)
-		if len(results) != len(sources) {
-			return nil, fmt.Errorf("could no derive correct source ID information for ingested sources, expected to return %d but have %d", len(sources), len(results))
-		}
-		return results, nil
-	}
-	return nil, err
+	return r.Backend.IngestSources(ctx, sources)
 }
 
 // Sources is the resolver for the sources field.

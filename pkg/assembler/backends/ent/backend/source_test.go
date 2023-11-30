@@ -100,7 +100,7 @@ func (s *Suite) TestSources() {
 			if err != nil {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
-			ingestedPkg, err := be.IngestSources(ctx, tt.srcInput)
+			ids, err := be.IngestSources(ctx, tt.srcInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -111,7 +111,7 @@ func (s *Suite) TestSources() {
 			}
 
 			if tt.idInFilter {
-				tt.srcFilter.ID = &ingestedPkg[0].Namespaces[0].Names[0].ID
+				tt.srcFilter.ID = &ids[0].SourceNameID
 			}
 			got, err := be.Sources(ctx, tt.srcFilter)
 			if (err != nil) != tt.wantErr {
@@ -623,12 +623,6 @@ func (s *Suite) TestHasSourceAt() {
 			_, err = b.IngestSources(ctx, test.InSrc)
 			s.NoError(err, "Could not ingest sources")
 
-			// for _, s := range test.InSrc {
-			// if _, err := b.IngestSource(ctx, *s); err != nil {
-			// 	t.Fatalf("Could not ingest source: %v", err)
-			// }
-			// }
-
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
 				v, err := b.IngestHasSourceAt(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
@@ -638,7 +632,7 @@ func (s *Suite) TestHasSourceAt() {
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 
 			if test.Query.ID != nil {
@@ -910,6 +904,58 @@ func (s *Suite) TestIngestHasSourceAts() {
 			}
 			if diff := cmp.Diff(test.ExpHSA, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+// This test is to traverse the other branches of the upsert, not covered by the happy path at the insertion,
+// when the create fails due to the presence of the input in the store, and a where query is used in the error branch
+func (s *Suite) TestSourcesIngestSameTwice() {
+
+	tests := []struct {
+		name             string
+		sourceInputsSpec []model.SourceInputSpec
+	}{{
+		name: "IngestSameTwice",
+		sourceInputsSpec: []model.SourceInputSpec{
+			{
+				Type:      "git",
+				Namespace: "github.com/jeff",
+				Name:      "myrepo",
+				Tag:       ptr("nightly"),
+				Commit:    ptr("012345678"),
+			},
+			{
+				Type:      "git",
+				Namespace: "github.com/jeff",
+				Name:      "myrepo",
+				Tag:       ptr("nightly"),
+				Commit:    ptr("012345678"),
+			},
+		},
+	}}
+
+	ctx := s.Ctx
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+
+			for _, bIn := range tt.sourceInputsSpec {
+				if _, err := b.IngestSource(ctx, bIn); err != nil {
+					t.Fatalf("Could not ingest source: %v , err: %v", bIn, err)
+				}
+			}
+			items, err := b.Sources(ctx, &model.SourceSpec{})
+			if err != nil {
+				t.Fatalf("Error on load Sources %v", err)
+			}
+			if len(items) == 2 {
+				t.Fatalf("Wrong ingestions, ingest same twice found two")
 			}
 		})
 	}

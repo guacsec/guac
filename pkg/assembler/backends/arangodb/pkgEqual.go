@@ -230,7 +230,7 @@ func getPkgEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilde
 	}
 	defer cursor.Close()
 
-	return getPkgEqualFromCursor(ctx, cursor)
+	return getPkgEqualFromCursor(ctx, cursor, false)
 }
 
 func setPkgEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, pkgEqualSpec *model.PkgEqualSpec, queryValues map[string]any) {
@@ -370,93 +370,35 @@ func (c *arangoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInp
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions
 		  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-		FOR pName in pkgNames
-		  FILTER pName._id == pVersion._parent
-		FOR pNs in pkgNamespaces
-		  FILTER pNs._id == pName._parent
-		FOR pType in pkgTypes
-		  FILTER pType._id == pNs._parent
-
 		RETURN {
-		  'typeID': pType._id,
-		  'type': pType.type,
-		  'namespace_id': pNs._id,
-		  'namespace': pNs.namespace,
-		  'name_id': pName._id,
-		  'name': pName.name,
-		  'version_id': pVersion._id,
-		  'version': pVersion.version,
-		  'subpath': pVersion.subpath,
-		  'qualifier_list': pVersion.qualifier_list,
-		  'versionDoc': pVersion
+			'version_id': pVersion._id,
+			'version_key': pVersion._key
 		}
 	)
 
 	LET equalPkg = FIRST(
 		FOR pVersion in pkgVersions
 		  FILTER pVersion.guacKey == doc.equalPkgVersionGuacKey
-		FOR pName in pkgNames
-		  FILTER pName._id == pVersion._parent
-		FOR pNs in pkgNamespaces
-		  FILTER pNs._id == pName._parent
-		FOR pType in pkgTypes
-		  FILTER pType._id == pNs._parent
-
 		RETURN {
-		  'typeID': pType._id,
-		  'type': pType.type,
-		  'namespace_id': pNs._id,
-		  'namespace': pNs.namespace,
-		  'name_id': pName._id,
-		  'name': pName.name,
-		  'version_id': pVersion._id,
-		  'version': pVersion.version,
-		  'subpath': pVersion.subpath,
-		  'qualifier_list': pVersion.qualifier_list,
-		  'versionDoc': pVersion
+			'version_id': pVersion._id,
+			'version_key': pVersion._key
 		}
 	)
 	
 	LET pkgEqual = FIRST(
-		UPSERT { packageID:firstPkg.versionDoc._id, equalPackageID:equalPkg.versionDoc._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-			INSERT { packageID:firstPkg.versionDoc._id, equalPackageID:equalPkg.versionDoc._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+		UPSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			INSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 			UPDATE {} IN pkgEquals
-			RETURN NEW
+			RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			}
 	)
 	
-	INSERT { _key: CONCAT("pkgEqualSubjectPkgEdges", firstPkg.versionDoc._key, pkgEqual._key), _from: firstPkg.versionDoc._id, _to: pkgEqual._id} INTO pkgEqualSubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
-	INSERT { _key: CONCAT("pkgEqualPkgEdges", pkgEqual._key, equalPkg.versionDoc._key), _from: pkgEqual._id, _to: equalPkg.versionDoc._id} INTO pkgEqualPkgEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("pkgEqualSubjectPkgEdges", firstPkg.version_key, pkgEqual._key), _from: firstPkg.version_id, _to: pkgEqual._id} INTO pkgEqualSubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("pkgEqualPkgEdges", pkgEqual._key, equalPkg.version_key), _from: pkgEqual._id, _to: equalPkg.version_id} INTO pkgEqualPkgEdges OPTIONS { overwriteMode: "ignore" }
 	
-	RETURN {
-		'pkgVersion': {
-			'type_id': firstPkg.typeID,
-			'type': firstPkg.type,
-			'namespace_id': firstPkg.namespace_id,
-			'namespace': firstPkg.namespace,
-			'name_id': firstPkg.name_id,
-			'name': firstPkg.name,
-			'version_id': firstPkg.version_id,
-			'version': firstPkg.version,
-			'subpath': firstPkg.subpath,
-			'qualifier_list': firstPkg.qualifier_list
-		},
-		'equalPkgVersion': {
-			'type_id': equalPkg.typeID,
-			'type': equalPkg.type,
-			'namespace_id': equalPkg.namespace_id,
-			'namespace': equalPkg.namespace,
-			'name_id': equalPkg.name_id,
-			'name': equalPkg.name,
-			'version_id': equalPkg.version_id,
-			'version': equalPkg.version,
-			'subpath': equalPkg.subpath,
-			'qualifier_list': equalPkg.qualifier_list
-		},
-		'pkgEqual_id': pkgEqual._id,
-		'justification': pkgEqual.justification,
-		'collector': pkgEqual.collector,
-		'origin': pkgEqual.origin
-	}`
+	RETURN { 'pkgEqual_id': pkgEqual._id }`
 
 	sb.WriteString(query)
 
@@ -466,7 +408,7 @@ func (c *arangoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInp
 	}
 	defer cursor.Close()
 
-	pkgEqualList, err := getPkgEqualFromCursor(ctx, cursor)
+	pkgEqualList, err := getPkgEqualFromCursor(ctx, cursor, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get pkgEqual from arango cursor: %w", err)
 	}
@@ -479,118 +421,60 @@ func (c *arangoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInp
 	return pkgEqualIDList, nil
 }
 
-func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
+func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	query := `
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions
 		  FILTER pVersion.guacKey == @pkgVersionGuacKey
-		FOR pName in pkgNames
-		  FILTER pName._id == pVersion._parent
-		FOR pNs in pkgNamespaces
-		  FILTER pNs._id == pName._parent
-		FOR pType in pkgTypes
-		  FILTER pType._id == pNs._parent
-
 		RETURN {
-		  'typeID': pType._id,
-		  'type': pType.type,
-		  'namespace_id': pNs._id,
-		  'namespace': pNs.namespace,
-		  'name_id': pName._id,
-		  'name': pName.name,
-		  'version_id': pVersion._id,
-		  'version': pVersion.version,
-		  'subpath': pVersion.subpath,
-		  'qualifier_list': pVersion.qualifier_list,
-		  'versionDoc': pVersion
+			'version_id': pVersion._id,
+			'version_key': pVersion._key
 		}
 	)
 
 	LET equalPkg = FIRST(
 		FOR pVersion in pkgVersions
 		  FILTER pVersion.guacKey == @equalPkgVersionGuacKey
-		FOR pName in pkgNames
-		  FILTER pName._id == pVersion._parent
-		FOR pNs in pkgNamespaces
-		  FILTER pNs._id == pName._parent
-		FOR pType in pkgTypes
-		  FILTER pType._id == pNs._parent
-
 		RETURN {
-		  'typeID': pType._id,
-		  'type': pType.type,
-		  'namespace_id': pNs._id,
-		  'namespace': pNs.namespace,
-		  'name_id': pName._id,
-		  'name': pName.name,
-		  'version_id': pVersion._id,
-		  'version': pVersion.version,
-		  'subpath': pVersion.subpath,
-		  'qualifier_list': pVersion.qualifier_list,
-		  'versionDoc': pVersion
+			'version_id': pVersion._id,
+			'version_key': pVersion._key
 		}
 	)
 	
 	LET pkgEqual = FIRST(
-		UPSERT { packageID:firstPkg.versionDoc._id, equalPackageID:equalPkg.versionDoc._id, justification:@justification, collector:@collector, origin:@origin } 
-			INSERT { packageID:firstPkg.versionDoc._id, equalPackageID:equalPkg.versionDoc._id, justification:@justification, collector:@collector, origin:@origin } 
+		UPSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:@justification, collector:@collector, origin:@origin } 
+			INSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:@justification, collector:@collector, origin:@origin } 
 			UPDATE {} IN pkgEquals
-			RETURN NEW
+			RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			}
 	)
 	
-	INSERT { _key: CONCAT("pkgEqualSubjectPkgEdges", firstPkg.versionDoc._key, pkgEqual._key), _from: firstPkg.versionDoc._id, _to: pkgEqual._id} INTO pkgEqualSubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
-	INSERT { _key: CONCAT("pkgEqualPkgEdges", pkgEqual._key, equalPkg.versionDoc._key), _from: pkgEqual._id, _to: equalPkg.versionDoc._id} INTO pkgEqualPkgEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("pkgEqualSubjectPkgEdges", firstPkg.version_key, pkgEqual._key), _from: firstPkg.version_id, _to: pkgEqual._id} INTO pkgEqualSubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("pkgEqualPkgEdges", pkgEqual._key, equalPkg.version_key), _from: pkgEqual._id, _to: equalPkg.version_id} INTO pkgEqualPkgEdges OPTIONS { overwriteMode: "ignore" }
 	
-	RETURN {
-		'pkgVersion': {
-			'type_id': firstPkg.typeID,
-			'type': firstPkg.type,
-			'namespace_id': firstPkg.namespace_id,
-			'namespace': firstPkg.namespace,
-			'name_id': firstPkg.name_id,
-			'name': firstPkg.name,
-			'version_id': firstPkg.version_id,
-			'version': firstPkg.version,
-			'subpath': firstPkg.subpath,
-			'qualifier_list': firstPkg.qualifier_list
-		},
-		'equalPkgVersion': {
-			'type_id': equalPkg.typeID,
-			'type': equalPkg.type,
-			'namespace_id': equalPkg.namespace_id,
-			'namespace': equalPkg.namespace,
-			'name_id': equalPkg.name_id,
-			'name': equalPkg.name,
-			'version_id': equalPkg.version_id,
-			'version': equalPkg.version,
-			'subpath': equalPkg.subpath,
-			'qualifier_list': equalPkg.qualifier_list
-		},
-		'pkgEqual_id': pkgEqual._id,
-		'justification': pkgEqual.justification,
-		'collector': pkgEqual.collector,
-		'origin': pkgEqual.origin
-	}`
+	RETURN { 'pkgEqual_id': pkgEqual._id }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getPkgEqualQueryValues(&pkg, &otherPackage, &pkgEqual), "IngestPkgEqual")
 	if err != nil {
-		return nil, fmt.Errorf("failed to ingest pkgEqual: %w", err)
+		return "", fmt.Errorf("failed to ingest pkgEqual: %w", err)
 	}
 	defer cursor.Close()
 
-	pkgEqualList, err := getPkgEqualFromCursor(ctx, cursor)
+	pkgEqualList, err := getPkgEqualFromCursor(ctx, cursor, true)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get pkgEqual from arango cursor: %w", err)
+		return "", fmt.Errorf("failed to get pkgEqual from arango cursor: %w", err)
 	}
 
 	if len(pkgEqualList) == 1 {
-		return pkgEqualList[0], nil
+		return pkgEqualList[0].ID, nil
 	} else {
-		return nil, fmt.Errorf("number of pkgEqual ingested is greater than one")
+		return "", fmt.Errorf("number of pkgEqual ingested is greater than one")
 	}
 }
 
-func getPkgEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.PkgEqual, error) {
+func getPkgEqualFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.PkgEqual, error) {
 	type collectedData struct {
 		PkgVersion      *dbPkgVersion `json:"pkgVersion"`
 		EqualPkgVersion *dbPkgVersion `json:"equalPkgVersion"`
@@ -617,20 +501,25 @@ func getPkgEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.
 
 	var pkgEqualList []*model.PkgEqual
 	for _, createdValue := range createdValues {
+		var pkgEqual *model.PkgEqual
+		if !ingestion {
+			pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+				createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
 
-		pkg := generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
-			createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+			equalPkg := generateModelPackage(createdValue.EqualPkgVersion.TypeID, createdValue.EqualPkgVersion.PkgType, createdValue.EqualPkgVersion.NamespaceID, createdValue.EqualPkgVersion.Namespace, createdValue.EqualPkgVersion.NameID,
+				createdValue.EqualPkgVersion.Name, createdValue.EqualPkgVersion.VersionID, createdValue.EqualPkgVersion.Version, createdValue.EqualPkgVersion.Subpath, createdValue.EqualPkgVersion.QualifierList)
 
-		equalPkg := generateModelPackage(createdValue.EqualPkgVersion.TypeID, createdValue.EqualPkgVersion.PkgType, createdValue.EqualPkgVersion.NamespaceID, createdValue.EqualPkgVersion.Namespace, createdValue.EqualPkgVersion.NameID,
-			createdValue.EqualPkgVersion.Name, createdValue.EqualPkgVersion.VersionID, createdValue.EqualPkgVersion.Version, createdValue.EqualPkgVersion.Subpath, createdValue.EqualPkgVersion.QualifierList)
-
-		pkgEqual := &model.PkgEqual{
-			ID:            createdValue.PkgEqualId,
-			Packages:      []*model.Package{pkg, equalPkg},
-			Justification: createdValue.Justification,
-			Origin:        createdValue.Origin,
-			Collector:     createdValue.Collector,
+			pkgEqual = &model.PkgEqual{
+				ID:            createdValue.PkgEqualId,
+				Packages:      []*model.Package{pkg, equalPkg},
+				Justification: createdValue.Justification,
+				Origin:        createdValue.Origin,
+				Collector:     createdValue.Collector,
+			}
+		} else {
+			pkgEqual = &model.PkgEqual{ID: createdValue.PkgEqualId}
 		}
+
 		pkgEqualList = append(pkgEqualList, pkgEqual)
 	}
 	return pkgEqualList, nil

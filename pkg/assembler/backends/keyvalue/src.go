@@ -184,8 +184,8 @@ func (n *srcNamespace) addName(ctx context.Context, name string, c *demoClient) 
 
 // Ingest Source
 
-func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
-	var modelSources []*model.Source
+func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
+	var modelSources []*model.SourceIDs
 	for _, src := range sources {
 		modelSrc, err := c.IngestSource(ctx, *src)
 		if err != nil {
@@ -196,7 +196,7 @@ func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceI
 	return modelSources, nil
 }
 
-func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.Source, error) {
+func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.SourceIDs, error) {
 	inType := &srcType{
 		Type: input.Type,
 	}
@@ -291,10 +291,11 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 		c.m.Unlock()
 	}
 
-	// build return GraphQL type
-	c.m.RLock()
-	defer c.m.RUnlock()
-	return c.buildSourceResponse(ctx, outName.ThisID, nil)
+	return &model.SourceIDs{
+		SourceTypeID:      outType.ThisID,
+		SourceNamespaceID: outNamespace.ThisID,
+		SourceNameID:      outName.ThisID,
+	}, nil
 }
 
 // Query Source

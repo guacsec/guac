@@ -37,14 +37,10 @@ func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability mo
 	}
 
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	ingestedVulnEqual, err := r.Backend.IngestVulnEqual(ctx,
+	return r.Backend.IngestVulnEqual(ctx,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
 		model.VulnerabilityInputSpec{Type: strings.ToLower(otherVulnerability.Type), VulnerabilityID: strings.ToLower(otherVulnerability.VulnerabilityID)},
 		vulnEqual)
-	if err != nil {
-		return "", err
-	}
-	return ingestedVulnEqual.ID, err
 }
 
 // IngestVulnEquals is the resolver for the ingestVulnEquals field.
@@ -94,11 +90,7 @@ func (r *mutationResolver) IngestVulnEquals(ctx context.Context, vulnerabilities
 	}
 
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	ingestedVulnEqualsIDS, err := r.Backend.IngestVulnEquals(ctx, lowercaseVulnList, lowercaseOtherVulnList, vulnEquals)
-	if err != nil {
-		return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-	return ingestedVulnEqualsIDS, err
+	return r.Backend.IngestVulnEquals(ctx, lowercaseVulnList, lowercaseOtherVulnList, vulnEquals)
 }
 
 // VulnEqual is the resolver for the vulnEqual field.

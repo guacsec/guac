@@ -530,7 +530,7 @@ func (s *Suite) TestHasSLSA() {
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 			if test.Query != nil && test.Query.ID != nil {
 				idIdx, err := strconv.Atoi(*test.Query.ID)

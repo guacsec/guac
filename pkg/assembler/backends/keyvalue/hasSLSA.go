@@ -183,8 +183,8 @@ func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSp
 
 // Ingest HasSlsa
 
-func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
-	var modelHasSLSAList []*model.HasSlsa
+func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+	var modelHasSLSAList []string
 	for i := range subjects {
 		hasSLSA, err := c.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsaList[i])
 		if err != nil {
@@ -198,14 +198,14 @@ func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifact
 func (c *demoClient) IngestSLSA(ctx context.Context,
 	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
 	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec,
-) (*model.HasSlsa, error) {
+) (string, error) {
 	return c.ingestSLSA(ctx, subject, builtFrom, builtBy, slsa, true)
 }
 
 func (c *demoClient) ingestSLSA(ctx context.Context,
 	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
 	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec, readOnly bool) (
-	*model.HasSlsa, error,
+	string, error,
 ) {
 	preds := convSLSAP(slsa.SlsaPredicate)
 	in := &hasSLSAStruct{
@@ -229,7 +229,7 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 
 	s, err := c.artifactByInput(ctx, &subject)
 	if err != nil {
-		return nil, gqlerror.Errorf("IngestSLSA :: Subject artifact not found")
+		return "", gqlerror.Errorf("IngestSLSA :: Subject artifact not found")
 	}
 	in.Subject = s.ThisID
 
@@ -238,7 +238,7 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	for i, a := range builtFrom {
 		b, err := c.artifactByInput(ctx, a)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestSLSA :: BuiltFrom %d artifact not found", i)
+			return "", gqlerror.Errorf("IngestSLSA :: BuiltFrom %d artifact not found", i)
 		}
 		bfs = append(bfs, b)
 		bfIDs = append(bfIDs, b.ID())
@@ -248,16 +248,16 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 
 	b, err := c.builderByInput(ctx, &builtBy)
 	if err != nil {
-		return nil, gqlerror.Errorf("IngestSLSA :: Builder not found")
+		return "", gqlerror.Errorf("IngestSLSA :: Builder not found")
 	}
 	in.BuiltBy = b.ThisID
 
 	out, err := byKeykv[*hasSLSAStruct](ctx, slsaCol, in.Key(), c)
 	if err == nil {
-		return c.convSLSA(ctx, out)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -270,24 +270,24 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	in.ThisID = c.getNextID()
 
 	if err := c.addToIndex(ctx, slsaCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := s.setHasSLSAs(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	for _, a := range bfs {
 		if err := a.setHasSLSAs(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if err := b.setHasSLSAs(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := setkv(ctx, slsaCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.convSLSA(ctx, in)
+	return in.ThisID, nil
 }
 
 func convSLSAP(in []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {

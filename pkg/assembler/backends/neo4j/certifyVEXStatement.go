@@ -630,7 +630,7 @@ func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStateme
 // 	return model.VexJustificationNotProvided, fmt.Errorf("failed to convert justification to enum")
 // }
 
-func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
 
 	// err := helper.ValidatePackageOrArtifactInput(&subject, "IngestVEXStatement")
 	// if err != nil {
@@ -641,7 +641,7 @@ func (c *neo4jClient) IngestVEXStatement(ctx context.Context, subject model.Pack
 	// 	return nil, err
 	// }
 	// panic(fmt.Errorf("not implemented: IngestVEXStatement - IngestVEXStatement"))
-	return nil, fmt.Errorf("not implemented - IngestVEXStatement")
+	return "", fmt.Errorf("not implemented - IngestVEXStatement")
 }
 
 func (c *neo4jClient) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {

@@ -18,11 +18,7 @@ func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.P
 	if err := helper.ValidatePackageOrSourceInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	ingestedOccurrence, err := r.Backend.IngestOccurrence(ctx, subject, artifact, occurrence)
-	if err != nil {
-		return "", err
-	}
-	return ingestedOccurrence.ID, err
+	return r.Backend.IngestOccurrence(ctx, subject, artifact, occurrence)
 }
 
 // IngestOccurrences is the resolver for the ingestOccurrences field.
@@ -52,13 +48,7 @@ func (r *mutationResolver) IngestOccurrences(ctx context.Context, subjects model
 		return ingestedOccurrencesIDs, gqlerror.Errorf("%v :: must specify at most packages or sources", funcName)
 	}
 
-	ingestedOccurrences, err := r.Backend.IngestOccurrences(ctx, subjects, artifacts, occurrences)
-	if err == nil {
-		for _, occurrence := range ingestedOccurrences {
-			ingestedOccurrencesIDs = append(ingestedOccurrencesIDs, occurrence.ID)
-		}
-	}
-	return ingestedOccurrencesIDs, err
+	return r.Backend.IngestOccurrences(ctx, subjects, artifacts, occurrences)
 }
 
 // IsOccurrence is the resolver for the IsOccurrence field.

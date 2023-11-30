@@ -198,7 +198,7 @@ func TestIngestVulnEqual(t *testing.T) {
 				b.
 					EXPECT().
 					IngestVulnEqual(ctx, gomock.Any(), gomock.Any(), *o.VE).
-					Return(&model.VulnEqual{}, nil).
+					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestVulnEqual(ctx, *o.V1, *o.V2, *o.VE)
 				if (err != nil) != test.ExpIngestErr {

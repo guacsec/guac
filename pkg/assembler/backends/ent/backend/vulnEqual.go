@@ -68,12 +68,12 @@ func (b *EntBackend) IngestVulnEquals(ctx context.Context, vulnerabilities []*mo
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestVulnEquals failed with err: %v", err)
 		}
-		ids = append(ids, ve.ID)
+		ids = append(ids, ve)
 	}
 	return ids, nil
 }
 
-func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
+func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
 
 	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		tx := ent.TxFromContext(ctx)
@@ -81,12 +81,10 @@ func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.Vu
 	})
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &model.VulnEqual{
-		ID: nodeID(*id),
-	}, nil
+	return nodeID(*id), nil
 }
 
 func upsertVulnEquals(ctx context.Context, client *ent.Tx, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*int, error) {

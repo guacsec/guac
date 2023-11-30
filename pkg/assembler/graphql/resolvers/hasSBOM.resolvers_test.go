@@ -85,7 +85,7 @@ func TestIngestHasSbom(t *testing.T) {
 				b.
 					EXPECT().
 					IngestHasSbom(ctx, o.Sub, *o.HS, *o.Inc).
-					Return(&model.HasSbom{ID: "a"}, nil).
+					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestHasSbom(ctx, o.Sub, *o.HS, *o.Inc)
 				if (err != nil) != test.ExpIngestErr {
@@ -212,7 +212,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 				b.
 					EXPECT().
 					IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc).
-					Return([]*model.HasSbom{{ID: "a"}}, nil).
+					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc)
 				if (err != nil) != test.ExpIngestErr {

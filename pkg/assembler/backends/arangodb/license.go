@@ -83,7 +83,7 @@ func nilToEmpty(s *string) string {
 	return *s
 }
 
-func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
+func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
 
 	var listOfValues []map[string]any
 
@@ -117,12 +117,7 @@ func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.Lic
 UPSERT { name:doc.name, inline:doc.inline, listversion:doc.listversion }
 INSERT { name:doc.name, inline:doc.inline, listversion:doc.listversion }
 UPDATE {} IN licenses OPTIONS { indexHint: "byNameInlineListVer" }
-RETURN {
-  "id": NEW._id,
-  "name": NEW.name,
-  "inline": NEW.inline,
-  "listversion": NEW.listversion,
-}`
+RETURN { "id": NEW._id }`
 
 	sb.WriteString(query)
 
@@ -132,36 +127,39 @@ RETURN {
 	}
 	defer cursor.Close()
 
-	return getLicenses(ctx, cursor)
+	createdLicenses, err := getLicenses(ctx, cursor)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get licenses from arango cursor: %w", err)
+	}
 
+	var licenseIDs []string
+	for _, license := range createdLicenses {
+		licenseIDs = append(licenseIDs, license.ID)
+	}
+	return licenseIDs, nil
 }
 
-func (c *arangoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
+func (c *arangoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
 	query := `
 UPSERT { name:@name, inline:@inline, listversion:@listversion }
 INSERT { name:@name, inline:@inline, listversion:@listversion }
 UPDATE {} IN licenses OPTIONS { indexHint: "byNameInlineListVer" }
-RETURN {
-  "id": NEW._id,
-  "name": NEW.name,
-  "inline": NEW.inline,
-  "listversion": NEW.listversion,
-}`
+RETURN { "id": NEW._id }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getLicenseQueryValues(license), "IngestLicense")
 	if err != nil {
-		return nil, fmt.Errorf("failed to ingest license: %w", err)
+		return "", fmt.Errorf("failed to ingest license: %w", err)
 	}
 	defer cursor.Close()
 
 	createdLicenses, err := getLicenses(ctx, cursor)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get licenses from arango cursor: %w", err)
+		return "", fmt.Errorf("failed to get licenses from arango cursor: %w", err)
 	}
 	if len(createdLicenses) == 1 {
-		return createdLicenses[0], nil
+		return createdLicenses[0].ID, nil
 	} else {
-		return nil, fmt.Errorf("number of licenses ingested is greater than one")
+		return "", fmt.Errorf("number of licenses ingested is greater than one")
 	}
 }
 
@@ -177,11 +175,15 @@ func getLicenses(ctx context.Context, cursor driver.Cursor) ([]*model.License, e
 				return nil, fmt.Errorf("failed to get license from cursor: %w", err)
 			}
 		} else {
-			if *doc.Inline == "" {
-				doc.Inline = nil
+			if doc.Inline != nil {
+				if *doc.Inline == "" {
+					doc.Inline = nil
+				}
 			}
-			if *doc.ListVersion == "" {
-				doc.ListVersion = nil
+			if doc.ListVersion != nil {
+				if *doc.ListVersion == "" {
+					doc.ListVersion = nil
+				}
 			}
 			createdLicenses = append(createdLicenses, doc)
 		}

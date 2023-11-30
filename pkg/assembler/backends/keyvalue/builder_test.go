@@ -139,41 +139,30 @@ func Test_demoClient_IngestBuilder(t *testing.T) {
 	tests := []struct {
 		name         string
 		builderInput *model.BuilderInputSpec
-		want         *model.Builder
 		wantErr      bool
-	}{{
-		name: "HubHostedActions",
-		builderInput: &model.BuilderInputSpec{
-			URI: "https://github.com/CreateFork/HubHostedActions@v1",
+	}{
+		{
+			name: "HubHostedActions",
+			builderInput: &model.BuilderInputSpec{
+				URI: "https://github.com/CreateFork/HubHostedActions@v1",
+			},
+			wantErr: false,
 		},
-		want: &model.Builder{
-			URI: "https://github.com/CreateFork/HubHostedActions@v1",
+		{
+			name: "chains",
+			builderInput: &model.BuilderInputSpec{
+				URI: "https://tekton.dev/chains/v2",
+			},
+			wantErr: false,
 		},
-		wantErr: false,
-	}, {
-		name: "chains",
-		builderInput: &model.BuilderInputSpec{
-			URI: "https://tekton.dev/chains/v2",
-		},
-		want: &model.Builder{
-			URI: "https://tekton.dev/chains/v2",
-		},
-		wantErr: false,
-	}}
+	}
 
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			got, err := c.IngestBuilder(ctx, tt.builderInput)
+			_, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -184,40 +173,28 @@ func Test_demoClient_IngestBuilders(t *testing.T) {
 	tests := []struct {
 		name          string
 		builderInputs []*model.BuilderInputSpec
-		want          []*model.Builder
 		wantErr       bool
-	}{{
-		name: "HubHostedActions",
-		builderInputs: []*model.BuilderInputSpec{
-			{
-				URI: "https://github.com/CreateFork/HubHostedActions@v1",
+	}{
+		{
+			name: "HubHostedActions",
+			builderInputs: []*model.BuilderInputSpec{
+				{
+					URI: "https://github.com/CreateFork/HubHostedActions@v1",
+				},
+				{
+					URI: "https://tekton.dev/chains/v2",
+				},
 			},
-			{
-				URI: "https://tekton.dev/chains/v2",
-			}},
-		want: []*model.Builder{
-			{
-				URI: "https://github.com/CreateFork/HubHostedActions@v1",
-			},
-			{
-				URI: "https://tekton.dev/chains/v2",
-			}},
-		wantErr: false,
-	}}
+			wantErr: false,
+		},
+	}
 
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			got, err := c.IngestBuilders(ctx, tt.builderInputs)
+			_, err := c.IngestBuilders(ctx, tt.builderInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -280,7 +257,7 @@ func Test_demoClient_Builders(t *testing.T) {
 				return
 			}
 			if tt.idInFilter {
-				tt.builderSpec.ID = &ingestedBuilder.ID
+				tt.builderSpec.ID = &ingestedBuilder
 			}
 			got, err := c.Builders(ctx, tt.builderSpec)
 			if (err != nil) != tt.wantErr {
@@ -338,7 +315,7 @@ func Test_demoClient_exactBuilder(t *testing.T) {
 				return
 			}
 			if tt.idInFilter {
-				tt.builderSpec.ID = &ingestedBuilder.ID
+				tt.builderSpec.ID = &ingestedBuilder
 			}
 			dc := c.(*demoClient)
 			got, err := dc.exactBuilder(ctx, tt.builderSpec)
@@ -346,7 +323,7 @@ func Test_demoClient_exactBuilder(t *testing.T) {
 				t.Errorf("demoClient.exactBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			tt.want.ThisID = ingestedBuilder.ID
+			tt.want.ThisID = ingestedBuilder
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("demoClient.exactBuilder() = %v, want %v", got, tt.want)
 			}

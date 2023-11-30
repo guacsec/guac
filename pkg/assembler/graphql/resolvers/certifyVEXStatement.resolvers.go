@@ -34,13 +34,9 @@ func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model
 	}
 
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	ingestedVEXStatement, err := r.Backend.IngestVEXStatement(ctx, subject,
+	return r.Backend.IngestVEXStatement(ctx, subject,
 		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
 		vexStatement)
-	if err != nil {
-		return "", err
-	}
-	return ingestedVEXStatement.ID, err
 }
 
 // IngestVEXStatements is the resolver for the ingestVEXStatements field.

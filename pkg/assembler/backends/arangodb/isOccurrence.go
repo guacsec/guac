@@ -134,7 +134,7 @@ func getSrcOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return getIsOccurrenceFromCursor(ctx, cursor)
+	return getIsOccurrenceFromCursor(ctx, cursor, false)
 }
 
 func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.IsOccurrence, error) {
@@ -169,7 +169,7 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 	}
 	defer cursor.Close()
 
-	return getIsOccurrenceFromCursor(ctx, cursor)
+	return getIsOccurrenceFromCursor(ctx, cursor, false)
 }
 
 func queryIsOccurrenceBasedOnFilter(arangoQueryBuilder *arangoQueryBuilder, isOccurrenceSpec *model.IsOccurrenceSpec, queryValues map[string]any) {
@@ -232,7 +232,9 @@ func getOccurrenceQueryValues(pkg *model.PkgInputSpec, src *model.SourceInputSpe
 	return values
 }
 
-func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
+func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+	var cursor driver.Cursor
+	var err error
 	if len(subjects.Packages) > 0 {
 		var listOfValues []map[string]any
 
@@ -265,80 +267,37 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
-			  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
+			FILTER pVersion.guacKey == doc.pkgVersionGuacKey
 			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
-			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
+				'version_id': pVersion._id,
+				'version_key': pVersion._key
 			}
 		)
 		  
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		  LET isOccurrence = FIRST(
-			  UPSERT { packageID:firstPkg.versionDoc._id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				  INSERT { packageID:firstPkg.versionDoc._id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			  UPSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  INSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN isOccurrences
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
 		  )
 		  			
-		  INSERT { _key: CONCAT("isOccurrenceSubjectPkgEdges", firstPkg.versionDoc._key, isOccurrence._key), _from: firstPkg.versionDoc._id, _to: isOccurrence._id } INTO isOccurrenceSubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("isOccurrenceSubjectPkgEdges", firstPkg.version_key, isOccurrence._key), _from: firstPkg.version_id, _to: isOccurrence._id } INTO isOccurrenceSubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
 		  INSERT { _key: CONCAT("isOccurrenceArtEdges", isOccurrence._key, artifact._key), _from: isOccurrence._id, _to: artifact._id } INTO isOccurrenceArtEdges OPTIONS { overwriteMode: "ignore" }
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'artifact': {
-				'id': artifact._id,
-				'algorithm': artifact.algorithm,
-				'digest': artifact.digest
-			},
-			'isOccurrence_id': isOccurrence._id,
-     		'justification': isOccurrence.justification,
-			'collector': isOccurrence.collector,
-			'origin': isOccurrence.origin
-		  }`
+		  RETURN { 'isOccurrence_id': isOccurrence._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestOccurrence")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestOccurrences")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package occurrence: %w", err)
 		}
 		defer cursor.Close()
-
-		isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
-		}
-
-		return isOccurrenceList, nil
-
 	} else if len(subjects.Sources) > 0 {
 		var listOfValues []map[string]any
 
@@ -372,21 +331,9 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		LET firstSrc = FIRST(
 			FOR sName in srcNames
 			  FILTER sName.guacKey == doc.srcNameGuacKey
-			FOR sNs in srcNamespaces
-			  FILTER sNs._id == sName._parent
-			FOR sType in srcTypes
-			  FILTER sType._id == sNs._parent
-	
 			RETURN {
-			  'typeID': sType._id,
-			  'type': sType.type,
-			  'namespace_id': sNs._id,
-			  'namespace': sNs.namespace,
-			  'name_id': sName._id,
-			  'name': sName.name,
-			  'commit': sName.commit,
-			  'tag': sName.tag,
-			  'nameDoc': sName
+				'name_id': sName._id,
+				'name_key': sName._key
 			}
 		)
 		  
@@ -396,214 +343,124 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 			  UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
 				  UPDATE {} IN isOccurrences
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
 		  )
 	
-		  INSERT { _key: CONCAT("isOccurrenceSubjectSrcEdges", firstSrc.nameDoc._key, isOccurrence._key), _from: firstSrc.name_id, _to: isOccurrence._id } INTO isOccurrenceSubjectSrcEdges OPTIONS { overwriteMode: "ignore" }
+		  INSERT { _key: CONCAT("isOccurrenceSubjectSrcEdges", firstSrc.name_key, isOccurrence._key), _from: firstSrc.name_id, _to: isOccurrence._id } INTO isOccurrenceSubjectSrcEdges OPTIONS { overwriteMode: "ignore" }
 		  INSERT { _key: CONCAT("isOccurrenceArtEdges", isOccurrence._key, artifact._key), _from: isOccurrence._id, _to: artifact._id } INTO isOccurrenceArtEdges OPTIONS { overwriteMode: "ignore" }
 		  
-		  RETURN {
-			'srcName': {
-				'type_id': firstSrc.typeID,
-				'type': firstSrc.type,
-				'namespace_id': firstSrc.namespace_id,
-				'namespace': firstSrc.namespace,
-				'name_id': firstSrc.name_id,
-				'name': firstSrc.name,
-				'commit': firstSrc.commit,
-				'tag': firstSrc.tag
-			},
-			'artifact': {
-				'id': artifact._id,
-				'algorithm': artifact.algorithm,
-				'digest': artifact.digest
-			},
-			'isOccurrence_id': isOccurrence._id,
-     		'justification': isOccurrence.justification,
-			'collector': isOccurrence.collector,
-			'origin': isOccurrence.origin
-		  }`
+		  RETURN { 'isOccurrence_id': isOccurrence._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestOccurrence")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestOccurrences")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest source occurrence: %w", err)
 		}
 		defer cursor.Close()
-		isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
-		}
-
-		return isOccurrenceList, nil
-
 	} else {
 		return nil, fmt.Errorf("package or source not specified for IngestOccurrence")
 	}
+	isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor, true)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
+	}
+
+	var isOcurIDList []string
+	for _, isOcur := range isOccurrenceList {
+		isOcurIDList = append(isOcurIDList, isOcur.ID)
+	}
+	return isOcurIDList, nil
 }
 
-func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
+func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+	var cursor driver.Cursor
+	var err error
 	if subject.Package != nil {
 		query := `
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions
 		  FILTER pVersion.guacKey == @pkgVersionGuacKey
-		FOR pName in pkgNames
-		  FILTER pName._id == pVersion._parent
-		FOR pNs in pkgNamespaces
-		  FILTER pNs._id == pName._parent
-		FOR pType in pkgTypes
-		  FILTER pType._id == pNs._parent
-
 		RETURN {
-		  'typeID': pType._id,
-		  'type': pType.type,
-		  'namespace_id': pNs._id,
-		  'namespace': pNs.namespace,
-		  'name_id': pName._id,
-		  'name': pName.name,
-		  'version_id': pVersion._id,
-		  'version': pVersion.version,
-		  'subpath': pVersion.subpath,
-		  'qualifier_list': pVersion.qualifier_list,
-		  'versionDoc': pVersion
+			'version_id': pVersion._id,
+			'version_key': pVersion._key
 		}
 	)
 	  
 	LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 	  
 	LET isOccurrence = FIRST(
-		  UPSERT { packageID:firstPkg.versionDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
-			  INSERT { packageID:firstPkg.versionDoc._id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+		  UPSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+			  INSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
 			  UPDATE {} IN isOccurrences
-			  RETURN NEW
+			  RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			  }
 	)
 	
-	INSERT { _key: CONCAT("isOccurrenceSubjectPkgEdges", firstPkg.versionDoc._key, isOccurrence._key), _from: firstPkg.versionDoc._id, _to: isOccurrence._id } INTO isOccurrenceSubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
+	INSERT { _key: CONCAT("isOccurrenceSubjectPkgEdges", firstPkg.version_key, isOccurrence._key), _from: firstPkg.version_id, _to: isOccurrence._id } INTO isOccurrenceSubjectPkgEdges OPTIONS { overwriteMode: "ignore" }
 	INSERT { _key: CONCAT("isOccurrenceArtEdges", isOccurrence._key, artifact._key), _from: isOccurrence._id, _to: artifact._id } INTO isOccurrenceArtEdges OPTIONS { overwriteMode: "ignore" }
 	  
-	RETURN {
-		'pkgVersion': {
-			'type_id': firstPkg.typeID,
-			'type': firstPkg.type,
-			'namespace_id': firstPkg.namespace_id,
-			'namespace': firstPkg.namespace,
-			'name_id': firstPkg.name_id,
-			'name': firstPkg.name,
-			'version_id': firstPkg.version_id,
-			'version': firstPkg.version,
-			'subpath': firstPkg.subpath,
-			'qualifier_list': firstPkg.qualifier_list
-		},
-		'artifact': {
-			'id': artifact._id,
-			'algorithm': artifact.algorithm,
-			'digest': artifact.digest
-		},
-		'isOccurrence_id': isOccurrence._id,
-		'justification': isOccurrence.justification,
-		'collector': isOccurrence.collector,
-		'origin': isOccurrence.origin
-	  }`
+	RETURN { 'isOccurrence_id': isOccurrence._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getOccurrenceQueryValues(subject.Package, nil, &artifact, &occurrence), "IngestOccurrence")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getOccurrenceQueryValues(subject.Package, nil, &artifact, &occurrence), "IngestOccurrence")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest package occurrence: %w", err)
+			return "", fmt.Errorf("failed to ingest package occurrence: %w", err)
 		}
 		defer cursor.Close()
-
-		isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
-		}
-
-		if len(isOccurrenceList) == 1 {
-			return isOccurrenceList[0], nil
-		} else {
-			return nil, fmt.Errorf("number of occurrences ingested is greater than one")
-		}
-
 	} else if subject.Source != nil {
 		query := `
 		LET firstSrc = FIRST(
 			FOR sName in srcNames
 			  FILTER sName.guacKey == @srcNameGuacKey
-			FOR sNs in srcNamespaces
-			  FILTER sNs._id == sName._parent
-			FOR sType in srcTypes
-			  FILTER sType._id == sNs._parent
-	
-			RETURN {
-			  'typeID': sType._id,
-			  'type': sType.type,
-			  'namespace_id': sNs._id,
-			  'namespace': sNs.namespace,
-			  'name_id': sName._id,
-			  'name': sName.name,
-			  'commit': sName.commit,
-			  'tag': sName.tag,
-			  'nameDoc': sName
-			}
+			  RETURN {
+				'name_id': sName._id,
+				'name_key': sName._key,
+			  }
 		)
 		  
-		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
+		LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
-		  LET isOccurrence = FIRST(
-			  UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
-				  INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
-				  UPDATE {} IN isOccurrences
-				  RETURN NEW
-		  )
+		LET isOccurrence = FIRST(
+			UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+			INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+			UPDATE {} IN isOccurrences
+			RETURN {
+				'_id': NEW._id,
+				'_key': NEW._key
+			}
+		)
 
-		  INSERT { _key: CONCAT("isOccurrenceSubjectSrcEdges", firstSrc.nameDoc._key, isOccurrence._key), _from: firstSrc.name_id, _to: isOccurrence._id } INTO isOccurrenceSubjectSrcEdges OPTIONS { overwriteMode: "ignore" }
-		  INSERT { _key: CONCAT("isOccurrenceArtEdges", isOccurrence._key, artifact._key), _from: isOccurrence._id, _to: artifact._id } INTO isOccurrenceArtEdges OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("isOccurrenceSubjectSrcEdges", firstSrc.name_key, isOccurrence._key), _from: firstSrc.name_id, _to: isOccurrence._id } INTO isOccurrenceSubjectSrcEdges OPTIONS { overwriteMode: "ignore" }
+		INSERT { _key: CONCAT("isOccurrenceArtEdges", isOccurrence._key, artifact._key), _from: isOccurrence._id, _to: artifact._id } INTO isOccurrenceArtEdges OPTIONS { overwriteMode: "ignore" }
 		  
-		  RETURN {
-			'srcName': {
-				'type_id': firstSrc.typeID,
-				'type': firstSrc.type,
-				'namespace_id': firstSrc.namespace_id,
-				'namespace': firstSrc.namespace,
-				'name_id': firstSrc.name_id,
-				'name': firstSrc.name,
-				'commit': firstSrc.commit,
-				'tag': firstSrc.tag
-			},
-			'artifact': {
-				'id': artifact._id,
-				'algorithm': artifact.algorithm,
-				'digest': artifact.digest
-			},
-			'isOccurrence_id': isOccurrence._id,
-     		'justification': isOccurrence.justification,
-			'collector': isOccurrence.collector,
-			'origin': isOccurrence.origin
-		  }`
+		RETURN { 'isOccurrence_id': isOccurrence._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getOccurrenceQueryValues(nil, subject.Source, &artifact, &occurrence), "IngestOccurrence")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getOccurrenceQueryValues(nil, subject.Source, &artifact, &occurrence), "IngestOccurrence")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest source occurrence: %w", err)
+			return "", fmt.Errorf("failed to ingest source occurrence: %w", err)
 		}
 		defer cursor.Close()
-
-		isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
-		}
-
-		if len(isOccurrenceList) == 1 {
-			return isOccurrenceList[0], nil
-		} else {
-			return nil, fmt.Errorf("number of occurrences ingested is greater than one")
-		}
-
 	} else {
-		return nil, fmt.Errorf("package or source not specified for IngestOccurrence")
+		return "", fmt.Errorf("package or source not specified for IngestOccurrence")
+	}
+	isOccurrenceList, err := getIsOccurrenceFromCursor(ctx, cursor, true)
+	if err != nil {
+		return "", fmt.Errorf("failed to get occurrences from arango cursor: %w", err)
+	}
+
+	if len(isOccurrenceList) == 1 {
+		return isOccurrenceList[0].ID, nil
+	} else {
+		return "", fmt.Errorf("number of occurrences ingested is greater than one")
 	}
 }
 
-func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.IsOccurrence, error) {
+func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.IsOccurrence, error) {
 	type collectedData struct {
 		PkgVersion     *dbPkgVersion   `json:"pkgVersion"`
 		SrcName        *dbSrcName      `json:"srcName"`
@@ -631,32 +488,36 @@ func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor) ([]*mo
 
 	var isOccurrenceList []*model.IsOccurrence
 	for _, createdValue := range createdValues {
-		if createdValue.Artifact == nil {
-			return nil, fmt.Errorf("failed to get artifact from cursor for isOccurrence")
-		}
-		var pkg *model.Package = nil
-		var src *model.Source = nil
-		if createdValue.PkgVersion != nil {
-			pkg = generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
-				createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+		var isOccurrence *model.IsOccurrence
+		if !ingestion {
+			if createdValue.Artifact == nil {
+				return nil, fmt.Errorf("failed to get artifact from cursor for isOccurrence")
+			}
+			var pkg *model.Package = nil
+			var src *model.Source = nil
+			if createdValue.PkgVersion != nil {
+				pkg = generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
+					createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
+			} else {
+				src = generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
+					createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
+			}
+			isOccurrence = &model.IsOccurrence{
+				ID:            createdValue.IsOccurrenceID,
+				Artifact:      createdValue.Artifact,
+				Justification: createdValue.Justification,
+				Origin:        createdValue.Origin,
+				Collector:     createdValue.Collector,
+			}
+			if pkg != nil {
+				isOccurrence.Subject = pkg
+			} else if src != nil {
+				isOccurrence.Subject = src
+			} else {
+				return nil, fmt.Errorf("failed to get subject from cursor for isOccurrence")
+			}
 		} else {
-			src = generateModelSource(createdValue.SrcName.TypeID, createdValue.SrcName.SrcType, createdValue.SrcName.NamespaceID, createdValue.SrcName.Namespace,
-				createdValue.SrcName.NameID, createdValue.SrcName.Name, createdValue.SrcName.Commit, createdValue.SrcName.Tag)
-		}
-
-		isOccurrence := &model.IsOccurrence{
-			ID:            createdValue.IsOccurrenceID,
-			Artifact:      createdValue.Artifact,
-			Justification: createdValue.Justification,
-			Origin:        createdValue.Origin,
-			Collector:     createdValue.Collector,
-		}
-		if pkg != nil {
-			isOccurrence.Subject = pkg
-		} else if src != nil {
-			isOccurrence.Subject = src
-		} else {
-			return nil, fmt.Errorf("failed to get subject from cursor for isOccurrence")
+			isOccurrence = &model.IsOccurrence{ID: createdValue.IsOccurrenceID}
 		}
 		isOccurrenceList = append(isOccurrenceList, isOccurrence)
 	}

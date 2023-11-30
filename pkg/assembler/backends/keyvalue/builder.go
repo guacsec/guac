@@ -62,8 +62,8 @@ func (c *demoClient) builderByInput(ctx context.Context, b *model.BuilderInputSp
 
 // Ingest Builders
 
-func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
-	var modelBuilders []*model.Builder
+func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
+	var modelBuilders []string
 	for _, build := range builders {
 		modelBuild, err := c.IngestBuilder(ctx, build)
 		if err != nil {
@@ -76,11 +76,11 @@ func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.Build
 
 // Ingest Builder
 
-func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
 	return c.ingestBuilder(ctx, builder, true)
 }
 
-func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.BuilderInputSpec, readOnly bool) (*model.Builder, error) {
+func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.BuilderInputSpec, readOnly bool) (string, error) {
 	in := &builderStruct{
 		URI: builder.URI,
 	}
@@ -90,10 +90,10 @@ func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.BuilderIn
 
 	out, err := byKeykv[*builderStruct](ctx, builderCol, in.Key(), c)
 	if err == nil {
-		return c.convBuilder(out), nil
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 	if readOnly {
 		c.m.RUnlock()
@@ -103,13 +103,13 @@ func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.BuilderIn
 	}
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, builderCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := setkv(ctx, builderCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.convBuilder(in), nil
+	return in.ThisID, nil
 }
 
 // Query Builder

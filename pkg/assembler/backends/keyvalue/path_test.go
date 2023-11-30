@@ -537,7 +537,7 @@ func Test_Nodes(t *testing.T) {
 				if pkg, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
-					includes.Software = append(includes.Software, pkg.Namespaces[0].Names[0].Versions[0].ID)
+					includes.Software = append(includes.Software, pkg.PackageVersionID)
 				}
 			}
 			for _, s := range tt.inSrc {
@@ -549,7 +549,7 @@ func Test_Nodes(t *testing.T) {
 				if art, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					includes.Software = append(includes.Software, art.ID)
+					includes.Software = append(includes.Software, art)
 				}
 			}
 			for _, bld := range tt.inBld {
@@ -573,7 +573,7 @@ func Test_Nodes(t *testing.T) {
 					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				nodeID = ingestedPkg.PackageVersionID
 				includes.Software = append(includes.Software, nodeID)
 			}
 			if tt.artifactInput != nil {
@@ -582,7 +582,7 @@ func Test_Nodes(t *testing.T) {
 					t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedArt.ID
+				nodeID = ingestedArt
 			}
 			if tt.builderInput != nil {
 				ingestedBuilder, err := b.IngestBuilder(ctx, tt.builderInput)
@@ -590,7 +590,7 @@ func Test_Nodes(t *testing.T) {
 					t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedBuilder.ID
+				nodeID = ingestedBuilder
 			}
 			if tt.srcInput != nil {
 				ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
@@ -598,14 +598,14 @@ func Test_Nodes(t *testing.T) {
 					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedSrc.Namespaces[0].Names[0].ID
+				nodeID = ingestedSrc.SourceNameID
 			}
 			if tt.vulnInput != nil {
 				ingestVuln, err := b.IngestVulnerability(ctx, *tt.vulnInput)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
 				}
-				nodeID = ingestVuln.VulnerabilityIDs[0].ID
+				nodeID = ingestVuln.VulnerabilityNodeID
 			}
 			if tt.licenseInput != nil {
 				ingestedLicense, err := b.IngestLicense(ctx, tt.licenseInput)
@@ -613,7 +613,7 @@ func Test_Nodes(t *testing.T) {
 					t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedLicense.ID
+				nodeID = ingestedLicense
 			}
 			if tt.certifyBadCall != nil {
 				found, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
@@ -623,7 +623,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.certifyGoodCall != nil {
 				found, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
@@ -633,7 +633,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.certifyLegalCall != nil {
 				found, err := b.IngestCertifyLegal(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
@@ -643,7 +643,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.scorecardCall != nil {
 				found, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
@@ -653,7 +653,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.vexCall != nil {
 				found, err := b.IngestVEXStatement(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
@@ -663,7 +663,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.certifyVulnCall != nil {
 				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
@@ -673,7 +673,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.hashEqualCall != nil {
 				found, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
@@ -683,7 +683,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.hasMetadataCall != nil {
 				found, err := b.IngestHasMetadata(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
@@ -693,7 +693,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.hasSlsaCall != nil {
 				found, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
@@ -703,7 +703,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.hasSourceAtCall != nil {
 				found, err := b.IngestHasSourceAt(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
@@ -713,7 +713,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.isDepCall != nil {
 				found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
@@ -723,7 +723,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 				includes.Dependencies = append(includes.Dependencies, nodeID)
 			}
 			if tt.isOcurCall != nil {
@@ -734,7 +734,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 				includes.Occurrences = append(includes.Occurrences, nodeID)
 			}
 			if tt.hasSBOMCall != nil {
@@ -746,7 +746,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.pkgEqualCall != nil {
 				found, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
@@ -756,7 +756,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.pointOfContactCall != nil {
 				found, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
@@ -766,7 +766,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.vulnEqualCall != nil {
 				found, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
@@ -776,7 +776,7 @@ func Test_Nodes(t *testing.T) {
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = found
 			}
 			if tt.vulnMetadataCall != nil {
 				found, err := b.IngestVulnerabilityMetadata(ctx, *tt.vulnMetadataCall.Vuln, *tt.vulnMetadataCall.VulnMetadata)

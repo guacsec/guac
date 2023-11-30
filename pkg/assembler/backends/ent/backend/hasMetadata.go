@@ -48,15 +48,15 @@ func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 	return collect(records, toModelHasMetadata), nil
 }
 
-func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
+func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		return upsertHasMetadata(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, hasMetadata)
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute IngestHasMetadata :: %s", err)
+		return "", fmt.Errorf("failed to execute IngestHasMetadata :: %s", err)
 	}
 
-	return &model.HasMetadata{ID: nodeID(*recordID)}, nil
+	return nodeID(*recordID), nil
 }
 
 func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
@@ -76,7 +76,7 @@ func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 		concurrently(eg, func() error {
 			hm, err := b.IngestHasMetadata(ctx, subject, pkgMatchType, hmSpec)
 			if err == nil {
-				results[index] = hm.ID
+				results[index] = hm
 				return err
 			} else {
 				return gqlerror.Errorf("IngestBulkHasMetadata failed with element #%v %+v with err: %v", i, *subject.Package, err)

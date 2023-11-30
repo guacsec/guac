@@ -452,7 +452,7 @@ func (s *Suite) TestVulnEqual() {
 				if err != nil {
 					return
 				}
-				recordIDs[i] = ve.ID
+				recordIDs[i] = ve
 			}
 
 			if test.Query.ID != nil {

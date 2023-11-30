@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/google/go-cmp/cmp"
+
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -58,12 +59,17 @@ func (s *Suite) TestIngestBuilder() {
 			if err != nil {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
-			got, err := b.IngestBuilder(ctx, tt.builderInput)
+			id, err := b.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+
+			got, err := b.Builders(ctx, &model.BuilderSpec{ID: &id})
+			if err != nil {
+				t.Fatalf("Builders() error = %v", err)
+			}
+			if diff := cmp.Diff(tt.want, got[0], ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -95,19 +101,23 @@ func (s *Suite) TestIngestBuilders() {
 		wantErr: false,
 	}}
 	ctx := s.Ctx
-	for _, tt := range tests {
+	for index, tt := range tests {
 		s.Run(tt.name, func() {
 			t := s.T()
 			b, err := GetBackend(s.Client)
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			got, err := b.IngestBuilders(ctx, tt.builderInputs)
+			ids, err := b.IngestBuilders(ctx, tt.builderInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
+			got, err := b.Builders(ctx, &model.BuilderSpec{ID: &ids[index]})
+			if err != nil {
+				t.Fatalf("Builders() error = %v", err)
+			}
+			if diff := cmp.Diff(tt.want[index], got[index], ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -166,13 +176,13 @@ func (s *Suite) TestBuilders() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			ingestedBuilder, err := b.IngestBuilder(ctx, tt.builderInput)
+			id, err := b.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.builderSpec.ID = &ingestedBuilder.ID
+				tt.builderSpec.ID = &id
 			}
 			got, err := b.Builders(ctx, tt.builderSpec)
 			if (err != nil) != tt.wantErr {
@@ -232,13 +242,13 @@ func (s *Suite) TestExactBuilder() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			ingestedBuilder, err := b.IngestBuilder(ctx, tt.builderInput)
+			id, err := b.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.builderSpec.ID = &ingestedBuilder.ID
+				tt.builderSpec.ID = &id
 			}
 			got, err := b.Builders(ctx, tt.builderSpec)
 			if (err != nil) != tt.wantErr {
@@ -247,6 +257,50 @@ func (s *Suite) TestExactBuilder() {
 			}
 			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+// This test is to traverse the other branches of the upsert, not covered by the happy path at the insertion,
+// when the create fails due to the presence of the input in the store, and a where query is used in the error branch
+func (s *Suite) TestBuildersIngestSameTwice() {
+
+	tests := []struct {
+		name              string
+		builderInputsSpec []*model.BuilderInputSpec
+	}{{
+		name: "IngestSameTwice",
+		builderInputsSpec: []*model.BuilderInputSpec{
+			{
+				URI: "https://github.com/CreateFork/HubHostedActions@v1",
+			},
+			{
+				URI: "https://github.com/CreateFork/HubHostedActions@v1",
+			},
+		},
+	}}
+
+	ctx := s.Ctx
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			t := s.T()
+			b, err := GetBackend(s.Client)
+			if err != nil {
+				t.Fatalf("Could not instantiate testing backend: %v", err)
+			}
+
+			for _, bIn := range tt.builderInputsSpec {
+				if _, err := b.IngestBuilder(ctx, bIn); err != nil {
+					t.Fatalf("Could not ingest builder: %v , err: %v", bIn, err)
+				}
+			}
+			items, err := b.Builders(ctx, &model.BuilderSpec{})
+			if err != nil {
+				t.Fatalf("Error on load Builders %v", err)
+			}
+			if len(items) == 2 {
+				t.Fatalf("Wrong ingestions, ingest same twice found two")
 			}
 		})
 	}

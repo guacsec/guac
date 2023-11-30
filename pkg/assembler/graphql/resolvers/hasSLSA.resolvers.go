@@ -17,11 +17,7 @@ func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.Artifac
 		return "", gqlerror.Errorf("IngestSLSA :: Must have at least 1 builtFrom")
 	}
 
-	ingestedSLSA, err := r.Backend.IngestSLSA(ctx, subject, builtFrom, builtBy, slsa)
-	if err != nil {
-		return "", err
-	}
-	return ingestedSLSA.ID, err
+	return r.Backend.IngestSLSA(ctx, subject, builtFrom, builtBy, slsa)
 }
 
 // IngestSLSAs is the resolver for the ingestSLSAs field.
@@ -38,13 +34,7 @@ func (r *mutationResolver) IngestSLSAs(ctx context.Context, subjects []*model.Ar
 		return ingestedSLSAIDS, gqlerror.Errorf("%v :: uneven subjects and built by for ingestion", funcName)
 	}
 
-	ingestedSLSAs, err := r.Backend.IngestSLSAs(ctx, subjects, builtFromList, builtByList, slsaList)
-	if err == nil {
-		for _, SLSA := range ingestedSLSAs {
-			ingestedSLSAIDS = append(ingestedSLSAIDS, SLSA.ID)
-		}
-	}
-	return ingestedSLSAIDS, err
+	return r.Backend.IngestSLSAs(ctx, subjects, builtFromList, builtByList, slsaList)
 }
 
 // HasSlsa is the resolver for the HasSLSA field.

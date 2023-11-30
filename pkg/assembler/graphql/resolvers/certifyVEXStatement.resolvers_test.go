@@ -156,7 +156,7 @@ func TestIngestVEXStatement(t *testing.T) {
 				b.
 					EXPECT().
 					IngestVEXStatement(ctx, o.Sub, gomock.Any(), *o.In).
-					Return(testdata.VEX1out, nil).
+					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {

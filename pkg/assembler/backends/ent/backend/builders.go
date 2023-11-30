@@ -17,6 +17,8 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -56,39 +58,47 @@ func builderInputQueryPredicate(spec model.BuilderInputSpec) predicate.Builder {
 	return builder.URIEqualFold(spec.URI)
 }
 
-func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.BuilderInputSpec) (*model.Builder, error) {
+func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.BuilderInputSpec) (string, error) {
 	funcName := "IngestBuilder"
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Builder, error) {
+	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
 		return upsertBuilder(ctx, client, build)
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, funcName)
+		return "", errors.Wrap(err, funcName)
 	}
-	return toModelBuilder(record.Unwrap()), nil
+	return strconv.Itoa(*id), nil
 }
 
-func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
-	var modelBuilders []*model.Builder
+func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
+	var buildersID []string
 	for _, builder := range builders {
-		modelBuilder, err := b.IngestBuilder(ctx, builder)
+		id, err := b.IngestBuilder(ctx, builder)
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestBuilders failed with err: %v", err)
 		}
-		modelBuilders = append(modelBuilders, modelBuilder)
+		buildersID = append(buildersID, id)
 	}
-	return modelBuilders, nil
+	return buildersID, nil
 }
 
-func upsertBuilder(ctx context.Context, client *ent.Tx, spec *model.BuilderInputSpec) (*ent.Builder, error) {
+func upsertBuilder(ctx context.Context, client *ent.Tx, spec *model.BuilderInputSpec) (*int, error) {
 	id, err := client.Builder.Create().SetURI(spec.URI).OnConflict(
 		sql.ConflictColumns(builder.FieldURI),
 	).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert builder")
+		}
+		id, err = client.Builder.Query().
+			Where(builder.URIEQ(spec.URI)).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get builder ID")
+		}
 	}
 
-	return client.Builder.Get(ctx, id)
+	return &id, nil
 }

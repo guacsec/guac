@@ -160,7 +160,7 @@ func getPackageQueryValues(pkg *model.PkgInputSpec) map[string]any {
 	return values
 }
 
-func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
+func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
 	var listOfValues []map[string]any
 	for i := range pkgs {
 		listOfValues = append(listOfValues, getPackageQueryValues(pkgs[i]))
@@ -235,15 +235,9 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 	  
   RETURN {
 	"type_id": type._id,
-	"type": type.type,
 	"namespace_id": ns._id,
-	"namespace": ns.namespace,
 	"name_id": name._id,
-	"name": name.name,
-	"version_id": pkgVersionObj._id,
-	"version": pkgVersionObj.version,
-	"subpath": pkgVersionObj.subpath,
-	"qualifier_list": pkgVersionObj.qualifier_list
+	"version_id": pkgVersionObj._id
 }`
 
 	sb.WriteString(query)
@@ -253,10 +247,10 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 		return nil, fmt.Errorf("failed to ingest package: %w", err)
 	}
 
-	return getPackages(ctx, cursor)
+	return getPackageIDs(ctx, cursor)
 }
 
-func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
+func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
 	query := `
 	  LET type = FIRST(
 		UPSERT { type: @pkgType }
@@ -303,16 +297,10 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 	  )
 		
 	RETURN {
-	  "type_id": type._id,
-	  "type": type.type,
-	  "namespace_id": ns._id,
-	  "namespace": ns.namespace,
-	  "name_id": name._id,
-	  "name": name.name,
-	  "version_id": pkgVersionObj._id,
-	  "version": pkgVersionObj.version,
-	  "subpath": pkgVersionObj.subpath,
-	  "qualifier_list": pkgVersionObj.qualifier_list
+		"type_id": type._id,
+		"namespace_id": ns._id,
+		"name_id": name._id,
+		"version_id": pkgVersionObj._id
   }`
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, query, getPackageQueryValues(&pkg), "IngestPackage")
@@ -320,15 +308,37 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		return nil, fmt.Errorf("failed to ingest package: %w", err)
 	}
 
-	createdPackages, err := getPackages(ctx, cursor)
+	createdPackageIDs, err := getPackageIDs(ctx, cursor)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get packages from arango cursor: %w", err)
 	}
-	if len(createdPackages) == 1 {
-		return createdPackages[0], nil
+	if len(createdPackageIDs) == 1 {
+		return createdPackageIDs[0], nil
 	} else {
 		return nil, fmt.Errorf("number of packages ingested is greater than one")
 	}
+}
+
+func getPackageIDs(ctx context.Context, cursor driver.Cursor) ([]*model.PackageIDs, error) {
+	var packageIDs []*model.PackageIDs
+	for {
+		var doc dbPkgVersion
+		_, err := cursor.ReadDocument(ctx, &doc)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			} else {
+				return nil, fmt.Errorf("failed to get packages from cursor: %w", err)
+			}
+		} else {
+			packageIDs = append(packageIDs, &model.PackageIDs{
+				PackageTypeID:      doc.TypeID,
+				PackageNamespaceID: doc.NamespaceID,
+				PackageNameID:      doc.NameID,
+				PackageVersionID:   *doc.VersionID})
+		}
+	}
+	return packageIDs, nil
 }
 
 func setPkgNameMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any) *arangoQueryBuilder {
@@ -675,8 +685,8 @@ func (c *arangoClient) packagesName(ctx context.Context, pkgSpec *model.PkgSpec)
 func getPackages(ctx context.Context, cursor driver.Cursor) ([]*model.Package, error) {
 
 	pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
-	var doc dbPkgVersion
 	for {
+		var doc dbPkgVersion
 		_, err := cursor.ReadDocument(ctx, &doc)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
