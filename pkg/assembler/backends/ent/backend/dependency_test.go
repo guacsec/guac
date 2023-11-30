@@ -618,7 +618,7 @@ func (s *Suite) TestIsDependency() {
 
 			pksIDs := make([]string, len(test.InPkg))
 			for i, a := range test.InPkg {
-				if id, err := b.IngestPackageID(ctx, *a); err != nil {
+				if id, err := b.IngestPackage(ctx, *a); err != nil {
 					s.Require().NoError(err, "Could not ingest pkg")
 				} else {
 					pksIDs[i] = id.PackageVersionID
@@ -628,7 +628,7 @@ func (s *Suite) TestIsDependency() {
 			depIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
 
-				dep, err := b.IngestDependencyID(ctx, *o.P1, *o.P2, o.MF, *o.ID)
+				dep, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
 				if (err != nil) != test.ExpIngestErr {
 					s.T().Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -736,12 +736,12 @@ func (s *Suite) TestIngestDependencies() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *a); err != nil {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestDependencyIDs(ctx, o.P1s, o.P2s, o.MF, o.IDs)
+				_, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

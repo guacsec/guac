@@ -344,7 +344,7 @@ func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpe
 	return values
 }
 
-func (c *arangoClient) IngestDependencyIDs(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO(LUMJJB): handle pkgmatchtype
 
 	var listOfValues []map[string]any
@@ -450,7 +450,7 @@ func (c *arangoClient) IngestDependencyIDs(ctx context.Context, pkgs []*model.Pk
 		sb.WriteString(query)
 	}
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestDependencyIDs")
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestDependencies")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest isDependency: %w", err)
 	}
@@ -468,7 +468,7 @@ func (c *arangoClient) IngestDependencyIDs(ctx context.Context, pkgs []*model.Pk
 	return isDepIDList, nil
 }
 
-func (c *arangoClient) IngestDependencyID(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 
 	var query string
 	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
@@ -543,7 +543,7 @@ func (c *arangoClient) IngestDependencyID(ctx context.Context, pkg model.PkgInpu
 	  
 	  RETURN { 'isDependency_id': isDependency._id }`
 	}
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getDependencyQueryValues(&pkg, &depPkg, depPkgMatchType, &dependency), "IngestDependencyID")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getDependencyQueryValues(&pkg, &depPkg, depPkgMatchType, &dependency), "IngestDependency")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest isDependency: %w", err)
 	}

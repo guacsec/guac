@@ -69,10 +69,10 @@ func (c *demoClient) licenseByInput(ctx context.Context, b *model.LicenseInputSp
 
 // Ingest Licenses
 
-func (c *demoClient) IngestLicenseIDs(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
+func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
 	var modelLicenses []string
 	for _, lic := range licenses {
-		modelLic, err := c.IngestLicenseID(ctx, lic)
+		modelLic, err := c.IngestLicense(ctx, lic)
 		if err != nil {
 			return nil, gqlerror.Errorf("ingestLicense failed with err: %v", err)
 		}
@@ -81,7 +81,7 @@ func (c *demoClient) IngestLicenseIDs(ctx context.Context, licenses []*model.Lic
 	return modelLicenses, nil
 }
 
-func (c *demoClient) IngestLicenseID(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
+func (c *demoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
 	return c.ingestLicense(ctx, license, true)
 }
 

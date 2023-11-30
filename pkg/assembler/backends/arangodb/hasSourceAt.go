@@ -256,7 +256,7 @@ func getHasSourceAtQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 	return values
 }
 
-func (c *arangoClient) IngestHasSourceAtID(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
+func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	var cursor driver.Cursor
 	var err error
 	if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {

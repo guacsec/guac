@@ -74,10 +74,10 @@ func (n *certifyVulnerabilityLink) BuildModelNode(ctx context.Context, c *demoCl
 }
 
 // Ingest CertifyVuln
-func (c *demoClient) IngestCertifyVulnIDs(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+func (c *demoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	var modelCertifyVulnList []string
 	for i := range certifyVulns {
-		certifyVuln, err := c.IngestCertifyVulnID(ctx, *pkgs[i], *vulnerabilities[i], *certifyVulns[i])
+		certifyVuln, err := c.IngestCertifyVuln(ctx, *pkgs[i], *vulnerabilities[i], *certifyVulns[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestCertifyVuln failed with err: %v", err)
 		}
@@ -86,7 +86,7 @@ func (c *demoClient) IngestCertifyVulnIDs(ctx context.Context, pkgs []*model.Pkg
 	return modelCertifyVulnList, nil
 }
 
-func (c *demoClient) IngestCertifyVulnID(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
+func (c *demoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
 	return c.ingestVulnerability(ctx, pkg, vulnerability, certifyVuln, true)
 }
 

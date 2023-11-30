@@ -114,7 +114,7 @@ func (s *Suite) TestLicense() {
 			}
 			recordIDs := make([]string, len(test.Ingests))
 			for x, i := range test.Ingests {
-				lic, err := b.IngestLicenseID(ctx, i)
+				lic, err := b.IngestLicense(ctx, i)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -173,7 +173,7 @@ func (s *Suite) TestIngestLicenses() {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			if _, err := b.IngestLicenseIDs(ctx, test.ingests); err != nil {
+			if _, err := b.IngestLicenses(ctx, test.ingests); err != nil {
 				t.Fatalf("ingest error: %v", err)
 			}
 		})

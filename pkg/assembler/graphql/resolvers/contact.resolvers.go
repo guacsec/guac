@@ -18,7 +18,7 @@ func (r *mutationResolver) IngestPointOfContact(ctx context.Context, subject mod
 	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return r.Backend.IngestPointOfContactID(ctx, subject, &pkgMatchType, pointOfContact)
+	return r.Backend.IngestPointOfContact(ctx, subject, &pkgMatchType, pointOfContact)
 }
 
 // IngestPointOfContacts is the resolver for the ingestPointOfContacts field.

@@ -22,7 +22,7 @@ func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.Pack
 		return "", gqlerror.Errorf("hasSbom.KnownSince is a zero time")
 	}
 
-	return r.Backend.IngestHasSbomID(ctx, subject, hasSbom, includes)
+	return r.Backend.IngestHasSbom(ctx, subject, hasSbom, includes)
 }
 
 // IngestHasSBOMs is the resolver for the ingestHasSBOMs field.
@@ -55,7 +55,7 @@ func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.Pa
 	if len(hasSBOMs) != len(includes) {
 		return ingestedHasSBOMSIDS, gqlerror.Errorf("%v :: uneven hasSBOMs and includes for ingestion", funcName)
 	}
-	return r.Backend.IngestHasSBOMIDs(ctx, subjects, hasSBOMs, includes)
+	return r.Backend.IngestHasSBOMs(ctx, subjects, hasSBOMs, includes)
 }
 
 // HasSbom is the resolver for the HasSBOM field.

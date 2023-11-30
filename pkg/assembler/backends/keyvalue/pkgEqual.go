@@ -61,7 +61,7 @@ func (n *pkgEqualStruct) BuildModelNode(ctx context.Context, c *demoClient) (mod
 func (c *demoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
 	var modelPkgEqualsIDs []string
 	for i := range pkgEquals {
-		pkgEqual, err := c.IngestPkgEqualID(ctx, *pkgs[i], *otherPackages[i], *pkgEquals[i])
+		pkgEqual, err := c.IngestPkgEqual(ctx, *pkgs[i], *otherPackages[i], *pkgEquals[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestPkgEqual failed with err: %v", err)
 		}
@@ -87,7 +87,7 @@ func (c *demoClient) convPkgEqual(ctx context.Context, in *pkgEqualStruct) (*mod
 	return out, nil
 }
 
-func (c *demoClient) IngestPkgEqualID(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
+func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	return c.ingestPkgEqual(ctx, pkg, depPkg, pkgEqual, true)
 }
 

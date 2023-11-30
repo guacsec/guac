@@ -73,7 +73,7 @@ func Test_demoClient_IngestSources(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(context.Background(), nil)
-			_, err := c.IngestSourceIDs(ctx, tt.srcInputs)
+			_, err := c.IngestSources(ctx, tt.srcInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSources() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -136,7 +136,7 @@ func Test_demoClient_Sources(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(context.Background(), nil)
-			ingestedPkg, err := c.IngestSourceID(ctx, *tt.srcInput)
+			ingestedPkg, err := c.IngestSource(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return

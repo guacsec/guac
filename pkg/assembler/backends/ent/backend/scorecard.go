@@ -89,7 +89,7 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 // IngestScorecard takes a scorecard and a source and creates a certifyScorecard
-func (b *EntBackend) IngestScorecardID(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+func (b *EntBackend) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
 	cscID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		return upsertScorecard(ctx, ent.TxFromContext(ctx), source, scorecard)
 	})
@@ -99,12 +99,12 @@ func (b *EntBackend) IngestScorecardID(ctx context.Context, source model.SourceI
 	return strconv.Itoa(*cscID), nil
 }
 
-func (b *EntBackend) IngestScorecardIDs(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	var modelScorecardIDs []string
 	for i, sc := range scorecards {
-		modelScorecardID, err := b.IngestScorecardID(ctx, *sources[i], *sc)
+		modelScorecardID, err := b.IngestScorecard(ctx, *sources[i], *sc)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestScorecardIDs failed with err: %v", err)
+			return nil, gqlerror.Errorf("IngestScorecards failed with err: %v", err)
 		}
 		modelScorecardIDs = append(modelScorecardIDs, modelScorecardID)
 	}

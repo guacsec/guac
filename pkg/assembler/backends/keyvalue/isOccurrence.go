@@ -71,7 +71,7 @@ func (n *isOccurrenceStruct) Key() string {
 
 // Ingest IngestOccurrences
 
-func (c *demoClient) IngestOccurrenceIDs(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	var modelIsOccurrences []string
 
 	for i := range occurrences {
@@ -79,13 +79,13 @@ func (c *demoClient) IngestOccurrenceIDs(ctx context.Context, subjects model.Pac
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrSourceInput{Package: subjects.Packages[i]}
-			isOccurrence, err = c.IngestOccurrenceID(ctx, subject, *artifacts[i], *occurrences[i])
+			isOccurrence, err = c.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("ingestOccurrence failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageOrSourceInput{Source: subjects.Sources[i]}
-			isOccurrence, err = c.IngestOccurrenceID(ctx, subject, *artifacts[i], *occurrences[i])
+			isOccurrence, err = c.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("ingestOccurrence failed with err: %v", err)
 			}
@@ -97,7 +97,7 @@ func (c *demoClient) IngestOccurrenceIDs(ctx context.Context, subjects model.Pac
 
 // Ingest IsOccurrence
 
-func (c *demoClient) IngestOccurrenceID(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
 	return c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
 }
 

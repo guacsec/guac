@@ -480,22 +480,22 @@ func (s *Suite) TestLegal() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicenseID(ctx, a); err != nil {
+				if _, err := b.IngestLicense(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyLegalID(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				_, err := b.IngestCertifyLegal(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -578,22 +578,22 @@ func (s *Suite) TestLegals() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InLic {
-				if _, err := b.IngestLicenseID(ctx, a); err != nil {
+				if _, err := b.IngestLicense(ctx, a); err != nil {
 					t.Fatalf("Could not ingest license: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestCertifyLegalIDs(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
+				_, err := b.IngestCertifyLegals(ctx, o.PkgSrc, o.Dec, o.Dis, o.Legal)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

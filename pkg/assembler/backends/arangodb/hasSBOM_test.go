@@ -568,7 +568,7 @@ func TestHasSBOM(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if pkgIDs, err := b.IngestPackageID(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					if test.QueryPkgID {
@@ -583,7 +583,7 @@ func TestHasSBOM(t *testing.T) {
 				}
 			}
 			for _, a := range test.InArt {
-				if artID, err := b.IngestArtifactID(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					if test.QueryArtID {
@@ -599,7 +599,7 @@ func TestHasSBOM(t *testing.T) {
 			}
 			for _, o := range test.Calls {
 				// TODO (knrc) handle includes
-				hsID, err := b.IngestHasSbomID(ctx, o.Sub, *o.HS, model.HasSBOMIncludesInputSpec{})
+				hsID, err := b.IngestHasSbom(ctx, o.Sub, *o.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -826,17 +826,17 @@ func TestIngestHasSBOM(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHasSBOMIDs(ctx, o.Sub, o.HS, o.Inc)
+				_, err := b.IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1022,18 +1022,18 @@ func Test_buildHasSbomByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
 				// TODO (knrc) handle includes
-				hsID, err := b.IngestHasSbomID(ctx, o.Sub, *o.HS, model.HasSBOMIncludesInputSpec{})
+				hsID, err := b.IngestHasSbom(ctx, o.Sub, *o.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

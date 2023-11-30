@@ -626,7 +626,7 @@ func TestHasSLSA(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if artID, err := b.IngestArtifactID(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					if test.QuerySubjectID {
@@ -639,7 +639,7 @@ func TestHasSLSA(t *testing.T) {
 				}
 			}
 			for _, bld := range test.InBld {
-				if buildID, err := b.IngestBuilderID(ctx, bld); err != nil {
+				if buildID, err := b.IngestBuilder(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				} else {
 					if test.QueryBuilderID {
@@ -652,7 +652,7 @@ func TestHasSLSA(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				slsaID, err := b.IngestSLSAID(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
+				slsaID, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -873,17 +873,17 @@ func TestIngestHasSLSAs(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestSLSAIDs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
+				_, err := b.IngestSLSAs(ctx, o.Sub, o.BF, o.BB, o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1096,17 +1096,17 @@ func Test_buildHasSlsaByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifactID(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilderID(ctx, bld); err != nil {
+				if _, err := b.IngestBuilder(ctx, bld); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				slsaID, err := b.IngestSLSAID(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
+				slsaID, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

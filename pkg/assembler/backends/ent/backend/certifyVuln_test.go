@@ -565,17 +565,17 @@ func (s *Suite) TestIngestCertifyVulnerability() {
 			}
 
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerabilityID(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
-			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
 			}
 
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				record, err := b.IngestCertifyVulnID(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
+				record, err := b.IngestCertifyVuln(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1032,16 +1032,16 @@ func (s *Suite) TestIngestCertifyVulns() {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
 
-			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerabilities: %a", err)
 			}
-			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest packages: %v", err)
 			}
 
 			recordIDs := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				cvs, err := b.IngestCertifyVulnIDs(ctx, o.Pkgs, o.Vulns, o.CertifyVulns)
+				cvs, err := b.IngestCertifyVulns(ctx, o.Pkgs, o.Vulns, o.CertifyVulns)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

@@ -13,7 +13,7 @@ import (
 
 // IngestDependency is the resolver for the ingestDependency field.
 func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
-	return r.Backend.IngestDependencyID(ctx, pkg, depPkg, depPkgMatchType, dependency)
+	return r.Backend.IngestDependency(ctx, pkg, depPkg, depPkgMatchType, dependency)
 }
 
 // IngestDependencies is the resolver for the ingestDependencies field.
@@ -27,7 +27,7 @@ func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model
 		return ingestedDependenciesIDS, gqlerror.Errorf("%v :: uneven packages and dependencies nodes for ingestion", funcName)
 	}
 
-	return r.Backend.IngestDependencyIDs(ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
+	return r.Backend.IngestDependencies(ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
 }
 
 // IsDependency is the resolver for the IsDependency field.

@@ -424,7 +424,7 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 	}
 }
 
-func (c *arangoClient) IngestVEXStatementID(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
+func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
 	if subject.Artifact != nil {
 		query := `
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)

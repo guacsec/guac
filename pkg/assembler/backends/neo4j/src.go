@@ -240,11 +240,11 @@ func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.So
 	return result.([]*model.Source), nil
 }
 
-func (c *neo4jClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
-	return []*model.Source{}, fmt.Errorf("not implemented: IngestSources")
+func (c *neo4jClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
+	return []*model.SourceIDs{}, fmt.Errorf("not implemented: IngestSources")
 }
 
-func (c *neo4jClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
+func (c *neo4jClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
@@ -303,7 +303,10 @@ RETURN type.type, ns.namespace, name.name, name.commit, name.tag`
 		return nil, err
 	}
 
-	return result.(*model.Source), nil
+	// TODO: return ID for type, namespace and name
+	return &model.SourceIDs{
+		SourceNameID: result.(*model.Source).ID,
+	}, nil
 }
 
 func setSrcMatchValues(sb *strings.Builder, src *model.SourceSpec, objectSrc bool, firstMatch *bool, queryValues map[string]any) {

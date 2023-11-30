@@ -125,7 +125,7 @@ func TestIngestLicense(t *testing.T) {
 			}
 			b.
 				EXPECT().
-				IngestLicenseID(ctx, test.Call).
+				IngestLicense(ctx, test.Call).
 				Return("", nil).
 				Times(times)
 			_, err := r.Mutation().IngestLicense(ctx, test.Call)
@@ -191,7 +191,7 @@ func TestIngestBulkLicense(t *testing.T) {
 			}
 			b.
 				EXPECT().
-				IngestLicenseIDs(ctx, test.Call).
+				IngestLicenses(ctx, test.Call).
 				Return(nil, nil).
 				Times(times)
 			_, err := r.Mutation().IngestLicenses(ctx, test.Call)

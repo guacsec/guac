@@ -83,7 +83,7 @@ func TestIngestOccurrence(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestOccurrenceID(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence).
+					IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence).
 					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
@@ -251,7 +251,7 @@ func TestIngestOccurrences(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestOccurrenceIDs(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences).
+					IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences).
 					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)

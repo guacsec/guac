@@ -115,7 +115,7 @@ func getSourceQueryValues(source *model.SourceInputSpec) map[string]any {
 	return values
 }
 
-func (c *arangoClient) IngestSourceIDs(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
+func (c *arangoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
 	var listOfValues []map[string]any
 
 	for i := range sources {
@@ -185,7 +185,7 @@ func (c *arangoClient) IngestSourceIDs(ctx context.Context, sources []*model.Sou
 
 	sb.WriteString(query)
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestSourceIDs")
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestSources")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest source: %w", err)
 	}
@@ -193,7 +193,7 @@ func (c *arangoClient) IngestSourceIDs(ctx context.Context, sources []*model.Sou
 	return getSourceIDs(ctx, cursor)
 }
 
-func (c *arangoClient) IngestSourceID(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
+func (c *arangoClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
 	query := `
 	LET type = FIRST(
 		UPSERT { type: @srcType }
@@ -233,7 +233,7 @@ func (c *arangoClient) IngestSourceID(ctx context.Context, source model.SourceIn
 	  "name_id": name._id
 	}`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getSourceQueryValues(&source), "IngestSourceID")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getSourceQueryValues(&source), "IngestSource")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest source: %w", err)
 	}

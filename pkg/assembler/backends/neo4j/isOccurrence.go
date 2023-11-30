@@ -201,13 +201,13 @@ func generateModelIsOccurrence(subject model.PackageOrSource, artifact *model.Ar
 
 // Ingest IngestOccurrences
 
-func (c *neo4jClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	return []*model.IsOccurrence{}, fmt.Errorf("not implemented: IngestOccurrences")
+func (c *neo4jClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+	return []string{}, fmt.Errorf("not implemented: IngestOccurrences")
 }
 
 // Ingest IngestOccurrence
 
-func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
+func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
@@ -279,10 +279,10 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.Packag
 				return isOccurrence, nil
 			})
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
-		return result.(*model.IsOccurrence), nil
+		return result.(*model.IsOccurrence).ID, nil
 	} else if subject.Source != nil {
 		// TODO: use generics here between SourceInputSpec and SourceSpec?
 		selectedSrcSpec := helper.ConvertSrcInputSpecToSrcSpec(subject.Source)
@@ -338,12 +338,12 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.Packag
 				return isOccurrence, nil
 			})
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
-		return result.(*model.IsOccurrence), nil
+		return result.(*model.IsOccurrence).ID, nil
 
 	} else {
-		return nil, gqlerror.Errorf("package or source not specified for IngestOccurrence")
+		return "", gqlerror.Errorf("package or source not specified for IngestOccurrence")
 	}
 }

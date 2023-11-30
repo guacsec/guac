@@ -88,7 +88,7 @@ func (n *hasSBOMStruct) BuildModelNode(ctx context.Context, c *demoClient) (mode
 
 // Ingest HasSBOM
 
-func (c *demoClient) IngestHasSBOMIDs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
+func (c *demoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
 	var modelHasSboms []string
 
 	for i := range hasSBOMs {
@@ -96,13 +96,13 @@ func (c *demoClient) IngestHasSBOMIDs(ctx context.Context, subjects model.Packag
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrArtifactInput{Package: subjects.Packages[i]}
-			hasSBOM, err = c.IngestHasSbomID(ctx, subject, *hasSBOMs[i], *includes[i])
+			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i], *includes[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			hasSBOM, err = c.IngestHasSbomID(ctx, subject, *hasSBOMs[i], *includes[i])
+			hasSBOM, err = c.IngestHasSbom(ctx, subject, *hasSBOMs[i], *includes[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestHasSbom failed with err: %v", err)
 			}
@@ -112,7 +112,7 @@ func (c *demoClient) IngestHasSBOMIDs(ctx context.Context, subjects model.Packag
 	return modelHasSboms, nil
 }
 
-func (c *demoClient) IngestHasSbomID(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
+func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, input model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
 
 	c.m.RLock()

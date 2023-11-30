@@ -865,7 +865,7 @@ func TestIsDependency(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InPkg {
-				if pkgIDs, err := b.IngestPackageID(ctx, *a); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				} else {
 					if test.QueryPkgID {
@@ -885,7 +885,7 @@ func TestIsDependency(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				depID, err := b.IngestDependencyID(ctx, *o.P1, *o.P2, o.MF, *o.ID)
+				depID, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -992,12 +992,12 @@ func TestIsDependencies(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *a); err != nil {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				depID, err := b.IngestDependencyIDs(ctx, o.P1s, o.P2s, o.MF, o.IDs)
+				depID, err := b.IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1159,12 +1159,12 @@ func Test_buildIsDependencyByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *a); err != nil {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				depID, err := b.IngestDependencyID(ctx, *o.P1, *o.P2, o.MF, *o.ID)
+				depID, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

@@ -98,7 +98,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 	return models, nil
 }
 
-func (b *EntBackend) IngestOccurrenceIDs(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	var models []string
 	for i := range occurrences {
 		var subject model.PackageOrSourceInput
@@ -107,7 +107,7 @@ func (b *EntBackend) IngestOccurrenceIDs(ctx context.Context, subjects model.Pac
 		} else {
 			subject = model.PackageOrSourceInput{Source: subjects.Sources[i]}
 		}
-		modelOccurrence, err := b.IngestOccurrenceID(ctx, subject, *artifacts[i], *occurrences[i])
+		modelOccurrence, err := b.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestOccurrences failed with element #%v with err: %v", i, err)
 		}
@@ -116,7 +116,7 @@ func (b *EntBackend) IngestOccurrenceIDs(ctx context.Context, subjects model.Pac
 	return models, nil
 }
 
-func (b *EntBackend) IngestOccurrenceID(ctx context.Context,
+func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	subject model.PackageOrSourceInput,
 	art model.ArtifactInputSpec,
 	spec model.IsOccurrenceInputSpec,

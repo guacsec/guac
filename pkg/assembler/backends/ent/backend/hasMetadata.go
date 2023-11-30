@@ -48,7 +48,7 @@ func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 	return collect(records, toModelHasMetadata), nil
 }
 
-func (b *EntBackend) IngestHasMetadataID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
+func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		return upsertHasMetadata(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, hasMetadata)
 	})
@@ -74,7 +74,7 @@ func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
 		}
 		concurrently(eg, func() error {
-			hm, err := b.IngestHasMetadataID(ctx, subject, pkgMatchType, hmSpec)
+			hm, err := b.IngestHasMetadata(ctx, subject, pkgMatchType, hmSpec)
 			if err == nil {
 				results[index] = hm
 				return err

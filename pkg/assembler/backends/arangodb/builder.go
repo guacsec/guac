@@ -64,7 +64,7 @@ func getBuilderQueryValues(builder *model.BuilderInputSpec) map[string]any {
 	return values
 }
 
-func (c *arangoClient) IngestBuilderIDs(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
+func (c *arangoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range builders {
@@ -100,7 +100,7 @@ RETURN { "id": NEW._id }`
 
 	sb.WriteString(query)
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBuilderIDs")
+	cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestBuilders")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest builder: %w", err)
 	}
@@ -118,14 +118,14 @@ RETURN { "id": NEW._id }`
 	return builderIDs, nil
 }
 
-func (c *arangoClient) IngestBuilderID(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
+func (c *arangoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
 	query := `
 UPSERT { uri:@uri } 
 INSERT { uri:@uri } 
 UPDATE {} IN builders OPTIONS { indexHint: "byUri" }
 RETURN { "id": NEW._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getBuilderQueryValues(builder), "IngestBuilderID")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getBuilderQueryValues(builder), "IngestBuilder")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest builder: %w", err)
 	}

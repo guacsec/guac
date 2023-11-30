@@ -72,7 +72,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 	return collect(deps, toModelIsDependencyWithBackrefs), nil
 }
 
-func (b *EntBackend) IngestDependencyIDs(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO: This looks like a good candidate for using BulkCreate()
 
 	var modelIsDependencies = make([]string, len(dependencies))
@@ -84,7 +84,7 @@ func (b *EntBackend) IngestDependencyIDs(ctx context.Context, pkgs []*model.PkgI
 		dpmt := depPkgMatchType
 		dep := *dependencies[index]
 		concurrently(eg, func() error {
-			p, err := b.IngestDependencyID(ctx, pkg, depPkg, dpmt, dep)
+			p, err := b.IngestDependency(ctx, pkg, depPkg, dpmt, dep)
 			if err == nil {
 				modelIsDependencies[index] = p
 			}
@@ -97,7 +97,7 @@ func (b *EntBackend) IngestDependencyIDs(ctx context.Context, pkgs []*model.PkgI
 	return modelIsDependencies, nil
 }
 
-func (b *EntBackend) IngestDependencyID(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
+func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
 	funcName := "IngestDependency"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {

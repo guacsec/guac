@@ -100,9 +100,9 @@ func (s *Suite) TestSources() {
 			if err != nil {
 				t.Fatalf("GetBackend() error = %v", err)
 			}
-			ids, err := be.IngestSourceIDs(ctx, tt.srcInput)
+			ids, err := be.IngestSources(ctx, tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("demoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("demoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
@@ -615,17 +615,17 @@ func (s *Suite) TestHasSourceAt() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 
-			_, err = b.IngestSourceIDs(ctx, test.InSrc)
+			_, err = b.IngestSources(ctx, test.InSrc)
 			s.NoError(err, "Could not ingest sources")
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestHasSourceAtID(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
+				v, err := b.IngestHasSourceAt(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -877,12 +877,12 @@ func (s *Suite) TestIngestHasSourceAts() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -946,7 +946,7 @@ func (s *Suite) TestSourcesIngestSameTwice() {
 			}
 
 			for _, bIn := range tt.sourceInputsSpec {
-				if _, err := b.IngestSourceID(ctx, bIn); err != nil {
+				if _, err := b.IngestSource(ctx, bIn); err != nil {
 					t.Fatalf("Could not ingest source: %v , err: %v", bIn, err)
 				}
 			}

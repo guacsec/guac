@@ -21,7 +21,7 @@ func (r *mutationResolver) IngestCertifyGood(ctx context.Context, subject model.
 	if certifyGood.KnownSince.IsZero() {
 		return "", gqlerror.Errorf("certifyGood.KnownSince is a zero time")
 	}
-	return r.Backend.IngestCertifyGoodID(ctx, subject, &pkgMatchType, certifyGood)
+	return r.Backend.IngestCertifyGood(ctx, subject, &pkgMatchType, certifyGood)
 }
 
 // IngestCertifyGoods is the resolver for the ingestCertifyGoods field.
@@ -57,7 +57,7 @@ func (r *mutationResolver) IngestCertifyGoods(ctx context.Context, subjects mode
 		}
 	}
 
-	return r.Backend.IngestCertifyGoodIDs(ctx, subjects, &pkgMatchType, certifyGoods)
+	return r.Backend.IngestCertifyGoods(ctx, subjects, &pkgMatchType, certifyGoods)
 }
 
 // CertifyGood is the resolver for the CertifyGood field.

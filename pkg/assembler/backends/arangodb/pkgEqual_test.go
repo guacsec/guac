@@ -576,14 +576,14 @@ func TestPkgEqual(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			var collectedPkgIDs []*model.PackageIDs
 			for _, a := range test.InPkg {
-				if pkgIDs, err := b.IngestPackageID(ctx, *a); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				} else {
 					collectedPkgIDs = append(collectedPkgIDs, pkgIDs)
 				}
 			}
 			for _, o := range test.Calls {
-				peID, err := b.IngestPkgEqualID(ctx, *o.P1, *o.P2, *o.HE)
+				peID, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -813,7 +813,7 @@ func TestIngestPkgEquals(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestPackageIDs(ctx, test.InPkg); err != nil {
+			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
 				t.Fatalf("Could not ingest pkg: %v", err)
 			}
 			for _, o := range test.Calls {
@@ -1114,12 +1114,12 @@ func Test_buildPkgEqualByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackageID(ctx, *a); err != nil {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				peID, err := b.IngestPkgEqualID(ctx, *o.P1, *o.P2, *o.HE)
+				peID, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

@@ -91,7 +91,7 @@ func TestIngestMetadata(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestHasMetadataID(ctx, o.Sub, o.Match, *o.HM).
+					IngestHasMetadata(ctx, o.Sub, o.Match, *o.HM).
 					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestHasMetadata(ctx, o.Sub, *o.Match, *o.HM)

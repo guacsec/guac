@@ -71,7 +71,7 @@ func (c *demoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgIn
 	var modelHasMetadataIDs []string
 
 	for i := range hasSourceAts {
-		hasMetadata, err := c.IngestHasSourceAtID(ctx, *pkgs[i], *pkgMatchType, *sources[i], *hasSourceAts[i])
+		hasMetadata, err := c.IngestHasSourceAt(ctx, *pkgs[i], *pkgMatchType, *sources[i], *hasSourceAts[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSourceAt failed with err: %v", err)
 		}
@@ -80,7 +80,7 @@ func (c *demoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgIn
 	return modelHasMetadataIDs, nil
 }
 
-func (c *demoClient) IngestHasSourceAtID(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
+func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	return c.ingestHasSourceAt(ctx, packageArg, pkgMatchType, source, hasSourceAt, true)
 }
 

@@ -100,7 +100,7 @@ func TestIngestHashEquals(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestHashEqualIDs(ctx, o.A1, o.A2, o.HE).
+					IngestHashEquals(ctx, o.A1, o.A2, o.HE).
 					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestHashEquals(ctx, o.A1, o.A2, o.HE)

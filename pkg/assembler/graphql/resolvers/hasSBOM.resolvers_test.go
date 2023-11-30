@@ -84,7 +84,7 @@ func TestIngestHasSbom(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestHasSbomID(ctx, o.Sub, *o.HS, *o.Inc).
+					IngestHasSbom(ctx, o.Sub, *o.HS, *o.Inc).
 					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestHasSbom(ctx, o.Sub, *o.HS, *o.Inc)
@@ -211,7 +211,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestHasSBOMIDs(ctx, o.Sub, o.HS, o.Inc).
+					IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc).
 					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc)

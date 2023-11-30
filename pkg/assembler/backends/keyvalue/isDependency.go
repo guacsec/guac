@@ -64,12 +64,12 @@ func (n *isDependencyLink) BuildModelNode(ctx context.Context, c *demoClient) (m
 
 // Ingest IngestDependencies
 
-func (c *demoClient) IngestDependencyIDs(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO(LUMJJB): match flags
 
 	var modelIsDependencies []string
 	for i := range dependencies {
-		isDependency, err := c.IngestDependencyID(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
+		isDependency, err := c.IngestDependency(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestDependency failed with err: %v", err)
 		}
@@ -79,7 +79,7 @@ func (c *demoClient) IngestDependencyIDs(ctx context.Context, pkgs []*model.PkgI
 }
 
 // Ingest IsDependency
-func (c *demoClient) IngestDependencyID(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 	return c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, true)
 }
 

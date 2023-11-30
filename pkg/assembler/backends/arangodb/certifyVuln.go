@@ -189,7 +189,7 @@ func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.Vul
 	return values
 }
 
-func (c *arangoClient) IngestCertifyVulnIDs(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range certifyVulns {
@@ -273,7 +273,7 @@ func (c *arangoClient) IngestCertifyVulnIDs(ctx context.Context, pkgs []*model.P
 	return certifyVulnIDList, nil
 }
 
-func (c *arangoClient) IngestCertifyVulnID(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
+func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
 	query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions

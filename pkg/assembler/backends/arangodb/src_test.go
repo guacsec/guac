@@ -56,9 +56,9 @@ func Test_IngestSources(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := b.IngestSourceIDs(ctx, tt.srcInputs)
+			got, err := b.IngestSources(ctx, tt.srcInputs)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSourceIDs() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSources() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if len(got) != len(tt.srcInputs) {
@@ -131,9 +131,9 @@ func Test_Sources(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
+			ingestedSrcIDs, err := b.IngestSource(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -232,9 +232,9 @@ func Test_SourceTypes(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
+			ingestedSrcIDs, err := b.IngestSource(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -342,9 +342,9 @@ func Test_SourceNamespaces(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
+			ingestedSrcIDs, err := b.IngestSource(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -426,9 +426,9 @@ func Test_buildSourceResponseFromID(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedSrcIDs, err := b.IngestSourceID(ctx, *tt.srcInput)
+			ingestedSrcIDs, err := b.IngestSource(ctx, *tt.srcInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestSourceID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {

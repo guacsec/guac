@@ -160,7 +160,7 @@ func Test_demoClient_IngestBuilder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			_, err := c.IngestBuilderID(ctx, tt.builderInput)
+			_, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -192,7 +192,7 @@ func Test_demoClient_IngestBuilders(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			_, err := c.IngestBuilderIDs(ctx, tt.builderInputs)
+			_, err := c.IngestBuilders(ctx, tt.builderInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -251,7 +251,7 @@ func Test_demoClient_Builders(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			ingestedBuilder, err := c.IngestBuilderID(ctx, tt.builderInput)
+			ingestedBuilder, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -309,7 +309,7 @@ func Test_demoClient_exactBuilder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			ingestedBuilder, err := c.IngestBuilderID(ctx, tt.builderInput)
+			ingestedBuilder, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return

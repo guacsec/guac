@@ -569,7 +569,7 @@ func Test_demoClient_Packages(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			ingestedPkg, err := c.IngestPackageID(ctx, *tt.pkgInput)
+			ingestedPkg, err := c.IngestPackage(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -605,7 +605,7 @@ func Test_demoClient_IngestPackages(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			_, err := c.IngestPackageIDs(ctx, tt.pkgInputs)
+			_, err := c.IngestPackages(ctx, tt.pkgInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -838,7 +838,7 @@ func Test_IngestingVersions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			_, err := c.IngestPackageIDs(ctx, tt.pkgInputs)
+			_, err := c.IngestPackages(ctx, tt.pkgInputs)
 			if err != nil {
 				t.Errorf("Unexpected demoClient.IngestPackages() error = %v, ", err)
 				return

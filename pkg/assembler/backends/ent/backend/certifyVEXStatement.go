@@ -32,7 +32,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func (b *EntBackend) IngestVEXStatementID(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
+func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
 	funcName := "IngestVEXStatement"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
@@ -153,7 +153,7 @@ func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.Pac
 		vuln := *vulnerabilities[index]
 		vexStatement := *vexStatements[index]
 		concurrently(eg, func() error {
-			statement, err := b.IngestVEXStatementID(ctx, subject, vuln, vexStatement)
+			statement, err := b.IngestVEXStatement(ctx, subject, vuln, vexStatement)
 			if err == nil {
 				ids[index] = statement
 				return err

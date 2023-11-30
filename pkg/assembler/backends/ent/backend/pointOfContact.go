@@ -47,7 +47,7 @@ func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfCo
 	return collect(records, toModelPointOfContact), nil
 }
 
-func (b *EntBackend) IngestPointOfContactID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
+func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		return upsertPointOfContact(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, pointOfContact)
 	})
@@ -69,7 +69,7 @@ func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.P
 		} else {
 			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
 		}
-		hm, err := b.IngestPointOfContactID(ctx, subject, pkgMatchType, *pointOfContactList[i])
+		hm, err := b.IngestPointOfContact(ctx, subject, pkgMatchType, *pointOfContactList[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestBulkPointOfContact failed with element #%v with err: %v", i, err)
 		}

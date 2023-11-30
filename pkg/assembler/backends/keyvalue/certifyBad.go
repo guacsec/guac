@@ -74,7 +74,7 @@ func (n *badLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Node
 }
 
 // Ingest CertifyBad
-func (c *demoClient) IngestCertifyBadIDs(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
+func (c *demoClient) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
 	var modelCertifyBads []string
 
 	for i := range certifyBads {
@@ -82,19 +82,19 @@ func (c *demoClient) IngestCertifyBadIDs(ctx context.Context, subjects model.Pac
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
-			certifyBad, err = c.IngestCertifyBadID(ctx, subject, pkgMatchType, *certifyBads[i])
+			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyBad failed with err: %v", err)
 			}
 		} else if len(subjects.Sources) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
-			certifyBad, err = c.IngestCertifyBadID(ctx, subject, pkgMatchType, *certifyBads[i])
+			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyBad failed with err: %v", err)
 			}
 		} else {
 			subject := model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
-			certifyBad, err = c.IngestCertifyBadID(ctx, subject, pkgMatchType, *certifyBads[i])
+			certifyBad, err = c.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
 			if err != nil {
 				return nil, gqlerror.Errorf("IngestCertifyBad failed with err: %v", err)
 			}
@@ -104,7 +104,7 @@ func (c *demoClient) IngestCertifyBadIDs(ctx context.Context, subjects model.Pac
 	return modelCertifyBads, nil
 }
 
-func (c *demoClient) IngestCertifyBadID(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error) {
+func (c *demoClient) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error) {
 	return c.ingestCertifyBad(ctx, subject, pkgMatchType, certifyBad, true)
 }
 func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec, readOnly bool) (string, error) {

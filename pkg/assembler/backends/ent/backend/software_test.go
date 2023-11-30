@@ -41,7 +41,7 @@ func (s *Suite) TestCreateSoftwareTree() {
 		s.NoError(err)
 
 		// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-		id, err2 := be.IngestPackageID(s.Ctx, model.PkgInputSpec{
+		id, err2 := be.IngestPackage(s.Ctx, model.PkgInputSpec{
 			Type:      "apk",
 			Namespace: ptr("alpine"),
 			Name:      "apk",
@@ -72,7 +72,7 @@ func (s *Suite) TestCreateSoftwareTree() {
 		}
 
 		// Ingest a second time should only create a new version
-		id, err2 = be.IngestPackageID(s.Ctx, model.PkgInputSpec{
+		id, err2 = be.IngestPackage(s.Ctx, model.PkgInputSpec{
 			Type:      "apk",
 			Namespace: ptr("alpine"),
 			Name:      "apk",
@@ -110,7 +110,7 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 		s.NoError(err)
 
 		// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-		id, err2 := be.IngestPackageID(s.Ctx, model.PkgInputSpec{
+		id, err2 := be.IngestPackage(s.Ctx, model.PkgInputSpec{
 			Type:       "apk",
 			Namespace:  ptr("alpine"),
 			Name:       "apk",
@@ -135,7 +135,7 @@ func (s *Suite) TestVersionUpsertsWithQualifiers() {
 			Qualifiers: []*model.PackageQualifierInputSpec{{Key: "arch", Value: "arm64"}},
 		}
 
-		id2, err4 := be.IngestPackageID(s.Ctx, spec2)
+		id2, err4 := be.IngestPackage(s.Ctx, spec2)
 		s.NoError(err4)
 		pkgs, err3 = be.Packages(s.Ctx, &model.PkgSpec{ID: &id2.PackageVersionID})
 		s.NoError(err3)
@@ -149,16 +149,16 @@ func (s *Suite) TestIngestOccurrence_Package() {
 		be, err := GetBackend(s.Client)
 		s.NoError(err)
 
-		_, err = be.IngestPackageID(s.Ctx, *p1)
+		_, err = be.IngestPackage(s.Ctx, *p1)
 		s.NoError(err)
 
-		_, err = be.IngestArtifactID(s.Ctx, &model.ArtifactInputSpec{
+		_, err = be.IngestArtifact(s.Ctx, &model.ArtifactInputSpec{
 			Algorithm: "sha256", Digest: "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 		})
 		s.NoError(err)
 
 		// pkg:apk/alpine/apk@2.12.9-r3?arch=x86
-		oc, err := be.IngestOccurrenceID(s.Ctx,
+		oc, err := be.IngestOccurrence(s.Ctx,
 			model.PackageOrSourceInput{
 				Package: p1,
 			},

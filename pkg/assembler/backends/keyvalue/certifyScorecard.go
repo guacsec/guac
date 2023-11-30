@@ -69,10 +69,10 @@ func (n *scorecardLink) BuildModelNode(ctx context.Context, c *demoClient) (mode
 
 // Ingest Scorecards
 
-func (c *demoClient) IngestScorecardIDs(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	var modelCertifyScorecards []string
 	for i := range scorecards {
-		scorecard, err := c.IngestScorecardID(ctx, *sources[i], *scorecards[i])
+		scorecard, err := c.IngestScorecard(ctx, *sources[i], *scorecards[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestScorecard failed with err: %v", err)
 		}
@@ -82,7 +82,7 @@ func (c *demoClient) IngestScorecardIDs(ctx context.Context, sources []*model.So
 }
 
 // Ingest CertifyScorecard
-func (c *demoClient) IngestScorecardID(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+func (c *demoClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
 	return c.certifyScorecard(ctx, source, scorecard, true)
 }
 

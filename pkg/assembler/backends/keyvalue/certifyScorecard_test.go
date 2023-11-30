@@ -397,12 +397,12 @@ func TestCertifyScorecard(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestScorecardID(ctx, *o.Src, *o.SC)
+				_, err := b.IngestScorecard(ctx, *o.Src, *o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -580,12 +580,12 @@ func TestIngestScorecards(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestScorecardIDs(ctx, o.Src, o.SC)
+				_, err := b.IngestScorecards(ctx, o.Src, o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -676,12 +676,12 @@ func TestCertifyScorecardNeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSourceID(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, o := range test.Calls {
-				if _, err := b.IngestScorecardID(ctx, *o.Src, *o.SC); err != nil {
+				if _, err := b.IngestScorecard(ctx, *o.Src, *o.SC); err != nil {
 					t.Fatalf("Could not ingest CertifyScorecard: %v", err)
 				}
 			}

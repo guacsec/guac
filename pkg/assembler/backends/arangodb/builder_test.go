@@ -61,9 +61,9 @@ func Test_IngestBuilder(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := c.IngestBuilderID(ctx, tt.builderInput)
+			got, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestBuilderID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if (got != "") != tt.wantID {
@@ -107,9 +107,9 @@ func Test_IngestBuilders(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := c.IngestBuilderIDs(ctx, tt.builderInputs)
+			got, err := c.IngestBuilders(ctx, tt.builderInputs)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestBuilderIDs() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestBuilders() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if len(got) != len(tt.builderInputs) {
@@ -176,9 +176,9 @@ func Test_Builders(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error creating arango backend: %v", err)
 			}
-			ingestedBuilderID, err := c.IngestBuilderID(ctx, tt.builderInput)
+			ingestedBuilderID, err := c.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestBuilderID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
@@ -238,9 +238,9 @@ func Test_buildBuilderResponseByID(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedBuilderID, err := b.IngestBuilderID(ctx, tt.builderInput)
+			ingestedBuilderID, err := b.IngestBuilder(ctx, tt.builderInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("arangoClient.IngestBuilderID() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			got, err := b.(*arangoClient).buildBuilderResponseByID(ctx, ingestedBuilderID, nil)

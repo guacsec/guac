@@ -13,7 +13,7 @@ import (
 
 // IngestPkgEqual is the resolver for the ingestPkgEqual field.
 func (r *mutationResolver) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
-	return r.Backend.IngestPkgEqualID(ctx, pkg, otherPackage, pkgEqual)
+	return r.Backend.IngestPkgEqual(ctx, pkg, otherPackage, pkgEqual)
 }
 
 // IngestPkgEquals is the resolver for the ingestPkgEquals field.

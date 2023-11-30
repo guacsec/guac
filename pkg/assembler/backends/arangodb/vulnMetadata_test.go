@@ -987,7 +987,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				ingestedVuln, err := b.IngestVulnerabilityID(ctx, *g)
+				ingestedVuln, err := b.IngestVulnerability(ctx, *g)
 				if err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
@@ -1307,7 +1307,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestVulnerabilityIDs(ctx, test.InVuln); err != nil {
+			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
 				t.Fatalf("Could not ingest vulnerabilities: %a", err)
 			}
 			for _, o := range test.Calls {
@@ -1458,7 +1458,7 @@ func Test_buildVulnerabilityMetadataByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				_, err := b.IngestVulnerabilityID(ctx, *g)
+				_, err := b.IngestVulnerability(ctx, *g)
 				if err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}

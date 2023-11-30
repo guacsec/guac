@@ -156,7 +156,7 @@ func TestLicense(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, i := range test.Ingests {
-				_, err := b.IngestLicenseID(ctx, i)
+				_, err := b.IngestLicense(ctx, i)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -201,7 +201,7 @@ func TestIngestLicenses(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
-			if _, err := b.IngestLicenseIDs(ctx, test.ingests); err != nil {
+			if _, err := b.IngestLicenses(ctx, test.ingests); err != nil {
 				t.Errorf("ingest error: %v", err)
 			}
 		})

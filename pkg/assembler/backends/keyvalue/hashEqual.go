@@ -60,10 +60,10 @@ func (n *hashEqualStruct) BuildModelNode(ctx context.Context, c *demoClient) (mo
 
 // Ingest HashEqual
 
-func (c *demoClient) IngestHashEqualIDs(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
+func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
 	var modelHashEquals []string
 	for i := range hashEquals {
-		hashEqual, err := c.IngestHashEqualID(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
+		hashEqual, err := c.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHashEqual failed with err: %v", err)
 		}
@@ -72,7 +72,7 @@ func (c *demoClient) IngestHashEqualIDs(ctx context.Context, artifacts []*model.
 	return modelHashEquals, nil
 }
 
-func (c *demoClient) IngestHashEqualID(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
+func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
 	return c.ingestHashEqual(ctx, artifact, equalArtifact, hashEqual, true)
 }
 
