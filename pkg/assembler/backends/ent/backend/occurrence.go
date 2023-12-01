@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
 	"strconv"
 
 	"entgo.io/ent/dialect/sql"
@@ -99,7 +100,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 }
 
 func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
-	var models []string
+	var ids []string
 	for i := range occurrences {
 		var subject model.PackageOrSourceInput
 		if len(subjects.Packages) > 0 {
@@ -107,13 +108,13 @@ func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.Packa
 		} else {
 			subject = model.PackageOrSourceInput{Source: subjects.Sources[i]}
 		}
-		modelOccurrence, err := b.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
+		id, err := b.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestOccurrences failed with element #%v with err: %v", i, err)
 		}
-		models = append(models, modelOccurrence)
+		ids = append(ids, id)
 	}
-	return models, nil
+	return ids, nil
 }
 
 func (b *EntBackend) IngestOccurrence(ctx context.Context,
@@ -127,7 +128,6 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		tx := ent.TxFromContext(ctx)
 		client := tx.Client()
 		var err error
-
 		artRecord, err := client.Artifact.Query().
 			Order(ent.Asc(artifact.FieldID)). // is order important here?
 			Where(artifactQueryInputPredicates(art)).
@@ -135,33 +135,24 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		if err != nil {
 			return nil, err
 		}
-
 		occurrenceCreate := client.Occurrence.Create().
 			SetArtifact(artRecord).
 			SetJustification(spec.Justification).
 			SetOrigin(spec.Origin).
 			SetCollector(spec.Collector)
-
 		occurrenceConflictColumns := []string{
 			occurrence.FieldArtifactID,
-			occurrence.FieldJustification,
-			occurrence.FieldOrigin,
-			occurrence.FieldCollector,
 		}
 
 		var conflictWhere *sql.Predicate
+		var pkgVersion *ent.PackageVersion
+		var srcNameID *int
 
 		if subject.Package != nil {
-			pkgVersion, err := getPkgVersion(ctx, client, *subject.Package)
+			pkgVersion, err = getPkgVersion(ctx, client, *subject.Package)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get package version")
 			}
-			occurrenceCreate.SetPackage(pkgVersion)
-			occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldPackageID)
-			conflictWhere = sql.And(
-				sql.NotNull(occurrence.FieldPackageID),
-				sql.IsNull(occurrence.FieldSourceID),
-			)
 		} else if subject.Source != nil {
 			srcNameID, err := upsertSource(ctx, tx, *subject.Source)
 			if err != nil {
@@ -180,16 +171,36 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		} else {
 			return nil, gqlerror.Errorf("%v :: %s", funcName, "subject must be either a package or source")
 		}
-
 		id, err := occurrenceCreate.
 			OnConflict(
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			UpdateNewValues().
+			DoNothing().
 			ID(ctx)
+
 		if err != nil {
-			return nil, err
+			if err != stdsql.ErrNoRows {
+				return nil, errors.Wrap(err, "upsertPackageEqual")
+			}
+			predicates := []predicate.Occurrence{
+				occurrence.ArtifactIDEQ(artRecord.ID),
+				occurrence.JustificationEQ(spec.Justification),
+				occurrence.OriginEQ(spec.Origin),
+				occurrence.CollectorEQ(spec.Collector),
+			}
+
+			if subject.Package != nil {
+				predicates = append(predicates, occurrence.PackageIDEQ(pkgVersion.ID))
+			} else if subject.Source != nil {
+				predicates = append(predicates, occurrence.SourceIDEQ(*srcNameID))
+			}
+
+			id, err = client.Occurrence.Query().Where(predicates...).OnlyID(ctx)
+
+			if err != nil {
+				return nil, errors.Wrap(err, "get Occurrence ID")
+			}
 		}
 
 		return &id, nil
@@ -198,28 +209,5 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		return "", gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	// TODO: Prepare response using a resusable resolver that accounts for preloads.
-
-	record, err := b.client.Occurrence.Query().
-		Where(occurrence.ID(*recordID)).
-		WithArtifact().
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
-		}).
-		WithSource(func(q *ent.SourceNameQuery) {
-			q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
-				q.WithSourceType()
-			})
-		}).
-		Only(ctx)
-	if err != nil {
-		return "", gqlerror.Errorf("%v :: %s", funcName, err)
-	}
-
-	//TODO optimize for only returning ID
-	return nodeID(record.ID), nil
+	return strconv.Itoa(*recordID), nil
 }

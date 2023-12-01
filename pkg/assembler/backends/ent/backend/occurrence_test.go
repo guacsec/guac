@@ -214,7 +214,7 @@ func (s *Suite) TestOccurrenceHappyPath() {
 		_, err = b.IngestArtifact(s.Ctx, a1)
 		s.Require().NoError(err)
 
-		occ, err := b.IngestOccurrence(s.Ctx,
+		id, err := b.IngestOccurrence(s.Ctx,
 			model.PackageOrSourceInput{
 				Package: p1,
 			},
@@ -223,6 +223,13 @@ func (s *Suite) TestOccurrenceHappyPath() {
 				Justification: "test justification",
 			},
 		)
+		occs, errR := b.IsOccurrence(s.Ctx, &model.IsOccurrenceSpec{
+			ID: &id,
+		})
+		if errR != nil {
+			s.Failf("fail", "error reading occurrence with id: %s", id, errR)
+		}
+		occ := occs[0]
 		s.Require().NoError(err)
 		s.Require().NotNil(occ)
 	})
@@ -660,11 +667,23 @@ func (s *Suite) TestIngestOccurrences() {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
-			for _, o := range test.Calls {
-				_, err := b.IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+			for i, o := range test.Calls {
+				ids, err := b.IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+				id := ids[i]
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
+				if err != nil {
+					return
+				}
+				got, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: &id})
+				if err != nil {
+					t.Fatalf("Occurence not found: %v", err)
+				}
+
+				/*if diff := cmp.Diff(test.ExpOcc, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}*/
 			}
 		})
 	}
