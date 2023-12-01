@@ -17,13 +17,15 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencySpec) ([]*model.IsDependency, error) {
@@ -73,28 +75,16 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 }
 
 func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
-	// TODO: This looks like a good candidate for using BulkCreate()
 
-	var modelIsDependencies = make([]string, len(dependencies))
-	eg, ctx := errgroup.WithContext(ctx)
+	var ids []string
 	for i := range dependencies {
-		index := i
-		pkg := *pkgs[index]
-		depPkg := *depPkgs[index]
-		dpmt := depPkgMatchType
-		dep := *dependencies[index]
-		concurrently(eg, func() error {
-			p, err := b.IngestDependency(ctx, pkg, depPkg, dpmt, dep)
-			if err == nil {
-				modelIsDependencies[index] = p
-			}
-			return err
-		})
+		isDependency, err := b.IngestDependency(ctx, *pkgs[i], *depPkgs[i], depPkgMatchType, *dependencies[i])
+		if err != nil {
+			return nil, Errorf("IngestDependency failed with err: %v", err)
+		}
+		ids = append(ids, isDependency)
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
-	return modelIsDependencies, nil
+	return ids, nil
 }
 
 func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
@@ -124,9 +114,10 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 		}
 
 		var conflictWhere *sql.Predicate
-
+		var dpn *ent.PackageName
+		var dpv *ent.PackageVersion
 		if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-			dpn, err := getPkgName(ctx, client.Client(), depPkg)
+			dpn, err = getPkgName(ctx, client.Client(), depPkg)
 			if err != nil {
 				return nil, err
 			}
@@ -137,7 +128,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 				sql.IsNull(dependency.FieldDependentPackageVersionID),
 			)
 		} else {
-			dpv, err := getPkgVersion(ctx, client.Client(), depPkg)
+			dpv, err = getPkgVersion(ctx, client.Client(), depPkg)
 			if err != nil {
 				return nil, err
 			}
@@ -148,16 +139,43 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 				sql.NotNull(dependency.FieldDependentPackageVersionID),
 			)
 		}
-
 		id, err := query.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			ID(ctx)
+
 		if err != nil {
-			return nil, err
+			if err != stdsql.ErrNoRows {
+				return nil, errors.Wrap(err, "Ingest dependency ID")
+			}
+			predicates := []predicate.Dependency{
+				dependency.PackageIDEQ(p.ID),
+				dependency.VersionRangeEQ(dep.VersionRange),
+				dependency.DependencyTypeEQ(dependencyTypeToEnum(dep.DependencyType)),
+				dependency.JustificationEQ(dep.Justification),
+				dependency.OriginEQ(dep.Origin),
+				dependency.CollectorEQ(dep.Collector),
+			}
+
+			if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+
+				predicates = append(predicates, dependency.DependentPackageNameIDEQ(dpn.ID))
+
+			} else {
+
+				predicates = append(predicates, dependency.DependentPackageVersionIDEQ(dpv.ID))
+			}
+
+			id, err = client.Dependency.Query().
+				Where(predicates...).
+				OnlyID(ctx)
+
+			if err != nil {
+				return nil, errors.Wrap(err, "Ingest dependency ID")
+			}
 		}
 		return &id, nil
 	})
@@ -165,7 +183,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 		return "", errors.Wrap(err, funcName)
 	}
 
-	return nodeID(*recordID), nil
+	return strconv.Itoa(*recordID), nil
 }
 
 func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
