@@ -483,7 +483,7 @@ func Test_spdxParser(t *testing.T) {
 				  "copyrightText": ""
 				},
 				{
-				  "fileName": "include-file",
+				  "fileName": "./include-file",
 				  "SPDXID": "SPDXRef-aef1c9f4f2277e36",
 				  "fileTypes": [
 					"TEXT"
