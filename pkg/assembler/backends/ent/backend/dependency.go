@@ -18,12 +18,12 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 )
