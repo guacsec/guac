@@ -676,7 +676,7 @@ func (s *Suite) TestIngestOccurrences() {
 				if err != nil {
 					return
 				}
-				got, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: &id})
+				_, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: &id})
 				if err != nil {
 					t.Fatalf("Occurence not found: %v", err)
 				}
