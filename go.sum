@@ -677,8 +677,8 @@ github.com/prometheus/procfs v0.11.1 h1:xRC8Iq1yyca5ypa9n1EZnWZkt7dwcoRPQwX/5gwa
 github.com/prometheus/procfs v0.11.1/go.mod h1:eesXgaPo1q7lBpVMoMy0ZOFTth9hBn4W/y0/p/ScXhY=
 github.com/redis/go-redis/v9 v9.3.0 h1:RiVDjmig62jIWp7Kk4XVLs0hzV6pI3PyTnnL0cnn0u0=
 github.com/redis/go-redis/v9 v9.3.0/go.mod h1:hdY0cQFCN4fnSYT6TkisLufl/4W5UIXyv0b/CLO2V2M=
-github.com/regclient/regclient v0.5.4 h1:oJLY/M18jo+Lzg+6KH29ZjzZ8XX5uIybAOTcAqP8hwU=
-github.com/regclient/regclient v0.5.4/go.mod h1:604ymXFhwbmWjyfGFp3uF91gfCXIcjWBxJhBg94s9cM=
+github.com/regclient/regclient v0.5.5 h1:fDh5afBCRbeSU71vcvbN0fI88D1fTfp2m39BPqki7EU=
+github.com/regclient/regclient v0.5.5/go.mod h1:604ymXFhwbmWjyfGFp3uF91gfCXIcjWBxJhBg94s9cM=
 github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 h1:OdAsTTz6OkFY5QxjkYwrChwuRruF69c169dPK26NUlk=
 github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0/go.mod h1:qqbHyh8v60DhA7CoWK5oRCqLrMHRGoxYCSS9EjAz6Eo=
 github.com/rhysd/actionlint v1.6.26 h1:zi7jPZf3Ks14gCXYAAL47uBziyFlX7+Xwilqhexct9g=
