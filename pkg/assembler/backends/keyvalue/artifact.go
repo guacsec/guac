@@ -141,8 +141,8 @@ func (c *demoClient) artifactModelByID(ctx context.Context, id string) (*model.A
 
 // Ingest Artifacts
 
-func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
-	var modelArtifacts []*model.Artifact
+func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+	var modelArtifacts []string
 	for _, art := range artifacts {
 		modelArt, err := c.IngestArtifact(ctx, art)
 		if err != nil {
@@ -153,11 +153,11 @@ func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.Art
 	return modelArtifacts, nil
 }
 
-func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
+func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
 	return c.ingestArtifact(ctx, artifact, true)
 }
 
-func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, readOnly bool) (*model.Artifact, error) {
+func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, readOnly bool) (string, error) {
 	algorithm := strings.ToLower(artifact.Algorithm)
 	digest := strings.ToLower(artifact.Digest)
 
@@ -173,7 +173,7 @@ func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.Artifac
 
 	if err != nil {
 		if !errors.Is(err, kv.NotFoundError) {
-			return nil, err
+			return "", err
 		}
 		// Got KeyError: not found, so do insert
 		if readOnly {
@@ -184,15 +184,15 @@ func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.Artifac
 		}
 		inA.ThisID = c.getNextID()
 		if err := c.addToIndex(ctx, artCol, inA); err != nil {
-			return nil, err
+			return "", err
 		}
 		if err := setkv(ctx, artCol, inA, c); err != nil {
-			return nil, err
+			return "", err
 		}
 		outA = inA
 	}
 
-	return c.convArtifact(outA), nil
+	return outA.ThisID, nil
 }
 
 func (c *demoClient) artifactExact(ctx context.Context, artifactSpec *model.ArtifactSpec) (*artStruct, error) {

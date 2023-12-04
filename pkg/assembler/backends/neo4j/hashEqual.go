@@ -138,10 +138,10 @@ func setHashEqualValues(sb *strings.Builder, hashEqualSpec *model.HashEqualSpec,
 	}
 }
 
-func (c *neo4jClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+func (c *neo4jClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
 	panic(fmt.Errorf("not implemented: IngestHashEqual - IngestHashEqual"))
 }
 
-func (c *neo4jClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
-	return []*model.HashEqual{}, fmt.Errorf("not implemented: IngestHashEquals")
+func (c *neo4jClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
+	return []string{}, fmt.Errorf("not implemented: IngestHashEquals")
 }

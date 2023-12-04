@@ -31,12 +31,12 @@ import (
 
 func TestVEX(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -856,22 +856,50 @@ func TestVEX(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					if test.QueryPkgID {
+						test.Query = &model.CertifyVEXStatementSpec{
+							Subject: &model.PackageOrArtifactSpec{
+								Package: &model.PkgSpec{
+									ID: ptrfrom.String(pkgIDs.PackageVersionID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %a", err)
+				} else {
+					if test.QueryArtID {
+						test.Query = &model.CertifyVEXStatementSpec{
+							Subject: &model.PackageOrArtifactSpec{
+								Artifact: &model.ArtifactSpec{
+									ID: ptrfrom.String(artID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, v := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *v); err != nil {
+				if vulnIDs, err := b.IngestVulnerability(ctx, *v); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %v", err)
+				} else {
+					if test.QueryVulnID {
+						test.Query = &model.CertifyVEXStatementSpec{
+							Vulnerability: &model.VulnerabilitySpec{
+								ID: ptrfrom.String(vulnIDs.VulnerabilityNodeID),
+							},
+						}
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
+				vexID, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -880,36 +908,7 @@ func TestVEX(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.CertifyVEXStatementSpec{
-						ID: ptrfrom.String(found.ID),
-					}
-				}
-				if test.QueryPkgID {
-					if _, ok := found.Subject.(*model.Package); ok {
-						test.Query = &model.CertifyVEXStatementSpec{
-							Subject: &model.PackageOrArtifactSpec{
-								Package: &model.PkgSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QueryArtID {
-					if _, ok := found.Subject.(*model.Artifact); ok {
-						test.Query = &model.CertifyVEXStatementSpec{
-							Subject: &model.PackageOrArtifactSpec{
-								Artifact: &model.ArtifactSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Artifact).ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QueryVulnID {
-					test.Query = &model.CertifyVEXStatementSpec{
-						Vulnerability: &model.VulnerabilitySpec{
-							ID: ptrfrom.String(found.Vulnerability.ID),
-						},
+						ID: ptrfrom.String(vexID),
 					}
 				}
 			}
@@ -929,12 +928,12 @@ func TestVEX(t *testing.T) {
 
 func TestVEXBulkIngest(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1321,12 +1320,12 @@ func TestVEXBulkIngest(t *testing.T) {
 
 func Test_buildCertifyVexByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1526,14 +1525,14 @@ func Test_buildCertifyVexByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
+				vexID, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildCertifyVexByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildCertifyVexByID(ctx, vexID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
@@ -1548,119 +1547,3 @@ func Test_buildCertifyVexByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestVEXNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Sub  model.PackageOrArtifactInput
-// 		Vuln *model.VulnerabilityInputSpec
-// 		In   *model.VexStatementInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		InArt        []*model.ArtifactInputSpec
-// 		InVuln       []*model.VulnerabilityInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:   "HappyPath",
-// 			InPkg:  []*model.PkgInputSpec{testdata.P1},
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-// 			Calls: []call{
-// 				call{
-// 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Vuln: testdata.O1,
-// 					In: &model.VexStatementInputSpec{
-// 						VexJustification: "test justification",
-// 						KnownSince:       time.Unix(1e9, 0),
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "7"}, // pkg version -> pkg name, vex
-// 				"6": []string{"5", "7"}, // vuln -> vuln type, vex
-// 				"7": []string{"1", "5"}, // Vex -> pkg version, vuln
-// 			},
-// 		},
-// 		{
-// 			Name:   "Two vex on same package",
-// 			InPkg:  []*model.PkgInputSpec{testdata.P1},
-// 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2},
-// 			Calls: []call{
-// 				{
-// 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Vuln: testdata.O1,
-// 					In: &model.VexStatementInputSpec{
-// 						VexJustification: "test justification",
-// 						KnownSince:       time.Unix(1e9, 0),
-// 					},
-// 				},
-// 				{
-// 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Vuln: testdata.O2,
-// 					In: &model.VexStatementInputSpec{
-// 						VexJustification: "test justification",
-// 						KnownSince:       time.Unix(1e9, 0),
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "8", "9"}, // pkg version -> pkg name, vex1, vex2
-// 				"6": []string{"5", "8"},      // Vuln1 -> vulnType, vex1
-// 				"7": []string{"5", "9"},      // Vuln2 -> vulnType, vex2
-// 				"8": []string{"1", "5"},      // Vex1 -> pkg version, vuln1
-// 				"9": []string{"1", "5"},      // Vex2 -> pkg version, vuln2
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
-// 					t.Fatalf("Could not ingest package: %v", err)
-// 				}
-// 			}
-// 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
-// 					t.Fatalf("Could not ingest artifact: %a", err)
-// 				}
-// 			}
-// 			for _, v := range test.InVuln {
-// 				if _, err := b.IngestVulnerability(ctx, *v); err != nil {
-// 					t.Fatalf("Could not ingest vulnerability: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In); err != nil {
-// 					t.Fatalf("Could not ingest VEXStatement")
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

@@ -159,13 +159,13 @@ func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDepend
 
 // Ingest IngestDependencies
 
-func (c *neo4jClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
-	return []*model.IsDependency{}, fmt.Errorf("not implemented: IngestDependencies")
+func (c *neo4jClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+	return []string{}, fmt.Errorf("not implemented: IngestDependencies")
 }
 
 // Ingest IsDependency
 
-func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 	// TODO: handle depPkgMatchType
@@ -264,10 +264,10 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 			return isDependency, nil
 		})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return result.(*model.IsDependency), nil
+	return result.(*model.IsDependency).ID, nil
 }
 
 func convertDependencyTypeToEnum(status string) (model.DependencyType, error) {

@@ -68,19 +68,20 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 	return collect(records, toModelHasSLSA), nil
 }
 
-func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
 	att, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SLSAAttestation, error) {
 		return upsertSLSA(ctx, ent.TxFromContext(ctx), subject, builtFrom, builtBy, slsa)
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelHasSLSA(att), nil
+	//TODO optimize for only returning ID
+	return nodeID(att.ID), nil
 }
 
-func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
-	var modelHasSlsas []*model.HasSlsa
+func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+	var modelHasSlsas []string
 	for i, slsa := range slsaList {
 		modelHasSlsa, err := b.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsa)
 		if err != nil {

@@ -231,10 +231,10 @@ func (mr *MockBackendMockRecorder) HashEqual(ctx, hashEqualSpec interface{}) *go
 }
 
 // IngestArtifact mocks base method.
-func (m *MockBackend) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (*model.Artifact, error) {
+func (m *MockBackend) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestArtifact", ctx, artifact)
-	ret0, _ := ret[0].(*model.Artifact)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -246,10 +246,10 @@ func (mr *MockBackendMockRecorder) IngestArtifact(ctx, artifact interface{}) *go
 }
 
 // IngestArtifacts mocks base method.
-func (m *MockBackend) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+func (m *MockBackend) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestArtifacts", ctx, artifacts)
-	ret0, _ := ret[0].([]*model.Artifact)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -261,10 +261,10 @@ func (mr *MockBackendMockRecorder) IngestArtifacts(ctx, artifacts interface{}) *
 }
 
 // IngestBuilder mocks base method.
-func (m *MockBackend) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (*model.Builder, error) {
+func (m *MockBackend) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestBuilder", ctx, builder)
-	ret0, _ := ret[0].(*model.Builder)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -276,10 +276,10 @@ func (mr *MockBackendMockRecorder) IngestBuilder(ctx, builder interface{}) *gomo
 }
 
 // IngestBuilders mocks base method.
-func (m *MockBackend) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]*model.Builder, error) {
+func (m *MockBackend) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestBuilders", ctx, builders)
-	ret0, _ := ret[0].([]*model.Builder)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -321,10 +321,10 @@ func (mr *MockBackendMockRecorder) IngestBulkVulnerabilityMetadata(ctx, vulnerab
 }
 
 // IngestCertifyBad mocks base method.
-func (m *MockBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (*model.CertifyBad, error) {
+func (m *MockBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestCertifyBad", ctx, subject, pkgMatchType, certifyBad)
-	ret0, _ := ret[0].(*model.CertifyBad)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -336,10 +336,10 @@ func (mr *MockBackendMockRecorder) IngestCertifyBad(ctx, subject, pkgMatchType, 
 }
 
 // IngestCertifyBads mocks base method.
-func (m *MockBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
+func (m *MockBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestCertifyBads", ctx, subjects, pkgMatchType, certifyBads)
-	ret0, _ := ret[0].([]*model.CertifyBad)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -351,10 +351,10 @@ func (mr *MockBackendMockRecorder) IngestCertifyBads(ctx, subjects, pkgMatchType
 }
 
 // IngestCertifyGood mocks base method.
-func (m *MockBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
+func (m *MockBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestCertifyGood", ctx, subject, pkgMatchType, certifyGood)
-	ret0, _ := ret[0].(*model.CertifyGood)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -366,10 +366,10 @@ func (mr *MockBackendMockRecorder) IngestCertifyGood(ctx, subject, pkgMatchType,
 }
 
 // IngestCertifyGoods mocks base method.
-func (m *MockBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
+func (m *MockBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestCertifyGoods", ctx, subjects, pkgMatchType, certifyGoods)
-	ret0, _ := ret[0].([]*model.CertifyGood)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -381,10 +381,10 @@ func (mr *MockBackendMockRecorder) IngestCertifyGoods(ctx, subjects, pkgMatchTyp
 }
 
 // IngestCertifyLegal mocks base method.
-func (m *MockBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (*model.CertifyLegal, error) {
+func (m *MockBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestCertifyLegal", ctx, subject, declaredLicenses, discoveredLicenses, certifyLegal)
-	ret0, _ := ret[0].(*model.CertifyLegal)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -396,10 +396,10 @@ func (mr *MockBackendMockRecorder) IngestCertifyLegal(ctx, subject, declaredLice
 }
 
 // IngestCertifyLegals mocks base method.
-func (m *MockBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
+func (m *MockBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestCertifyLegals", ctx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
-	ret0, _ := ret[0].([]*model.CertifyLegal)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -411,10 +411,10 @@ func (mr *MockBackendMockRecorder) IngestCertifyLegals(ctx, subjects, declaredLi
 }
 
 // IngestCertifyVuln mocks base method.
-func (m *MockBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
+func (m *MockBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestCertifyVuln", ctx, pkg, vulnerability, certifyVuln)
-	ret0, _ := ret[0].(*model.CertifyVuln)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -426,10 +426,10 @@ func (mr *MockBackendMockRecorder) IngestCertifyVuln(ctx, pkg, vulnerability, ce
 }
 
 // IngestCertifyVulns mocks base method.
-func (m *MockBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
+func (m *MockBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestCertifyVulns", ctx, pkgs, vulnerabilities, certifyVulns)
-	ret0, _ := ret[0].([]*model.CertifyVuln)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -441,10 +441,10 @@ func (mr *MockBackendMockRecorder) IngestCertifyVulns(ctx, pkgs, vulnerabilities
 }
 
 // IngestDependencies mocks base method.
-func (m *MockBackend) IngestDependencies(ctx context.Context, pkgs, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]*model.IsDependency, error) {
+func (m *MockBackend) IngestDependencies(ctx context.Context, pkgs, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestDependencies", ctx, pkgs, depPkgs, depPkgMatchType, dependencies)
-	ret0, _ := ret[0].([]*model.IsDependency)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -456,10 +456,10 @@ func (mr *MockBackendMockRecorder) IngestDependencies(ctx, pkgs, depPkgs, depPkg
 }
 
 // IngestDependency mocks base method.
-func (m *MockBackend) IngestDependency(ctx context.Context, pkg, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (*model.IsDependency, error) {
+func (m *MockBackend) IngestDependency(ctx context.Context, pkg, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestDependency", ctx, pkg, depPkg, depPkgMatchType, dependency)
-	ret0, _ := ret[0].(*model.IsDependency)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -471,10 +471,10 @@ func (mr *MockBackendMockRecorder) IngestDependency(ctx, pkg, depPkg, depPkgMatc
 }
 
 // IngestHasMetadata mocks base method.
-func (m *MockBackend) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
+func (m *MockBackend) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestHasMetadata", ctx, subject, pkgMatchType, hasMetadata)
-	ret0, _ := ret[0].(*model.HasMetadata)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -486,10 +486,10 @@ func (mr *MockBackendMockRecorder) IngestHasMetadata(ctx, subject, pkgMatchType,
 }
 
 // IngestHasSBOMs mocks base method.
-func (m *MockBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]*model.HasSbom, error) {
+func (m *MockBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestHasSBOMs", ctx, subjects, hasSBOMs, includes)
-	ret0, _ := ret[0].([]*model.HasSbom)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -501,10 +501,10 @@ func (mr *MockBackendMockRecorder) IngestHasSBOMs(ctx, subjects, hasSBOMs, inclu
 }
 
 // IngestHasSbom mocks base method.
-func (m *MockBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (*model.HasSbom, error) {
+func (m *MockBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestHasSbom", ctx, subject, hasSbom, includes)
-	ret0, _ := ret[0].(*model.HasSbom)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -516,10 +516,10 @@ func (mr *MockBackendMockRecorder) IngestHasSbom(ctx, subject, hasSbom, includes
 }
 
 // IngestHasSourceAt mocks base method.
-func (m *MockBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
+func (m *MockBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestHasSourceAt", ctx, pkg, pkgMatchType, source, hasSourceAt)
-	ret0, _ := ret[0].(*model.HasSourceAt)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -546,10 +546,10 @@ func (mr *MockBackendMockRecorder) IngestHasSourceAts(ctx, pkgs, pkgMatchType, s
 }
 
 // IngestHashEqual mocks base method.
-func (m *MockBackend) IngestHashEqual(ctx context.Context, artifact, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+func (m *MockBackend) IngestHashEqual(ctx context.Context, artifact, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestHashEqual", ctx, artifact, equalArtifact, hashEqual)
-	ret0, _ := ret[0].(*model.HashEqual)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -561,10 +561,10 @@ func (mr *MockBackendMockRecorder) IngestHashEqual(ctx, artifact, equalArtifact,
 }
 
 // IngestHashEquals mocks base method.
-func (m *MockBackend) IngestHashEquals(ctx context.Context, artifacts, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
+func (m *MockBackend) IngestHashEquals(ctx context.Context, artifacts, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestHashEquals", ctx, artifacts, otherArtifacts, hashEquals)
-	ret0, _ := ret[0].([]*model.HashEqual)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -576,10 +576,10 @@ func (mr *MockBackendMockRecorder) IngestHashEquals(ctx, artifacts, otherArtifac
 }
 
 // IngestLicense mocks base method.
-func (m *MockBackend) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
+func (m *MockBackend) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestLicense", ctx, license)
-	ret0, _ := ret[0].(*model.License)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -591,10 +591,10 @@ func (mr *MockBackendMockRecorder) IngestLicense(ctx, license interface{}) *gomo
 }
 
 // IngestLicenses mocks base method.
-func (m *MockBackend) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
+func (m *MockBackend) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestLicenses", ctx, licenses)
-	ret0, _ := ret[0].([]*model.License)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -606,10 +606,10 @@ func (mr *MockBackendMockRecorder) IngestLicenses(ctx, licenses interface{}) *go
 }
 
 // IngestOccurrence mocks base method.
-func (m *MockBackend) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
+func (m *MockBackend) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestOccurrence", ctx, subject, artifact, occurrence)
-	ret0, _ := ret[0].(*model.IsOccurrence)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -621,10 +621,10 @@ func (mr *MockBackendMockRecorder) IngestOccurrence(ctx, subject, artifact, occu
 }
 
 // IngestOccurrences mocks base method.
-func (m *MockBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
+func (m *MockBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestOccurrences", ctx, subjects, artifacts, occurrences)
-	ret0, _ := ret[0].([]*model.IsOccurrence)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -636,10 +636,10 @@ func (mr *MockBackendMockRecorder) IngestOccurrences(ctx, subjects, artifacts, o
 }
 
 // IngestPackage mocks base method.
-func (m *MockBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.Package, error) {
+func (m *MockBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestPackage", ctx, pkg)
-	ret0, _ := ret[0].(*model.Package)
+	ret0, _ := ret[0].(*model.PackageIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -651,10 +651,10 @@ func (mr *MockBackendMockRecorder) IngestPackage(ctx, pkg interface{}) *gomock.C
 }
 
 // IngestPackages mocks base method.
-func (m *MockBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.Package, error) {
+func (m *MockBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestPackages", ctx, pkgs)
-	ret0, _ := ret[0].([]*model.Package)
+	ret0, _ := ret[0].([]*model.PackageIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -666,10 +666,10 @@ func (mr *MockBackendMockRecorder) IngestPackages(ctx, pkgs interface{}) *gomock
 }
 
 // IngestPkgEqual mocks base method.
-func (m *MockBackend) IngestPkgEqual(ctx context.Context, pkg, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
+func (m *MockBackend) IngestPkgEqual(ctx context.Context, pkg, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestPkgEqual", ctx, pkg, depPkg, pkgEqual)
-	ret0, _ := ret[0].(*model.PkgEqual)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -696,10 +696,10 @@ func (mr *MockBackendMockRecorder) IngestPkgEquals(ctx, pkgs, otherPackages, pkg
 }
 
 // IngestPointOfContact mocks base method.
-func (m *MockBackend) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (*model.PointOfContact, error) {
+func (m *MockBackend) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestPointOfContact", ctx, subject, pkgMatchType, pointOfContact)
-	ret0, _ := ret[0].(*model.PointOfContact)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -726,10 +726,10 @@ func (mr *MockBackendMockRecorder) IngestPointOfContacts(ctx, subjects, pkgMatch
 }
 
 // IngestSLSA mocks base method.
-func (m *MockBackend) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*model.HasSlsa, error) {
+func (m *MockBackend) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestSLSA", ctx, subject, builtFrom, builtBy, slsa)
-	ret0, _ := ret[0].(*model.HasSlsa)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -741,10 +741,10 @@ func (mr *MockBackendMockRecorder) IngestSLSA(ctx, subject, builtFrom, builtBy, 
 }
 
 // IngestSLSAs mocks base method.
-func (m *MockBackend) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]*model.HasSlsa, error) {
+func (m *MockBackend) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestSLSAs", ctx, subjects, builtFromList, builtByList, slsaList)
-	ret0, _ := ret[0].([]*model.HasSlsa)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -756,10 +756,10 @@ func (mr *MockBackendMockRecorder) IngestSLSAs(ctx, subjects, builtFromList, bui
 }
 
 // IngestScorecard mocks base method.
-func (m *MockBackend) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (*model.CertifyScorecard, error) {
+func (m *MockBackend) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestScorecard", ctx, source, scorecard)
-	ret0, _ := ret[0].(*model.CertifyScorecard)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -771,10 +771,10 @@ func (mr *MockBackendMockRecorder) IngestScorecard(ctx, source, scorecard interf
 }
 
 // IngestScorecards mocks base method.
-func (m *MockBackend) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]*model.CertifyScorecard, error) {
+func (m *MockBackend) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestScorecards", ctx, sources, scorecards)
-	ret0, _ := ret[0].([]*model.CertifyScorecard)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -786,10 +786,10 @@ func (mr *MockBackendMockRecorder) IngestScorecards(ctx, sources, scorecards int
 }
 
 // IngestSource mocks base method.
-func (m *MockBackend) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.Source, error) {
+func (m *MockBackend) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestSource", ctx, source)
-	ret0, _ := ret[0].(*model.Source)
+	ret0, _ := ret[0].(*model.SourceIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -801,10 +801,10 @@ func (mr *MockBackendMockRecorder) IngestSource(ctx, source interface{}) *gomock
 }
 
 // IngestSources mocks base method.
-func (m *MockBackend) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
+func (m *MockBackend) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestSources", ctx, sources)
-	ret0, _ := ret[0].([]*model.Source)
+	ret0, _ := ret[0].([]*model.SourceIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -816,10 +816,10 @@ func (mr *MockBackendMockRecorder) IngestSources(ctx, sources interface{}) *gomo
 }
 
 // IngestVEXStatement mocks base method.
-func (m *MockBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (m *MockBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestVEXStatement", ctx, subject, vulnerability, vexStatement)
-	ret0, _ := ret[0].(*model.CertifyVEXStatement)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -846,10 +846,10 @@ func (mr *MockBackendMockRecorder) IngestVEXStatements(ctx, subjects, vulnerabil
 }
 
 // IngestVulnEqual mocks base method.
-func (m *MockBackend) IngestVulnEqual(ctx context.Context, vulnerability, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
+func (m *MockBackend) IngestVulnEqual(ctx context.Context, vulnerability, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestVulnEqual", ctx, vulnerability, otherVulnerability, vulnEqual)
-	ret0, _ := ret[0].(*model.VulnEqual)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -876,10 +876,10 @@ func (mr *MockBackendMockRecorder) IngestVulnEquals(ctx, vulnerabilities, otherV
 }
 
 // IngestVulnerabilities mocks base method.
-func (m *MockBackend) IngestVulnerabilities(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]*model.Vulnerability, error) {
+func (m *MockBackend) IngestVulnerabilities(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]*model.VulnerabilityIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestVulnerabilities", ctx, vulns)
-	ret0, _ := ret[0].([]*model.Vulnerability)
+	ret0, _ := ret[0].([]*model.VulnerabilityIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -891,10 +891,10 @@ func (mr *MockBackendMockRecorder) IngestVulnerabilities(ctx, vulns interface{})
 }
 
 // IngestVulnerability mocks base method.
-func (m *MockBackend) IngestVulnerability(ctx context.Context, vuln model.VulnerabilityInputSpec) (*model.Vulnerability, error) {
+func (m *MockBackend) IngestVulnerability(ctx context.Context, vuln model.VulnerabilityInputSpec) (*model.VulnerabilityIDs, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IngestVulnerability", ctx, vuln)
-	ret0, _ := ret[0].(*model.Vulnerability)
+	ret0, _ := ret[0].(*model.VulnerabilityIDs)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

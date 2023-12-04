@@ -71,11 +71,11 @@ func (n *isOccurrenceStruct) Key() string {
 
 // Ingest IngestOccurrences
 
-func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	var modelIsOccurrences []*model.IsOccurrence
+func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+	var modelIsOccurrences []string
 
 	for i := range occurrences {
-		var isOccurrence *model.IsOccurrence
+		var isOccurrence string
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrSourceInput{Package: subjects.Packages[i]}
@@ -97,11 +97,11 @@ func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.Packa
 
 // Ingest IsOccurrence
 
-func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (*model.IsOccurrence, error) {
+func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
 	return c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
 }
 
-func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec, readOnly bool) (*model.IsOccurrence, error) {
+func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestOccurrence"
 
 	in := &isOccurrenceStruct{
@@ -115,7 +115,7 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 
 	a, err := c.artifactByInput(ctx, &artifact)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v :: Artifact not found %s", funcName, err)
+		return "", gqlerror.Errorf("%v :: Artifact not found %s", funcName, err)
 	}
 	in.Artifact = a.ThisID
 
@@ -124,7 +124,7 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 		var err error
 		pkgVer, err = c.getPackageVerFromInput(ctx, *subject.Package)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestOccurrence :: %v", err)
+			return "", gqlerror.Errorf("IngestOccurrence :: %v", err)
 		}
 		in.Pkg = pkgVer.ThisID
 	}
@@ -134,17 +134,17 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 		var err error
 		src, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestOccurrence :: %v", err)
+			return "", gqlerror.Errorf("IngestOccurrence :: %v", err)
 		}
 		in.Source = src.ThisID
 	}
 
 	out, err := byKeykv[*isOccurrenceStruct](ctx, occCol, in.Key(), c)
 	if err == nil {
-		return c.convOccurrence(ctx, out)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -155,25 +155,25 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 	}
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, occCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := a.setOccurrences(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if pkgVer != nil {
 		if err := pkgVer.setOccurrenceLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	} else {
 		if err := src.setOccurrenceLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if err := setkv(ctx, occCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.convOccurrence(ctx, in)
+	return in.ThisID, nil
 }
 
 func (c *demoClient) convOccurrence(ctx context.Context, in *isOccurrenceStruct) (*model.IsOccurrence, error) {

@@ -84,7 +84,7 @@ func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.Pac
 	var modelVexStatementIDs []string
 
 	for i := range vexStatements {
-		var certVex *model.CertifyVEXStatement
+		var certVex string
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageOrArtifactInput{Package: subjects.Packages[i]}
@@ -99,16 +99,16 @@ func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.Pac
 				return nil, gqlerror.Errorf("IngestVEXStatement failed with err: %v", err)
 			}
 		}
-		modelVexStatementIDs = append(modelVexStatementIDs, certVex.ID)
+		modelVexStatementIDs = append(modelVexStatementIDs, certVex)
 	}
 	return modelVexStatementIDs, nil
 }
 
-func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
 	return c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, true)
 }
 
-func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec, readOnly bool) (*model.CertifyVEXStatement, error) {
+func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestVEXStatement"
 
 	in := &vexLink{
@@ -130,30 +130,30 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		var err error
 		foundPkgVersionNode, err = c.getPackageVerFromInput(ctx, *subject.Package)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.PackageID = foundPkgVersionNode.ThisID
 	} else {
 		var err error
 		foundArtStrct, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.ArtifactID = foundArtStrct.ThisID
 	}
 
 	foundVulnNode, err := c.getVulnerabilityFromInput(ctx, vulnerability)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	in.VulnerabilityID = foundVulnNode.ThisID
 
 	out, err := byKeykv[*vexLink](ctx, cVEXCol, in.Key(), c)
 	if err == nil {
-		return c.buildCertifyVEXStatement(ctx, out, nil, true)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -165,26 +165,26 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, cVEXCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	// set the backlinks
 	if foundPkgVersionNode != nil {
 		if err := foundPkgVersionNode.setVexLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	} else {
 		if err := foundArtStrct.setVexLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if err := foundVulnNode.setVexLinks(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := setkv(ctx, cVEXCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.buildCertifyVEXStatement(ctx, in, nil, true)
+	return in.ThisID, nil
 }
 
 // Query CertifyVex

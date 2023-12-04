@@ -36,9 +36,25 @@ func (cvu *CertifyVulnUpdate) SetVulnerabilityID(i int) *CertifyVulnUpdate {
 	return cvu
 }
 
+// SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillableVulnerabilityID(i *int) *CertifyVulnUpdate {
+	if i != nil {
+		cvu.SetVulnerabilityID(*i)
+	}
+	return cvu
+}
+
 // SetPackageID sets the "package_id" field.
 func (cvu *CertifyVulnUpdate) SetPackageID(i int) *CertifyVulnUpdate {
 	cvu.mutation.SetPackageID(i)
+	return cvu
+}
+
+// SetNillablePackageID sets the "package_id" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillablePackageID(i *int) *CertifyVulnUpdate {
+	if i != nil {
+		cvu.SetPackageID(*i)
+	}
 	return cvu
 }
 
@@ -48,9 +64,25 @@ func (cvu *CertifyVulnUpdate) SetTimeScanned(t time.Time) *CertifyVulnUpdate {
 	return cvu
 }
 
+// SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillableTimeScanned(t *time.Time) *CertifyVulnUpdate {
+	if t != nil {
+		cvu.SetTimeScanned(*t)
+	}
+	return cvu
+}
+
 // SetDbURI sets the "db_uri" field.
 func (cvu *CertifyVulnUpdate) SetDbURI(s string) *CertifyVulnUpdate {
 	cvu.mutation.SetDbURI(s)
+	return cvu
+}
+
+// SetNillableDbURI sets the "db_uri" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillableDbURI(s *string) *CertifyVulnUpdate {
+	if s != nil {
+		cvu.SetDbURI(*s)
+	}
 	return cvu
 }
 
@@ -60,9 +92,25 @@ func (cvu *CertifyVulnUpdate) SetDbVersion(s string) *CertifyVulnUpdate {
 	return cvu
 }
 
+// SetNillableDbVersion sets the "db_version" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillableDbVersion(s *string) *CertifyVulnUpdate {
+	if s != nil {
+		cvu.SetDbVersion(*s)
+	}
+	return cvu
+}
+
 // SetScannerURI sets the "scanner_uri" field.
 func (cvu *CertifyVulnUpdate) SetScannerURI(s string) *CertifyVulnUpdate {
 	cvu.mutation.SetScannerURI(s)
+	return cvu
+}
+
+// SetNillableScannerURI sets the "scanner_uri" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillableScannerURI(s *string) *CertifyVulnUpdate {
+	if s != nil {
+		cvu.SetScannerURI(*s)
+	}
 	return cvu
 }
 
@@ -72,15 +120,39 @@ func (cvu *CertifyVulnUpdate) SetScannerVersion(s string) *CertifyVulnUpdate {
 	return cvu
 }
 
+// SetNillableScannerVersion sets the "scanner_version" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillableScannerVersion(s *string) *CertifyVulnUpdate {
+	if s != nil {
+		cvu.SetScannerVersion(*s)
+	}
+	return cvu
+}
+
 // SetOrigin sets the "origin" field.
 func (cvu *CertifyVulnUpdate) SetOrigin(s string) *CertifyVulnUpdate {
 	cvu.mutation.SetOrigin(s)
 	return cvu
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillableOrigin(s *string) *CertifyVulnUpdate {
+	if s != nil {
+		cvu.SetOrigin(*s)
+	}
+	return cvu
+}
+
 // SetCollector sets the "collector" field.
 func (cvu *CertifyVulnUpdate) SetCollector(s string) *CertifyVulnUpdate {
 	cvu.mutation.SetCollector(s)
+	return cvu
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillableCollector(s *string) *CertifyVulnUpdate {
+	if s != nil {
+		cvu.SetCollector(*s)
+	}
 	return cvu
 }
 
@@ -266,9 +338,25 @@ func (cvuo *CertifyVulnUpdateOne) SetVulnerabilityID(i int) *CertifyVulnUpdateOn
 	return cvuo
 }
 
+// SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillableVulnerabilityID(i *int) *CertifyVulnUpdateOne {
+	if i != nil {
+		cvuo.SetVulnerabilityID(*i)
+	}
+	return cvuo
+}
+
 // SetPackageID sets the "package_id" field.
 func (cvuo *CertifyVulnUpdateOne) SetPackageID(i int) *CertifyVulnUpdateOne {
 	cvuo.mutation.SetPackageID(i)
+	return cvuo
+}
+
+// SetNillablePackageID sets the "package_id" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillablePackageID(i *int) *CertifyVulnUpdateOne {
+	if i != nil {
+		cvuo.SetPackageID(*i)
+	}
 	return cvuo
 }
 
@@ -278,9 +366,25 @@ func (cvuo *CertifyVulnUpdateOne) SetTimeScanned(t time.Time) *CertifyVulnUpdate
 	return cvuo
 }
 
+// SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillableTimeScanned(t *time.Time) *CertifyVulnUpdateOne {
+	if t != nil {
+		cvuo.SetTimeScanned(*t)
+	}
+	return cvuo
+}
+
 // SetDbURI sets the "db_uri" field.
 func (cvuo *CertifyVulnUpdateOne) SetDbURI(s string) *CertifyVulnUpdateOne {
 	cvuo.mutation.SetDbURI(s)
+	return cvuo
+}
+
+// SetNillableDbURI sets the "db_uri" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillableDbURI(s *string) *CertifyVulnUpdateOne {
+	if s != nil {
+		cvuo.SetDbURI(*s)
+	}
 	return cvuo
 }
 
@@ -290,9 +394,25 @@ func (cvuo *CertifyVulnUpdateOne) SetDbVersion(s string) *CertifyVulnUpdateOne {
 	return cvuo
 }
 
+// SetNillableDbVersion sets the "db_version" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillableDbVersion(s *string) *CertifyVulnUpdateOne {
+	if s != nil {
+		cvuo.SetDbVersion(*s)
+	}
+	return cvuo
+}
+
 // SetScannerURI sets the "scanner_uri" field.
 func (cvuo *CertifyVulnUpdateOne) SetScannerURI(s string) *CertifyVulnUpdateOne {
 	cvuo.mutation.SetScannerURI(s)
+	return cvuo
+}
+
+// SetNillableScannerURI sets the "scanner_uri" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillableScannerURI(s *string) *CertifyVulnUpdateOne {
+	if s != nil {
+		cvuo.SetScannerURI(*s)
+	}
 	return cvuo
 }
 
@@ -302,15 +422,39 @@ func (cvuo *CertifyVulnUpdateOne) SetScannerVersion(s string) *CertifyVulnUpdate
 	return cvuo
 }
 
+// SetNillableScannerVersion sets the "scanner_version" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillableScannerVersion(s *string) *CertifyVulnUpdateOne {
+	if s != nil {
+		cvuo.SetScannerVersion(*s)
+	}
+	return cvuo
+}
+
 // SetOrigin sets the "origin" field.
 func (cvuo *CertifyVulnUpdateOne) SetOrigin(s string) *CertifyVulnUpdateOne {
 	cvuo.mutation.SetOrigin(s)
 	return cvuo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillableOrigin(s *string) *CertifyVulnUpdateOne {
+	if s != nil {
+		cvuo.SetOrigin(*s)
+	}
+	return cvuo
+}
+
 // SetCollector sets the "collector" field.
 func (cvuo *CertifyVulnUpdateOne) SetCollector(s string) *CertifyVulnUpdateOne {
 	cvuo.mutation.SetCollector(s)
+	return cvuo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillableCollector(s *string) *CertifyVulnUpdateOne {
+	if s != nil {
+		cvuo.SetCollector(*s)
+	}
 	return cvuo
 }
 

@@ -86,7 +86,7 @@ func TestIngestCertifyBad(t *testing.T) {
 				b.
 					EXPECT().
 					IngestCertifyBad(ctx, o.Sub, &o.Match, *o.CB).
-					Return(testdata.CB1out, nil).
+					Return("", nil).
 					Times(times)
 				_, err := r.Mutation().IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB)
 				if (err != nil) != test.ExpIngestErr {
@@ -214,7 +214,7 @@ func TestIngestCertifyBads(t *testing.T) {
 				b.
 					EXPECT().
 					IngestCertifyBads(ctx, o.Sub, &o.Match, o.CB).
-					Return([]*model.CertifyBad{testdata.CB1out}, nil).
+					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestCertifyBads(ctx, o.Sub, o.Match, o.CB)
 				if (err != nil) != test.ExpIngestErr {

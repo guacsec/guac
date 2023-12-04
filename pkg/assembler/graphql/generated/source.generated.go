@@ -639,8 +639,6 @@ func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, o
 		}
 		switch k {
 		case "type":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -648,8 +646,6 @@ func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, o
 			}
 			it.Type = data
 		case "namespace":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("namespace"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -657,8 +653,6 @@ func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, o
 			}
 			it.Namespace = data
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -666,8 +660,6 @@ func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, o
 			}
 			it.Name = data
 		case "tag":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -675,8 +667,6 @@ func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, o
 			}
 			it.Tag = data
 		case "commit":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commit"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -704,8 +694,6 @@ func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj in
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -713,8 +701,6 @@ func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj in
 			}
 			it.ID = data
 		case "type":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -722,8 +708,6 @@ func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj in
 			}
 			it.Type = data
 		case "namespace":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("namespace"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -731,8 +715,6 @@ func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj in
 			}
 			it.Namespace = data
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -740,8 +722,6 @@ func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj in
 			}
 			it.Name = data
 		case "tag":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -749,8 +729,6 @@ func (ec *executionContext) unmarshalInputSourceSpec(ctx context.Context, obj in
 			}
 			it.Tag = data
 		case "commit":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commit"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {

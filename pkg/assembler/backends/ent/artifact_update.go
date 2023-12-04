@@ -37,9 +37,25 @@ func (au *ArtifactUpdate) SetAlgorithm(s string) *ArtifactUpdate {
 	return au
 }
 
+// SetNillableAlgorithm sets the "algorithm" field if the given value is not nil.
+func (au *ArtifactUpdate) SetNillableAlgorithm(s *string) *ArtifactUpdate {
+	if s != nil {
+		au.SetAlgorithm(*s)
+	}
+	return au
+}
+
 // SetDigest sets the "digest" field.
 func (au *ArtifactUpdate) SetDigest(s string) *ArtifactUpdate {
 	au.mutation.SetDigest(s)
+	return au
+}
+
+// SetNillableDigest sets the "digest" field if the given value is not nil.
+func (au *ArtifactUpdate) SetNillableDigest(s *string) *ArtifactUpdate {
+	if s != nil {
+		au.SetDigest(*s)
+	}
 	return au
 }
 
@@ -440,9 +456,25 @@ func (auo *ArtifactUpdateOne) SetAlgorithm(s string) *ArtifactUpdateOne {
 	return auo
 }
 
+// SetNillableAlgorithm sets the "algorithm" field if the given value is not nil.
+func (auo *ArtifactUpdateOne) SetNillableAlgorithm(s *string) *ArtifactUpdateOne {
+	if s != nil {
+		auo.SetAlgorithm(*s)
+	}
+	return auo
+}
+
 // SetDigest sets the "digest" field.
 func (auo *ArtifactUpdateOne) SetDigest(s string) *ArtifactUpdateOne {
 	auo.mutation.SetDigest(s)
+	return auo
+}
+
+// SetNillableDigest sets the "digest" field if the given value is not nil.
+func (auo *ArtifactUpdateOne) SetNillableDigest(s *string) *ArtifactUpdateOne {
+	if s != nil {
+		auo.SetDigest(*s)
+	}
 	return auo
 }
 

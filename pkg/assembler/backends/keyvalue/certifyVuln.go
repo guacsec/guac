@@ -74,8 +74,8 @@ func (n *certifyVulnerabilityLink) BuildModelNode(ctx context.Context, c *demoCl
 }
 
 // Ingest CertifyVuln
-func (c *demoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]*model.CertifyVuln, error) {
-	var modelCertifyVulnList []*model.CertifyVuln
+func (c *demoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+	var modelCertifyVulnList []string
 	for i := range certifyVulns {
 		certifyVuln, err := c.IngestCertifyVuln(ctx, *pkgs[i], *vulnerabilities[i], *certifyVulns[i])
 		if err != nil {
@@ -86,11 +86,11 @@ func (c *demoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgIn
 	return modelCertifyVulnList, nil
 }
 
-func (c *demoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (*model.CertifyVuln, error) {
+func (c *demoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
 	return c.ingestVulnerability(ctx, pkg, vulnerability, certifyVuln, true)
 }
 
-func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput, readOnly bool) (*model.CertifyVuln, error) {
+func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput, readOnly bool) (string, error) {
 	funcName := "IngestVulnerability"
 
 	in := &certifyVulnerabilityLink{
@@ -108,22 +108,22 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 
 	foundPackage, err := c.getPackageVerFromInput(ctx, packageArg)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	in.PackageID = foundPackage.ThisID
 
 	foundVulnNode, err := c.getVulnerabilityFromInput(ctx, vulnerability)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	in.VulnerabilityID = foundVulnNode.ThisID
 
 	out, err := byKeykv[*certifyVulnerabilityLink](ctx, cVulnCol, in.Key(), c)
 	if err == nil {
-		return c.buildCertifyVulnerability(ctx, out, nil, true)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -135,20 +135,20 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.P
 
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, cVulnCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	// set the backlinks
 	if err := foundPackage.setVulnerabilityLinks(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := foundVulnNode.setVulnerabilityLinks(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := setkv(ctx, cVulnCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.buildCertifyVulnerability(ctx, in, nil, true)
+	return in.ThisID, nil
 }
 
 // Query CertifyVuln

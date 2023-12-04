@@ -31,12 +31,12 @@ import (
 
 func TestCertifyGood(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -639,22 +639,52 @@ func TestCertifyGood(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					if test.QueryPkgID {
+						test.Query = &model.CertifyGoodSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Package: &model.PkgSpec{
+									ID: ptrfrom.String(pkgIDs.PackageVersionID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if srcIDs, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
+				} else {
+					if test.QuerySourceID {
+						test.Query = &model.CertifyGoodSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Source: &model.SourceSpec{
+									ID: ptrfrom.String(srcIDs.SourceNameID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
+				} else {
+					if test.QueryArtID {
+						test.Query = &model.CertifyGoodSpec{
+							Subject: &model.PackageSourceOrArtifactSpec{
+								Artifact: &model.ArtifactSpec{
+									ID: ptrfrom.String(artID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestCertifyGood(ctx, o.Sub, o.Match, *o.CG)
+				cgID, err := b.IngestCertifyGood(ctx, o.Sub, o.Match, *o.CG)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -663,40 +693,7 @@ func TestCertifyGood(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.CertifyGoodSpec{
-						ID: ptrfrom.String(found.ID),
-					}
-				}
-				if test.QueryPkgID {
-					if _, ok := found.Subject.(*model.Package); ok {
-						test.Query = &model.CertifyGoodSpec{
-							Subject: &model.PackageSourceOrArtifactSpec{
-								Package: &model.PkgSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QuerySourceID {
-					if _, ok := found.Subject.(*model.Source); ok {
-						test.Query = &model.CertifyGoodSpec{
-							Subject: &model.PackageSourceOrArtifactSpec{
-								Source: &model.SourceSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Source).Namespaces[0].Names[0].ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QueryArtID {
-					if _, ok := found.Subject.(*model.Artifact); ok {
-						test.Query = &model.CertifyGoodSpec{
-							Subject: &model.PackageSourceOrArtifactSpec{
-								Artifact: &model.ArtifactSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Artifact).ID),
-								},
-							},
-						}
+						ID: ptrfrom.String(cgID),
 					}
 				}
 			}
@@ -716,12 +713,12 @@ func TestCertifyGood(t *testing.T) {
 
 func TestIngestCertifyGoods(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1021,12 +1018,12 @@ func TestIngestCertifyGoods(t *testing.T) {
 
 func Test_buildCertifyGoodByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -1215,7 +1212,7 @@ func Test_buildCertifyGoodByID(t *testing.T) {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
-			found, err := b.IngestCertifyGood(ctx, test.Call.Sub, test.Call.Match, *test.Call.CG)
+			cgID, err := b.IngestCertifyGood(ctx, test.Call.Sub, test.Call.Match, *test.Call.CG)
 			if (err != nil) != test.ExpIngestErr {
 				t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 			}
@@ -1223,7 +1220,7 @@ func Test_buildCertifyGoodByID(t *testing.T) {
 				return
 			}
 
-			got, err := b.(*arangoClient).buildCertifyGoodByID(ctx, found.ID, test.Query)
+			got, err := b.(*arangoClient).buildCertifyGoodByID(ctx, cgID, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
@@ -1236,132 +1233,3 @@ func Test_buildCertifyGoodByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestCertifyGoodNeighbors(t *testing.T) {
-// 	type call struct {
-// 		Sub   model.PackageSourceOrArtifactInput
-// 		Match *model.MatchFlags
-// 		CG    *model.CertifyGoodInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		InSrc        []*model.SourceInputSpec
-// 		InArt        []*model.ArtifactInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			Calls: []call{
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Match: &model.MatchFlags{
-// 						Pkg: model.PkgMatchTypeSpecificVersion,
-// 					},
-// 					CG: &model.CertifyGoodInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "5"}, // pkg version
-// 				"5": []string{"1"},      // certify good
-// 			},
-// 		},
-// 		{
-// 			Name:  "Pkg Name Src and Artifact",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			InSrc: []*model.SourceInputSpec{testdata.S1},
-// 			InArt: []*model.ArtifactInputSpec{testdata.A1},
-// 			Calls: []call{
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Match: &model.MatchFlags{
-// 						Pkg: model.PkgMatchTypeAllVersions,
-// 					},
-// 					CG: &model.CertifyGoodInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Source: testdata.S1,
-// 					},
-// 					CG: &model.CertifyGoodInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				{
-// 					Sub: model.PackageSourceOrArtifactInput{
-// 						Artifact: testdata.A1,
-// 					},
-// 					CG: &model.CertifyGoodInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"1":  []string{"1"},
-// 				"2":  []string{"1", "1"},
-// 				"3":  []string{"1", "1", "9"}, // pkg name
-// 				"4":  []string{"1"},           // pkg version
-// 				"5":  []string{"5"},
-// 				"6":  []string{"5", "5"},
-// 				"7":  []string{"5", "10"}, // src name
-// 				"8":  []string{"11"},      // art
-// 				"9":  []string{"1"},       // cb 1 -> pkg name
-// 				"10": []string{"5"},       // cb 2 -> src name
-// 				"11": []string{"8"},       // cb 3 -> art
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
-// 					t.Fatalf("Could not ingest package: %v", err)
-// 				}
-// 			}
-// 			for _, s := range test.InSrc {
-// 				if _, err := b.IngestSource(ctx, *s); err != nil {
-// 					t.Fatalf("Could not ingest source: %v", err)
-// 				}
-// 			}
-// 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
-// 					t.Fatalf("Could not ingest artifact: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestCertifyGood(ctx, o.Sub, o.Match, *o.CG); err != nil {
-// 					t.Fatalf("Could not ingest CertifyGood: %v", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

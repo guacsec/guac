@@ -41,8 +41,8 @@ func (s *Suite) TestNode() {
 			InBld: []*model.BuilderInputSpec{b1},
 			Expected: []interface{}{
 				a1out,
-				p4outNamespace,
-				s1outNamespace,
+				p4out,
+				s1out,
 				b1out,
 			},
 		},
@@ -69,31 +69,31 @@ func (s *Suite) TestNode() {
 				if a, err := b.IngestArtifact(ctx, inA); err != nil {
 					s.T().Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					ids = append(ids, a.ID)
+					ids = append(ids, a)
 				}
 			}
 
 			for _, inP := range test.InPkg {
-				if p, err := b.IngestPackage(ctx, *inP); err != nil {
+				if id, err := b.IngestPackage(ctx, *inP); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				} else {
-					ids = append(ids, p.ID)
+					ids = append(ids, id.PackageVersionID)
 				}
 			}
 
 			for _, inSrc := range test.InSrc {
-				if src, err := b.IngestSource(ctx, *inSrc); err != nil {
+				if id, err := b.IngestSource(ctx, *inSrc); err != nil {
 					s.T().Fatalf("Could not ingest source: %v", err)
 				} else {
-					ids = append(ids, src.ID)
+					ids = append(ids, id.SourceNameID)
 				}
 			}
 
 			for _, inBLD := range test.InBld {
-				if bld, err := b.IngestBuilder(ctx, inBLD); err != nil {
+				if id, err := b.IngestBuilder(ctx, inBLD); err != nil {
 					s.T().Fatalf("Could not ingest builder: %v", err)
 				} else {
-					ids = append(ids, bld.ID)
+					ids = append(ids, id)
 				}
 			}
 
@@ -116,10 +116,14 @@ func (s *Suite) TestNodes() {
 		v, err := be.IngestArtifact(s.Ctx, a1)
 		s.Require().NoError(err)
 
-		p, err := be.IngestPackage(s.Ctx, *p4)
+		id, err := be.IngestPackage(s.Ctx, *p4)
 		s.Require().NoError(err)
 
-		nodes, err := be.Nodes(s.Ctx, []string{v.ID, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
+		pkgs, err := be.Packages(s.Ctx, &model.PkgSpec{ID: &id.PackageVersionID})
+		s.Require().NoError(err)
+		p := pkgs[0]
+
+		nodes, err := be.Nodes(s.Ctx, []string{v, p.ID, p.Namespaces[0].Names[0].Versions[0].ID})
 		s.Require().NoError(err)
 		if diff := cmp.Diff(a1out, nodes[0], ignoreID, ignoreEmptySlices); diff != "" {
 			s.T().Errorf("Unexpected results. (-want +got):\n%s", diff)

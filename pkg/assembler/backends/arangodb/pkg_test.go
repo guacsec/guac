@@ -31,12 +31,12 @@ import (
 
 func Test_Packages(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -131,13 +131,13 @@ func Test_Packages(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackage(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = ptrfrom.String(ingestedPkgIDs.PackageVersionID)
 			}
 			got, err := b.Packages(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -154,12 +154,12 @@ func Test_Packages(t *testing.T) {
 
 func Test_PackageTypes(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -242,13 +242,13 @@ func Test_PackageTypes(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackage(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = ptrfrom.String(ingestedPkgIDs.PackageVersionID)
 			}
 			got, err := b.(*arangoClient).packagesType(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -264,12 +264,12 @@ func Test_PackageTypes(t *testing.T) {
 
 func Test_PackagesNamespace(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -356,13 +356,13 @@ func Test_PackagesNamespace(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackage(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = ptrfrom.String(ingestedPkgIDs.PackageVersionID)
 			}
 			got, err := b.(*arangoClient).packagesNamespace(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -378,12 +378,12 @@ func Test_PackagesNamespace(t *testing.T) {
 
 func Test_PackagesName(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -487,13 +487,13 @@ func Test_PackagesName(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackage(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = ptrfrom.String(ingestedPkgIDs.PackageVersionID)
 			}
 			got, err := b.(*arangoClient).packagesName(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -515,29 +515,24 @@ func lessPkg(a, b *model.Package) int {
 
 func Test_IngestPackages(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
 	tests := []struct {
 		name      string
 		pkgInputs []*model.PkgInputSpec
-		want      []*model.Package
 		wantErr   bool
 	}{{
 		name:      "tensorflow empty version",
 		pkgInputs: []*model.PkgInputSpec{testdata.P3, testdata.P4},
-		want:      []*model.Package{testdata.P4out, testdata.P3out},
 		wantErr:   false,
 	}}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := b.IngestPackages(ctx, tt.pkgInputs)
@@ -545,9 +540,8 @@ func Test_IngestPackages(t *testing.T) {
 				t.Errorf("arangoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			slices.SortFunc(got, lessPkg)
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			if len(got) != len(tt.pkgInputs) {
+				t.Errorf("Unexpected number of results. Wanted: %d, got %d", len(tt.pkgInputs), len(got))
 			}
 		})
 	}
@@ -555,12 +549,12 @@ func Test_IngestPackages(t *testing.T) {
 
 func Test_buildPackageResponseFromID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -599,12 +593,12 @@ func Test_buildPackageResponseFromID(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkg, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackage(ctx, *tt.pkgInput)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			got, err := b.(*arangoClient).buildPackageResponseFromID(ctx, ingestedPkg.Namespaces[0].Names[0].Versions[0].ID, tt.pkgFilter)
+			got, err := b.(*arangoClient).buildPackageResponseFromID(ctx, ingestedPkgIDs.PackageVersionID, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.buildPackageResponseFromID() error = %v, wantErr %v", err, tt.wantErr)
 				return

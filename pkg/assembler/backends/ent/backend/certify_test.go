@@ -570,7 +570,7 @@ func (s *Suite) TestCertifyBad() {
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 
 			if test.Query.ID != nil {
@@ -1489,7 +1489,7 @@ func (s *Suite) TestCertifyGood() {
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 			if test.Query.ID != nil {
 				idIdx, err := strconv.Atoi(*test.Query.ID)

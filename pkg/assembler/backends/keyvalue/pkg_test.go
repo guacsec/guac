@@ -575,7 +575,7 @@ func Test_demoClient_Packages(t *testing.T) {
 				return
 			}
 			if tt.idInFilter {
-				tt.pkgFilter.ID = &ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				tt.pkgFilter.ID = &ingestedPkg.PackageVersionID
 			}
 			got, err := c.Packages(ctx, tt.pkgFilter)
 			if (err != nil) != tt.wantErr {
@@ -594,28 +594,20 @@ func Test_demoClient_IngestPackages(t *testing.T) {
 	tests := []struct {
 		name      string
 		pkgInputs []*model.PkgInputSpec
-		want      []*model.Package
 		wantErr   bool
-	}{{
-		name:      "tensorflow empty version",
-		pkgInputs: []*model.PkgInputSpec{p1, p2, p3, p4},
-		want:      []*model.Package{p1out, p2out, p3out, p4out},
-		wantErr:   false,
-	},
+	}{
+		{
+			name:      "tensorflow empty version",
+			pkgInputs: []*model.PkgInputSpec{p1, p2, p3, p4},
+			wantErr:   false,
+		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := getBackend(ctx, nil)
-			got, err := c.IngestPackages(ctx, tt.pkgInputs)
+			_, err := c.IngestPackages(ctx, tt.pkgInputs)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.IngestPackages() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}

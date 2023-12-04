@@ -66,16 +66,16 @@ func (c *demoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*mo
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestVulnEqual failed with err: %v", err)
 		}
-		modelHashEqualsIDs = append(modelHashEqualsIDs, vulnEqual.ID)
+		modelHashEqualsIDs = append(modelHashEqualsIDs, vulnEqual)
 	}
 	return modelHashEqualsIDs, nil
 }
 
-func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*model.VulnEqual, error) {
+func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	return c.ingestVulnEqual(ctx, vulnerability, otherVulnerability, vulnEqual, true)
 }
 
-func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec, readOnly bool) (*model.VulnEqual, error) {
+func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec, readOnly bool) (string, error) {
 	funcName := "ingestVulnEqual"
 
 	in := &vulnerabilityEqualLink{
@@ -92,7 +92,7 @@ func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.Vu
 	for _, vi := range []model.VulnerabilityInputSpec{vulnerability, otherVulnerability} {
 		v, err := c.getVulnerabilityFromInput(ctx, vi)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			return "", gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		vs = append(vs, v)
 		vIDs = append(vIDs, v.ThisID)
@@ -102,10 +102,10 @@ func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.Vu
 
 	out, err := byKeykv[*vulnerabilityEqualLink](ctx, vulnEqCol, in.Key(), c)
 	if err == nil {
-		return c.convVulnEqual(ctx, out)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -117,18 +117,18 @@ func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.Vu
 
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, vulnEqCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	for _, v := range vs {
 		if err := v.setVulnEqualLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if err := setkv(ctx, vulnEqCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.convVulnEqual(ctx, in)
+	return in.ThisID, nil
 }
 
 func (c *demoClient) convVulnEqual(ctx context.Context, in *vulnerabilityEqualLink) (*model.VulnEqual, error) {

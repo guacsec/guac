@@ -313,8 +313,6 @@ func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Contex
 		}
 		switch k {
 		case "justification":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -322,8 +320,6 @@ func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Contex
 			}
 			it.Justification = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -331,8 +327,6 @@ func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Contex
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -340,8 +334,6 @@ func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Contex
 			}
 			it.Collector = data
 		case "knownSince":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
 			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
 			if err != nil {
@@ -369,8 +361,6 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -378,8 +368,6 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 			}
 			it.ID = data
 		case "subject":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
 			data, err := ec.unmarshalOPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx, v)
 			if err != nil {
@@ -387,8 +375,6 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 			}
 			it.Subject = data
 		case "justification":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -396,8 +382,6 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 			}
 			it.Justification = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -405,8 +389,6 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -414,8 +396,6 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 			}
 			it.Collector = data
 		case "knownSince":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -443,8 +423,6 @@ func (ec *executionContext) unmarshalInputMatchFlags(ctx context.Context, obj in
 		}
 		switch k {
 		case "pkg":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
 			data, err := ec.unmarshalNPkgMatchType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgMatchType(ctx, v)
 			if err != nil {
@@ -472,8 +450,6 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx conte
 		}
 		switch k {
 		case "package":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
 			data, err := ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, v)
 			if err != nil {
@@ -481,8 +457,6 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx conte
 			}
 			it.Package = data
 		case "source":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
 			data, err := ec.unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, v)
 			if err != nil {
@@ -490,8 +464,6 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx conte
 			}
 			it.Source = data
 		case "artifact":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
 			data, err := ec.unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, v)
 			if err != nil {
@@ -519,8 +491,6 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInputs(ctx cont
 		}
 		switch k {
 		case "packages":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packages"))
 			data, err := ec.unmarshalOPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, v)
 			if err != nil {
@@ -528,8 +498,6 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInputs(ctx cont
 			}
 			it.Packages = data
 		case "sources":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
 			data, err := ec.unmarshalOSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx, v)
 			if err != nil {
@@ -537,8 +505,6 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInputs(ctx cont
 			}
 			it.Sources = data
 		case "artifacts":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
 			data, err := ec.unmarshalOArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, v)
 			if err != nil {
@@ -566,8 +532,6 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactSpec(ctx contex
 		}
 		switch k {
 		case "package":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
 			data, err := ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
 			if err != nil {
@@ -575,8 +539,6 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactSpec(ctx contex
 			}
 			it.Package = data
 		case "source":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
 			data, err := ec.unmarshalOSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, v)
 			if err != nil {
@@ -584,8 +546,6 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactSpec(ctx contex
 			}
 			it.Source = data
 		case "artifact":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
 			data, err := ec.unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, v)
 			if err != nil {

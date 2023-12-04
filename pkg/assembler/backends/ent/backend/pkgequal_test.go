@@ -479,10 +479,18 @@ func (s *Suite) TestPkgEqual() {
 			}
 			pkgIDs := make([]string, len(test.InPkg))
 			for i, a := range test.InPkg {
-				if v, err := b.IngestPackage(ctx, *a); err != nil {
+				if id, err := b.IngestPackage(ctx, *a); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				} else {
-					pkgIDs[i] = v.Namespaces[0].Names[0].Versions[0].ID
+					pkgs, err := b.Packages(ctx, &model.PkgSpec{ID: &id.PackageVersionID})
+					if err != nil {
+						t.Fatalf("Package not found with ID %v error: %v", id, err)
+					}
+					if len(pkgs) > 0 {
+						pkgIDs[i] = pkgs[0].Namespaces[0].Names[0].Versions[0].ID
+					} else {
+						t.Fatalf("Package not found with ID %v", id)
+					}
 				}
 			}
 
@@ -503,7 +511,7 @@ func (s *Suite) TestPkgEqual() {
 
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				v, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.PkgEqual)
+				id, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.PkgEqual)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -511,7 +519,7 @@ func (s *Suite) TestPkgEqual() {
 					return
 				}
 
-				ids[i] = v.ID
+				ids[i] = id
 			}
 			afterCount := s.Client.PkgEqual.Query().CountX(ctx)
 

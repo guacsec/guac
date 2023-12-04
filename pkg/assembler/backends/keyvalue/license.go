@@ -69,8 +69,8 @@ func (c *demoClient) licenseByInput(ctx context.Context, b *model.LicenseInputSp
 
 // Ingest Licenses
 
-func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
-	var modelLicenses []*model.License
+func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
+	var modelLicenses []string
 	for _, lic := range licenses {
 		modelLic, err := c.IngestLicense(ctx, lic)
 		if err != nil {
@@ -81,11 +81,11 @@ func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.Licen
 	return modelLicenses, nil
 }
 
-func (c *demoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (*model.License, error) {
+func (c *demoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
 	return c.ingestLicense(ctx, license, true)
 }
 
-func (c *demoClient) ingestLicense(ctx context.Context, license *model.LicenseInputSpec, readOnly bool) (*model.License, error) {
+func (c *demoClient) ingestLicense(ctx context.Context, license *model.LicenseInputSpec, readOnly bool) (string, error) {
 	in := &licStruct{
 		Name:        license.Name,
 		Inline:      nilToEmpty(license.Inline),
@@ -97,10 +97,10 @@ func (c *demoClient) ingestLicense(ctx context.Context, license *model.LicenseIn
 
 	out, err := byKeykv[*licStruct](ctx, licenseCol, in.Key(), c)
 	if err == nil {
-		return c.convLicense(out), nil
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 	if readOnly {
 		c.m.RUnlock()
@@ -111,13 +111,13 @@ func (c *demoClient) ingestLicense(ctx context.Context, license *model.LicenseIn
 	in.ThisID = c.getNextID()
 
 	if err := c.addToIndex(ctx, licenseCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := setkv(ctx, licenseCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.convLicense(in), nil
+	return in.ThisID, nil
 }
 
 func (c *demoClient) licenseExact(ctx context.Context, licenseSpec *model.LicenseSpec) (*licStruct, error) {

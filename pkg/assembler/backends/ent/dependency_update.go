@@ -35,6 +35,14 @@ func (du *DependencyUpdate) SetPackageID(i int) *DependencyUpdate {
 	return du
 }
 
+// SetNillablePackageID sets the "package_id" field if the given value is not nil.
+func (du *DependencyUpdate) SetNillablePackageID(i *int) *DependencyUpdate {
+	if i != nil {
+		du.SetPackageID(*i)
+	}
+	return du
+}
+
 // SetDependentPackageNameID sets the "dependent_package_name_id" field.
 func (du *DependencyUpdate) SetDependentPackageNameID(i int) *DependencyUpdate {
 	du.mutation.SetDependentPackageNameID(i)
@@ -81,9 +89,25 @@ func (du *DependencyUpdate) SetVersionRange(s string) *DependencyUpdate {
 	return du
 }
 
+// SetNillableVersionRange sets the "version_range" field if the given value is not nil.
+func (du *DependencyUpdate) SetNillableVersionRange(s *string) *DependencyUpdate {
+	if s != nil {
+		du.SetVersionRange(*s)
+	}
+	return du
+}
+
 // SetDependencyType sets the "dependency_type" field.
 func (du *DependencyUpdate) SetDependencyType(dt dependency.DependencyType) *DependencyUpdate {
 	du.mutation.SetDependencyType(dt)
+	return du
+}
+
+// SetNillableDependencyType sets the "dependency_type" field if the given value is not nil.
+func (du *DependencyUpdate) SetNillableDependencyType(dt *dependency.DependencyType) *DependencyUpdate {
+	if dt != nil {
+		du.SetDependencyType(*dt)
+	}
 	return du
 }
 
@@ -93,15 +117,39 @@ func (du *DependencyUpdate) SetJustification(s string) *DependencyUpdate {
 	return du
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (du *DependencyUpdate) SetNillableJustification(s *string) *DependencyUpdate {
+	if s != nil {
+		du.SetJustification(*s)
+	}
+	return du
+}
+
 // SetOrigin sets the "origin" field.
 func (du *DependencyUpdate) SetOrigin(s string) *DependencyUpdate {
 	du.mutation.SetOrigin(s)
 	return du
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (du *DependencyUpdate) SetNillableOrigin(s *string) *DependencyUpdate {
+	if s != nil {
+		du.SetOrigin(*s)
+	}
+	return du
+}
+
 // SetCollector sets the "collector" field.
 func (du *DependencyUpdate) SetCollector(s string) *DependencyUpdate {
 	du.mutation.SetCollector(s)
+	return du
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (du *DependencyUpdate) SetNillableCollector(s *string) *DependencyUpdate {
+	if s != nil {
+		du.SetCollector(*s)
+	}
 	return du
 }
 
@@ -323,6 +371,14 @@ func (duo *DependencyUpdateOne) SetPackageID(i int) *DependencyUpdateOne {
 	return duo
 }
 
+// SetNillablePackageID sets the "package_id" field if the given value is not nil.
+func (duo *DependencyUpdateOne) SetNillablePackageID(i *int) *DependencyUpdateOne {
+	if i != nil {
+		duo.SetPackageID(*i)
+	}
+	return duo
+}
+
 // SetDependentPackageNameID sets the "dependent_package_name_id" field.
 func (duo *DependencyUpdateOne) SetDependentPackageNameID(i int) *DependencyUpdateOne {
 	duo.mutation.SetDependentPackageNameID(i)
@@ -369,9 +425,25 @@ func (duo *DependencyUpdateOne) SetVersionRange(s string) *DependencyUpdateOne {
 	return duo
 }
 
+// SetNillableVersionRange sets the "version_range" field if the given value is not nil.
+func (duo *DependencyUpdateOne) SetNillableVersionRange(s *string) *DependencyUpdateOne {
+	if s != nil {
+		duo.SetVersionRange(*s)
+	}
+	return duo
+}
+
 // SetDependencyType sets the "dependency_type" field.
 func (duo *DependencyUpdateOne) SetDependencyType(dt dependency.DependencyType) *DependencyUpdateOne {
 	duo.mutation.SetDependencyType(dt)
+	return duo
+}
+
+// SetNillableDependencyType sets the "dependency_type" field if the given value is not nil.
+func (duo *DependencyUpdateOne) SetNillableDependencyType(dt *dependency.DependencyType) *DependencyUpdateOne {
+	if dt != nil {
+		duo.SetDependencyType(*dt)
+	}
 	return duo
 }
 
@@ -381,15 +453,39 @@ func (duo *DependencyUpdateOne) SetJustification(s string) *DependencyUpdateOne 
 	return duo
 }
 
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (duo *DependencyUpdateOne) SetNillableJustification(s *string) *DependencyUpdateOne {
+	if s != nil {
+		duo.SetJustification(*s)
+	}
+	return duo
+}
+
 // SetOrigin sets the "origin" field.
 func (duo *DependencyUpdateOne) SetOrigin(s string) *DependencyUpdateOne {
 	duo.mutation.SetOrigin(s)
 	return duo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (duo *DependencyUpdateOne) SetNillableOrigin(s *string) *DependencyUpdateOne {
+	if s != nil {
+		duo.SetOrigin(*s)
+	}
+	return duo
+}
+
 // SetCollector sets the "collector" field.
 func (duo *DependencyUpdateOne) SetCollector(s string) *DependencyUpdateOne {
 	duo.mutation.SetCollector(s)
+	return duo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (duo *DependencyUpdateOne) SetNillableCollector(s *string) *DependencyUpdateOne {
+	if s != nil {
+		duo.SetCollector(*s)
+	}
 	return duo
 }
 

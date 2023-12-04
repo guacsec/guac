@@ -22,8 +22,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func (c *neo4jClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
-	return nil, fmt.Errorf("not implemented: IngestHasMetadata")
+func (c *neo4jClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
+	return "", fmt.Errorf("not implemented: IngestHasMetadata")
 }
 
 func (c *neo4jClient) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
@@ -31,5 +31,5 @@ func (c *neo4jClient) HasMetadata(ctx context.Context, hasMetadataSpec *model.Ha
 }
 
 func (c *neo4jClient) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
-	return nil, fmt.Errorf("not implemented: IngestBulkHasMetadata")
+	return []string{}, fmt.Errorf("not implemented: IngestBulkHasMetadata")
 }

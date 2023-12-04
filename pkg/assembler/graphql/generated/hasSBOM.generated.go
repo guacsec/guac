@@ -609,8 +609,6 @@ func (ec *executionContext) unmarshalInputHasSBOMIncludesInputSpec(ctx context.C
 		}
 		switch k {
 		case "software":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("software"))
 			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -618,8 +616,6 @@ func (ec *executionContext) unmarshalInputHasSBOMIncludesInputSpec(ctx context.C
 			}
 			it.Software = data
 		case "dependencies":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencies"))
 			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -627,8 +623,6 @@ func (ec *executionContext) unmarshalInputHasSBOMIncludesInputSpec(ctx context.C
 			}
 			it.Dependencies = data
 		case "occurrences":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("occurrences"))
 			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -656,8 +650,6 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 		}
 		switch k {
 		case "uri":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uri"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -665,8 +657,6 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 			}
 			it.URI = data
 		case "algorithm":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -674,8 +664,6 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 			}
 			it.Algorithm = data
 		case "digest":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("digest"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -683,8 +671,6 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 			}
 			it.Digest = data
 		case "downloadLocation":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("downloadLocation"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -692,8 +678,6 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 			}
 			it.DownloadLocation = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -701,8 +685,6 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -710,8 +692,6 @@ func (ec *executionContext) unmarshalInputHasSBOMInputSpec(ctx context.Context, 
 			}
 			it.Collector = data
 		case "knownSince":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
 			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
 			if err != nil {
@@ -739,8 +719,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -748,8 +726,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.ID = data
 		case "subject":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
 			data, err := ec.unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx, v)
 			if err != nil {
@@ -757,8 +733,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.Subject = data
 		case "uri":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uri"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -766,8 +740,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.URI = data
 		case "algorithm":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -775,8 +747,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.Algorithm = data
 		case "digest":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("digest"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -784,8 +754,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.Digest = data
 		case "downloadLocation":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("downloadLocation"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -793,8 +761,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.DownloadLocation = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -802,8 +768,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -811,8 +775,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.Collector = data
 		case "knownSince":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -820,8 +782,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.KnownSince = data
 		case "includedSoftware":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includedSoftware"))
 			data, err := ec.unmarshalNPackageOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx, v)
 			if err != nil {
@@ -829,8 +789,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.IncludedSoftware = data
 		case "includedDependencies":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includedDependencies"))
 			data, err := ec.unmarshalNIsDependencySpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, v)
 			if err != nil {
@@ -838,8 +796,6 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			}
 			it.IncludedDependencies = data
 		case "includedOccurrences":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includedOccurrences"))
 			data, err := ec.unmarshalNIsOccurrenceSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, v)
 			if err != nil {

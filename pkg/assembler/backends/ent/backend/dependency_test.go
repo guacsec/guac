@@ -618,10 +618,10 @@ func (s *Suite) TestIsDependency() {
 
 			pksIDs := make([]string, len(test.InPkg))
 			for i, a := range test.InPkg {
-				if p, err := b.IngestPackage(ctx, *a); err != nil {
+				if id, err := b.IngestPackage(ctx, *a); err != nil {
 					s.Require().NoError(err, "Could not ingest pkg")
 				} else {
-					pksIDs[i] = p.Namespaces[0].Names[0].Versions[0].ID
+					pksIDs[i] = id.PackageVersionID
 				}
 			}
 
@@ -635,7 +635,7 @@ func (s *Suite) TestIsDependency() {
 				if err != nil {
 					return
 				}
-				depIDs[i] = dep.ID
+				depIDs[i] = dep
 			}
 
 			if test.Query.ID != nil {

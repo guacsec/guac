@@ -118,9 +118,25 @@ func (hmu *HasMetadataUpdate) SetTimestamp(t time.Time) *HasMetadataUpdate {
 	return hmu
 }
 
+// SetNillableTimestamp sets the "timestamp" field if the given value is not nil.
+func (hmu *HasMetadataUpdate) SetNillableTimestamp(t *time.Time) *HasMetadataUpdate {
+	if t != nil {
+		hmu.SetTimestamp(*t)
+	}
+	return hmu
+}
+
 // SetKey sets the "key" field.
 func (hmu *HasMetadataUpdate) SetKey(s string) *HasMetadataUpdate {
 	hmu.mutation.SetKey(s)
+	return hmu
+}
+
+// SetNillableKey sets the "key" field if the given value is not nil.
+func (hmu *HasMetadataUpdate) SetNillableKey(s *string) *HasMetadataUpdate {
+	if s != nil {
+		hmu.SetKey(*s)
+	}
 	return hmu
 }
 
@@ -130,9 +146,25 @@ func (hmu *HasMetadataUpdate) SetValue(s string) *HasMetadataUpdate {
 	return hmu
 }
 
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (hmu *HasMetadataUpdate) SetNillableValue(s *string) *HasMetadataUpdate {
+	if s != nil {
+		hmu.SetValue(*s)
+	}
+	return hmu
+}
+
 // SetJustification sets the "justification" field.
 func (hmu *HasMetadataUpdate) SetJustification(s string) *HasMetadataUpdate {
 	hmu.mutation.SetJustification(s)
+	return hmu
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (hmu *HasMetadataUpdate) SetNillableJustification(s *string) *HasMetadataUpdate {
+	if s != nil {
+		hmu.SetJustification(*s)
+	}
 	return hmu
 }
 
@@ -142,9 +174,25 @@ func (hmu *HasMetadataUpdate) SetOrigin(s string) *HasMetadataUpdate {
 	return hmu
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (hmu *HasMetadataUpdate) SetNillableOrigin(s *string) *HasMetadataUpdate {
+	if s != nil {
+		hmu.SetOrigin(*s)
+	}
+	return hmu
+}
+
 // SetCollector sets the "collector" field.
 func (hmu *HasMetadataUpdate) SetCollector(s string) *HasMetadataUpdate {
 	hmu.mutation.SetCollector(s)
+	return hmu
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (hmu *HasMetadataUpdate) SetNillableCollector(s *string) *HasMetadataUpdate {
+	if s != nil {
+		hmu.SetCollector(*s)
+	}
 	return hmu
 }
 
@@ -487,9 +535,25 @@ func (hmuo *HasMetadataUpdateOne) SetTimestamp(t time.Time) *HasMetadataUpdateOn
 	return hmuo
 }
 
+// SetNillableTimestamp sets the "timestamp" field if the given value is not nil.
+func (hmuo *HasMetadataUpdateOne) SetNillableTimestamp(t *time.Time) *HasMetadataUpdateOne {
+	if t != nil {
+		hmuo.SetTimestamp(*t)
+	}
+	return hmuo
+}
+
 // SetKey sets the "key" field.
 func (hmuo *HasMetadataUpdateOne) SetKey(s string) *HasMetadataUpdateOne {
 	hmuo.mutation.SetKey(s)
+	return hmuo
+}
+
+// SetNillableKey sets the "key" field if the given value is not nil.
+func (hmuo *HasMetadataUpdateOne) SetNillableKey(s *string) *HasMetadataUpdateOne {
+	if s != nil {
+		hmuo.SetKey(*s)
+	}
 	return hmuo
 }
 
@@ -499,9 +563,25 @@ func (hmuo *HasMetadataUpdateOne) SetValue(s string) *HasMetadataUpdateOne {
 	return hmuo
 }
 
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (hmuo *HasMetadataUpdateOne) SetNillableValue(s *string) *HasMetadataUpdateOne {
+	if s != nil {
+		hmuo.SetValue(*s)
+	}
+	return hmuo
+}
+
 // SetJustification sets the "justification" field.
 func (hmuo *HasMetadataUpdateOne) SetJustification(s string) *HasMetadataUpdateOne {
 	hmuo.mutation.SetJustification(s)
+	return hmuo
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (hmuo *HasMetadataUpdateOne) SetNillableJustification(s *string) *HasMetadataUpdateOne {
+	if s != nil {
+		hmuo.SetJustification(*s)
+	}
 	return hmuo
 }
 
@@ -511,9 +591,25 @@ func (hmuo *HasMetadataUpdateOne) SetOrigin(s string) *HasMetadataUpdateOne {
 	return hmuo
 }
 
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (hmuo *HasMetadataUpdateOne) SetNillableOrigin(s *string) *HasMetadataUpdateOne {
+	if s != nil {
+		hmuo.SetOrigin(*s)
+	}
+	return hmuo
+}
+
 // SetCollector sets the "collector" field.
 func (hmuo *HasMetadataUpdateOne) SetCollector(s string) *HasMetadataUpdateOne {
 	hmuo.mutation.SetCollector(s)
+	return hmuo
+}
+
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (hmuo *HasMetadataUpdateOne) SetNillableCollector(s *string) *HasMetadataUpdateOne {
+	if s != nil {
+		hmuo.SetCollector(*s)
+	}
 	return hmuo
 }
 

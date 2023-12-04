@@ -293,22 +293,6 @@ var includedTestExpectedSBOM = &model.HasSbom{
 
 // End of Test resources
 
-func getPackageVersionFromIngestedPackage(pkg *model.Package) (string, error) {
-	if pkg != nil {
-		if len(pkg.Namespaces) == 1 {
-			namespace := pkg.Namespaces[0]
-			if len(namespace.Names) == 1 {
-				name := namespace.Names[0]
-				if len(name.Versions) == 1 {
-					version := name.Versions[0]
-					return version.ID, nil
-				}
-			}
-		}
-	}
-	return "", fmt.Errorf("could not retrieve ingested PackageVersion from package id %v", pkg)
-}
-
 func getNodeIds(nodes []model.Node) ([]string, error) {
 	var ids []string
 	for _, node := range nodes {
@@ -2651,19 +2635,13 @@ func TestHasSBOM(t *testing.T) {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					for _, pkg := range pkgs {
-						if id, err := getPackageVersionFromIngestedPackage(pkg); err != nil {
-							t.Fatalf("Could not determine PackageVersion id: %v", err)
-						} else {
-							includes.Software = append(includes.Software, id)
-						}
+						includes.Software = append(includes.Software, pkg.PackageVersionID)
 					}
 				}
 				if arts, err := b.IngestArtifacts(ctx, test.PkgArt.Artifacts); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					for _, art := range arts {
-						includes.Software = append(includes.Software, art.ID)
-					}
+					includes.Software = append(includes.Software, arts...)
 				}
 			}
 
@@ -2671,7 +2649,7 @@ func TestHasSBOM(t *testing.T) {
 				if isDep, err := b.IngestDependency(ctx, *dep.pkg, *dep.depPkg, dep.matchType, *dep.isDep); err != nil {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
-					includes.Dependencies = append(includes.Dependencies, isDep.ID)
+					includes.Dependencies = append(includes.Dependencies, isDep)
 				}
 			}
 
@@ -2679,7 +2657,7 @@ func TestHasSBOM(t *testing.T) {
 				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, *occ.Art, *occ.isOcc); err != nil {
 					t.Fatalf("Could not ingest occurrence: %v", err)
 				} else {
-					includes.Occurrences = append(includes.Occurrences, isOcc.ID)
+					includes.Occurrences = append(includes.Occurrences, isOcc)
 				}
 			}
 			for _, o := range test.Calls {
@@ -2973,19 +2951,13 @@ func TestIngestHasSBOMs(t *testing.T) {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					for _, pkg := range pkgs {
-						if id, err := getPackageVersionFromIngestedPackage(pkg); err != nil {
-							t.Fatalf("Could not determine PackageVersion id: %v", err)
-						} else {
-							includes.Software = append(includes.Software, id)
-						}
+						includes.Software = append(includes.Software, pkg.PackageVersionID)
 					}
 				}
 				if arts, err := b.IngestArtifacts(ctx, test.PkgArt.Artifacts); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					for _, art := range arts {
-						includes.Software = append(includes.Software, art.ID)
-					}
+					includes.Software = append(includes.Software, arts...)
 				}
 			}
 
@@ -2993,7 +2965,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 				if isDep, err := b.IngestDependency(ctx, *dep.pkg, *dep.depPkg, dep.matchType, *dep.isDep); err != nil {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
-					includes.Dependencies = append(includes.Dependencies, isDep.ID)
+					includes.Dependencies = append(includes.Dependencies, isDep)
 				}
 			}
 
@@ -3001,7 +2973,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, *occ.Art, *occ.isOcc); err != nil {
 					t.Fatalf("Could not ingest occurrence: %v", err)
 				} else {
-					includes.Occurrences = append(includes.Occurrences, isOcc.ID)
+					includes.Occurrences = append(includes.Occurrences, isOcc)
 				}
 			}
 			for _, o := range test.Calls {
@@ -3168,19 +3140,13 @@ func TestHasSBOMNeighbors(t *testing.T) {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					for _, pkg := range pkgs {
-						if id, err := getPackageVersionFromIngestedPackage(pkg); err != nil {
-							t.Fatalf("Could not determine PackageVersion id: %v", err)
-						} else {
-							includes.Software = append(includes.Software, id)
-						}
+						includes.Software = append(includes.Software, pkg.PackageVersionID)
 					}
 				}
 				if arts, err := b.IngestArtifacts(ctx, test.PkgArt.Artifacts); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					for _, art := range arts {
-						includes.Software = append(includes.Software, art.ID)
-					}
+					includes.Software = append(includes.Software, arts...)
 				}
 			}
 
@@ -3188,7 +3154,7 @@ func TestHasSBOMNeighbors(t *testing.T) {
 				if isDep, err := b.IngestDependency(ctx, *dep.pkg, *dep.depPkg, dep.matchType, *dep.isDep); err != nil {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
-					includes.Dependencies = append(includes.Dependencies, isDep.ID)
+					includes.Dependencies = append(includes.Dependencies, isDep)
 				}
 			}
 
@@ -3196,7 +3162,7 @@ func TestHasSBOMNeighbors(t *testing.T) {
 				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, *occ.Art, *occ.isOcc); err != nil {
 					t.Fatalf("Could not ingest occurrence: %v", err)
 				} else {
-					includes.Occurrences = append(includes.Occurrences, isOcc.ID)
+					includes.Occurrences = append(includes.Occurrences, isOcc)
 				}
 			}
 

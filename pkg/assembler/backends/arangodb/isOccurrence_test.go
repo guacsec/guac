@@ -31,12 +31,12 @@ import (
 
 func TestOccurrence(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -197,7 +197,7 @@ func TestOccurrence(t *testing.T) {
 		{
 			Name:  "Query on Artifact ID",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InArt: []*model.ArtifactInputSpec{testdata.A4, testdata.A2},
+			InArt: []*model.ArtifactInputSpec{testdata.A2, testdata.A4},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
@@ -268,7 +268,7 @@ func TestOccurrence(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package ID",
-			InPkg: []*model.PkgInputSpec{testdata.P4, testdata.P2},
+			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
 			InArt: []*model.ArtifactInputSpec{testdata.A1},
 			Calls: []call{
 				{
@@ -488,22 +488,51 @@ func TestOccurrence(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					if test.QueryPkgID {
+						test.Query = &model.IsOccurrenceSpec{
+							Subject: &model.PackageOrSourceSpec{
+								Package: &model.PkgSpec{
+									ID: ptrfrom.String(pkgIDs.PackageVersionID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if srcIDs, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
+				} else {
+					if test.QuerySourceID {
+						test.Query = &model.IsOccurrenceSpec{
+							Subject: &model.PackageOrSourceSpec{
+								Source: &model.SourceSpec{
+									ID: ptrfrom.String(srcIDs.SourceNameID),
+								},
+							},
+						}
+					}
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
+				} else {
+					if test.QueryArtID {
+						test.Query = &model.IsOccurrenceSpec{
+							Artifact: &model.ArtifactSpec{
+								ID: ptrfrom.String(artID),
+							},
+						}
+
+					}
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
+				ocurID, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -512,38 +541,8 @@ func TestOccurrence(t *testing.T) {
 				}
 				if test.QueryID {
 					test.Query = &model.IsOccurrenceSpec{
-						ID: ptrfrom.String(found.ID),
+						ID: ptrfrom.String(ocurID),
 					}
-				}
-				if test.QueryPkgID {
-					if _, ok := found.Subject.(*model.Package); ok {
-						test.Query = &model.IsOccurrenceSpec{
-							Subject: &model.PackageOrSourceSpec{
-								Package: &model.PkgSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QuerySourceID {
-					if _, ok := found.Subject.(*model.Source); ok {
-						test.Query = &model.IsOccurrenceSpec{
-							Subject: &model.PackageOrSourceSpec{
-								Source: &model.SourceSpec{
-									ID: ptrfrom.String(found.Subject.(*model.Source).Namespaces[0].Names[0].ID),
-								},
-							},
-						}
-					}
-				}
-				if test.QueryArtID {
-					test.Query = &model.IsOccurrenceSpec{
-						Artifact: &model.ArtifactSpec{
-							ID: ptrfrom.String(found.Artifact.ID),
-						},
-					}
-
 				}
 			}
 			got, err := b.IsOccurrence(ctx, test.Query)
@@ -562,12 +561,12 @@ func TestOccurrence(t *testing.T) {
 
 func TestIngestOccurrences(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -606,10 +605,6 @@ func TestIngestOccurrences(t *testing.T) {
 			{
 				Subject:       testdata.P1out,
 				Artifact:      testdata.A1out,
-				Justification: "test justification",
-			}, {
-				Subject:       testdata.P2out,
-				Artifact:      testdata.A2out,
 				Justification: "test justification",
 			},
 		},
@@ -657,9 +652,16 @@ func TestIngestOccurrences(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				got, err := b.IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
+				ocurID, err := b.IngestOccurrences(ctx, o.PkgSrcs, o.Artifacts, o.Occurrences)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: ptrfrom.String(ocurID[0])})
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
 				if err != nil {
 					return
@@ -674,12 +676,12 @@ func TestIngestOccurrences(t *testing.T) {
 
 func Test_buildIsOccurrenceByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -906,14 +908,14 @@ func Test_buildIsOccurrenceByID(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				found, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
+				ocurID, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
 				if err != nil {
 					return
 				}
-				got, err := b.(*arangoClient).buildIsOccurrenceByID(ctx, found.ID, test.Query)
+				got, err := b.(*arangoClient).buildIsOccurrenceByID(ctx, ocurID, test.Query)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
@@ -928,119 +930,3 @@ func Test_buildIsOccurrenceByID(t *testing.T) {
 		})
 	}
 }
-
-// TODO (pxp928): add tests back in when implemented
-
-// func TestOccurrenceNeighbors(t *testing.T) {
-// 	type call struct {
-// 		PkgSrc     model.PackageOrSourceInput
-// 		Artifact   *model.ArtifactInputSpec
-// 		Occurrence *model.IsOccurrenceInputSpec
-// 	}
-// 	tests := []struct {
-// 		Name         string
-// 		InPkg        []*model.PkgInputSpec
-// 		InSrc        []*model.SourceInputSpec
-// 		InArt        []*model.ArtifactInputSpec
-// 		Calls        []call
-// 		ExpNeighbors map[string][]string
-// 	}{
-// 		{
-// 			Name:  "HappyPath",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			InArt: []*model.ArtifactInputSpec{testdata.A1},
-// 			Calls: []call{
-// 				call{
-// 					PkgSrc: model.PackageOrSourceInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Artifact: testdata.A1,
-// 					Occurrence: &model.IsOccurrenceInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"1": []string{"1"},
-// 				"2": []string{"1", "1"},
-// 				"3": []string{"1", "1"},
-// 				"4": []string{"1", "6"}, // pkg version
-// 				"5": []string{"6"},      // artifact
-// 				"6": []string{"1", "5"}, // isOccurence
-// 			},
-// 		},
-// 		{
-// 			Name:  "Two occurrences",
-// 			InPkg: []*model.PkgInputSpec{testdata.P1},
-// 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
-// 			Calls: []call{
-// 				call{
-// 					PkgSrc: model.PackageOrSourceInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Artifact: testdata.A1,
-// 					Occurrence: &model.IsOccurrenceInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 				call{
-// 					PkgSrc: model.PackageOrSourceInput{
-// 						Package: testdata.P1,
-// 					},
-// 					Artifact: testdata.A2,
-// 					Occurrence: &model.IsOccurrenceInputSpec{
-// 						Justification: "test justification",
-// 					},
-// 				},
-// 			},
-// 			ExpNeighbors: map[string][]string{
-// 				"4": []string{"1", "7", "8"}, // pkg version
-// 				"5": []string{"7"},           // artifact1
-// 				"6": []string{"8"},           // artifact2
-// 				"7": []string{"1", "5"},      // isOccurence 1
-// 				"8": []string{"1", "6"},      // isOccurence 2
-// 			},
-// 		},
-// 	}
-// 	ctx := context.Background()
-// 	for _, test := range tests {
-// 		t.Run(test.Name, func(t *testing.T) {
-// 			b, err := inmem.getBackend(nil)
-// 			if err != nil {
-// 				t.Fatalf("Could not instantiate testing backend: %v", err)
-// 			}
-// 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
-// 					t.Fatalf("Could not ingest package: %v", err)
-// 				}
-// 			}
-// 			for _, s := range test.InSrc {
-// 				if _, err := b.IngestSource(ctx, *s); err != nil {
-// 					t.Fatalf("Could not ingest source: %v", err)
-// 				}
-// 			}
-// 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
-// 					t.Fatalf("Could not ingest artifact: %v", err)
-// 				}
-// 			}
-// 			for _, o := range test.Calls {
-// 				if _, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence); err != nil {
-// 					t.Fatalf("Could not ingest isOccurrence: %s", err)
-// 				}
-// 			}
-// 			for q, r := range test.ExpNeighbors {
-// 				got, err := b.Neighbors(ctx, q, nil)
-// 				if err != nil {
-// 					t.Fatalf("Could not query neighbors: %s", err)
-// 				}
-// 				gotIDs := convNodes(got)
-// 				slices.Sort(r)
-// 				slices.Sort(gotIDs)
-// 				if diff := cmp.Diff(r, gotIDs); diff != "" {
-// 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-// 				}
-// 			}
-// 		})
-// 	}
-// }

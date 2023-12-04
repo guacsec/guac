@@ -65,7 +65,7 @@ func (c *demoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInput
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestPkgEqual failed with err: %v", err)
 		}
-		modelPkgEqualsIDs = append(modelPkgEqualsIDs, pkgEqual.ID)
+		modelPkgEqualsIDs = append(modelPkgEqualsIDs, pkgEqual)
 	}
 	return modelPkgEqualsIDs, nil
 }
@@ -87,11 +87,11 @@ func (c *demoClient) convPkgEqual(ctx context.Context, in *pkgEqualStruct) (*mod
 	return out, nil
 }
 
-func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
+func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	return c.ingestPkgEqual(ctx, pkg, depPkg, pkgEqual, true)
 }
 
-func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec, readOnly bool) (*model.PkgEqual, error) {
+func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestPkgEqual"
 
 	in := &pkgEqualStruct{
@@ -108,7 +108,7 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 	for _, pi := range []model.PkgInputSpec{pkg, depPkg} {
 		p, err := c.getPackageVerFromInput(ctx, pi)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			return "", gqlerror.Errorf("%v :: %v", funcName, err)
 		}
 		ps = append(ps, p)
 		pIDs = append(pIDs, p.ThisID)
@@ -118,10 +118,10 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 
 	out, err := byKeykv[*pkgEqualStruct](ctx, pkgEqCol, in.Key(), c)
 	if err == nil {
-		return c.convPkgEqual(ctx, out)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -133,18 +133,18 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, pkgEqCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	for _, p := range ps {
 		if err := p.setPkgEquals(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if err := setkv(ctx, pkgEqCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.convPkgEqual(ctx, in)
+	return in.ThisID, nil
 }
 
 // Query PkgEqual

@@ -60,8 +60,8 @@ func (n *hashEqualStruct) BuildModelNode(ctx context.Context, c *demoClient) (mo
 
 // Ingest HashEqual
 
-func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]*model.HashEqual, error) {
-	var modelHashEquals []*model.HashEqual
+func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
+	var modelHashEquals []string
 	for i := range hashEquals {
 		hashEqual, err := c.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
 		if err != nil {
@@ -72,11 +72,11 @@ func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.Ar
 	return modelHashEquals, nil
 }
 
-func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (*model.HashEqual, error) {
+func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
 	return c.ingestHashEqual(ctx, artifact, equalArtifact, hashEqual, true)
 }
 
-func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec, readOnly bool) (*model.HashEqual, error) {
+func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec, readOnly bool) (string, error) {
 	in := &hashEqualStruct{
 		Justification: hashEqual.Justification,
 		Origin:        hashEqual.Origin,
@@ -88,11 +88,11 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.Artifac
 
 	aInt1, err := c.artifactByInput(ctx, &artifact)
 	if err != nil {
-		return nil, gqlerror.Errorf("IngestHashEqual :: Artifact not found")
+		return "", gqlerror.Errorf("IngestHashEqual :: Artifact not found")
 	}
 	aInt2, err := c.artifactByInput(ctx, &equalArtifact)
 	if err != nil {
-		return nil, gqlerror.Errorf("IngestHashEqual :: Artifact not found")
+		return "", gqlerror.Errorf("IngestHashEqual :: Artifact not found")
 	}
 	artIDs := []string{aInt1.ThisID, aInt2.ThisID}
 	slices.Sort(artIDs)
@@ -100,10 +100,10 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.Artifac
 
 	out, err := byKeykv[*hashEqualStruct](ctx, hashEqCol, in.Key(), c)
 	if err == nil {
-		return c.convHashEqual(ctx, out)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -115,19 +115,19 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.Artifac
 
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, hashEqCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := aInt1.setHashEquals(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := aInt2.setHashEquals(ctx, in.ThisID, c); err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := setkv(ctx, hashEqCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.convHashEqual(ctx, in)
+	return in.ThisID, nil
 }
 
 func (c *demoClient) matchArtifacts(ctx context.Context, filter []*model.ArtifactSpec, value []string) bool {

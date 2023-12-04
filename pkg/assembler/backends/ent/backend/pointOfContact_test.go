@@ -648,7 +648,7 @@ func (s *Suite) TestPointOfContact() {
 				if err != nil {
 					return
 				}
-				recordIDs[i] = poc.ID
+				recordIDs[i] = poc
 			}
 
 			if test.Query.ID != nil {

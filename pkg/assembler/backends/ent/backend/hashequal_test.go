@@ -471,7 +471,7 @@ func (s *Suite) TestHashEqual() {
 				if v, err := b.IngestArtifact(ctx, a); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					artifactIDs[i] = v.ID
+					artifactIDs[i] = v
 				}
 			}
 
@@ -501,7 +501,7 @@ func (s *Suite) TestHashEqual() {
 				if err != nil {
 					return
 				}
-				ids[i] = v.ID
+				ids[i] = v
 			}
 
 			if test.Query != nil && test.Query.ID != nil {

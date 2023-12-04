@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -97,8 +98,8 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 	return models, nil
 }
 
-func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]*model.IsOccurrence, error) {
-	var models []*model.IsOccurrence
+func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+	var models []string
 	for i := range occurrences {
 		var subject model.PackageOrSourceInput
 		if len(subjects.Packages) > 0 {
@@ -119,7 +120,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	subject model.PackageOrSourceInput,
 	art model.ArtifactInputSpec,
 	spec model.IsOccurrenceInputSpec,
-) (*model.IsOccurrence, error) {
+) (string, error) {
 	funcName := "IngestOccurrence"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
@@ -162,11 +163,15 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 				sql.IsNull(occurrence.FieldSourceID),
 			)
 		} else if subject.Source != nil {
-			srcName, err := upsertSource(ctx, tx, *subject.Source)
+			srcNameID, err := upsertSource(ctx, tx, *subject.Source)
 			if err != nil {
 				return nil, err
 			}
-			occurrenceCreate.SetSource(srcName)
+			srcID, err := strconv.Atoi(srcNameID.SourceNameID)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to get Source ID")
+			}
+			occurrenceCreate.SetSourceID(srcID)
 			occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldSourceID)
 			conflictWhere = sql.And(
 				sql.IsNull(occurrence.FieldPackageID),
@@ -190,7 +195,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		return &id, nil
 	})
 	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+		return "", gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
 	// TODO: Prepare response using a resusable resolver that accounts for preloads.
@@ -212,8 +217,9 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		}).
 		Only(ctx)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+		return "", gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 
-	return toModelIsOccurrenceWithSubject(record), nil
+	//TODO optimize for only returning ID
+	return nodeID(record.ID), nil
 }

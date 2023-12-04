@@ -77,9 +77,25 @@ func (clu *CertifyLegalUpdate) SetDeclaredLicense(s string) *CertifyLegalUpdate 
 	return clu
 }
 
+// SetNillableDeclaredLicense sets the "declared_license" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableDeclaredLicense(s *string) *CertifyLegalUpdate {
+	if s != nil {
+		clu.SetDeclaredLicense(*s)
+	}
+	return clu
+}
+
 // SetDiscoveredLicense sets the "discovered_license" field.
 func (clu *CertifyLegalUpdate) SetDiscoveredLicense(s string) *CertifyLegalUpdate {
 	clu.mutation.SetDiscoveredLicense(s)
+	return clu
+}
+
+// SetNillableDiscoveredLicense sets the "discovered_license" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableDiscoveredLicense(s *string) *CertifyLegalUpdate {
+	if s != nil {
+		clu.SetDiscoveredLicense(*s)
+	}
 	return clu
 }
 
@@ -89,9 +105,25 @@ func (clu *CertifyLegalUpdate) SetAttribution(s string) *CertifyLegalUpdate {
 	return clu
 }
 
+// SetNillableAttribution sets the "attribution" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableAttribution(s *string) *CertifyLegalUpdate {
+	if s != nil {
+		clu.SetAttribution(*s)
+	}
+	return clu
+}
+
 // SetJustification sets the "justification" field.
 func (clu *CertifyLegalUpdate) SetJustification(s string) *CertifyLegalUpdate {
 	clu.mutation.SetJustification(s)
+	return clu
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableJustification(s *string) *CertifyLegalUpdate {
+	if s != nil {
+		clu.SetJustification(*s)
+	}
 	return clu
 }
 
@@ -101,9 +133,25 @@ func (clu *CertifyLegalUpdate) SetTimeScanned(t time.Time) *CertifyLegalUpdate {
 	return clu
 }
 
+// SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableTimeScanned(t *time.Time) *CertifyLegalUpdate {
+	if t != nil {
+		clu.SetTimeScanned(*t)
+	}
+	return clu
+}
+
 // SetOrigin sets the "origin" field.
 func (clu *CertifyLegalUpdate) SetOrigin(s string) *CertifyLegalUpdate {
 	clu.mutation.SetOrigin(s)
+	return clu
+}
+
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableOrigin(s *string) *CertifyLegalUpdate {
+	if s != nil {
+		clu.SetOrigin(*s)
+	}
 	return clu
 }
 
@@ -113,15 +161,39 @@ func (clu *CertifyLegalUpdate) SetCollector(s string) *CertifyLegalUpdate {
 	return clu
 }
 
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableCollector(s *string) *CertifyLegalUpdate {
+	if s != nil {
+		clu.SetCollector(*s)
+	}
+	return clu
+}
+
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
 func (clu *CertifyLegalUpdate) SetDeclaredLicensesHash(s string) *CertifyLegalUpdate {
 	clu.mutation.SetDeclaredLicensesHash(s)
 	return clu
 }
 
+// SetNillableDeclaredLicensesHash sets the "declared_licenses_hash" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableDeclaredLicensesHash(s *string) *CertifyLegalUpdate {
+	if s != nil {
+		clu.SetDeclaredLicensesHash(*s)
+	}
+	return clu
+}
+
 // SetDiscoveredLicensesHash sets the "discovered_licenses_hash" field.
 func (clu *CertifyLegalUpdate) SetDiscoveredLicensesHash(s string) *CertifyLegalUpdate {
 	clu.mutation.SetDiscoveredLicensesHash(s)
+	return clu
+}
+
+// SetNillableDiscoveredLicensesHash sets the "discovered_licenses_hash" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableDiscoveredLicensesHash(s *string) *CertifyLegalUpdate {
+	if s != nil {
+		clu.SetDiscoveredLicensesHash(*s)
+	}
 	return clu
 }
 
@@ -501,9 +573,25 @@ func (cluo *CertifyLegalUpdateOne) SetDeclaredLicense(s string) *CertifyLegalUpd
 	return cluo
 }
 
+// SetNillableDeclaredLicense sets the "declared_license" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableDeclaredLicense(s *string) *CertifyLegalUpdateOne {
+	if s != nil {
+		cluo.SetDeclaredLicense(*s)
+	}
+	return cluo
+}
+
 // SetDiscoveredLicense sets the "discovered_license" field.
 func (cluo *CertifyLegalUpdateOne) SetDiscoveredLicense(s string) *CertifyLegalUpdateOne {
 	cluo.mutation.SetDiscoveredLicense(s)
+	return cluo
+}
+
+// SetNillableDiscoveredLicense sets the "discovered_license" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableDiscoveredLicense(s *string) *CertifyLegalUpdateOne {
+	if s != nil {
+		cluo.SetDiscoveredLicense(*s)
+	}
 	return cluo
 }
 
@@ -513,9 +601,25 @@ func (cluo *CertifyLegalUpdateOne) SetAttribution(s string) *CertifyLegalUpdateO
 	return cluo
 }
 
+// SetNillableAttribution sets the "attribution" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableAttribution(s *string) *CertifyLegalUpdateOne {
+	if s != nil {
+		cluo.SetAttribution(*s)
+	}
+	return cluo
+}
+
 // SetJustification sets the "justification" field.
 func (cluo *CertifyLegalUpdateOne) SetJustification(s string) *CertifyLegalUpdateOne {
 	cluo.mutation.SetJustification(s)
+	return cluo
+}
+
+// SetNillableJustification sets the "justification" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableJustification(s *string) *CertifyLegalUpdateOne {
+	if s != nil {
+		cluo.SetJustification(*s)
+	}
 	return cluo
 }
 
@@ -525,9 +629,25 @@ func (cluo *CertifyLegalUpdateOne) SetTimeScanned(t time.Time) *CertifyLegalUpda
 	return cluo
 }
 
+// SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableTimeScanned(t *time.Time) *CertifyLegalUpdateOne {
+	if t != nil {
+		cluo.SetTimeScanned(*t)
+	}
+	return cluo
+}
+
 // SetOrigin sets the "origin" field.
 func (cluo *CertifyLegalUpdateOne) SetOrigin(s string) *CertifyLegalUpdateOne {
 	cluo.mutation.SetOrigin(s)
+	return cluo
+}
+
+// SetNillableOrigin sets the "origin" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableOrigin(s *string) *CertifyLegalUpdateOne {
+	if s != nil {
+		cluo.SetOrigin(*s)
+	}
 	return cluo
 }
 
@@ -537,15 +657,39 @@ func (cluo *CertifyLegalUpdateOne) SetCollector(s string) *CertifyLegalUpdateOne
 	return cluo
 }
 
+// SetNillableCollector sets the "collector" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableCollector(s *string) *CertifyLegalUpdateOne {
+	if s != nil {
+		cluo.SetCollector(*s)
+	}
+	return cluo
+}
+
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
 func (cluo *CertifyLegalUpdateOne) SetDeclaredLicensesHash(s string) *CertifyLegalUpdateOne {
 	cluo.mutation.SetDeclaredLicensesHash(s)
 	return cluo
 }
 
+// SetNillableDeclaredLicensesHash sets the "declared_licenses_hash" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableDeclaredLicensesHash(s *string) *CertifyLegalUpdateOne {
+	if s != nil {
+		cluo.SetDeclaredLicensesHash(*s)
+	}
+	return cluo
+}
+
 // SetDiscoveredLicensesHash sets the "discovered_licenses_hash" field.
 func (cluo *CertifyLegalUpdateOne) SetDiscoveredLicensesHash(s string) *CertifyLegalUpdateOne {
 	cluo.mutation.SetDiscoveredLicensesHash(s)
+	return cluo
+}
+
+// SetNillableDiscoveredLicensesHash sets the "discovered_licenses_hash" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableDiscoveredLicensesHash(s *string) *CertifyLegalUpdateOne {
+	if s != nil {
+		cluo.SetDiscoveredLicensesHash(*s)
+	}
 	return cluo
 }
 

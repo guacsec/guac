@@ -73,11 +73,11 @@ func (n *goodLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Nod
 
 // Ingest CertifyGood
 
-func (c *demoClient) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
-	var modelCertifyGoods []*model.CertifyGood
+func (c *demoClient) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
+	var modelCertifyGoods []string
 
 	for i := range certifyGoods {
-		var certifyGood *model.CertifyGood
+		var certifyGood string
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
@@ -103,10 +103,10 @@ func (c *demoClient) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 	return modelCertifyGoods, nil
 }
 
-func (c *demoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
+func (c *demoClient) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (string, error) {
 	return c.ingestCertifyGood(ctx, subject, pkgMatchType, certifyGood, true)
 }
-func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec, readOnly bool) (*model.CertifyGood, error) {
+func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, certifyGood model.CertifyGoodInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestCertifyGood"
 
 	in := &goodLink{
@@ -127,31 +127,31 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 		var err error
 		foundPkgNameorVersionNode, err = c.getPackageNameOrVerFromInput(ctx, *subject.Package, *pkgMatchType)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.PackageID = foundPkgNameorVersionNode.ID()
 	} else if subject.Artifact != nil {
 		var err error
 		foundArtStrct, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.ArtifactID = foundArtStrct.ThisID
 	} else {
 		var err error
 		foundSrcName, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.SourceID = foundSrcName.ThisID
 	}
 
 	out, err := byKeykv[*goodLink](ctx, cgCol, in.Key(), c)
 	if err == nil {
-		return c.buildCertifyGood(ctx, out, nil, true)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -163,26 +163,26 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 	in.ThisID = c.getNextID()
 
 	if err := c.addToIndex(ctx, cgCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 	if foundPkgNameorVersionNode != nil {
 		if err := foundPkgNameorVersionNode.setCertifyGoodLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	} else if foundArtStrct != nil {
 		if err := foundArtStrct.setCertifyGoodLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	} else {
 		if err := foundSrcName.setCertifyGoodLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if err := setkv(ctx, cgCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return c.buildCertifyGood(ctx, in, nil, true)
+	return in.ThisID, nil
 }
 
 // Query CertifyGood

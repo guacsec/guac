@@ -35,6 +35,14 @@ func (snu *SourceNameUpdate) SetName(s string) *SourceNameUpdate {
 	return snu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (snu *SourceNameUpdate) SetNillableName(s *string) *SourceNameUpdate {
+	if s != nil {
+		snu.SetName(*s)
+	}
+	return snu
+}
+
 // SetCommit sets the "commit" field.
 func (snu *SourceNameUpdate) SetCommit(s string) *SourceNameUpdate {
 	snu.mutation.SetCommit(s)
@@ -78,6 +86,14 @@ func (snu *SourceNameUpdate) ClearTag() *SourceNameUpdate {
 // SetNamespaceID sets the "namespace_id" field.
 func (snu *SourceNameUpdate) SetNamespaceID(i int) *SourceNameUpdate {
 	snu.mutation.SetNamespaceID(i)
+	return snu
+}
+
+// SetNillableNamespaceID sets the "namespace_id" field if the given value is not nil.
+func (snu *SourceNameUpdate) SetNillableNamespaceID(i *int) *SourceNameUpdate {
+	if i != nil {
+		snu.SetNamespaceID(*i)
+	}
 	return snu
 }
 
@@ -295,6 +311,14 @@ func (snuo *SourceNameUpdateOne) SetName(s string) *SourceNameUpdateOne {
 	return snuo
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (snuo *SourceNameUpdateOne) SetNillableName(s *string) *SourceNameUpdateOne {
+	if s != nil {
+		snuo.SetName(*s)
+	}
+	return snuo
+}
+
 // SetCommit sets the "commit" field.
 func (snuo *SourceNameUpdateOne) SetCommit(s string) *SourceNameUpdateOne {
 	snuo.mutation.SetCommit(s)
@@ -338,6 +362,14 @@ func (snuo *SourceNameUpdateOne) ClearTag() *SourceNameUpdateOne {
 // SetNamespaceID sets the "namespace_id" field.
 func (snuo *SourceNameUpdateOne) SetNamespaceID(i int) *SourceNameUpdateOne {
 	snuo.mutation.SetNamespaceID(i)
+	return snuo
+}
+
+// SetNillableNamespaceID sets the "namespace_id" field if the given value is not nil.
+func (snuo *SourceNameUpdateOne) SetNillableNamespaceID(i *int) *SourceNameUpdateOne {
+	if i != nil {
+		snuo.SetNamespaceID(*i)
+	}
 	return snuo
 }
 

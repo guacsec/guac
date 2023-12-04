@@ -18,6 +18,7 @@ package csaf
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -103,16 +104,17 @@ func findPurl(ctx context.Context, tree csaf.ProductBranch, product_ref string) 
 }
 
 func findPurlSearch(ctx context.Context, tree csaf.ProductBranch, product_ref string, visited map[string]bool) *string {
-	if visited[tree.Name] {
-		return nil
-	}
-	visited[tree.Name] = true
 	if tree.Name == product_ref {
 		purl := tree.Product.IdentificationHelper["purl"]
 		return &purl
 	}
 
-	for _, b := range tree.Branches {
+	for i, b := range tree.Branches {
+		key := fmt.Sprintf("%v-%v-%v", tree.Name, strconv.Itoa(i), b.Name)
+		if visited[key] {
+			continue
+		}
+		visited[key] = true
 		purl := findPurlSearch(ctx, b, product_ref, visited)
 		if purl != nil {
 			return purl

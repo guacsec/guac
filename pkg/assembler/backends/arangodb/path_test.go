@@ -178,11 +178,6 @@ func Test_Path(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var startID string
 			var stopID string
-			for _, g := range tt.inVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
-					t.Fatalf("Could not ingest vulnerability: %a", err)
-				}
-			}
 			if tt.certifyVulnTwoPkgsCall != nil {
 				var nonVulnPkgID string
 				for _, p := range tt.inPkg {
@@ -190,33 +185,40 @@ func Test_Path(t *testing.T) {
 					if err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
-					nonVulnPkgID = pkg.Namespaces[0].Names[0].Versions[0].ID
+					nonVulnPkgID = pkg.PackageVersionID
 				}
-				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnTwoPkgsCall.Pkg, *tt.certifyVulnTwoPkgsCall.Vuln, *tt.certifyVulnTwoPkgsCall.CertifyVuln)
+				cvID, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnTwoPkgsCall.Pkg, *tt.certifyVulnTwoPkgsCall.Vuln, *tt.certifyVulnTwoPkgsCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				startID = found.ID
+				startID = cvID
 				stopID = nonVulnPkgID
 			}
 			if tt.certifyVulnCall != nil {
 				for _, p := range tt.inPkg {
-					if _, err := b.IngestPackage(ctx, *p); err != nil {
+					if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
+					} else {
+						startID = pkgIDs.PackageVersionID
 					}
 				}
-				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
+				for _, g := range tt.inVuln {
+					if vulnIDs, err := b.IngestVulnerability(ctx, *g); err != nil {
+						t.Fatalf("Could not ingest vulnerability: %a", err)
+					} else {
+						stopID = vulnIDs.VulnerabilityNodeID
+					}
+				}
+				_, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				startID = found.Package.Namespaces[0].Names[0].Versions[0].ID
-				stopID = found.Vulnerability.VulnerabilityIDs[0].ID
 			}
 			if tt.isDepCall != nil {
 				for _, p := range tt.inPkg {
@@ -224,15 +226,19 @@ func Test_Path(t *testing.T) {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
 				}
-				found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				startID = found.Package.Namespaces[0].Names[0].Versions[0].ID
-				stopID = found.DependencyPackage.Namespaces[0].Names[0].ID
+				found, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: &dID})
+				if err != nil {
+					t.Fatal()
+				}
+				startID = found[0].Package.Namespaces[0].Names[0].Versions[0].ID
+				stopID = found[0].DependencyPackage.Namespaces[0].Names[0].ID
 			}
 			got, err := b.Path(ctx, startID, stopID, 5, tt.edges)
 			if (err != nil) != tt.wantErr {
@@ -248,12 +254,12 @@ func Test_Path(t *testing.T) {
 
 func Test_Nodes(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -761,23 +767,23 @@ func Test_Nodes(t *testing.T) {
 					t.Errorf("arangoClient.IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+				nodeID = ingestedPkg.PackageVersionID
 			}
 			if tt.artifactInput != nil {
-				ingestedArt, err := b.IngestArtifact(ctx, tt.artifactInput)
+				ingestedArtID, err := b.IngestArtifact(ctx, tt.artifactInput)
 				if (err != nil) != tt.wantErr {
 					t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedArt.ID
+				nodeID = ingestedArtID
 			}
 			if tt.builderInput != nil {
-				ingestedBuilder, err := b.IngestBuilder(ctx, tt.builderInput)
+				ingestedBuilderID, err := b.IngestBuilder(ctx, tt.builderInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("demoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestBuilder() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedBuilder.ID
+				nodeID = ingestedBuilderID
 			}
 			if tt.srcInput != nil {
 				ingestedSrc, err := b.IngestSource(ctx, *tt.srcInput)
@@ -785,193 +791,193 @@ func Test_Nodes(t *testing.T) {
 					t.Errorf("arangoClient.IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedSrc.Namespaces[0].Names[0].ID
+				nodeID = ingestedSrc.SourceNameID
 			}
 			if tt.vulnInput != nil {
 				ingestVuln, err := b.IngestVulnerability(ctx, *tt.vulnInput)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
 				}
-				nodeID = ingestVuln.VulnerabilityIDs[0].ID
+				nodeID = ingestVuln.VulnerabilityNodeID
 			}
 			if tt.licenseInput != nil {
-				ingestedLicense, err := b.IngestLicense(ctx, tt.licenseInput)
+				ingestedLicenseID, err := b.IngestLicense(ctx, tt.licenseInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedLicense.ID
+				nodeID = ingestedLicenseID
 			}
 			if tt.certifyBadCall != nil {
-				found, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
+				cbID, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = cbID
 			}
 			if tt.certifyGoodCall != nil {
-				found, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
+				cgID, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = cgID
 			}
 			if tt.certifyLegalCall != nil {
-				found, err := b.IngestCertifyLegal(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
+				cLID, err := b.IngestCertifyLegal(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = cLID
 			}
 			if tt.scorecardCall != nil {
-				found, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
+				sID, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = sID
 			}
 			if tt.vexCall != nil {
-				found, err := b.IngestVEXStatement(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
+				vID, err := b.IngestVEXStatement(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = vID
 			}
 			if tt.certifyVulnCall != nil {
-				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
+				cvID, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = cvID
 			}
 			if tt.hashEqualCall != nil {
-				found, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
+				heID, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = heID
 			}
 			if tt.hasMetadataCall != nil {
-				found, err := b.IngestHasMetadata(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
+				hmID, err := b.IngestHasMetadata(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = hmID
 			}
 			if tt.hasSBOMCall != nil {
 				// TODO (knrc) handle includes
-				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
+				hsID, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = hsID
 			}
 			if tt.hasSlsaCall != nil {
-				found, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
+				sID, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = sID
 			}
 			if tt.hasSourceAtCall != nil {
-				found, err := b.IngestHasSourceAt(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
+				hsID, err := b.IngestHasSourceAt(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = hsID
 			}
 			if tt.isDepCall != nil {
-				found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = dID
 			}
 			if tt.isOcurCall != nil {
-				found, err := b.IngestOccurrence(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
+				oID, err := b.IngestOccurrence(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = oID
 			}
 			if tt.pkgEqualCall != nil {
-				found, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
+				peID, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = peID
 			}
 			if tt.pointOfContactCall != nil {
-				found, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
+				pocID, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = pocID
 			}
 			if tt.vulnEqualCall != nil {
-				found, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
+				veID, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found.ID
+				nodeID = veID
 			}
 			if tt.vulnMetadataCall != nil {
-				found, err := b.IngestVulnerabilityMetadata(ctx, *tt.vulnMetadataCall.Vuln, *tt.vulnMetadataCall.VulnMetadata)
+				vmID, err := b.IngestVulnerabilityMetadata(ctx, *tt.vulnMetadataCall.Vuln, *tt.vulnMetadataCall.VulnMetadata)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
-				nodeID = found
+				nodeID = vmID
 			}
 			got, err := b.Nodes(ctx, []string{nodeID})
 			if (err != nil) != tt.wantErr {
@@ -987,12 +993,12 @@ func Test_Nodes(t *testing.T) {
 
 func Test_Neighbors(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -3095,19 +3101,19 @@ func Test_Neighbors(t *testing.T) {
 					return
 				}
 				if tt.queryPkgTypeID {
-					nodeID = ingestedPkg.ID
+					nodeID = ingestedPkg.PackageTypeID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.queryPkgNamespaceID {
-					nodeID = ingestedPkg.Namespaces[0].ID
+					nodeID = ingestedPkg.PackageNamespaceID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.queryPkgNameID {
-					nodeID = ingestedPkg.Namespaces[0].Names[0].ID
+					nodeID = ingestedPkg.PackageNameID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = ingestedPkg.Namespaces[0].Names[0].Versions[0].ID
+					nodeID = ingestedPkg.PackageVersionID
 					tt.usingOnly = []model.Edge{}
 				}
 			}
@@ -3118,15 +3124,15 @@ func Test_Neighbors(t *testing.T) {
 					return
 				}
 				if tt.querySrcTypeID {
-					nodeID = ingestedSrc.ID
+					nodeID = ingestedSrc.SourceTypeID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.querySrcNamespaceID {
-					nodeID = ingestedSrc.Namespaces[0].ID
+					nodeID = ingestedSrc.SourceNamespaceID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.querySrcNameID {
-					nodeID = ingestedSrc.Namespaces[0].Names[0].ID
+					nodeID = ingestedSrc.SourceNameID
 					tt.usingOnly = []model.Edge{}
 				}
 			}
@@ -3136,392 +3142,456 @@ func Test_Neighbors(t *testing.T) {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.want, err)
 				}
 				if tt.queryVulnTypeID {
-					nodeID = ingestVuln.ID
+					nodeID = ingestVuln.VulnerabilityTypeID
 					tt.usingOnly = []model.Edge{}
 				}
 				if tt.queryVulnID {
-					nodeID = ingestVuln.VulnerabilityIDs[0].ID
+					nodeID = ingestVuln.VulnerabilityNodeID
 					tt.usingOnly = []model.Edge{}
 				}
 			}
 			if tt.licenseInput != nil {
-				ingestedLicense, err := b.IngestLicense(ctx, tt.licenseInput)
+				ingestedLicenseID, err := b.IngestLicense(ctx, tt.licenseInput)
 				if (err != nil) != tt.wantErr {
-					t.Errorf("demoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("arangoClient.IngestLicense() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-				nodeID = ingestedLicense.ID
+				nodeID = ingestedLicenseID
 			}
 			if tt.certifyBadCall != nil {
-				found, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
+				cbID, err := b.IngestCertifyBad(ctx, tt.certifyBadCall.Sub, tt.certifyBadCall.Match, *tt.certifyBadCall.CB)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.CertifyBad(ctx, &model.CertifyBadSpec{ID: &cbID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryArtifactID {
-					nodeID = found.Subject.(*model.Artifact).ID
+					nodeID = found[0].Subject.(*model.Artifact).ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactCertifyBad}
 				}
 				if tt.queryPkgNameID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageCertifyBad, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageCertifyBad, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
-					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyBad, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryCertifyBadID {
-					nodeID = found.ID
+					nodeID = cbID
 					tt.usingOnly = []model.Edge{model.EdgeCertifyBadPackage, model.EdgeCertifyBadArtifact, model.EdgeCertifyBadSource}
 				}
 			}
 			if tt.certifyGoodCall != nil {
-				found, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
+				cgID, err := b.IngestCertifyGood(ctx, tt.certifyGoodCall.Sub, tt.certifyGoodCall.Match, *tt.certifyGoodCall.CG)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.CertifyGood(ctx, &model.CertifyGoodSpec{ID: &cgID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryArtifactID {
-					nodeID = found.Subject.(*model.Artifact).ID
+					nodeID = found[0].Subject.(*model.Artifact).ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactCertifyGood}
 				}
 				if tt.queryPkgNameID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageCertifyGood, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageCertifyGood, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
-					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyGood, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryCertifyGoodID {
-					nodeID = found.ID
+					nodeID = cgID
 					tt.usingOnly = []model.Edge{model.EdgeCertifyGoodPackage, model.EdgeCertifyGoodArtifact, model.EdgeCertifyGoodSource}
 				}
 			}
 			if tt.certifyLegalCall != nil {
-				found, err := b.IngestCertifyLegal(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
+				clID, err := b.IngestCertifyLegal(ctx, tt.certifyLegalCall.PkgSrc, tt.certifyLegalCall.Dec, tt.certifyLegalCall.Dis, tt.certifyLegalCall.Legal)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.CertifyLegal(ctx, &model.CertifyLegalSpec{ID: &clID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageCertifyLegal, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
-					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyLegal, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryDeclaredLicenseID {
-					nodeID = found.DeclaredLicenses[0].ID
+					nodeID = found[0].DeclaredLicenses[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeLicenseCertifyLegal}
 				}
 				if tt.queryDiscoveredLicenseID {
-					nodeID = found.DiscoveredLicenses[0].ID
+					nodeID = found[0].DiscoveredLicenses[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeLicenseCertifyLegal}
 				}
 				if tt.queryCertifyLegalID {
-					nodeID = found.ID
+					nodeID = clID
 				}
 			}
 			if tt.scorecardCall != nil {
-				found, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
+				sID, err := b.IngestScorecard(ctx, *tt.scorecardCall.Src, *tt.scorecardCall.SC)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.Scorecards(ctx, &model.CertifyScorecardSpec{ID: &sID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.querySrcNameID {
-					nodeID = found.Source.Namespaces[0].Names[0].ID
+					nodeID = found[0].Source.Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceCertifyScorecard, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryScorecardID {
-					nodeID = found.ID
+					nodeID = sID
 				}
 			}
 			if tt.vexCall != nil {
-				found, err := b.IngestVEXStatement(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
+				vexID, err := b.IngestVEXStatement(ctx, tt.vexCall.Sub, *tt.vexCall.Vuln, *tt.vexCall.In)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.CertifyVEXStatement(ctx, &model.CertifyVEXStatementSpec{ID: &vexID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryArtifactID {
-					nodeID = found.Subject.(*model.Artifact).ID
+					nodeID = found[0].Subject.(*model.Artifact).ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactCertifyVexStatement}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageCertifyVexStatement, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryVulnID {
-					nodeID = found.Vulnerability.VulnerabilityIDs[0].ID
+					nodeID = found[0].Vulnerability.VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityCertifyVexStatement, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryCertifyVexID {
-					nodeID = found.ID
+					nodeID = vexID
 				}
 			}
 			if tt.certifyVulnCall != nil {
-				found, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
+				cvID, err := b.IngestCertifyVuln(ctx, *tt.certifyVulnCall.Pkg, *tt.certifyVulnCall.Vuln, *tt.certifyVulnCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.CertifyVuln(ctx, &model.CertifyVulnSpec{ID: &cvID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Package.Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Package.Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageCertifyVuln, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryVulnID {
-					nodeID = found.Vulnerability.VulnerabilityIDs[0].ID
+					nodeID = found[0].Vulnerability.VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityCertifyVuln, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryCertifyVulnID {
-					nodeID = found.ID
+					nodeID = cvID
 				}
 			}
 			if tt.hashEqualCall != nil {
-				found, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
+				heID, err := b.IngestHashEqual(ctx, *tt.hashEqualCall.A1, *tt.hashEqualCall.A2, *tt.hashEqualCall.HE)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.HashEqual(ctx, &model.HashEqualSpec{ID: &heID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryArtifactID {
-					nodeID = found.Artifacts[0].ID
+					nodeID = found[0].Artifacts[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactHashEqual}
 				}
 				if tt.queryEqualArtifactID {
-					nodeID = found.Artifacts[1].ID
+					nodeID = found[0].Artifacts[1].ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactHashEqual}
 				}
 				if tt.queryHashEqualID {
-					nodeID = found.ID
+					nodeID = heID
 					tt.usingOnly = []model.Edge{model.EdgeHashEqualArtifact}
 				}
 			}
 			if tt.hasMetadataCall != nil {
-				found, err := b.IngestHasMetadata(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
+				hmID, err := b.IngestHasMetadata(ctx, tt.hasMetadataCall.Sub, tt.hasMetadataCall.Match, *tt.hasMetadataCall.HM)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.HasMetadata(ctx, &model.HasMetadataSpec{ID: &hmID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryArtifactID {
-					nodeID = found.Subject.(*model.Artifact).ID
+					nodeID = found[0].Subject.(*model.Artifact).ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactHasMetadata}
 				}
 				if tt.queryPkgNameID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageHasMetadata, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageHasMetadata, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
-					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceHasMetadata, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryHasMetadataID {
-					nodeID = found.ID
+					nodeID = hmID
 				}
 			}
 			if tt.hasSBOMCall != nil {
 				// TODO (knrc) handle includes
-				found, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
+				hsID, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.HasSBOM(ctx, &model.HasSBOMSpec{ID: &hsID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryArtifactID {
-					nodeID = found.Subject.(*model.Artifact).ID
+					nodeID = found[0].Subject.(*model.Artifact).ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactHasSbom}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageHasSbom, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryHasSbomID {
-					nodeID = found.ID
+					nodeID = hsID
 				}
 			}
 			if tt.hasSlsaCall != nil {
-				found, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
+				slsaID, err := b.IngestSLSA(ctx, *tt.hasSlsaCall.Sub, tt.hasSlsaCall.BF, *tt.hasSlsaCall.BB, *tt.hasSlsaCall.SLSA)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.HasSlsa(ctx, &model.HasSLSASpec{ID: &slsaID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryBuilderID {
-					nodeID = found.Slsa.BuiltBy.ID
+					nodeID = found[0].Slsa.BuiltBy.ID
 					tt.usingOnly = []model.Edge{model.EdgeBuilderHasSlsa}
 				}
 				if tt.queryArtifactID {
-					nodeID = found.Subject.ID
+					nodeID = found[0].Subject.ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactHasSlsa}
 				}
 				if tt.queryHasSlsaID {
-					nodeID = found.ID
+					nodeID = slsaID
 				}
 			}
 			if tt.hasSourceAtCall != nil {
-				found, err := b.IngestHasSourceAt(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
+				hsID, err := b.IngestHasSourceAt(ctx, *tt.hasSourceAtCall.Pkg, *tt.hasSourceAtCall.Match, *tt.hasSourceAtCall.Src, *tt.hasSourceAtCall.HSA)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.HasSourceAt(ctx, &model.HasSourceAtSpec{ID: &hsID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryPkgNameID {
-					nodeID = found.Package.Namespaces[0].Names[0].ID
+					nodeID = found[0].Package.Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageHasSourceAt, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Package.Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Package.Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageHasSourceAt, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
-					nodeID = found.Source.Namespaces[0].Names[0].ID
+					nodeID = found[0].Source.Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceHasSourceAt, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryHasSourceAtID {
-					nodeID = found.ID
+					nodeID = hsID
 				}
 			}
 			if tt.isDepCall != nil {
-				found, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
+				dID, err := b.IngestDependency(ctx, *tt.isDepCall.P1, *tt.isDepCall.P2, tt.isDepCall.MF, *tt.isDepCall.ID)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: &dID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryPkgNameID {
-					nodeID = found.DependencyPackage.Namespaces[0].Names[0].ID
+					nodeID = found[0].DependencyPackage.Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = found.DependencyPackage.Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].DependencyPackage.Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageIsDependency, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryIsDependencyID {
-					nodeID = found.ID
+					nodeID = dID
 				}
 			}
 			if tt.isOcurCall != nil {
-				found, err := b.IngestOccurrence(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
+				oID, err := b.IngestOccurrence(ctx, tt.isOcurCall.PkgSrc, *tt.isOcurCall.Artifact, *tt.isOcurCall.Occurrence)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: &oID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryArtifactID {
-					nodeID = found.Artifact.ID
+					nodeID = found[0].Artifact.ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactIsOccurrence}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackageIsOccurrence, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
-					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourceIsOccurrence, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryIsOccurrenceID {
-					nodeID = found.ID
+					nodeID = oID
 				}
 			}
 			if tt.pkgEqualCall != nil {
-				found, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
+				peID, err := b.IngestPkgEqual(ctx, *tt.pkgEqualCall.P1, *tt.pkgEqualCall.P2, *tt.pkgEqualCall.HE)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.PkgEqual(ctx, &model.PkgEqualSpec{ID: &peID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Packages[0].Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Packages[0].Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackagePkgEqual, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryEqualPkgID {
-					nodeID = found.Packages[1].Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Packages[1].Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackagePkgEqual, model.EdgePackageVersionPackageName}
 				}
 				if tt.queryPkgEqualID {
-					nodeID = found.ID
+					nodeID = peID
 				}
 			}
 			if tt.pointOfContactCall != nil {
-				found, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
+				pocID, err := b.IngestPointOfContact(ctx, tt.pointOfContactCall.Sub, tt.pointOfContactCall.Match, *tt.pointOfContactCall.POC)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.PointOfContact(ctx, &model.PointOfContactSpec{ID: &pocID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryArtifactID {
-					nodeID = found.Subject.(*model.Artifact).ID
+					nodeID = found[0].Subject.(*model.Artifact).ID
 					tt.usingOnly = []model.Edge{model.EdgeArtifactPointOfContact}
 				}
 				if tt.queryPkgNameID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackagePointOfContact, model.EdgePackageNamePackageNamespace, model.EdgePackageNamePackageVersion}
 				}
 				if tt.queryPkgVersionID {
-					nodeID = found.Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
+					nodeID = found[0].Subject.(*model.Package).Namespaces[0].Names[0].Versions[0].ID
 					tt.usingOnly = []model.Edge{model.EdgePackagePointOfContact, model.EdgePackageVersionPackageName}
 				}
 				if tt.querySrcNameID {
-					nodeID = found.Subject.(*model.Source).Namespaces[0].Names[0].ID
+					nodeID = found[0].Subject.(*model.Source).Namespaces[0].Names[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeSourcePointOfContact, model.EdgeSourceNameSourceNamespace}
 				}
 				if tt.queryPointOfContactID {
-					nodeID = found.ID
+					nodeID = pocID
 				}
 			}
 			if tt.vulnEqualCall != nil {
-				found, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
+				veID, err := b.IngestVulnEqual(ctx, *tt.vulnEqualCall.Vuln, *tt.vulnEqualCall.OtherVuln, *tt.vulnEqualCall.In)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
 				if err != nil {
 					return
 				}
+				found, err := b.VulnEqual(ctx, &model.VulnEqualSpec{ID: &veID})
+				if err != nil {
+					t.Fatal()
+				}
 				if tt.queryVulnID {
-					nodeID = found.Vulnerabilities[0].VulnerabilityIDs[0].ID
+					nodeID = found[0].Vulnerabilities[0].VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityVulnEqual, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryEqualVulnID {
-					nodeID = found.Vulnerabilities[1].VulnerabilityIDs[0].ID
+					nodeID = found[0].Vulnerabilities[1].VulnerabilityIDs[0].ID
 					tt.usingOnly = []model.Edge{model.EdgeVulnerabilityVulnEqual, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryVulnEqualID {
-					nodeID = found.ID
+					nodeID = veID
 				}
 			}
 			if tt.vulnMetadataCall != nil {
@@ -3538,7 +3608,7 @@ func Test_Neighbors(t *testing.T) {
 					return
 				}
 				if tt.queryVulnID {
-					nodeID = ingestedVuln.VulnerabilityIDs[0].ID
+					nodeID = ingestedVuln.VulnerabilityNodeID
 					tt.usingOnly = []model.Edge{model.EdgeVulnMetadataVulnerability, model.EdgeVulnerabilityIDVulnerabilityType}
 				}
 				if tt.queryVulnMetadataID {

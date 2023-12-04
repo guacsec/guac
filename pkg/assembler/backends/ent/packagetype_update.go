@@ -34,6 +34,14 @@ func (ptu *PackageTypeUpdate) SetType(s string) *PackageTypeUpdate {
 	return ptu
 }
 
+// SetNillableType sets the "type" field if the given value is not nil.
+func (ptu *PackageTypeUpdate) SetNillableType(s *string) *PackageTypeUpdate {
+	if s != nil {
+		ptu.SetType(*s)
+	}
+	return ptu
+}
+
 // AddNamespaceIDs adds the "namespaces" edge to the PackageNamespace entity by IDs.
 func (ptu *PackageTypeUpdate) AddNamespaceIDs(ids ...int) *PackageTypeUpdate {
 	ptu.mutation.AddNamespaceIDs(ids...)
@@ -195,6 +203,14 @@ type PackageTypeUpdateOne struct {
 // SetType sets the "type" field.
 func (ptuo *PackageTypeUpdateOne) SetType(s string) *PackageTypeUpdateOne {
 	ptuo.mutation.SetType(s)
+	return ptuo
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (ptuo *PackageTypeUpdateOne) SetNillableType(s *string) *PackageTypeUpdateOne {
+	if s != nil {
+		ptuo.SetType(*s)
+	}
 	return ptuo
 }
 

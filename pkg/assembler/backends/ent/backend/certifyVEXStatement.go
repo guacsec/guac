@@ -32,7 +32,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (*model.CertifyVEXStatement, error) {
+func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
 	funcName := "IngestVEXStatement"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
@@ -133,10 +133,10 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 	})
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &model.CertifyVEXStatement{ID: nodeID(*recordID)}, nil
+	return nodeID(*recordID), nil
 }
 
 func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
@@ -155,7 +155,7 @@ func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.Pac
 		concurrently(eg, func() error {
 			statement, err := b.IngestVEXStatement(ctx, subject, vuln, vexStatement)
 			if err == nil {
-				ids[index] = statement.ID
+				ids[index] = statement
 				return err
 			} else {
 				return gqlerror.Errorf("IngestVEXStatements failed with element #%v with err: %v", i, err)

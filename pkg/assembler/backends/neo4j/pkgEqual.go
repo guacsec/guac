@@ -165,7 +165,7 @@ func setPkgEqualValues(sb *strings.Builder, pkgEqualSpec *model.PkgEqualSpec, fi
 
 // Ingest PkgEqual
 
-func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (*model.PkgEqual, error) {
+func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
@@ -253,9 +253,9 @@ func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec
 			return pkgEqual, nil
 		})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return result.(*model.PkgEqual), nil
+	return result.(*model.PkgEqual).ID, nil
 }
 
 func (c *neo4jClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {

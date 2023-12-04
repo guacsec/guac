@@ -4,6 +4,9 @@
   <img src="https://user-images.githubusercontent.com/3060102/204297133-9bf702c6-b4e2-46df-a029-42b5060b19a4.png">
 </p>
 
+[![build](https://github.com/guacsec/guac/workflows/release/badge.svg)](https://github.com/guacsec/guac/actions?query=workflow%3Arelease) [![PkgGoDev](https://pkg.go.dev/badge/github.com/guacsec/guac)](https://pkg.go.dev/github.com/guacsec/guac) [![Go Report Card](https://goreportcard.com/badge/github.com/guacsec/guac)](https://goreportcard.com/report/github.com/guacsec/guac)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/guacsec/guac/badge)](https://api.securityscorecards.dev/projects/github.com/guacsec/guac)
+
 **Note:** GUAC is under active development - if you are interested in
 contributing, please look at [contributor guide](CONTRIBUTING.md).
 

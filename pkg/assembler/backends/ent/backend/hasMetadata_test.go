@@ -685,7 +685,7 @@ func (s *Suite) TestHasMetadata() {
 				if err != nil {
 					return
 				}
-				recordIDs[i] = hm.ID
+				recordIDs[i] = hm
 			}
 
 			if test.Query.ID != nil {

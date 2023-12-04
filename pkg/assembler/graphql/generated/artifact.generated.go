@@ -63,8 +63,8 @@ type MutationResolver interface {
 	IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error)
 	IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error)
 	IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error)
-	IngestVulnerability(ctx context.Context, vuln model.VulnerabilityInputSpec) (string, error)
-	IngestVulnerabilities(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]string, error)
+	IngestVulnerability(ctx context.Context, vuln model.VulnerabilityInputSpec) (*model.VulnerabilityIDs, error)
+	IngestVulnerabilities(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]*model.VulnerabilityIDs, error)
 }
 type QueryResolver interface {
 	Artifacts(ctx context.Context, artifactSpec model.ArtifactSpec) ([]*model.Artifact, error)
@@ -4532,9 +4532,9 @@ func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.VulnerabilityIDs)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNVulnerabilityIDs2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityIDs(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestVulnerability(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4544,7 +4544,13 @@ func (ec *executionContext) fieldContext_Mutation_ingestVulnerability(ctx contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			switch field.Name {
+			case "vulnerabilityTypeID":
+				return ec.fieldContext_VulnerabilityIDs_vulnerabilityTypeID(ctx, field)
+			case "vulnerabilityNodeID":
+				return ec.fieldContext_VulnerabilityIDs_vulnerabilityNodeID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityIDs", field.Name)
 		},
 	}
 	defer func() {
@@ -4587,9 +4593,9 @@ func (ec *executionContext) _Mutation_ingestVulnerabilities(ctx context.Context,
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.([]*model.VulnerabilityIDs)
 	fc.Result = res
-	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalNVulnerabilityIDs2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityIDsᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_ingestVulnerabilities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4599,7 +4605,13 @@ func (ec *executionContext) fieldContext_Mutation_ingestVulnerabilities(ctx cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			switch field.Name {
+			case "vulnerabilityTypeID":
+				return ec.fieldContext_VulnerabilityIDs_vulnerabilityTypeID(ctx, field)
+			case "vulnerabilityNodeID":
+				return ec.fieldContext_VulnerabilityIDs_vulnerabilityNodeID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityIDs", field.Name)
 		},
 	}
 	defer func() {
@@ -6614,8 +6626,6 @@ func (ec *executionContext) unmarshalInputArtifactInputSpec(ctx context.Context,
 		}
 		switch k {
 		case "algorithm":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -6623,8 +6633,6 @@ func (ec *executionContext) unmarshalInputArtifactInputSpec(ctx context.Context,
 			}
 			it.Algorithm = data
 		case "digest":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("digest"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -6652,8 +6660,6 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -6661,8 +6667,6 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 			}
 			it.ID = data
 		case "algorithm":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6670,8 +6674,6 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 			}
 			it.Algorithm = data
 		case "digest":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("digest"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {

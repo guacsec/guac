@@ -130,7 +130,7 @@ func getPkgHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 	}
 	defer cursor.Close()
 
-	return getHasSBOMFromCursor(ctx, cursor)
+	return getHasSBOMFromCursor(ctx, cursor, false)
 }
 
 func getArtifactHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder *arangoQueryBuilder, values map[string]any) ([]*model.HasSbom, error) {
@@ -157,7 +157,7 @@ func getArtifactHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQuer
 	}
 	defer cursor.Close()
 
-	return getHasSBOMFromCursor(ctx, cursor)
+	return getHasSBOMFromCursor(ctx, cursor, false)
 }
 
 func setHasSBOMMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSBOMSpec *model.HasSBOMSpec, queryValues map[string]any) {
@@ -218,8 +218,10 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 	return values
 }
 
-func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]*model.HasSbom, error) {
+func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
 	// TODO(knrc) - handle includes
+	var cursor driver.Cursor
+	var err error
 	if len(subjects.Packages) > 0 {
 		var listOfValues []map[string]any
 
@@ -253,25 +255,9 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
 			  FILTER pVersion.guacKey == doc.pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
 			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
 			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
+			  'version_key': pVersion._key
 			}
 		)
 		  
@@ -279,51 +265,25 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 			  UPSERT {  packageID:firstPkg.version_id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 				  INSERT {  packageID:firstPkg.version_id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 				  UPDATE {} IN hasSBOMs
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
 		  )
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("hasSBOMPkgEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id } INTO hasSBOMPkgEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("hasSBOMPkgEdges", firstPkg.version_key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id } INTO hasSBOMPkgEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'hasSBOM_id': hasSBOM._id,
-			'uri': hasSBOM.uri,
-			'algorithm': hasSBOM.algorithm,
-			'digest': hasSBOM.digest,
-			'downloadLocation': hasSBOM.downloadLocation,
-			'collector': hasSBOM.collector,
-			'knownSince': hasSBOM.knownSince,
-			'origin': hasSBOM.origin  
-		  }`
+		  RETURN { 'hasSBOM_id': hasSBOM._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSBOMs")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSBOMs")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package hasSBOMs: %w", err)
 		}
 		defer cursor.Close()
-
-		hasSBOMList, err := getHasSBOMFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasSBOMs from arango cursor: %w", err)
-		}
-
-		return hasSBOMList, nil
-
 	} else if len(subjects.Artifacts) > 0 {
 
 		var listOfValues []map[string]any
@@ -360,50 +320,46 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 			UPSERT { artifactID:artifact._id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 				INSERT { artifactID:artifact._id, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
 				UPDATE {} IN hasSBOMs
-				RETURN NEW
+				RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				}
 		)
 		
 		LET edgeCollection = (
 		  INSERT {  _key: CONCAT("hasSBOMArtEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id } INTO hasSBOMArtEdges OPTIONS { overwriteMode: "ignore" }
 		)
 		
-		RETURN {
-		  'artifact': {
-			  'id': artifact._id,
-			  'algorithm': artifact.algorithm,
-			  'digest': artifact.digest
-		  },
-		  'hasSBOM_id': hasSBOM._id,
-		  'uri': hasSBOM.uri,
-		  'algorithm': hasSBOM.algorithm,
-		  'digest': hasSBOM.digest,
-		  'downloadLocation': hasSBOM.downloadLocation,
-		  'collector': hasSBOM.collector,
-		  'knownSince': hasSBOM.knownSince,
-		  'origin': hasSBOM.origin  
-		}`
+		RETURN { 'hasSBOM_id': hasSBOM._id }`
 
 		sb.WriteString(query)
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSBOMs")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSBOMs")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact hasSBOM: %w", err)
 		}
 		defer cursor.Close()
-		hasSBOMList, err := getHasSBOMFromCursor(ctx, cursor)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
-		}
-
-		return hasSBOMList, nil
-
 	} else {
 		return nil, fmt.Errorf("packages or artifacts not specified for IngestHasSBOMs")
 	}
+
+	hasSBOMList, err := getHasSBOMFromCursor(ctx, cursor, true)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hasSBOMs from arango cursor: %w", err)
+	}
+
+	var hasSbomIDList []string
+	for _, ingestHasSbom := range hasSBOMList {
+		hasSbomIDList = append(hasSbomIDList, ingestHasSbom.ID)
+	}
+
+	return hasSbomIDList, nil
 }
 
-func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (*model.HasSbom, error) {
+func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	// TODO(knrc) - handle includes
+	var cursor driver.Cursor
+	var err error
 	if subject.Artifact != nil {
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
@@ -411,125 +367,80 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			  UPSERT { artifactID:artifact._id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
 				  INSERT { artifactID:artifact._id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
 				  UPDATE {} IN hasSBOMs
-				  RETURN NEW
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
 		  )
 		  
 		  LET edgeCollection = (
 			INSERT {  _key: CONCAT("hasSBOMArtEdges", artifact._key, hasSBOM._key), _from: artifact._id, _to: hasSBOM._id } INTO hasSBOMArtEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
-		  RETURN {
-			'artifact': {
-				'id': artifact._id,
-				'algorithm': artifact.algorithm,
-				'digest': artifact.digest
-			},
-			'hasSBOM_id': hasSBOM._id,
-			'uri': hasSBOM.uri,
-			'algorithm': hasSBOM.algorithm,
-			'digest': hasSBOM.digest,
-			'downloadLocation': hasSBOM.downloadLocation,
-			'collector': hasSBOM.collector,
-			'knownSince': hasSBOM.knownSince,
-			'origin': hasSBOM.origin  
-		  }`
+		  RETURN { 'hasSBOM_id': hasSBOM._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(nil, subject.Artifact, &hasSbom), "IngestHasSbom - Artifact")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(nil, subject.Artifact, &hasSbom), "IngestHasSbom - Artifact")
 		if err != nil {
-			return nil, fmt.Errorf("failed to ingest hasSBOM: %w", err)
+			return "", fmt.Errorf("failed to ingest hasSBOM: %w", err)
 		}
 		defer cursor.Close()
-		hasSBOMList, err := getHasSBOMFromCursor(ctx, cursor)
+		hasSBOMList, err := getHasSBOMFromCursor(ctx, cursor, true)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
+			return "", fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
 		}
 
 		if len(hasSBOMList) == 1 {
-			return hasSBOMList[0], nil
+			return hasSBOMList[0].ID, nil
 		} else {
-			return nil, fmt.Errorf("number of hasSBOM ingested is greater than one")
+			return "", fmt.Errorf("number of hasSBOM ingested is greater than one")
 		}
 	} else {
 		query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
 			  FILTER pVersion.guacKey == @pkgVersionGuacKey
-			FOR pName in pkgNames
-			  FILTER pName._id == pVersion._parent
-			FOR pNs in pkgNamespaces
-			  FILTER pNs._id == pName._parent
-			FOR pType in pkgTypes
-			  FILTER pType._id == pNs._parent
-	
-			RETURN {
-			  'typeID': pType._id,
-			  'type': pType.type,
-			  'namespace_id': pNs._id,
-			  'namespace': pNs.namespace,
-			  'name_id': pName._id,
-			  'name': pName.name,
-			  'version_id': pVersion._id,
-			  'version': pVersion.version,
-			  'subpath': pVersion.subpath,
-			  'qualifier_list': pVersion.qualifier_list,
-			  'versionDoc': pVersion
-			}
+			  RETURN {
+				'version_id': pVersion._id,
+				'version_key': pVersion._key
+			  }
 		)
 		  
-		  LET hasSBOM = FIRST(
+		LET hasSBOM = FIRST(
 			  UPSERT {  packageID:firstPkg.version_id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
 				  INSERT {  packageID:firstPkg.version_id, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
 				  UPDATE {} IN hasSBOMs
-				  RETURN NEW
-		  )
+				  RETURN {
+					'_id': NEW._id,
+					'_key': NEW._key
+				  }
+		)
 		  
 		  LET edgeCollection = (
-			INSERT {  _key: CONCAT("hasSBOMPkgEdges", firstPkg.versionDoc._key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id } INTO hasSBOMPkgEdges OPTIONS { overwriteMode: "ignore" }
+			INSERT {  _key: CONCAT("hasSBOMPkgEdges", firstPkg.version_key, hasSBOM._key), _from: firstPkg.version_id, _to: hasSBOM._id } INTO hasSBOMPkgEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
-		  RETURN {
-			'pkgVersion': {
-				'type_id': firstPkg.typeID,
-				'type': firstPkg.type,
-				'namespace_id': firstPkg.namespace_id,
-				'namespace': firstPkg.namespace,
-				'name_id': firstPkg.name_id,
-				'name': firstPkg.name,
-				'version_id': firstPkg.version_id,
-				'version': firstPkg.version,
-				'subpath': firstPkg.subpath,
-				'qualifier_list': firstPkg.qualifier_list
-			},
-			'hasSBOM_id': hasSBOM._id,
-			'uri': hasSBOM.uri,
-			'algorithm': hasSBOM.algorithm,
-			'digest': hasSBOM.digest,
-			'downloadLocation': hasSBOM.downloadLocation,
-			'collector': hasSBOM.collector,
-			'knownSince': hasSBOM.knownSince,
-			'origin': hasSBOM.origin  
-		  }`
+		  RETURN { 'hasSBOM_id': hasSBOM._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(subject.Package, nil, &hasSbom), "IngestHasSbom - Package")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(subject.Package, nil, &hasSbom), "IngestHasSbom - Package")
 		if err != nil {
-			return nil, fmt.Errorf("failed to create ingest hasSBOM: %w", err)
+			return "", fmt.Errorf("failed to create ingest hasSBOM: %w", err)
 		}
 		defer cursor.Close()
 
-		hasSBOMList, err := getHasSBOMFromCursor(ctx, cursor)
+		hasSBOMList, err := getHasSBOMFromCursor(ctx, cursor, true)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
+			return "", fmt.Errorf("failed to get hasSBOM from arango cursor: %w", err)
 		}
 
 		if len(hasSBOMList) == 1 {
-			return hasSBOMList[0], nil
+			return hasSBOMList[0].ID, nil
 		} else {
-			return nil, fmt.Errorf("number of hasSBOM ingested is greater than one")
+			return "", fmt.Errorf("number of hasSBOM ingested is greater than one")
 		}
 	}
 }
 
-func getHasSBOMFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.HasSbom, error) {
+func getHasSBOMFromCursor(ctx context.Context, cursor driver.Cursor, ingestion bool) ([]*model.HasSbom, error) {
 	type collectedData struct {
 		PkgVersion       *dbPkgVersion   `json:"pkgVersion"`
 		Artifact         *model.Artifact `json:"artifact"`
@@ -581,7 +492,9 @@ func getHasSBOMFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model.H
 		} else if createdValue.Artifact != nil {
 			hasSBOM.Subject = createdValue.Artifact
 		} else {
-			return nil, fmt.Errorf("failed to get subject from cursor for hasSBOM")
+			if !ingestion {
+				return nil, fmt.Errorf("failed to get subject from cursor for hasSBOM")
+			}
 		}
 		hasSBOMList = append(hasSBOMList, hasSBOM)
 	}

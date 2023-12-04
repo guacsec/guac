@@ -79,7 +79,7 @@ func (c *demoClient) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 	var modelHasMetadataIDs []string
 
 	for i := range hasMetadataList {
-		var hasMetadata *model.HasMetadata
+		var hasMetadata string
 		var err error
 		if len(subjects.Packages) > 0 {
 			subject := model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
@@ -100,16 +100,16 @@ func (c *demoClient) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 				return nil, gqlerror.Errorf("IngestHasMetadata failed with err: %v", err)
 			}
 		}
-		modelHasMetadataIDs = append(modelHasMetadataIDs, hasMetadata.ID)
+		modelHasMetadataIDs = append(modelHasMetadataIDs, hasMetadata)
 	}
 	return modelHasMetadataIDs, nil
 }
 
-func (c *demoClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (*model.HasMetadata, error) {
+func (c *demoClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
 	return c.ingestHasMetadata(ctx, subject, pkgMatchType, hasMetadata, true)
 }
 
-func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec, readOnly bool) (*model.HasMetadata, error) {
+func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestHasMetadata"
 
 	in := &hasMetadataLink{
@@ -131,31 +131,31 @@ func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.Packag
 		var err error
 		foundPkgNameorVersionNode, err = c.getPackageNameOrVerFromInput(ctx, *subject.Package, *pkgMatchType)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.PackageID = foundPkgNameorVersionNode.ID()
 	} else if subject.Artifact != nil {
 		var err error
 		foundArtStrct, err = c.artifactByInput(ctx, subject.Artifact)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.ArtifactID = foundArtStrct.ThisID
 	} else {
 		var err error
 		srcName, err = c.getSourceNameFromInput(ctx, *subject.Source)
 		if err != nil {
-			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.SourceID = srcName.ThisID
 	}
 
 	out, err := byKeykv[*hasMetadataLink](ctx, hasMDCol, in.Key(), c)
 	if err == nil {
-		return c.buildHasMetadata(ctx, out, nil, true)
+		return out.ThisID, nil
 	}
 	if !errors.Is(err, kv.NotFoundError) {
-		return nil, err
+		return "", err
 	}
 
 	if readOnly {
@@ -167,32 +167,32 @@ func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.Packag
 
 	in.ThisID = c.getNextID()
 	if err := c.addToIndex(ctx, hasMDCol, in); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	// set the backlinks
 	if foundPkgNameorVersionNode != nil {
 		if err := foundPkgNameorVersionNode.setHasMetadataLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if foundArtStrct != nil {
 		if err := foundArtStrct.setHasMetadataLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	if srcName != nil {
 		if err := srcName.setHasMetadataLinks(ctx, in.ThisID, c); err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 
 	if err := setkv(ctx, hasMDCol, in, c); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	// build return GraphQL type
-	return c.buildHasMetadata(ctx, in, nil, true)
+	return in.ThisID, nil
 }
 
 // Query HasMetadata

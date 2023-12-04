@@ -41,21 +41,20 @@ func lessArtifact(a, b *model.Artifact) int {
 	return strings.Compare(a.Digest, b.Digest)
 }
 
-func Test_IngestArtifacts(t *testing.T) {
+func Test_IngestArtifactIDs(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := getBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
 	tests := []struct {
 		name           string
 		artifactInputs []*model.ArtifactInputSpec
-		want           []*model.Artifact
 		wantErr        bool
 	}{{
 		name: "sha256",
@@ -69,52 +68,37 @@ func Test_IngestArtifacts(t *testing.T) {
 			Algorithm: "sha512",
 			Digest:    "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7",
 		}},
-		want: []*model.Artifact{{
-			Algorithm: "sha512",
-			Digest:    "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7",
-		}, {
-			Algorithm: "sha256",
-			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-		}, {
-			Algorithm: "sha1",
-			Digest:    "7a8f47318e4676dacb0142afa0b83029cd7befd9",
-		}},
 		wantErr: false,
 	}}
-
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := c.IngestArtifacts(ctx, tt.artifactInputs)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestArtifacts() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			slices.SortFunc(got, lessArtifact)
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			if len(got) != len(tt.artifactInputs) {
+				t.Errorf("Unexpected number of results. Wanted: %d, got %d", len(tt.artifactInputs), len(got))
 			}
 		})
 	}
 }
 
-func Test_IngestArtifact(t *testing.T) {
+func Test_IngestArtifactID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := getBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
 	tests := []struct {
 		name          string
 		artifactInput *model.ArtifactInputSpec
-		want          *model.Artifact
+		wantID        bool
 		wantErr       bool
 	}{{
 		name: "sha256",
@@ -122,10 +106,7 @@ func Test_IngestArtifact(t *testing.T) {
 			Algorithm: "sha256",
 			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
 		},
-		want: &model.Artifact{
-			Algorithm: "sha256",
-			Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-		},
+		wantID:  true,
 		wantErr: false,
 	}, {
 		name: "sha1",
@@ -133,10 +114,7 @@ func Test_IngestArtifact(t *testing.T) {
 			Algorithm: "sha1",
 			Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
 		},
-		want: &model.Artifact{
-			Algorithm: "sha1",
-			Digest:    "7a8f47318e4676dacb0142afa0b83029cd7befd9",
-		},
+		wantID:  true,
 		wantErr: false,
 	}, {
 		name: "sha512",
@@ -144,25 +122,27 @@ func Test_IngestArtifact(t *testing.T) {
 			Algorithm: "sha512",
 			Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
 		},
-		want: &model.Artifact{
+		wantID:  true,
+		wantErr: false,
+	}, {
+		name: "duplicate sha512",
+		artifactInput: &model.ArtifactInputSpec{
 			Algorithm: "sha512",
-			Digest:    "374ab8f711235830769aa5f0b31ce9b72c5670074b34cb302cdafe3b606233ee92ee01e298e5701f15cc7087714cd9abd7ddb838a6e1206b3642de16d9fc9dd7",
+			Digest:    "374AB8F711235830769AA5F0B31CE9B72C5670074B34CB302CDAFE3B606233EE92EE01E298E5701F15CC7087714CD9ABD7DDB838A6E1206B3642DE16D9FC9DD7",
 		},
+		wantID:  true,
 		wantErr: false,
 	}}
-
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, ignoreID); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			if (got != "") != tt.wantID {
+				t.Errorf("Unexpected number of results")
+				return
 			}
 		})
 	}
@@ -170,12 +150,12 @@ func Test_IngestArtifact(t *testing.T) {
 
 func Test_Artifacts(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	c, err := getBackend(ctx, arangArg)
+	c, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -238,17 +218,17 @@ func Test_Artifacts(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedArt, err := c.IngestArtifact(ctx, tt.artifactInput)
+			ingestedArtID, err := c.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.artifactSpec.ID = &ingestedArt.ID
+				tt.artifactSpec.ID = ptrfrom.String(ingestedArtID)
 			}
 			got, err := c.Artifacts(ctx, tt.artifactSpec)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("demoClient.Artifacts() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.Artifacts() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			slices.SortFunc(got, lessArtifact)
@@ -261,12 +241,12 @@ func Test_Artifacts(t *testing.T) {
 
 func Test_buildArtifactResponseByID(t *testing.T) {
 	ctx := context.Background()
-	arangArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangArg)
+	arangoArgs := getArangoConfig()
+	err := deleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
-	b, err := getBackend(ctx, arangArg)
+	b, err := getBackend(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error creating arango backend: %v", err)
 	}
@@ -329,15 +309,15 @@ func Test_buildArtifactResponseByID(t *testing.T) {
 	}, cmp.Ignore())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedArt, err := b.IngestArtifact(ctx, tt.artifactInput)
+			ingestedArtID, err := b.IngestArtifact(ctx, tt.artifactInput)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("demoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.idInFilter {
-				tt.artifactSpec.ID = &ingestedArt.ID
+				tt.artifactSpec.ID = ptrfrom.String(ingestedArtID)
 			}
-			got, err := b.(*arangoClient).buildArtifactResponseByID(ctx, ingestedArt.ID, tt.artifactSpec)
+			got, err := b.(*arangoClient).buildArtifactResponseByID(ctx, ingestedArtID, tt.artifactSpec)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.buildPackageResponseFromID() error = %v, wantErr %v", err, tt.wantErr)
 				return

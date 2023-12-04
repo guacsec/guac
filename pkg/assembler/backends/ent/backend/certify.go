@@ -53,20 +53,21 @@ func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 	return collect(records, toModelCertifyGood), nil
 }
 
-func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (*model.CertifyBad, error) {
+func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (string, error) {
 
 	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelCertifyBad(certRecord), nil
+	//TODO optimize for only returning ID
+	return nodeID(certRecord.ID), nil
 }
 
-func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]*model.CertifyBad, error) {
-	var result []*model.CertifyBad
+func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
+	var result []string
 	for i := range certifyBads {
 		var subject model.PackageSourceOrArtifactInput
 		if len(subjects.Packages) > 0 {
@@ -85,20 +86,21 @@ func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.Packa
 	return result, nil
 }
 
-func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (*model.CertifyGood, error) {
+func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (string, error) {
 
 	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelCertifyGood(certRecord), nil
+	//TODO optimize for only returning ID
+	return nodeID(certRecord.ID), nil
 }
 
-func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]*model.CertifyGood, error) {
-	var result []*model.CertifyGood
+func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
+	var result []string
 	for i := range certifyGoods {
 		var subject model.PackageSourceOrArtifactInput
 		if len(subjects.Packages) > 0 {

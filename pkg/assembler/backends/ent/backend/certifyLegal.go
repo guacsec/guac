@@ -68,8 +68,8 @@ func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalS
 	return collect(records, toModelCertifyLegal), nil
 }
 
-func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]*model.CertifyLegal, error) {
-	var modelCertifyLegals []*model.CertifyLegal
+func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
+	var modelCertifyLegals []string
 	for i := range certifyLegals {
 		var subject model.PackageOrSourceInput
 		if len(subjects.Packages) > 0 {
@@ -86,7 +86,7 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 	return modelCertifyLegals, nil
 }
 
-func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, spec *model.CertifyLegalInputSpec) (*model.CertifyLegal, error) {
+func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, spec *model.CertifyLegalInputSpec) (string, error) {
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		tx := ent.TxFromContext(ctx)
@@ -183,10 +183,10 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 		return &id, nil
 	})
 	if err != nil {
-		return nil, gqlerror.Errorf("IngestCertifyLegal :: %s", err)
+		return "", gqlerror.Errorf("IngestCertifyLegal :: %s", err)
 	}
 
-	return &model.CertifyLegal{ID: nodeID(*recordID)}, nil
+	return nodeID(*recordID), nil
 }
 
 // hashLicenses is used to create a unique key for the M2M edge between CertifyLegal <-M2M-> License

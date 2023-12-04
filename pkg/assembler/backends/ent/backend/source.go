@@ -17,7 +17,8 @@ package backend
 
 import (
 	"context"
-	"log"
+	stdsql "database/sql"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -27,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -66,15 +68,16 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	return collect(records, toModelHasSourceAt), nil
 }
 
-func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (*model.HasSourceAt, error) {
+func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.HasSourceAt, error) {
 		return upsertHasSourceAt(ctx, ent.TxFromContext(ctx), pkg, pkgMatchType, source, hasSourceAt)
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return toModelHasSourceAt(record.Unwrap()), nil
+	//TODO optimize for only returning ID
+	return nodeID(record.ID), nil
 }
 
 func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType *model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
@@ -84,7 +87,7 @@ func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgIn
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSourceAts failed with err: %v", err)
 		}
-		result = append(result, hsa.ID)
+		result = append(result, hsa)
 	}
 	return result, nil
 }
@@ -157,47 +160,48 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 	return collect(records, toModelSourceName), nil
 }
 
-func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.Source, error) {
-	results, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]*ent.SourceName, error) {
-		results := make([]*ent.SourceName, len(sources))
-		var err error
-		for i, src := range sources {
-			results[i], err = upsertSource(ctx, ent.TxFromContext(ctx), *src)
-			if err != nil {
-				return nil, err
-			}
+func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
+	ids := make([]*model.SourceIDs, len(sources))
+	for i, src := range sources {
+		s, err := b.IngestSource(ctx, *src)
+		if err != nil {
+			return nil, err
 		}
-		return &results, nil
-	})
-
-	if err != nil {
-		return nil, err
+		ids[i] = s
 	}
-
-	return collect(*results, toModelSourceName), nil
+	return ids, nil
 }
 
-func (b *EntBackend) IngestSource(ctx context.Context, src model.SourceInputSpec) (*model.Source, error) {
-	sourceName, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SourceName, error) {
-		return upsertSource(ctx, ent.TxFromContext(ctx), src)
+func (b *EntBackend) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
+	sourceNameID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.SourceIDs, error) {
+		return upsertSource(ctx, ent.TxFromContext(ctx), source)
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return toModelSource(backReferenceSourceName(sourceName.Unwrap())), nil
+	return sourceNameID, nil
 }
 
-func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec) (*ent.SourceName, error) {
+func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec) (*model.SourceIDs, error) {
 	sourceTypeID, err := client.SourceType.Create().
 		SetType(src.Type).
 		OnConflict(
 			sql.ConflictColumns(sourcetype.FieldType),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
+
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert source")
+		}
+		sourceTypeID, err = client.SourceType.Query().
+			Where(sourcetype.TypeEQ(src.Type)).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get source type")
+		}
 	}
 
 	sourceNamespaceID, err := client.SourceNamespace.Create().
@@ -206,10 +210,23 @@ func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec
 		OnConflict(
 			sql.ConflictColumns(sourcenamespace.FieldNamespace, sourcenamespace.FieldSourceID),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
+
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert source namespace")
+		}
+
+		sourceNamespaceID, err = client.SourceNamespace.Query().
+			Where(
+				sourcenamespace.HasSourceTypeWith(sourcetype.IDEQ(sourceTypeID)),
+				sourcenamespace.NamespaceEQ(src.Namespace),
+			).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get source namespace")
+		}
 	}
 
 	create := client.SourceName.Create().
@@ -227,19 +244,30 @@ func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec
 				sourcename.FieldCommit,
 			),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
-		return nil, err
-	}
-	log.Println(sourceNameID, src)
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert package version")
+		}
 
-	return client.SourceName.Query().
-		Where(sourcename.ID(sourceNameID)).
-		WithNamespace(func(q *ent.SourceNamespaceQuery) {
-			q.WithSourceType()
-		}).
-		Only(ctx)
+		sourceNameID, err = client.SourceName.Query().
+			Where(
+				sourcename.HasNamespaceWith(sourcenamespace.ID(sourceNamespaceID)),
+				optionalPredicate(&src.Name, sourcename.NameEQ),
+				optionalPredicate(src.Tag, sourcename.TagEQ),
+				optionalPredicate(src.Commit, sourcename.CommitEQ),
+			).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "get sourcename ID")
+		}
+	}
+
+	return &model.SourceIDs{
+		SourceTypeID:      strconv.Itoa(sourceTypeID),
+		SourceNamespaceID: strconv.Itoa(sourceNamespaceID),
+		SourceNameID:      strconv.Itoa(sourceNameID)}, nil
 }
 
 func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {

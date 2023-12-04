@@ -65,7 +65,7 @@ type SourceName {
 }
 
 """
-The IDs of the ingested pacsourcekage
+The IDs of the ingested source
 """
 type SourceIDs {
   sourceTypeID: ID!
