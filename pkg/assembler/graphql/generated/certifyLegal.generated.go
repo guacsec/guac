@@ -553,8 +553,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalInputSpec(ctx context.Cont
 		}
 		switch k {
 		case "declaredLicense":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicense"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -562,8 +560,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalInputSpec(ctx context.Cont
 			}
 			it.DeclaredLicense = data
 		case "discoveredLicense":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicense"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -571,8 +567,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalInputSpec(ctx context.Cont
 			}
 			it.DiscoveredLicense = data
 		case "attribution":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attribution"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -580,8 +574,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalInputSpec(ctx context.Cont
 			}
 			it.Attribution = data
 		case "justification":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -589,8 +581,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalInputSpec(ctx context.Cont
 			}
 			it.Justification = data
 		case "timeScanned":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeScanned"))
 			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
 			if err != nil {
@@ -598,8 +588,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalInputSpec(ctx context.Cont
 			}
 			it.TimeScanned = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -607,8 +595,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalInputSpec(ctx context.Cont
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -636,8 +622,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -645,8 +629,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.ID = data
 		case "subject":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
 			data, err := ec.unmarshalOPackageOrSourceSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrSourceSpec(ctx, v)
 			if err != nil {
@@ -654,8 +636,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.Subject = data
 		case "declaredLicense":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicense"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -663,8 +643,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.DeclaredLicense = data
 		case "declaredLicenses":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicenses"))
 			data, err := ec.unmarshalOLicenseSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpecᚄ(ctx, v)
 			if err != nil {
@@ -672,8 +650,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.DeclaredLicenses = data
 		case "discoveredLicense":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicense"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -681,8 +657,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.DiscoveredLicense = data
 		case "discoveredLicenses":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicenses"))
 			data, err := ec.unmarshalOLicenseSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpecᚄ(ctx, v)
 			if err != nil {
@@ -690,8 +664,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.DiscoveredLicenses = data
 		case "attribution":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("attribution"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -699,8 +671,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.Attribution = data
 		case "justification":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -708,8 +678,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.Justification = data
 		case "timeScanned":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timeScanned"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -717,8 +685,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.TimeScanned = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -726,8 +692,6 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {

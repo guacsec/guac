@@ -400,8 +400,6 @@ func (ec *executionContext) unmarshalInputPointOfContactInputSpec(ctx context.Co
 		}
 		switch k {
 		case "email":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -409,8 +407,6 @@ func (ec *executionContext) unmarshalInputPointOfContactInputSpec(ctx context.Co
 			}
 			it.Email = data
 		case "info":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("info"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -418,8 +414,6 @@ func (ec *executionContext) unmarshalInputPointOfContactInputSpec(ctx context.Co
 			}
 			it.Info = data
 		case "since":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("since"))
 			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
 			if err != nil {
@@ -427,8 +421,6 @@ func (ec *executionContext) unmarshalInputPointOfContactInputSpec(ctx context.Co
 			}
 			it.Since = data
 		case "justification":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -436,8 +428,6 @@ func (ec *executionContext) unmarshalInputPointOfContactInputSpec(ctx context.Co
 			}
 			it.Justification = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -445,8 +435,6 @@ func (ec *executionContext) unmarshalInputPointOfContactInputSpec(ctx context.Co
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -474,8 +462,6 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -483,8 +469,6 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 			}
 			it.ID = data
 		case "subject":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
 			data, err := ec.unmarshalOPackageSourceOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageSourceOrArtifactSpec(ctx, v)
 			if err != nil {
@@ -492,8 +476,6 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 			}
 			it.Subject = data
 		case "email":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -501,8 +483,6 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 			}
 			it.Email = data
 		case "info":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("info"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -510,8 +490,6 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 			}
 			it.Info = data
 		case "since":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("since"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -519,8 +497,6 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 			}
 			it.Since = data
 		case "justification":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -528,8 +504,6 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 			}
 			it.Justification = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -537,8 +511,6 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {

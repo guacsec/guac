@@ -217,8 +217,6 @@ func (ec *executionContext) unmarshalInputLicenseInputSpec(ctx context.Context, 
 		}
 		switch k {
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -226,8 +224,6 @@ func (ec *executionContext) unmarshalInputLicenseInputSpec(ctx context.Context, 
 			}
 			it.Name = data
 		case "inline":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inline"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -235,8 +231,6 @@ func (ec *executionContext) unmarshalInputLicenseInputSpec(ctx context.Context, 
 			}
 			it.Inline = data
 		case "listVersion":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("listVersion"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -264,8 +258,6 @@ func (ec *executionContext) unmarshalInputLicenseSpec(ctx context.Context, obj i
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -273,8 +265,6 @@ func (ec *executionContext) unmarshalInputLicenseSpec(ctx context.Context, obj i
 			}
 			it.ID = data
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -282,8 +272,6 @@ func (ec *executionContext) unmarshalInputLicenseSpec(ctx context.Context, obj i
 			}
 			it.Name = data
 		case "inline":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inline"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -291,8 +279,6 @@ func (ec *executionContext) unmarshalInputLicenseSpec(ctx context.Context, obj i
 			}
 			it.Inline = data
 		case "listVersion":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("listVersion"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
