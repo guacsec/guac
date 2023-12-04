@@ -416,8 +416,6 @@ func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Cont
 		}
 		switch k {
 		case "versionRange":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionRange"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -425,8 +423,6 @@ func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Cont
 			}
 			it.VersionRange = data
 		case "dependencyType":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencyType"))
 			data, err := ec.unmarshalNDependencyType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx, v)
 			if err != nil {
@@ -434,8 +430,6 @@ func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Cont
 			}
 			it.DependencyType = data
 		case "justification":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -443,8 +437,6 @@ func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Cont
 			}
 			it.Justification = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -452,8 +444,6 @@ func (ec *executionContext) unmarshalInputIsDependencyInputSpec(ctx context.Cont
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -481,8 +471,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -490,8 +478,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 			}
 			it.ID = data
 		case "package":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
 			data, err := ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
 			if err != nil {
@@ -499,8 +485,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 			}
 			it.Package = data
 		case "dependencyPackage":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencyPackage"))
 			data, err := ec.unmarshalOPkgSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, v)
 			if err != nil {
@@ -508,8 +492,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 			}
 			it.DependencyPackage = data
 		case "versionRange":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("versionRange"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -517,8 +499,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 			}
 			it.VersionRange = data
 		case "dependencyType":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencyType"))
 			data, err := ec.unmarshalODependencyType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx, v)
 			if err != nil {
@@ -526,8 +506,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 			}
 			it.DependencyType = data
 		case "justification":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("justification"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -535,8 +513,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 			}
 			it.Justification = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -544,8 +520,6 @@ func (ec *executionContext) unmarshalInputIsDependencySpec(ctx context.Context, 
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {

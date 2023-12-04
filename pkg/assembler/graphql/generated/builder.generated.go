@@ -135,8 +135,6 @@ func (ec *executionContext) unmarshalInputBuilderInputSpec(ctx context.Context, 
 		}
 		switch k {
 		case "uri":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uri"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -164,8 +162,6 @@ func (ec *executionContext) unmarshalInputBuilderSpec(ctx context.Context, obj i
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -173,8 +169,6 @@ func (ec *executionContext) unmarshalInputBuilderSpec(ctx context.Context, obj i
 			}
 			it.ID = data
 		case "uri":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uri"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {

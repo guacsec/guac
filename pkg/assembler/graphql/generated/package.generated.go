@@ -916,8 +916,6 @@ func (ec *executionContext) unmarshalInputPackageQualifierInputSpec(ctx context.
 		}
 		switch k {
 		case "key":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -925,8 +923,6 @@ func (ec *executionContext) unmarshalInputPackageQualifierInputSpec(ctx context.
 			}
 			it.Key = data
 		case "value":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -954,8 +950,6 @@ func (ec *executionContext) unmarshalInputPackageQualifierSpec(ctx context.Conte
 		}
 		switch k {
 		case "key":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -963,8 +957,6 @@ func (ec *executionContext) unmarshalInputPackageQualifierSpec(ctx context.Conte
 			}
 			it.Key = data
 		case "value":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -1005,8 +997,6 @@ func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj 
 		}
 		switch k {
 		case "type":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -1014,8 +1004,6 @@ func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj 
 			}
 			it.Type = data
 		case "namespace":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("namespace"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -1023,8 +1011,6 @@ func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj 
 			}
 			it.Namespace = data
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -1032,8 +1018,6 @@ func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj 
 			}
 			it.Name = data
 		case "version":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -1041,8 +1025,6 @@ func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj 
 			}
 			it.Version = data
 		case "qualifiers":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("qualifiers"))
 			data, err := ec.unmarshalOPackageQualifierInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierInputSpecᚄ(ctx, v)
 			if err != nil {
@@ -1050,8 +1032,6 @@ func (ec *executionContext) unmarshalInputPkgInputSpec(ctx context.Context, obj 
 			}
 			it.Qualifiers = data
 		case "subpath":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subpath"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -1086,8 +1066,6 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -1095,8 +1073,6 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 			}
 			it.ID = data
 		case "type":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -1104,8 +1080,6 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 			}
 			it.Type = data
 		case "namespace":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("namespace"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -1113,8 +1087,6 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 			}
 			it.Namespace = data
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -1122,8 +1094,6 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 			}
 			it.Name = data
 		case "version":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("version"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -1131,8 +1101,6 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 			}
 			it.Version = data
 		case "qualifiers":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("qualifiers"))
 			data, err := ec.unmarshalOPackageQualifierSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageQualifierSpecᚄ(ctx, v)
 			if err != nil {
@@ -1140,8 +1108,6 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 			}
 			it.Qualifiers = data
 		case "matchOnlyEmptyQualifiers":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("matchOnlyEmptyQualifiers"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -1149,8 +1115,6 @@ func (ec *executionContext) unmarshalInputPkgSpec(ctx context.Context, obj inter
 			}
 			it.MatchOnlyEmptyQualifiers = data
 		case "subpath":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subpath"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {

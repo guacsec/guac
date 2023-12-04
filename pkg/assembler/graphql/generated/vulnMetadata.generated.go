@@ -365,8 +365,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx con
 		}
 		switch k {
 		case "scoreType":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scoreType"))
 			data, err := ec.unmarshalNVulnerabilityScoreType2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx, v)
 			if err != nil {
@@ -374,8 +372,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx con
 			}
 			it.ScoreType = data
 		case "scoreValue":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scoreValue"))
 			data, err := ec.unmarshalNFloat2float64(ctx, v)
 			if err != nil {
@@ -383,8 +379,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx con
 			}
 			it.ScoreValue = data
 		case "timestamp":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
 			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
 			if err != nil {
@@ -392,8 +386,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx con
 			}
 			it.Timestamp = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -401,8 +393,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx con
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -430,8 +420,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -439,8 +427,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 			}
 			it.ID = data
 		case "vulnerability":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
 			data, err := ec.unmarshalOVulnerabilitySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, v)
 			if err != nil {
@@ -448,8 +434,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 			}
 			it.Vulnerability = data
 		case "scoreType":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scoreType"))
 			data, err := ec.unmarshalOVulnerabilityScoreType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityScoreType(ctx, v)
 			if err != nil {
@@ -457,8 +441,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 			}
 			it.ScoreType = data
 		case "scoreValue":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scoreValue"))
 			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
@@ -466,8 +448,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 			}
 			it.ScoreValue = data
 		case "comparator":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("comparator"))
 			data, err := ec.unmarshalOComparator2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐComparator(ctx, v)
 			if err != nil {
@@ -475,8 +455,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 			}
 			it.Comparator = data
 		case "timestamp":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -484,8 +462,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 			}
 			it.Timestamp = data
 		case "origin":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -493,8 +469,6 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 			}
 			it.Origin = data
 		case "collector":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("collector"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
