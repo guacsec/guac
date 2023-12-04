@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"math"
 	"reflect"
-	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -284,29 +283,6 @@ func unlock(m *sync.RWMutex, readOnly bool) {
 
 func timeKey(t time.Time) string {
 	return fmt.Sprint(t.Unix())
-}
-
-func sortAndRemoveDups(ids []string) []string {
-	numIDs := len(ids)
-	if numIDs > 1 {
-		slices.Sort(ids)
-		nextIndex := 1
-		for index := 1; index < numIDs; index++ {
-			currentVal := ids[index]
-			if ids[index-1] != currentVal {
-				ids[nextIndex] = currentVal
-				nextIndex++
-			}
-		}
-		ids = ids[:nextIndex]
-	}
-	return ids
-}
-
-// IDs should be sorted
-func (c *demoClient) isIDPresent(id string, linkIDs []string) bool {
-	_, found := slices.BinarySearch[[]string](linkIDs, id)
-	return found
 }
 
 func (c *demoClient) getPackageVersionAndArtifacts(ctx context.Context, pkgOrArt []string) ([]string, []string, error) {

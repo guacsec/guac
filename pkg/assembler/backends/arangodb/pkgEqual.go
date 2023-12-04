@@ -88,7 +88,7 @@ func matchPkgEqualByInput(ctx context.Context, c *arangoClient, pkgEqualSpec *mo
 			if !*secondPkg.MatchOnlyEmptyQualifiers {
 				if len(secondPkg.Qualifiers) > 0 {
 					arangoQueryBuilder.filter("epVersion", "qualifier_list", "==", "@equalQualifier")
-					values["equalQualifier"] = getQualifiers(secondPkg.Qualifiers)
+					values["equalQualifier"] = getFilterQualifiers(secondPkg.Qualifiers)
 				}
 			} else {
 				arangoQueryBuilder.filterLength("epVersion", "qualifier_list", "==", 0)
@@ -96,7 +96,7 @@ func matchPkgEqualByInput(ctx context.Context, c *arangoClient, pkgEqualSpec *mo
 		} else {
 			if len(secondPkg.Qualifiers) > 0 {
 				arangoQueryBuilder.filter("epVersion", "qualifier_list", "==", "@equalQualifier")
-				values["equalQualifier"] = getQualifiers(secondPkg.Qualifiers)
+				values["equalQualifier"] = getFilterQualifiers(secondPkg.Qualifiers)
 			}
 		}
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "epName", "epVersion")
@@ -149,7 +149,7 @@ func matchPkgEqualByInput(ctx context.Context, c *arangoClient, pkgEqualSpec *mo
 			if !*secondPkg.MatchOnlyEmptyQualifiers {
 				if len(secondPkg.Qualifiers) > 0 {
 					arangoQueryBuilder.filter("epVersion", "qualifier_list", "==", "@equalQualifier")
-					values["equalQualifier"] = getQualifiers(secondPkg.Qualifiers)
+					values["equalQualifier"] = getFilterQualifiers(secondPkg.Qualifiers)
 				}
 			} else {
 				arangoQueryBuilder.filterLength("epVersion", "qualifier_list", "==", 0)
@@ -157,7 +157,7 @@ func matchPkgEqualByInput(ctx context.Context, c *arangoClient, pkgEqualSpec *mo
 		} else {
 			if len(secondPkg.Qualifiers) > 0 {
 				arangoQueryBuilder.filter("epVersion", "qualifier_list", "==", "@equalQualifier")
-				values["equalQualifier"] = getQualifiers(secondPkg.Qualifiers)
+				values["equalQualifier"] = getFilterQualifiers(secondPkg.Qualifiers)
 			}
 		}
 		arangoQueryBuilder.forInBound(pkgHasVersionStr, "epName", "epVersion")

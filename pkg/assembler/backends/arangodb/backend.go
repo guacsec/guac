@@ -1177,3 +1177,10 @@ func getPreloadString(prefix, name string) string {
 func ptrfromArangoSearchNGramStreamType(s driver.ArangoSearchNGramStreamType) *driver.ArangoSearchNGramStreamType {
 	return &s
 }
+
+func noMatch(filter *string, value string) bool {
+	if filter != nil {
+		return value != *filter
+	}
+	return false
+}

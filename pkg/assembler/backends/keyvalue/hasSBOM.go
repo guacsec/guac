@@ -24,6 +24,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 )
@@ -79,7 +80,7 @@ func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []string {
 	if allowedEdges[model.EdgeHasSbomIncludedOccurrences] {
 		out = append(out, n.IncludedOccurrences...)
 	}
-	return sortAndRemoveDups(out)
+	return helper.SortAndRemoveDups(out)
 }
 
 func (n *hasSBOMStruct) BuildModelNode(ctx context.Context, c *demoClient) (model.Node, error) {
@@ -136,9 +137,9 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 	}
 	c.m.RUnlock()
 
-	softwareIDs := sortAndRemoveDups(includes.Software)
-	dependencyIDs := sortAndRemoveDups(includes.Dependencies)
-	occurrenceIDs := sortAndRemoveDups(includes.Occurrences)
+	softwareIDs := helper.SortAndRemoveDups(includes.Software)
+	dependencyIDs := helper.SortAndRemoveDups(includes.Dependencies)
+	occurrenceIDs := helper.SortAndRemoveDups(includes.Occurrences)
 	return c.ingestHasSbom(ctx, subject, input, softwareIDs, dependencyIDs, occurrenceIDs, true)
 }
 
@@ -395,7 +396,7 @@ func (c *demoClient) addHasSBOMIfMatch(ctx context.Context, out []*model.HasSbom
 			return out, err
 		}
 
-		pkgFilters, artFilters := getPackageAndArtifactFilters(filter.IncludedSoftware)
+		pkgFilters, artFilters := helper.GetPackageAndArtifactFilters(filter.IncludedSoftware)
 		if !c.matchPackages(ctx, pkgFilters, pkgs) || !c.matchArtifacts(ctx, artFilters, artifacts) ||
 			!c.matchDependencies(ctx, filter.IncludedDependencies, link.IncludedDependencies) ||
 			!c.matchOccurrences(ctx, filter.IncludedOccurrences, link.IncludedOccurrences) {
@@ -429,15 +430,4 @@ func (c *demoClient) addHasSBOMIfMatch(ctx context.Context, out []*model.HasSbom
 		return nil, err
 	}
 	return append(out, sb), nil
-}
-
-func getPackageAndArtifactFilters(filters []*model.PackageOrArtifactSpec) (pkgs []*model.PkgSpec, arts []*model.ArtifactSpec) {
-	for _, pkgOrArtSpec := range filters {
-		if pkgOrArtSpec.Package != nil {
-			pkgs = append(pkgs, pkgOrArtSpec.Package)
-		} else if pkgOrArtSpec.Artifact != nil {
-			arts = append(arts, pkgOrArtSpec.Artifact)
-		}
-	}
-	return
 }

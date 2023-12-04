@@ -22,6 +22,7 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -276,7 +277,7 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 				if !*isDependencySpec.DependencyPackage.MatchOnlyEmptyQualifiers {
 					if len(isDependencySpec.DependencyPackage.Qualifiers) > 0 {
 						arangoQueryBuilder.filter("depVersion", "qualifier_list", "==", "@depQualifier")
-						queryValues["depQualifier"] = getQualifiers(isDependencySpec.DependencyPackage.Qualifiers)
+						queryValues["depQualifier"] = getFilterQualifiers(isDependencySpec.DependencyPackage.Qualifiers)
 					}
 				} else {
 					arangoQueryBuilder.filterLength("depVersion", "qualifier_list", "==", 0)
@@ -284,7 +285,7 @@ func setIsDependencyMatchValues(arangoQueryBuilder *arangoQueryBuilder, isDepend
 			} else {
 				if len(isDependencySpec.DependencyPackage.Qualifiers) > 0 {
 					arangoQueryBuilder.filter("depVersion", "qualifier_list", "==", "@depQualifier")
-					queryValues["depQualifier"] = getQualifiers(isDependencySpec.DependencyPackage.Qualifiers)
+					queryValues["depQualifier"] = getFilterQualifiers(isDependencySpec.DependencyPackage.Qualifiers)
 				}
 			}
 			arangoQueryBuilder.forInBound(pkgHasVersionStr, "depName", "depVersion")
@@ -763,4 +764,51 @@ func (c *arangoClient) isDependencyNeighbors(ctx context.Context, nodeID string,
 	}
 
 	return out, nil
+}
+
+func noMatchIsDep(filter *model.IsDependencySpec, link *model.IsDependency) bool {
+	if filter != nil {
+		return noMatch(filter.Justification, link.Justification) ||
+			noMatch(filter.Origin, link.Origin) ||
+			noMatch(filter.Collector, link.Collector) ||
+			noMatch(filter.VersionRange, link.VersionRange) ||
+			(filter.DependencyType != nil && *filter.DependencyType != link.DependencyType)
+	} else {
+		return false
+	}
+}
+
+func matchDependencies(ctx context.Context, filters []*model.IsDependencySpec, deps []*model.IsDependency) bool {
+	if len(filters) > 0 {
+		var depIDs []string
+		for _, dep := range deps {
+			depIDs = append(depIDs, dep.ID)
+		}
+		for _, filter := range filters {
+			if filter == nil {
+				continue
+			}
+			if filter.ID != nil {
+				// Check by ID if present
+				if !helper.IsIDPresent(*filter.ID, depIDs) {
+					return false
+				}
+			} else {
+				// Otherwise match spec information
+				match := false
+				for _, dep := range deps {
+					if !noMatchIsDep(filter, dep) &&
+						(filter.Package == nil || matchPackages(ctx, []*model.PkgSpec{filter.Package}, []*model.Package{dep.Package})) &&
+						(filter.DependencyPackage == nil || matchPackages(ctx, []*model.PkgSpec{filter.DependencyPackage}, []*model.Package{dep.DependencyPackage})) {
+						match = true
+						break
+					}
+				}
+				if !match {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }

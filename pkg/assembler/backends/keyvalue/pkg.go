@@ -25,6 +25,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 )
@@ -954,13 +955,13 @@ func (c *demoClient) exactPackageName(ctx context.Context, filter *model.PkgSpec
 
 func (c *demoClient) matchPackages(ctx context.Context, filter []*model.PkgSpec, pkgs []string) bool {
 	pkgs = slices.Clone(pkgs)
-	pkgs = sortAndRemoveDups(pkgs)
+	pkgs = helper.SortAndRemoveDups(pkgs)
 
 	for _, pvSpec := range filter {
 		if pvSpec != nil {
 			if pvSpec.ID != nil {
 				// Check by ID if present
-				if !c.isIDPresent(*pvSpec.ID, pkgs) {
+				if !helper.IsIDPresent(*pvSpec.ID, pkgs) {
 					return false
 				}
 			} else {

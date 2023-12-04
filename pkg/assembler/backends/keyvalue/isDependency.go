@@ -22,6 +22,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 )
@@ -331,7 +332,7 @@ func (c *demoClient) matchDependencies(ctx context.Context, filters []*model.IsD
 			}
 			if filter.ID != nil {
 				// Check by ID if present
-				if !c.isIDPresent(*filter.ID, depLinkIDs) {
+				if !helper.IsIDPresent(*filter.ID, depLinkIDs) {
 					return false
 				}
 			} else {

@@ -18,11 +18,13 @@ package arangodb
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -402,7 +404,7 @@ func setPkgVersionMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any
 			if !*pkgSpec.MatchOnlyEmptyQualifiers {
 				if len(pkgSpec.Qualifiers) > 0 {
 					arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
-					queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
+					queryValues["qualifier"] = getFilterQualifiers(pkgSpec.Qualifiers)
 				}
 			} else {
 				arangoQueryBuilder.filterLength("pVersion", "qualifier_list", "==", 0)
@@ -410,7 +412,7 @@ func setPkgVersionMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any
 		} else {
 			if len(pkgSpec.Qualifiers) > 0 {
 				arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
-				queryValues["qualifier"] = getQualifiers(pkgSpec.Qualifiers)
+				queryValues["qualifier"] = getFilterQualifiers(pkgSpec.Qualifiers)
 			}
 		}
 	} else {
@@ -814,7 +816,7 @@ func generateModelPackage(pkgTypeID, pkgType, namespaceID, namespaceStr, nameID,
 	return &pkg
 }
 
-func getQualifiers(qualifiersSpec []*model.PackageQualifierSpec) []string {
+func getFilterQualifiers(qualifiersSpec []*model.PackageQualifierSpec) []string {
 	qualifiersMap := map[string]string{}
 	var keys []string
 	for _, kv := range qualifiersSpec {
@@ -931,7 +933,7 @@ func (c *arangoClient) queryPkgVersionNodeByID(ctx context.Context, id string, f
 			if !*filter.MatchOnlyEmptyQualifiers {
 				if len(filter.Qualifiers) > 0 {
 					arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
-					values["qualifier"] = getQualifiers(filter.Qualifiers)
+					values["qualifier"] = getFilterQualifiers(filter.Qualifiers)
 				}
 			} else {
 				arangoQueryBuilder.filterLength("pVersion", "qualifier_list", "==", 0)
@@ -939,7 +941,7 @@ func (c *arangoClient) queryPkgVersionNodeByID(ctx context.Context, id string, f
 		} else {
 			if len(filter.Qualifiers) > 0 {
 				arangoQueryBuilder.filter("pVersion", "qualifier_list", "==", "@qualifier")
-				values["qualifier"] = getQualifiers(filter.Qualifiers)
+				values["qualifier"] = getFilterQualifiers(filter.Qualifiers)
 			}
 		}
 	}
@@ -1564,4 +1566,79 @@ func (c *arangoClient) packageVersionNeighbors(ctx context.Context, nodeID strin
 	}
 
 	return out, nil
+}
+
+func matchPackages(ctx context.Context, filter []*model.PkgSpec, pkgs []*model.Package) bool {
+	// collect all IDs for packages
+	var pkgIDs []string
+	for _, pkg := range pkgs {
+		pkgIDs = append(pkgIDs, pkg.ID)
+	}
+	for _, pvSpec := range filter {
+		if pvSpec != nil {
+			if pvSpec.ID != nil {
+				// Check by ID if present from the list of collected pkg IDs
+				if !helper.IsIDPresent(*pvSpec.ID, pkgIDs) {
+					return false
+				}
+			} else {
+				// Otherwise match spec information
+				match := false
+				for _, pkg := range pkgs {
+					pkgVersion := pkg.Namespaces[0].Names[0].Versions[0]
+					if noMatch(pvSpec.Subpath, pkgVersion.Subpath) || noMatchQualifiers(pvSpec, pkgVersion.Qualifiers) || noMatch(pvSpec.Version, pkgVersion.Version) {
+						continue
+					}
+					pkgName := pkg.Namespaces[0].Names[0]
+					if noMatch(pvSpec.Name, pkgName.Name) {
+						continue
+					}
+					pkgNamespace := pkg.Namespaces[0]
+					if noMatch(pvSpec.Namespace, pkgNamespace.Namespace) {
+						continue
+					}
+					pkgType := pkg.Type
+					if noMatch(pvSpec.Type, pkgType) {
+						continue
+					} else {
+						match = true
+						break
+					}
+				}
+				if !match {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
+
+func getPkgQualifiers(pkgQualifiers []*model.PackageQualifier) []string {
+	qualifiersMap := map[string]string{}
+	var keys []string
+	for _, kv := range pkgQualifiers {
+		key := removeInvalidCharFromProperty(kv.Key)
+		qualifiersMap[key] = kv.Value
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	var qualifiers []string
+	for _, k := range keys {
+		qualifiers = append(qualifiers, k, qualifiersMap[k])
+	}
+	return qualifiers
+}
+
+func noMatchQualifiers(filter *model.PkgSpec, v []*model.PackageQualifier) bool {
+	// Allow matching on nodes with no qualifiers
+	if filter.MatchOnlyEmptyQualifiers != nil {
+		if *filter.MatchOnlyEmptyQualifiers && len(v) != 0 {
+			return true
+		}
+	}
+	if filter.Qualifiers != nil && len(filter.Qualifiers) > 0 {
+		return !reflect.DeepEqual(getPkgQualifiers(v), getFilterQualifiers(filter.Qualifiers))
+	}
+	return false
 }
