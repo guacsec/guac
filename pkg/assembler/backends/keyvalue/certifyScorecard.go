@@ -44,7 +44,7 @@ type scorecardLink struct {
 
 func (n *scorecardLink) ID() string { return n.ThisID }
 func (n *scorecardLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.SourceID,
 		timeKey(n.TimeScanned),
 		fmt.Sprint(n.AggregateScore),
@@ -53,7 +53,7 @@ func (n *scorecardLink) Key() string {
 		n.ScorecardCommit,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *scorecardLink) Neighbors(allowedEdges edgeMap) []string {

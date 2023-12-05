@@ -42,7 +42,7 @@ type hasMetadataLink struct {
 
 func (n *hasMetadataLink) ID() string { return n.ThisID }
 func (n *hasMetadataLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.ArtifactID,
 		n.SourceID,
@@ -52,7 +52,7 @@ func (n *hasMetadataLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *hasMetadataLink) Neighbors(allowedEdges edgeMap) []string {

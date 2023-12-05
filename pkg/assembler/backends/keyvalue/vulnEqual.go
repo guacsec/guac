@@ -38,12 +38,12 @@ type vulnerabilityEqualLink struct {
 
 func (n *vulnerabilityEqualLink) ID() string { return n.ThisID }
 func (n *vulnerabilityEqualLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		fmt.Sprint(n.Vulnerabilities),
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *vulnerabilityEqualLink) Neighbors(allowedEdges edgeMap) []string {

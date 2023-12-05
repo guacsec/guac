@@ -408,11 +408,11 @@ func TestCertifyGood(t *testing.T) {
 			},
 			ExpCG: []*model.CertifyGood{
 				{
-					Subject:       s1out,
+					Subject:       s2out,
 					Justification: "test justification",
 				},
 				{
-					Subject:       s2out,
+					Subject:       s1out,
 					Justification: "test justification",
 				},
 			},
@@ -464,11 +464,11 @@ func TestCertifyGood(t *testing.T) {
 			},
 			ExpCG: []*model.CertifyGood{
 				{
-					Subject:       p1outName,
+					Subject:       p2out,
 					Justification: "test justification",
 				},
 				{
-					Subject:       p2out,
+					Subject:       p1outName,
 					Justification: "test justification",
 				},
 			},

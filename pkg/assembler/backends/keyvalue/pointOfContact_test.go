@@ -243,14 +243,14 @@ func TestPointOfContact(t *testing.T) {
 			ExpHM: []*model.PointOfContact{
 				{
 					Subject:       p1out,
-					Email:         "a@b.com",
-					Info:          "info1",
+					Email:         "x@y.com",
+					Info:          "info2",
 					Justification: "test justification",
 				},
 				{
 					Subject:       p1out,
-					Email:         "x@y.com",
-					Info:          "info2",
+					Email:         "a@b.com",
+					Info:          "info1",
 					Justification: "test justification",
 				},
 			},
@@ -490,11 +490,11 @@ func TestPointOfContact(t *testing.T) {
 			},
 			ExpHM: []*model.PointOfContact{
 				{
-					Subject:       s1out,
+					Subject:       s2out,
 					Justification: "test justification",
 				},
 				{
-					Subject:       s2out,
+					Subject:       s1out,
 					Justification: "test justification",
 				},
 			},
@@ -546,11 +546,11 @@ func TestPointOfContact(t *testing.T) {
 			},
 			ExpHM: []*model.PointOfContact{
 				{
-					Subject:       p1outName,
+					Subject:       p2out,
 					Justification: "test justification",
 				},
 				{
-					Subject:       p2out,
+					Subject:       p1outName,
 					Justification: "test justification",
 				},
 			},

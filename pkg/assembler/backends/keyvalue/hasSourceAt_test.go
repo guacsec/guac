@@ -437,11 +437,11 @@ func TestHasSourceAt(t *testing.T) {
 			},
 			ExpHSA: []*model.HasSourceAt{
 				{
-					Package: p1outName,
+					Package: p1out,
 					Source:  s1out,
 				},
 				{
-					Package: p1out,
+					Package: p1outName,
 					Source:  s1out,
 				},
 			},

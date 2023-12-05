@@ -37,10 +37,10 @@ type licStruct struct {
 
 func (n *licStruct) ID() string { return n.ThisID }
 func (n *licStruct) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Name,
 		n.ListVersion,
-	}, ":")
+	}, ":"))
 }
 
 func (n *licStruct) Neighbors(allowedEdges edgeMap) []string {

@@ -39,12 +39,12 @@ type hashEqualStruct struct {
 
 func (n *hashEqualStruct) ID() string { return n.ThisID }
 func (n *hashEqualStruct) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		fmt.Sprint(n.Artifacts),
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *hashEqualStruct) Neighbors(allowedEdges edgeMap) []string {

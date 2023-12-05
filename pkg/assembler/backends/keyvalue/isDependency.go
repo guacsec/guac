@@ -40,7 +40,7 @@ type isDependencyLink struct {
 
 func (n *isDependencyLink) ID() string { return n.ThisID }
 func (n *isDependencyLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.DepPackageID,
 		n.VersionRange,
@@ -48,7 +48,7 @@ func (n *isDependencyLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *isDependencyLink) Neighbors(allowedEdges edgeMap) []string {

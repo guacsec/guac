@@ -431,12 +431,12 @@ func TestLegal(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          p1out,
+					Subject:          p2out,
 					DeclaredLicenses: []*model.License{l1out},
 					Justification:    "test justification",
 				},
 				{
-					Subject:          p2out,
+					Subject:          p1out,
 					DeclaredLicenses: []*model.License{l1out},
 					Justification:    "test justification",
 				},
@@ -570,12 +570,12 @@ func TestLegals(t *testing.T) {
 			},
 			ExpLegal: []*model.CertifyLegal{
 				{
-					Subject:          p1out,
+					Subject:          p2out,
 					DeclaredLicenses: []*model.License{l1out},
 					Justification:    "test justification",
 				},
 				{
-					Subject:          p2out,
+					Subject:          p1out,
 					DeclaredLicenses: []*model.License{l1out},
 					Justification:    "test justification",
 				},

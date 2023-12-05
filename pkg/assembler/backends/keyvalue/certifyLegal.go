@@ -47,7 +47,7 @@ type certifyLegalStruct struct {
 
 func (n *certifyLegalStruct) ID() string { return n.ThisID }
 func (n *certifyLegalStruct) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Pkg,
 		n.Source,
 		n.DeclaredLicense,
@@ -59,7 +59,7 @@ func (n *certifyLegalStruct) Key() string {
 		timeKey(n.TimeScanned),
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *certifyLegalStruct) Neighbors(allowedEdges edgeMap) []string {

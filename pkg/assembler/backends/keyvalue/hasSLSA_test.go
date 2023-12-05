@@ -299,14 +299,14 @@ func TestHasSLSA(t *testing.T) {
 					Subject: a1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out, a3out},
+						BuiltFrom: []*model.Artifact{a2out},
 					},
 				},
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
+						BuiltFrom: []*model.Artifact{a2out, a3out},
 					},
 				},
 			},
@@ -683,14 +683,14 @@ func TestIngestHasSLSAs(t *testing.T) {
 					Subject: a1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out, a3out},
+						BuiltFrom: []*model.Artifact{a2out},
 					},
 				},
 				{
 					Subject: a1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   b1out,
-						BuiltFrom: []*model.Artifact{a2out},
+						BuiltFrom: []*model.Artifact{a2out, a3out},
 					},
 				},
 			},

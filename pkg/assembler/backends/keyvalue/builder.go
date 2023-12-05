@@ -32,7 +32,7 @@ type builderStruct struct {
 }
 
 func (n *builderStruct) Key() string {
-	return n.URI
+	return hashKey(n.URI)
 }
 
 func (b *builderStruct) ID() string { return b.ThisID }
