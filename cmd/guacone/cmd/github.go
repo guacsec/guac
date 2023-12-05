@@ -18,17 +18,19 @@ package cmd
 import (
 	"context"
 	"fmt"
-	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
-	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
+	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/guacsec/guac/pkg/cli"
-
 	"github.com/guacsec/guac/internal/client/githubclient"
+	"github.com/guacsec/guac/pkg/collectsub/client"
+	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/github"
 	"github.com/guacsec/guac/pkg/logging"
@@ -45,10 +47,8 @@ const (
 type githubOptions struct {
 	// datasource for the collector
 	dataSource datasource.CollectSource
-	// address for pubsub connection
-	pubsubAddr string
-	// address for blob store
-	blobAddr string
+	// address for NATS connection
+	natsAddr string
 	// run as poll collector
 	poll bool
 	// the mode to run the collector in
@@ -59,45 +59,32 @@ type githubOptions struct {
 	workflowFileName string
 	// the owner/repo name to use for the collector
 	ownerRepoName string
+	// csub client options for identifier strings
+	csubClientOptions client.CsubClientOptions
+	// graphql endpoint
+	graphqlEndpoint string
 }
 
 var githubCmd = &cobra.Command{
 	Use:   "github if <github-mode> is \"release\" then [flags] release_url1 release_url2..., otherwise if <github-mode> is \"workflow\" then [flags] <owner>/<repo>",
-	Short: "takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph utilizing Nats pubsub and blob store",
-	Long: `
-Takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph.
-  <github-mode> must be either "workflow", "release", or "". If "", then the default is "release".
-  if <github-mode> is "workflow", then <owner-repo> must be specified.
-
-guaccollect github checks repos and tags to download metadata documents stored in Github releases. Ingestion to GUAC happens via an event stream (NATS)
-to allow for decoupling of the collectors from the ingestion into GUAC. 
-
-Each collector collects the "document" and stores it in the blob store for further
-evaluation. The collector creates a CDEvent (https://cdevents.dev/) that is published via 
-the event stream. The downstream guacingest subscribes to the stream and retrieves the "document" from the blob store for 
-processing and ingestion.
-
-Various blob stores can be used (such as S3, Azure Blob, Google Cloud Bucket) as documented here: https://gocloud.dev/howto/blob/
-For example: "s3://my-bucket?region=us-west-1"
-
-Specific authentication method vary per cloud provider. Please follow the documentation per implementation to ensure
-you have access to read and write to the respective blob store.`,
+	Short: "takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph.",
+	Long: `Takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph.
+  if <github-mode> is "release" then [flags] release_url1 release_url2..., otherwise if <github-mode> is "workflow" then [flags] <owner>/<repo>.`,
 	Args: cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateGithubFlags(
-			viper.GetString("pubsub-addr"),
-			viper.GetString("blob-addr"),
-			viper.GetString("csub-addr"),
 			viper.GetString(githubMode),
 			viper.GetString(githubSbom),
 			viper.GetString(githubWorkflowFile),
+			viper.GetString("nats-addr"),
+			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
-			viper.GetBool("service-poll"),
+			viper.GetBool("poll"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -108,7 +95,7 @@ you have access to read and write to the respective blob store.`,
 		// GITHUB_TOKEN is the default token name
 		ghc, err := githubclient.NewGithubClient(ctx, os.Getenv("GITHUB_TOKEN"))
 		if err != nil {
-			logger.Fatalf("unable to create github client: %v", err)
+			logger.Errorf("unable to create github client: %v", err)
 		}
 
 		// Register collector
@@ -126,44 +113,81 @@ you have access to read and write to the respective blob store.`,
 		if opts.poll {
 			collectorOpts = append(collectorOpts, github.WithPolling(30*time.Second))
 		}
-
 		if opts.ownerRepoName != "" {
 			if !strings.Contains(opts.ownerRepoName, "/") {
-				logger.Fatalf("owner-repo flag must be in the format <owner>/<repo>")
+				logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
 			} else {
 				ownerRepoName := strings.Split(opts.ownerRepoName, "/")
 				if len(ownerRepoName) != 2 {
-					logger.Fatalf("owner-repo flag must be in the format <owner>/<repo>")
+					logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
 				}
 				collectorOpts = append(collectorOpts, github.WithOwner(ownerRepoName[0]))
 				collectorOpts = append(collectorOpts, github.WithRepo(ownerRepoName[1]))
 			}
 		}
-
 		githubCollector, err := github.NewGithubCollector(collectorOpts...)
 		if err != nil {
-			logger.Fatalf("unable to create Github collector: %v", err)
+			logger.Errorf("unable to create Github collector: %v", err)
 		}
 		err = collector.RegisterDocumentCollector(githubCollector, github.GithubCollector)
 		if err != nil {
-			logger.Fatalf("unable to register Github collector: %v", err)
+			logger.Errorf("unable to register Github collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
+		csubClient, err := csubclient.NewClient(opts.csubClientOptions)
+		if err != nil {
+			logger.Infof("collectsub client initialization failed, this ingestion will not pull in any additional data through the collectsub service: %v", err)
+			csubClient = nil
+		} else {
+			defer csubClient.Close()
+		}
+
+		var errFound bool
+
+		emit := func(d *processor.Document) error {
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+
+			if err != nil {
+				errFound = true
+				return fmt.Errorf("unable to ingest document: %w", err)
+			}
+			return nil
+		}
+
+		errHandler := func(err error) bool {
+			if err == nil {
+				logger.Info("collector ended gracefully")
+				return true
+			}
+			logger.Errorf("collector ended with error: %v", err)
+			return false
+		}
+
+		cancelCtx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		if err := collector.Collect(cancelCtx, emit, errHandler); err != nil {
+			logger.Fatal(err)
+		}
+
+		if errFound {
+			logger.Fatalf("completed ingestion with error")
+		} else {
+			logger.Infof("completed ingestion")
+		}
 	},
 }
 
-func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, workflowFileName string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(githubMode, sbomName, workflowFileName, natsAddr, csubAddr string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
 	var opts githubOptions
-	opts.pubsubAddr = pubsubAddr
-	opts.blobAddr = blobAddr
+	opts.natsAddr = natsAddr
 	opts.poll = poll
 	opts.githubMode = githubMode
 	opts.sbomName = sbomName
 	opts.workflowFileName = workflowFileName
 
 	if useCsub {
-		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+		csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 		if err != nil {
 			return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 		}
@@ -216,7 +240,7 @@ func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, w
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{githubMode, githubSbom, githubWorkflowFile})
+	set, err := cli.BuildFlags([]string{githubMode, githubSbom, githubWorkflowFile, "use-csub", "poll"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
@@ -226,5 +250,5 @@ func init() {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)
 	}
-	rootCmd.AddCommand(githubCmd)
+	collectCmd.AddCommand(githubCmd)
 }

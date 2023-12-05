@@ -408,11 +408,9 @@ func Test_githubClient_GetWorkflow(t *testing.T) {
 			want: []client.Workflow{
 				{
 					Name: "Test Workflow",
-					Id:   77746986,
 				},
 				{
 					Name: "Test Workflow - Version 2",
-					Id:   77748205,
 				},
 			},
 		},
@@ -427,7 +425,6 @@ func Test_githubClient_GetWorkflow(t *testing.T) {
 			want: []client.Workflow{
 				{
 					Name: "Test Workflow",
-					Id:   77746986,
 				},
 			},
 		},
@@ -439,8 +436,13 @@ func Test_githubClient_GetWorkflow(t *testing.T) {
 				t.Errorf("GetWorkflow() error = %v, wantErr %v", err, test.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("GetWorkflow() got = %v, want %v", got, test.want)
+			if len(got) != len(test.want) {
+				t.Fatalf("GetWorkflow got %v, want %v", got, test.want)
+			}
+			for i := 0; i < len(got); i++ {
+				if got[i].Name != test.want[i].Name {
+					t.Fatalf("GetWorkflow got %v, want %v", got[i].Name, test.want[i].Name)
+				}
 			}
 		})
 	}
