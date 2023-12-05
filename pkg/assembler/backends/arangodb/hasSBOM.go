@@ -122,7 +122,10 @@ func getPkgHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 		'downloadLocation': hasSBOM.downloadLocation,
 		'collector': hasSBOM.collector,
 		'knownSince': hasSBOM.knownSince,
-		'origin': hasSBOM.origin  
+		'origin': hasSBOM.origin,
+		'includedSoftware': hasSBOM.includedSoftware,
+		'includedDependencies': hasSBOM.includedDependencies,
+		'includesOccurrences': hasSBOM.includesOccurrences
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSBOM")
@@ -149,7 +152,10 @@ func getArtifactHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQuer
 		'downloadLocation': hasSBOM.downloadLocation,
 		'collector': hasSBOM.collector,
 		'knownSince': hasSBOM.knownSince,
-		'origin': hasSBOM.origin  
+		'origin': hasSBOM.origin,
+		'includedSoftware': hasSBOM.includedSoftware,
+		'includedDependencies': hasSBOM.includedDependencies,
+		'includesOccurrences': hasSBOM.includesOccurrences
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSBOM")
@@ -208,14 +214,24 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 		values["art_digest"] = strings.ToLower(artifact.Digest)
 	}
 
-	dedupedIncludedSoftwareIDs := helper.SortAndRemoveDups(includes.Software)
-	dedupedIncludedDependenciesIDs := helper.SortAndRemoveDups(includes.Dependencies)
-	dedupedIncludesOccurrencesIDs := helper.SortAndRemoveDups(includes.Occurrences)
+	// initialize as empty slices for the query to run. Nil slice will cause an error
+	dedupedIncludedSoftwareIDs := []string{}
+	dedupedIncludedDependenciesIDs := []string{}
+	dedupedIncludesOccurrencesIDs := []string{}
+	includedSoftwarePkgKeys := []string{}
+	includedSoftwareArtKeys := []string{}
+	includedDependenciesKeys := []string{}
+	includedOccurrencesKeys := []string{}
 
-	var includedSoftwarePkgKeys []string
-	var includedSoftwareArtKeys []string
-	var includedDependenciesKeys []string
-	var includedOccurrencesKeys []string
+	if includes.Software != nil {
+		dedupedIncludedSoftwareIDs = helper.SortAndRemoveDups(includes.Software)
+	}
+	if includes.Dependencies != nil {
+		dedupedIncludedDependenciesIDs = helper.SortAndRemoveDups(includes.Dependencies)
+	}
+	if includes.Occurrences != nil {
+		dedupedIncludesOccurrencesIDs = helper.SortAndRemoveDups(includes.Occurrences)
+	}
 
 	for _, id := range dedupedIncludedSoftwareIDs {
 		idSplit := strings.Split(id, "/")
@@ -319,19 +335,19 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 			INSERT { _key: CONCAT("hasSBOMIncludedSoftwareArtEdges", hasSBOM._key, artData), _from: hasSBOM._id, _to: CONCAT("artifacts/", artData) } INTO hasSBOMIncludedSoftwareArtEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 
-		  LET hasSBOMIncludedDependencyEdgesCollection = (FOR bfData IN doc.includedDependencyKeys
-			INSERT { _key: CONCAT("hasSBOMIncludedDependencyEdges", hasSBOM._key, bfData), _from: hasSBOM._id, _to: CONCAT("isDependencies/", bfData) } INTO hasSBOMIncludedDependencyEdges OPTIONS { overwriteMode: "ignore" }
+		  LET hasSBOMIncludedDependencyEdgesCollection = (FOR inDepData IN doc.includedDependencyKeys
+			INSERT { _key: CONCAT("hasSBOMIncludedDependencyEdges", hasSBOM._key, inDepData), _from: hasSBOM._id, _to: CONCAT("isDependencies/", inDepData) } INTO hasSBOMIncludedDependencyEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 
-		  LET hasSBOMIncludedOccurrenceEdgesCollection = (FOR bfData IN doc.includesOccurrenceKeys
-			INSERT { _key: CONCAT("hasSBOMIncludedOccurrenceEdges", hasSBOM._key, bfData), _from: hasSBOM._id, _to: CONCAT("isOccurrences/", bfData) } INTO hasSBOMIncludedOccurrenceEdges OPTIONS { overwriteMode: "ignore" }
+		  LET hasSBOMIncludedOccurrenceEdgesCollection = (FOR inOccurData IN doc.includesOccurrenceKeys
+			INSERT { _key: CONCAT("hasSBOMIncludedOccurrenceEdges", hasSBOM._key, inOccurData), _from: hasSBOM._id, _to: CONCAT("isOccurrences/", inOccurData) } INTO hasSBOMIncludedOccurrenceEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN { 'hasSBOM_id': hasSBOM._id }`
 
 		sb.WriteString(query)
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSBOMs")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSBOMs - package")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package hasSBOMs: %w", err)
 		}
@@ -390,19 +406,19 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 			INSERT { _key: CONCAT("hasSBOMIncludedSoftwareArtEdges", hasSBOM._key, artData), _from: hasSBOM._id, _to: CONCAT("artifacts/", artData) } INTO hasSBOMIncludedSoftwareArtEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 
-		  LET hasSBOMIncludedDependencyEdgesCollection = (FOR bfData IN doc.includedDependencyKeys
-			INSERT { _key: CONCAT("hasSBOMIncludedDependencyEdges", hasSBOM._key, bfData), _from: hasSBOM._id, _to: CONCAT("isDependencies/", bfData) } INTO hasSBOMIncludedDependencyEdges OPTIONS { overwriteMode: "ignore" }
+		  LET hasSBOMIncludedDependencyEdgesCollection = (FOR inDepData IN doc.includedDependencyKeys
+			INSERT { _key: CONCAT("hasSBOMIncludedDependencyEdges", hasSBOM._key, inDepData), _from: hasSBOM._id, _to: CONCAT("isDependencies/", inDepData) } INTO hasSBOMIncludedDependencyEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 
-		  LET hasSBOMIncludedOccurrenceEdgesCollection = (FOR bfData IN doc.includesOccurrenceKeys
-			INSERT { _key: CONCAT("hasSBOMIncludedOccurrenceEdges", hasSBOM._key, bfData), _from: hasSBOM._id, _to: CONCAT("isOccurrences/", bfData) } INTO hasSBOMIncludedOccurrenceEdges OPTIONS { overwriteMode: "ignore" }
+		  LET hasSBOMIncludedOccurrenceEdgesCollection = (FOR inOccurData IN doc.includesOccurrenceKeys
+			INSERT { _key: CONCAT("hasSBOMIncludedOccurrenceEdges", hasSBOM._key, inOccurData), _from: hasSBOM._id, _to: CONCAT("isOccurrences/", inOccurData) } INTO hasSBOMIncludedOccurrenceEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		
 		RETURN { 'hasSBOM_id': hasSBOM._id }`
 
 		sb.WriteString(query)
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSBOMs")
+		cursor, err = executeQueryWithRetry(ctx, c.db, sb.String(), nil, "IngestHasSBOMs - artifact")
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest artifact hasSBOM: %w", err)
 		}
@@ -452,12 +468,12 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			INSERT { _key: CONCAT("hasSBOMIncludedSoftwareArtEdges", hasSBOM._key, artData), _from: hasSBOM._id, _to: CONCAT("artifacts/", artData) } INTO hasSBOMIncludedSoftwareArtEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 
-		  LET hasSBOMIncludedDependencyEdgesCollection = (FOR bfData IN @includedDependencyKeys
-			INSERT { _key: CONCAT("hasSBOMIncludedDependencyEdges", hasSBOM._key, bfData), _from: hasSBOM._id, _to: CONCAT("isDependencies/", bfData) } INTO hasSBOMIncludedDependencyEdges OPTIONS { overwriteMode: "ignore" }
+		  LET hasSBOMIncludedDependencyEdgesCollection = (FOR inDepData IN @includedDependencyKeys
+			INSERT { _key: CONCAT("hasSBOMIncludedDependencyEdges", hasSBOM._key, inDepData), _from: hasSBOM._id, _to: CONCAT("isDependencies/", inDepData) } INTO hasSBOMIncludedDependencyEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 
-		  LET hasSBOMIncludedOccurrenceEdgesCollection = (FOR bfData IN @includesOccurrenceKeys
-			INSERT { _key: CONCAT("hasSBOMIncludedOccurrenceEdges", hasSBOM._key, bfData), _from: hasSBOM._id, _to: CONCAT("isOccurrences/", bfData) } INTO hasSBOMIncludedOccurrenceEdges OPTIONS { overwriteMode: "ignore" }
+		  LET hasSBOMIncludedOccurrenceEdgesCollection = (FOR inOccurData IN @includesOccurrenceKeys
+			INSERT { _key: CONCAT("hasSBOMIncludedOccurrenceEdges", hasSBOM._key, inOccurData), _from: hasSBOM._id, _to: CONCAT("isOccurrences/", inOccurData) } INTO hasSBOMIncludedOccurrenceEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN { 'hasSBOM_id': hasSBOM._id }`
@@ -510,12 +526,12 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 			INSERT { _key: CONCAT("hasSBOMIncludedSoftwareArtEdges", hasSBOM._key, artData), _from: hasSBOM._id, _to: CONCAT("artifacts/", artData) } INTO hasSBOMIncludedSoftwareArtEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 
-		  LET hasSBOMIncludedDependencyEdgesCollection = (FOR bfData IN @includedDependencyKeys
-			INSERT { _key: CONCAT("hasSBOMIncludedDependencyEdges", hasSBOM._key, bfData), _from: hasSBOM._id, _to: CONCAT("isDependencies/", bfData) } INTO hasSBOMIncludedDependencyEdges OPTIONS { overwriteMode: "ignore" }
+		  LET hasSBOMIncludedDependencyEdgesCollection = (FOR inDepData IN @includedDependencyKeys
+			INSERT { _key: CONCAT("hasSBOMIncludedDependencyEdges", hasSBOM._key, inDepData), _from: hasSBOM._id, _to: CONCAT("isDependencies/", inDepData) } INTO hasSBOMIncludedDependencyEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 
-		  LET hasSBOMIncludedOccurrenceEdgesCollection = (FOR bfData IN @includesOccurrenceKeys
-			INSERT { _key: CONCAT("hasSBOMIncludedOccurrenceEdges", hasSBOM._key, bfData), _from: hasSBOM._id, _to: CONCAT("isOccurrences/", bfData) } INTO hasSBOMIncludedOccurrenceEdges OPTIONS { overwriteMode: "ignore" }
+		  LET hasSBOMIncludedOccurrenceEdgesCollection = (FOR inOccurData IN @includesOccurrenceKeys
+			INSERT { _key: CONCAT("hasSBOMIncludedOccurrenceEdges", hasSBOM._key, inOccurData), _from: hasSBOM._id, _to: CONCAT("isOccurrences/", inOccurData) } INTO hasSBOMIncludedOccurrenceEdges OPTIONS { overwriteMode: "ignore" }
 		  )
 		  
 		  RETURN { 'hasSBOM_id': hasSBOM._id }`

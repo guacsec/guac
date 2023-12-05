@@ -17,8 +17,6 @@ package arangodb
 
 import (
 	"context"
-	"fmt"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -291,65 +289,6 @@ var includedTestExpectedSBOM = &model.HasSbom{
 
 // End of Test resources
 
-func getPackageVersionFromIngestedPackage(pkg *model.Package) (string, error) {
-	if pkg != nil {
-		if len(pkg.Namespaces) == 1 {
-			namespace := pkg.Namespaces[0]
-			if len(namespace.Names) == 1 {
-				name := namespace.Names[0]
-				if len(name.Versions) == 1 {
-					version := name.Versions[0]
-					return version.ID, nil
-				}
-			}
-		}
-	}
-	return "", fmt.Errorf("could not retrieve ingested PackageVersion from package id %v", pkg)
-}
-
-func getNodeIds(nodes []model.Node) ([]string, error) {
-	var ids []string
-	for _, node := range nodes {
-		var id *string
-		switch typed := node.(type) {
-		case *model.Package:
-			switch len(typed.Namespaces) {
-			case 0:
-				id = &typed.ID
-			case 1:
-				namespace := typed.Namespaces[0]
-				switch len(namespace.Names) {
-				case 0:
-					id = &namespace.ID
-				case 1:
-					name := namespace.Names[0]
-					switch len(name.Versions) {
-					case 0:
-						id = &name.ID
-					case 1:
-						version := name.Versions[0]
-						id = &version.ID
-					}
-				}
-			}
-		case *model.Artifact:
-			id = &typed.ID
-		case *model.HasSbom:
-			id = &typed.ID
-		case *model.IsDependency:
-			id = &typed.ID
-		case *model.IsOccurrence:
-			id = &typed.ID
-		}
-		if id == nil {
-			return nil, fmt.Errorf("Could not idenitfy correct id for node: %v", reflect.TypeOf(node))
-		} else {
-			ids = append(ids, *id)
-		}
-	}
-	return ids, nil
-}
-
 func TestHasSBOM(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
@@ -522,20 +461,20 @@ func TestHasSBOM(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
 			InArt: []*model.ArtifactInputSpec{testdata.A1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{p2, p4},
-				Artifacts: []*model.ArtifactInputSpec{a1},
+				Packages:  []*model.PkgInputSpec{testdata.P2, testdata.P4},
+				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
 			},
 			IsDeps: []testDependency{{
-				pkg:       p2,
-				depPkg:    p4,
+				pkg:       testdata.P2,
+				depPkg:    testdata.P4,
 				matchType: mSpecific,
 				isDep: &model.IsDependencyInputSpec{
 					Justification: "test justification",
 				},
 			}},
 			IsOccs: []testOccurrence{{
-				Subj:  &model.PackageOrSourceInput{Package: p4},
-				Art:   a1,
+				Subj:  &model.PackageOrSourceInput{Package: testdata.P4},
+				Art:   testdata.A1,
 				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
 			}},
 			Calls: []call{
@@ -575,15 +514,15 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject:          testdata.P2out,
 					URI:              "test uri",
-					IncludedSoftware: []model.PackageOrArtifact{p2out, p4out, a1out},
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P2out, testdata.P4out, testdata.A1out},
 					IncludedDependencies: []*model.IsDependency{{
-						Package:           p2out,
-						DependencyPackage: p4out,
+						Package:           testdata.P2out,
+						DependencyPackage: testdata.P4out,
 						Justification:     "test justification",
 					}},
 					IncludedOccurrences: []*model.IsOccurrence{{
-						Subject:       p4out,
-						Artifact:      a1out,
+						Subject:       testdata.P4out,
+						Artifact:      testdata.A1out,
 						Justification: "test justification",
 					}},
 				},
@@ -632,8 +571,8 @@ func TestHasSBOM(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{testdata.P2},
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{p2},
-				Artifacts: []*model.ArtifactInputSpec{a1, a2},
+				Packages:  []*model.PkgInputSpec{testdata.P2},
+				Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			},
 			Calls: []call{
 				{
@@ -672,7 +611,7 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject:          testdata.A2out,
 					URI:              "test uri",
-					IncludedSoftware: []model.PackageOrArtifact{p2out, a1out, a2out},
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P2out, testdata.A1out, testdata.A2out},
 				},
 			},
 		},
@@ -718,7 +657,7 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query on Algorithm",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{p1},
+				Packages: []*model.PkgInputSpec{testdata.P1},
 			},
 			Calls: []call{
 				{
@@ -745,28 +684,28 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject:          testdata.P1out,
 					Algorithm:        "qwerasdf",
-					IncludedSoftware: []model.PackageOrArtifact{p1out},
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
 				},
 			},
 		},
 		{
 			Name:  "Query on Digest",
-			InPkg: []*model.PkgInputSpec{p2, p4},
+			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{p2, p4},
-				Artifacts: []*model.ArtifactInputSpec{a1},
+				Packages:  []*model.PkgInputSpec{testdata.P2, testdata.P4},
+				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
 			},
 			IsDeps: []testDependency{{
-				pkg:       p2,
-				depPkg:    p4,
+				pkg:       testdata.P2,
+				depPkg:    testdata.P4,
 				matchType: mSpecific,
 				isDep: &model.IsDependencyInputSpec{
 					Justification: "test justification",
 				},
 			}},
 			IsOccs: []testOccurrence{{
-				Subj:  &model.PackageOrSourceInput{Package: p4},
-				Art:   a1,
+				Subj:  &model.PackageOrSourceInput{Package: testdata.P4},
+				Art:   testdata.A1,
 				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
 			}},
 			Calls: []call{
@@ -792,17 +731,17 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject:          p2out,
+					Subject:          testdata.P2out,
 					Digest:           "qwerasdf",
-					IncludedSoftware: []model.PackageOrArtifact{p2out, p4out, a1out},
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P2out, testdata.P4out, testdata.A1out},
 					IncludedDependencies: []*model.IsDependency{{
-						Package:           p2out,
-						DependencyPackage: p4out,
+						Package:           testdata.P2out,
+						DependencyPackage: testdata.P4out,
 						Justification:     "test justification",
 					}},
 					IncludedOccurrences: []*model.IsOccurrence{{
-						Subject:       p4out,
-						Artifact:      a1out,
+						Subject:       testdata.P4out,
+						Artifact:      testdata.A1out,
 						Justification: "test justification",
 					}},
 				},
@@ -812,7 +751,7 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query on DownloadLocation",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{p1},
+				Packages: []*model.PkgInputSpec{testdata.P1},
 			},
 			Calls: []call{
 				{
@@ -839,7 +778,7 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject:          testdata.P1out,
 					DownloadLocation: "location two",
-					IncludedSoftware: []model.PackageOrArtifact{p1out},
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
 				},
 			},
 		},
@@ -847,7 +786,7 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query none",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{p1},
+				Packages: []*model.PkgInputSpec{testdata.P1},
 			},
 			Calls: []call{
 				{
@@ -919,7 +858,7 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query on ID",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{p1},
+				Packages: []*model.PkgInputSpec{testdata.P1},
 			},
 			Calls: []call{
 				{
@@ -944,7 +883,7 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject:          testdata.P1out,
 					DownloadLocation: "location two",
-					IncludedSoftware: []model.PackageOrArtifact{p1out},
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
 				},
 			},
 		},
@@ -952,7 +891,7 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query bad ID",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{p1},
+				Packages: []*model.PkgInputSpec{testdata.P1},
 			},
 			Calls: []call{
 				{
@@ -2745,19 +2684,13 @@ func TestHasSBOM(t *testing.T) {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					for _, pkg := range pkgs {
-						if id, err := getPackageVersionFromIngestedPackage(pkg); err != nil {
-							t.Fatalf("Could not determine PackageVersion id: %v", err)
-						} else {
-							includes.Software = append(includes.Software, id)
-						}
+						includes.Software = append(includes.Software, pkg.PackageVersionID)
 					}
 				}
 				if arts, err := b.IngestArtifacts(ctx, test.PkgArt.Artifacts); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					for _, art := range arts {
-						includes.Software = append(includes.Software, art.ID)
-					}
+					includes.Software = append(includes.Software, arts...)
 				}
 			}
 
@@ -2765,7 +2698,7 @@ func TestHasSBOM(t *testing.T) {
 				if isDep, err := b.IngestDependency(ctx, *dep.pkg, *dep.depPkg, dep.matchType, *dep.isDep); err != nil {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
-					includes.Dependencies = append(includes.Dependencies, isDep.ID)
+					includes.Dependencies = append(includes.Dependencies, isDep)
 				}
 			}
 
@@ -2773,7 +2706,7 @@ func TestHasSBOM(t *testing.T) {
 				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, *occ.Art, *occ.isOcc); err != nil {
 					t.Fatalf("Could not ingest occurrence: %v", err)
 				} else {
-					includes.Occurrences = append(includes.Occurrences, isOcc.ID)
+					includes.Occurrences = append(includes.Occurrences, isOcc)
 				}
 			}
 			for _, o := range test.Calls {
@@ -2804,7 +2737,7 @@ func TestHasSBOM(t *testing.T) {
 	}
 }
 
-func TestIngestHasSBOM(t *testing.T) {
+func TestIngestHasSBOMs(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
 	err := deleteDatabase(ctx, arangoArgs)
@@ -2824,6 +2757,9 @@ func TestIngestHasSBOM(t *testing.T) {
 		Name         string
 		InPkg        []*model.PkgInputSpec
 		InArt        []*model.ArtifactInputSpec
+		PkgArt       *model.PackageOrArtifactInputs
+		IsDeps       []testDependency
+		IsOccs       []testOccurrence
 		Calls        []call
 		Query        *model.HasSBOMSpec
 		ExpHS        []*model.HasSbom
@@ -2833,6 +2769,9 @@ func TestIngestHasSBOM(t *testing.T) {
 		{
 			Name:  "HappyPath",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages: []*model.PkgInputSpec{testdata.P1},
+			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
@@ -2850,14 +2789,18 @@ func TestIngestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject: testdata.P1out,
-					URI:     "test uri",
+					Subject:          testdata.P1out,
+					URI:              "test uri",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
 				},
 			},
 		},
 		{
 			Name:  "Ingest same twice",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages: []*model.PkgInputSpec{testdata.P1},
+			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
@@ -2878,14 +2821,18 @@ func TestIngestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject: testdata.P1out,
-					URI:     "test uri",
+					Subject:          testdata.P1out,
+					URI:              "test uri",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
 				},
 			},
 		},
 		{
 			Name:  "Query on URI",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages: []*model.PkgInputSpec{testdata.P1},
+			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
@@ -2906,19 +2853,37 @@ func TestIngestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject: testdata.P1out,
-					URI:     "test uri one",
+					Subject:          testdata.P1out,
+					URI:              "test uri one",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
 				},
 			},
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
 			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages:  []*model.PkgInputSpec{testdata.P2, testdata.P4},
+				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+			},
+			IsDeps: []testDependency{{
+				pkg:       testdata.P2,
+				depPkg:    testdata.P4,
+				matchType: mSpecific,
+				isDep: &model.IsDependencyInputSpec{
+					Justification: "test justification",
+				},
+			}},
+			IsOccs: []testOccurrence{{
+				Subj:  &model.PackageOrSourceInput{Package: testdata.P4},
+				Art:   testdata.A1,
+				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
+			}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.PkgInputSpec{testdata.P2, testdata.P4},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2949,8 +2914,19 @@ func TestIngestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject: testdata.P2out,
-					URI:     "test uri",
+					Subject:          testdata.P2out,
+					URI:              "test uri",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P2out, testdata.P4out, testdata.A1out},
+					IncludedDependencies: []*model.IsDependency{{
+						Package:           testdata.P2out,
+						DependencyPackage: testdata.P4out,
+						Justification:     "test justification",
+					}},
+					IncludedOccurrences: []*model.IsOccurrence{{
+						Subject:       testdata.P4out,
+						Artifact:      testdata.A1out,
+						Justification: "test justification",
+					}},
 				},
 			},
 		},
@@ -2958,6 +2934,15 @@ func TestIngestHasSBOM(t *testing.T) {
 			Name:  "Query on Artifact",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages:  []*model.PkgInputSpec{testdata.P1},
+				Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			},
+			IsOccs: []testOccurrence{{
+				Subj:  &model.PackageOrSourceInput{Package: testdata.P1},
+				Art:   testdata.A2,
+				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
+			}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
@@ -2992,8 +2977,14 @@ func TestIngestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject: testdata.A2out,
-					URI:     "test uri",
+					Subject:          testdata.A2out,
+					URI:              "test uri",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out, testdata.A1out, testdata.A2out},
+					IncludedOccurrences: []*model.IsOccurrence{{
+						Subject:       testdata.P1out,
+						Artifact:      testdata.A2out,
+						Justification: "test justification",
+					}},
 				},
 			},
 		},
@@ -3013,8 +3004,43 @@ func TestIngestHasSBOM(t *testing.T) {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
+			includes := model.HasSBOMIncludesInputSpec{}
+			if test.PkgArt != nil {
+				if pkgs, err := b.IngestPackages(ctx, test.PkgArt.Packages); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				} else {
+					for _, pkg := range pkgs {
+						includes.Software = append(includes.Software, pkg.PackageVersionID)
+					}
+				}
+				if arts, err := b.IngestArtifacts(ctx, test.PkgArt.Artifacts); err != nil {
+					t.Fatalf("Could not ingest artifact: %v", err)
+				} else {
+					includes.Software = append(includes.Software, arts...)
+				}
+			}
+
+			for _, dep := range test.IsDeps {
+				if isDep, err := b.IngestDependency(ctx, *dep.pkg, *dep.depPkg, dep.matchType, *dep.isDep); err != nil {
+					t.Fatalf("Could not ingest dependency: %v", err)
+				} else {
+					includes.Dependencies = append(includes.Dependencies, isDep)
+				}
+			}
+
+			for _, occ := range test.IsOccs {
+				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, *occ.Art, *occ.isOcc); err != nil {
+					t.Fatalf("Could not ingest occurrence: %v", err)
+				} else {
+					includes.Occurrences = append(includes.Occurrences, isOcc)
+				}
+			}
 			for _, o := range test.Calls {
-				_, err := b.IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc)
+				var sbomIncludes []*model.HasSBOMIncludesInputSpec
+				for count := 0; count < len(o.HS); count++ {
+					sbomIncludes = append(sbomIncludes, &includes)
+				}
+				_, err := b.IngestHasSBOMs(ctx, o.Sub, o.HS, sbomIncludes)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
