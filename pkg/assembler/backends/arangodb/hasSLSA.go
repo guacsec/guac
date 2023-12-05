@@ -24,6 +24,7 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -175,7 +176,7 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 		builtFromKeyList = append(builtFromKeyList, splitID[1])
 	}
 
-	values[builtFromStr] = builtFromIDList
+	values[builtFromStr] = helper.SortAndRemoveDups(builtFromIDList)
 	values["buildFromKeyList"] = builtFromKeyList
 	values[buildTypeStr] = slsa.BuildType
 	values[slsaVersionStr] = slsa.SlsaVersion
