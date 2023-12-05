@@ -44,3 +44,19 @@ type Repo struct {
 	Owner string
 	Repo  string
 }
+
+type Workflow struct {
+	Name string
+	Id   int64
+}
+
+type WorkflowArtifactContent struct {
+	Name  string
+	Bytes []byte
+	RunId int64
+}
+
+type WorkflowRun struct {
+	RunId      int64
+	WorkflowId int64
+}

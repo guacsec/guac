@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/google/go-github/v50/github"
 	"github.com/guacsec/guac/internal/client"
@@ -46,6 +48,15 @@ type GithubClient interface {
 
 	// GetReleaseAsset fetches the content of a release asset, e.g. artifacts, metadata documents, etc.
 	GetReleaseAsset(asset client.ReleaseAsset) (*client.ReleaseAssetContent, error)
+
+	// GetWorkflow fetches the workflow for a given workflow name or all workflows if the workflow name is empty
+	GetWorkflow(ctx context.Context, owner string, repo string, githubWorkflowName string) ([]client.Workflow, error)
+
+	// GetWorkflowRuns fetches all the workflow run for a given workflow id
+	GetWorkflowRuns(ctx context.Context, owner, repo string, workflowId int64) (*client.WorkflowRun, error)
+
+	// GetWorkflowRunArtifacts fetches all the workflow run artifacts for a given workflow run id
+	GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName, githubWorkflowName string) ([]*client.WorkflowArtifactContent, error)
 }
 
 type githubClient struct {
@@ -109,6 +120,133 @@ func (gc *githubClient) GetLatestRelease(ctx context.Context, owner string, repo
 	}
 
 	return &release, nil
+}
+
+// GetWorkflow retrieves the workflow run for a specified workflow name from a given GitHub repository.
+// If the workflow name is not provided, it fetches all workflows for the repository.
+// It returns an error if the workflow name is provided but not found in the repository.
+func (gc *githubClient) GetWorkflow(ctx context.Context, owner, repo, githubWorkflowFileName string) ([]client.Workflow, error) {
+	workflows, _, err := gc.ghClient.Actions.ListWorkflows(ctx, owner, repo, nil)
+	if err != nil {
+		return nil, fmt.Errorf("unable to list workflows: %w", err)
+	}
+
+	res := []client.Workflow{}
+
+	for _, workflow := range workflows.Workflows {
+		// The workflow file name is the last element of the path
+		splitPath := strings.Split(*workflow.Path, "/")
+		workflowFileName := splitPath[len(splitPath)-1]
+
+		if workflowFileName == githubWorkflowFileName {
+			return []client.Workflow{
+				{
+					Name: *workflow.Name,
+					Id:   *workflow.ID,
+				},
+			}, nil
+		} else if githubWorkflowFileName == "" {
+			res = append(res, client.Workflow{
+				Name: *workflow.Name,
+				Id:   *workflow.ID,
+			})
+		}
+	}
+
+	if githubWorkflowFileName != "" {
+		// if the workflow name is not empty, we should have already found a workflow and returned
+		return nil, fmt.Errorf("no workflow found with name: %s", githubWorkflowFileName)
+	}
+
+	return res, nil
+}
+
+// GetWorkflowRuns retrieves all the workflow runs associated with a specified workflow ID from a given GitHub repository.
+// It returns an error if the workflow runs cannot be fetched.
+func (gc *githubClient) GetWorkflowRuns(ctx context.Context, owner, repo string, workflowId int64) (*client.WorkflowRun, error) {
+	runs, _, err := gc.ghClient.Actions.ListWorkflowRunsByID(ctx, owner, repo, workflowId, nil)
+	if err != nil {
+		return nil, fmt.Errorf("unable to list workflow runs: %w", err)
+	}
+
+	if len(runs.WorkflowRuns) == 0 {
+		return nil, nil
+	}
+
+	// runs.WorkflowRuns is sorted by created_at in descending order so the first element is the latest run
+	return &client.WorkflowRun{WorkflowId: *runs.WorkflowRuns[0].WorkflowID, RunId: *runs.WorkflowRuns[0].ID}, nil
+}
+
+func (gc *githubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName, githubWorkflowFileName string) ([]*client.WorkflowArtifactContent, error) {
+	runs, _, err := gc.ghClient.Actions.ListWorkflowRunsByFileName(ctx, owner, repo, githubWorkflowFileName, nil)
+	if err != nil {
+		return nil, fmt.Errorf("unable to list workflow runs by file name: %w", err)
+	}
+
+	var res []*client.WorkflowArtifactContent
+
+	for _, run := range runs.WorkflowRuns {
+		// get workflow run artifacts
+		artifacts, _, err := gc.ghClient.Actions.ListWorkflowRunArtifacts(ctx, owner, repo, run.GetID(), nil)
+		if err != nil {
+			return nil, fmt.Errorf("unable to list workflow run artifacts: %w", err)
+		}
+		for _, j := range artifacts.Artifacts {
+			// download artifact
+			file, _, err := gc.ghClient.Actions.DownloadArtifact(ctx, owner, repo, j.GetID(), true)
+			if err != nil {
+				return nil, fmt.Errorf("unable to download artifact: %w", err)
+			}
+			fmt.Println(file)
+			// Create a new file in the local filesystem
+			out, err := os.Create(*j.Name)
+			if err != nil {
+				return nil, fmt.Errorf("unable to create file: %w", err)
+			}
+			defer out.Close()
+
+			// Create a new HTTP client and request
+			httpClient := &http.Client{}
+			req, err := http.NewRequest("GET", file.String(), nil)
+			if err != nil {
+				return nil, fmt.Errorf("unable to create new request: %w", err)
+			}
+
+			// Send the request
+			resp, err := httpClient.Do(req)
+			if err != nil {
+				return nil, fmt.Errorf("unable to send request: %w", err)
+			}
+			defer resp.Body.Close()
+
+			// Write the contents of the response body to the new file
+			_, err = io.Copy(out, resp.Body)
+			if err != nil {
+				return nil, fmt.Errorf("unable to write file: %w", err)
+			}
+
+			// Read the contents of the file
+			file2, err := os.Open(*j.Name)
+			if err != nil {
+				return nil, fmt.Errorf("unable to open file: %w", err)
+			}
+			defer file2.Close()
+
+			bytes, err := io.ReadAll(file2)
+			if err != nil {
+				return nil, fmt.Errorf("unable to read file: %w", err)
+			}
+
+			// Write the file contents to res
+			res = append(res, &client.WorkflowArtifactContent{
+				Name:  *j.Name,
+				Bytes: bytes,
+				RunId: run.GetID(),
+			})
+		}
+	}
+
+	return res, nil
 }
 
 func (gc *githubClient) GetCommitSHA1(ctx context.Context, owner string, repo string, ref string) (string, error) {

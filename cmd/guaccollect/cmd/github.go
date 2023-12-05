@@ -70,6 +70,9 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
 			viper.GetString("csub-addr"),
+			viper.GetString("github-mode"),
+			viper.GetString("github-sbom-name"),
+			viper.GetString("github-workflow-file-name"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
@@ -112,7 +115,7 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateGithubFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, workflowFileName string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
 	var opts githubOptions
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr

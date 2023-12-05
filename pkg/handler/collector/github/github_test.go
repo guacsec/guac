@@ -144,6 +144,18 @@ func (m *MockGithubClient) GetReleaseAsset(asset client.ReleaseAsset) (*client.R
 	return &rac, nil
 }
 
+func (m *MockGithubClient) GetWorkflow(ctx context.Context, owner string, repo string, githubWorkflowName string) ([]client.Workflow, error) {
+	return nil, nil
+}
+
+func (m *MockGithubClient) GetWorkflowRuns(ctx context.Context, owner, repo string, workflowId int64) (*client.WorkflowRun, error) {
+	return nil, nil
+}
+
+func (m *MockGithubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName, githubWorkflowName string) ([]*client.WorkflowArtifactContent, error) {
+	return nil, nil
+}
+
 func TestNewGithubCollector(t *testing.T) {
 	mockClient := &MockGithubClient{}
 	mockData := mockDataSource()
@@ -683,14 +695,14 @@ func Test_parseGitDataSource(t *testing.T) {
 			name: "parse valid tag git uri",
 			args: args{
 				source: datasource.Source{
-					Value: "git+https://github.com/mock/repo@v1",
+					Value: "git+https://github.com/guacsec/guac@v0.3.0",
 				},
 			},
 			want: &client.Repo{
-				Owner: "mock",
-				Repo:  "repo",
+				Owner: "guacsec",
+				Repo:  "guac",
 			},
-			want1:   "v1",
+			want1:   "v0.3.0",
 			wantErr: false,
 		},
 		{
