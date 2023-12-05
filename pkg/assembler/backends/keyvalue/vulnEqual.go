@@ -196,18 +196,24 @@ func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 			}
 		}
 	} else {
-		veKeys, err := c.kv.Keys(ctx, vulnEqCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, vek := range veKeys {
-			link, err := byKeykv[*vulnerabilityEqualLink](ctx, vulnEqCol, vek, c)
+		var done bool
+		scn := c.kv.Keys(vulnEqCol)
+		for !done {
+			var veKeys []string
+			var err error
+			veKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addVulnIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, vek := range veKeys {
+				link, err := byKeykv[*vulnerabilityEqualLink](ctx, vulnEqCol, vek, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addVulnIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

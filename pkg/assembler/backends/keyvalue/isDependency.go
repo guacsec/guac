@@ -211,18 +211,24 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 			}
 		}
 	} else {
-		depKeys, err := c.kv.Keys(ctx, isDepCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, depKey := range depKeys {
-			link, err := byKeykv[*isDependencyLink](ctx, isDepCol, depKey, c)
+		var done bool
+		scn := c.kv.Keys(isDepCol)
+		for !done {
+			var depKeys []string
+			var err error
+			depKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addDepIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, depKey := range depKeys {
+				link, err := byKeykv[*isDependencyLink](ctx, isDepCol, depKey, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addDepIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

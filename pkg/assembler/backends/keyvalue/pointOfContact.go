@@ -251,18 +251,24 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 			}
 		}
 	} else {
-		pocKeys, err := c.kv.Keys(ctx, pocCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, pk := range pocKeys {
-			link, err := byKeykv[*pointOfContactLink](ctx, pocCol, pk, c)
+		var done bool
+		scn := c.kv.Keys(pocCol)
+		for !done {
+			var pocKeys []string
+			var err error
+			pocKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addPOCIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, pk := range pocKeys {
+				link, err := byKeykv[*pointOfContactLink](ctx, pocCol, pk, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addPOCIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

@@ -332,22 +332,28 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 			}
 		}
 	} else {
-		typeKeys, err := c.kv.Keys(ctx, srcTypeCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, tk := range typeKeys {
-			srcTypeNode, err := byKeykv[*srcType](ctx, srcTypeCol, tk, c)
+		var done bool
+		scn := c.kv.Keys(srcTypeCol)
+		for !done {
+			var typeKeys []string
+			var err error
+			typeKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, filter)
-			if len(sNamespaces) > 0 {
-				out = append(out, &model.Source{
-					ID:         srcTypeNode.ThisID,
-					Type:       srcTypeNode.Type,
-					Namespaces: sNamespaces,
-				})
+			for _, tk := range typeKeys {
+				srcTypeNode, err := byKeykv[*srcType](ctx, srcTypeCol, tk, c)
+				if err != nil {
+					return nil, err
+				}
+				sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, filter)
+				if len(sNamespaces) > 0 {
+					out = append(out, &model.Source{
+						ID:         srcTypeNode.ThisID,
+						Type:       srcTypeNode.Type,
+						Namespaces: sNamespaces,
+					})
+				}
 			}
 		}
 	}
