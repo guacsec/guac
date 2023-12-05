@@ -174,18 +174,24 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 			}
 		}
 	} else {
-		vmdKeys, err := c.kv.Keys(ctx, vulnMDCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, vmdk := range vmdKeys {
-			link, err := byKeykv[*vulnerabilityMetadataLink](ctx, vulnMDCol, vmdk, c)
+		var done bool
+		scn := c.kv.Keys(vulnMDCol)
+		for !done {
+			var vmdKeys []string
+			var err error
+			vmdKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addVulnMetadataMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, vmdk := range vmdKeys {
+				link, err := byKeykv[*vulnerabilityMetadataLink](ctx, vulnMDCol, vmdk, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addVulnMetadataMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

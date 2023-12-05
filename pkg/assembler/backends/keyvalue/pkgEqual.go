@@ -191,18 +191,24 @@ func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) (
 			}
 		}
 	} else {
-		peKeys, err := c.kv.Keys(ctx, pkgEqCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, pek := range peKeys {
-			link, err := byKeykv[*pkgEqualStruct](ctx, pkgEqCol, pek, c)
+		var done bool
+		scn := c.kv.Keys(pkgEqCol)
+		for !done {
+			var peKeys []string
+			var err error
+			peKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addCPIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, pek := range peKeys {
+				link, err := byKeykv[*pkgEqualStruct](ctx, pkgEqCol, pek, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addCPIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

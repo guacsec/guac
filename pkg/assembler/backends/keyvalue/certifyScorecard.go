@@ -183,18 +183,24 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 			}
 		}
 	} else {
-		cscKeys, err := c.kv.Keys(ctx, cscCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, csck := range cscKeys {
-			link, err := byKeykv[*scorecardLink](ctx, cscCol, csck, c)
+		var done bool
+		scn := c.kv.Keys(cscCol)
+		for !done {
+			var cscKeys []string
+			var err error
+			cscKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addSCIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, csck := range cscKeys {
+				link, err := byKeykv[*scorecardLink](ctx, cscCol, csck, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addSCIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

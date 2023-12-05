@@ -189,18 +189,24 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 			}
 		}
 	} else {
-		hsaKeys, err := c.kv.Keys(ctx, hsaCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, hsak := range hsaKeys {
-			link, err := byKeykv[*srcMapLink](ctx, hsaCol, hsak, c)
+		var done bool
+		scn := c.kv.Keys(hsaCol)
+		for !done {
+			var hsaKeys []string
+			var err error
+			hsaKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addSrcIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, hsak := range hsaKeys {
+				link, err := byKeykv[*srcMapLink](ctx, hsaCol, hsak, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addSrcIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

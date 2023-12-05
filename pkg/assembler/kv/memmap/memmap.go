@@ -24,17 +24,18 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-type Store struct {
+type store struct {
 	m map[string]map[string]any
 }
 
+// GetStore returns a kv.Store that stores all data in an internal go map.
 func GetStore() kv.Store {
-	return &Store{
+	return &store{
 		m: make(map[string]map[string]any),
 	}
 }
 
-func (s *Store) Get(_ context.Context, c, k string, v any) error {
+func (s *store) Get(_ context.Context, c, k string, v any) error {
 	col, ok := s.m[c]
 	if !ok {
 		return fmt.Errorf("%w : Collection %q", kv.NotFoundError, c)
@@ -47,7 +48,7 @@ func (s *Store) Get(_ context.Context, c, k string, v any) error {
 	return copyAny(val, v)
 }
 
-func (s *Store) Set(_ context.Context, c, k string, v any) error {
+func (s *store) Set(_ context.Context, c, k string, v any) error {
 	if s.m[c] == nil {
 		s.m[c] = make(map[string]any)
 	}
@@ -55,11 +56,12 @@ func (s *Store) Set(_ context.Context, c, k string, v any) error {
 	return nil
 }
 
-func (s *Store) Keys(_ context.Context, c string) ([]string, error) {
-	if s.m[c] == nil {
-		return nil, nil
+func (s *store) Keys(c string) kv.Scanner {
+	return &scanner{
+		collection: c,
+		done:       false,
+		store:      s,
 	}
-	return maps.Keys(s.m[c]), nil
 }
 
 func copyAny(src any, dst any) error {
@@ -79,4 +81,21 @@ func copyAny(src any, dst any) error {
 	// }
 	d.Set(s)
 	return nil
+}
+
+type scanner struct {
+	collection string
+	done       bool
+	store      *store
+}
+
+func (s *scanner) Scan(_ context.Context) ([]string, bool, error) {
+	if s.done {
+		return nil, true, nil
+	}
+	s.done = true
+	if s.store.m[s.collection] == nil {
+		return nil, true, nil
+	}
+	return maps.Keys(s.store.m[s.collection]), true, nil
 }

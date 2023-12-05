@@ -239,28 +239,33 @@ func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 	algorithm := strings.ToLower(nilToEmpty(artifactSpec.Algorithm))
 	digest := strings.ToLower(nilToEmpty(artifactSpec.Digest))
 	var rv []*model.Artifact
-	artKeys, err := c.kv.Keys(ctx, artCol)
-	if err != nil {
-		return nil, err
-	}
-	for _, ak := range artKeys {
-		a, err := byKeykv[*artStruct](ctx, artCol, ak, c)
+	var done bool
+	scn := c.kv.Keys(artCol)
+	for !done {
+		var artKeys []string
+		artKeys, done, err = scn.Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
+		for _, ak := range artKeys {
+			a, err := byKeykv[*artStruct](ctx, artCol, ak, c)
+			if err != nil {
+				return nil, err
+			}
 
-		matchAlgorithm := false
-		if algorithm == "" || algorithm == a.Algorithm {
-			matchAlgorithm = true
-		}
+			matchAlgorithm := false
+			if algorithm == "" || algorithm == a.Algorithm {
+				matchAlgorithm = true
+			}
 
-		matchDigest := false
-		if digest == "" || digest == a.Digest {
-			matchDigest = true
-		}
+			matchDigest := false
+			if digest == "" || digest == a.Digest {
+				matchDigest = true
+			}
 
-		if matchDigest && matchAlgorithm {
-			rv = append(rv, c.convArtifact(a))
+			if matchDigest && matchAlgorithm {
+				rv = append(rv, c.convArtifact(a))
+			}
 		}
 	}
 	return rv, nil

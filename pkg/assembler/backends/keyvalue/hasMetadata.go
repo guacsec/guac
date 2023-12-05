@@ -253,18 +253,24 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 			}
 		}
 	} else {
-		hmk, err := c.kv.Keys(ctx, hasMDCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, hk := range hmk {
-			link, err := byKeykv[*hasMetadataLink](ctx, hasMDCol, hk, c)
+		var done bool
+		scn := c.kv.Keys(hasMDCol)
+		for !done {
+			var hmk []string
+			var err error
+			hmk, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addHMIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, hk := range hmk {
+				link, err := byKeykv[*hasMetadataLink](ctx, hasMDCol, hk, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addHMIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

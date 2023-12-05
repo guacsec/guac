@@ -227,18 +227,24 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			}
 		}
 	} else {
-		keys, err := c.kv.Keys(ctx, cVulnCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, key := range keys {
-			link, err := byKeykv[*certifyVulnerabilityLink](ctx, cVulnCol, key, c)
+		var done bool
+		scn := c.kv.Keys(cVulnCol)
+		for !done {
+			var keys []string
+			var err error
+			keys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addCVIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, key := range keys {
+				link, err := byKeykv[*certifyVulnerabilityLink](ctx, cVulnCol, key, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addCVIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

@@ -227,18 +227,24 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 			}
 		}
 	} else {
-		heKeys, err := c.kv.Keys(ctx, hashEqCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, hek := range heKeys {
-			link, err := byKeykv[*hashEqualStruct](ctx, hashEqCol, hek, c)
+		var done bool
+		scn := c.kv.Keys(hashEqCol)
+		for !done {
+			var heKeys []string
+			var err error
+			heKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addHEIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, hek := range heKeys {
+				link, err := byKeykv[*hashEqualStruct](ctx, hashEqCol, hek, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addHEIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

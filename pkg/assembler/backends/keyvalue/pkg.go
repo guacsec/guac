@@ -528,22 +528,28 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 			}
 		}
 	} else {
-		typeKeys, err := c.kv.Keys(ctx, pkgTypeCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, tk := range typeKeys {
-			pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
+		var done bool
+		scn := c.kv.Keys(pkgTypeCol)
+		for !done {
+			var typeKeys []string
+			var err error
+			typeKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			pNamespaces := c.buildPkgNamespace(ctx, pkgTypeNode, filter)
-			if len(pNamespaces) > 0 {
-				out = append(out, &model.Package{
-					ID:         pkgTypeNode.ThisID,
-					Type:       pkgTypeNode.Type,
-					Namespaces: pNamespaces,
-				})
+			for _, tk := range typeKeys {
+				pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
+				if err != nil {
+					return nil, err
+				}
+				pNamespaces := c.buildPkgNamespace(ctx, pkgTypeNode, filter)
+				if len(pNamespaces) > 0 {
+					out = append(out, &model.Package{
+						ID:         pkgTypeNode.ThisID,
+						Type:       pkgTypeNode.Type,
+						Namespaces: pNamespaces,
+					})
+				}
 			}
 		}
 	}

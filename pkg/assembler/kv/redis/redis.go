@@ -26,7 +26,9 @@ import (
 
 var json = jsoniter.ConfigFastest
 
-type Store struct {
+const count = 1000
+
+type store struct {
 	c *redis.Client
 }
 
@@ -39,12 +41,12 @@ func GetStore(s string) (kv.Store, error) {
 		return nil, err
 	}
 
-	return &Store{
+	return &store{
 		c: redis.NewClient(opt),
 	}, nil
 }
 
-func (s *Store) Get(ctx context.Context, c, k string, v any) error {
+func (s *store) Get(ctx context.Context, c, k string, v any) error {
 	j, err := s.c.HGet(ctx, c, k).Result()
 	// TODO(jeffmendoza), should figure out error type and check it, instead just see if
 	// string is empty for now.
@@ -57,7 +59,7 @@ func (s *Store) Get(ctx context.Context, c, k string, v any) error {
 	return json.Unmarshal([]byte(j), v)
 }
 
-func (s *Store) Set(ctx context.Context, c, k string, v any) error {
+func (s *store) Set(ctx context.Context, c, k string, v any) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -65,7 +67,33 @@ func (s *Store) Set(ctx context.Context, c, k string, v any) error {
 	return s.c.HSet(ctx, c, k, string(b)).Err()
 }
 
-func (s *Store) Keys(ctx context.Context, c string) ([]string, error) {
-	// TODO(jeffmendoza) implement scanning in kv interface, use "Keys" for now.
-	return s.c.HKeys(ctx, c).Result()
+func (s *store) Keys(c string) kv.Scanner {
+	return &scanner{
+		collection: c,
+		done:       false,
+		cursor:     0,
+		c:          s.c,
+	}
+}
+
+type scanner struct {
+	collection string
+	done       bool
+	cursor     uint64
+	c          *redis.Client
+}
+
+func (s *scanner) Scan(ctx context.Context) ([]string, bool, error) {
+	if s.done {
+		return nil, true, nil
+	}
+	rv, newCur, err := s.c.HScan(ctx, s.collection, s.cursor, "", count).Result()
+	if err != nil {
+		return nil, false, err
+	}
+	s.cursor = newCur
+	if newCur == 0 {
+		s.done = true
+	}
+	return rv, s.done, nil
 }

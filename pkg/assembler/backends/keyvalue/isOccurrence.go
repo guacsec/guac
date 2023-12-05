@@ -293,18 +293,24 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 			}
 		}
 	} else {
-		occKeys, err := c.kv.Keys(ctx, occCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, ok := range occKeys {
-			link, err := byKeykv[*isOccurrenceStruct](ctx, occCol, ok, c)
+		var done bool
+		scn := c.kv.Keys(occCol)
+		for !done {
+			var occKeys []string
+			var err error
+			occKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addOccIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, ok := range occKeys {
+				link, err := byKeykv[*isOccurrenceStruct](ctx, occCol, ok, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addOccIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

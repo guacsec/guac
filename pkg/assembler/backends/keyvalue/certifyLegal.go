@@ -343,18 +343,24 @@ func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLega
 			}
 		}
 	} else {
-		clKeys, err := c.kv.Keys(ctx, clCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, clk := range clKeys {
-			link, err := byKeykv[*certifyLegalStruct](ctx, clCol, clk, c)
+		var done bool
+		scn := c.kv.Keys(clCol)
+		for !done {
+			var clKeys []string
+			var err error
+			clKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addLegalIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, clk := range clKeys {
+				link, err := byKeykv[*certifyLegalStruct](ctx, clCol, clk, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addLegalIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}
