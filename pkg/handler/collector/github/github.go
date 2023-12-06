@@ -54,6 +54,7 @@ type githubCollector struct {
 	workflowFileName  string
 	owner             string
 	repo              string
+	lastIngestedRun   int64
 }
 
 type Config struct {
@@ -180,7 +181,16 @@ func (g *githubCollector) RetrieveArtifacts(ctx context.Context, docChannel chan
 			}
 		}
 	} else {
-		g.fetchWorkflowRunArtifacts(ctx, g.owner, g.repo, docChannel)
+		if g.poll {
+			g.fetchWorkflowRunArtifacts(ctx, g.owner, g.repo, docChannel)
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(g.interval):
+			}
+		} else {
+			g.fetchWorkflowRunArtifacts(ctx, g.owner, g.repo, docChannel)
+		}
 	}
 
 	return nil
@@ -213,6 +223,7 @@ func (g *githubCollector) populateRepoToReleaseTags(ctx context.Context) error {
 		r, t, err := ParseGitDataSource(gds)
 		if err != nil {
 			logger.Warnf("unable to parse git datasource: %v", err)
+			continue
 		}
 		g.repoToReleaseTags[*r] = append(g.repoToReleaseTags[*r], t)
 	}
@@ -294,14 +305,16 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner s
 			continue
 		}
 
+		// don't re-ingest the same run
+		if run.RunId == g.lastIngestedRun {
+			continue
+		}
+
+		fmt.Println("run.RunId: ", run.RunId)
+
 		artifacts, err := g.client.GetWorkflowRunArtifacts(ctx, owner, repo, g.sbomName, g.workflowFileName)
 		if err != nil {
 			logger.Warnf("unable to fetch workflow run artifacts for run %v: %v", run.RunId, err)
-			continue
-		}
-		if artifacts == nil {
-			// Some artifacts are not available for download one error received is "You must have the actions scope to download artifacts"
-			logger.Warnf("no workflow run artifacts found for run %v", run.RunId)
 			continue
 		}
 
@@ -317,6 +330,8 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner s
 			}
 			docChannel <- doc
 		}
+
+		g.lastIngestedRun = run.RunId
 	}
 }
 

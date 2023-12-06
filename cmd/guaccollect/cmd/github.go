@@ -112,11 +112,13 @@ you have access to read and write to the respective blob store.`,
 			github.WithRelease(opts.githubMode),
 			github.WithSbomName(opts.sbomName),
 			github.WithWorkflowName(opts.workflowFileName),
-			github.WithOwner(opts.ownerRepoName[:strings.Index(opts.ownerRepoName, "/")]),  // the owner name is everything before the slash
-			github.WithRepo(opts.ownerRepoName[strings.Index(opts.ownerRepoName, "/")+1:]), // the repo name is everything after the slash
 		}
 		if opts.poll {
 			collectorOpts = append(collectorOpts, github.WithPolling(30*time.Second))
+		}
+		if opts.ownerRepoName != "" {
+			collectorOpts = append(collectorOpts, github.WithOwner(opts.ownerRepoName[:strings.Index(opts.ownerRepoName, "/")]))  // the owner name is everything before the slash
+			collectorOpts = append(collectorOpts, github.WithRepo(opts.ownerRepoName[strings.Index(opts.ownerRepoName, "/")+1:])) // the repo name is everything after the slash
 		}
 		githubCollector, err := github.NewGithubCollector(collectorOpts...)
 		if err != nil {
