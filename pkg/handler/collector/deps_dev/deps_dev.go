@@ -71,7 +71,7 @@ type depsCollector struct {
 	poll                 bool
 	retrieveDependencies bool
 	interval             time.Duration
-	metrics              metrics.MetricCollector
+	Metrics              metrics.MetricCollector
 	checkedPurls         map[string]*PackageComponent
 	ingestedSource       map[string]*model.SourceInputSpec
 	projectInfoMap       map[string]*pb.Project
@@ -82,6 +82,7 @@ type depsCollector struct {
 var registerOnce sync.Once
 
 func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, retrieveDependencies bool, interval time.Duration) (*depsCollector, error) {
+	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
 	if err != nil {
@@ -100,10 +101,10 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	// Create a new Insights Client.
 	client := pb.NewInsightsClient(conn)
 
-	// Initialize the metrics collector
+	// Initialize the Metrics collector
 	metricsCollector := metrics.FromContext(ctx, prometheusPrefix)
 	if err := registerMetricsOnce(ctx, metricsCollector); err != nil {
-		return nil, fmt.Errorf("unable to register metrics: %w", err)
+		return nil, fmt.Errorf("unable to register Metrics: %w", err)
 	}
 	return &depsCollector{
 		collectDataSource:    collectDataSource,
@@ -116,7 +117,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		projectInfoMap:       map[string]*pb.Project{},
 		versions:             map[string]*pb.Version{},
 		dependencies:         map[string]*pb.Dependencies{},
-		metrics:              metricsCollector,
+		Metrics:              metricsCollector,
 	}, nil
 }
 
@@ -542,7 +543,7 @@ func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType s
 		logger.Debugf("The version key was not found in the map: %v", versionKey)
 		versionResponse, err = d.client.GetVersion(ctx, versionReq)
 		if err != nil {
-			if metricsErr := d.metrics.AddCounter(ctx, GetVersionErrorsCounter, 1, pkgType, *namespace, name); metricsErr != nil {
+			if metricsErr := d.Metrics.AddCounter(ctx, GetVersionErrorsCounter, 1, pkgType, *namespace, name); metricsErr != nil {
 				logger.Errorf("failed to add counter: %v", metricsErr)
 			}
 			return fmt.Errorf("failed to get version information: %w", err)
@@ -728,7 +729,7 @@ func (d *depsCollector) getVersions(ctx context.Context, inputs <-chan *pb.Versi
 
 // getProject fetches project info for a given project URL.
 func (d *depsCollector) getProject(ctx context.Context, v *pb.ProjectKey) (*pb.Project, error) {
-	defer d.metrics.MeasureFunctionExecutionTime(ctx, GetProjectDurationHistogram) // nolint:errcheck
+	defer d.Metrics.MeasureFunctionExecutionTime(ctx, GetProjectDurationHistogram) // nolint:errcheck
 	return d.client.GetProject(ctx, &pb.GetProjectRequest{
 		ProjectKey: v,
 	})
@@ -736,7 +737,7 @@ func (d *depsCollector) getProject(ctx context.Context, v *pb.ProjectKey) (*pb.P
 
 // getVersions fetches version info from deps.dev.
 func (d *depsCollector) getVersion(ctx context.Context, v *pb.VersionKey) (*pb.Version, error) {
-	defer d.metrics.MeasureFunctionExecutionTime(ctx, "getVersion") // nolint:errcheck
+	defer d.Metrics.MeasureFunctionExecutionTime(ctx, "getVersion") // nolint:errcheck
 	return d.client.GetVersion(ctx, &pb.GetVersionRequest{
 		VersionKey: v,
 	})
@@ -763,7 +764,7 @@ func (d *depsCollector) projectKey(versionResponse *pb.Version) *pb.ProjectKey {
 	return nil
 }
 
-// registerMetrics registers the metrics for the collector.
+// registerMetrics registers the Metrics for the collector.
 func registerMetrics(ctx context.Context, m metrics.MetricCollector) error {
 	// Registering counter for get version errors
 	if _, err := m.RegisterCounter(ctx, GetVersionErrorsCounter, "pkgtype", "namespace", "name"); err != nil {
@@ -772,7 +773,7 @@ func registerMetrics(ctx context.Context, m metrics.MetricCollector) error {
 	return nil
 }
 
-// registerMetricsOnce registers the metrics for the collector once.
+// registerMetricsOnce registers the Metrics for the collector once.
 func registerMetricsOnce(ctx context.Context, metricsCollector metrics.MetricCollector) error {
 	var err error
 	registerOnce.Do(func() {
