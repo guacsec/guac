@@ -40,10 +40,13 @@ type prometheusCollector struct {
 	gauges map[string]*prometheus.GaugeVec
 	// counters is a map that holds the CounterVec objects.
 	counters map[string]*prometheus.CounterVec
+	// prefix is a string that holds the prefix for the metrics.
+	name string
 }
 
 // SetGauge sets a gauge metric with a given name, value, and labels.
-func (p *prometheusCollector) SetGauge(ctx context.Context, name string, value float64, labels ...string) error {
+func (p *prometheusCollector) SetGauge(_ context.Context, name string, value float64, labels ...string) error {
+	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.gauges[name]; !ok {
 		return fmt.Errorf("gauge '%s' not found", name)
 	}
@@ -52,7 +55,8 @@ func (p *prometheusCollector) SetGauge(ctx context.Context, name string, value f
 }
 
 // AddHistogram increments a histogram metric with a given name, value, and labels.
-func (p *prometheusCollector) AddHistogram(ctx context.Context, name string, value float64, labels ...string) error {
+func (p *prometheusCollector) AddHistogram(_ context.Context, name string, value float64, labels ...string) error {
+	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.histograms[name]; !ok {
 		return fmt.Errorf("histogram '%s' not found", name)
 	}
@@ -62,7 +66,8 @@ func (p *prometheusCollector) AddHistogram(ctx context.Context, name string, val
 
 // AddCounter increments a counter metric with a given name, value, and labels.
 // It returns an error if the counter is not found.
-func (p *prometheusCollector) AddCounter(ctx context.Context, name string, value float64, labels ...string) error {
+func (p *prometheusCollector) AddCounter(_ context.Context, name string, value float64, labels ...string) error {
+	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.counters[name]; !ok {
 		return fmt.Errorf("counter '%s' not found", name)
 	}
@@ -70,7 +75,7 @@ func (p *prometheusCollector) AddCounter(ctx context.Context, name string, value
 	return nil
 }
 
-// MetricsHandler returns an http.Handler for the prometheus metrics.
+// MetricsHandler returns a http.Handler for the prometheus metrics.
 func (p *prometheusCollector) MetricsHandler() http.Handler {
 	return promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{
 		EnableOpenMetrics: true,
@@ -78,10 +83,11 @@ func (p *prometheusCollector) MetricsHandler() http.Handler {
 }
 
 // NewPrometheus creates a new prometheusCollector with empty sync.Maps for histograms, gauges, and counters.
-func NewPrometheus() MetricCollector {
+func NewPrometheus(name string) MetricCollector {
+	name = fmt.Sprintf("%s_%s_function_duration_seconds", "guac", name)
 	functionDuration := prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "function_duration_seconds",
+			Name:    name,
 			Help:    "Time spent executing functions.",
 			Buckets: prometheus.DefBuckets,
 		},
@@ -92,12 +98,13 @@ func NewPrometheus() MetricCollector {
 		gauges:     make(map[string]*prometheus.GaugeVec),
 		counters:   make(map[string]*prometheus.CounterVec),
 	}
-	p.histograms["function_duration_seconds"] = functionDuration
+	p.histograms[name] = functionDuration
 	return p
 }
 
 // RegisterGauge registers a gauge metric with the given name and labels.
-func (p *prometheusCollector) RegisterGauge(ctx context.Context, name string, labels ...string) (Counter, error) {
+func (p *prometheusCollector) RegisterGauge(_ context.Context, name string, labels ...string) (Counter, error) {
+	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.gauges[name]; ok {
 		return nil, fmt.Errorf("gauge '%s' already registered", name)
 	}
@@ -114,7 +121,8 @@ func (p *prometheusCollector) RegisterGauge(ctx context.Context, name string, la
 }
 
 // RegisterCounter registers a counter metric with the given name and labels.
-func (p *prometheusCollector) RegisterCounter(ctx context.Context, name string, labels ...string) (Counter, error) {
+func (p *prometheusCollector) RegisterCounter(_ context.Context, name string, labels ...string) (Counter, error) {
+	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.counters[name]; ok {
 		return nil, fmt.Errorf("counter '%s' already registered", name)
 	}
@@ -131,7 +139,8 @@ func (p *prometheusCollector) RegisterCounter(ctx context.Context, name string, 
 }
 
 // RegisterHistogram registers a histogram metric with the given name and labels.
-func (p *prometheusCollector) RegisterHistogram(ctx context.Context, name string, labels ...string) (Observable, error) {
+func (p *prometheusCollector) RegisterHistogram(_ context.Context, name string, labels ...string) (Observable, error) {
+	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.histograms[name]; ok {
 		return nil, fmt.Errorf("histogram '%s' already registered", name)
 	}
@@ -149,8 +158,8 @@ func (p *prometheusCollector) RegisterHistogram(ctx context.Context, name string
 }
 
 // WithMetrics returns a new context with a prometheusCollector.
-func WithMetrics(ctx context.Context) context.Context {
-	metricsCollector := NewPrometheus()
+func WithMetrics(ctx context.Context, name string) context.Context {
+	metricsCollector := NewPrometheus(name)
 	return context.WithValue(ctx, metrics(collectorKey), metricsCollector)
 }
 
@@ -159,7 +168,8 @@ func WithMetrics(ctx context.Context) context.Context {
 // Example usage:
 //
 //	defer p.MeasureFunctionExecutionTime(ctx, "myFunction", "label1", "label2")()
-func (p *prometheusCollector) MeasureFunctionExecutionTime(ctx context.Context, name string) (func(), error) {
+func (p *prometheusCollector) MeasureFunctionExecutionTime(_ context.Context, name string) (func(), error) {
+	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.histograms[functionDuration]; !ok {
 		return nil, fmt.Errorf("histogram '%s' not found", name)
 	}
@@ -171,7 +181,8 @@ func (p *prometheusCollector) MeasureFunctionExecutionTime(ctx context.Context, 
 }
 
 // ObserveHistogram observes a histogram metric with a given name, value, and labels.
-func (p *prometheusCollector) ObserveHistogram(ctx context.Context, name string, value float64, labels ...string) error {
+func (p *prometheusCollector) ObserveHistogram(_ context.Context, name string, value float64, labels ...string) error {
+	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.histograms[name]; !ok {
 		return fmt.Errorf("histogram '%s' not found", name)
 	}
@@ -180,10 +191,10 @@ func (p *prometheusCollector) ObserveHistogram(ctx context.Context, name string,
 }
 
 // FromContext returns the MetricCollector from the context.
-func FromContext(ctx context.Context) MetricCollector {
+func FromContext(ctx context.Context, name string) MetricCollector {
 	c := metrics(collectorKey)
 	if met, ok := ctx.Value(c).(MetricCollector); ok {
 		return met
 	}
-	return NewPrometheus()
+	return NewPrometheus(name)
 }

@@ -51,6 +51,8 @@ type depsDevOptions struct {
 	promeAddr string
 }
 
+const prometheusPrefix = "deps_dev"
+
 var depsDevCmd = &cobra.Command{
 	Use:   "deps_dev [flags] purl1 purl2...",
 	Short: "takes purls and queries them against deps.dev to find additional metadata to add to GUAC graph",
@@ -76,8 +78,8 @@ var depsDevCmd = &cobra.Command{
 			_ = cmd.Help()
 			os.Exit(1)
 		}
-		ctx = metrics.WithMetrics(ctx)
-		m := metrics.FromContext(ctx)
+		ctx = metrics.WithMetrics(ctx, prometheusPrefix)
+		m := metrics.FromContext(ctx, prometheusPrefix)
 		// Register collector
 		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second)
 		if err != nil {

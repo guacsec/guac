@@ -21,14 +21,11 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 func TestRegisterCounter(t *testing.T) {
-	ctx := WithMetrics(context.Background())
-	collector := FromContext(ctx)
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
 
 	_, err := collector.RegisterCounter(ctx, "test_counter", "label1")
 	if err != nil {
@@ -42,8 +39,8 @@ func TestRegisterCounter(t *testing.T) {
 }
 
 func TestRegisterHistogram(t *testing.T) {
-	ctx := WithMetrics(context.Background())
-	collector := FromContext(ctx)
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
 
 	_, err := collector.RegisterHistogram(ctx, "test_histogram", "label1")
 	if err != nil {
@@ -57,8 +54,8 @@ func TestRegisterHistogram(t *testing.T) {
 }
 
 func TestRegisterGauge(t *testing.T) {
-	ctx := WithMetrics(context.Background())
-	collector := FromContext(ctx)
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
 
 	_, err := collector.RegisterGauge(ctx, "test_gauge", "label1")
 	if err != nil {
@@ -71,8 +68,8 @@ func TestRegisterGauge(t *testing.T) {
 }
 
 func TestMetricsHandler(t *testing.T) {
-	ctx := WithMetrics(context.Background())
-	collector := FromContext(ctx)
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
 
 	handler := collector.MetricsHandler()
 
@@ -90,8 +87,8 @@ func TestMetricsHandler(t *testing.T) {
 }
 
 func TestNonExistingCounter(t *testing.T) {
-	ctx := WithMetrics(context.Background())
-	collector := FromContext(ctx)
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
 
 	err := collector.AddCounter(ctx, "non_existing_counter", 1, "label1")
 	if err == nil {
@@ -100,8 +97,8 @@ func TestNonExistingCounter(t *testing.T) {
 }
 
 func TestHandlerBody(t *testing.T) {
-	ctx := WithMetrics(context.Background())
-	collector := FromContext(ctx)
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
 
 	handler := collector.MetricsHandler()
 
@@ -113,18 +110,8 @@ func TestHandlerBody(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 
-	expected := `guac_test_counter{label1="label1"}`
+	expected := `guac__test_counter{label1="label1"}`
 	if !strings.Contains(rr.Body.String(), expected) {
 		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
-	}
-}
-
-func assertMetricRegistered(t *testing.T, metricName string) {
-	count, err := testutil.GatherAndCount(prometheus.DefaultGatherer, metricName)
-	if err != nil {
-		t.Errorf("Failed to gather and count: %v", err)
-	}
-	if count == 0 {
-		t.Errorf("%s is not registered", metricName)
 	}
 }

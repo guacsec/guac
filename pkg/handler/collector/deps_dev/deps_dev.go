@@ -47,6 +47,7 @@ const (
 	sourceRepo                  = "SOURCE_REPO"
 	GetProjectDurationHistogram = "http_deps_dev_project_duration"
 	GetVersionErrorsCounter     = "http_deps_dev_version_errors"
+	prometheusPrefix            = "deps_dev"
 )
 
 type IsDepPackage struct {
@@ -100,7 +101,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 	client := pb.NewInsightsClient(conn)
 
 	// Initialize the metrics collector
-	metricsCollector := metrics.FromContext(ctx)
+	metricsCollector := metrics.FromContext(ctx, prometheusPrefix)
 	if err := registerMetricsOnce(ctx, metricsCollector); err != nil {
 		return nil, fmt.Errorf("unable to register metrics: %w", err)
 	}
