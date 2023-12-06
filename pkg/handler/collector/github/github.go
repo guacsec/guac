@@ -52,6 +52,8 @@ type githubCollector struct {
 	isRelease         bool
 	sbomName          string
 	workflowFileName  string
+	owner             string
+	repo              string
 }
 
 type Config struct {
@@ -98,9 +100,13 @@ func WithPolling(interval time.Duration) Opt {
 	}
 }
 
-func WithRelease(isRelease bool) Opt {
+func WithRelease(githubMode string) Opt {
 	return func(g *githubCollector) {
-		g.isRelease = isRelease
+		if githubMode == "release" || githubMode == "" {
+			g.isRelease = true
+		} else {
+			g.isRelease = false // otherwise it is a workflow
+		}
 	}
 }
 
@@ -113,6 +119,18 @@ func WithSbomName(sbomName string) Opt {
 func WithWorkflowName(workflowName string) Opt {
 	return func(g *githubCollector) {
 		g.workflowFileName = workflowName
+	}
+}
+
+func WithOwner(owner string) Opt {
+	return func(g *githubCollector) {
+		g.owner = owner
+	}
+}
+
+func WithRepo(repo string) Opt {
+	return func(g *githubCollector) {
+		g.repo = repo
 	}
 }
 
@@ -142,11 +160,11 @@ func WithCollectDataSource(collectDataSource datasource.CollectSource) Opt {
 
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
 func (g *githubCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	err := g.populateRepoToReleaseTags(ctx)
-	if err != nil {
-		return err
-	}
 	if g.isRelease {
+		err := g.populateRepoToReleaseTags(ctx)
+		if err != nil {
+			return err
+		}
 		if g.poll {
 			for repo, tags := range g.repoToReleaseTags {
 				g.fetchAssets(ctx, repo.Owner, repo.Repo, tags, docChannel)
@@ -162,8 +180,7 @@ func (g *githubCollector) RetrieveArtifacts(ctx context.Context, docChannel chan
 			}
 		}
 	} else {
-		// example workflow file name for guac-test is: testWorkflow.yaml
-		g.fetchWorkflowRunArtifacts(ctx, "guacsec", "guac-test", docChannel)
+		g.fetchWorkflowRunArtifacts(ctx, g.owner, g.repo, docChannel)
 	}
 
 	return nil
@@ -266,7 +283,6 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner s
 	}
 
 	for _, workflow := range workflows {
-		logger.Infof("workflow name: %v", workflow.Name)
 		// get the latest workflow run
 		run, err := g.client.GetWorkflowRuns(ctx, owner, repo, workflow.Id)
 		if err != nil {

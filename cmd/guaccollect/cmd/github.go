@@ -18,7 +18,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/guacsec/guac/pkg/cli"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/guacsec/guac/internal/client/githubclient"
@@ -42,6 +44,14 @@ type githubOptions struct {
 	blobAddr string
 	// run as poll collector
 	poll bool
+	// the mode to run the collector in
+	githubMode string
+	// the name of the sbom file to look for
+	sbomName string
+	// the name of the workflow file to look for
+	workflowFileName string
+	// the owner/repo name to use for the collector
+	ownerRepoName string
 }
 
 var githubCmd = &cobra.Command{
@@ -71,8 +81,9 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("blob-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetString("github-mode"),
-			viper.GetString("github-sbom-name"),
-			viper.GetString("github-workflow-file-name"),
+			viper.GetString("github-sbom"),
+			viper.GetString("github-workflow-file"),
+			viper.GetString("owner-repo"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
@@ -98,6 +109,11 @@ you have access to read and write to the respective blob store.`,
 		collectorOpts := []github.Opt{
 			github.WithCollectDataSource(opts.dataSource),
 			github.WithClient(ghc),
+			github.WithRelease(opts.githubMode),
+			github.WithSbomName(opts.sbomName),
+			github.WithWorkflowName(opts.workflowFileName),
+			github.WithOwner(opts.ownerRepoName[:strings.Index(opts.ownerRepoName, "/")]),  // the owner name is everything before the slash
+			github.WithRepo(opts.ownerRepoName[strings.Index(opts.ownerRepoName, "/")+1:]), // the repo name is everything after the slash
 		}
 		if opts.poll {
 			collectorOpts = append(collectorOpts, github.WithPolling(30*time.Second))
@@ -115,11 +131,15 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, workflowFileName string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, workflowFileName, ownerRepoName string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
 	var opts githubOptions
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
+	opts.githubMode = githubMode
+	opts.sbomName = sbomName
+	opts.workflowFileName = workflowFileName
+	opts.ownerRepoName = ownerRepoName
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -160,9 +180,21 @@ func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, w
 		return opts, err
 	}
 
+	// TODO (nathan): Add support for workflow mode
+
 	return opts, nil
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"github-mode", "github-sbom", "github-workflow-file", "owner-repo"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	githubCmd.PersistentFlags().AddFlagSet(set)
+	if err := viper.BindPFlags(githubCmd.PersistentFlags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
 	rootCmd.AddCommand(githubCmd)
 }

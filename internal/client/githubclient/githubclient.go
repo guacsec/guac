@@ -56,7 +56,7 @@ type GithubClient interface {
 	GetWorkflowRuns(ctx context.Context, owner, repo string, workflowId int64) (*client.WorkflowRun, error)
 
 	// GetWorkflowRunArtifacts fetches all the workflow run artifacts for a given workflow run id
-	GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName, githubWorkflowName string) ([]*client.WorkflowArtifactContent, error)
+	GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName, githubWorkflowFileName string) ([]*client.WorkflowArtifactContent, error)
 }
 
 type githubClient struct {
@@ -178,9 +178,18 @@ func (gc *githubClient) GetWorkflowRuns(ctx context.Context, owner, repo string,
 }
 
 func (gc *githubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName, githubWorkflowFileName string) ([]*client.WorkflowArtifactContent, error) {
-	runs, _, err := gc.ghClient.Actions.ListWorkflowRunsByFileName(ctx, owner, repo, githubWorkflowFileName, nil)
-	if err != nil {
-		return nil, fmt.Errorf("unable to list workflow runs by file name: %w", err)
+	var runs *github.WorkflowRuns
+	var err error
+	if githubWorkflowFileName == "" {
+		runs, _, err = gc.ghClient.Actions.ListRepositoryWorkflowRuns(ctx, owner, repo, nil)
+		if err != nil {
+			return nil, fmt.Errorf("unable to list workflow runs: %w", err)
+		}
+	} else {
+		runs, _, err = gc.ghClient.Actions.ListWorkflowRunsByFileName(ctx, owner, repo, githubWorkflowFileName, nil)
+		if err != nil {
+			return nil, fmt.Errorf("unable to list workflow runs by file name: %w", err)
+		}
 	}
 
 	var res []*client.WorkflowArtifactContent
@@ -197,7 +206,7 @@ func (gc *githubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo
 			if err != nil {
 				return nil, fmt.Errorf("unable to download artifact: %w", err)
 			}
-			fmt.Println(file)
+
 			// Create a new file in the local filesystem
 			out, err := os.Create(*j.Name)
 			if err != nil {
@@ -225,24 +234,28 @@ func (gc *githubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo
 				return nil, fmt.Errorf("unable to write file: %w", err)
 			}
 
-			// Read the contents of the file
-			file2, err := os.Open(*j.Name)
-			if err != nil {
-				return nil, fmt.Errorf("unable to open file: %w", err)
-			}
-			defer file2.Close()
+			// If the githubSBOMName is empty, we want to return all artifacts
+			// Otherwise, we only want to return the artifacts that have the name of githubSBOMName
+			if githubSBOMName == "" || (githubSBOMName != "" && *j.Name == githubSBOMName) {
+				// Read the contents of the file
+				fileContents, err := os.Open(*j.Name)
+				if err != nil {
+					return nil, fmt.Errorf("unable to open file: %w", err)
+				}
+				defer fileContents.Close()
 
-			bytes, err := io.ReadAll(file2)
-			if err != nil {
-				return nil, fmt.Errorf("unable to read file: %w", err)
-			}
+				bytes, err := io.ReadAll(fileContents)
+				if err != nil {
+					return nil, fmt.Errorf("unable to read file: %w", err)
+				}
 
-			// Write the file contents to res
-			res = append(res, &client.WorkflowArtifactContent{
-				Name:  *j.Name,
-				Bytes: bytes,
-				RunId: run.GetID(),
-			})
+				// Write the file contents to res
+				res = append(res, &client.WorkflowArtifactContent{
+					Name:  *j.Name,
+					Bytes: bytes,
+					RunId: run.GetID(),
+				})
+			}
 		}
 	}
 
