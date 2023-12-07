@@ -347,10 +347,10 @@ func TestIngestVulnMetadata(t *testing.T) {
 				{
 					Vulnerability: &model.Vulnerability{
 						Type:             "cve",
-						VulnerabilityIDs: []*model.VulnerabilityID{c2out},
+						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 					},
-					ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
-					ScoreValue: 8.9,
+					ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+					ScoreValue: 7.9,
 					Timestamp:  t1,
 					Collector:  "test collector",
 					Origin:     "test origin",
@@ -358,10 +358,10 @@ func TestIngestVulnMetadata(t *testing.T) {
 				{
 					Vulnerability: &model.Vulnerability{
 						Type:             "cve",
-						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
+						VulnerabilityIDs: []*model.VulnerabilityID{c2out},
 					},
-					ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
-					ScoreValue: 7.9,
+					ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
+					ScoreValue: 8.9,
 					Timestamp:  t1,
 					Collector:  "test collector",
 					Origin:     "test origin",
@@ -455,10 +455,10 @@ func TestIngestVulnMetadata(t *testing.T) {
 				{
 					Vulnerability: &model.Vulnerability{
 						Type:             "cve",
-						VulnerabilityIDs: []*model.VulnerabilityID{c2out},
+						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 					},
-					ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
-					ScoreValue: 8.9,
+					ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+					ScoreValue: 7.9,
 					Timestamp:  t1,
 					Collector:  "test collector",
 					Origin:     "test origin",
@@ -466,10 +466,10 @@ func TestIngestVulnMetadata(t *testing.T) {
 				{
 					Vulnerability: &model.Vulnerability{
 						Type:             "cve",
-						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
+						VulnerabilityIDs: []*model.VulnerabilityID{c2out},
 					},
-					ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
-					ScoreValue: 7.9,
+					ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
+					ScoreValue: 8.9,
 					Timestamp:  t1,
 					Collector:  "test collector",
 					Origin:     "test origin",
@@ -571,22 +571,22 @@ func TestIngestVulnMetadata(t *testing.T) {
 			ExpVuln: []*model.VulnerabilityMetadata{
 				{
 					Vulnerability: &model.Vulnerability{
-						Type:             "cve",
-						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
+						Type:             "ghsa",
+						VulnerabilityIDs: []*model.VulnerabilityID{g1out},
 					},
 					ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
-					ScoreValue: 7.9,
+					ScoreValue: 6.3,
 					Timestamp:  t1,
 					Collector:  "test collector",
 					Origin:     "test origin",
 				},
 				{
 					Vulnerability: &model.Vulnerability{
-						Type:             "ghsa",
-						VulnerabilityIDs: []*model.VulnerabilityID{g1out},
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 					},
 					ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
-					ScoreValue: 6.3,
+					ScoreValue: 7.9,
 					Timestamp:  t1,
 					Collector:  "test collector",
 					Origin:     "test origin",
@@ -740,17 +740,6 @@ func TestIngestVulnMetadata(t *testing.T) {
 				{
 					Vulnerability: &model.Vulnerability{
 						Type:             "cve",
-						VulnerabilityIDs: []*model.VulnerabilityID{c2out},
-					},
-					ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
-					ScoreValue: 8.9,
-					Timestamp:  t1,
-					Collector:  "test collector",
-					Origin:     "test origin",
-				},
-				{
-					Vulnerability: &model.Vulnerability{
-						Type:             "cve",
 						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
 					},
 					ScoreType:  model.VulnerabilityScoreTypeEPSSv2,
@@ -766,6 +755,17 @@ func TestIngestVulnMetadata(t *testing.T) {
 					},
 					ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
 					ScoreValue: 2.9,
+					Timestamp:  t1,
+					Collector:  "test collector",
+					Origin:     "test origin",
+				},
+				{
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{c2out},
+					},
+					ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
+					ScoreValue: 8.9,
 					Timestamp:  t1,
 					Collector:  "test collector",
 					Origin:     "test origin",

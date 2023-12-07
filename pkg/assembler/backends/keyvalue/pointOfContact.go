@@ -43,7 +43,7 @@ type pointOfContactLink struct {
 
 func (n *pointOfContactLink) ID() string { return n.ThisID }
 func (n *pointOfContactLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.ArtifactID,
 		n.SourceID,
@@ -53,7 +53,7 @@ func (n *pointOfContactLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *pointOfContactLink) Neighbors(allowedEdges edgeMap) []string {

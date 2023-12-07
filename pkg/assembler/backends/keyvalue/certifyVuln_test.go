@@ -502,14 +502,6 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 			},
 			ExpVuln: []*model.CertifyVuln{
 				{
-					Package: p2out,
-					Vulnerability: &model.Vulnerability{
-						Type:             "novuln",
-						VulnerabilityIDs: []*model.VulnerabilityID{noVulnOut},
-					},
-					Metadata: vmd1,
-				},
-				{
 					Package: p1out,
 					Vulnerability: &model.Vulnerability{
 						Type:             "cve",
@@ -522,6 +514,14 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					Vulnerability: &model.Vulnerability{
 						Type:             "ghsa",
 						VulnerabilityIDs: []*model.VulnerabilityID{g1out},
+					},
+					Metadata: vmd1,
+				},
+				{
+					Package: p2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "novuln",
+						VulnerabilityIDs: []*model.VulnerabilityID{noVulnOut},
 					},
 					Metadata: vmd1,
 				},
@@ -701,18 +701,18 @@ func TestIngestCertifyVulns(t *testing.T) {
 			},
 			ExpVuln: []*model.CertifyVuln{
 				{
-					Package: p1out,
-					Vulnerability: &model.Vulnerability{
-						Type:             "cve",
-						VulnerabilityIDs: []*model.VulnerabilityID{c2out},
-					},
-					Metadata: vmd1,
-				},
-				{
 					Package: p2out,
 					Vulnerability: &model.Vulnerability{
 						Type:             "cve",
 						VulnerabilityIDs: []*model.VulnerabilityID{c1out},
+					},
+					Metadata: vmd1,
+				},
+				{
+					Package: p1out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{c2out},
 					},
 					Metadata: vmd1,
 				},

@@ -46,7 +46,7 @@ type vexLink struct {
 func (n *vexLink) ID() string { return n.ThisID }
 
 func (n *vexLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.ArtifactID,
 		n.VulnerabilityID,
@@ -57,7 +57,7 @@ func (n *vexLink) Key() string {
 		string(n.Justification),
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *vexLink) Neighbors(allowedEdges edgeMap) []string {

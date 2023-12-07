@@ -55,7 +55,7 @@ func (n *hasSLSAStruct) Key() string {
 	if n.Finish != nil {
 		fn = timeKey(*n.Finish)
 	}
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Subject,
 		fmt.Sprint(n.BuiltFrom),
 		n.BuiltBy,
@@ -66,7 +66,7 @@ func (n *hasSLSAStruct) Key() string {
 		fn,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *hasSLSAStruct) Neighbors(allowedEdges edgeMap) []string {

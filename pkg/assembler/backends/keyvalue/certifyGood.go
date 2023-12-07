@@ -42,7 +42,7 @@ type goodLink struct {
 func (n *goodLink) ID() string { return n.ThisID }
 
 func (n *goodLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.ArtifactID,
 		n.SourceID,
@@ -50,7 +50,7 @@ func (n *goodLink) Key() string {
 		n.Origin,
 		n.Collector,
 		timeKey(n.KnownSince),
-	}, ":")
+	}, ":"))
 }
 
 func (n *goodLink) Neighbors(allowedEdges edgeMap) []string {

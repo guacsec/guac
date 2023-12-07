@@ -45,7 +45,7 @@ type certifyVulnerabilityLink struct {
 
 func (n *certifyVulnerabilityLink) ID() string { return n.ThisID }
 func (n *certifyVulnerabilityLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.VulnerabilityID,
 		timeKey(n.TimeScanned),
@@ -55,7 +55,7 @@ func (n *certifyVulnerabilityLink) Key() string {
 		n.ScannerVersion,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *certifyVulnerabilityLink) Neighbors(allowedEdges edgeMap) []string {

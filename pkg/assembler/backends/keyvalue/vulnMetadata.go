@@ -40,14 +40,14 @@ type vulnerabilityMetadataLink struct {
 
 func (n *vulnerabilityMetadataLink) ID() string { return n.ThisID }
 func (n *vulnerabilityMetadataLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.VulnerabilityID,
 		string(n.ScoreType),
 		fmt.Sprint(n.ScoreValue), // TODO check that fmt.Sprint(float64) is stable for small diffs (epsilon) fmt.Sprintf("%.2f", f)
 		timeKey(n.Timestamp),
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *vulnerabilityMetadataLink) Neighbors(allowedEdges edgeMap) []string {

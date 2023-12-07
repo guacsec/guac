@@ -40,14 +40,14 @@ type srcMapLink struct {
 
 func (n *srcMapLink) ID() string { return n.ThisID }
 func (n *srcMapLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.SourceID,
 		n.PackageID,
 		timeKey(n.KnownSince),
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *srcMapLink) Neighbors(allowedEdges edgeMap) []string {

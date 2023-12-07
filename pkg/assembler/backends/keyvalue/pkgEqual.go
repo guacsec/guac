@@ -37,12 +37,12 @@ type pkgEqualStruct struct {
 
 func (n *pkgEqualStruct) ID() string { return n.ThisID }
 func (n *pkgEqualStruct) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		fmt.Sprint(n.Pkgs),
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *pkgEqualStruct) Neighbors(allowedEdges edgeMap) []string {

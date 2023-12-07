@@ -59,14 +59,14 @@ func (n *isOccurrenceStruct) BuildModelNode(ctx context.Context, c *demoClient) 
 }
 
 func (n *isOccurrenceStruct) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Pkg,
 		n.Source,
 		n.Artifact,
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 // Ingest IngestOccurrences

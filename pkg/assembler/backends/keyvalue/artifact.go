@@ -120,7 +120,7 @@ func (n *artStruct) setPointOfContactLinks(ctx context.Context, ID string, c *de
 }
 
 func (n *artStruct) Key() string {
-	return strings.Join([]string{n.Algorithm, n.Digest}, ":")
+	return hashKey(strings.Join([]string{n.Algorithm, n.Digest}, ":"))
 }
 
 func (c *demoClient) artifactByInput(ctx context.Context, a *model.ArtifactInputSpec) (*artStruct, error) {

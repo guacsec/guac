@@ -60,23 +60,23 @@ func (n *srcNamespace) ID() string { return n.ThisID }
 func (n *srcNameNode) ID() string  { return n.ThisID }
 
 func (n *srcType) Key() string {
-	return n.Type
+	return hashKey(n.Type)
 }
 
 func (n *srcNamespace) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Parent,
 		n.Namespace,
-	}, ":")
+	}, ":"))
 }
 
 func (n *srcNameNode) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Parent,
 		n.Name,
 		n.Tag,
 		n.Commit,
-	}, ":")
+	}, ":"))
 }
 
 func (n *srcType) Neighbors(allowedEdges edgeMap) []string {
