@@ -7,7 +7,7 @@ mkShell {
     docker-compose
     jq  
     gcc
-    go_1_19
+    go_1_21
     gopls
     gotests
     goreleaser
