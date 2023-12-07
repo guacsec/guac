@@ -154,7 +154,7 @@ start-service: check-docker-compose-tool-check
 		sleep 1; \
 		counter=$$((counter+1)); \
 	done; \
- 	[ $$counter -eq 15 ] && { echo "Inmem GUAC service did not start in time"; exit 1; } || echo "Inmem GUAC service is up!"
+	[ $$counter -eq 15 ] && { echo "Inmem GUAC service did not start in time"; exit 1; } || echo "Inmem GUAC service is up!"
 
 # to flush state, service-stop must be used else state is taken from old containers
 .PHONY: stop-service
@@ -173,6 +173,19 @@ start-inmem-db: check-docker-compose-tool-check
 		counter=$$((counter+1)); \
 	done; \
 	[ $$counter -eq 15 ] && { echo "Arango GUAC service did not start in time"; exit 1; } || echo "Inmem GUAC service is up!"
+
+# start graphQL server with keyvalue-redis backend
+.PHONY: start-redis-db
+start-redis-db: check-docker-compose-tool-check
+	$(CONTAINER) compose -f docker-compose.yml -f container_files/redis.yaml up -d 2>&1
+	@echo "Waiting for the service to start"
+	@counter=0; \
+	while [ $$counter -lt 15 ] && ! curl --silent --head --output /dev/null --fail http://localhost:8080; do \
+		printf '.'; \
+		sleep 1; \
+		counter=$$((counter+1)); \
+	done; \
+	[ $$counter -eq 15 ] && { echo "Redis GUAC service did not start in time"; exit 1; } || echo "Redis GUAC service is up!"
 
 # start graphQL server with arango backend
 .PHONY: start-arango-db
