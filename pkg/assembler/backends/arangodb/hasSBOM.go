@@ -597,34 +597,21 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 				pkg = generateModelPackage(createdValue.PkgVersion.TypeID, createdValue.PkgVersion.PkgType, createdValue.PkgVersion.NamespaceID, createdValue.PkgVersion.Namespace, createdValue.PkgVersion.NameID,
 					createdValue.PkgVersion.Name, createdValue.PkgVersion.VersionID, createdValue.PkgVersion.Version, createdValue.PkgVersion.Subpath, createdValue.PkgVersion.QualifierList)
 			}
-			var collectedPkgs []*model.Package
-			var collectedArts []*model.Artifact
+
 			var collectedSoftware []model.PackageOrArtifact
 			var collectedDeps []*model.IsDependency
 			var collectedOccurs []*model.IsOccurrence
-			for _, id := range createdValue.IncludedSoftware {
-				idSplit := strings.Split(id, "/")
-				if len(idSplit) != 2 {
-					return nil, fmt.Errorf("invalid ID: %s", id)
-				}
-				switch idSplit[0] {
-				case pkgVersionsStr:
-					if pkg, err := c.buildPackageResponseFromID(ctx, id, nil); err != nil {
-						return nil, fmt.Errorf("failed to get package from ID: %w", err)
-					} else {
-						collectedPkgs = append(collectedPkgs, pkg)
-						collectedSoftware = append(collectedSoftware, pkg)
-					}
-				case artifactsStr:
-					if art, err := c.buildArtifactResponseByID(ctx, id, nil); err != nil {
-						return nil, fmt.Errorf("failed to get artifact from ID: %w", err)
-					} else {
-						collectedArts = append(collectedArts, art)
-						collectedSoftware = append(collectedSoftware, pkg)
-					}
-				default:
-					return nil, fmt.Errorf("expected Package or Artifact, found %s", idSplit[0])
-				}
+
+			// collect packages and artifacts from included software
+			collectedPkgs, collectedArts, err := c.getPackageVersionAndArtifacts(ctx, createdValue.IncludedSoftware)
+			if err != nil {
+				return nil, err
+			}
+			for _, cPkg := range collectedPkgs {
+				collectedSoftware = append(collectedSoftware, cPkg)
+			}
+			for _, cArt := range collectedArts {
+				collectedSoftware = append(collectedSoftware, cArt)
 			}
 			for _, id := range createdValue.IncludedDependencies {
 				isDep, err := c.buildIsDependencyByID(ctx, id, nil)
@@ -641,25 +628,9 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 				collectedOccurs = append(collectedOccurs, isOccur)
 			}
 
-			matchingSoftware := true
-			if filter.IncludedSoftware != nil {
-				pkgFilters, artFilters := helper.GetPackageAndArtifactFilters(filter.IncludedSoftware)
-				matchingSoftware = matchPackages(ctx, pkgFilters, collectedPkgs)
-				for _, artFilter := range artFilters {
-					if found := containsMatchingArtifact(collectedArts, artFilter.ID, artFilter.Algorithm, artFilter.Digest); !found {
-						matchingSoftware = false
-						break
-					}
-				}
-			}
-			matchingDeps := true
-			if filter.IncludedDependencies != nil {
-				matchingDeps = matchDependencies(ctx, filter.IncludedDependencies, collectedDeps)
-			}
-			matchingOccur := true
-			if filter.IncludedOccurrences != nil {
-				matchingDeps = matchOccurrences(ctx, filter.IncludedOccurrences, collectedOccurs)
-			}
+			matchingSoftware, matchingDeps, matchingOccur := checkMatchingIncludes(ctx, filter, collectedPkgs, collectedArts,
+				collectedDeps, collectedOccurs)
+
 			if !matchingSoftware && !matchingDeps && !matchingOccur {
 				continue
 			}
@@ -689,6 +660,59 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 		hasSBOMList = append(hasSBOMList, hasSBOM)
 	}
 	return hasSBOMList, nil
+}
+
+func (c *arangoClient) getPackageVersionAndArtifacts(ctx context.Context, includesSoftware []string) ([]*model.Package, []*model.Artifact, error) {
+	var collectedPkgs []*model.Package
+	var collectedArts []*model.Artifact
+	for _, id := range includesSoftware {
+		idSplit := strings.Split(id, "/")
+		if len(idSplit) != 2 {
+			return nil, nil, fmt.Errorf("invalid ID: %s", id)
+		}
+		switch idSplit[0] {
+		case pkgVersionsStr:
+			if pkg, err := c.buildPackageResponseFromID(ctx, id, nil); err != nil {
+				return nil, nil, fmt.Errorf("failed to get package from ID: %w", err)
+			} else {
+				collectedPkgs = append(collectedPkgs, pkg)
+			}
+		case artifactsStr:
+			if art, err := c.buildArtifactResponseByID(ctx, id, nil); err != nil {
+				return nil, nil, fmt.Errorf("failed to get artifact from ID: %w", err)
+			} else {
+				collectedArts = append(collectedArts, art)
+			}
+		default:
+			return nil, nil, fmt.Errorf("expected Package or Artifact, found %s", idSplit[0])
+		}
+	}
+	return collectedPkgs, collectedArts, nil
+}
+
+func checkMatchingIncludes(ctx context.Context, filter *model.HasSBOMSpec, collectedPkgs []*model.Package, collectedArts []*model.Artifact,
+	collectedDeps []*model.IsDependency, collectedOccurs []*model.IsOccurrence) (bool, bool, bool) {
+
+	matchingSoftware := true
+	if filter.IncludedSoftware != nil {
+		pkgFilters, artFilters := helper.GetPackageAndArtifactFilters(filter.IncludedSoftware)
+		matchingSoftware = matchPackages(ctx, pkgFilters, collectedPkgs)
+		for _, artFilter := range artFilters {
+			if found := containsMatchingArtifact(collectedArts, artFilter.ID, artFilter.Algorithm, artFilter.Digest); !found {
+				matchingSoftware = false
+				break
+			}
+		}
+	}
+	matchingDeps := true
+	if filter.IncludedDependencies != nil {
+		matchingDeps = matchDependencies(ctx, filter.IncludedDependencies, collectedDeps)
+	}
+	matchingOccur := true
+	if filter.IncludedOccurrences != nil {
+		matchingDeps = matchOccurrences(ctx, filter.IncludedOccurrences, collectedOccurs)
+	}
+	return matchingSoftware, matchingDeps, matchingOccur
 }
 
 func (c *arangoClient) buildHasSbomByID(ctx context.Context, id string, filter *model.HasSBOMSpec) (*model.HasSbom, error) {
@@ -731,15 +755,18 @@ func (c *arangoClient) queryHasSbomNodeByID(ctx context.Context, filter *model.H
 	defer cursor.Close()
 
 	type dbHasSbom struct {
-		HasSbomID        string  `json:"_id"`
-		PackageID        *string `json:"packageID"`
-		ArtifactID       *string `json:"artifactID"`
-		Uri              string  `json:"uri"`
-		Algorithm        string  `json:"algorithm"`
-		Digest           string  `json:"digest"`
-		DownloadLocation string  `json:"downloadLocation"`
-		Collector        string  `json:"collector"`
-		Origin           string  `json:"origin"`
+		HasSbomID            string   `json:"_id"`
+		PackageID            *string  `json:"packageID"`
+		ArtifactID           *string  `json:"artifactID"`
+		Uri                  string   `json:"uri"`
+		Algorithm            string   `json:"algorithm"`
+		Digest               string   `json:"digest"`
+		DownloadLocation     string   `json:"downloadLocation"`
+		Collector            string   `json:"collector"`
+		Origin               string   `json:"origin"`
+		IncludedSoftware     []string `json:"includedSoftware"`
+		IncludedDependencies []string `json:"includedDependencies"`
+		IncludesOccurrences  []string `json:"includesOccurrences"`
 	}
 
 	var collectedValues []dbHasSbom
@@ -761,14 +788,54 @@ func (c *arangoClient) queryHasSbomNodeByID(ctx context.Context, filter *model.H
 		return nil, fmt.Errorf("number of hasSBOM nodes found for ID: %s is greater than one", *filter.ID)
 	}
 
+	var collectedSoftware []model.PackageOrArtifact
+	var collectedDeps []*model.IsDependency
+	var collectedOccurs []*model.IsOccurrence
+
+	// collect packages and artifacts from included software
+	collectedPkgs, collectedArts, err := c.getPackageVersionAndArtifacts(ctx, collectedValues[0].IncludedSoftware)
+	if err != nil {
+		return nil, err
+	}
+	for _, cPkg := range collectedPkgs {
+		collectedSoftware = append(collectedSoftware, cPkg)
+	}
+	for _, cArt := range collectedArts {
+		collectedSoftware = append(collectedSoftware, cArt)
+	}
+	for _, id := range collectedValues[0].IncludedDependencies {
+		isDep, err := c.buildIsDependencyByID(ctx, id, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get isDependency from ID: %w", err)
+		}
+		collectedDeps = append(collectedDeps, isDep)
+	}
+	for _, id := range collectedValues[0].IncludesOccurrences {
+		isOccur, err := c.buildIsOccurrenceByID(ctx, id, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get isOccurrence from ID: %w", err)
+		}
+		collectedOccurs = append(collectedOccurs, isOccur)
+	}
+
+	matchingSoftware, matchingDeps, matchingOccur := checkMatchingIncludes(ctx, filter, collectedPkgs, collectedArts,
+		collectedDeps, collectedOccurs)
+
+	if !matchingSoftware && !matchingDeps && !matchingOccur {
+		return nil, fmt.Errorf("includes failed to match specified filter")
+	}
+
 	hasSBOM := &model.HasSbom{
-		ID:               collectedValues[0].HasSbomID,
-		URI:              collectedValues[0].Uri,
-		Algorithm:        collectedValues[0].Algorithm,
-		Digest:           collectedValues[0].Digest,
-		DownloadLocation: collectedValues[0].DownloadLocation,
-		Origin:           collectedValues[0].Origin,
-		Collector:        collectedValues[0].Collector,
+		ID:                   collectedValues[0].HasSbomID,
+		URI:                  collectedValues[0].Uri,
+		Algorithm:            collectedValues[0].Algorithm,
+		Digest:               collectedValues[0].Digest,
+		DownloadLocation:     collectedValues[0].DownloadLocation,
+		Origin:               collectedValues[0].Origin,
+		Collector:            collectedValues[0].Collector,
+		IncludedSoftware:     collectedSoftware,
+		IncludedDependencies: collectedDeps,
+		IncludedOccurrences:  collectedOccurs,
 	}
 
 	if collectedValues[0].PackageID != nil {
