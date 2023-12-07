@@ -84,10 +84,10 @@ func (p *prometheusCollector) MetricsHandler() http.Handler {
 
 // NewPrometheus creates a new prometheusCollector with empty sync.Maps for histograms, gauges, and counters.
 func NewPrometheus(name string) MetricCollector {
-	name = fmt.Sprintf("%s_%s_function_duration_seconds", "guac", name)
+	prefix := fmt.Sprintf("%s_%s_function_duration_seconds", "guac", name)
 	functionDuration := prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    name,
+			Name:    prefix,
 			Help:    "Time spent executing functions.",
 			Buckets: prometheus.DefBuckets,
 		},
@@ -97,8 +97,9 @@ func NewPrometheus(name string) MetricCollector {
 		histograms: make(map[string]*prometheus.HistogramVec),
 		gauges:     make(map[string]*prometheus.GaugeVec),
 		counters:   make(map[string]*prometheus.CounterVec),
+		name:       name,
 	}
-	p.histograms[name] = functionDuration
+	p.histograms[prefix] = functionDuration
 	return p
 }
 

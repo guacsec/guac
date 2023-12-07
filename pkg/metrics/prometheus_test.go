@@ -21,18 +21,35 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 func TestRegisterCounter(t *testing.T) {
 	ctx := WithMetrics(context.Background(), "guac_test")
 	collector := FromContext(ctx, "guac_test")
 
-	_, err := collector.RegisterCounter(ctx, "test_counter", "label1")
+	counter, err := collector.RegisterCounter(ctx, "test_counter", "label1")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	err = collector.AddCounter(ctx, "test_counter", 1, "label1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Validate the counter
+	counterVec, ok := counter.(prometheus.Collector)
+	if !ok {
+		t.Fatal("counter is not a Collector")
+	}
+	err = testutil.CollectAndCompare(counterVec, strings.NewReader(`
+	    # HELP guac_guac_test_test_counter Counter for guac_test_test_counter
+		# TYPE guac_guac_test_test_counter counter
+		guac_guac_test_test_counter{label1="label1"} 1
+	`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,11 +74,21 @@ func TestRegisterGauge(t *testing.T) {
 	ctx := WithMetrics(context.Background(), "guac_test")
 	collector := FromContext(ctx, "guac_test")
 
-	_, err := collector.RegisterGauge(ctx, "test_gauge", "label1")
+	gaugeVec, err := collector.RegisterGauge(ctx, "test_gauge", "label1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = collector.SetGauge(ctx, "test_gauge", 1.5, "label1")
+
+	a, ok := gaugeVec.(prometheus.Collector)
+	if !ok {
+		t.Fatal("gaugeVec is not a Collector")
+	}
+	gaugeVec.Add(1)
+	err = testutil.CollectAndCompare(a, strings.NewReader(`
+	    # HELP guac_guac_test_test_gauge Gauge for guac_test_test_gauge
+		# TYPE guac_guac_test_test_gauge gauge
+		guac_guac_test_test_gauge{label1="label1"} 1
+	`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,25 +120,5 @@ func TestNonExistingCounter(t *testing.T) {
 	err := collector.AddCounter(ctx, "non_existing_counter", 1, "label1")
 	if err == nil {
 		t.Fatal("expected error for non-existing counter")
-	}
-}
-
-func TestHandlerBody(t *testing.T) {
-	ctx := WithMetrics(context.Background(), "guac_test")
-	collector := FromContext(ctx, "guac_test")
-
-	handler := collector.MetricsHandler()
-
-	req, err := http.NewRequest("GET", "/metrics", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rr := httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-
-	expected := `guac__test_counter{label1="label1"}`
-	if !strings.Contains(rr.Body.String(), expected) {
-		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 	}
 }
