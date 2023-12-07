@@ -58,9 +58,9 @@ cover: test
 .PHONY: fmt
 fmt:
 	@echo "Testing formatting and imports"
-	test -z "$(shell find . -name '*.go' -not -path './.git/*' -not -wholename './vendor/*' -not -name '*.pb.go' -exec goimports -l -e {} \;)"
+	test -z "$(shell git diff --name-status $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@') -- '*.go' | grep '.go$$' | grep -v '^D' | grep -v '*.pb.go' | grep -v 'vendor/*' | cut -f 2- | xargs -n 1 -P 4 goimports -l -e)"
 	@echo "Testing copyright notice"
-	test -z "$(shell find . -name '*.go' -not -path './.git/*' -not -wholename './vendor/*' -not -name '*.pb.go' -exec .github/scripts/copyright.sh {} \;)"
+	test -z "$(shell git diff --name-status $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@') -- '*.go' | grep '.go$$' | grep -v '^D' | grep -v '*.pb.go' | grep -v 'vendor/*' | cut -f 2- | xargs -n 1 -P 4 .github/scripts/copyright.sh)"
 
 
 # Check that generated files are up to date
