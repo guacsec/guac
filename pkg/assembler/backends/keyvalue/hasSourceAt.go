@@ -40,14 +40,14 @@ type srcMapLink struct {
 
 func (n *srcMapLink) ID() string { return n.ThisID }
 func (n *srcMapLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.SourceID,
 		n.PackageID,
 		timeKey(n.KnownSince),
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *srcMapLink) Neighbors(allowedEdges edgeMap) []string {
@@ -189,18 +189,24 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 			}
 		}
 	} else {
-		hsaKeys, err := c.kv.Keys(ctx, hsaCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, hsak := range hsaKeys {
-			link, err := byKeykv[*srcMapLink](ctx, hsaCol, hsak, c)
+		var done bool
+		scn := c.kv.Keys(hsaCol)
+		for !done {
+			var hsaKeys []string
+			var err error
+			hsaKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addSrcIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, hsak := range hsaKeys {
+				link, err := byKeykv[*srcMapLink](ctx, hsaCol, hsak, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addSrcIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

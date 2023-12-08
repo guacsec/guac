@@ -243,14 +243,14 @@ func TestHasMetadata(t *testing.T) {
 			ExpHM: []*model.HasMetadata{
 				{
 					Subject:       p1out,
-					Key:           "key1",
-					Value:         "value1",
+					Key:           "key2",
+					Value:         "value2",
 					Justification: "test justification",
 				},
 				{
 					Subject:       p1out,
-					Key:           "key2",
-					Value:         "value2",
+					Key:           "key1",
+					Value:         "value1",
 					Justification: "test justification",
 				},
 			},
@@ -546,11 +546,11 @@ func TestHasMetadata(t *testing.T) {
 			},
 			ExpHM: []*model.HasMetadata{
 				{
-					Subject:       p1outName,
+					Subject:       p2out,
 					Justification: "test justification",
 				},
 				{
-					Subject:       p2out,
+					Subject:       p1outName,
 					Justification: "test justification",
 				},
 			},

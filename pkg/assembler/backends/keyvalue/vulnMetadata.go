@@ -40,14 +40,14 @@ type vulnerabilityMetadataLink struct {
 
 func (n *vulnerabilityMetadataLink) ID() string { return n.ThisID }
 func (n *vulnerabilityMetadataLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.VulnerabilityID,
 		string(n.ScoreType),
 		fmt.Sprint(n.ScoreValue), // TODO check that fmt.Sprint(float64) is stable for small diffs (epsilon) fmt.Sprintf("%.2f", f)
 		timeKey(n.Timestamp),
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *vulnerabilityMetadataLink) Neighbors(allowedEdges edgeMap) []string {
@@ -174,18 +174,24 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 			}
 		}
 	} else {
-		vmdKeys, err := c.kv.Keys(ctx, vulnMDCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, vmdk := range vmdKeys {
-			link, err := byKeykv[*vulnerabilityMetadataLink](ctx, vulnMDCol, vmdk, c)
+		var done bool
+		scn := c.kv.Keys(vulnMDCol)
+		for !done {
+			var vmdKeys []string
+			var err error
+			vmdKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addVulnMetadataMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, vmdk := range vmdKeys {
+				link, err := byKeykv[*vulnerabilityMetadataLink](ctx, vulnMDCol, vmdk, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addVulnMetadataMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

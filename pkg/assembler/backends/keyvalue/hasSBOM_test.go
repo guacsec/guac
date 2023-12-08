@@ -798,11 +798,11 @@ func TestHasSBOM(t *testing.T) {
 			},
 			ExpHS: []*model.HasSbom{
 				{
-					Subject:          p1out,
+					Subject:          p2out,
 					DownloadLocation: "location two",
 				},
 				{
-					Subject:          p2out,
+					Subject:          p1out,
 					DownloadLocation: "location two",
 				},
 			},

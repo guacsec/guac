@@ -42,7 +42,7 @@ type goodLink struct {
 func (n *goodLink) ID() string { return n.ThisID }
 
 func (n *goodLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.ArtifactID,
 		n.SourceID,
@@ -50,7 +50,7 @@ func (n *goodLink) Key() string {
 		n.Origin,
 		n.Collector,
 		timeKey(n.KnownSince),
-	}, ":")
+	}, ":"))
 }
 
 func (n *goodLink) Neighbors(allowedEdges edgeMap) []string {
@@ -243,18 +243,24 @@ func (c *demoClient) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 			}
 		}
 	} else {
-		cgKeys, err := c.kv.Keys(ctx, cgCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, cgk := range cgKeys {
-			link, err := byKeykv[*goodLink](ctx, cgCol, cgk, c)
+		var done bool
+		scn := c.kv.Keys(cgCol)
+		for !done {
+			var cgKeys []string
+			var err error
+			cgKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addCGIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, cgk := range cgKeys {
+				link, err := byKeykv[*goodLink](ctx, cgCol, cgk, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addCGIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

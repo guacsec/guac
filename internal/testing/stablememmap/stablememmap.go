@@ -17,35 +17,47 @@ package stablememmap
 
 import (
 	"context"
+	"errors"
 	"slices"
 
 	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/guacsec/guac/pkg/assembler/kv/memmap"
 )
 
-type Store struct {
+type store struct {
 	mm kv.Store
 }
 
 func GetStore() kv.Store {
-	return &Store{
+	return &store{
 		mm: memmap.GetStore(),
 	}
 }
 
-func (s *Store) Get(ctx context.Context, c, k string, v any) error {
+func (s *store) Get(ctx context.Context, c, k string, v any) error {
 	return s.mm.Get(ctx, c, k, v)
 }
 
-func (s *Store) Set(ctx context.Context, c, k string, v any) error {
+func (s *store) Set(ctx context.Context, c, k string, v any) error {
 	return s.mm.Set(ctx, c, k, v)
 }
 
-func (s *Store) Keys(ctx context.Context, c string) ([]string, error) {
-	keys, err := s.mm.Keys(ctx, c)
+func (s *store) Keys(c string) kv.Scanner {
+	return &scanner{mms: s.mm.Keys(c)}
+}
+
+type scanner struct {
+	mms kv.Scanner
+}
+
+func (s *scanner) Scan(ctx context.Context) ([]string, bool, error) {
+	keys, done, err := s.mms.Scan(ctx)
 	if err != nil {
-		return nil, err
+		return nil, false, err
+	}
+	if !done {
+		return nil, false, errors.New("Expect memmap to always return all keys at once")
 	}
 	slices.Sort(keys)
-	return keys, nil
+	return keys, true, nil
 }

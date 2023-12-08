@@ -16,6 +16,7 @@
 package tikv
 
 import (
+	"bytes"
 	"context"
 	"strings"
 
@@ -28,7 +29,9 @@ import (
 
 var json = jsoniter.ConfigFastest
 
-type Store struct {
+const count = 1000
+
+type store struct {
 	c *rawkv.Client
 }
 
@@ -38,12 +41,12 @@ func GetStore(ctx context.Context, s string) (kv.Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Store{
+	return &store{
 		c: c,
 	}, nil
 }
 
-func (s *Store) Get(ctx context.Context, c, k string, v any) error {
+func (s *store) Get(ctx context.Context, c, k string, v any) error {
 	ck := strings.Join([]string{c, k}, ":")
 	bts, err := s.c.Get(ctx, []byte(ck))
 	// TODO(jeffmendoza), should figure out error type and check it, instead just see if
@@ -57,7 +60,7 @@ func (s *Store) Get(ctx context.Context, c, k string, v any) error {
 	return json.Unmarshal(bts, v)
 }
 
-func (s *Store) Set(ctx context.Context, c, k string, v any) error {
+func (s *store) Set(ctx context.Context, c, k string, v any) error {
 	ck := strings.Join([]string{c, k}, ":")
 	bts, err := json.Marshal(v)
 	if err != nil {
@@ -66,15 +69,44 @@ func (s *Store) Set(ctx context.Context, c, k string, v any) error {
 	return s.c.Put(ctx, []byte(ck), bts)
 }
 
-func (s *Store) Keys(ctx context.Context, c string) ([]string, error) {
-	// TODO(jeffmendoza) implement scanning in kv interface, use 1000 for now.
-	ks, _, err := s.c.Scan(ctx, []byte(c), kvti.PrefixNextKey([]byte(c)), 10000, rawkv.ScanKeyOnly())
+func (s *store) Keys(c string) kv.Scanner {
+	return &scanner{
+		c:      s.c,
+		done:   false,
+		curKey: []byte(c),
+		endKey: kvti.PrefixNextKey([]byte(c)),
+	}
+}
+
+type scanner struct {
+	c      *rawkv.Client
+	done   bool
+	curKey []byte
+	endKey []byte
+}
+
+func (s *scanner) Scan(ctx context.Context) ([]string, bool, error) {
+	if s.done {
+		return nil, true, nil
+	}
+	ks, _, err := s.c.Scan(ctx, s.curKey, s.endKey, count, rawkv.ScanKeyOnly())
 	if err != nil {
-		return nil, err
+		return nil, false, err
+	}
+	if len(ks) < count {
+		s.done = true
+	}
+	if len(ks) == 0 {
+		return nil, true, nil
 	}
 	rv := make([]string, len(ks))
+	var largest []byte
 	for i, k := range ks {
+		if bytes.Compare(k, largest) > 0 {
+			largest = k
+		}
 		rv[i] = string(k)
 	}
-	return rv, nil
+	s.curKey = kvti.NextKey(largest)
+	return rv, s.done, nil
 }

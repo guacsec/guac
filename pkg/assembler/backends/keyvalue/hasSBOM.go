@@ -46,7 +46,7 @@ type hasSBOMStruct struct {
 
 func (n *hasSBOMStruct) ID() string { return n.ThisID }
 func (n *hasSBOMStruct) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Pkg,
 		n.Artifact,
 		n.URI,
@@ -59,7 +59,7 @@ func (n *hasSBOMStruct) Key() string {
 		fmt.Sprint(n.IncludedSoftware),
 		fmt.Sprint(n.IncludedDependencies),
 		fmt.Sprint(n.IncludedOccurrences),
-	}, ":")
+	}, ":"))
 }
 
 func (n *hasSBOMStruct) Neighbors(allowedEdges edgeMap) []string {
@@ -356,18 +356,24 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 			}
 		}
 	} else {
-		hsks, err := c.kv.Keys(ctx, hasSBOMCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, hsk := range hsks {
-			link, err := byKeykv[*hasSBOMStruct](ctx, hasSBOMCol, hsk, c)
+		var done bool
+		scn := c.kv.Keys(hasSBOMCol)
+		for !done {
+			var hsks []string
+			var err error
+			hsks, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addHasSBOMIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, hsk := range hsks {
+				link, err := byKeykv[*hasSBOMStruct](ctx, hasSBOMCol, hsk, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addHasSBOMIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

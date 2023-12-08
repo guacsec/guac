@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"math"
 	"reflect"
 	"slices"
@@ -328,4 +329,19 @@ func (c *demoClient) getPackageVersionAndArtifacts(ctx context.Context, pkgOrArt
 	}
 
 	return pkgs, arts, nil
+}
+
+func hashKey(in string) string {
+	h := fnv.New128a()
+	h.Write([]byte(in))
+	bts := h.Sum(nil)
+	return fmtBytes(bts)
+}
+
+func fmtBytes(s []byte) string {
+	strs := make([]string, len(s))
+	for i, v := range s {
+		strs[i] = fmt.Sprintf("%x", v)
+	}
+	return strings.Join(strs, "")
 }

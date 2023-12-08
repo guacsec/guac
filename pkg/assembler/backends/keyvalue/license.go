@@ -37,10 +37,10 @@ type licStruct struct {
 
 func (n *licStruct) ID() string { return n.ThisID }
 func (n *licStruct) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Name,
 		n.ListVersion,
-	}, ":")
+	}, ":"))
 }
 
 func (n *licStruct) Neighbors(allowedEdges edgeMap) []string {
@@ -169,21 +169,26 @@ func (c *demoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpe
 	}
 
 	var rv []*model.License
-	lKeys, err := c.kv.Keys(ctx, licenseCol)
-	if err != nil {
-		return nil, err
-	}
-	for _, lk := range lKeys {
-		l, err := byKeykv[*licStruct](ctx, licenseCol, lk, c)
+	var done bool
+	scn := c.kv.Keys(licenseCol)
+	for !done {
+		var lKeys []string
+		lKeys, done, err = scn.Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
-		if noMatch(licenseSpec.Name, l.Name) ||
-			noMatch(licenseSpec.ListVersion, l.ListVersion) ||
-			noMatch(licenseSpec.Inline, l.Inline) {
-			continue
+		for _, lk := range lKeys {
+			l, err := byKeykv[*licStruct](ctx, licenseCol, lk, c)
+			if err != nil {
+				return nil, err
+			}
+			if noMatch(licenseSpec.Name, l.Name) ||
+				noMatch(licenseSpec.ListVersion, l.ListVersion) ||
+				noMatch(licenseSpec.Inline, l.Inline) {
+				continue
+			}
+			rv = append(rv, c.convLicense(l))
 		}
-		rv = append(rv, c.convLicense(l))
 	}
 	return rv, nil
 }

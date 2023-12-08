@@ -60,23 +60,23 @@ func (n *srcNamespace) ID() string { return n.ThisID }
 func (n *srcNameNode) ID() string  { return n.ThisID }
 
 func (n *srcType) Key() string {
-	return n.Type
+	return hashKey(n.Type)
 }
 
 func (n *srcNamespace) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Parent,
 		n.Namespace,
-	}, ":")
+	}, ":"))
 }
 
 func (n *srcNameNode) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Parent,
 		n.Name,
 		n.Tag,
 		n.Commit,
-	}, ":")
+	}, ":"))
 }
 
 func (n *srcType) Neighbors(allowedEdges edgeMap) []string {
@@ -332,22 +332,28 @@ func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 			}
 		}
 	} else {
-		typeKeys, err := c.kv.Keys(ctx, srcTypeCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, tk := range typeKeys {
-			srcTypeNode, err := byKeykv[*srcType](ctx, srcTypeCol, tk, c)
+		var done bool
+		scn := c.kv.Keys(srcTypeCol)
+		for !done {
+			var typeKeys []string
+			var err error
+			typeKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, filter)
-			if len(sNamespaces) > 0 {
-				out = append(out, &model.Source{
-					ID:         srcTypeNode.ThisID,
-					Type:       srcTypeNode.Type,
-					Namespaces: sNamespaces,
-				})
+			for _, tk := range typeKeys {
+				srcTypeNode, err := byKeykv[*srcType](ctx, srcTypeCol, tk, c)
+				if err != nil {
+					return nil, err
+				}
+				sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, filter)
+				if len(sNamespaces) > 0 {
+					out = append(out, &model.Source{
+						ID:         srcTypeNode.ThisID,
+						Type:       srcTypeNode.Type,
+						Namespaces: sNamespaces,
+					})
+				}
 			}
 		}
 	}

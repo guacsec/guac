@@ -310,7 +310,7 @@ func (p *pkgVersion) setCertifyLegals(ctx context.Context, id string, c *demoCli
 }
 
 func (n *pkgType) Key() string {
-	return n.Type
+	return hashKey(n.Type)
 }
 
 func (n *pkgType) addNamespace(ctx context.Context, ns string, c *demoClient) error {
@@ -319,10 +319,10 @@ func (n *pkgType) addNamespace(ctx context.Context, ns string, c *demoClient) er
 }
 
 func (n *pkgNamespace) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Parent,
 		n.Namespace,
-	}, ":")
+	}, ":"))
 }
 
 func (n *pkgNamespace) addName(ctx context.Context, name string, c *demoClient) error {
@@ -331,10 +331,10 @@ func (n *pkgNamespace) addName(ctx context.Context, name string, c *demoClient) 
 }
 
 func (n *pkgName) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Parent,
 		n.Name,
-	}, ":")
+	}, ":"))
 }
 
 func (n *pkgName) addVersion(ctx context.Context, ver string, c *demoClient) error {
@@ -343,10 +343,10 @@ func (n *pkgName) addVersion(ctx context.Context, ver string, c *demoClient) err
 }
 
 func (n *pkgVersion) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Parent,
 		hashVersionHelper(n.Version, n.Subpath, n.Qualifiers),
-	}, ":")
+	}, ":"))
 }
 
 // Ingest Package
@@ -528,22 +528,28 @@ func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*mo
 			}
 		}
 	} else {
-		typeKeys, err := c.kv.Keys(ctx, pkgTypeCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, tk := range typeKeys {
-			pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
+		var done bool
+		scn := c.kv.Keys(pkgTypeCol)
+		for !done {
+			var typeKeys []string
+			var err error
+			typeKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			pNamespaces := c.buildPkgNamespace(ctx, pkgTypeNode, filter)
-			if len(pNamespaces) > 0 {
-				out = append(out, &model.Package{
-					ID:         pkgTypeNode.ThisID,
-					Type:       pkgTypeNode.Type,
-					Namespaces: pNamespaces,
-				})
+			for _, tk := range typeKeys {
+				pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
+				if err != nil {
+					return nil, err
+				}
+				pNamespaces := c.buildPkgNamespace(ctx, pkgTypeNode, filter)
+				if len(pNamespaces) > 0 {
+					out = append(out, &model.Package{
+						ID:         pkgTypeNode.ThisID,
+						Type:       pkgTypeNode.Type,
+						Namespaces: pNamespaces,
+					})
+				}
 			}
 		}
 	}

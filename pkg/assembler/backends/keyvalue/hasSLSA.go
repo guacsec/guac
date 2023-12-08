@@ -55,7 +55,7 @@ func (n *hasSLSAStruct) Key() string {
 	if n.Finish != nil {
 		fn = timeKey(*n.Finish)
 	}
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.Subject,
 		fmt.Sprint(n.BuiltFrom),
 		n.BuiltBy,
@@ -66,7 +66,7 @@ func (n *hasSLSAStruct) Key() string {
 		fn,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *hasSLSAStruct) Neighbors(allowedEdges edgeMap) []string {
@@ -151,18 +151,24 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 			}
 		}
 	} else {
-		slsaKeys, err := c.kv.Keys(ctx, slsaCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, slsak := range slsaKeys {
-			link, err := byKeykv[*hasSLSAStruct](ctx, slsaCol, slsak, c)
+		var done bool
+		scn := c.kv.Keys(slsaCol)
+		for !done {
+			var slsaKeys []string
+			var err error
+			slsaKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addSLSAIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, slsak := range slsaKeys {
+				link, err := byKeykv[*hasSLSAStruct](ctx, slsaCol, slsak, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addSLSAIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

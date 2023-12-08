@@ -43,7 +43,7 @@ type pointOfContactLink struct {
 
 func (n *pointOfContactLink) ID() string { return n.ThisID }
 func (n *pointOfContactLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.ArtifactID,
 		n.SourceID,
@@ -53,7 +53,7 @@ func (n *pointOfContactLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *pointOfContactLink) Neighbors(allowedEdges edgeMap) []string {
@@ -251,18 +251,24 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 			}
 		}
 	} else {
-		pocKeys, err := c.kv.Keys(ctx, pocCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, pk := range pocKeys {
-			link, err := byKeykv[*pointOfContactLink](ctx, pocCol, pk, c)
+		var done bool
+		scn := c.kv.Keys(pocCol)
+		for !done {
+			var pocKeys []string
+			var err error
+			pocKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addPOCIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, pk := range pocKeys {
+				link, err := byKeykv[*pointOfContactLink](ctx, pocCol, pk, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addPOCIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

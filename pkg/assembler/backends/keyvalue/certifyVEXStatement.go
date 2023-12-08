@@ -46,7 +46,7 @@ type vexLink struct {
 func (n *vexLink) ID() string { return n.ThisID }
 
 func (n *vexLink) Key() string {
-	return strings.Join([]string{
+	return hashKey(strings.Join([]string{
 		n.PackageID,
 		n.ArtifactID,
 		n.VulnerabilityID,
@@ -57,7 +57,7 @@ func (n *vexLink) Key() string {
 		string(n.Justification),
 		n.Origin,
 		n.Collector,
-	}, ":")
+	}, ":"))
 }
 
 func (n *vexLink) Neighbors(allowedEdges edgeMap) []string {
@@ -254,18 +254,24 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 			}
 		}
 	} else {
-		keys, err := c.kv.Keys(ctx, cVEXCol)
-		if err != nil {
-			return nil, err
-		}
-		for _, key := range keys {
-			link, err := byKeykv[*vexLink](ctx, cVEXCol, key, c)
+		var done bool
+		scn := c.kv.Keys(cVEXCol)
+		for !done {
+			var keys []string
+			var err error
+			keys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
 			}
-			out, err = c.addVexIfMatch(ctx, out, filter, link)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			for _, key := range keys {
+				link, err := byKeykv[*vexLink](ctx, cVEXCol, key, c)
+				if err != nil {
+					return nil, err
+				}
+				out, err = c.addVexIfMatch(ctx, out, filter, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
 			}
 		}
 	}

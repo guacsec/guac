@@ -32,7 +32,7 @@ type builderStruct struct {
 }
 
 func (n *builderStruct) Key() string {
-	return n.URI
+	return hashKey(n.URI)
 }
 
 func (b *builderStruct) ID() string { return b.ThisID }
@@ -124,16 +124,21 @@ func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 		return []*model.Builder{c.convBuilder(b)}, nil
 	}
 	var builders []*model.Builder
-	bKeys, err := c.kv.Keys(ctx, builderCol)
-	if err != nil {
-		return nil, err
-	}
-	for _, bk := range bKeys {
-		b, err := byKeykv[*builderStruct](ctx, builderCol, bk, c)
+	var done bool
+	scn := c.kv.Keys(builderCol)
+	for !done {
+		var bKeys []string
+		bKeys, done, err = scn.Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
-		builders = append(builders, c.convBuilder(b))
+		for _, bk := range bKeys {
+			b, err := byKeykv[*builderStruct](ctx, builderCol, bk, c)
+			if err != nil {
+				return nil, err
+			}
+			builders = append(builders, c.convBuilder(b))
+		}
 	}
 	return builders, nil
 }
