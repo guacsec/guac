@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package github
 
 import (
@@ -695,14 +697,14 @@ func Test_parseGitDataSource(t *testing.T) {
 			name: "parse valid tag git uri",
 			args: args{
 				source: datasource.Source{
-					Value: "git+https://github.com/guacsec/guac@v0.3.0",
+					Value: "git+https://github.com/mock/repo@v1",
 				},
 			},
 			want: &client.Repo{
-				Owner: "guacsec",
-				Repo:  "guac",
+				Owner: "mock",
+				Repo:  "repo",
 			},
-			want1:   "v0.3.0",
+			want1:   "v1",
 			wantErr: false,
 		},
 		{

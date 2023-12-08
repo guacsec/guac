@@ -88,7 +88,7 @@ func NewGithubCollector(opts ...Opt) (*githubCollector, error) {
 	if len(g.assetSuffixes) == 0 {
 		return nil, fmt.Errorf("no asset suffixes for github collector")
 	}
-	if len(g.repoToReleaseTags) == 0 && g.collectDataSource == nil {
+	if g.isRelease && len(g.repoToReleaseTags) == 0 && g.collectDataSource == nil {
 		return nil, fmt.Errorf("no repos and releases to collect nor any data source for future subscriptions")
 	}
 	return g, nil
@@ -309,8 +309,6 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner s
 		if run.RunId == g.lastIngestedRun {
 			continue
 		}
-
-		fmt.Println("run.RunId: ", run.RunId)
 
 		artifacts, err := g.client.GetWorkflowRunArtifacts(ctx, owner, repo, g.sbomName, g.workflowFileName)
 		if err != nil {

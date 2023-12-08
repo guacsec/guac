@@ -35,6 +35,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	githubMode         = "github-mode"
+	githubSbom         = "github-sbom"
+	githubWorkflowFile = "github-workflow-file"
+)
+
 type githubOptions struct {
 	// datasource for the collector
 	dataSource datasource.CollectSource
@@ -55,7 +61,7 @@ type githubOptions struct {
 }
 
 var githubCmd = &cobra.Command{
-	Use:   "github [flags] release_url1 release_url2...",
+	Use:   "github <subject> is in the form of <release_url> for release mode or <owner>/<repo> for workflow mode",
 	Short: "takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph utilizing Nats pubsub and blob store",
 	Long: `
 guaccollect github checks repos and tags to download metadata documents stored in Github releases. Ingestion to GUAC happens via an event stream (NATS)
@@ -79,11 +85,10 @@ you have access to read and write to the respective blob store.`,
 		opts, err := validateGithubFlags(
 			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
+			viper.GetString(githubMode),
+			viper.GetString(githubSbom),
+			viper.GetString(githubWorkflowFile),
 			viper.GetString("csub-addr"),
-			viper.GetString("github-mode"),
-			viper.GetString("github-sbom"),
-			viper.GetString("github-workflow-file"),
-			viper.GetString("owner-repo"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
@@ -116,10 +121,16 @@ you have access to read and write to the respective blob store.`,
 		if opts.poll {
 			collectorOpts = append(collectorOpts, github.WithPolling(30*time.Second))
 		}
+
 		if opts.ownerRepoName != "" {
-			collectorOpts = append(collectorOpts, github.WithOwner(opts.ownerRepoName[:strings.Index(opts.ownerRepoName, "/")]))  // the owner name is everything before the slash
-			collectorOpts = append(collectorOpts, github.WithRepo(opts.ownerRepoName[strings.Index(opts.ownerRepoName, "/")+1:])) // the repo name is everything after the slash
+			if strings.Index(opts.ownerRepoName, "/") == -1 {
+				logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
+			} else {
+				collectorOpts = append(collectorOpts, github.WithOwner(opts.ownerRepoName[:strings.Index(opts.ownerRepoName, "/")]))  // the owner name is everything before the slash
+				collectorOpts = append(collectorOpts, github.WithRepo(opts.ownerRepoName[strings.Index(opts.ownerRepoName, "/")+1:])) // the repo name is everything after the slash
+			}
 		}
+
 		githubCollector, err := github.NewGithubCollector(collectorOpts...)
 		if err != nil {
 			logger.Errorf("unable to create Github collector: %v", err)
@@ -133,7 +144,7 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, workflowFileName, ownerRepoName string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, workflowFileName string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
 	var opts githubOptions
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
@@ -141,7 +152,6 @@ func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, w
 	opts.githubMode = githubMode
 	opts.sbomName = sbomName
 	opts.workflowFileName = workflowFileName
-	opts.ownerRepoName = ownerRepoName
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
@@ -156,39 +166,49 @@ func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, w
 		return opts, err
 	}
 
-	// else direct CLI call
-	if len(args) < 1 {
-		return opts, fmt.Errorf("expected positional argument(s) for release_url(s)")
-	}
+	// Otherwise direct CLI call
 
-	sources := []datasource.Source{}
-	for _, arg := range args {
-		// TODO (mlieberman85): Below should be a github url parser helper instead of in the github collector
-		if _, _, err := github.ParseGithubReleaseDataSource(datasource.Source{
-			Value: arg,
-		}); err != nil {
-			return opts, fmt.Errorf("release_url parsing error. require format https://github.com/<org>/<repo>/releases/<optional_tag>: %v", err)
+	if githubMode == "" || githubMode == "release" {
+		if len(args) < 1 {
+			return opts, fmt.Errorf("expected positional argument(s) for release_url(s)")
 		}
-		sources = append(sources, datasource.Source{
-			Value: arg,
+
+		sources := []datasource.Source{}
+		for _, arg := range args {
+			// TODO (mlieberman85): Below should be a github url parser helper instead of in the github collector
+			if _, _, err := github.ParseGithubReleaseDataSource(datasource.Source{
+				Value: arg,
+			}); err != nil {
+				return opts, fmt.Errorf("release_url parsing error. require format https://github.com/<org>/<repo>/releases/<optional_tag>: %v", err)
+			}
+			sources = append(sources, datasource.Source{
+				Value: arg,
+			})
+		}
+
+		var err error
+		opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
+			GithubReleaseDataSources: sources,
 		})
-	}
+		if err != nil {
+			return opts, err
+		}
+	} else {
+		if len(args) != 1 {
+			return opts, fmt.Errorf("expected positional argument for owner-repo in the format <owner>/<repo>")
+		}
+		opts.ownerRepoName = args[0]
 
-	var err error
-	opts.dataSource, err = inmemsource.NewInmemDataSources(&datasource.DataSources{
-		GithubReleaseDataSources: sources,
-	})
-	if err != nil {
-		return opts, err
+		if opts.ownerRepoName == "" {
+			return opts, fmt.Errorf("owner-repo flag must be in the format <owner>/<repo>")
+		}
 	}
-
-	// TODO (nathan): Add support for workflow mode
 
 	return opts, nil
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"github-mode", "github-sbom", "github-workflow-file", "owner-repo"})
+	set, err := cli.BuildFlags([]string{githubMode, githubSbom, githubWorkflowFile})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
