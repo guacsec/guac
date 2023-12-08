@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package arangodb
 
 import (
@@ -2712,20 +2714,13 @@ func TestHasSBOM(t *testing.T) {
 				}
 			}
 			includes := model.HasSBOMIncludesInputSpec{}
-			var includesPkgID string
-			var includeArtID string
-			var includeDepID string
-			var includeOccurID string
-			var includeDepMainPkgID string
-			var includeDepPkgID string
-			var includeOccurPkgID string
-			var includeOccurArtID string
-			var includeOccurSrcID string
 			for _, s := range test.InSrc {
 				if srcIDs, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				} else {
-					includeOccurSrcID = srcIDs.SourceNameID
+					if test.QueryIncludeOccurSrcID {
+						test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Source: &model.SourceSpec{ID: ptrfrom.String(srcIDs.SourceNameID)}}}}}
+					}
 				}
 			}
 			if test.PkgArt != nil {
@@ -2736,10 +2731,21 @@ func TestHasSBOM(t *testing.T) {
 						for _, pkg := range pkgs {
 							includes.Software = append(includes.Software, pkg.PackageVersionID)
 						}
-						includesPkgID = pkgs[0].PackageVersionID
-						includeDepMainPkgID = pkgs[0].PackageVersionID
-						includeOccurPkgID = pkgs[0].PackageVersionID
-						includeDepPkgID = pkgs[len(pkgs)-1].PackageVersionID
+						if test.QueryIncludePkgID {
+							test.Query = &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Package: &model.PkgSpec{ID: ptrfrom.String(pkgs[0].PackageVersionID)}}}}
+						}
+						if test.QueryIncludeOccurPkgID {
+							test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{ID: ptrfrom.String(pkgs[0].PackageVersionID)}}}}}
+						}
+						if test.QueryIncludeDepMainPkgID {
+							test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String(pkgs[0].PackageVersionID)}}}}
+						}
+						if test.QueryIncludeDepPkgID {
+							test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{DependencyPackage: &model.PkgSpec{ID: ptrfrom.String(pkgs[len(pkgs)-1].PackageVersionID)}}}}
+						}
+						if test.QueryIncludeDepMainPkgID && test.QueryIncludeDepPkgID {
+							test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String(pkgs[0].PackageVersionID)}, DependencyPackage: &model.PkgSpec{ID: ptrfrom.String(pkgs[len(pkgs)-1].PackageVersionID)}}}}
+						}
 					}
 				}
 				if arts, err := b.IngestArtifacts(ctx, test.PkgArt.Artifacts); err != nil {
@@ -2747,8 +2753,12 @@ func TestHasSBOM(t *testing.T) {
 				} else {
 					if arts != nil {
 						includes.Software = append(includes.Software, arts...)
-						includeArtID = arts[0]
-						includeOccurArtID = arts[0]
+						if test.QueryIncludeArtID {
+							test.Query = &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String(arts[0])}}}}
+						}
+						if test.QueryIncludeOccurArtID {
+							test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String(arts[0])}}}}
+						}
 					}
 				}
 			}
@@ -2758,7 +2768,9 @@ func TestHasSBOM(t *testing.T) {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
 					includes.Dependencies = append(includes.Dependencies, isDep)
-					includeDepID = isDep
+					if test.QueryIncludeDepID {
+						test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{ID: ptrfrom.String(isDep)}}}
+					}
 				}
 			}
 
@@ -2767,39 +2779,10 @@ func TestHasSBOM(t *testing.T) {
 					t.Fatalf("Could not ingest occurrence: %v", err)
 				} else {
 					includes.Occurrences = append(includes.Occurrences, isOcc)
-					includeOccurID = isOcc
+					if test.QueryIncludeOccurID {
+						test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{ID: ptrfrom.String(isOcc)}}}
+					}
 				}
-			}
-
-			if test.QueryIncludePkgID {
-				test.Query = &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Package: &model.PkgSpec{ID: ptrfrom.String(includesPkgID)}}}}
-			}
-			if test.QueryIncludeArtID {
-				test.Query = &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String(includeArtID)}}}}
-			}
-			if test.QueryIncludeDepID {
-				test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{ID: ptrfrom.String(includeDepID)}}}
-			}
-			if test.QueryIncludeOccurID {
-				test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{ID: ptrfrom.String(includeOccurID)}}}
-			}
-			if test.QueryIncludeOccurPkgID {
-				test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{ID: ptrfrom.String(includeOccurPkgID)}}}}}
-			}
-			if test.QueryIncludeOccurArtID {
-				test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String(includeOccurArtID)}}}}
-			}
-			if test.QueryIncludeOccurSrcID {
-				test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Source: &model.SourceSpec{ID: ptrfrom.String(includeOccurSrcID)}}}}}
-			}
-			if test.QueryIncludeDepMainPkgID {
-				test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String(includeDepMainPkgID)}}}}
-			}
-			if test.QueryIncludeDepPkgID {
-				test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{DependencyPackage: &model.PkgSpec{ID: ptrfrom.String(includeDepPkgID)}}}}
-			}
-			if test.QueryIncludeDepMainPkgID && test.QueryIncludeDepPkgID {
-				test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String(includeDepMainPkgID)}, DependencyPackage: &model.PkgSpec{ID: ptrfrom.String(includeDepPkgID)}}}}
 			}
 
 			for _, o := range test.Calls {

@@ -906,48 +906,7 @@ func (c *arangoClient) hasSbomNeighbors(ctx context.Context, nodeID string, allo
 		values := map[string]any{}
 		arangoQueryBuilder := newForQuery(hasSBOMsStr, "hasSBOM")
 		setHasSBOMMatchValues(arangoQueryBuilder, &model.HasSBOMSpec{ID: &nodeID}, values)
-		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSBOM.includedSoftware }")
-
-		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "hasSbomNeighbors - includedSoftware")
-		if err != nil {
-			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hasSbomNeighbors", err)
-		}
-		defer cursor.Close()
-
-		type dbIncludedSoftware struct {
-			IncludedSoftware []string `json:"includedSoftware"`
-		}
-
-		var collectedIncludedSoftwares []dbIncludedSoftware
-		for {
-			var doc dbIncludedSoftware
-			_, err := cursor.ReadDocument(ctx, &doc)
-			if err != nil {
-				if driver.IsNoMoreDocuments(err) {
-					break
-				} else {
-					return nil, fmt.Errorf("failed to get neighbor id from cursor for %s with error: %w", "hasSbomNeighbors", err)
-				}
-			} else {
-				collectedIncludedSoftwares = append(collectedIncludedSoftwares, doc)
-			}
-		}
-
-		var foundIDs []string
-		for _, inSoftware := range collectedIncludedSoftwares {
-			if inSoftware.IncludedSoftware != nil {
-				foundIDs = append(foundIDs, inSoftware.IncludedSoftware...)
-			}
-		}
-
-		out = append(out, foundIDs...)
-	}
-
-	if allowedEdges[model.EdgeHasSbomIncludedSoftware] {
-		values := map[string]any{}
-		arangoQueryBuilder := newForQuery(hasSBOMsStr, "hasSBOM")
-		setHasSBOMMatchValues(arangoQueryBuilder, &model.HasSBOMSpec{ID: &nodeID}, values)
-		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSBOM.includedSoftware }")
+		arangoQueryBuilder.query.WriteString("\nRETURN { includedSoftware:  hasSBOM.includedSoftware }")
 
 		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "hasSbomNeighbors - includedSoftware")
 		if err != nil {
@@ -988,7 +947,7 @@ func (c *arangoClient) hasSbomNeighbors(ctx context.Context, nodeID string, allo
 		values := map[string]any{}
 		arangoQueryBuilder := newForQuery(hasSBOMsStr, "hasSBOM")
 		setHasSBOMMatchValues(arangoQueryBuilder, &model.HasSBOMSpec{ID: &nodeID}, values)
-		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSBOM.includedDependencies }")
+		arangoQueryBuilder.query.WriteString("\nRETURN { includedDependencies:  hasSBOM.includedDependencies }")
 
 		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "hasSbomNeighbors - includedDependencies")
 		if err != nil {
@@ -1029,7 +988,7 @@ func (c *arangoClient) hasSbomNeighbors(ctx context.Context, nodeID string, allo
 		values := map[string]any{}
 		arangoQueryBuilder := newForQuery(hasSBOMsStr, "hasSBOM")
 		setHasSBOMMatchValues(arangoQueryBuilder, &model.HasSBOMSpec{ID: &nodeID}, values)
-		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSBOM.includesOccurrences }")
+		arangoQueryBuilder.query.WriteString("\nRETURN { includesOccurrences:  hasSBOM.includesOccurrences }")
 
 		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "hasSbomNeighbors - includesOccurrences")
 		if err != nil {
