@@ -127,9 +127,13 @@ const (
 
 	// hasSBOM collection
 
-	hasSBOMPkgEdgesStr string = "hasSBOMPkgEdges"
-	hasSBOMArtEdgesStr string = "hasSBOMArtEdges"
-	hasSBOMsStr        string = "hasSBOMs"
+	hasSBOMPkgEdgesStr                 string = "hasSBOMPkgEdges"
+	hasSBOMArtEdgesStr                 string = "hasSBOMArtEdges"
+	hasSBOMIncludedSoftwarePkgEdgesStr string = "hasSBOMIncludedSoftwarePkgEdges"
+	hasSBOMIncludedSoftwareArtEdgesStr string = "hasSBOMIncludedSoftwareArtEdges"
+	hasSBOMIncludedDependencyEdgesStr  string = "hasSBOMIncludedDependencyEdges"
+	hasSBOMIncludedOccurrenceEdgesStr  string = "hasSBOMIncludedOccurrenceEdges"
+	hasSBOMsStr                        string = "hasSBOMs"
 
 	// hasSourceAt collection
 
@@ -219,6 +223,9 @@ var mapEdgeToArangoEdgeCollection = map[model.Edge][]string{
 	model.EdgePackageCertifyVuln:               {certifyVulnPkgEdgesStr},
 	model.EdgePackageHasMetadata:               {hasMetadataPkgNameEdgesStr, hasMetadataPkgVersionEdgesStr},
 	model.EdgePackageHasSbom:                   {hasSBOMPkgEdgesStr},
+	model.EdgeHasSbomIncludedSoftware:          {hasSBOMIncludedSoftwarePkgEdgesStr, hasMetadataArtEdgesStr},
+	model.EdgeHasSbomIncludedDependencies:      {hasSBOMIncludedDependencyEdgesStr},
+	model.EdgeHasSbomIncludedOccurrences:       {hasSBOMIncludedOccurrenceEdgesStr},
 	model.EdgePackageHasSourceAt:               {hasMetadataPkgVersionEdgesStr, hasSourceAtPkgNameEdgesStr},
 	model.EdgePackageIsDependency:              {isDependencySubjectPkgEdgesStr},
 	model.EdgePackageIsOccurrence:              {isOccurrenceSubjectPkgEdgesStr},
@@ -541,6 +548,26 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		hasSBOMArtEdges.From = []string{artifactsStr}
 		hasSBOMArtEdges.To = []string{hasSBOMsStr}
 
+		var hasSBOMIncludedSoftwarePkgEdges driver.EdgeDefinition
+		hasSBOMIncludedSoftwarePkgEdges.Collection = hasSBOMIncludedSoftwarePkgEdgesStr
+		hasSBOMIncludedSoftwarePkgEdges.From = []string{hasSBOMsStr}
+		hasSBOMIncludedSoftwarePkgEdges.To = []string{pkgVersionsStr}
+
+		var hasSBOMIncludedSoftwareArtEdges driver.EdgeDefinition
+		hasSBOMIncludedSoftwareArtEdges.Collection = hasSBOMIncludedSoftwareArtEdgesStr
+		hasSBOMIncludedSoftwareArtEdges.From = []string{hasSBOMsStr}
+		hasSBOMIncludedSoftwareArtEdges.To = []string{artifactsStr}
+
+		var hasSBOMIncludedDependencyEdges driver.EdgeDefinition
+		hasSBOMIncludedDependencyEdges.Collection = hasSBOMIncludedDependencyEdgesStr
+		hasSBOMIncludedDependencyEdges.From = []string{hasSBOMsStr}
+		hasSBOMIncludedDependencyEdges.To = []string{isDependenciesStr}
+
+		var hasSBOMIncludedOccurrenceEdges driver.EdgeDefinition
+		hasSBOMIncludedOccurrenceEdges.Collection = hasSBOMIncludedOccurrenceEdgesStr
+		hasSBOMIncludedOccurrenceEdges.From = []string{hasSBOMsStr}
+		hasSBOMIncludedOccurrenceEdges.To = []string{isOccurrencesStr}
+
 		// setup hasSourceAt collections
 		var hasSourceAtPkgVersionEdges driver.EdgeDefinition
 		hasSourceAtPkgVersionEdges.Collection = hasSourceAtPkgVersionEdgesStr
@@ -687,7 +714,8 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			pkgHasVersion, srcHasNamespace, srcHasName, vulnHasVulnerabilityID, isDependencyDepPkgVersionEdges, isDependencyDepPkgNameEdges, isDependencySubjectPkgEdges,
 			isOccurrenceArtEdges, isOccurrenceSubjectPkgEdges, isOccurrenceSubjectSrcEdges, hasSLSASubjectArtEdges,
 			hasSLSABuiltByEdges, hasSLSABuiltFromEdges, hashEqualArtEdges, hashEqualSubjectArtEdges, hasSBOMPkgEdges,
-			hasSBOMArtEdges, certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
+			hasSBOMArtEdges, hasSBOMIncludedSoftwarePkgEdges, hasSBOMIncludedSoftwareArtEdges, hasSBOMIncludedDependencyEdges, hasSBOMIncludedOccurrenceEdges,
+			certifyVulnPkgEdges, certifyVulnEdges, certifyScorecardSrcEdges, certifyBadPkgVersionEdges, certifyBadPkgNameEdges,
 			certifyBadArtEdges, certifyBadSrcEdges, certifyGoodPkgVersionEdges, certifyGoodPkgNameEdges, certifyGoodArtEdges, certifyGoodSrcEdges,
 			certifyVexPkgEdges, certifyVexArtEdges, certifyVexVulnEdges, vulnMetadataEdges, vulnEqualVulnEdges, vulnEqualSubjectVulnEdges,
 			pkgEqualPkgEdges, pkgEqualSubjectPkgEdges, hasMetadataPkgVersionEdges, hasMetadataPkgNameEdges,
@@ -1176,4 +1204,11 @@ func getPreloadString(prefix, name string) string {
 
 func ptrfromArangoSearchNGramStreamType(s driver.ArangoSearchNGramStreamType) *driver.ArangoSearchNGramStreamType {
 	return &s
+}
+
+func noMatch(filter *string, value string) bool {
+	if filter != nil {
+		return value != *filter
+	}
+	return false
 }

@@ -22,6 +22,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 )
@@ -378,7 +379,7 @@ func (c *demoClient) matchOccurrences(ctx context.Context, filters []*model.IsOc
 			}
 			if filter.ID != nil {
 				// Check by ID if present
-				if !c.isIDPresent(*filter.ID, occLinkIDs) {
+				if !helper.IsIDPresent(*filter.ID, occLinkIDs) {
 					return false
 				}
 			} else {

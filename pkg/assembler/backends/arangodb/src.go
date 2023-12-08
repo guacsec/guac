@@ -22,6 +22,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -965,4 +966,46 @@ func (c *arangoClient) srcNameNeighbors(ctx context.Context, nodeID string, allo
 	}
 
 	return out, nil
+}
+
+func matchSources(ctx context.Context, filter []*model.SourceSpec, sources []*model.Source) bool {
+	// collect all IDs for sources
+	var srcIDs []string
+	for _, src := range sources {
+		srcIDs = append(srcIDs, src.Namespaces[0].Names[0].ID)
+	}
+	for _, srSpec := range filter {
+		if srSpec != nil {
+			if srSpec.ID != nil {
+				// Check by ID if present from the list of collected pkg IDs
+				if !helper.IsIDPresent(*srSpec.ID, srcIDs) {
+					return false
+				}
+			} else {
+				// Otherwise match spec information
+				match := false
+				for _, src := range sources {
+					srcName := src.Namespaces[0].Names[0]
+					if noMatch(srSpec.Name, srcName.Name) || noMatch(srSpec.Tag, *srcName.Tag) || noMatch(srSpec.Commit, *srcName.Commit) {
+						continue
+					}
+					srcNamespace := src.Namespaces[0]
+					if noMatch(srSpec.Namespace, srcNamespace.Namespace) {
+						continue
+					}
+					srcType := src.Type
+					if noMatch(srSpec.Type, srcType) {
+						continue
+					} else {
+						match = true
+						break
+					}
+				}
+				if !match {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }
