@@ -605,8 +605,8 @@ func getIsDependencyFromCursor(ctx context.Context, cursor driver.Cursor, ingest
 				DependencyPackage: depPkg,
 				VersionRange:      createdValue.VersionRange,
 				Justification:     createdValue.Justification,
-				Origin:            createdValue.Collector,
-				Collector:         createdValue.Origin,
+				Origin:            createdValue.Origin,
+				Collector:         createdValue.Collector,
 			}
 
 			if depType, ok := dependencyTypeToEnum[createdValue.DependencyType]; ok {
@@ -716,8 +716,8 @@ func (c *arangoClient) queryIsDependencyNodeByID(ctx context.Context, filter *mo
 		VersionRange:      collectedValues[0].VersionRange,
 		DependencyType:    depType,
 		Justification:     collectedValues[0].Justification,
-		Origin:            collectedValues[0].Collector,
-		Collector:         collectedValues[0].Origin,
+		Origin:            collectedValues[0].Origin,
+		Collector:         collectedValues[0].Collector,
 	}, nil
 }
 

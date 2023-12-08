@@ -1572,7 +1572,7 @@ func matchPackages(ctx context.Context, filter []*model.PkgSpec, pkgs []*model.P
 	// collect all IDs for packages
 	var pkgIDs []string
 	for _, pkg := range pkgs {
-		pkgIDs = append(pkgIDs, pkg.ID)
+		pkgIDs = append(pkgIDs, pkg.Namespaces[0].Names[0].Versions[0].ID)
 	}
 	for _, pvSpec := range filter {
 		if pvSpec != nil {

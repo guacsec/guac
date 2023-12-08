@@ -631,7 +631,7 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 			matchingSoftware, matchingDeps, matchingOccur := checkMatchingIncludes(ctx, filter, collectedPkgs, collectedArts,
 				collectedDeps, collectedOccurs)
 
-			if !matchingSoftware && !matchingDeps && !matchingOccur {
+			if !matchingSoftware || !matchingDeps || !matchingOccur {
 				continue
 			}
 			hasSBOM = &model.HasSbom{
@@ -640,8 +640,8 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 				Algorithm:            createdValue.Algorithm,
 				Digest:               createdValue.Digest,
 				DownloadLocation:     createdValue.DownloadLocation,
-				Origin:               createdValue.Collector,
-				Collector:            createdValue.Origin,
+				Origin:               createdValue.Origin,
+				Collector:            createdValue.Collector,
 				KnownSince:           createdValue.KnownSince,
 				IncludedSoftware:     collectedSoftware,
 				IncludedDependencies: collectedDeps,
@@ -697,10 +697,12 @@ func checkMatchingIncludes(ctx context.Context, filter *model.HasSBOMSpec, colle
 	if filter.IncludedSoftware != nil {
 		pkgFilters, artFilters := helper.GetPackageAndArtifactFilters(filter.IncludedSoftware)
 		matchingSoftware = matchPackages(ctx, pkgFilters, collectedPkgs)
-		for _, artFilter := range artFilters {
-			if found := containsMatchingArtifact(collectedArts, artFilter.ID, artFilter.Algorithm, artFilter.Digest); !found {
-				matchingSoftware = false
-				break
+		if matchingSoftware {
+			for _, artFilter := range artFilters {
+				if found := containsMatchingArtifact(collectedArts, artFilter.ID, artFilter.Algorithm, artFilter.Digest); !found {
+					matchingSoftware = false
+					break
+				}
 			}
 		}
 	}

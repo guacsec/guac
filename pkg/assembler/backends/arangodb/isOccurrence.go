@@ -704,19 +704,30 @@ func matchOccurrences(ctx context.Context, filters []*model.IsOccurrenceSpec, oc
 				for _, link := range occurs {
 					if !noMatch(filter.Justification, link.Justification) &&
 						!noMatch(filter.Origin, link.Origin) &&
-						!noMatch(filter.Collector, link.Collector) &&
-						containsMatchingArtifact([]*model.Artifact{link.Artifact}, filter.Artifact.ID, filter.Artifact.Algorithm, filter.Artifact.Digest) {
+						!noMatch(filter.Collector, link.Collector) {
 
+						if filter.Artifact != nil && !containsMatchingArtifact([]*model.Artifact{link.Artifact}, filter.Artifact.ID, filter.Artifact.Algorithm, filter.Artifact.Digest) {
+							continue
+						}
+
+						matchSubject := false
 						if filter.Subject != nil {
 							switch subject := link.Subject.(type) {
 							case *model.Package:
-								if filter.Subject.Package != nil && !matchPackages(ctx, []*model.PkgSpec{filter.Subject.Package}, []*model.Package{subject}) {
-									continue
+								if filter.Subject.Source != nil || (filter.Subject.Package != nil && !matchPackages(ctx, []*model.PkgSpec{filter.Subject.Package}, []*model.Package{subject})) {
+									matchSubject = false
+								} else {
+									matchSubject = true
 								}
 							case *model.Source:
-								if filter.Subject.Source != nil && !matchSources(ctx, []*model.SourceSpec{filter.Subject.Source}, []*model.Source{subject}) {
-									continue
+								if filter.Subject.Package != nil || (filter.Subject.Source != nil && !matchSources(ctx, []*model.SourceSpec{filter.Subject.Source}, []*model.Source{subject})) {
+									matchSubject = false
+								} else {
+									matchSubject = true
 								}
+							}
+							if !matchSubject {
+								continue
 							}
 						}
 						match = true

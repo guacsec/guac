@@ -972,7 +972,7 @@ func matchSources(ctx context.Context, filter []*model.SourceSpec, sources []*mo
 	// collect all IDs for sources
 	var srcIDs []string
 	for _, src := range sources {
-		srcIDs = append(srcIDs, src.ID)
+		srcIDs = append(srcIDs, src.Namespaces[0].Names[0].ID)
 	}
 	for _, srSpec := range filter {
 		if srSpec != nil {

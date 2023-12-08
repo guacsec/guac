@@ -308,22 +308,48 @@ func TestHasSBOM(t *testing.T) {
 		Inc *model.HasSBOMIncludesInputSpec
 	}
 	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		InArt        []*model.ArtifactInputSpec
-		PkgArt       *model.PackageOrArtifactInputs
-		InSrc        []*model.SourceInputSpec
-		IsDeps       []testDependency
-		IsOccs       []testOccurrence
-		Calls        []call
-		Query        *model.HasSBOMSpec
-		QueryID      bool
-		QueryPkgID   bool
-		QueryArtID   bool
-		ExpHS        []*model.HasSbom
-		ExpIngestErr bool
-		ExpQueryErr  bool
+		Name                     string
+		InPkg                    []*model.PkgInputSpec
+		InArt                    []*model.ArtifactInputSpec
+		PkgArt                   *model.PackageOrArtifactInputs
+		InSrc                    []*model.SourceInputSpec
+		IsDeps                   []testDependency
+		IsOccs                   []testOccurrence
+		Calls                    []call
+		Query                    *model.HasSBOMSpec
+		QueryID                  bool
+		QueryPkgID               bool
+		QueryArtID               bool
+		QueryIncludePkgID        bool
+		QueryIncludeArtID        bool
+		QueryIncludeDepID        bool
+		QueryIncludeOccurID      bool
+		QueryIncludeDepMainPkgID bool
+		QueryIncludeDepPkgID     bool
+		QueryIncludeOccurPkgID   bool
+		QueryIncludeOccurArtID   bool
+		QueryIncludeOccurSrcID   bool
+		ExpHS                    []*model.HasSbom
+		ExpIngestErr             bool
+		ExpQueryErr              bool
 	}{
+		{
+			Name:   "Includes - include without filters",
+			InPkg:  includedPackages,
+			InArt:  includedArtifacts,
+			InSrc:  includedSources,
+			PkgArt: includedPackageArtifacts,
+			IsDeps: includedTestDependencies,
+			IsOccs: includedTestOccurrences,
+			Calls: []call{{
+				Sub: model.PackageOrArtifactInput{
+					Package: includedPackage1,
+				},
+				HS: includedHasSBOM,
+			}},
+			Query: &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{}},
+			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+		},
 		{
 			Name:  "HappyPath",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
@@ -564,6 +590,21 @@ func TestHasSBOM(t *testing.T) {
 					Subject: testdata.P2out,
 					URI:     "test uri",
 				},
+				{
+					Subject:          testdata.P2out,
+					URI:              "test uri",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P2out, testdata.P4out, testdata.A1out},
+					IncludedDependencies: []*model.IsDependency{{
+						Package:           testdata.P2out,
+						DependencyPackage: testdata.P4out,
+						Justification:     "test justification",
+					}},
+					IncludedOccurrences: []*model.IsOccurrence{{
+						Subject:       testdata.P4out,
+						Artifact:      testdata.A1out,
+						Justification: "test justification",
+					}},
+				},
 			},
 		},
 		{
@@ -650,6 +691,11 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject: testdata.A2out,
 					URI:     "test uri",
+				},
+				{
+					Subject:          testdata.A2out,
+					URI:              "test uri",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P2out, testdata.A1out, testdata.A2out},
 				},
 			},
 		},
@@ -847,6 +893,11 @@ func TestHasSBOM(t *testing.T) {
 				{
 					Subject:          testdata.P1out,
 					DownloadLocation: "location two",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
+				},
+				{
+					Subject:          testdata.P1out,
+					DownloadLocation: "location two",
 				},
 				{
 					Subject:          testdata.P2out,
@@ -917,23 +968,6 @@ func TestHasSBOM(t *testing.T) {
 			ExpQueryErr: true,
 		},
 		{
-			Name:   "Includeds - include without filters",
-			InPkg:  includedPackages,
-			InArt:  includedArtifacts,
-			InSrc:  includedSources,
-			PkgArt: includedPackageArtifacts,
-			IsDeps: includedTestDependencies,
-			IsOccs: includedTestOccurrences,
-			Calls: []call{{
-				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
-				},
-				HS: includedHasSBOM,
-			}},
-			Query: &model.HasSBOMSpec{},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
-		},
-		{
 			Name:   "IncludedSoftware - Valid Included Package ID",
 			InPkg:  includedPackages,
 			InArt:  includedArtifacts,
@@ -947,8 +981,8 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Package: &model.PkgSpec{ID: ptrfrom.String("8")}}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludePkgID: true,
+			ExpHS:             []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedSoftware - Invalid Included Package ID",
@@ -1168,8 +1202,9 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String("13")}}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludeArtID: true,
+			Query:             &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String("13")}}}},
+			ExpHS:             []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedSoftware - Invalid Included Artifact ID",
@@ -1270,8 +1305,9 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{ID: ptrfrom.String("19")}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludeDepID: true,
+			Query:             &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{ID: ptrfrom.String("19")}}},
+			ExpHS:             []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedDependencies - Invalid Included ID",
@@ -1304,8 +1340,8 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String("4")}}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludeDepMainPkgID: true,
+			ExpHS:                    []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedDependencies - Invalid Included Package ID",
@@ -1526,8 +1562,8 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{DependencyPackage: &model.PkgSpec{ID: ptrfrom.String("8")}}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludeDepPkgID: true,
+			ExpHS:                []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedDependencies - Invalid Included DependencyPackage ID",
@@ -1747,8 +1783,9 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String("4")}, DependencyPackage: &model.PkgSpec{ID: ptrfrom.String("8")}}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludeDepMainPkgID: true,
+			QueryIncludeDepPkgID:     true,
+			ExpHS:                    []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedDependencies - Valid Included Package ID and Invalid DependencyPackage ID",
@@ -2019,8 +2056,9 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{ID: ptrfrom.String("21")}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludeOccurID: true,
+			Query:               &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{ID: ptrfrom.String("21")}}},
+			ExpHS:               []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedOccurrences - Invalid Included ID",
@@ -2053,8 +2091,8 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{ID: ptrfrom.String("4")}}}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludeOccurPkgID: true,
+			ExpHS:                  []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedOccurrences - Invalid Included Package ID",
@@ -2274,8 +2312,8 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Source: &model.SourceSpec{ID: ptrfrom.String("17")}}}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludeOccurSrcID: true,
+			ExpHS:                  []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedOccurrences - Invalid Included Source ID",
@@ -2447,8 +2485,8 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String("13")}}}},
-			ExpHS: []*model.HasSbom{includedTestExpectedSBOM},
+			QueryIncludeOccurArtID: true,
+			ExpHS:                  []*model.HasSbom{includedTestExpectedSBOM},
 		},
 		{
 			Name:   "IncludedOccurrences - Invalid Included Artifact ID",
@@ -2673,24 +2711,45 @@ func TestHasSBOM(t *testing.T) {
 					}
 				}
 			}
+			includes := model.HasSBOMIncludesInputSpec{}
+			var includesPkgID string
+			var includeArtID string
+			var includeDepID string
+			var includeOccurID string
+			var includeDepMainPkgID string
+			var includeDepPkgID string
+			var includeOccurPkgID string
+			var includeOccurArtID string
+			var includeOccurSrcID string
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if srcIDs, err := b.IngestSource(ctx, *s); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
+				} else {
+					includeOccurSrcID = srcIDs.SourceNameID
 				}
 			}
-			includes := model.HasSBOMIncludesInputSpec{}
 			if test.PkgArt != nil {
 				if pkgs, err := b.IngestPackages(ctx, test.PkgArt.Packages); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
-					for _, pkg := range pkgs {
-						includes.Software = append(includes.Software, pkg.PackageVersionID)
+					if pkgs != nil {
+						for _, pkg := range pkgs {
+							includes.Software = append(includes.Software, pkg.PackageVersionID)
+						}
+						includesPkgID = pkgs[0].PackageVersionID
+						includeDepMainPkgID = pkgs[0].PackageVersionID
+						includeOccurPkgID = pkgs[0].PackageVersionID
+						includeDepPkgID = pkgs[len(pkgs)-1].PackageVersionID
 					}
 				}
 				if arts, err := b.IngestArtifacts(ctx, test.PkgArt.Artifacts); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					includes.Software = append(includes.Software, arts...)
+					if arts != nil {
+						includes.Software = append(includes.Software, arts...)
+						includeArtID = arts[0]
+						includeOccurArtID = arts[0]
+					}
 				}
 			}
 
@@ -2699,6 +2758,7 @@ func TestHasSBOM(t *testing.T) {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
 					includes.Dependencies = append(includes.Dependencies, isDep)
+					includeDepID = isDep
 				}
 			}
 
@@ -2707,8 +2767,41 @@ func TestHasSBOM(t *testing.T) {
 					t.Fatalf("Could not ingest occurrence: %v", err)
 				} else {
 					includes.Occurrences = append(includes.Occurrences, isOcc)
+					includeOccurID = isOcc
 				}
 			}
+
+			if test.QueryIncludePkgID {
+				test.Query = &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Package: &model.PkgSpec{ID: ptrfrom.String(includesPkgID)}}}}
+			}
+			if test.QueryIncludeArtID {
+				test.Query = &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String(includeArtID)}}}}
+			}
+			if test.QueryIncludeDepID {
+				test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{ID: ptrfrom.String(includeDepID)}}}
+			}
+			if test.QueryIncludeOccurID {
+				test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{ID: ptrfrom.String(includeOccurID)}}}
+			}
+			if test.QueryIncludeOccurPkgID {
+				test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{ID: ptrfrom.String(includeOccurPkgID)}}}}}
+			}
+			if test.QueryIncludeOccurArtID {
+				test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String(includeOccurArtID)}}}}
+			}
+			if test.QueryIncludeOccurSrcID {
+				test.Query = &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Source: &model.SourceSpec{ID: ptrfrom.String(includeOccurSrcID)}}}}}
+			}
+			if test.QueryIncludeDepMainPkgID {
+				test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String(includeDepMainPkgID)}}}}
+			}
+			if test.QueryIncludeDepPkgID {
+				test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{DependencyPackage: &model.PkgSpec{ID: ptrfrom.String(includeDepPkgID)}}}}
+			}
+			if test.QueryIncludeDepMainPkgID && test.QueryIncludeDepPkgID {
+				test.Query = &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String(includeDepMainPkgID)}, DependencyPackage: &model.PkgSpec{ID: ptrfrom.String(includeDepPkgID)}}}}
+			}
+
 			for _, o := range test.Calls {
 				hsID, err := b.IngestHasSbom(ctx, o.Sub, *o.HS, includes)
 				if (err != nil) != test.ExpIngestErr {
