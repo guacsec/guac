@@ -123,7 +123,7 @@ you have access to read and write to the respective blob store.`,
 		}
 
 		if opts.ownerRepoName != "" {
-			if strings.Index(opts.ownerRepoName, "/") == -1 {
+			if !strings.Contains(opts.ownerRepoName, "/") {
 				logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
 			} else {
 				collectorOpts = append(collectorOpts, github.WithOwner(opts.ownerRepoName[:strings.Index(opts.ownerRepoName, "/")]))  // the owner name is everything before the slash
