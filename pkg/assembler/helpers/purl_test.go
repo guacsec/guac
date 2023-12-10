@@ -34,6 +34,9 @@ func TestPurlConvert(t *testing.T) {
 		expected *model.PkgInputSpec
 	}{
 		{
+			purlUri:  "pkg:maven/US_export_policy/US_export_policy",
+			expected: pkg("maven", "US_export_policy", "US_export_policy", "", "", map[string]string{}),
+		}, {
 			// alpine
 			purlUri: "pkg:alpm/arch/pacman@6.0.1-1?arch=x86_64",
 			expected: pkg("alpm", "arch", "pacman", "6.0.1-1", "", map[string]string{
