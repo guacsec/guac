@@ -76,6 +76,7 @@ func NewGithubCollector(opts ...Opt) (*githubCollector, error) {
 		repoToReleaseTags: map[client.Repo][]TagOrLatest{},
 		assetSuffixes:     defaultAssetSuffixes(),
 		collectDataSource: nil,
+		isRelease:         true,
 	}
 
 	for _, opt := range opts {
@@ -101,13 +102,9 @@ func WithPolling(interval time.Duration) Opt {
 	}
 }
 
-func WithRelease(githubMode string) Opt {
+func WithMode(githubMode string) Opt {
 	return func(g *githubCollector) {
-		if githubMode == "release" || githubMode == "" {
-			g.isRelease = true
-		} else {
-			g.isRelease = false // otherwise it is a workflow
-		}
+		g.isRelease = githubMode == "release"
 	}
 }
 
@@ -297,11 +294,11 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner s
 		// get the latest workflow run
 		run, err := g.client.GetWorkflowRuns(ctx, owner, repo, workflow.Id)
 		if err != nil {
-			logger.Warnf("unable to fetch workflow runs for workflow %v: %v", workflow.Id, err)
+			logger.Errorf("unable to fetch workflow runs for workflow %v: %v", workflow.Id, err)
 			continue
 		}
 		if run == nil {
-			logger.Warnf("no workflow runs found for workflow %v", workflow.Id)
+			logger.Errorf("no workflow runs found for workflow %v", workflow.Id)
 			continue
 		}
 
@@ -310,9 +307,9 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner s
 			continue
 		}
 
-		artifacts, err := g.client.GetWorkflowRunArtifacts(ctx, owner, repo, g.sbomName, g.workflowFileName)
+		artifacts, err := g.client.GetWorkflowRunArtifacts(ctx, owner, repo, g.sbomName, run.RunId)
 		if err != nil {
-			logger.Warnf("unable to fetch workflow run artifacts for run %v: %v", run.RunId, err)
+			logger.Errorf("unable to fetch workflow run artifacts for run %v: %v", run.RunId, err)
 			continue
 		}
 

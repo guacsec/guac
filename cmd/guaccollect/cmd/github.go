@@ -18,10 +18,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/guacsec/guac/pkg/cli"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/guacsec/guac/pkg/cli"
 
 	"github.com/guacsec/guac/internal/client/githubclient"
 	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
@@ -64,6 +65,10 @@ var githubCmd = &cobra.Command{
 	Use:   "github <subject> is in the form of <release_url> for release mode or <owner>/<repo> for workflow mode",
 	Short: "takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph utilizing Nats pubsub and blob store",
 	Long: `
+Takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph.
+  <github-mode> must be either "workflow", "release", or "". If "", then the default is "release".
+  if <github-mode> is "workflow", then <owner-repo> must be specified.
+
 guaccollect github checks repos and tags to download metadata documents stored in Github releases. Ingestion to GUAC happens via an event stream (NATS)
 to allow for decoupling of the collectors from the ingestion into GUAC. 
 
@@ -114,7 +119,7 @@ you have access to read and write to the respective blob store.`,
 		collectorOpts := []github.Opt{
 			github.WithCollectDataSource(opts.dataSource),
 			github.WithClient(ghc),
-			github.WithRelease(opts.githubMode),
+			github.WithMode(opts.githubMode),
 			github.WithSbomName(opts.sbomName),
 			github.WithWorkflowName(opts.workflowFileName),
 		}
@@ -126,8 +131,12 @@ you have access to read and write to the respective blob store.`,
 			if !strings.Contains(opts.ownerRepoName, "/") {
 				logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
 			} else {
-				collectorOpts = append(collectorOpts, github.WithOwner(opts.ownerRepoName[:strings.Index(opts.ownerRepoName, "/")]))  // the owner name is everything before the slash
-				collectorOpts = append(collectorOpts, github.WithRepo(opts.ownerRepoName[strings.Index(opts.ownerRepoName, "/")+1:])) // the repo name is everything after the slash
+				ownerRepoName := strings.Split(opts.ownerRepoName, "/")
+				if len(ownerRepoName) != 2 {
+					logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
+				}
+				collectorOpts = append(collectorOpts, github.WithOwner(ownerRepoName[0]))
+				collectorOpts = append(collectorOpts, github.WithRepo(ownerRepoName[1]))
 			}
 		}
 
@@ -168,7 +177,7 @@ func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, w
 
 	// Otherwise direct CLI call
 
-	if githubMode == "" || githubMode == "release" {
+	if githubMode == "release" {
 		if len(args) < 1 {
 			return opts, fmt.Errorf("expected positional argument(s) for release_url(s)")
 		}
@@ -200,7 +209,7 @@ func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, w
 		opts.ownerRepoName = args[0]
 
 		if opts.ownerRepoName == "" {
-			return opts, fmt.Errorf("owner-repo flag must be in the format <owner>/<repo>")
+			return opts, fmt.Errorf("owner-repo argument must be in the format <owner>/<repo>")
 		}
 	}
 

@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package github
 
 import (
@@ -146,7 +144,7 @@ func (m *MockGithubClient) GetReleaseAsset(asset client.ReleaseAsset) (*client.R
 	return &rac, nil
 }
 
-func (m *MockGithubClient) GetWorkflow(ctx context.Context, owner string, repo string, githubWorkflowName string) ([]client.Workflow, error) {
+func (m *MockGithubClient) GetWorkflow(ctx context.Context, owner string, repo string, githubWorkflowName string) ([]*client.Workflow, error) {
 	return nil, nil
 }
 
@@ -154,7 +152,7 @@ func (m *MockGithubClient) GetWorkflowRuns(ctx context.Context, owner, repo stri
 	return nil, nil
 }
 
-func (m *MockGithubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName, githubWorkflowName string) ([]*client.WorkflowArtifactContent, error) {
+func (m *MockGithubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName string, runID int64) ([]*client.WorkflowArtifactContent, error) {
 	return nil, nil
 }
 
