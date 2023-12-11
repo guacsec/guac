@@ -116,7 +116,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Trivy in fs mode to generate SBOM
-        uses: aquasecurity/trivy-action@2b6a709cf9c4025c5438138008beaddbb02086f0 # master
+        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601 # master
         with:
           scan-type: 'fs'
           format: 'spdx-json'
