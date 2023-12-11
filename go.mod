@@ -278,7 +278,7 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	github.com/redis/go-redis/v9 v9.3.0
 	github.com/regclient/regclient v0.5.5
-	github.com/segmentio/kafka-go v0.4.44
+	github.com/segmentio/kafka-go v0.4.46
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sigstore/sigstore v1.7.5
 	github.com/spdx/tools-golang v0.5.3
