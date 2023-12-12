@@ -18,6 +18,7 @@ package tikv
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/kv"
@@ -105,7 +106,11 @@ func (s *scanner) Scan(ctx context.Context) ([]string, bool, error) {
 		if bytes.Compare(k, largest) > 0 {
 			largest = k
 		}
-		rv[i] = string(k)
+		parts := strings.SplitN(string(k), ":", 2)
+		if len(parts) != 2 {
+			return nil, false, fmt.Errorf("Invalid key found in TiKV: %q", string(k))
+		}
+		rv[i] = string(parts[1])
 	}
 	s.curKey = kvti.NextKey(largest)
 	return rv, s.done, nil

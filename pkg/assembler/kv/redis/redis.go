@@ -87,13 +87,20 @@ func (s *scanner) Scan(ctx context.Context) ([]string, bool, error) {
 	if s.done {
 		return nil, true, nil
 	}
-	rv, newCur, err := s.c.HScan(ctx, s.collection, s.cursor, "", count).Result()
+	res, newCur, err := s.c.HScan(ctx, s.collection, s.cursor, "", count).Result()
 	if err != nil {
 		return nil, false, err
 	}
 	s.cursor = newCur
 	if newCur == 0 {
 		s.done = true
+	}
+	// HSCAN returns keys and values, need just keys.
+	rv := make([]string, len(res)/2)
+	for i, v := range res {
+		if i%2 == 0 {
+			rv[i/2] = v
+		}
 	}
 	return rv, s.done, nil
 }
