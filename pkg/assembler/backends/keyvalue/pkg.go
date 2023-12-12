@@ -379,13 +379,16 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 		outType, err = byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
 		if err != nil {
 			if !errors.Is(err, kv.NotFoundError) {
+				c.m.Unlock()
 				return nil, err
 			}
 			inType.ThisID = c.getNextID()
 			if err := c.addToIndex(ctx, pkgTypeCol, inType); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := setkv(ctx, pkgTypeCol, inType, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			outType = inType
@@ -404,14 +407,21 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 		c.m.Lock()
 		outNamespace, err = byKeykv[*pkgNamespace](ctx, pkgNSCol, inNamespace.Key(), c)
 		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) {
+				c.m.Unlock()
+				return nil, err
+			}
 			inNamespace.ThisID = c.getNextID()
 			if err := c.addToIndex(ctx, pkgNSCol, inNamespace); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := setkv(ctx, pkgNSCol, inNamespace, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := outType.addNamespace(ctx, inNamespace.ThisID, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			outNamespace = inNamespace
@@ -430,14 +440,21 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 		c.m.Lock()
 		outName, err = byKeykv[*pkgName](ctx, pkgNameCol, inName.Key(), c)
 		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) {
+				c.m.Unlock()
+				return nil, err
+			}
 			inName.ThisID = c.getNextID()
 			if err := c.addToIndex(ctx, pkgNameCol, inName); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := setkv(ctx, pkgNameCol, inName, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := outNamespace.addName(ctx, inName.ThisID, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			outName = inName
@@ -458,14 +475,21 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec
 		c.m.Lock()
 		outVersion, err = byKeykv[*pkgVersion](ctx, pkgVerCol, inVersion.Key(), c)
 		if err != nil {
+			if !errors.Is(err, kv.NotFoundError) {
+				c.m.Unlock()
+				return nil, err
+			}
 			inVersion.ThisID = c.getNextID()
 			if err := c.addToIndex(ctx, pkgVerCol, inVersion); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := setkv(ctx, pkgVerCol, inVersion, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := outName.addVersion(ctx, inVersion.ThisID, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			outVersion = inVersion
