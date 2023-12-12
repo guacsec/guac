@@ -211,13 +211,16 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 		outType, err = byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
 		if err != nil {
 			if !errors.Is(err, kv.NotFoundError) {
+				c.m.Unlock()
 				return nil, err
 			}
 			inType.ThisID = c.getNextID()
 			if err := c.addToIndex(ctx, srcTypeCol, inType); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := setkv(ctx, srcTypeCol, inType, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			outType = inType
@@ -240,16 +243,20 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 		outNamespace, err = byKeykv[*srcNamespace](ctx, srcNSCol, inNamespace.Key(), c)
 		if err != nil {
 			if !errors.Is(err, kv.NotFoundError) {
+				c.m.Unlock()
 				return nil, err
 			}
 			inNamespace.ThisID = c.getNextID()
 			if err := c.addToIndex(ctx, srcNSCol, inNamespace); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := setkv(ctx, srcNSCol, inNamespace, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := outType.addNamespace(ctx, inNamespace.ThisID, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			outNamespace = inNamespace
@@ -274,16 +281,20 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 		outName, err = byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
 		if err != nil {
 			if !errors.Is(err, kv.NotFoundError) {
+				c.m.Unlock()
 				return nil, err
 			}
 			inName.ThisID = c.getNextID()
 			if err := c.addToIndex(ctx, srcNameCol, inName); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := setkv(ctx, srcNameCol, inName, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			if err := outNamespace.addName(ctx, inName.ThisID, c); err != nil {
+				c.m.Unlock()
 				return nil, err
 			}
 			outName = inName
