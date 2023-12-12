@@ -54,8 +54,6 @@ func (c *demoClient) Neighbors(ctx context.Context, source string, usingOnly []m
 	}
 	c.m.RUnlock()
 
-	c.m.RLock()
-	defer c.m.RUnlock()
 	return c.Nodes(ctx, neighbors)
 }
 
