@@ -41,6 +41,7 @@ jobs:
         database:
           - inmem
           - redis
+          - tikv
           - arango
           - ent
     outputs:
@@ -84,6 +85,8 @@ jobs:
             make start-inmem-db
           elif [ ${{ matrix.database }} == redis ]; then
             make start-redis-db
+          elif [ ${{ matrix.database }} == tikv ]; then
+            make start-tikv-db
           elif [ ${{ matrix.database }} == "arango" ]; then
             make start-arango-db
           elif [ ${{ matrix.database }} == "ent" ]; then
@@ -166,14 +169,22 @@ jobs:
           printf "%-15s%-20s%s\n" "----" "--------------" "----"
           printf "%-15s%-20s%s seconds\n" "Ingestion" "inmem" "${{ env.inmem }}"
           printf "%-15s%-20s%s seconds\n" "Ingestion" "arango" "${{ env.arango }}"
+          printf "%-15s%-20s%s seconds\n" "Ingestion" "redis" "${{ env.redis }}"
+          printf "%-15s%-20s%s seconds\n" "Ingestion" "tikv" "${{ env.tikv }}"
           printf "%-15s%-20s%s seconds\n" "Ingestion" "ent" "${{ env.ent }}"
           printf "%-15s%-20s%s seconds\n" "Query" "inmem" "${{ env.inmem_query }}"
           printf "%-15s%-20s%s seconds\n" "Query" "arango" "${{ env.arango_query }}"
+          printf "%-15s%-20s%s seconds\n" "Query" "redis" "${{ env.redis_query }}"
+          printf "%-15s%-20s%s seconds\n" "Query" "tikv" "${{ env.tikv_query }}"
           printf "%-15s%-20s%s seconds\n" "Query" "ent" "${{ env.ent_query }}"
         env:
           inmem: ${{ fromJson(needs.read.outputs.result).elapsed_time.inmem }}
           arango: ${{ fromJson(needs.read.outputs.result).elapsed_time.arango }}
+          redis: ${{ fromJson(needs.read.outputs.result).elapsed_time.redis }}
+          tikv: ${{ fromJson(needs.read.outputs.result).elapsed_time.tikv }}
           ent: ${{ fromJson(needs.read.outputs.result).elapsed_time.ent }}
           inmem_query: ${{ fromJson(needs.read.outputs.query_result).query_time.inmem }}
           arango_query: ${{ fromJson(needs.read.outputs.query_result).query_time.arango }}
+          redis_query: ${{ fromJson(needs.read.outputs.query_result).query_time.redis }}
+          tikv_query: ${{ fromJson(needs.read.outputs.query_result).query_time.tikv }}
           ent_query: ${{ fromJson(needs.read.outputs.query_result).query_time.ent }}

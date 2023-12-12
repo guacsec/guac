@@ -187,6 +187,19 @@ start-redis-db: check-docker-compose-tool-check
 	done; \
 	[ $$counter -eq 15 ] && { echo "Redis GUAC service did not start in time"; exit 1; } || echo "Redis GUAC service is up!"
 
+# start graphQL server with keyvalue-tikv backend
+.PHONY: start-tikv-db
+start-tikv-db: check-docker-compose-tool-check
+	$(CONTAINER) compose -f docker-compose.yml -f container_files/tikv.yaml up -d 2>&1
+	@echo "Waiting for the service to start"
+	@counter=0; \
+	while [ $$counter -lt 15 ] && ! curl --silent --head --output /dev/null --fail http://localhost:8080; do \
+		printf '.'; \
+		sleep 1; \
+		counter=$$((counter+1)); \
+	done; \
+	[ $$counter -eq 15 ] && { echo "Tikv GUAC service did not start in time"; exit 1; } || echo "Tikv GUAC service is up!"
+
 # start graphQL server with arango backend
 .PHONY: start-arango-db
 start-arango-db: check-docker-compose-tool-check

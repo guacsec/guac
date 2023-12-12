@@ -1,0 +1,59 @@
+version: "3.9"
+
+volumes:
+  pd_guac_data:
+  tikv_guac_data:
+services:
+  guac-graphql:
+    networks: [frontend]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacgql"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      nats:
+        condition: service_healthy
+      pd:
+        condition: service_started
+    ports:
+      - "$GUAC_API_PORT:8080"
+    volumes:
+      - ./container_files/tikv:/guac:z
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+  pd:
+    networks: [frontend]
+    image: docker.io/pingcap/pd:latest
+    ports:
+      - "2379"
+      - "2380"
+    volumes:
+      - pd_guac_data:/data
+    command:
+      - --name=pd
+      - --client-urls=http://0.0.0.0:2379
+      - --peer-urls=http://0.0.0.0:2380
+      - --advertise-client-urls=http://pd:2379
+      - --advertise-peer-urls=http://pd:2380
+      - --initial-cluster=pd=http://pd:2380
+      - --data-dir=/data
+    restart: on-failure
+  tikv:
+    networks: [frontend]
+    image: docker.io/pingcap/tikv:latest
+    ports:
+      - "20160"
+    volumes:
+      - tikv_guac_data:/data
+    command:
+      - --addr=0.0.0.0:20160
+      - --advertise-addr=tikv:20160
+      - --data-dir=/data
+      - --pd=pd:2379
+    depends_on:
+      - "pd"
+    restart: on-failure
