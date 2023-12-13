@@ -17,6 +17,8 @@ package deps_dev
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"reflect"
 	"testing"
 	"time"
@@ -26,6 +28,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
@@ -51,7 +54,9 @@ func TestNewDepsDevParser(t *testing.T) {
 func Test_depsDevParser_Parse(t *testing.T) {
 	tm, _ := time.Parse(time.RFC3339, "2022-11-21T17:45:50.52Z")
 	ctx := logging.WithLogger(context.Background())
-
+	sha256sumNPMReact := sha256.Sum256([]byte(testdata.CollectedNPMReact))
+	sha256sumForeignTypes := sha256.Sum256([]byte(testdata.CollectedForeignTypes))
+	sha256sumYargsParser := sha256.Sum256([]byte(testdata.CollectedYargsParser))
 	tests := []struct {
 		name           string
 		doc            *processor.Document
@@ -75,7 +80,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("1.4.0"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),
@@ -98,7 +103,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("17.0.0"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),
@@ -128,7 +133,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("4.1.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
 						VersionRange:   "^4.1.1",
@@ -204,6 +209,31 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Justification: "collected via deps.dev",
 						Origin:        "",
 						Collector:     "",
+					},
+				},
+			},
+			HasSBOM: []assembler.HasSBOMIngest{
+				{
+					Pkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "react",
+						Version:   ptrfrom.String("17.0.0"),
+						Subpath:   ptrfrom.String(""),
+					},
+					HasSBOM: &model.HasSBOMInputSpec{
+						Uri: helpers.PkgInputSpecToPurl(&model.PkgInputSpec{
+							Type:      "npm",
+							Namespace: ptrfrom.String(""),
+							Name:      "react",
+							Version:   ptrfrom.String("17.0.0"),
+							Subpath:   ptrfrom.String(""),
+						}),
+						Algorithm:  "sha256",
+						Digest:     hex.EncodeToString(sha256sumNPMReact[:]),
+						KnownSince: tm.UTC(),
+						Origin:     "",
+						Collector:  "",
 					},
 				},
 			},
@@ -295,7 +325,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("0.1.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					IsDependency: &model.IsDependencyInputSpec{
 						DependencyType: model.DependencyTypeDirect,
 						VersionRange:   "^0.1",
@@ -352,6 +382,31 @@ func Test_depsDevParser_Parse(t *testing.T) {
 					},
 				},
 			},
+			HasSBOM: []assembler.HasSBOMIngest{
+				{
+					Pkg: &model.PkgInputSpec{
+						Type:      "cargo",
+						Namespace: ptrfrom.String(""),
+						Name:      "foreign-types",
+						Version:   ptrfrom.String("0.3.2"),
+						Subpath:   ptrfrom.String(""),
+					},
+					HasSBOM: &model.HasSBOMInputSpec{
+						Uri: helpers.PkgInputSpecToPurl(&model.PkgInputSpec{
+							Type:      "cargo",
+							Namespace: ptrfrom.String(""),
+							Name:      "foreign-types",
+							Version:   ptrfrom.String("0.3.2"),
+							Subpath:   ptrfrom.String(""),
+						}),
+						Algorithm:  "sha256",
+						Digest:     hex.EncodeToString(sha256sumForeignTypes[:]),
+						KnownSince: tm.UTC(),
+						Origin:     "",
+						Collector:  "",
+					},
+				},
+			},
 		},
 		wantErr: false,
 	}, {
@@ -372,7 +427,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Version:   ptrfrom.String("4.2.1"),
 						Subpath:   ptrfrom.String(""),
 					},
-					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+					DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 					DepPkg: &model.PkgInputSpec{
 						Type:      "npm",
 						Namespace: ptrfrom.String(""),
@@ -434,6 +489,31 @@ func Test_depsDevParser_Parse(t *testing.T) {
 						Justification: "collected via deps.dev",
 						Origin:        "",
 						Collector:     "",
+					},
+				},
+			},
+			HasSBOM: []assembler.HasSBOMIngest{
+				{
+					Pkg: &model.PkgInputSpec{
+						Type:      "npm",
+						Namespace: ptrfrom.String(""),
+						Name:      "yargs-parser",
+						Version:   ptrfrom.String("4.2.1"),
+						Subpath:   ptrfrom.String(""),
+					},
+					HasSBOM: &model.HasSBOMInputSpec{
+						Uri: helpers.PkgInputSpecToPurl(&model.PkgInputSpec{
+							Type:      "npm",
+							Namespace: ptrfrom.String(""),
+							Name:      "yargs-parser",
+							Version:   ptrfrom.String("4.2.1"),
+							Subpath:   ptrfrom.String(""),
+						}),
+						Algorithm:  "sha256",
+						Digest:     hex.EncodeToString(sha256sumYargsParser[:]),
+						KnownSince: tm.UTC(),
+						Origin:     "",
+						Collector:  "",
 					},
 				},
 			},
