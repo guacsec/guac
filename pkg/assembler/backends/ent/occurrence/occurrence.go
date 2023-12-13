@@ -30,6 +30,8 @@ const (
 	EdgePackage = "package"
 	// EdgeSource holds the string denoting the source edge name in mutations.
 	EdgeSource = "source"
+	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
+	EdgeIncludedInSboms = "included_in_sboms"
 	// Table holds the table name of the occurrence in the database.
 	Table = "occurrences"
 	// ArtifactTable is the table that holds the artifact relation/edge.
@@ -53,6 +55,11 @@ const (
 	SourceInverseTable = "source_names"
 	// SourceColumn is the table column denoting the source relation/edge.
 	SourceColumn = "source_id"
+	// IncludedInSbomsTable is the table that holds the included_in_sboms relation/edge. The primary key declared below.
+	IncludedInSbomsTable = "bill_of_materials_included_occurrences"
+	// IncludedInSbomsInverseTable is the table name for the BillOfMaterials entity.
+	// It exists in this package in order to avoid circular dependency with the "billofmaterials" package.
+	IncludedInSbomsInverseTable = "bill_of_materials"
 )
 
 // Columns holds all SQL columns for occurrence fields.
@@ -65,6 +72,12 @@ var Columns = []string{
 	FieldSourceID,
 	FieldPackageID,
 }
+
+var (
+	// IncludedInSbomsPrimaryKey and IncludedInSbomsColumn2 are the table columns denoting the
+	// primary key for the included_in_sboms relation (M2M).
+	IncludedInSbomsPrimaryKey = []string{"bill_of_materials_id", "occurrence_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -134,6 +147,20 @@ func BySourceField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSourceStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByIncludedInSbomsCount orders the results by included_in_sboms count.
+func ByIncludedInSbomsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIncludedInSbomsStep(), opts...)
+	}
+}
+
+// ByIncludedInSboms orders the results by included_in_sboms terms.
+func ByIncludedInSboms(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIncludedInSbomsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newArtifactStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -153,5 +180,12 @@ func newSourceStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SourceInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, SourceTable, SourceColumn),
+	)
+}
+func newIncludedInSbomsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IncludedInSbomsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, IncludedInSbomsTable, IncludedInSbomsPrimaryKey...),
 	)
 }

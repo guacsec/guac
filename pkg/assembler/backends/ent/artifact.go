@@ -36,16 +36,19 @@ type ArtifactEdges struct {
 	Attestations []*SLSAAttestation `json:"attestations,omitempty"`
 	// Same holds the value of the same edge.
 	Same []*HashEqual `json:"same,omitempty"`
+	// IncludedInSboms holds the value of the included_in_sboms edge.
+	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 	// totalCount holds the count of the edges above.
-	totalCount [4]map[string]int
+	totalCount [5]map[string]int
 
-	namedOccurrences  map[string][]*Occurrence
-	namedSbom         map[string][]*BillOfMaterials
-	namedAttestations map[string][]*SLSAAttestation
-	namedSame         map[string][]*HashEqual
+	namedOccurrences     map[string][]*Occurrence
+	namedSbom            map[string][]*BillOfMaterials
+	namedAttestations    map[string][]*SLSAAttestation
+	namedSame            map[string][]*HashEqual
+	namedIncludedInSboms map[string][]*BillOfMaterials
 }
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
@@ -82,6 +85,15 @@ func (e ArtifactEdges) SameOrErr() ([]*HashEqual, error) {
 		return e.Same, nil
 	}
 	return nil, &NotLoadedError{edge: "same"}
+}
+
+// IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
+	if e.loadedTypes[4] {
+		return e.IncludedInSboms, nil
+	}
+	return nil, &NotLoadedError{edge: "included_in_sboms"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -157,6 +169,11 @@ func (a *Artifact) QueryAttestations() *SLSAAttestationQuery {
 // QuerySame queries the "same" edge of the Artifact entity.
 func (a *Artifact) QuerySame() *HashEqualQuery {
 	return NewArtifactClient(a.config).QuerySame(a)
+}
+
+// QueryIncludedInSboms queries the "included_in_sboms" edge of the Artifact entity.
+func (a *Artifact) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	return NewArtifactClient(a.config).QueryIncludedInSboms(a)
 }
 
 // Update returns a builder for updating this Artifact.
@@ -284,6 +301,30 @@ func (a *Artifact) appendNamedSame(name string, edges ...*HashEqual) {
 		a.Edges.namedSame[name] = []*HashEqual{}
 	} else {
 		a.Edges.namedSame[name] = append(a.Edges.namedSame[name], edges...)
+	}
+}
+
+// NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
+	if a.Edges.namedIncludedInSboms == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedIncludedInSboms[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
+	if a.Edges.namedIncludedInSboms == nil {
+		a.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
+	} else {
+		a.Edges.namedIncludedInSboms[name] = append(a.Edges.namedIncludedInSboms[name], edges...)
 	}
 }
 

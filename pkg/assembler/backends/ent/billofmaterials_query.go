@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,6 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
@@ -19,14 +22,22 @@ import (
 // BillOfMaterialsQuery is the builder for querying BillOfMaterials entities.
 type BillOfMaterialsQuery struct {
 	config
-	ctx          *QueryContext
-	order        []billofmaterials.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.BillOfMaterials
-	withPackage  *PackageVersionQuery
-	withArtifact *ArtifactQuery
-	modifiers    []func(*sql.Selector)
-	loadTotal    []func(context.Context, []*BillOfMaterials) error
+	ctx                                *QueryContext
+	order                              []billofmaterials.OrderOption
+	inters                             []Interceptor
+	predicates                         []predicate.BillOfMaterials
+	withPackage                        *PackageVersionQuery
+	withArtifact                       *ArtifactQuery
+	withIncludedSoftwarePackages       *PackageVersionQuery
+	withIncludedSoftwareArtifacts      *ArtifactQuery
+	withIncludedDependencies           *DependencyQuery
+	withIncludedOccurrences            *OccurrenceQuery
+	modifiers                          []func(*sql.Selector)
+	loadTotal                          []func(context.Context, []*BillOfMaterials) error
+	withNamedIncludedSoftwarePackages  map[string]*PackageVersionQuery
+	withNamedIncludedSoftwareArtifacts map[string]*ArtifactQuery
+	withNamedIncludedDependencies      map[string]*DependencyQuery
+	withNamedIncludedOccurrences       map[string]*OccurrenceQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -100,6 +111,94 @@ func (bomq *BillOfMaterialsQuery) QueryArtifact() *ArtifactQuery {
 			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, selector),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, billofmaterials.ArtifactTable, billofmaterials.ArtifactColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bomq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIncludedSoftwarePackages chains the current query on the "included_software_packages" edge.
+func (bomq *BillOfMaterialsQuery) QueryIncludedSoftwarePackages() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: bomq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bomq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bomq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, selector),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedSoftwarePackagesTable, billofmaterials.IncludedSoftwarePackagesPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(bomq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIncludedSoftwareArtifacts chains the current query on the "included_software_artifacts" edge.
+func (bomq *BillOfMaterialsQuery) QueryIncludedSoftwareArtifacts() *ArtifactQuery {
+	query := (&ArtifactClient{config: bomq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bomq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bomq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, selector),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedSoftwareArtifactsTable, billofmaterials.IncludedSoftwareArtifactsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(bomq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIncludedDependencies chains the current query on the "included_dependencies" edge.
+func (bomq *BillOfMaterialsQuery) QueryIncludedDependencies() *DependencyQuery {
+	query := (&DependencyClient{config: bomq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bomq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bomq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, selector),
+			sqlgraph.To(dependency.Table, dependency.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedDependenciesTable, billofmaterials.IncludedDependenciesPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(bomq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIncludedOccurrences chains the current query on the "included_occurrences" edge.
+func (bomq *BillOfMaterialsQuery) QueryIncludedOccurrences() *OccurrenceQuery {
+	query := (&OccurrenceClient{config: bomq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bomq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bomq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, selector),
+			sqlgraph.To(occurrence.Table, occurrence.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedOccurrencesTable, billofmaterials.IncludedOccurrencesPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(bomq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,13 +393,17 @@ func (bomq *BillOfMaterialsQuery) Clone() *BillOfMaterialsQuery {
 		return nil
 	}
 	return &BillOfMaterialsQuery{
-		config:       bomq.config,
-		ctx:          bomq.ctx.Clone(),
-		order:        append([]billofmaterials.OrderOption{}, bomq.order...),
-		inters:       append([]Interceptor{}, bomq.inters...),
-		predicates:   append([]predicate.BillOfMaterials{}, bomq.predicates...),
-		withPackage:  bomq.withPackage.Clone(),
-		withArtifact: bomq.withArtifact.Clone(),
+		config:                        bomq.config,
+		ctx:                           bomq.ctx.Clone(),
+		order:                         append([]billofmaterials.OrderOption{}, bomq.order...),
+		inters:                        append([]Interceptor{}, bomq.inters...),
+		predicates:                    append([]predicate.BillOfMaterials{}, bomq.predicates...),
+		withPackage:                   bomq.withPackage.Clone(),
+		withArtifact:                  bomq.withArtifact.Clone(),
+		withIncludedSoftwarePackages:  bomq.withIncludedSoftwarePackages.Clone(),
+		withIncludedSoftwareArtifacts: bomq.withIncludedSoftwareArtifacts.Clone(),
+		withIncludedDependencies:      bomq.withIncludedDependencies.Clone(),
+		withIncludedOccurrences:       bomq.withIncludedOccurrences.Clone(),
 		// clone intermediate query.
 		sql:  bomq.sql.Clone(),
 		path: bomq.path,
@@ -326,6 +429,50 @@ func (bomq *BillOfMaterialsQuery) WithArtifact(opts ...func(*ArtifactQuery)) *Bi
 		opt(query)
 	}
 	bomq.withArtifact = query
+	return bomq
+}
+
+// WithIncludedSoftwarePackages tells the query-builder to eager-load the nodes that are connected to
+// the "included_software_packages" edge. The optional arguments are used to configure the query builder of the edge.
+func (bomq *BillOfMaterialsQuery) WithIncludedSoftwarePackages(opts ...func(*PackageVersionQuery)) *BillOfMaterialsQuery {
+	query := (&PackageVersionClient{config: bomq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bomq.withIncludedSoftwarePackages = query
+	return bomq
+}
+
+// WithIncludedSoftwareArtifacts tells the query-builder to eager-load the nodes that are connected to
+// the "included_software_artifacts" edge. The optional arguments are used to configure the query builder of the edge.
+func (bomq *BillOfMaterialsQuery) WithIncludedSoftwareArtifacts(opts ...func(*ArtifactQuery)) *BillOfMaterialsQuery {
+	query := (&ArtifactClient{config: bomq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bomq.withIncludedSoftwareArtifacts = query
+	return bomq
+}
+
+// WithIncludedDependencies tells the query-builder to eager-load the nodes that are connected to
+// the "included_dependencies" edge. The optional arguments are used to configure the query builder of the edge.
+func (bomq *BillOfMaterialsQuery) WithIncludedDependencies(opts ...func(*DependencyQuery)) *BillOfMaterialsQuery {
+	query := (&DependencyClient{config: bomq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bomq.withIncludedDependencies = query
+	return bomq
+}
+
+// WithIncludedOccurrences tells the query-builder to eager-load the nodes that are connected to
+// the "included_occurrences" edge. The optional arguments are used to configure the query builder of the edge.
+func (bomq *BillOfMaterialsQuery) WithIncludedOccurrences(opts ...func(*OccurrenceQuery)) *BillOfMaterialsQuery {
+	query := (&OccurrenceClient{config: bomq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bomq.withIncludedOccurrences = query
 	return bomq
 }
 
@@ -407,9 +554,13 @@ func (bomq *BillOfMaterialsQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	var (
 		nodes       = []*BillOfMaterials{}
 		_spec       = bomq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [6]bool{
 			bomq.withPackage != nil,
 			bomq.withArtifact != nil,
+			bomq.withIncludedSoftwarePackages != nil,
+			bomq.withIncludedSoftwareArtifacts != nil,
+			bomq.withIncludedDependencies != nil,
+			bomq.withIncludedOccurrences != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -442,6 +593,70 @@ func (bomq *BillOfMaterialsQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if query := bomq.withArtifact; query != nil {
 		if err := bomq.loadArtifact(ctx, query, nodes, nil,
 			func(n *BillOfMaterials, e *Artifact) { n.Edges.Artifact = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := bomq.withIncludedSoftwarePackages; query != nil {
+		if err := bomq.loadIncludedSoftwarePackages(ctx, query, nodes,
+			func(n *BillOfMaterials) { n.Edges.IncludedSoftwarePackages = []*PackageVersion{} },
+			func(n *BillOfMaterials, e *PackageVersion) {
+				n.Edges.IncludedSoftwarePackages = append(n.Edges.IncludedSoftwarePackages, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := bomq.withIncludedSoftwareArtifacts; query != nil {
+		if err := bomq.loadIncludedSoftwareArtifacts(ctx, query, nodes,
+			func(n *BillOfMaterials) { n.Edges.IncludedSoftwareArtifacts = []*Artifact{} },
+			func(n *BillOfMaterials, e *Artifact) {
+				n.Edges.IncludedSoftwareArtifacts = append(n.Edges.IncludedSoftwareArtifacts, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := bomq.withIncludedDependencies; query != nil {
+		if err := bomq.loadIncludedDependencies(ctx, query, nodes,
+			func(n *BillOfMaterials) { n.Edges.IncludedDependencies = []*Dependency{} },
+			func(n *BillOfMaterials, e *Dependency) {
+				n.Edges.IncludedDependencies = append(n.Edges.IncludedDependencies, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := bomq.withIncludedOccurrences; query != nil {
+		if err := bomq.loadIncludedOccurrences(ctx, query, nodes,
+			func(n *BillOfMaterials) { n.Edges.IncludedOccurrences = []*Occurrence{} },
+			func(n *BillOfMaterials, e *Occurrence) {
+				n.Edges.IncludedOccurrences = append(n.Edges.IncludedOccurrences, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range bomq.withNamedIncludedSoftwarePackages {
+		if err := bomq.loadIncludedSoftwarePackages(ctx, query, nodes,
+			func(n *BillOfMaterials) { n.appendNamedIncludedSoftwarePackages(name) },
+			func(n *BillOfMaterials, e *PackageVersion) { n.appendNamedIncludedSoftwarePackages(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range bomq.withNamedIncludedSoftwareArtifacts {
+		if err := bomq.loadIncludedSoftwareArtifacts(ctx, query, nodes,
+			func(n *BillOfMaterials) { n.appendNamedIncludedSoftwareArtifacts(name) },
+			func(n *BillOfMaterials, e *Artifact) { n.appendNamedIncludedSoftwareArtifacts(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range bomq.withNamedIncludedDependencies {
+		if err := bomq.loadIncludedDependencies(ctx, query, nodes,
+			func(n *BillOfMaterials) { n.appendNamedIncludedDependencies(name) },
+			func(n *BillOfMaterials, e *Dependency) { n.appendNamedIncludedDependencies(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range bomq.withNamedIncludedOccurrences {
+		if err := bomq.loadIncludedOccurrences(ctx, query, nodes,
+			func(n *BillOfMaterials) { n.appendNamedIncludedOccurrences(name) },
+			func(n *BillOfMaterials, e *Occurrence) { n.appendNamedIncludedOccurrences(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -513,6 +728,250 @@ func (bomq *BillOfMaterialsQuery) loadArtifact(ctx context.Context, query *Artif
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (bomq *BillOfMaterialsQuery) loadIncludedSoftwarePackages(ctx context.Context, query *PackageVersionQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *PackageVersion)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*BillOfMaterials)
+	nids := make(map[int]map[*BillOfMaterials]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(billofmaterials.IncludedSoftwarePackagesTable)
+		s.Join(joinT).On(s.C(packageversion.FieldID), joinT.C(billofmaterials.IncludedSoftwarePackagesPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(billofmaterials.IncludedSoftwarePackagesPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(billofmaterials.IncludedSoftwarePackagesPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*BillOfMaterials]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*PackageVersion](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "included_software_packages" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (bomq *BillOfMaterialsQuery) loadIncludedSoftwareArtifacts(ctx context.Context, query *ArtifactQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *Artifact)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*BillOfMaterials)
+	nids := make(map[int]map[*BillOfMaterials]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(billofmaterials.IncludedSoftwareArtifactsTable)
+		s.Join(joinT).On(s.C(artifact.FieldID), joinT.C(billofmaterials.IncludedSoftwareArtifactsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(billofmaterials.IncludedSoftwareArtifactsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(billofmaterials.IncludedSoftwareArtifactsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*BillOfMaterials]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Artifact](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "included_software_artifacts" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (bomq *BillOfMaterialsQuery) loadIncludedDependencies(ctx context.Context, query *DependencyQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *Dependency)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*BillOfMaterials)
+	nids := make(map[int]map[*BillOfMaterials]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(billofmaterials.IncludedDependenciesTable)
+		s.Join(joinT).On(s.C(dependency.FieldID), joinT.C(billofmaterials.IncludedDependenciesPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(billofmaterials.IncludedDependenciesPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(billofmaterials.IncludedDependenciesPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*BillOfMaterials]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Dependency](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "included_dependencies" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (bomq *BillOfMaterialsQuery) loadIncludedOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *Occurrence)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*BillOfMaterials)
+	nids := make(map[int]map[*BillOfMaterials]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(billofmaterials.IncludedOccurrencesTable)
+		s.Join(joinT).On(s.C(occurrence.FieldID), joinT.C(billofmaterials.IncludedOccurrencesPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(billofmaterials.IncludedOccurrencesPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(billofmaterials.IncludedOccurrencesPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*BillOfMaterials]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Occurrence](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "included_occurrences" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil
@@ -606,6 +1065,62 @@ func (bomq *BillOfMaterialsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedIncludedSoftwarePackages tells the query-builder to eager-load the nodes that are connected to the "included_software_packages"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (bomq *BillOfMaterialsQuery) WithNamedIncludedSoftwarePackages(name string, opts ...func(*PackageVersionQuery)) *BillOfMaterialsQuery {
+	query := (&PackageVersionClient{config: bomq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if bomq.withNamedIncludedSoftwarePackages == nil {
+		bomq.withNamedIncludedSoftwarePackages = make(map[string]*PackageVersionQuery)
+	}
+	bomq.withNamedIncludedSoftwarePackages[name] = query
+	return bomq
+}
+
+// WithNamedIncludedSoftwareArtifacts tells the query-builder to eager-load the nodes that are connected to the "included_software_artifacts"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (bomq *BillOfMaterialsQuery) WithNamedIncludedSoftwareArtifacts(name string, opts ...func(*ArtifactQuery)) *BillOfMaterialsQuery {
+	query := (&ArtifactClient{config: bomq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if bomq.withNamedIncludedSoftwareArtifacts == nil {
+		bomq.withNamedIncludedSoftwareArtifacts = make(map[string]*ArtifactQuery)
+	}
+	bomq.withNamedIncludedSoftwareArtifacts[name] = query
+	return bomq
+}
+
+// WithNamedIncludedDependencies tells the query-builder to eager-load the nodes that are connected to the "included_dependencies"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (bomq *BillOfMaterialsQuery) WithNamedIncludedDependencies(name string, opts ...func(*DependencyQuery)) *BillOfMaterialsQuery {
+	query := (&DependencyClient{config: bomq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if bomq.withNamedIncludedDependencies == nil {
+		bomq.withNamedIncludedDependencies = make(map[string]*DependencyQuery)
+	}
+	bomq.withNamedIncludedDependencies[name] = query
+	return bomq
+}
+
+// WithNamedIncludedOccurrences tells the query-builder to eager-load the nodes that are connected to the "included_occurrences"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (bomq *BillOfMaterialsQuery) WithNamedIncludedOccurrences(name string, opts ...func(*OccurrenceQuery)) *BillOfMaterialsQuery {
+	query := (&OccurrenceClient{config: bomq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if bomq.withNamedIncludedOccurrences == nil {
+		bomq.withNamedIncludedOccurrences = make(map[string]*OccurrenceQuery)
+	}
+	bomq.withNamedIncludedOccurrences[name] = query
+	return bomq
 }
 
 // BillOfMaterialsGroupBy is the group-by builder for BillOfMaterials entities.

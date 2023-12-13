@@ -97,6 +97,21 @@ func (ac *ArtifactCreate) AddSame(h ...*HashEqual) *ArtifactCreate {
 	return ac.AddSameIDs(ids...)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (ac *ArtifactCreate) AddIncludedInSbomIDs(ids ...int) *ArtifactCreate {
+	ac.mutation.AddIncludedInSbomIDs(ids...)
+	return ac
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (ac *ArtifactCreate) AddIncludedInSboms(b ...*BillOfMaterials) *ArtifactCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ac.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (ac *ArtifactCreate) Mutation() *ArtifactMutation {
 	return ac.mutation
@@ -229,6 +244,22 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.IncludedInSbomsTable,
+			Columns: artifact.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

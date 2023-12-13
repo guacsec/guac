@@ -45,11 +45,15 @@ type OccurrenceEdges struct {
 	Package *PackageVersion `json:"package,omitempty"`
 	// Source holds the value of the source edge.
 	Source *SourceName `json:"source,omitempty"`
+	// IncludedInSboms holds the value of the included_in_sboms edge.
+	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 	// totalCount holds the count of the edges above.
-	totalCount [3]map[string]int
+	totalCount [4]map[string]int
+
+	namedIncludedInSboms map[string][]*BillOfMaterials
 }
 
 // ArtifactOrErr returns the Artifact value or an error if the edge
@@ -89,6 +93,15 @@ func (e OccurrenceEdges) SourceOrErr() (*SourceName, error) {
 		return e.Source, nil
 	}
 	return nil, &NotLoadedError{edge: "source"}
+}
+
+// IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
+// was not loaded in eager-loading.
+func (e OccurrenceEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
+	if e.loadedTypes[3] {
+		return e.IncludedInSboms, nil
+	}
+	return nil, &NotLoadedError{edge: "included_in_sboms"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -187,6 +200,11 @@ func (o *Occurrence) QuerySource() *SourceNameQuery {
 	return NewOccurrenceClient(o.config).QuerySource(o)
 }
 
+// QueryIncludedInSboms queries the "included_in_sboms" edge of the Occurrence entity.
+func (o *Occurrence) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	return NewOccurrenceClient(o.config).QueryIncludedInSboms(o)
+}
+
 // Update returns a builder for updating this Occurrence.
 // Note that you need to call Occurrence.Unwrap() before calling this method if this Occurrence
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -233,6 +251,30 @@ func (o *Occurrence) String() string {
 	}
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (o *Occurrence) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
+	if o.Edges.namedIncludedInSboms == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := o.Edges.namedIncludedInSboms[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (o *Occurrence) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
+	if o.Edges.namedIncludedInSboms == nil {
+		o.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
+	}
+	if len(edges) == 0 {
+		o.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
+	} else {
+		o.Edges.namedIncludedInSboms[name] = append(o.Edges.namedIncludedInSboms[name], edges...)
+	}
 }
 
 // Occurrences is a parsable slice of Occurrence.

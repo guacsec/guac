@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
@@ -178,6 +180,66 @@ func (bomu *BillOfMaterialsUpdate) SetArtifact(a *Artifact) *BillOfMaterialsUpda
 	return bomu.SetArtifactID(a.ID)
 }
 
+// AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by IDs.
+func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsUpdate {
+	bomu.mutation.AddIncludedSoftwarePackageIDs(ids...)
+	return bomu
+}
+
+// AddIncludedSoftwarePackages adds the "included_software_packages" edges to the PackageVersion entity.
+func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return bomu.AddIncludedSoftwarePackageIDs(ids...)
+}
+
+// AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by IDs.
+func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsUpdate {
+	bomu.mutation.AddIncludedSoftwareArtifactIDs(ids...)
+	return bomu
+}
+
+// AddIncludedSoftwareArtifacts adds the "included_software_artifacts" edges to the Artifact entity.
+func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return bomu.AddIncludedSoftwareArtifactIDs(ids...)
+}
+
+// AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by IDs.
+func (bomu *BillOfMaterialsUpdate) AddIncludedDependencyIDs(ids ...int) *BillOfMaterialsUpdate {
+	bomu.mutation.AddIncludedDependencyIDs(ids...)
+	return bomu
+}
+
+// AddIncludedDependencies adds the "included_dependencies" edges to the Dependency entity.
+func (bomu *BillOfMaterialsUpdate) AddIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return bomu.AddIncludedDependencyIDs(ids...)
+}
+
+// AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by IDs.
+func (bomu *BillOfMaterialsUpdate) AddIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsUpdate {
+	bomu.mutation.AddIncludedOccurrenceIDs(ids...)
+	return bomu
+}
+
+// AddIncludedOccurrences adds the "included_occurrences" edges to the Occurrence entity.
+func (bomu *BillOfMaterialsUpdate) AddIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return bomu.AddIncludedOccurrenceIDs(ids...)
+}
+
 // Mutation returns the BillOfMaterialsMutation object of the builder.
 func (bomu *BillOfMaterialsUpdate) Mutation() *BillOfMaterialsMutation {
 	return bomu.mutation
@@ -193,6 +255,90 @@ func (bomu *BillOfMaterialsUpdate) ClearPackage() *BillOfMaterialsUpdate {
 func (bomu *BillOfMaterialsUpdate) ClearArtifact() *BillOfMaterialsUpdate {
 	bomu.mutation.ClearArtifact()
 	return bomu
+}
+
+// ClearIncludedSoftwarePackages clears all "included_software_packages" edges to the PackageVersion entity.
+func (bomu *BillOfMaterialsUpdate) ClearIncludedSoftwarePackages() *BillOfMaterialsUpdate {
+	bomu.mutation.ClearIncludedSoftwarePackages()
+	return bomu
+}
+
+// RemoveIncludedSoftwarePackageIDs removes the "included_software_packages" edge to PackageVersion entities by IDs.
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsUpdate {
+	bomu.mutation.RemoveIncludedSoftwarePackageIDs(ids...)
+	return bomu
+}
+
+// RemoveIncludedSoftwarePackages removes "included_software_packages" edges to PackageVersion entities.
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return bomu.RemoveIncludedSoftwarePackageIDs(ids...)
+}
+
+// ClearIncludedSoftwareArtifacts clears all "included_software_artifacts" edges to the Artifact entity.
+func (bomu *BillOfMaterialsUpdate) ClearIncludedSoftwareArtifacts() *BillOfMaterialsUpdate {
+	bomu.mutation.ClearIncludedSoftwareArtifacts()
+	return bomu
+}
+
+// RemoveIncludedSoftwareArtifactIDs removes the "included_software_artifacts" edge to Artifact entities by IDs.
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsUpdate {
+	bomu.mutation.RemoveIncludedSoftwareArtifactIDs(ids...)
+	return bomu
+}
+
+// RemoveIncludedSoftwareArtifacts removes "included_software_artifacts" edges to Artifact entities.
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return bomu.RemoveIncludedSoftwareArtifactIDs(ids...)
+}
+
+// ClearIncludedDependencies clears all "included_dependencies" edges to the Dependency entity.
+func (bomu *BillOfMaterialsUpdate) ClearIncludedDependencies() *BillOfMaterialsUpdate {
+	bomu.mutation.ClearIncludedDependencies()
+	return bomu
+}
+
+// RemoveIncludedDependencyIDs removes the "included_dependencies" edge to Dependency entities by IDs.
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedDependencyIDs(ids ...int) *BillOfMaterialsUpdate {
+	bomu.mutation.RemoveIncludedDependencyIDs(ids...)
+	return bomu
+}
+
+// RemoveIncludedDependencies removes "included_dependencies" edges to Dependency entities.
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return bomu.RemoveIncludedDependencyIDs(ids...)
+}
+
+// ClearIncludedOccurrences clears all "included_occurrences" edges to the Occurrence entity.
+func (bomu *BillOfMaterialsUpdate) ClearIncludedOccurrences() *BillOfMaterialsUpdate {
+	bomu.mutation.ClearIncludedOccurrences()
+	return bomu
+}
+
+// RemoveIncludedOccurrenceIDs removes the "included_occurrences" edge to Occurrence entities by IDs.
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsUpdate {
+	bomu.mutation.RemoveIncludedOccurrenceIDs(ids...)
+	return bomu
+}
+
+// RemoveIncludedOccurrences removes "included_occurrences" edges to Occurrence entities.
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return bomu.RemoveIncludedOccurrenceIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -303,6 +449,186 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bomu.mutation.IncludedSoftwarePackagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwarePackagesTable,
+			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomu.mutation.RemovedIncludedSoftwarePackagesIDs(); len(nodes) > 0 && !bomu.mutation.IncludedSoftwarePackagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwarePackagesTable,
+			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomu.mutation.IncludedSoftwarePackagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwarePackagesTable,
+			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bomu.mutation.IncludedSoftwareArtifactsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwareArtifactsTable,
+			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomu.mutation.RemovedIncludedSoftwareArtifactsIDs(); len(nodes) > 0 && !bomu.mutation.IncludedSoftwareArtifactsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwareArtifactsTable,
+			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomu.mutation.IncludedSoftwareArtifactsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwareArtifactsTable,
+			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bomu.mutation.IncludedDependenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedDependenciesTable,
+			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomu.mutation.RemovedIncludedDependenciesIDs(); len(nodes) > 0 && !bomu.mutation.IncludedDependenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedDependenciesTable,
+			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomu.mutation.IncludedDependenciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedDependenciesTable,
+			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bomu.mutation.IncludedOccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedOccurrencesTable,
+			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomu.mutation.RemovedIncludedOccurrencesIDs(); len(nodes) > 0 && !bomu.mutation.IncludedOccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedOccurrencesTable,
+			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomu.mutation.IncludedOccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedOccurrencesTable,
+			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -478,6 +804,66 @@ func (bomuo *BillOfMaterialsUpdateOne) SetArtifact(a *Artifact) *BillOfMaterials
 	return bomuo.SetArtifactID(a.ID)
 }
 
+// AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by IDs.
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.AddIncludedSoftwarePackageIDs(ids...)
+	return bomuo
+}
+
+// AddIncludedSoftwarePackages adds the "included_software_packages" edges to the PackageVersion entity.
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return bomuo.AddIncludedSoftwarePackageIDs(ids...)
+}
+
+// AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by IDs.
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.AddIncludedSoftwareArtifactIDs(ids...)
+	return bomuo
+}
+
+// AddIncludedSoftwareArtifacts adds the "included_software_artifacts" edges to the Artifact entity.
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return bomuo.AddIncludedSoftwareArtifactIDs(ids...)
+}
+
+// AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by IDs.
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedDependencyIDs(ids ...int) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.AddIncludedDependencyIDs(ids...)
+	return bomuo
+}
+
+// AddIncludedDependencies adds the "included_dependencies" edges to the Dependency entity.
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return bomuo.AddIncludedDependencyIDs(ids...)
+}
+
+// AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by IDs.
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.AddIncludedOccurrenceIDs(ids...)
+	return bomuo
+}
+
+// AddIncludedOccurrences adds the "included_occurrences" edges to the Occurrence entity.
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return bomuo.AddIncludedOccurrenceIDs(ids...)
+}
+
 // Mutation returns the BillOfMaterialsMutation object of the builder.
 func (bomuo *BillOfMaterialsUpdateOne) Mutation() *BillOfMaterialsMutation {
 	return bomuo.mutation
@@ -493,6 +879,90 @@ func (bomuo *BillOfMaterialsUpdateOne) ClearPackage() *BillOfMaterialsUpdateOne 
 func (bomuo *BillOfMaterialsUpdateOne) ClearArtifact() *BillOfMaterialsUpdateOne {
 	bomuo.mutation.ClearArtifact()
 	return bomuo
+}
+
+// ClearIncludedSoftwarePackages clears all "included_software_packages" edges to the PackageVersion entity.
+func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedSoftwarePackages() *BillOfMaterialsUpdateOne {
+	bomuo.mutation.ClearIncludedSoftwarePackages()
+	return bomuo
+}
+
+// RemoveIncludedSoftwarePackageIDs removes the "included_software_packages" edge to PackageVersion entities by IDs.
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.RemoveIncludedSoftwarePackageIDs(ids...)
+	return bomuo
+}
+
+// RemoveIncludedSoftwarePackages removes "included_software_packages" edges to PackageVersion entities.
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return bomuo.RemoveIncludedSoftwarePackageIDs(ids...)
+}
+
+// ClearIncludedSoftwareArtifacts clears all "included_software_artifacts" edges to the Artifact entity.
+func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedSoftwareArtifacts() *BillOfMaterialsUpdateOne {
+	bomuo.mutation.ClearIncludedSoftwareArtifacts()
+	return bomuo
+}
+
+// RemoveIncludedSoftwareArtifactIDs removes the "included_software_artifacts" edge to Artifact entities by IDs.
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.RemoveIncludedSoftwareArtifactIDs(ids...)
+	return bomuo
+}
+
+// RemoveIncludedSoftwareArtifacts removes "included_software_artifacts" edges to Artifact entities.
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return bomuo.RemoveIncludedSoftwareArtifactIDs(ids...)
+}
+
+// ClearIncludedDependencies clears all "included_dependencies" edges to the Dependency entity.
+func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedDependencies() *BillOfMaterialsUpdateOne {
+	bomuo.mutation.ClearIncludedDependencies()
+	return bomuo
+}
+
+// RemoveIncludedDependencyIDs removes the "included_dependencies" edge to Dependency entities by IDs.
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedDependencyIDs(ids ...int) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.RemoveIncludedDependencyIDs(ids...)
+	return bomuo
+}
+
+// RemoveIncludedDependencies removes "included_dependencies" edges to Dependency entities.
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return bomuo.RemoveIncludedDependencyIDs(ids...)
+}
+
+// ClearIncludedOccurrences clears all "included_occurrences" edges to the Occurrence entity.
+func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedOccurrences() *BillOfMaterialsUpdateOne {
+	bomuo.mutation.ClearIncludedOccurrences()
+	return bomuo
+}
+
+// RemoveIncludedOccurrenceIDs removes the "included_occurrences" edge to Occurrence entities by IDs.
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.RemoveIncludedOccurrenceIDs(ids...)
+	return bomuo
+}
+
+// RemoveIncludedOccurrences removes "included_occurrences" edges to Occurrence entities.
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return bomuo.RemoveIncludedOccurrenceIDs(ids...)
 }
 
 // Where appends a list predicates to the BillOfMaterialsUpdate builder.
@@ -633,6 +1103,186 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bomuo.mutation.IncludedSoftwarePackagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwarePackagesTable,
+			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomuo.mutation.RemovedIncludedSoftwarePackagesIDs(); len(nodes) > 0 && !bomuo.mutation.IncludedSoftwarePackagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwarePackagesTable,
+			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomuo.mutation.IncludedSoftwarePackagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwarePackagesTable,
+			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bomuo.mutation.IncludedSoftwareArtifactsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwareArtifactsTable,
+			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomuo.mutation.RemovedIncludedSoftwareArtifactsIDs(); len(nodes) > 0 && !bomuo.mutation.IncludedSoftwareArtifactsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwareArtifactsTable,
+			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomuo.mutation.IncludedSoftwareArtifactsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwareArtifactsTable,
+			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bomuo.mutation.IncludedDependenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedDependenciesTable,
+			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomuo.mutation.RemovedIncludedDependenciesIDs(); len(nodes) > 0 && !bomuo.mutation.IncludedDependenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedDependenciesTable,
+			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomuo.mutation.IncludedDependenciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedDependenciesTable,
+			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bomuo.mutation.IncludedOccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedOccurrencesTable,
+			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomuo.mutation.RemovedIncludedOccurrencesIDs(); len(nodes) > 0 && !bomuo.mutation.IncludedOccurrencesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedOccurrencesTable,
+			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bomuo.mutation.IncludedOccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedOccurrencesTable,
+			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -19,7 +19,9 @@ package backend
 
 import (
 	"reflect"
+	"strconv"
 	"strings"
+	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -51,6 +53,8 @@ var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.SortSlices(certifyVulnLess),
 	cmpopts.SortSlices(certifyVexLess),
 	cmpopts.SortSlices(vulnerabilityLess),
+	cmpopts.SortSlices(hasSbomLess),
+	cmpopts.SortSlices(packageOrArtifactLess),
 }
 
 func isDependencyLess(e1, e2 *model.IsDependency) bool {
@@ -81,4 +85,39 @@ func vulnerabilityLess(e1, e2 *model.Vulnerability) bool {
 		e2String += e2.VulnerabilityIDs[0].VulnerabilityID
 	}
 	return e1String < e2String
+}
+
+func hasSbomLess(e1, e2 *model.HasSbom) bool {
+	return packageOrArtifactLess(e1.Subject, e2.Subject)
+}
+
+func packageOrArtifactLess(e1, e2 model.PackageOrArtifact) bool {
+	switch subject1 := e1.(type) {
+	case *model.Package:
+		switch subject2 := e2.(type) {
+		case *model.Package:
+			return packageLess(subject1, subject2)
+		case *model.Artifact:
+			return false
+		}
+	case *model.Artifact:
+		switch subject2 := e2.(type) {
+		case *model.Package:
+			return true
+		case *model.Artifact:
+			return subject1.Digest < subject2.Digest
+		}
+	}
+	return false
+}
+
+func rewriteID(t *testing.T, queryID *string, realIDs []string) {
+	idIdx, err := strconv.Atoi(*queryID)
+	if err == nil {
+		if idIdx >= len(realIDs) {
+			t.Logf("ID index out of range, want: %d, got: %d. So ID %d will be directly used to query.", len(realIDs), idIdx, idIdx)
+		} else {
+			*queryID = realIDs[idIdx]
+		}
+	}
 }
