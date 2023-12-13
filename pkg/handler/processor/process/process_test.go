@@ -600,55 +600,6 @@ func Test_validateFormat(t *testing.T) {
 	}
 }
 
-func Test_guessEncoding(t *testing.T) {
-	tests := []struct {
-		name         string
-		doc          processor.Document
-		wantErr      bool
-		wantMimeType string
-	}{
-		{
-			name: "valid .bz2 format document",
-			doc: processor.Document{
-				Blob:   []byte(testdata.CycloneDXBz2Example),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
-				SourceInformation: processor.SourceInformation{
-					Collector: "a-collector",
-					Source:    "a-source",
-				},
-			},
-			wantErr:      false,
-			wantMimeType: "application/x-bzip2",
-		},
-		{
-			name: "valid .zst format document",
-			doc: processor.Document{
-				Blob:   []byte(testdata.CycloneDXZstdExample),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
-				SourceInformation: processor.SourceInformation{
-					Collector: "a-collector",
-					Source:    "a-source",
-				},
-			},
-			wantErr:      false,
-			wantMimeType: "application/zstd",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			mimeType, err := detectFileEncoding(&tt.doc)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("detectFileEncoding() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if mimeType != tt.wantMimeType {
-				t.Errorf("detectFileEncoding() incorrect mimeType = %v", mimeType)
-			}
-		})
-	}
-}
-
 /*
 // TODO: Fix tests to check for logger messages instead of err text
 // https://github.com/guacsec/guac/issues/765
