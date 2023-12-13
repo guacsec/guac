@@ -30,8 +30,8 @@ jobs:
   build:
     uses: ./.github/workflows/reusable-local-build.yaml
     with:
-      repository: 'guacsec/guac'
-      ref: 'main'
+      repository: ${{ github.repository}}
+      ref: ${{ github.ref }}
 
   db-performance:
     needs: [build]
@@ -115,30 +115,28 @@ jobs:
           matrix-key: ${{ matrix.database }}
           outputs: |-
             elapsed_time: ${{ steps.run_test.outputs.elapsed_time }}
-      # - name: Run query tests with ${{ matrix.database }}
-      #   id: query_test
-      #   run: |
-      #     if [ ${{ matrix.database }} == "inmem" ]; then
-      #       #!/usr/bin/env bash
-      #       set -euo pipefail
-      #       echo "Running query tests..."
-      #       start=$(date -u +%s)
-      #       ./bin/guacone certifier osv --poll=false > output 2>&1
-      #       ./bin/guacone query vuln "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" > output 2>&1
-      #       #grep "Visualizer url" output
-      #       end=$(date -u +%s)
-      #       query_time=$((end - start))
-      #       printf "%-15s%-20s%-15s%s seconds\n" "Query" "${{ matrix.database }}" "$query_time"
-      #       echo "query_time=$query_time" >> $GITHUB_OUTPUT
-      #     fi
-      # ## Write for matrix outputs workaround
-      # - uses: cloudposse/github-action-matrix-outputs-write@main
-      #   id: out-query
-      #   with:
-      #     matrix-step-name: query_test
-      #     matrix-key: ${{ matrix.database }}
-      #     outputs: |-
-      #       query_time: ${{ steps.query_test.outputs.query_time }}
+      - name: Run query tests with ${{ matrix.database }}
+        id: query_test
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          echo "Running query tests..."
+          start=$(date -u +%s)
+          ./bin/guacone certifier osv --poll=false > output 2>&1
+          ./bin/guacone query vuln "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" > output 2>&1
+          grep "Visualizer url" output
+          end=$(date -u +%s)
+          query_time=$((end - start))
+          printf "%-15s%-20s%-15s%s seconds\n" "Query" "${{ matrix.database }}" "$query_time"
+          echo "query_time=$query_time" >> $GITHUB_OUTPUT
+      ## Write for matrix outputs workaround
+      - uses: cloudposse/github-action-matrix-outputs-write@main
+        id: out-query
+        with:
+          matrix-step-name: query_test
+          matrix-key: ${{ matrix.database }}
+          outputs: |-
+            query_time: ${{ steps.query_test.outputs.query_time }}
   ## Read matrix outputs
   read:
     runs-on: ubuntu-latest
