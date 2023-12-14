@@ -427,6 +427,29 @@ func HasSourceWith(preds ...predicate.SourceName) predicate.Occurrence {
 	})
 }
 
+// HasIncludedInSboms applies the HasEdge predicate on the "included_in_sboms" edge.
+func HasIncludedInSboms() predicate.Occurrence {
+	return predicate.Occurrence(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, IncludedInSbomsTable, IncludedInSbomsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIncludedInSbomsWith applies the HasEdge predicate on the "included_in_sboms" edge with a given conditions (other predicates).
+func HasIncludedInSbomsWith(preds ...predicate.BillOfMaterials) predicate.Occurrence {
+	return predicate.Occurrence(func(s *sql.Selector) {
+		step := newIncludedInSbomsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Occurrence) predicate.Occurrence {
 	return predicate.Occurrence(sql.AndPredicates(predicates...))

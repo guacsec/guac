@@ -22,20 +22,22 @@ import (
 // ArtifactQuery is the builder for querying Artifact entities.
 type ArtifactQuery struct {
 	config
-	ctx                   *QueryContext
-	order                 []artifact.OrderOption
-	inters                []Interceptor
-	predicates            []predicate.Artifact
-	withOccurrences       *OccurrenceQuery
-	withSbom              *BillOfMaterialsQuery
-	withAttestations      *SLSAAttestationQuery
-	withSame              *HashEqualQuery
-	modifiers             []func(*sql.Selector)
-	loadTotal             []func(context.Context, []*Artifact) error
-	withNamedOccurrences  map[string]*OccurrenceQuery
-	withNamedSbom         map[string]*BillOfMaterialsQuery
-	withNamedAttestations map[string]*SLSAAttestationQuery
-	withNamedSame         map[string]*HashEqualQuery
+	ctx                      *QueryContext
+	order                    []artifact.OrderOption
+	inters                   []Interceptor
+	predicates               []predicate.Artifact
+	withOccurrences          *OccurrenceQuery
+	withSbom                 *BillOfMaterialsQuery
+	withAttestations         *SLSAAttestationQuery
+	withSame                 *HashEqualQuery
+	withIncludedInSboms      *BillOfMaterialsQuery
+	modifiers                []func(*sql.Selector)
+	loadTotal                []func(context.Context, []*Artifact) error
+	withNamedOccurrences     map[string]*OccurrenceQuery
+	withNamedSbom            map[string]*BillOfMaterialsQuery
+	withNamedAttestations    map[string]*SLSAAttestationQuery
+	withNamedSame            map[string]*HashEqualQuery
+	withNamedIncludedInSboms map[string]*BillOfMaterialsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -153,6 +155,28 @@ func (aq *ArtifactQuery) QuerySame() *HashEqualQuery {
 			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
 			sqlgraph.To(hashequal.Table, hashequal.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, artifact.SameTable, artifact.SamePrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIncludedInSboms chains the current query on the "included_in_sboms" edge.
+func (aq *ArtifactQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, artifact.IncludedInSbomsTable, artifact.IncludedInSbomsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -347,15 +371,16 @@ func (aq *ArtifactQuery) Clone() *ArtifactQuery {
 		return nil
 	}
 	return &ArtifactQuery{
-		config:           aq.config,
-		ctx:              aq.ctx.Clone(),
-		order:            append([]artifact.OrderOption{}, aq.order...),
-		inters:           append([]Interceptor{}, aq.inters...),
-		predicates:       append([]predicate.Artifact{}, aq.predicates...),
-		withOccurrences:  aq.withOccurrences.Clone(),
-		withSbom:         aq.withSbom.Clone(),
-		withAttestations: aq.withAttestations.Clone(),
-		withSame:         aq.withSame.Clone(),
+		config:              aq.config,
+		ctx:                 aq.ctx.Clone(),
+		order:               append([]artifact.OrderOption{}, aq.order...),
+		inters:              append([]Interceptor{}, aq.inters...),
+		predicates:          append([]predicate.Artifact{}, aq.predicates...),
+		withOccurrences:     aq.withOccurrences.Clone(),
+		withSbom:            aq.withSbom.Clone(),
+		withAttestations:    aq.withAttestations.Clone(),
+		withSame:            aq.withSame.Clone(),
+		withIncludedInSboms: aq.withIncludedInSboms.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -403,6 +428,17 @@ func (aq *ArtifactQuery) WithSame(opts ...func(*HashEqualQuery)) *ArtifactQuery 
 		opt(query)
 	}
 	aq.withSame = query
+	return aq
+}
+
+// WithIncludedInSboms tells the query-builder to eager-load the nodes that are connected to
+// the "included_in_sboms" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithIncludedInSboms(opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
+	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withIncludedInSboms = query
 	return aq
 }
 
@@ -484,11 +520,12 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	var (
 		nodes       = []*Artifact{}
 		_spec       = aq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			aq.withOccurrences != nil,
 			aq.withSbom != nil,
 			aq.withAttestations != nil,
 			aq.withSame != nil,
+			aq.withIncludedInSboms != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -540,6 +577,13 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 			return nil, err
 		}
 	}
+	if query := aq.withIncludedInSboms; query != nil {
+		if err := aq.loadIncludedInSboms(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.IncludedInSboms = []*BillOfMaterials{} },
+			func(n *Artifact, e *BillOfMaterials) { n.Edges.IncludedInSboms = append(n.Edges.IncludedInSboms, e) }); err != nil {
+			return nil, err
+		}
+	}
 	for name, query := range aq.withNamedOccurrences {
 		if err := aq.loadOccurrences(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedOccurrences(name) },
@@ -565,6 +609,13 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 		if err := aq.loadSame(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedSame(name) },
 			func(n *Artifact, e *HashEqual) { n.appendNamedSame(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedIncludedInSboms {
+		if err := aq.loadIncludedInSboms(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedIncludedInSboms(name) },
+			func(n *Artifact, e *BillOfMaterials) { n.appendNamedIncludedInSboms(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -761,6 +812,67 @@ func (aq *ArtifactQuery) loadSame(ctx context.Context, query *HashEqualQuery, no
 	}
 	return nil
 }
+func (aq *ArtifactQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Artifact)
+	nids := make(map[int]map[*Artifact]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(artifact.IncludedInSbomsTable)
+		s.Join(joinT).On(s.C(billofmaterials.FieldID), joinT.C(artifact.IncludedInSbomsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(artifact.IncludedInSbomsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(artifact.IncludedInSbomsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Artifact]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*BillOfMaterials](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "included_in_sboms" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
 
 func (aq *ArtifactQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := aq.querySpec()
@@ -899,6 +1011,20 @@ func (aq *ArtifactQuery) WithNamedSame(name string, opts ...func(*HashEqualQuery
 		aq.withNamedSame = make(map[string]*HashEqualQuery)
 	}
 	aq.withNamedSame[name] = query
+	return aq
+}
+
+// WithNamedIncludedInSboms tells the query-builder to eager-load the nodes that are connected to the "included_in_sboms"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedIncludedInSboms(name string, opts ...func(*BillOfMaterialsQuery)) *ArtifactQuery {
+	query := (&BillOfMaterialsClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedIncludedInSboms == nil {
+		aq.withNamedIncludedInSboms = make(map[string]*BillOfMaterialsQuery)
+	}
+	aq.withNamedIncludedInSboms[name] = query
 	return aq
 }
 

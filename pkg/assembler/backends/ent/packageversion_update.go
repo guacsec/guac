@@ -157,6 +157,21 @@ func (pvu *PackageVersionUpdate) AddEqualPackages(p ...*PkgEqual) *PackageVersio
 	return pvu.AddEqualPackageIDs(ids...)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (pvu *PackageVersionUpdate) AddIncludedInSbomIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.AddIncludedInSbomIDs(ids...)
+	return pvu
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (pvu *PackageVersionUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *PackageVersionUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return pvu.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the PackageVersionMutation object of the builder.
 func (pvu *PackageVersionUpdate) Mutation() *PackageVersionMutation {
 	return pvu.mutation
@@ -229,6 +244,27 @@ func (pvu *PackageVersionUpdate) RemoveEqualPackages(p ...*PkgEqual) *PackageVer
 		ids[i] = p[i].ID
 	}
 	return pvu.RemoveEqualPackageIDs(ids...)
+}
+
+// ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
+func (pvu *PackageVersionUpdate) ClearIncludedInSboms() *PackageVersionUpdate {
+	pvu.mutation.ClearIncludedInSboms()
+	return pvu
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveIncludedInSbomIDs(ids ...int) *PackageVersionUpdate {
+	pvu.mutation.RemoveIncludedInSbomIDs(ids...)
+	return pvu
+}
+
+// RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
+func (pvu *PackageVersionUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *PackageVersionUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return pvu.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -462,6 +498,51 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pvu.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   packageversion.IncludedInSbomsTable,
+			Columns: packageversion.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !pvu.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   packageversion.IncludedInSbomsTable,
+			Columns: packageversion.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   packageversion.IncludedInSbomsTable,
+			Columns: packageversion.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pvu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{packageversion.Label}
@@ -606,6 +687,21 @@ func (pvuo *PackageVersionUpdateOne) AddEqualPackages(p ...*PkgEqual) *PackageVe
 	return pvuo.AddEqualPackageIDs(ids...)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddIncludedInSbomIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.AddIncludedInSbomIDs(ids...)
+	return pvuo
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (pvuo *PackageVersionUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *PackageVersionUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return pvuo.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the PackageVersionMutation object of the builder.
 func (pvuo *PackageVersionUpdateOne) Mutation() *PackageVersionMutation {
 	return pvuo.mutation
@@ -678,6 +774,27 @@ func (pvuo *PackageVersionUpdateOne) RemoveEqualPackages(p ...*PkgEqual) *Packag
 		ids[i] = p[i].ID
 	}
 	return pvuo.RemoveEqualPackageIDs(ids...)
+}
+
+// ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
+func (pvuo *PackageVersionUpdateOne) ClearIncludedInSboms() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearIncludedInSboms()
+	return pvuo
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveIncludedInSbomIDs(ids ...int) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveIncludedInSbomIDs(ids...)
+	return pvuo
+}
+
+// RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
+func (pvuo *PackageVersionUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *PackageVersionUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return pvuo.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Where appends a list predicates to the PackageVersionUpdate builder.
@@ -934,6 +1051,51 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   packageversion.IncludedInSbomsTable,
+			Columns: packageversion.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !pvuo.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   packageversion.IncludedInSbomsTable,
+			Columns: packageversion.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   packageversion.IncludedInSbomsTable,
+			Columns: packageversion.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

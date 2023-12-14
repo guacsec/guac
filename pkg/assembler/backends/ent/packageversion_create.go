@@ -122,6 +122,21 @@ func (pvc *PackageVersionCreate) AddEqualPackages(p ...*PkgEqual) *PackageVersio
 	return pvc.AddEqualPackageIDs(ids...)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (pvc *PackageVersionCreate) AddIncludedInSbomIDs(ids ...int) *PackageVersionCreate {
+	pvc.mutation.AddIncludedInSbomIDs(ids...)
+	return pvc
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (pvc *PackageVersionCreate) AddIncludedInSboms(b ...*BillOfMaterials) *PackageVersionCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return pvc.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the PackageVersionMutation object of the builder.
 func (pvc *PackageVersionCreate) Mutation() *PackageVersionMutation {
 	return pvc.mutation
@@ -285,6 +300,22 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   packageversion.IncludedInSbomsTable,
+			Columns: packageversion.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

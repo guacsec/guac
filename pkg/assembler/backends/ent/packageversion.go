@@ -45,15 +45,18 @@ type PackageVersionEdges struct {
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
 	// EqualPackages holds the value of the equal_packages edge.
 	EqualPackages []*PkgEqual `json:"equal_packages,omitempty"`
+	// IncludedInSboms holds the value of the included_in_sboms edge.
+	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 	// totalCount holds the count of the edges above.
-	totalCount [4]map[string]int
+	totalCount [5]map[string]int
 
-	namedOccurrences   map[string][]*Occurrence
-	namedSbom          map[string][]*BillOfMaterials
-	namedEqualPackages map[string][]*PkgEqual
+	namedOccurrences     map[string][]*Occurrence
+	namedSbom            map[string][]*BillOfMaterials
+	namedEqualPackages   map[string][]*PkgEqual
+	namedIncludedInSboms map[string][]*BillOfMaterials
 }
 
 // NameOrErr returns the Name value or an error if the edge
@@ -94,6 +97,15 @@ func (e PackageVersionEdges) EqualPackagesOrErr() ([]*PkgEqual, error) {
 		return e.EqualPackages, nil
 	}
 	return nil, &NotLoadedError{edge: "equal_packages"}
+}
+
+// IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
+	if e.loadedTypes[4] {
+		return e.IncludedInSboms, nil
+	}
+	return nil, &NotLoadedError{edge: "included_in_sboms"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -191,6 +203,11 @@ func (pv *PackageVersion) QuerySbom() *BillOfMaterialsQuery {
 // QueryEqualPackages queries the "equal_packages" edge of the PackageVersion entity.
 func (pv *PackageVersion) QueryEqualPackages() *PkgEqualQuery {
 	return NewPackageVersionClient(pv.config).QueryEqualPackages(pv)
+}
+
+// QueryIncludedInSboms queries the "included_in_sboms" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	return NewPackageVersionClient(pv.config).QueryIncludedInSboms(pv)
 }
 
 // Update returns a builder for updating this PackageVersion.
@@ -303,6 +320,30 @@ func (pv *PackageVersion) appendNamedEqualPackages(name string, edges ...*PkgEqu
 		pv.Edges.namedEqualPackages[name] = []*PkgEqual{}
 	} else {
 		pv.Edges.namedEqualPackages[name] = append(pv.Edges.namedEqualPackages[name], edges...)
+	}
+}
+
+// NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
+	if pv.Edges.namedIncludedInSboms == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedIncludedInSboms[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
+	if pv.Edges.namedIncludedInSboms == nil {
+		pv.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
+	} else {
+		pv.Edges.namedIncludedInSboms[name] = append(pv.Edges.namedIncludedInSboms[name], edges...)
 	}
 }
 

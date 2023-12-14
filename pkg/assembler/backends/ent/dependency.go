@@ -48,11 +48,15 @@ type DependencyEdges struct {
 	DependentPackageName *PackageName `json:"dependent_package_name,omitempty"`
 	// DependentPackageVersion holds the value of the dependent_package_version edge.
 	DependentPackageVersion *PackageVersion `json:"dependent_package_version,omitempty"`
+	// IncludedInSboms holds the value of the included_in_sboms edge.
+	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 	// totalCount holds the count of the edges above.
-	totalCount [3]map[string]int
+	totalCount [4]map[string]int
+
+	namedIncludedInSboms map[string][]*BillOfMaterials
 }
 
 // PackageOrErr returns the Package value or an error if the edge
@@ -92,6 +96,15 @@ func (e DependencyEdges) DependentPackageVersionOrErr() (*PackageVersion, error)
 		return e.DependentPackageVersion, nil
 	}
 	return nil, &NotLoadedError{edge: "dependent_package_version"}
+}
+
+// IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
+// was not loaded in eager-loading.
+func (e DependencyEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
+	if e.loadedTypes[3] {
+		return e.IncludedInSboms, nil
+	}
+	return nil, &NotLoadedError{edge: "included_in_sboms"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -200,6 +213,11 @@ func (d *Dependency) QueryDependentPackageVersion() *PackageVersionQuery {
 	return NewDependencyClient(d.config).QueryDependentPackageVersion(d)
 }
 
+// QueryIncludedInSboms queries the "included_in_sboms" edge of the Dependency entity.
+func (d *Dependency) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	return NewDependencyClient(d.config).QueryIncludedInSboms(d)
+}
+
 // Update returns a builder for updating this Dependency.
 // Note that you need to call Dependency.Unwrap() before calling this method if this Dependency
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -248,6 +266,30 @@ func (d *Dependency) String() string {
 	builder.WriteString(d.Collector)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (d *Dependency) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
+	if d.Edges.namedIncludedInSboms == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := d.Edges.namedIncludedInSboms[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (d *Dependency) appendNamedIncludedInSboms(name string, edges ...*BillOfMaterials) {
+	if d.Edges.namedIncludedInSboms == nil {
+		d.Edges.namedIncludedInSboms = make(map[string][]*BillOfMaterials)
+	}
+	if len(edges) == 0 {
+		d.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
+	} else {
+		d.Edges.namedIncludedInSboms[name] = append(d.Edges.namedIncludedInSboms[name], edges...)
+	}
 }
 
 // Dependencies is a parsable slice of Dependency.

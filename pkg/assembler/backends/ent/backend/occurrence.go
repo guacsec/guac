@@ -23,9 +23,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -33,45 +34,8 @@ import (
 
 func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
-	predicates := []predicate.Occurrence{
-		optionalPredicate(query.ID, IDEQ),
-		optionalPredicate(query.Justification, occurrence.JustificationEQ),
-		optionalPredicate(query.Origin, occurrence.OriginEQ),
-		optionalPredicate(query.Collector, occurrence.CollectorEQ),
-	}
-
-	if query.Artifact != nil {
-		predicates = append(predicates,
-			occurrence.HasArtifactWith(func(s *sql.Selector) {
-				if query.Artifact != nil {
-					optionalPredicate(query.Artifact.Digest, artifact.DigestEQ)(s)
-					optionalPredicate(query.Artifact.Algorithm, artifact.AlgorithmEQ)(s)
-					optionalPredicate(query.Artifact.ID, IDEQ)(s)
-				}
-			}),
-		)
-	}
-
-	if query.Subject != nil {
-		if query.Subject.Package != nil {
-			predicates = append(predicates,
-				occurrence.HasPackageWith(
-					packageversion.VersionEQ(*query.Subject.Package.Version),
-				),
-			)
-		} else if query.Subject.Source != nil {
-			predicates = append(predicates,
-				occurrence.HasSourceWith(
-					optionalPredicate(query.Subject.Source.Name, sourcename.NameEQ),
-					optionalPredicate(query.Subject.Source.Commit, sourcename.CommitEQ),
-					optionalPredicate(query.Subject.Source.Tag, sourcename.TagEQ),
-				),
-			)
-		}
-	}
-
 	records, err := b.client.Occurrence.Query().
-		Where(predicates...).
+		Where(isOccurrenceQuery(query)).
 		WithArtifact().
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {
@@ -222,4 +186,50 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 
 	//TODO optimize for only returning ID
 	return nodeID(record.ID), nil
+}
+
+func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
+	if filter == nil {
+		return NoOpSelector()
+	}
+	predicates := []predicate.Occurrence{
+		optionalPredicate(filter.ID, IDEQ),
+		optionalPredicate(filter.Justification, occurrence.JustificationEQ),
+		optionalPredicate(filter.Origin, occurrence.OriginEQ),
+		optionalPredicate(filter.Collector, occurrence.CollectorEQ),
+	}
+
+	if filter.Artifact != nil {
+		predicates = append(predicates,
+			occurrence.HasArtifactWith(func(s *sql.Selector) {
+				if filter.Artifact != nil {
+					optionalPredicate(filter.Artifact.Digest, artifact.DigestEQ)(s)
+					optionalPredicate(filter.Artifact.Algorithm, artifact.AlgorithmEQ)(s)
+					optionalPredicate(filter.Artifact.ID, IDEQ)(s)
+				}
+			}),
+		)
+	}
+
+	if filter.Subject != nil {
+		if filter.Subject.Package != nil {
+			predicates = append(predicates, occurrence.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
+		} else if filter.Subject.Source != nil {
+			predicates = append(predicates,
+				occurrence.HasSourceWith(
+					optionalPredicate(filter.Subject.Source.ID, IDEQ),
+					sourcename.HasNamespaceWith(
+						optionalPredicate(filter.Subject.Source.Namespace, sourcenamespace.NamespaceEQ),
+						sourcenamespace.HasSourceTypeWith(
+							optionalPredicate(filter.Subject.Source.Type, sourcetype.TypeEQ),
+						),
+					),
+					optionalPredicate(filter.Subject.Source.Name, sourcename.NameEQ),
+					optionalPredicate(filter.Subject.Source.Commit, sourcename.CommitEQ),
+					optionalPredicate(filter.Subject.Source.Tag, sourcename.TagEQ),
+				),
+			)
+		}
+	}
+	return occurrence.And(predicates...)
 }

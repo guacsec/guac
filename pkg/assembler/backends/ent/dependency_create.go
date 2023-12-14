@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -100,6 +101,21 @@ func (dc *DependencyCreate) SetDependentPackageName(p *PackageName) *DependencyC
 // SetDependentPackageVersion sets the "dependent_package_version" edge to the PackageVersion entity.
 func (dc *DependencyCreate) SetDependentPackageVersion(p *PackageVersion) *DependencyCreate {
 	return dc.SetDependentPackageVersionID(p.ID)
+}
+
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (dc *DependencyCreate) AddIncludedInSbomIDs(ids ...int) *DependencyCreate {
+	dc.mutation.AddIncludedInSbomIDs(ids...)
+	return dc
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (dc *DependencyCreate) AddIncludedInSboms(b ...*BillOfMaterials) *DependencyCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return dc.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the DependencyMutation object of the builder.
@@ -258,6 +274,22 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.DependentPackageVersionID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dc.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dependency.IncludedInSbomsTable,
+			Columns: dependency.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

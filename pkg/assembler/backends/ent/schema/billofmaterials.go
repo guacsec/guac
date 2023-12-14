@@ -48,6 +48,10 @@ func (BillOfMaterials) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("package", PackageVersion.Type).Field("package_id").Unique(),
 		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique(),
+		edge.To("included_software_packages", PackageVersion.Type),
+		edge.To("included_software_artifacts", Artifact.Type),
+		edge.To("included_dependencies", Dependency.Type),
+		edge.To("included_occurrences", Occurrence.Type),
 	}
 }
 

@@ -204,15 +204,18 @@ func dependencyTypeFromEnum(t dependency.DependencyType) model.DependencyType {
 
 func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 	return &model.HasSbom{
-		ID:               nodeID(sbom.ID),
-		Subject:          toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
-		URI:              sbom.URI,
-		Algorithm:        sbom.Algorithm,
-		Digest:           sbom.Digest,
-		DownloadLocation: sbom.DownloadLocation,
-		Origin:           sbom.Origin,
-		Collector:        sbom.Collector,
-		KnownSince:       sbom.KnownSince,
+		ID:                   nodeID(sbom.ID),
+		Subject:              toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
+		URI:                  sbom.URI,
+		Algorithm:            sbom.Algorithm,
+		Digest:               sbom.Digest,
+		DownloadLocation:     sbom.DownloadLocation,
+		Origin:               sbom.Origin,
+		Collector:            sbom.Collector,
+		KnownSince:           sbom.KnownSince,
+		IncludedSoftware:     toIncludedSoftware(sbom.Edges.IncludedSoftwarePackages, sbom.Edges.IncludedSoftwareArtifacts),
+		IncludedDependencies: collect(sbom.Edges.IncludedDependencies, toModelIsDependencyWithBackrefs),
+		IncludedOccurrences:  collect(sbom.Edges.IncludedOccurrences, toModelIsOccurrenceWithSubject),
 	}
 }
 
@@ -223,6 +226,17 @@ func toPackageOrArtifact(p *ent.PackageVersion, a *ent.Artifact) model.PackageOr
 		return toModelArtifact(a)
 	}
 	return nil
+}
+
+func toIncludedSoftware(pkgs []*ent.PackageVersion, artifacts []*ent.Artifact) []model.PackageOrArtifact {
+	var result []model.PackageOrArtifact
+	for i := range pkgs {
+		result = append(result, toModelPackage(backReferencePackageVersion(pkgs[i])))
+	}
+	for i := range artifacts {
+		result = append(result, toModelArtifact(artifacts[i]))
+	}
+	return result
 }
 
 func toModelLicense(license *ent.License) *model.License {

@@ -119,6 +119,21 @@ func (au *ArtifactUpdate) AddSame(h ...*HashEqual) *ArtifactUpdate {
 	return au.AddSameIDs(ids...)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (au *ArtifactUpdate) AddIncludedInSbomIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.AddIncludedInSbomIDs(ids...)
+	return au
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (au *ArtifactUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return au.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (au *ArtifactUpdate) Mutation() *ArtifactMutation {
 	return au.mutation
@@ -206,6 +221,27 @@ func (au *ArtifactUpdate) RemoveSame(h ...*HashEqual) *ArtifactUpdate {
 		ids[i] = h[i].ID
 	}
 	return au.RemoveSameIDs(ids...)
+}
+
+// ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
+func (au *ArtifactUpdate) ClearIncludedInSboms() *ArtifactUpdate {
+	au.mutation.ClearIncludedInSboms()
+	return au
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
+func (au *ArtifactUpdate) RemoveIncludedInSbomIDs(ids ...int) *ArtifactUpdate {
+	au.mutation.RemoveIncludedInSbomIDs(ids...)
+	return au
+}
+
+// RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
+func (au *ArtifactUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return au.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -430,6 +466,51 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if au.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.IncludedInSbomsTable,
+			Columns: artifact.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !au.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.IncludedInSbomsTable,
+			Columns: artifact.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.IncludedInSbomsTable,
+			Columns: artifact.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{artifact.Label}
@@ -538,6 +619,21 @@ func (auo *ArtifactUpdateOne) AddSame(h ...*HashEqual) *ArtifactUpdateOne {
 	return auo.AddSameIDs(ids...)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (auo *ArtifactUpdateOne) AddIncludedInSbomIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.AddIncludedInSbomIDs(ids...)
+	return auo
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (auo *ArtifactUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return auo.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the ArtifactMutation object of the builder.
 func (auo *ArtifactUpdateOne) Mutation() *ArtifactMutation {
 	return auo.mutation
@@ -625,6 +721,27 @@ func (auo *ArtifactUpdateOne) RemoveSame(h ...*HashEqual) *ArtifactUpdateOne {
 		ids[i] = h[i].ID
 	}
 	return auo.RemoveSameIDs(ids...)
+}
+
+// ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
+func (auo *ArtifactUpdateOne) ClearIncludedInSboms() *ArtifactUpdateOne {
+	auo.mutation.ClearIncludedInSboms()
+	return auo
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveIncludedInSbomIDs(ids ...int) *ArtifactUpdateOne {
+	auo.mutation.RemoveIncludedInSbomIDs(ids...)
+	return auo
+}
+
+// RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
+func (auo *ArtifactUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return auo.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Where appends a list predicates to the ArtifactUpdate builder.
@@ -872,6 +989,51 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.IncludedInSbomsTable,
+			Columns: artifact.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !auo.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.IncludedInSbomsTable,
+			Columns: artifact.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   artifact.IncludedInSbomsTable,
+			Columns: artifact.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
