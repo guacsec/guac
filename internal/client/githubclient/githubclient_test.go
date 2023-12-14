@@ -406,8 +406,14 @@ func Test_githubClient_GetWorkflow(t *testing.T) {
 				githubWorkflowName: "",
 			},
 			want: []client.Workflow{
-				{"Test Workflow", 77746986},
-				{"Test Workflow - Version 2", 77748205},
+				{
+					Name: "Test Workflow",
+					Id:   77746986,
+				},
+				{
+					Name: "Test Workflow - Version 2",
+					Id:   77748205,
+				},
 			},
 		},
 		{
@@ -419,7 +425,10 @@ func Test_githubClient_GetWorkflow(t *testing.T) {
 				githubWorkflowName: "Test Workflow",
 			},
 			want: []client.Workflow{
-				{"Test Workflow", 77746986},
+				{
+					Name: "Test Workflow",
+					Id:   77746986,
+				},
 			},
 		},
 	}

@@ -292,7 +292,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner s
 
 	for _, workflow := range workflows {
 		// get the latest workflow run
-		run, err := g.client.GetWorkflowRuns(ctx, owner, repo, workflow.Id)
+		run, err := g.client.GetLatestWorkflowRun(ctx, owner, repo, workflow.Id)
 		if err != nil {
 			logger.Errorf("unable to fetch workflow runs for workflow %v: %v", workflow.Id, err)
 			continue

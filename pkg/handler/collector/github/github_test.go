@@ -148,7 +148,7 @@ func (m *MockGithubClient) GetWorkflow(ctx context.Context, owner string, repo s
 	return nil, nil
 }
 
-func (m *MockGithubClient) GetWorkflowRuns(ctx context.Context, owner, repo string, workflowId int64) (*client.WorkflowRun, error) {
+func (m *MockGithubClient) GetLatestWorkflowRun(ctx context.Context, owner, repo string, workflowId int64) (*client.WorkflowRun, error) {
 	return nil, nil
 }
 
