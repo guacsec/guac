@@ -54,7 +54,6 @@ var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.SortSlices(certifyVexLess),
 	cmpopts.SortSlices(vulnerabilityLess),
 	cmpopts.SortSlices(hasSbomLess),
-	cmpopts.SortSlices(packageOrArtifactLess),
 }
 
 func isDependencyLess(e1, e2 *model.IsDependency) bool {
@@ -88,20 +87,16 @@ func vulnerabilityLess(e1, e2 *model.Vulnerability) bool {
 }
 
 func hasSbomLess(e1, e2 *model.HasSbom) bool {
-	return packageOrArtifactLess(e1.Subject, e2.Subject)
-}
-
-func packageOrArtifactLess(e1, e2 model.PackageOrArtifact) bool {
-	switch subject1 := e1.(type) {
+	switch subject1 := e1.Subject.(type) {
 	case *model.Package:
-		switch subject2 := e2.(type) {
+		switch subject2 := e2.Subject.(type) {
 		case *model.Package:
 			return packageLess(subject1, subject2)
 		case *model.Artifact:
 			return false
 		}
 	case *model.Artifact:
-		switch subject2 := e2.(type) {
+		switch subject2 := e2.Subject.(type) {
 		case *model.Package:
 			return true
 		case *model.Artifact:

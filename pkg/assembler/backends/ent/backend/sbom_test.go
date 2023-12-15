@@ -248,11 +248,11 @@ var includedTestExpectedSBOM = &model.HasSbom{
 	Origin:           "sbom_origin",
 	Collector:        "sbom_collector",
 	IncludedSoftware: []model.PackageOrArtifact{
+		includedTestExpectedPackage1,
+		includedTestExpectedPackage2,
 		includedTestExpectedPackage3,
 		includedTestExpectedArtifact1,
 		includedTestExpectedArtifact2,
-		includedTestExpectedPackage1,
-		includedTestExpectedPackage2,
 	},
 	IncludedDependencies: []*model.IsDependency{{
 		Package:           includedTestExpectedPackage1,
