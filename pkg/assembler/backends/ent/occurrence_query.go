@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -20,15 +22,17 @@ import (
 // OccurrenceQuery is the builder for querying Occurrence entities.
 type OccurrenceQuery struct {
 	config
-	ctx          *QueryContext
-	order        []occurrence.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Occurrence
-	withArtifact *ArtifactQuery
-	withPackage  *PackageVersionQuery
-	withSource   *SourceNameQuery
-	modifiers    []func(*sql.Selector)
-	loadTotal    []func(context.Context, []*Occurrence) error
+	ctx                      *QueryContext
+	order                    []occurrence.OrderOption
+	inters                   []Interceptor
+	predicates               []predicate.Occurrence
+	withArtifact             *ArtifactQuery
+	withPackage              *PackageVersionQuery
+	withSource               *SourceNameQuery
+	withIncludedInSboms      *BillOfMaterialsQuery
+	modifiers                []func(*sql.Selector)
+	loadTotal                []func(context.Context, []*Occurrence) error
+	withNamedIncludedInSboms map[string]*BillOfMaterialsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -124,6 +128,28 @@ func (oq *OccurrenceQuery) QuerySource() *SourceNameQuery {
 			sqlgraph.From(occurrence.Table, occurrence.FieldID, selector),
 			sqlgraph.To(sourcename.Table, sourcename.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, occurrence.SourceTable, occurrence.SourceColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIncludedInSboms chains the current query on the "included_in_sboms" edge.
+func (oq *OccurrenceQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: oq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := oq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := oq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(occurrence.Table, occurrence.FieldID, selector),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, occurrence.IncludedInSbomsTable, occurrence.IncludedInSbomsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +344,15 @@ func (oq *OccurrenceQuery) Clone() *OccurrenceQuery {
 		return nil
 	}
 	return &OccurrenceQuery{
-		config:       oq.config,
-		ctx:          oq.ctx.Clone(),
-		order:        append([]occurrence.OrderOption{}, oq.order...),
-		inters:       append([]Interceptor{}, oq.inters...),
-		predicates:   append([]predicate.Occurrence{}, oq.predicates...),
-		withArtifact: oq.withArtifact.Clone(),
-		withPackage:  oq.withPackage.Clone(),
-		withSource:   oq.withSource.Clone(),
+		config:              oq.config,
+		ctx:                 oq.ctx.Clone(),
+		order:               append([]occurrence.OrderOption{}, oq.order...),
+		inters:              append([]Interceptor{}, oq.inters...),
+		predicates:          append([]predicate.Occurrence{}, oq.predicates...),
+		withArtifact:        oq.withArtifact.Clone(),
+		withPackage:         oq.withPackage.Clone(),
+		withSource:          oq.withSource.Clone(),
+		withIncludedInSboms: oq.withIncludedInSboms.Clone(),
 		// clone intermediate query.
 		sql:  oq.sql.Clone(),
 		path: oq.path,
@@ -362,6 +389,17 @@ func (oq *OccurrenceQuery) WithSource(opts ...func(*SourceNameQuery)) *Occurrenc
 		opt(query)
 	}
 	oq.withSource = query
+	return oq
+}
+
+// WithIncludedInSboms tells the query-builder to eager-load the nodes that are connected to
+// the "included_in_sboms" edge. The optional arguments are used to configure the query builder of the edge.
+func (oq *OccurrenceQuery) WithIncludedInSboms(opts ...func(*BillOfMaterialsQuery)) *OccurrenceQuery {
+	query := (&BillOfMaterialsClient{config: oq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	oq.withIncludedInSboms = query
 	return oq
 }
 
@@ -443,10 +481,11 @@ func (oq *OccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 	var (
 		nodes       = []*Occurrence{}
 		_spec       = oq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			oq.withArtifact != nil,
 			oq.withPackage != nil,
 			oq.withSource != nil,
+			oq.withIncludedInSboms != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -485,6 +524,20 @@ func (oq *OccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 	if query := oq.withSource; query != nil {
 		if err := oq.loadSource(ctx, query, nodes, nil,
 			func(n *Occurrence, e *SourceName) { n.Edges.Source = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := oq.withIncludedInSboms; query != nil {
+		if err := oq.loadIncludedInSboms(ctx, query, nodes,
+			func(n *Occurrence) { n.Edges.IncludedInSboms = []*BillOfMaterials{} },
+			func(n *Occurrence, e *BillOfMaterials) { n.Edges.IncludedInSboms = append(n.Edges.IncludedInSboms, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range oq.withNamedIncludedInSboms {
+		if err := oq.loadIncludedInSboms(ctx, query, nodes,
+			func(n *Occurrence) { n.appendNamedIncludedInSboms(name) },
+			func(n *Occurrence, e *BillOfMaterials) { n.appendNamedIncludedInSboms(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -589,6 +642,67 @@ func (oq *OccurrenceQuery) loadSource(ctx context.Context, query *SourceNameQuer
 	}
 	return nil
 }
+func (oq *OccurrenceQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *BillOfMaterials)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Occurrence)
+	nids := make(map[int]map[*Occurrence]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(occurrence.IncludedInSbomsTable)
+		s.Join(joinT).On(s.C(billofmaterials.FieldID), joinT.C(occurrence.IncludedInSbomsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(occurrence.IncludedInSbomsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(occurrence.IncludedInSbomsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Occurrence]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*BillOfMaterials](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "included_in_sboms" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
 
 func (oq *OccurrenceQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := oq.querySpec()
@@ -681,6 +795,20 @@ func (oq *OccurrenceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedIncludedInSboms tells the query-builder to eager-load the nodes that are connected to the "included_in_sboms"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (oq *OccurrenceQuery) WithNamedIncludedInSboms(name string, opts ...func(*BillOfMaterialsQuery)) *OccurrenceQuery {
+	query := (&BillOfMaterialsClient{config: oq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if oq.withNamedIncludedInSboms == nil {
+		oq.withNamedIncludedInSboms = make(map[string]*BillOfMaterialsQuery)
+	}
+	oq.withNamedIncludedInSboms[name] = query
+	return oq
 }
 
 // OccurrenceGroupBy is the group-by builder for Occurrence entities.

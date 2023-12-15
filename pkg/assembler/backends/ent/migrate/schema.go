@@ -1145,6 +1145,106 @@ var (
 			},
 		},
 	}
+	// BillOfMaterialsIncludedSoftwarePackagesColumns holds the columns for the "bill_of_materials_included_software_packages" table.
+	BillOfMaterialsIncludedSoftwarePackagesColumns = []*schema.Column{
+		{Name: "bill_of_materials_id", Type: field.TypeInt},
+		{Name: "package_version_id", Type: field.TypeInt},
+	}
+	// BillOfMaterialsIncludedSoftwarePackagesTable holds the schema information for the "bill_of_materials_included_software_packages" table.
+	BillOfMaterialsIncludedSoftwarePackagesTable = &schema.Table{
+		Name:       "bill_of_materials_included_software_packages",
+		Columns:    BillOfMaterialsIncludedSoftwarePackagesColumns,
+		PrimaryKey: []*schema.Column{BillOfMaterialsIncludedSoftwarePackagesColumns[0], BillOfMaterialsIncludedSoftwarePackagesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "bill_of_materials_included_software_packages_bill_of_materials_id",
+				Columns:    []*schema.Column{BillOfMaterialsIncludedSoftwarePackagesColumns[0]},
+				RefColumns: []*schema.Column{BillOfMaterialsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "bill_of_materials_included_software_packages_package_version_id",
+				Columns:    []*schema.Column{BillOfMaterialsIncludedSoftwarePackagesColumns[1]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// BillOfMaterialsIncludedSoftwareArtifactsColumns holds the columns for the "bill_of_materials_included_software_artifacts" table.
+	BillOfMaterialsIncludedSoftwareArtifactsColumns = []*schema.Column{
+		{Name: "bill_of_materials_id", Type: field.TypeInt},
+		{Name: "artifact_id", Type: field.TypeInt},
+	}
+	// BillOfMaterialsIncludedSoftwareArtifactsTable holds the schema information for the "bill_of_materials_included_software_artifacts" table.
+	BillOfMaterialsIncludedSoftwareArtifactsTable = &schema.Table{
+		Name:       "bill_of_materials_included_software_artifacts",
+		Columns:    BillOfMaterialsIncludedSoftwareArtifactsColumns,
+		PrimaryKey: []*schema.Column{BillOfMaterialsIncludedSoftwareArtifactsColumns[0], BillOfMaterialsIncludedSoftwareArtifactsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "bill_of_materials_included_software_artifacts_bill_of_materials_id",
+				Columns:    []*schema.Column{BillOfMaterialsIncludedSoftwareArtifactsColumns[0]},
+				RefColumns: []*schema.Column{BillOfMaterialsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "bill_of_materials_included_software_artifacts_artifact_id",
+				Columns:    []*schema.Column{BillOfMaterialsIncludedSoftwareArtifactsColumns[1]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// BillOfMaterialsIncludedDependenciesColumns holds the columns for the "bill_of_materials_included_dependencies" table.
+	BillOfMaterialsIncludedDependenciesColumns = []*schema.Column{
+		{Name: "bill_of_materials_id", Type: field.TypeInt},
+		{Name: "dependency_id", Type: field.TypeInt},
+	}
+	// BillOfMaterialsIncludedDependenciesTable holds the schema information for the "bill_of_materials_included_dependencies" table.
+	BillOfMaterialsIncludedDependenciesTable = &schema.Table{
+		Name:       "bill_of_materials_included_dependencies",
+		Columns:    BillOfMaterialsIncludedDependenciesColumns,
+		PrimaryKey: []*schema.Column{BillOfMaterialsIncludedDependenciesColumns[0], BillOfMaterialsIncludedDependenciesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "bill_of_materials_included_dependencies_bill_of_materials_id",
+				Columns:    []*schema.Column{BillOfMaterialsIncludedDependenciesColumns[0]},
+				RefColumns: []*schema.Column{BillOfMaterialsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "bill_of_materials_included_dependencies_dependency_id",
+				Columns:    []*schema.Column{BillOfMaterialsIncludedDependenciesColumns[1]},
+				RefColumns: []*schema.Column{DependenciesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// BillOfMaterialsIncludedOccurrencesColumns holds the columns for the "bill_of_materials_included_occurrences" table.
+	BillOfMaterialsIncludedOccurrencesColumns = []*schema.Column{
+		{Name: "bill_of_materials_id", Type: field.TypeInt},
+		{Name: "occurrence_id", Type: field.TypeInt},
+	}
+	// BillOfMaterialsIncludedOccurrencesTable holds the schema information for the "bill_of_materials_included_occurrences" table.
+	BillOfMaterialsIncludedOccurrencesTable = &schema.Table{
+		Name:       "bill_of_materials_included_occurrences",
+		Columns:    BillOfMaterialsIncludedOccurrencesColumns,
+		PrimaryKey: []*schema.Column{BillOfMaterialsIncludedOccurrencesColumns[0], BillOfMaterialsIncludedOccurrencesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "bill_of_materials_included_occurrences_bill_of_materials_id",
+				Columns:    []*schema.Column{BillOfMaterialsIncludedOccurrencesColumns[0]},
+				RefColumns: []*schema.Column{BillOfMaterialsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "bill_of_materials_included_occurrences_occurrence_id",
+				Columns:    []*schema.Column{BillOfMaterialsIncludedOccurrencesColumns[1]},
+				RefColumns: []*schema.Column{OccurrencesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// CertifyLegalDeclaredLicensesColumns holds the columns for the "certify_legal_declared_licenses" table.
 	CertifyLegalDeclaredLicensesColumns = []*schema.Column{
 		{Name: "certify_legal_id", Type: field.TypeInt},
@@ -1327,6 +1427,10 @@ var (
 		VulnerabilityIdsTable,
 		VulnerabilityMetadataTable,
 		VulnerabilityTypesTable,
+		BillOfMaterialsIncludedSoftwarePackagesTable,
+		BillOfMaterialsIncludedSoftwareArtifactsTable,
+		BillOfMaterialsIncludedDependenciesTable,
+		BillOfMaterialsIncludedOccurrencesTable,
 		CertifyLegalDeclaredLicensesTable,
 		CertifyLegalDiscoveredLicensesTable,
 		HashEqualArtifactsTable,
@@ -1383,6 +1487,14 @@ func init() {
 	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
 	VulnerabilityIdsTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
 	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
+	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
+	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable
+	BillOfMaterialsIncludedSoftwareArtifactsTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
+	BillOfMaterialsIncludedSoftwareArtifactsTable.ForeignKeys[1].RefTable = ArtifactsTable
+	BillOfMaterialsIncludedDependenciesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
+	BillOfMaterialsIncludedDependenciesTable.ForeignKeys[1].RefTable = DependenciesTable
+	BillOfMaterialsIncludedOccurrencesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
+	BillOfMaterialsIncludedOccurrencesTable.ForeignKeys[1].RefTable = OccurrencesTable
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable

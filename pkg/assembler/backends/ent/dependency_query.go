@@ -4,12 +4,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -26,8 +28,10 @@ type DependencyQuery struct {
 	withPackage                 *PackageVersionQuery
 	withDependentPackageName    *PackageNameQuery
 	withDependentPackageVersion *PackageVersionQuery
+	withIncludedInSboms         *BillOfMaterialsQuery
 	modifiers                   []func(*sql.Selector)
 	loadTotal                   []func(context.Context, []*Dependency) error
+	withNamedIncludedInSboms    map[string]*BillOfMaterialsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -123,6 +127,28 @@ func (dq *DependencyQuery) QueryDependentPackageVersion() *PackageVersionQuery {
 			sqlgraph.From(dependency.Table, dependency.FieldID, selector),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, dependency.DependentPackageVersionTable, dependency.DependentPackageVersionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryIncludedInSboms chains the current query on the "included_in_sboms" edge.
+func (dq *DependencyQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: dq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dependency.Table, dependency.FieldID, selector),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, dependency.IncludedInSbomsTable, dependency.IncludedInSbomsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
 		return fromU, nil
@@ -325,6 +351,7 @@ func (dq *DependencyQuery) Clone() *DependencyQuery {
 		withPackage:                 dq.withPackage.Clone(),
 		withDependentPackageName:    dq.withDependentPackageName.Clone(),
 		withDependentPackageVersion: dq.withDependentPackageVersion.Clone(),
+		withIncludedInSboms:         dq.withIncludedInSboms.Clone(),
 		// clone intermediate query.
 		sql:  dq.sql.Clone(),
 		path: dq.path,
@@ -361,6 +388,17 @@ func (dq *DependencyQuery) WithDependentPackageVersion(opts ...func(*PackageVers
 		opt(query)
 	}
 	dq.withDependentPackageVersion = query
+	return dq
+}
+
+// WithIncludedInSboms tells the query-builder to eager-load the nodes that are connected to
+// the "included_in_sboms" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DependencyQuery) WithIncludedInSboms(opts ...func(*BillOfMaterialsQuery)) *DependencyQuery {
+	query := (&BillOfMaterialsClient{config: dq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	dq.withIncludedInSboms = query
 	return dq
 }
 
@@ -442,10 +480,11 @@ func (dq *DependencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*D
 	var (
 		nodes       = []*Dependency{}
 		_spec       = dq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			dq.withPackage != nil,
 			dq.withDependentPackageName != nil,
 			dq.withDependentPackageVersion != nil,
+			dq.withIncludedInSboms != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -484,6 +523,20 @@ func (dq *DependencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*D
 	if query := dq.withDependentPackageVersion; query != nil {
 		if err := dq.loadDependentPackageVersion(ctx, query, nodes, nil,
 			func(n *Dependency, e *PackageVersion) { n.Edges.DependentPackageVersion = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := dq.withIncludedInSboms; query != nil {
+		if err := dq.loadIncludedInSboms(ctx, query, nodes,
+			func(n *Dependency) { n.Edges.IncludedInSboms = []*BillOfMaterials{} },
+			func(n *Dependency, e *BillOfMaterials) { n.Edges.IncludedInSboms = append(n.Edges.IncludedInSboms, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range dq.withNamedIncludedInSboms {
+		if err := dq.loadIncludedInSboms(ctx, query, nodes,
+			func(n *Dependency) { n.appendNamedIncludedInSboms(name) },
+			func(n *Dependency, e *BillOfMaterials) { n.appendNamedIncludedInSboms(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -582,6 +635,67 @@ func (dq *DependencyQuery) loadDependentPackageVersion(ctx context.Context, quer
 	}
 	return nil
 }
+func (dq *DependencyQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Dependency, init func(*Dependency), assign func(*Dependency, *BillOfMaterials)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Dependency)
+	nids := make(map[int]map[*Dependency]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(dependency.IncludedInSbomsTable)
+		s.Join(joinT).On(s.C(billofmaterials.FieldID), joinT.C(dependency.IncludedInSbomsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(dependency.IncludedInSbomsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(dependency.IncludedInSbomsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Dependency]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*BillOfMaterials](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "included_in_sboms" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
 
 func (dq *DependencyQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := dq.querySpec()
@@ -674,6 +788,20 @@ func (dq *DependencyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedIncludedInSboms tells the query-builder to eager-load the nodes that are connected to the "included_in_sboms"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (dq *DependencyQuery) WithNamedIncludedInSboms(name string, opts ...func(*BillOfMaterialsQuery)) *DependencyQuery {
+	query := (&BillOfMaterialsClient{config: dq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if dq.withNamedIncludedInSboms == nil {
+		dq.withNamedIncludedInSboms = make(map[string]*BillOfMaterialsQuery)
+	}
+	dq.withNamedIncludedInSboms[name] = query
+	return dq
 }
 
 // DependencyGroupBy is the group-by builder for Dependency entities.

@@ -108,6 +108,18 @@ func (a *ArtifactQuery) collectField(ctx context.Context, opCtx *graphql.Operati
 			a.WithNamedSame(alias, func(wq *HashEqualQuery) {
 				*wq = *query
 			})
+		case "includedInSboms":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&BillOfMaterialsClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.WithNamedIncludedInSboms(alias, func(wq *BillOfMaterialsQuery) {
+				*wq = *query
+			})
 		case "algorithm":
 			if _, ok := fieldSeen[artifact.FieldAlgorithm]; !ok {
 				selectedFields = append(selectedFields, artifact.FieldAlgorithm)
@@ -205,6 +217,54 @@ func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphq
 				selectedFields = append(selectedFields, billofmaterials.FieldArtifactID)
 				fieldSeen[billofmaterials.FieldArtifactID] = struct{}{}
 			}
+		case "includedSoftwarePackages":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PackageVersionClient{config: bom.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			bom.WithNamedIncludedSoftwarePackages(alias, func(wq *PackageVersionQuery) {
+				*wq = *query
+			})
+		case "includedSoftwareArtifacts":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&ArtifactClient{config: bom.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			bom.WithNamedIncludedSoftwareArtifacts(alias, func(wq *ArtifactQuery) {
+				*wq = *query
+			})
+		case "includedDependencies":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&DependencyClient{config: bom.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			bom.WithNamedIncludedDependencies(alias, func(wq *DependencyQuery) {
+				*wq = *query
+			})
+		case "includedOccurrences":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&OccurrenceClient{config: bom.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			bom.WithNamedIncludedOccurrences(alias, func(wq *OccurrenceQuery) {
+				*wq = *query
+			})
 		case "packageID":
 			if _, ok := fieldSeen[billofmaterials.FieldPackageID]; !ok {
 				selectedFields = append(selectedFields, billofmaterials.FieldPackageID)
@@ -1133,6 +1193,18 @@ func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, dependency.FieldDependentPackageVersionID)
 				fieldSeen[dependency.FieldDependentPackageVersionID] = struct{}{}
 			}
+		case "includedInSboms":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&BillOfMaterialsClient{config: d.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			d.WithNamedIncludedInSboms(alias, func(wq *BillOfMaterialsQuery) {
+				*wq = *query
+			})
 		case "packageID":
 			if _, ok := fieldSeen[dependency.FieldPackageID]; !ok {
 				selectedFields = append(selectedFields, dependency.FieldPackageID)
@@ -1871,6 +1943,18 @@ func (o *OccurrenceQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, occurrence.FieldSourceID)
 				fieldSeen[occurrence.FieldSourceID] = struct{}{}
 			}
+		case "includedInSboms":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&BillOfMaterialsClient{config: o.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			o.WithNamedIncludedInSboms(alias, func(wq *BillOfMaterialsQuery) {
+				*wq = *query
+			})
 		case "artifactID":
 			if _, ok := fieldSeen[occurrence.FieldArtifactID]; !ok {
 				selectedFields = append(selectedFields, occurrence.FieldArtifactID)
@@ -2274,6 +2358,18 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 				return err
 			}
 			pv.WithNamedEqualPackages(alias, func(wq *PkgEqualQuery) {
+				*wq = *query
+			})
+		case "includedInSboms":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&BillOfMaterialsClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedIncludedInSboms(alias, func(wq *BillOfMaterialsQuery) {
 				*wq = *query
 			})
 		case "nameID":

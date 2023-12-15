@@ -623,6 +623,22 @@ func (c *ArtifactClient) QuerySame(a *Artifact) *HashEqualQuery {
 	return query
 }
 
+// QueryIncludedInSboms queries the included_in_sboms edge of a Artifact.
+func (c *ArtifactClient) QueryIncludedInSboms(a *Artifact) *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, id),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, artifact.IncludedInSbomsTable, artifact.IncludedInSbomsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ArtifactClient) Hooks() []Hook {
 	return c.hooks.Artifact
@@ -781,6 +797,70 @@ func (c *BillOfMaterialsClient) QueryArtifact(bom *BillOfMaterials) *ArtifactQue
 			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, billofmaterials.ArtifactTable, billofmaterials.ArtifactColumn),
+		)
+		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIncludedSoftwarePackages queries the included_software_packages edge of a BillOfMaterials.
+func (c *BillOfMaterialsClient) QueryIncludedSoftwarePackages(bom *BillOfMaterials) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bom.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedSoftwarePackagesTable, billofmaterials.IncludedSoftwarePackagesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIncludedSoftwareArtifacts queries the included_software_artifacts edge of a BillOfMaterials.
+func (c *BillOfMaterialsClient) QueryIncludedSoftwareArtifacts(bom *BillOfMaterials) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bom.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedSoftwareArtifactsTable, billofmaterials.IncludedSoftwareArtifactsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIncludedDependencies queries the included_dependencies edge of a BillOfMaterials.
+func (c *BillOfMaterialsClient) QueryIncludedDependencies(bom *BillOfMaterials) *DependencyQuery {
+	query := (&DependencyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bom.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
+			sqlgraph.To(dependency.Table, dependency.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedDependenciesTable, billofmaterials.IncludedDependenciesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIncludedOccurrences queries the included_occurrences edge of a BillOfMaterials.
+func (c *BillOfMaterialsClient) QueryIncludedOccurrences(bom *BillOfMaterials) *OccurrenceQuery {
+	query := (&OccurrenceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bom.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(billofmaterials.Table, billofmaterials.FieldID, id),
+			sqlgraph.To(occurrence.Table, occurrence.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, billofmaterials.IncludedOccurrencesTable, billofmaterials.IncludedOccurrencesPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(bom.driver.Dialect(), step)
 		return fromV, nil
@@ -2023,6 +2103,22 @@ func (c *DependencyClient) QueryDependentPackageVersion(d *Dependency) *PackageV
 	return query
 }
 
+// QueryIncludedInSboms queries the included_in_sboms edge of a Dependency.
+func (c *DependencyClient) QueryIncludedInSboms(d *Dependency) *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dependency.Table, dependency.FieldID, id),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, dependency.IncludedInSbomsTable, dependency.IncludedInSbomsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DependencyClient) Hooks() []Hook {
 	return c.hooks.Dependency
@@ -3061,6 +3157,22 @@ func (c *OccurrenceClient) QuerySource(o *Occurrence) *SourceNameQuery {
 	return query
 }
 
+// QueryIncludedInSboms queries the included_in_sboms edge of a Occurrence.
+func (c *OccurrenceClient) QueryIncludedInSboms(o *Occurrence) *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := o.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(occurrence.Table, occurrence.FieldID, id),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, occurrence.IncludedInSbomsTable, occurrence.IncludedInSbomsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(o.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *OccurrenceClient) Hooks() []Hook {
 	return c.hooks.Occurrence
@@ -3730,6 +3842,22 @@ func (c *PackageVersionClient) QueryEqualPackages(pv *PackageVersion) *PkgEqualQ
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.EqualPackagesTable, packageversion.EqualPackagesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIncludedInSboms queries the included_in_sboms edge of a PackageVersion.
+func (c *PackageVersionClient) QueryIncludedInSboms(pv *PackageVersion) *BillOfMaterialsQuery {
+	query := (&BillOfMaterialsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.IncludedInSbomsTable, packageversion.IncludedInSbomsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
 		return fromV, nil

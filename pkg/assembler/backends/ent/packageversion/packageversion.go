@@ -30,6 +30,8 @@ const (
 	EdgeSbom = "sbom"
 	// EdgeEqualPackages holds the string denoting the equal_packages edge name in mutations.
 	EdgeEqualPackages = "equal_packages"
+	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
+	EdgeIncludedInSboms = "included_in_sboms"
 	// Table holds the table name of the packageversion in the database.
 	Table = "package_versions"
 	// NameTable is the table that holds the name relation/edge.
@@ -58,6 +60,11 @@ const (
 	// EqualPackagesInverseTable is the table name for the PkgEqual entity.
 	// It exists in this package in order to avoid circular dependency with the "pkgequal" package.
 	EqualPackagesInverseTable = "pkg_equals"
+	// IncludedInSbomsTable is the table that holds the included_in_sboms relation/edge. The primary key declared below.
+	IncludedInSbomsTable = "bill_of_materials_included_software_packages"
+	// IncludedInSbomsInverseTable is the table name for the BillOfMaterials entity.
+	// It exists in this package in order to avoid circular dependency with the "billofmaterials" package.
+	IncludedInSbomsInverseTable = "bill_of_materials"
 )
 
 // Columns holds all SQL columns for packageversion fields.
@@ -74,6 +81,9 @@ var (
 	// EqualPackagesPrimaryKey and EqualPackagesColumn2 are the table columns denoting the
 	// primary key for the equal_packages relation (M2M).
 	EqualPackagesPrimaryKey = []string{"pkg_equal_id", "package_version_id"}
+	// IncludedInSbomsPrimaryKey and IncludedInSbomsColumn2 are the table columns denoting the
+	// primary key for the included_in_sboms relation (M2M).
+	IncludedInSbomsPrimaryKey = []string{"bill_of_materials_id", "package_version_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -169,6 +179,20 @@ func ByEqualPackages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newEqualPackagesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByIncludedInSbomsCount orders the results by included_in_sboms count.
+func ByIncludedInSbomsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIncludedInSbomsStep(), opts...)
+	}
+}
+
+// ByIncludedInSboms orders the results by included_in_sboms terms.
+func ByIncludedInSboms(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIncludedInSbomsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newNameStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -195,5 +219,12 @@ func newEqualPackagesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(EqualPackagesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, EqualPackagesTable, EqualPackagesPrimaryKey...),
+	)
+}
+func newIncludedInSbomsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IncludedInSbomsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, IncludedInSbomsTable, IncludedInSbomsPrimaryKey...),
 	)
 }

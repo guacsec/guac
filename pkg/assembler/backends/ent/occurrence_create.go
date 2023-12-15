@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -89,6 +90,21 @@ func (oc *OccurrenceCreate) SetPackage(p *PackageVersion) *OccurrenceCreate {
 // SetSource sets the "source" edge to the SourceName entity.
 func (oc *OccurrenceCreate) SetSource(s *SourceName) *OccurrenceCreate {
 	return oc.SetSourceID(s.ID)
+}
+
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (oc *OccurrenceCreate) AddIncludedInSbomIDs(ids ...int) *OccurrenceCreate {
+	oc.mutation.AddIncludedInSbomIDs(ids...)
+	return oc
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (oc *OccurrenceCreate) AddIncludedInSboms(b ...*BillOfMaterials) *OccurrenceCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return oc.AddIncludedInSbomIDs(ids...)
 }
 
 // Mutation returns the OccurrenceMutation object of the builder.
@@ -228,6 +244,22 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.SourceID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := oc.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   occurrence.IncludedInSbomsTable,
+			Columns: occurrence.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

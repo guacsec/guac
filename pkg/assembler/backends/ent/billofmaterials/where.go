@@ -636,6 +636,98 @@ func HasArtifactWith(preds ...predicate.Artifact) predicate.BillOfMaterials {
 	})
 }
 
+// HasIncludedSoftwarePackages applies the HasEdge predicate on the "included_software_packages" edge.
+func HasIncludedSoftwarePackages() predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, IncludedSoftwarePackagesTable, IncludedSoftwarePackagesPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIncludedSoftwarePackagesWith applies the HasEdge predicate on the "included_software_packages" edge with a given conditions (other predicates).
+func HasIncludedSoftwarePackagesWith(preds ...predicate.PackageVersion) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(func(s *sql.Selector) {
+		step := newIncludedSoftwarePackagesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasIncludedSoftwareArtifacts applies the HasEdge predicate on the "included_software_artifacts" edge.
+func HasIncludedSoftwareArtifacts() predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, IncludedSoftwareArtifactsTable, IncludedSoftwareArtifactsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIncludedSoftwareArtifactsWith applies the HasEdge predicate on the "included_software_artifacts" edge with a given conditions (other predicates).
+func HasIncludedSoftwareArtifactsWith(preds ...predicate.Artifact) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(func(s *sql.Selector) {
+		step := newIncludedSoftwareArtifactsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasIncludedDependencies applies the HasEdge predicate on the "included_dependencies" edge.
+func HasIncludedDependencies() predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, IncludedDependenciesTable, IncludedDependenciesPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIncludedDependenciesWith applies the HasEdge predicate on the "included_dependencies" edge with a given conditions (other predicates).
+func HasIncludedDependenciesWith(preds ...predicate.Dependency) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(func(s *sql.Selector) {
+		step := newIncludedDependenciesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasIncludedOccurrences applies the HasEdge predicate on the "included_occurrences" edge.
+func HasIncludedOccurrences() predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, IncludedOccurrencesTable, IncludedOccurrencesPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasIncludedOccurrencesWith applies the HasEdge predicate on the "included_occurrences" edge with a given conditions (other predicates).
+func HasIncludedOccurrencesWith(preds ...predicate.Occurrence) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(func(s *sql.Selector) {
+		step := newIncludedOccurrencesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.BillOfMaterials) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.AndPredicates(predicates...))

@@ -52,6 +52,20 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 		}
 	}
 
+	for i := range spec.IncludedSoftware {
+		if spec.IncludedSoftware[i].Package != nil {
+			predicates = append(predicates, billofmaterials.HasIncludedSoftwarePackagesWith(packageVersionQuery(spec.IncludedSoftware[i].Package)))
+		} else {
+			predicates = append(predicates, billofmaterials.HasIncludedSoftwareArtifactsWith(artifactQueryPredicates(spec.IncludedSoftware[i].Artifact)))
+		}
+	}
+	for i := range spec.IncludedDependencies {
+		predicates = append(predicates, billofmaterials.HasIncludedDependenciesWith(isDependencyQuery(spec.IncludedDependencies[i])))
+	}
+	for i := range spec.IncludedOccurrences {
+		predicates = append(predicates, billofmaterials.HasIncludedOccurrencesWith(isOccurrenceQuery(spec.IncludedOccurrences[i])))
+	}
+
 	records, err := b.client.BillOfMaterials.Query().
 		Where(predicates...).
 		WithPackage(func(q *ent.PackageVersionQuery) {
@@ -62,6 +76,18 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 			})
 		}).
 		WithArtifact().
+		WithIncludedSoftwareArtifacts().
+		WithIncludedSoftwarePackages(withPackageVersionTree()).
+		WithIncludedDependencies(func(q *ent.DependencyQuery) {
+			q.WithPackage(withPackageVersionTree()).
+				WithDependentPackageName(withPackageNameTree()).
+				WithDependentPackageVersion(withPackageVersionTree())
+		}).
+		WithIncludedOccurrences(func(q *ent.OccurrenceQuery) {
+			q.WithArtifact().
+				WithPackage(withPackageVersionTree()).
+				WithSource(withSourceNameTreeQuery())
+		}).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -127,6 +153,48 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			return nil, Errorf("%v :: %s", funcName, "subject must be either a package or artifact")
 		}
 
+		for _, pkgVersionOrArtifactID := range includes.Software {
+			pkgID, err := client.PackageVersion.Query().
+				Where(IDEQ(pkgVersionOrArtifactID)).
+				OnlyID(ctx)
+			if err != nil {
+				if !ent.IsNotFound(err) {
+					return nil, Errorf("%v %v :: %s", funcName, "error querying for PackageVersion", err)
+				} else {
+					artifactId, err := client.Artifact.Query().
+						Where(IDEQ(pkgVersionOrArtifactID)).
+						OnlyID(ctx)
+					if err != nil {
+						return nil, Errorf("%v :: %s", funcName, "includes.Software must be either a package or artifact")
+					} else {
+						sbomCreate.AddIncludedSoftwareArtifactIDs(artifactId)
+					}
+				}
+			} else {
+				sbomCreate.AddIncludedSoftwarePackageIDs(pkgID)
+			}
+		}
+
+		for _, isDependencyID := range includes.Dependencies {
+			isDepID, err := client.Dependency.Query().
+				Where(IDEQ(isDependencyID)).
+				OnlyID(ctx)
+			if err != nil {
+				return nil, Errorf("%v :: %s", funcName, "includes.Dependencies must be a valid IsDependency ID")
+			}
+			sbomCreate.AddIncludedDependencyIDs(isDepID)
+		}
+
+		for _, isOccurenceID := range includes.Occurrences {
+			isOccID, err := client.Occurrence.Query().
+				Where(IDEQ(isOccurenceID)).
+				OnlyID(ctx)
+			if err != nil {
+				return nil, Errorf("%v :: %s", funcName, "includes.Occurrences must be a valid IsOccurrence ID")
+			}
+			sbomCreate.AddIncludedOccurrenceIDs(isOccID)
+		}
+
 		id, err := sbomCreate.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
@@ -164,8 +232,7 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 		} else {
 			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
 		}
-		// TODO(knrc) - handle includes
-		modelHasSbom, err := b.IngestHasSbom(ctx, subject, *hasSbom, model.HasSBOMIncludesInputSpec{})
+		modelHasSbom, err := b.IngestHasSbom(ctx, subject, *hasSbom, *includes[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
 		}

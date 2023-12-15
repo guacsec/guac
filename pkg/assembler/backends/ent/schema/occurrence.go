@@ -52,6 +52,7 @@ func (Occurrence) Edges() []ent.Edge {
 		edge.To("artifact", Artifact.Type).Field("artifact_id").Unique().Required(),
 		edge.To("package", PackageVersion.Type).Unique().Field("package_id"),
 		edge.To("source", SourceName.Type).Unique().Field("source_id"),
+		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_occurrences"),
 	}
 }
 
