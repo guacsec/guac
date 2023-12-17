@@ -62,7 +62,7 @@ type githubOptions struct {
 }
 
 var githubCmd = &cobra.Command{
-	Use:   "github <subject> is in the form of <release_url> for release mode or <owner>/<repo> for workflow mode",
+	Use:   "github if <github-mode> is \"release\" then [flags] release_url1 release_url2..., otherwise if <github-mode> is \"workflow\" then [flags] <owner>/<repo>",
 	Short: "takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph utilizing Nats pubsub and blob store",
 	Long: `
 Takes github repos and tags to download metadata documents stored in Github releases to add to GUAC graph.
