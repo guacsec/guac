@@ -280,7 +280,7 @@ require (
 	github.com/regclient/regclient v0.5.5
 	github.com/segmentio/kafka-go v0.4.46
 	github.com/segmentio/ksuid v1.0.4
-	github.com/sigstore/sigstore v1.7.5
+	github.com/sigstore/sigstore v1.7.6
 	github.com/spdx/tools-golang v0.5.3
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4
