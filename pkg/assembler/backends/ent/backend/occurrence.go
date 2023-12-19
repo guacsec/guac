@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
@@ -63,19 +64,28 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 }
 
 func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
-	var models []string
+	models := make([]string, len(occurrences))
+	eg, ctx := errgroup.WithContext(ctx)
 	for i := range occurrences {
+		index := i
 		var subject model.PackageOrSourceInput
 		if len(subjects.Packages) > 0 {
-			subject = model.PackageOrSourceInput{Package: subjects.Packages[i]}
+			subject = model.PackageOrSourceInput{Package: subjects.Packages[index]}
 		} else {
-			subject = model.PackageOrSourceInput{Source: subjects.Sources[i]}
+			subject = model.PackageOrSourceInput{Source: subjects.Sources[index]}
 		}
-		modelOccurrence, err := b.IngestOccurrence(ctx, subject, *artifacts[i], *occurrences[i])
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestOccurrences failed with element #%v with err: %v", i, err)
-		}
-		models = append(models, modelOccurrence)
+		art := artifacts[index]
+		occ := occurrences[index]
+		concurrently(eg, func() error {
+			modelOccurrence, err := b.IngestOccurrence(ctx, subject, *art, *occ)
+			if err == nil {
+				models[index] = modelOccurrence
+			}
+			return err
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return models, nil
 }
