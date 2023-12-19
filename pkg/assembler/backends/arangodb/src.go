@@ -491,10 +491,14 @@ func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, err
 			typeString := doc.SrcType + "," + doc.TypeID
 
 			srcName := &model.SourceName{
-				ID:     doc.NameID,
-				Name:   nameString,
-				Tag:    &tagString,
-				Commit: &commitString,
+				ID:   doc.NameID,
+				Name: nameString,
+			}
+			if tagString != "" {
+				srcName.Tag = &tagString
+			}
+			if commitString != "" {
+				srcName.Commit = &commitString
 			}
 			if srcNamespaces, ok := srcTypes[typeString]; ok {
 				srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
@@ -530,10 +534,14 @@ func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, err
 
 func generateModelSource(srcTypeID, srcType, namespaceID, namespaceStr, nameID, nameStr string, commitValue, tagValue string) *model.Source {
 	name := &model.SourceName{
-		ID:     nameID,
-		Name:   nameStr,
-		Tag:    &tagValue,
-		Commit: &commitValue,
+		ID:   nameID,
+		Name: nameStr,
+	}
+	if tagValue != "" {
+		name.Tag = &tagValue
+	}
+	if commitValue != "" {
+		name.Commit = &commitValue
 	}
 
 	namespace := &model.SourceNamespace{
