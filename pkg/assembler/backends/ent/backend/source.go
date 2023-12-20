@@ -355,12 +355,17 @@ func toModelSource(s *ent.SourceType) *model.Source {
 				ID:        nodeID(n.ID),
 				Namespace: n.Namespace,
 				Names: collect(n.Edges.Names, func(n *ent.SourceName) *model.SourceName {
-					return &model.SourceName{
-						ID:     nodeID(n.ID),
-						Name:   n.Name,
-						Tag:    &n.Tag,
-						Commit: &n.Commit,
+					sn := &model.SourceName{
+						ID:   nodeID(n.ID),
+						Name: n.Name,
 					}
+					if n.Tag != "" {
+						sn.Tag = &n.Tag
+					}
+					if n.Commit != "" {
+						sn.Commit = &n.Commit
+					}
+					return sn
 				}),
 			}
 		}),

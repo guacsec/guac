@@ -93,9 +93,7 @@ var S1out = &model.Source{
 	Namespaces: []*model.SourceNamespace{{
 		Namespace: "github.com/jeff",
 		Names: []*model.SourceName{{
-			Name:   "myrepo",
-			Tag:    ptrfrom.String(""),
-			Commit: ptrfrom.String(""),
+			Name: "myrepo",
 		}},
 	}},
 }
@@ -110,9 +108,7 @@ var S2out = &model.Source{
 	Namespaces: []*model.SourceNamespace{{
 		Namespace: "github.com/bob",
 		Names: []*model.SourceName{{
-			Name:   "bobsrepo",
-			Tag:    ptrfrom.String(""),
-			Commit: ptrfrom.String(""),
+			Name: "bobsrepo",
 		}},
 	}},
 }
@@ -128,9 +124,8 @@ var S3out = &model.Source{
 	Namespaces: []*model.SourceNamespace{{
 		Namespace: "github.com/jeff",
 		Names: []*model.SourceName{{
-			Name:   "myrepo",
-			Tag:    ptrfrom.String("v1.0"),
-			Commit: ptrfrom.String(""),
+			Name: "myrepo",
+			Tag:  ptrfrom.String("v1.0"),
 		}},
 	}},
 }
@@ -147,7 +142,6 @@ var S4out = &model.Source{
 		Namespace: "github.com/bob",
 		Names: []*model.SourceName{{
 			Name:   "bobsrepo",
-			Tag:    ptrfrom.String(""),
 			Commit: ptrfrom.String("5e7c41f"),
 		}},
 	}},
