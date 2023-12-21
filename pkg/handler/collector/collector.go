@@ -43,6 +43,10 @@ type Collector interface {
 	Type() string
 }
 
+type DeregisterCollector interface {
+	DeregisterCollector(collectorType string) error
+}
+
 // Emitter processes a document
 type Emitter func(*processor.Document) error
 
@@ -57,6 +61,11 @@ var (
 
 func RegisterDocumentCollector(c Collector, collectorType string) error {
 	if _, ok := documentCollectors[collectorType]; ok {
+		// check if the collector is of the type DeregisterCollector
+		if deregister, ok := c.(DeregisterCollector); ok {
+			return deregister.DeregisterCollector(collectorType)
+		}
+		documentCollectors[collectorType] = c
 		return fmt.Errorf("%w: %s", ErrCollectorOverwrite, collectorType)
 	}
 	documentCollectors[collectorType] = c

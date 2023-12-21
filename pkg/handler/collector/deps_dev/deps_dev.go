@@ -773,6 +773,16 @@ func registerMetrics(ctx context.Context, m metrics.MetricCollector) error {
 	return nil
 }
 
+// unregisterMetrics unregisters the metrics for the collector
+func unregisterMetrics(ctx context.Context, m metrics.MetricCollector, name string) error {
+	return m.UnRegisterCounter(ctx, name)
+}
+
+// DeregisterCollector deregisters the collector
+func (d *depsCollector) DeregisterCollector(collectorType string) error {
+	return unregisterMetrics(context.Background(), d.Metrics, collectorType)
+}
+
 // registerMetricsOnce registers the Metrics for the collector once.
 func registerMetricsOnce(ctx context.Context, metricsCollector metrics.MetricCollector) error {
 	var err error

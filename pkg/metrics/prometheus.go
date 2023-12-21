@@ -191,6 +191,42 @@ func (p *prometheusCollector) ObserveHistogram(_ context.Context, name string, v
 	return nil
 }
 
+// UnRegisterCounter unregisters the counter metric with the given name and labels.
+func (p *prometheusCollector) UnRegisterCounter(_ context.Context, name string, labels ...string) error {
+	name = fmt.Sprintf("%s_%s", p.name, name)
+	if _, ok := p.counters[name]; !ok {
+		// If the counter is not found, return nil. Probably the counter was already unregistered.
+		return nil
+	}
+	prometheus.Unregister(p.counters[name])
+	delete(p.counters, name)
+	return nil
+}
+
+// UnRegisterHistogram unregisters the histogram metric with the given name and labels.
+func (p *prometheusCollector) UnRegisterHistogram(_ context.Context, name string, labels ...string) error {
+	name = fmt.Sprintf("%s_%s", p.name, name)
+	if _, ok := p.histograms[name]; !ok {
+		// If the histogram is not found, return nil. Probably the histogram was already unregistered.
+		return nil
+	}
+	prometheus.Unregister(p.histograms[name])
+	delete(p.histograms, name)
+	return nil
+}
+
+// UnRegisterGauge unregisters the gauge metric with the given name and labels.
+func (p *prometheusCollector) UnRegisterGauge(_ context.Context, name string, labels ...string) error {
+	name = fmt.Sprintf("%s_%s", p.name, name)
+	if _, ok := p.gauges[name]; !ok {
+		// If the gauge is not found, return nil. Probably the gauge was already unregistered.
+		return nil
+	}
+	prometheus.Unregister(p.gauges[name])
+	delete(p.gauges, name)
+	return nil
+}
+
 // FromContext returns the MetricCollector from the context.
 func FromContext(ctx context.Context, name string) MetricCollector {
 	c := metrics(collectorKey)
