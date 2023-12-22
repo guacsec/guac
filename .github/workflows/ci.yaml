@@ -34,31 +34,6 @@ jobs:
   test-integration:
     runs-on: ubuntu-latest
     name: CI for integration tests
-    services:
-      neo4j:
-        image: neo4j:latest # TODO(mihaimaruseac): Pin to hash
-        env:
-          NEO4J_AUTH: none
-        ports:
-          - 7687:7687
-      postgres:
-        image: postgres:16.0@sha256:f007ec48ff3ef9b75dc473d915a3ea3713167ba015340316f6bcabfa86a7b4a6
-        env:
-          POSTGRES_USER: guac
-          POSTGRES_PASSWORD: guac
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      arango:
-        image: arangodb:latest@sha256:085b45e8c56d5d4114e409482694d40fc8d1678c6b5d98d774bab31193034d6a
-        env:
-          ARANGO_ROOT_PASSWORD: test123
-        ports:
-          - 8529:8529
     steps:
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
@@ -72,6 +47,14 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Setup the project
         run: go mod download
+      - name: Run backends
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd internal/testing/backend
+          docker-compose up -d
+          sleep 10
+          echo "backends started"
       - name: Run integration tests
         env:
             ENT_TEST_DATABASE_URL: 'postgresql://guac:guac@localhost/guac?sslmode=disable'

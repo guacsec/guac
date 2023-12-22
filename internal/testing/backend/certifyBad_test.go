@@ -15,13 +15,13 @@
 
 //go:build integration
 
-package arangodb
+package backend_test
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -29,21 +29,156 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func TestHasMetadata(t *testing.T) {
+// TODO move src cmp to src_test.go
+
+func cmpSrcName(a, b *model.SourceName) int {
+	if d := strings.Compare(a.Name, b.Name); d != 0 {
+		return d
+	}
+	if a.Tag != nil && b.Tag == nil {
+		return 1
+	}
+	if b.Tag != nil && a.Tag == nil {
+		return -1
+	}
+	if a.Tag != nil && b.Tag != nil {
+		return strings.Compare(*a.Tag, *b.Tag)
+	}
+	if a.Commit != nil && b.Commit == nil {
+		return 1
+	}
+	if b.Commit != nil && a.Commit == nil {
+		return -1
+	}
+	if a.Commit != nil && b.Commit != nil {
+		return strings.Compare(*a.Commit, *b.Commit)
+	}
+	// names were equal, and neither has tag nor commit
+	return 0
+}
+
+func cmpSrcNS(a, b *model.SourceNamespace) int {
+	if d := strings.Compare(a.Namespace, b.Namespace); d != 0 {
+		return d
+	}
+	slices.SortFunc(a.Names, cmpSrcName)
+	slices.SortFunc(b.Names, cmpSrcName)
+	return slices.CompareFunc(a.Names, b.Names, cmpSrcName)
+}
+
+func cmpSrc(a, b *model.Source) int {
+	if d := strings.Compare(a.Type, b.Type); d != 0 {
+		return d
+	}
+	slices.SortFunc(a.Namespaces, cmpSrcNS)
+	slices.SortFunc(b.Namespaces, cmpSrcNS)
+	return slices.CompareFunc(a.Namespaces, b.Namespaces, cmpSrcNS)
+}
+
+// TODO move pkg cmp to pkg_test.go
+
+func cmpPkgQual(a, b *model.PackageQualifier) int {
+	if d := strings.Compare(a.Key, b.Key); d != 0 {
+		return d
+	}
+	return strings.Compare(a.Value, b.Value)
+}
+
+func cmpPkgVer(a, b *model.PackageVersion) int {
+	if d := strings.Compare(a.Version, b.Version); d != 0 {
+		return d
+	}
+	if d := strings.Compare(a.Subpath, b.Subpath); d != 0 {
+		return d
+	}
+	slices.SortFunc(a.Qualifiers, cmpPkgQual)
+	slices.SortFunc(b.Qualifiers, cmpPkgQual)
+	return slices.CompareFunc(a.Qualifiers, b.Qualifiers, cmpPkgQual)
+}
+
+func cmpPkgName(a, b *model.PackageName) int {
+	if d := strings.Compare(a.Name, b.Name); d != 0 {
+		return d
+	}
+	slices.SortFunc(a.Versions, cmpPkgVer)
+	slices.SortFunc(b.Versions, cmpPkgVer)
+	return slices.CompareFunc(a.Versions, b.Versions, cmpPkgVer)
+}
+
+func cmpPkgNS(a, b *model.PackageNamespace) int {
+	if d := strings.Compare(a.Namespace, b.Namespace); d != 0 {
+		return d
+	}
+	slices.SortFunc(a.Names, cmpPkgName)
+	slices.SortFunc(b.Names, cmpPkgName)
+	return slices.CompareFunc(a.Names, b.Names, cmpPkgName)
+}
+
+func cmpPkg(a, b *model.Package) int {
+	if d := strings.Compare(a.Type, b.Type); d != 0 {
+		return d
+	}
+	slices.SortFunc(a.Namespaces, cmpPkgNS)
+	slices.SortFunc(b.Namespaces, cmpPkgNS)
+	return slices.CompareFunc(a.Namespaces, b.Namespaces, cmpPkgNS)
+}
+
+// TODO move artifact cmp to artifact_test.go
+
+func cmpArt(a, b *model.Artifact) int {
+	if d := strings.Compare(a.Algorithm, b.Algorithm); d != 0 {
+		return d
+	}
+	return strings.Compare(a.Digest, b.Digest)
+}
+
+func cmpCB(a, b *model.CertifyBad) int {
+	if d := strings.Compare(a.Justification, b.Justification); d != 0 {
+		return d
+	}
+	if d := strings.Compare(a.Origin, b.Origin); d != 0 {
+		return d
+	}
+	if d := strings.Compare(a.Collector, b.Collector); d != 0 {
+		return d
+	}
+	if d := a.KnownSince.Compare(b.KnownSince); d != 0 {
+		return d
+	}
+	ap, oka := a.Subject.(*model.Package)
+	bp, okb := b.Subject.(*model.Package)
+	if oka && !okb {
+		return 1
+	}
+	if okb && !oka {
+		return -1
+	}
+	if oka && okb {
+		return cmpPkg(ap, bp)
+	}
+	as, oka := a.Subject.(*model.Source)
+	bs, okb := b.Subject.(*model.Source)
+	if oka && !okb {
+		return 1
+	}
+	if okb && !oka {
+		return -1
+	}
+	if oka && okb {
+		return cmpSrc(as, bs)
+	}
+	aa := a.Subject.(*model.Artifact)
+	ba := b.Subject.(*model.Artifact)
+	return cmpArt(aa, ba)
+}
+
+func TestCertifyBad(t *testing.T) {
 	ctx := context.Background()
-	arangoArgs := getArangoConfig()
-	err := DeleteDatabase(ctx, arangoArgs)
-	if err != nil {
-		t.Fatalf("error deleting arango database: %v", err)
-	}
-	b, err := getBackend(ctx, arangoArgs)
-	if err != nil {
-		t.Fatalf("error creating arango backend: %v", err)
-	}
+	b := setupTest(t)
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInput
 		Match *model.MatchFlags
-		HM    *model.HasMetadataInputSpec
+		CB    *model.CertifyBadInputSpec
 	}
 	tests := []struct {
 		Name          string
@@ -51,12 +186,12 @@ func TestHasMetadata(t *testing.T) {
 		InSrc         []*model.SourceInputSpec
 		InArt         []*model.ArtifactInputSpec
 		Calls         []call
-		Query         *model.HasMetadataSpec
+		Query         *model.CertifyBadSpec
 		QueryID       bool
 		QueryPkgID    bool
 		QuerySourceID bool
 		QueryArtID    bool
-		ExpHM         []*model.HasMetadata
+		ExpCB         []*model.CertifyBad
 		ExpIngestErr  bool
 		ExpQueryErr   bool
 	}{
@@ -71,91 +206,20 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
-						Key:           "key1",
-						Value:         "value1",
-						Timestamp:     time.Unix(1e9, 0),
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
-				Key:           ptrfrom.String("key1"),
-				Value:         ptrfrom.String("value1"),
-				Since:         ptrfrom.Time(time.Unix(1e9, 0)),
+			Query: &model.CertifyBadSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P1out,
-					Key:           "key1",
-					Value:         "value1",
-					Timestamp:     time.Unix(1e9, 0),
 					Justification: "test justification",
 				},
 			},
-		},
-		{
-			Name:  "HappyPath check time since",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Key:           "key1",
-						Value:         "value1",
-						Timestamp:     time.Unix(1e9, 0),
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.HasMetadataSpec{
-				Key:           ptrfrom.String("key1"),
-				Value:         ptrfrom.String("value1"),
-				Since:         ptrfrom.Time(time.Unix(1e8, 0)),
-				Justification: ptrfrom.String("test justification"),
-			},
-			ExpHM: []*model.HasMetadata{
-				{
-					Subject:       testdata.P1out,
-					Key:           "key1",
-					Value:         "value1",
-					Timestamp:     time.Unix(1e9, 0),
-					Justification: "test justification",
-				},
-			},
-		},
-		{
-			Name:  "UnhappyPath check time since",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Key:           "key1",
-						Value:         "value1",
-						Timestamp:     time.Unix(1e9, 0),
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.HasMetadataSpec{
-				Key:           ptrfrom.String("key1"),
-				Value:         ptrfrom.String("value1"),
-				Since:         ptrfrom.Time(time.Unix(1e10, 0)),
-				Justification: ptrfrom.String("test justification"),
-			},
-			ExpHM: nil,
 		},
 		{
 			Name:  "HappyPath All Version",
@@ -168,20 +232,17 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P1out,
-					Key:           "key1",
-					Value:         "value1",
-					Timestamp:     time.Unix(1e9, 0),
 					Justification: "test justification",
 				},
 				{
@@ -192,139 +253,41 @@ func TestHasMetadata(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same twice",
-			InPkg: []*model.PkgInputSpec{testdata.P3},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P3,
+						Package: testdata.P1,
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P3,
+						Package: testdata.P1,
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
-				Subject: &model.PackageSourceOrArtifactSpec{
-					Package: &model.PkgSpec{
-						Version: ptrfrom.String("2.11.1"),
-						Subpath: ptrfrom.String("saved_model_cli.py"),
-					},
-				},
+			Query: &model.CertifyBadSpec{
+				Justification: ptrfrom.String("test justification"),
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
-					Subject:       testdata.P3out,
+					Subject:       testdata.P1out,
 					Justification: "test justification",
 				},
 				{
 					Subject:       testdata.P1outName,
-					Justification: "test justification",
-				},
-			},
-		},
-		{
-			Name:  "Ingest two different keys - query key",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Key:           "key1",
-						Value:         "value1",
-						Justification: "test justification",
-					},
-				},
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Key:           "key2",
-						Value:         "value2",
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.HasMetadataSpec{
-				Key: ptrfrom.String("key2"),
-			},
-			ExpHM: []*model.HasMetadata{
-				{
-					Subject:       testdata.P1out,
-					Key:           "key2",
-					Value:         "value2",
-					Justification: "test justification",
-				},
-			},
-		},
-		{
-			Name:  "Ingest two different keys - query value",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Key:           "key1",
-						Value:         "value1",
-						Justification: "test justification",
-					},
-				},
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
-					},
-					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Key:           "key2",
-						Value:         "value2",
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.HasMetadataSpec{
-				Value: ptrfrom.String("value1"),
-			},
-			ExpHM: []*model.HasMetadata{
-				{
-					Subject:       testdata.P1out,
-					Key:           "key1",
-					Value:         "value1",
-					Timestamp:     time.Unix(1e9, 0),
-					Justification: "test justification",
-				},
-				{
-					Subject:       testdata.P1out,
-					Key:           "key1",
-					Value:         "value1",
 					Justification: "test justification",
 				},
 			},
@@ -340,7 +303,7 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification one",
 					},
 				},
@@ -351,15 +314,15 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification two",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Justification: ptrfrom.String("test justification one"),
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification one",
@@ -367,9 +330,8 @@ func TestHasMetadata(t *testing.T) {
 			},
 		},
 		{
-			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P4},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Name:  "Query on KnownSince",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
@@ -378,7 +340,48 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
+						Justification: "test justification one",
+						KnownSince:    curTime,
+					},
+				},
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P1,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						Justification: "test justification two",
+						KnownSince:    timeAfterOneSecond,
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				KnownSince: ptrfrom.Time(timeAfterOneSecond),
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:       testdata.P1out,
+					Justification: "test justification two",
+					KnownSince:    timeAfterOneSecond,
+				},
+			},
+		},
+		{
+			Name:  "Query on Package",
+			InPkg: []*model.PkgInputSpec{testdata.P4},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: testdata.P4,
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeAllVersions,
+					},
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -389,7 +392,7 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -397,23 +400,28 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S1,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
 						Type:      ptrfrom.String("conan"),
 						Namespace: ptrfrom.String("openssl.org"),
 						Name:      ptrfrom.String("openssl"),
+						Version:   ptrfrom.String("3.0.3"),
 					},
 				},
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P4out,
+					Justification: "test justification",
+				},
+				{
+					Subject:       testdata.P4outName,
 					Justification: "test justification",
 				},
 			},
@@ -430,13 +438,13 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
 			QueryPkgID: true,
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P4out,
 					Justification: "test justification",
@@ -455,7 +463,7 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -463,7 +471,7 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S1,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -471,19 +479,19 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S2,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Source: &model.SourceSpec{
 						Name: ptrfrom.String("bobsrepo"),
 					},
 				},
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.S2out,
 					Justification: "test justification",
@@ -499,13 +507,13 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S2,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
 			QuerySourceID: true,
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.S2out,
 					Justification: "test justification",
@@ -521,7 +529,7 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A1,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -529,7 +537,7 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A2,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -537,19 +545,19 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S1,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Artifact: &model.ArtifactSpec{
 						Algorithm: ptrfrom.String("sha1"),
 					},
 				},
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
@@ -565,7 +573,7 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A1,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -573,13 +581,13 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A2,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
 			QueryArtID: true,
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
@@ -594,7 +602,7 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A1,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -602,19 +610,19 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A2,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Artifact: &model.ArtifactSpec{
 						Algorithm: ptrfrom.String("asdf"),
 					},
 				},
 			},
-			ExpHM: nil,
+			ExpCB: nil,
 		},
 		{
 			Name:  "Query multiple",
@@ -624,7 +632,7 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S1,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -632,18 +640,19 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Source: testdata.S2,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Source: &model.SourceSpec{
 						Type: ptrfrom.String("git"),
 					},
-				}},
-			ExpHM: []*model.HasMetadata{
+				},
+			},
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.S2out,
 					Justification: "test justification",
@@ -656,7 +665,7 @@ func TestHasMetadata(t *testing.T) {
 		},
 		{
 			Name:  "Query Packages",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P4},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
@@ -665,7 +674,7 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -676,37 +685,37 @@ func TestHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P4,
+						Package: testdata.P2,
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
-						Name:    ptrfrom.String("openssl"),
-						Version: ptrfrom.String("3.0.3"),
+						Type:    ptrfrom.String("pypi"),
+						Version: ptrfrom.String("2.11.1"),
 					},
 				},
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
-					Subject:       testdata.P4out,
+					Subject:       testdata.P2out,
 					Justification: "test justification",
 				},
 				{
-					Subject:       testdata.P4outName,
+					Subject:       testdata.P1outName,
 					Justification: "test justification",
 				},
 			},
@@ -719,7 +728,7 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A1,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
@@ -727,41 +736,20 @@ func TestHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInput{
 						Artifact: testdata.A2,
 					},
-					HM: &model.HasMetadataInputSpec{
+					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
 					},
 				},
 			},
 			QueryID: true,
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
 				},
 			},
 		},
-		{
-			Name:  "Query bad ID",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.HasMetadataSpec{
-				ID: ptrfrom.String("asdf"),
-			},
-			ExpQueryErr: true,
-		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
@@ -769,7 +757,7 @@ func TestHasMetadata(t *testing.T) {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					if test.QueryPkgID {
-						test.Query = &model.HasMetadataSpec{
+						test.Query = &model.CertifyBadSpec{
 							Subject: &model.PackageSourceOrArtifactSpec{
 								Package: &model.PkgSpec{
 									ID: ptrfrom.String(pkgIDs.PackageVersionID),
@@ -784,7 +772,7 @@ func TestHasMetadata(t *testing.T) {
 					t.Fatalf("Could not ingest source: %v", err)
 				} else {
 					if test.QuerySourceID {
-						test.Query = &model.HasMetadataSpec{
+						test.Query = &model.CertifyBadSpec{
 							Subject: &model.PackageSourceOrArtifactSpec{
 								Source: &model.SourceSpec{
 									ID: ptrfrom.String(srcIDs.SourceNameID),
@@ -799,7 +787,7 @@ func TestHasMetadata(t *testing.T) {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					if test.QueryArtID {
-						test.Query = &model.HasMetadataSpec{
+						test.Query = &model.CertifyBadSpec{
 							Subject: &model.PackageSourceOrArtifactSpec{
 								Artifact: &model.ArtifactSpec{
 									ID: ptrfrom.String(artID),
@@ -810,7 +798,7 @@ func TestHasMetadata(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				hmID, err := b.IngestHasMetadata(ctx, o.Sub, o.Match, *o.HM)
+				cbID, err := b.IngestCertifyBad(ctx, o.Sub, o.Match, *o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -818,40 +806,34 @@ func TestHasMetadata(t *testing.T) {
 					return
 				}
 				if test.QueryID {
-					test.Query = &model.HasMetadataSpec{
-						ID: ptrfrom.String(hmID),
+					test.Query = &model.CertifyBadSpec{
+						ID: ptrfrom.String(cbID),
 					}
 				}
 			}
-			got, err := b.HasMetadata(ctx, test.Query)
+			got, err := b.CertifyBad(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHM, got, ignoreID); diff != "" {
+			slices.SortFunc(got, cmpCB)
+			slices.SortFunc(test.ExpCB, cmpCB)
+			if diff := cmp.Diff(test.ExpCB, got, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
 	}
 }
 
-func TestIngestBulkHasMetadata(t *testing.T) {
+func TestIngestCertifyBads(t *testing.T) {
 	ctx := context.Background()
-	arangoArgs := getArangoConfig()
-	err := DeleteDatabase(ctx, arangoArgs)
-	if err != nil {
-		t.Fatalf("error deleting arango database: %v", err)
-	}
-	b, err := getBackend(ctx, arangoArgs)
-	if err != nil {
-		t.Fatalf("error creating arango backend: %v", err)
-	}
+	b := setupTest(t)
 	type call struct {
 		Sub   model.PackageSourceOrArtifactInputs
 		Match *model.MatchFlags
-		HM    []*model.HasMetadataInputSpec
+		CB    []*model.CertifyBadInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -859,8 +841,8 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 		InSrc        []*model.SourceInputSpec
 		InArt        []*model.ArtifactInputSpec
 		Calls        []call
-		Query        *model.HasMetadataSpec
-		ExpHM        []*model.HasMetadata
+		Query        *model.CertifyBadSpec
+		ExpCB        []*model.CertifyBad
 		ExpIngestErr bool
 		ExpQueryErr  bool
 	}{
@@ -875,17 +857,17 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: []*model.HasMetadataInputSpec{
+					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
 						},
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -903,17 +885,17 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
-					HM: []*model.HasMetadataInputSpec{
+					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
 						},
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Justification: ptrfrom.String("test justification"),
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.P1out,
 					Justification: "test justification",
@@ -926,16 +908,16 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same twice",
-			InPkg: []*model.PkgInputSpec{testdata.P3},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P3, testdata.P3},
+						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: []*model.HasMetadataInputSpec{
+					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -945,17 +927,12 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
-				Subject: &model.PackageSourceOrArtifactSpec{
-					Package: &model.PkgSpec{
-						Version: ptrfrom.String("2.11.1"),
-						Subpath: ptrfrom.String("saved_model_cli.py"),
-					},
-				},
+			Query: &model.CertifyBadSpec{
+				Justification: ptrfrom.String("test justification"),
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
-					Subject:       testdata.P3out,
+					Subject:       testdata.P1out,
 					Justification: "test justification",
 				},
 				{
@@ -966,17 +943,17 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P4},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P4},
+						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: []*model.HasMetadataInputSpec{
+					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -989,25 +966,27 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInputs{
 						Sources: []*model.SourceInputSpec{testdata.S1},
 					},
-					HM: []*model.HasMetadataInputSpec{
+					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
 						},
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Package: &model.PkgSpec{
-						Type:      ptrfrom.String("conan"),
-						Namespace: ptrfrom.String("openssl.org"),
-						Name:      ptrfrom.String("openssl"),
+						Version: ptrfrom.String("2.11.1"),
 					},
 				},
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
-					Subject:       testdata.P4out,
+					Subject:       testdata.P2out,
+					Justification: "test justification",
+				},
+				{
+					Subject:       testdata.P1outName,
 					Justification: "test justification",
 				},
 			},
@@ -1024,7 +1003,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					HM: []*model.HasMetadataInputSpec{
+					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -1034,7 +1013,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInputs{
 						Sources: []*model.SourceInputSpec{testdata.S2, testdata.S2},
 					},
-					HM: []*model.HasMetadataInputSpec{
+					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -1044,14 +1023,14 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Source: &model.SourceSpec{
 						Name: ptrfrom.String("bobsrepo"),
 					},
 				},
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.S2out,
 					Justification: "test justification",
@@ -1067,7 +1046,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInputs{
 						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 					},
-					HM: []*model.HasMetadataInputSpec{
+					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
 						},
@@ -1080,21 +1059,21 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					Sub: model.PackageSourceOrArtifactInputs{
 						Sources: []*model.SourceInputSpec{testdata.S1},
 					},
-					HM: []*model.HasMetadataInputSpec{
+					CB: []*model.CertifyBadInputSpec{
 						{
 							Justification: "test justification",
 						},
 					},
 				},
 			},
-			Query: &model.HasMetadataSpec{
+			Query: &model.CertifyBadSpec{
 				Subject: &model.PackageSourceOrArtifactSpec{
 					Artifact: &model.ArtifactSpec{
 						Algorithm: ptrfrom.String("sha1"),
 					},
 				},
 			},
-			ExpHM: []*model.HasMetadata{
+			ExpCB: []*model.CertifyBad{
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
@@ -1102,9 +1081,6 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			},
 		},
 	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
@@ -1123,7 +1099,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				_, err := b.IngestBulkHasMetadata(ctx, o.Sub, o.Match, o.HM)
+				_, err := b.IngestCertifyBads(ctx, o.Sub, o.Match, o.CB)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1131,265 +1107,18 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.HasMetadata(ctx, test.Query)
+			got, err := b.CertifyBad(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHM, got, ignoreID); diff != "" {
+			slices.SortFunc(got, cmpCB)
+			slices.SortFunc(test.ExpCB, cmpCB)
+			if diff := cmp.Diff(test.ExpCB, got, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
-		})
-	}
-}
-
-func Test_buildHasMetadataByID(t *testing.T) {
-	ctx := context.Background()
-	arangoArgs := getArangoConfig()
-	err := DeleteDatabase(ctx, arangoArgs)
-	if err != nil {
-		t.Fatalf("error deleting arango database: %v", err)
-	}
-	b, err := getBackend(ctx, arangoArgs)
-	if err != nil {
-		t.Fatalf("error creating arango backend: %v", err)
-	}
-	type call struct {
-		Sub   model.PackageSourceOrArtifactInput
-		Match *model.MatchFlags
-		HM    *model.HasMetadataInputSpec
-	}
-	tests := []struct {
-		Name         string
-		InPkg        []*model.PkgInputSpec
-		InSrc        []*model.SourceInputSpec
-		InArt        []*model.ArtifactInputSpec
-		Calls        []call
-		Query        *model.HasMetadataSpec
-		ExpHM        *model.HasMetadata
-		ExpIngestErr bool
-		ExpQueryErr  bool
-	}{
-		{
-			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P4},
-			InSrc: []*model.SourceInputSpec{},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P4,
-					},
-					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.HasMetadataSpec{
-				Subject: &model.PackageSourceOrArtifactSpec{
-					Package: &model.PkgSpec{
-						Type:      ptrfrom.String("conan"),
-						Namespace: ptrfrom.String("openssl.org"),
-						Name:      ptrfrom.String("openssl"),
-					},
-				},
-			},
-			ExpHM: &model.HasMetadata{
-				Subject:       testdata.P4out,
-				Justification: "test justification",
-			},
-		},
-		{
-			Name:  "Query on Package without filter",
-			InPkg: []*model.PkgInputSpec{testdata.P4},
-			InSrc: []*model.SourceInputSpec{},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P4,
-					},
-					Match: &model.MatchFlags{
-						Pkg: model.PkgMatchTypeSpecificVersion,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpHM: &model.HasMetadata{
-				Subject:       testdata.P4out,
-				Justification: "test justification",
-			},
-		},
-		{
-			Name:  "Query on Source",
-			InSrc: []*model.SourceInputSpec{testdata.S2},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S2,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.HasMetadataSpec{
-				Subject: &model.PackageSourceOrArtifactSpec{
-					Source: &model.SourceSpec{
-						Name: ptrfrom.String("bobsrepo"),
-					},
-				},
-			},
-			ExpHM: &model.HasMetadata{
-				Subject:       testdata.S2out,
-				Justification: "test justification",
-			},
-		},
-		{
-			Name:  "Query on Source without filter",
-			InSrc: []*model.SourceInputSpec{testdata.S2},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S2,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpHM: &model.HasMetadata{
-
-				Subject:       testdata.S2out,
-				Justification: "test justification",
-			},
-		},
-		{
-			Name:  "Query on Artifact",
-			InArt: []*model.ArtifactInputSpec{testdata.A2},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A2,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.HasMetadataSpec{
-				Subject: &model.PackageSourceOrArtifactSpec{
-					Artifact: &model.ArtifactSpec{
-						Algorithm: ptrfrom.String("sha1"),
-					},
-				},
-			},
-			ExpHM: &model.HasMetadata{
-				Subject:       testdata.A2out,
-				Justification: "test justification",
-			},
-		},
-		{
-			Name:  "Query on Artifact without filter",
-			InSrc: []*model.SourceInputSpec{},
-			InArt: []*model.ArtifactInputSpec{testdata.A2},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A2,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpHM: &model.HasMetadata{
-				Subject:       testdata.A2out,
-				Justification: "test justification",
-			},
-		},
-		{
-			Name:  "Query ID",
-			InArt: []*model.ArtifactInputSpec{testdata.A2},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A2,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			ExpHM: &model.HasMetadata{
-				Subject:       testdata.A2out,
-				Justification: "test justification",
-			},
-		},
-		{
-			Name:  "Query bad ID",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
-			Calls: []call{
-				{
-					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
-					},
-					HM: &model.HasMetadataInputSpec{
-						Justification: "test justification",
-					},
-				},
-			},
-			Query: &model.HasMetadataSpec{
-				ID: ptrfrom.String("asdf"),
-			},
-			ExpQueryErr: true,
-		},
-	}
-	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
-		return strings.Compare(".ID", p[len(p)-1].String()) == 0
-	}, cmp.Ignore())
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
-					t.Fatalf("Could not ingest package: %v", err)
-				}
-			}
-			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
-					t.Fatalf("Could not ingest source: %v", err)
-				}
-			}
-			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
-					t.Fatalf("Could not ingest artifact: %v", err)
-				}
-			}
-			for _, o := range test.Calls {
-				hsID, err := b.IngestHasMetadata(ctx, o.Sub, o.Match, *o.HM)
-				if (err != nil) != test.ExpIngestErr {
-					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
-				}
-				if err != nil {
-					return
-				}
-				got, err := b.(*arangoClient).buildHasMetadataByID(ctx, hsID, test.Query)
-				if (err != nil) != test.ExpQueryErr {
-					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
-				}
-				if err != nil {
-					return
-				}
-				if diff := cmp.Diff(test.ExpHM, got, ignoreID); diff != "" {
-					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
-				}
-			}
-
 		})
 	}
 }

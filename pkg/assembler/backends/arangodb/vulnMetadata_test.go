@@ -42,7 +42,7 @@ var cvss2ScoreType model.VulnerabilityScoreType = model.VulnerabilityScoreTypeCV
 func TestIngestVulnMetadata(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -1041,7 +1041,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 func TestIngestVulnMetadatas(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -1337,7 +1337,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 func Test_buildVulnerabilityMetadataByID(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}

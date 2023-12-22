@@ -332,7 +332,7 @@ func arangoDBConnect(address, user, password string) (driver.Client, error) {
 	return client, nil
 }
 
-func deleteDatabase(ctx context.Context, args backends.BackendArgs) error {
+func DeleteDatabase(ctx context.Context, args backends.BackendArgs) error {
 	config, ok := args.(*ArangoConfig)
 	if !ok {
 		return fmt.Errorf("failed to assert arango config from backend args")

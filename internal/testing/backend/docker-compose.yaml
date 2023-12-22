@@ -1,0 +1,84 @@
+version: "3.8"
+networks:
+  frontend:
+    driver: bridge
+volumes:
+  pd_guac_data:
+  tikv_guac_data:
+  redis_guac_data:
+  arangodb_data_container:
+  arangodb_apps_data_container:
+  postgres_data:
+services:
+  arangodb:
+    networks: [frontend]
+    image: docker.io/library/arangodb:latest
+    environment:
+      ARANGO_ROOT_PASSWORD: test123
+    ports:
+      - "8529:8529"
+    volumes:
+      - arangodb_data_container:/var/lib/arangodb3
+      - arangodb_apps_data_container:/var/lib/arangodb3-apps
+  postgres:
+    image: docker.io/library/postgres:16
+    environment:
+      POSTGRES_USER: guac
+      POSTGRES_PASSWORD: guac
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks: [frontend]
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  redis:
+    networks: [frontend]
+    image: cgr.dev/chainguard/redis
+    ports:
+    - "6379:6379"
+    restart: on-failure
+    volumes:
+    - redis_guac_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 1s
+  pd:
+    networks: [frontend]
+    image: docker.io/pingcap/pd:latest
+    ports:
+      - "2379:2379"
+    volumes:
+      - pd_guac_data:/data
+    command:
+      - --name=pd
+      - --client-urls=http://0.0.0.0:2379
+      - --peer-urls=http://0.0.0.0:2380
+      - --advertise-client-urls=http://127.0.0.1:2379,http://pd:2379
+      - --advertise-peer-urls=http://pd:2380
+      - --initial-cluster=pd=http://pd:2380
+      - --data-dir=/data
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "127.0.0.1:2379/pd/api/v1/stores"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 1s
+  tikv:
+    networks: [frontend]
+    image: docker.io/pingcap/tikv:latest
+    volumes:
+      - tikv_guac_data:/data
+    ports:
+      - "20160:20160"
+    command:
+      - --addr=0.0.0.0:20160
+      - --advertise-addr=127.0.0.1:20160
+      - --data-dir=/data
+      - --pd=pd:2379
+    depends_on:
+      - "pd"
+    restart: on-failure
