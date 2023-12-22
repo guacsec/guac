@@ -47,5 +47,5 @@ run with normal unit tests.
   * Add any needed skips to the `skipMatrix` map, if the new backend does not
     support all the node types yet.
 
-* Before submitting, update this [docker-compse.yaml](docker-compose.yaml) to start any
+* Before submitting, update this [docker-compose.yaml](docker-compose.yaml) to start any
   external dependencies needed.
