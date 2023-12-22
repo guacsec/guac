@@ -608,7 +608,7 @@ func (s *Suite) TestLegals() {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpLegal, got, ignoreID); diff != "" {
+			if diff := cmp.Diff(test.ExpLegal, got, IngestPredicatesCmpOpts...); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

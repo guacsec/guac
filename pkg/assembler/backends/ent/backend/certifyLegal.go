@@ -39,6 +39,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
@@ -69,19 +70,29 @@ func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalS
 }
 
 func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
-	var modelCertifyLegals []string
+	modelCertifyLegals := make([]string, len(certifyLegals))
+	eg, ctx := errgroup.WithContext(ctx)
 	for i := range certifyLegals {
+		index := i
 		var subject model.PackageOrSourceInput
 		if len(subjects.Packages) > 0 {
-			subject = model.PackageOrSourceInput{Package: subjects.Packages[i]}
+			subject = model.PackageOrSourceInput{Package: subjects.Packages[index]}
 		} else {
-			subject = model.PackageOrSourceInput{Source: subjects.Sources[i]}
+			subject = model.PackageOrSourceInput{Source: subjects.Sources[index]}
 		}
-		modelCertifyLegal, err := b.IngestCertifyLegal(ctx, subject, declaredLicensesList[i], discoveredLicensesList[i], certifyLegals[i])
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestCertifyLegal failed with element #%v with err: %v", i, err)
-		}
-		modelCertifyLegals = append(modelCertifyLegals, modelCertifyLegal)
+		declaredLicense := declaredLicensesList[index]
+		discoveredLicense := discoveredLicensesList[index]
+		certifyLegal := certifyLegals[index]
+		concurrently(eg, func() error {
+			modelCertifyLegal, err := b.IngestCertifyLegal(ctx, subject, declaredLicense, discoveredLicense, certifyLegal)
+			if err == nil {
+				modelCertifyLegals[index] = modelCertifyLegal
+			}
+			return err
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return modelCertifyLegals, nil
 }

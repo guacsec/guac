@@ -24,7 +24,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/sync/errgroup"
 )
 
 type certificationInputSpec interface {
@@ -67,21 +67,29 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 }
 
 func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
-	var result []string
+	result := make([]string, len(certifyBads))
+	eg, ctx := errgroup.WithContext(ctx)
 	for i := range certifyBads {
+		index := i
 		var subject model.PackageSourceOrArtifactInput
 		if len(subjects.Packages) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
+			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[index]}
 		} else if len(subjects.Artifacts) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
+			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[index]}
 		} else {
-			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
+			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[index]}
 		}
-		cb, err := b.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestCertifyBads failed with err: %v", err)
-		}
-		result = append(result, cb)
+		certifyBad := *certifyBads[index]
+		concurrently(eg, func() error {
+			cb, err := b.IngestCertifyBad(ctx, subject, pkgMatchType, certifyBad)
+			if err == nil {
+				result[index] = cb
+			}
+			return err
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return result, nil
 }
@@ -100,21 +108,29 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 }
 
 func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
-	var result []string
+	result := make([]string, len(certifyGoods))
+	eg, ctx := errgroup.WithContext(ctx)
 	for i := range certifyGoods {
+		index := i
 		var subject model.PackageSourceOrArtifactInput
 		if len(subjects.Packages) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
+			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[index]}
 		} else if len(subjects.Artifacts) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
+			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[index]}
 		} else {
-			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
+			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[index]}
 		}
-		cg, err := b.IngestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i])
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestCertifyGoods failed with err: %v", err)
-		}
-		result = append(result, cg)
+		certifyGood := *certifyGoods[index]
+		concurrently(eg, func() error {
+			cg, err := b.IngestCertifyGood(ctx, subject, pkgMatchType, certifyGood)
+			if err == nil {
+				result[index] = cg
+			}
+			return err
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return result, nil
 }
