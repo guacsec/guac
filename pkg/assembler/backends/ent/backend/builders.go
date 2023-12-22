@@ -26,7 +26,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
-	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
@@ -71,13 +71,21 @@ func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.BuilderInpu
 }
 
 func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
-	var buildersID []string
-	for _, builder := range builders {
-		id, err := b.IngestBuilder(ctx, builder)
-		if err != nil {
-			return nil, gqlerror.Errorf("IngestBuilders failed with err: %v", err)
-		}
-		buildersID = append(buildersID, id)
+	buildersID := make([]string, len(builders))
+	eg, ctx := errgroup.WithContext(ctx)
+	for i := range builders {
+		index := i
+		bld := builders[index]
+		concurrently(eg, func() error {
+			id, err := b.IngestBuilder(ctx, bld)
+			if err == nil {
+				buildersID[index] = id
+			}
+			return err
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return buildersID, nil
 }
