@@ -780,7 +780,8 @@ func unregisterMetrics(ctx context.Context, m metrics.MetricCollector, name stri
 
 // DeregisterCollector deregisters the collector
 func (d *depsCollector) DeregisterCollector(collectorType string) error {
-	return unregisterMetrics(context.Background(), d.Metrics, collectorType)
+	return nil
+	// return unregisterMetrics(context.Background(), d.Metrics, collectorType)
 }
 
 // registerMetricsOnce registers the Metrics for the collector once.
