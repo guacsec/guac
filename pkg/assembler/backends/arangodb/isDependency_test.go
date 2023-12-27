@@ -36,7 +36,7 @@ var (
 func TestIsDependency(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -915,7 +915,7 @@ func TestIsDependency(t *testing.T) {
 func TestIsDependencies(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -1022,7 +1022,7 @@ func TestIsDependencies(t *testing.T) {
 func Test_buildIsDependencyByID(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}

@@ -24,3 +24,4 @@
     - Easier to read visualizations
     - Data representation of software tries should be easier to manage
     - Show sizable amount of information and “show more” for extra
+- GUAC "cooking show" setup - making it easy to quickstart with GUAC [#1577](https://github.com/guacsec/guac/issues/1577)

@@ -34,36 +34,11 @@ jobs:
   test-integration:
     runs-on: ubuntu-latest
     name: CI for integration tests
-    services:
-      neo4j:
-        image: neo4j:latest # TODO(mihaimaruseac): Pin to hash
-        env:
-          NEO4J_AUTH: none
-        ports:
-          - 7687:7687
-      postgres:
-        image: postgres:16.0@sha256:f007ec48ff3ef9b75dc473d915a3ea3713167ba015340316f6bcabfa86a7b4a6
-        env:
-          POSTGRES_USER: guac
-          POSTGRES_PASSWORD: guac
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      arango:
-        image: arangodb:latest@sha256:085b45e8c56d5d4114e409482694d40fc8d1678c6b5d98d774bab31193034d6a
-        env:
-          ARANGO_ROOT_PASSWORD: test123
-        ports:
-          - 8529:8529
     steps:
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v3.2.1
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v3.2.1
         with:
           go-version: '1.21'
       - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
@@ -72,6 +47,14 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Setup the project
         run: go mod download
+      - name: Run backends
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd internal/testing/backend
+          docker-compose up -d
+          sleep 10
+          echo "backends started"
       - name: Run integration tests
         env:
             ENT_TEST_DATABASE_URL: 'postgresql://guac:guac@localhost/guac?sslmode=disable'
@@ -84,7 +67,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v3.2.1
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v3.2.1
         with:
           go-version: '1.21'
       - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
@@ -103,7 +86,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v3.2.1
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v3.2.1
         with:
           go-version: '1.21'
       - name: Install formatter
@@ -119,7 +102,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v4.1.0
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v5.0.0
         with:
           go-version: '1.21'
       - name: golangci-lint
@@ -136,10 +119,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
-    - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
+    - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491
       with:
         go-version: '~1.21'
-    - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236
+    - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c
       with:
         python-version: '3.10'
     - run: ./internal/testing/e2e/e2e
@@ -192,7 +175,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
       - name: setup-go
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # tag=v3.2.1
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v3.2.1
         with:
           go-version: '1.21'
       - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2

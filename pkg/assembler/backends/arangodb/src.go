@@ -22,6 +22,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/arangodb/go-driver"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -490,10 +491,14 @@ func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, err
 			typeString := doc.SrcType + "," + doc.TypeID
 
 			srcName := &model.SourceName{
-				ID:     doc.NameID,
-				Name:   nameString,
-				Tag:    &tagString,
-				Commit: &commitString,
+				ID:   doc.NameID,
+				Name: nameString,
+			}
+			if tagString != "" {
+				srcName.Tag = &tagString
+			}
+			if commitString != "" {
+				srcName.Commit = &commitString
 			}
 			if srcNamespaces, ok := srcTypes[typeString]; ok {
 				srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], srcName)
@@ -529,10 +534,14 @@ func getSources(ctx context.Context, cursor driver.Cursor) ([]*model.Source, err
 
 func generateModelSource(srcTypeID, srcType, namespaceID, namespaceStr, nameID, nameStr string, commitValue, tagValue string) *model.Source {
 	name := &model.SourceName{
-		ID:     nameID,
-		Name:   nameStr,
-		Tag:    &tagValue,
-		Commit: &commitValue,
+		ID:   nameID,
+		Name: nameStr,
+	}
+	if tagValue != "" {
+		name.Tag = &tagValue
+	}
+	if commitValue != "" {
+		name.Commit = &commitValue
 	}
 
 	namespace := &model.SourceNamespace{
@@ -669,12 +678,18 @@ func (c *arangoClient) querySrcNameNodeByID(ctx context.Context, id string, filt
 		return nil, "", fmt.Errorf("number of source name nodes found for ID: %s is greater than one", id)
 	}
 
-	return &model.SourceName{
-		ID:     collectedValues[0].NameID,
-		Name:   collectedValues[0].Name,
-		Tag:    &collectedValues[0].Tag,
-		Commit: &collectedValues[0].Commit,
-	}, collectedValues[0].Parent, nil
+	sn := &model.SourceName{
+		ID:   collectedValues[0].NameID,
+		Name: collectedValues[0].Name,
+	}
+	if collectedValues[0].Tag != "" {
+		sn.Tag = &collectedValues[0].Tag
+	}
+	if collectedValues[0].Commit != "" {
+		sn.Commit = &collectedValues[0].Commit
+	}
+
+	return sn, collectedValues[0].Parent, nil
 }
 
 func (c *arangoClient) querySrcNamespaceNodeByID(ctx context.Context, id string, filter *model.SourceSpec, snl []*model.SourceName) (*model.SourceNamespace, string, error) {
@@ -965,4 +980,46 @@ func (c *arangoClient) srcNameNeighbors(ctx context.Context, nodeID string, allo
 	}
 
 	return out, nil
+}
+
+func matchSources(ctx context.Context, filter []*model.SourceSpec, sources []*model.Source) bool {
+	// collect all IDs for sources
+	var srcIDs []string
+	for _, src := range sources {
+		srcIDs = append(srcIDs, src.Namespaces[0].Names[0].ID)
+	}
+	for _, srSpec := range filter {
+		if srSpec != nil {
+			if srSpec.ID != nil {
+				// Check by ID if present from the list of collected pkg IDs
+				if !helper.IsIDPresent(*srSpec.ID, srcIDs) {
+					return false
+				}
+			} else {
+				// Otherwise match spec information
+				match := false
+				for _, src := range sources {
+					srcName := src.Namespaces[0].Names[0]
+					if noMatch(srSpec.Name, srcName.Name) || noMatch(srSpec.Tag, *srcName.Tag) || noMatch(srSpec.Commit, *srcName.Commit) {
+						continue
+					}
+					srcNamespace := src.Namespaces[0]
+					if noMatch(srSpec.Namespace, srcNamespace.Namespace) {
+						continue
+					}
+					srcType := src.Type
+					if noMatch(srSpec.Type, srcType) {
+						continue
+					} else {
+						match = true
+						break
+					}
+				}
+				if !match {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }

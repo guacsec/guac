@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
@@ -162,12 +163,20 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 
 func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
 	ids := make([]*model.SourceIDs, len(sources))
-	for i, src := range sources {
-		s, err := b.IngestSource(ctx, *src)
-		if err != nil {
-			return nil, err
-		}
-		ids[i] = s
+	eg, ctx := errgroup.WithContext(ctx)
+	for i := range sources {
+		index := i
+		src := sources[index]
+		concurrently(eg, func() error {
+			s, err := b.IngestSource(ctx, *src)
+			if err == nil {
+				ids[index] = s
+			}
+			return err
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 	return ids, nil
 }
@@ -248,7 +257,7 @@ func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec
 		ID(ctx)
 	if err != nil {
 		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert package version")
+			return nil, errors.Wrap(err, "upsert source name")
 		}
 
 		sourceNameID, err = client.SourceName.Query().
@@ -355,12 +364,17 @@ func toModelSource(s *ent.SourceType) *model.Source {
 				ID:        nodeID(n.ID),
 				Namespace: n.Namespace,
 				Names: collect(n.Edges.Names, func(n *ent.SourceName) *model.SourceName {
-					return &model.SourceName{
-						ID:     nodeID(n.ID),
-						Name:   n.Name,
-						Tag:    &n.Tag,
-						Commit: &n.Commit,
+					sn := &model.SourceName{
+						ID:   nodeID(n.ID),
+						Name: n.Name,
 					}
+					if n.Tag != "" {
+						sn.Tag = &n.Tag
+					}
+					if n.Commit != "" {
+						sn.Commit = &n.Commit
+					}
+					return sn
 				}),
 			}
 		}),

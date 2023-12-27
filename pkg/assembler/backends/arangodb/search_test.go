@@ -31,7 +31,7 @@ import (
 func Test_arangoClient_FindSoftware(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}

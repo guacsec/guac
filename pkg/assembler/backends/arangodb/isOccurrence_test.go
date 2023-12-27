@@ -32,7 +32,7 @@ import (
 func TestOccurrence(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -562,7 +562,7 @@ func TestOccurrence(t *testing.T) {
 func TestIngestOccurrences(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -677,7 +677,7 @@ func TestIngestOccurrences(t *testing.T) {
 func Test_buildIsOccurrenceByID(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}

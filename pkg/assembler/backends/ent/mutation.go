@@ -89,27 +89,30 @@ const (
 // ArtifactMutation represents an operation that mutates the Artifact nodes in the graph.
 type ArtifactMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *int
-	algorithm           *string
-	digest              *string
-	clearedFields       map[string]struct{}
-	occurrences         map[int]struct{}
-	removedoccurrences  map[int]struct{}
-	clearedoccurrences  bool
-	sbom                map[int]struct{}
-	removedsbom         map[int]struct{}
-	clearedsbom         bool
-	attestations        map[int]struct{}
-	removedattestations map[int]struct{}
-	clearedattestations bool
-	same                map[int]struct{}
-	removedsame         map[int]struct{}
-	clearedsame         bool
-	done                bool
-	oldValue            func(context.Context) (*Artifact, error)
-	predicates          []predicate.Artifact
+	op                       Op
+	typ                      string
+	id                       *int
+	algorithm                *string
+	digest                   *string
+	clearedFields            map[string]struct{}
+	occurrences              map[int]struct{}
+	removedoccurrences       map[int]struct{}
+	clearedoccurrences       bool
+	sbom                     map[int]struct{}
+	removedsbom              map[int]struct{}
+	clearedsbom              bool
+	attestations             map[int]struct{}
+	removedattestations      map[int]struct{}
+	clearedattestations      bool
+	same                     map[int]struct{}
+	removedsame              map[int]struct{}
+	clearedsame              bool
+	included_in_sboms        map[int]struct{}
+	removedincluded_in_sboms map[int]struct{}
+	clearedincluded_in_sboms bool
+	done                     bool
+	oldValue                 func(context.Context) (*Artifact, error)
+	predicates               []predicate.Artifact
 }
 
 var _ ent.Mutation = (*ArtifactMutation)(nil)
@@ -498,6 +501,60 @@ func (m *ArtifactMutation) ResetSame() {
 	m.removedsame = nil
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
+func (m *ArtifactMutation) AddIncludedInSbomIDs(ids ...int) {
+	if m.included_in_sboms == nil {
+		m.included_in_sboms = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.included_in_sboms[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIncludedInSboms clears the "included_in_sboms" edge to the BillOfMaterials entity.
+func (m *ArtifactMutation) ClearIncludedInSboms() {
+	m.clearedincluded_in_sboms = true
+}
+
+// IncludedInSbomsCleared reports if the "included_in_sboms" edge to the BillOfMaterials entity was cleared.
+func (m *ArtifactMutation) IncludedInSbomsCleared() bool {
+	return m.clearedincluded_in_sboms
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (m *ArtifactMutation) RemoveIncludedInSbomIDs(ids ...int) {
+	if m.removedincluded_in_sboms == nil {
+		m.removedincluded_in_sboms = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.included_in_sboms, ids[i])
+		m.removedincluded_in_sboms[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIncludedInSboms returns the removed IDs of the "included_in_sboms" edge to the BillOfMaterials entity.
+func (m *ArtifactMutation) RemovedIncludedInSbomsIDs() (ids []int) {
+	for id := range m.removedincluded_in_sboms {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IncludedInSbomsIDs returns the "included_in_sboms" edge IDs in the mutation.
+func (m *ArtifactMutation) IncludedInSbomsIDs() (ids []int) {
+	for id := range m.included_in_sboms {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIncludedInSboms resets all changes to the "included_in_sboms" edge.
+func (m *ArtifactMutation) ResetIncludedInSboms() {
+	m.included_in_sboms = nil
+	m.clearedincluded_in_sboms = false
+	m.removedincluded_in_sboms = nil
+}
+
 // Where appends a list predicates to the ArtifactMutation builder.
 func (m *ArtifactMutation) Where(ps ...predicate.Artifact) {
 	m.predicates = append(m.predicates, ps...)
@@ -648,7 +705,7 @@ func (m *ArtifactMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ArtifactMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.occurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -660,6 +717,9 @@ func (m *ArtifactMutation) AddedEdges() []string {
 	}
 	if m.same != nil {
 		edges = append(edges, artifact.EdgeSame)
+	}
+	if m.included_in_sboms != nil {
+		edges = append(edges, artifact.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -692,13 +752,19 @@ func (m *ArtifactMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case artifact.EdgeIncludedInSboms:
+		ids := make([]ent.Value, 0, len(m.included_in_sboms))
+		for id := range m.included_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ArtifactMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedoccurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -710,6 +776,9 @@ func (m *ArtifactMutation) RemovedEdges() []string {
 	}
 	if m.removedsame != nil {
 		edges = append(edges, artifact.EdgeSame)
+	}
+	if m.removedincluded_in_sboms != nil {
+		edges = append(edges, artifact.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -742,13 +811,19 @@ func (m *ArtifactMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case artifact.EdgeIncludedInSboms:
+		ids := make([]ent.Value, 0, len(m.removedincluded_in_sboms))
+		for id := range m.removedincluded_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ArtifactMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedoccurrences {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -760,6 +835,9 @@ func (m *ArtifactMutation) ClearedEdges() []string {
 	}
 	if m.clearedsame {
 		edges = append(edges, artifact.EdgeSame)
+	}
+	if m.clearedincluded_in_sboms {
+		edges = append(edges, artifact.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -776,6 +854,8 @@ func (m *ArtifactMutation) EdgeCleared(name string) bool {
 		return m.clearedattestations
 	case artifact.EdgeSame:
 		return m.clearedsame
+	case artifact.EdgeIncludedInSboms:
+		return m.clearedincluded_in_sboms
 	}
 	return false
 }
@@ -804,6 +884,9 @@ func (m *ArtifactMutation) ResetEdge(name string) error {
 	case artifact.EdgeSame:
 		m.ResetSame()
 		return nil
+	case artifact.EdgeIncludedInSboms:
+		m.ResetIncludedInSboms()
+		return nil
 	}
 	return fmt.Errorf("unknown Artifact edge %s", name)
 }
@@ -811,24 +894,36 @@ func (m *ArtifactMutation) ResetEdge(name string) error {
 // BillOfMaterialsMutation represents an operation that mutates the BillOfMaterials nodes in the graph.
 type BillOfMaterialsMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *int
-	uri               *string
-	algorithm         *string
-	digest            *string
-	download_location *string
-	origin            *string
-	collector         *string
-	known_since       *time.Time
-	clearedFields     map[string]struct{}
-	_package          *int
-	cleared_package   bool
-	artifact          *int
-	clearedartifact   bool
-	done              bool
-	oldValue          func(context.Context) (*BillOfMaterials, error)
-	predicates        []predicate.BillOfMaterials
+	op                                 Op
+	typ                                string
+	id                                 *int
+	uri                                *string
+	algorithm                          *string
+	digest                             *string
+	download_location                  *string
+	origin                             *string
+	collector                          *string
+	known_since                        *time.Time
+	clearedFields                      map[string]struct{}
+	_package                           *int
+	cleared_package                    bool
+	artifact                           *int
+	clearedartifact                    bool
+	included_software_packages         map[int]struct{}
+	removedincluded_software_packages  map[int]struct{}
+	clearedincluded_software_packages  bool
+	included_software_artifacts        map[int]struct{}
+	removedincluded_software_artifacts map[int]struct{}
+	clearedincluded_software_artifacts bool
+	included_dependencies              map[int]struct{}
+	removedincluded_dependencies       map[int]struct{}
+	clearedincluded_dependencies       bool
+	included_occurrences               map[int]struct{}
+	removedincluded_occurrences        map[int]struct{}
+	clearedincluded_occurrences        bool
+	done                               bool
+	oldValue                           func(context.Context) (*BillOfMaterials, error)
+	predicates                         []predicate.BillOfMaterials
 }
 
 var _ ent.Mutation = (*BillOfMaterialsMutation)(nil)
@@ -1333,6 +1428,222 @@ func (m *BillOfMaterialsMutation) ResetArtifact() {
 	m.clearedartifact = false
 }
 
+// AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by ids.
+func (m *BillOfMaterialsMutation) AddIncludedSoftwarePackageIDs(ids ...int) {
+	if m.included_software_packages == nil {
+		m.included_software_packages = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.included_software_packages[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIncludedSoftwarePackages clears the "included_software_packages" edge to the PackageVersion entity.
+func (m *BillOfMaterialsMutation) ClearIncludedSoftwarePackages() {
+	m.clearedincluded_software_packages = true
+}
+
+// IncludedSoftwarePackagesCleared reports if the "included_software_packages" edge to the PackageVersion entity was cleared.
+func (m *BillOfMaterialsMutation) IncludedSoftwarePackagesCleared() bool {
+	return m.clearedincluded_software_packages
+}
+
+// RemoveIncludedSoftwarePackageIDs removes the "included_software_packages" edge to the PackageVersion entity by IDs.
+func (m *BillOfMaterialsMutation) RemoveIncludedSoftwarePackageIDs(ids ...int) {
+	if m.removedincluded_software_packages == nil {
+		m.removedincluded_software_packages = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.included_software_packages, ids[i])
+		m.removedincluded_software_packages[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIncludedSoftwarePackages returns the removed IDs of the "included_software_packages" edge to the PackageVersion entity.
+func (m *BillOfMaterialsMutation) RemovedIncludedSoftwarePackagesIDs() (ids []int) {
+	for id := range m.removedincluded_software_packages {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IncludedSoftwarePackagesIDs returns the "included_software_packages" edge IDs in the mutation.
+func (m *BillOfMaterialsMutation) IncludedSoftwarePackagesIDs() (ids []int) {
+	for id := range m.included_software_packages {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIncludedSoftwarePackages resets all changes to the "included_software_packages" edge.
+func (m *BillOfMaterialsMutation) ResetIncludedSoftwarePackages() {
+	m.included_software_packages = nil
+	m.clearedincluded_software_packages = false
+	m.removedincluded_software_packages = nil
+}
+
+// AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by ids.
+func (m *BillOfMaterialsMutation) AddIncludedSoftwareArtifactIDs(ids ...int) {
+	if m.included_software_artifacts == nil {
+		m.included_software_artifacts = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.included_software_artifacts[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIncludedSoftwareArtifacts clears the "included_software_artifacts" edge to the Artifact entity.
+func (m *BillOfMaterialsMutation) ClearIncludedSoftwareArtifacts() {
+	m.clearedincluded_software_artifacts = true
+}
+
+// IncludedSoftwareArtifactsCleared reports if the "included_software_artifacts" edge to the Artifact entity was cleared.
+func (m *BillOfMaterialsMutation) IncludedSoftwareArtifactsCleared() bool {
+	return m.clearedincluded_software_artifacts
+}
+
+// RemoveIncludedSoftwareArtifactIDs removes the "included_software_artifacts" edge to the Artifact entity by IDs.
+func (m *BillOfMaterialsMutation) RemoveIncludedSoftwareArtifactIDs(ids ...int) {
+	if m.removedincluded_software_artifacts == nil {
+		m.removedincluded_software_artifacts = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.included_software_artifacts, ids[i])
+		m.removedincluded_software_artifacts[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIncludedSoftwareArtifacts returns the removed IDs of the "included_software_artifacts" edge to the Artifact entity.
+func (m *BillOfMaterialsMutation) RemovedIncludedSoftwareArtifactsIDs() (ids []int) {
+	for id := range m.removedincluded_software_artifacts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IncludedSoftwareArtifactsIDs returns the "included_software_artifacts" edge IDs in the mutation.
+func (m *BillOfMaterialsMutation) IncludedSoftwareArtifactsIDs() (ids []int) {
+	for id := range m.included_software_artifacts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIncludedSoftwareArtifacts resets all changes to the "included_software_artifacts" edge.
+func (m *BillOfMaterialsMutation) ResetIncludedSoftwareArtifacts() {
+	m.included_software_artifacts = nil
+	m.clearedincluded_software_artifacts = false
+	m.removedincluded_software_artifacts = nil
+}
+
+// AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by ids.
+func (m *BillOfMaterialsMutation) AddIncludedDependencyIDs(ids ...int) {
+	if m.included_dependencies == nil {
+		m.included_dependencies = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.included_dependencies[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIncludedDependencies clears the "included_dependencies" edge to the Dependency entity.
+func (m *BillOfMaterialsMutation) ClearIncludedDependencies() {
+	m.clearedincluded_dependencies = true
+}
+
+// IncludedDependenciesCleared reports if the "included_dependencies" edge to the Dependency entity was cleared.
+func (m *BillOfMaterialsMutation) IncludedDependenciesCleared() bool {
+	return m.clearedincluded_dependencies
+}
+
+// RemoveIncludedDependencyIDs removes the "included_dependencies" edge to the Dependency entity by IDs.
+func (m *BillOfMaterialsMutation) RemoveIncludedDependencyIDs(ids ...int) {
+	if m.removedincluded_dependencies == nil {
+		m.removedincluded_dependencies = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.included_dependencies, ids[i])
+		m.removedincluded_dependencies[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIncludedDependencies returns the removed IDs of the "included_dependencies" edge to the Dependency entity.
+func (m *BillOfMaterialsMutation) RemovedIncludedDependenciesIDs() (ids []int) {
+	for id := range m.removedincluded_dependencies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IncludedDependenciesIDs returns the "included_dependencies" edge IDs in the mutation.
+func (m *BillOfMaterialsMutation) IncludedDependenciesIDs() (ids []int) {
+	for id := range m.included_dependencies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIncludedDependencies resets all changes to the "included_dependencies" edge.
+func (m *BillOfMaterialsMutation) ResetIncludedDependencies() {
+	m.included_dependencies = nil
+	m.clearedincluded_dependencies = false
+	m.removedincluded_dependencies = nil
+}
+
+// AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by ids.
+func (m *BillOfMaterialsMutation) AddIncludedOccurrenceIDs(ids ...int) {
+	if m.included_occurrences == nil {
+		m.included_occurrences = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.included_occurrences[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIncludedOccurrences clears the "included_occurrences" edge to the Occurrence entity.
+func (m *BillOfMaterialsMutation) ClearIncludedOccurrences() {
+	m.clearedincluded_occurrences = true
+}
+
+// IncludedOccurrencesCleared reports if the "included_occurrences" edge to the Occurrence entity was cleared.
+func (m *BillOfMaterialsMutation) IncludedOccurrencesCleared() bool {
+	return m.clearedincluded_occurrences
+}
+
+// RemoveIncludedOccurrenceIDs removes the "included_occurrences" edge to the Occurrence entity by IDs.
+func (m *BillOfMaterialsMutation) RemoveIncludedOccurrenceIDs(ids ...int) {
+	if m.removedincluded_occurrences == nil {
+		m.removedincluded_occurrences = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.included_occurrences, ids[i])
+		m.removedincluded_occurrences[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIncludedOccurrences returns the removed IDs of the "included_occurrences" edge to the Occurrence entity.
+func (m *BillOfMaterialsMutation) RemovedIncludedOccurrencesIDs() (ids []int) {
+	for id := range m.removedincluded_occurrences {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IncludedOccurrencesIDs returns the "included_occurrences" edge IDs in the mutation.
+func (m *BillOfMaterialsMutation) IncludedOccurrencesIDs() (ids []int) {
+	for id := range m.included_occurrences {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIncludedOccurrences resets all changes to the "included_occurrences" edge.
+func (m *BillOfMaterialsMutation) ResetIncludedOccurrences() {
+	m.included_occurrences = nil
+	m.clearedincluded_occurrences = false
+	m.removedincluded_occurrences = nil
+}
+
 // Where appends a list predicates to the BillOfMaterialsMutation builder.
 func (m *BillOfMaterialsMutation) Where(ps ...predicate.BillOfMaterials) {
 	m.predicates = append(m.predicates, ps...)
@@ -1620,12 +1931,24 @@ func (m *BillOfMaterialsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *BillOfMaterialsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 6)
 	if m._package != nil {
 		edges = append(edges, billofmaterials.EdgePackage)
 	}
 	if m.artifact != nil {
 		edges = append(edges, billofmaterials.EdgeArtifact)
+	}
+	if m.included_software_packages != nil {
+		edges = append(edges, billofmaterials.EdgeIncludedSoftwarePackages)
+	}
+	if m.included_software_artifacts != nil {
+		edges = append(edges, billofmaterials.EdgeIncludedSoftwareArtifacts)
+	}
+	if m.included_dependencies != nil {
+		edges = append(edges, billofmaterials.EdgeIncludedDependencies)
+	}
+	if m.included_occurrences != nil {
+		edges = append(edges, billofmaterials.EdgeIncludedOccurrences)
 	}
 	return edges
 }
@@ -1642,30 +1965,104 @@ func (m *BillOfMaterialsMutation) AddedIDs(name string) []ent.Value {
 		if id := m.artifact; id != nil {
 			return []ent.Value{*id}
 		}
+	case billofmaterials.EdgeIncludedSoftwarePackages:
+		ids := make([]ent.Value, 0, len(m.included_software_packages))
+		for id := range m.included_software_packages {
+			ids = append(ids, id)
+		}
+		return ids
+	case billofmaterials.EdgeIncludedSoftwareArtifacts:
+		ids := make([]ent.Value, 0, len(m.included_software_artifacts))
+		for id := range m.included_software_artifacts {
+			ids = append(ids, id)
+		}
+		return ids
+	case billofmaterials.EdgeIncludedDependencies:
+		ids := make([]ent.Value, 0, len(m.included_dependencies))
+		for id := range m.included_dependencies {
+			ids = append(ids, id)
+		}
+		return ids
+	case billofmaterials.EdgeIncludedOccurrences:
+		ids := make([]ent.Value, 0, len(m.included_occurrences))
+		for id := range m.included_occurrences {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *BillOfMaterialsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 6)
+	if m.removedincluded_software_packages != nil {
+		edges = append(edges, billofmaterials.EdgeIncludedSoftwarePackages)
+	}
+	if m.removedincluded_software_artifacts != nil {
+		edges = append(edges, billofmaterials.EdgeIncludedSoftwareArtifacts)
+	}
+	if m.removedincluded_dependencies != nil {
+		edges = append(edges, billofmaterials.EdgeIncludedDependencies)
+	}
+	if m.removedincluded_occurrences != nil {
+		edges = append(edges, billofmaterials.EdgeIncludedOccurrences)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *BillOfMaterialsMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case billofmaterials.EdgeIncludedSoftwarePackages:
+		ids := make([]ent.Value, 0, len(m.removedincluded_software_packages))
+		for id := range m.removedincluded_software_packages {
+			ids = append(ids, id)
+		}
+		return ids
+	case billofmaterials.EdgeIncludedSoftwareArtifacts:
+		ids := make([]ent.Value, 0, len(m.removedincluded_software_artifacts))
+		for id := range m.removedincluded_software_artifacts {
+			ids = append(ids, id)
+		}
+		return ids
+	case billofmaterials.EdgeIncludedDependencies:
+		ids := make([]ent.Value, 0, len(m.removedincluded_dependencies))
+		for id := range m.removedincluded_dependencies {
+			ids = append(ids, id)
+		}
+		return ids
+	case billofmaterials.EdgeIncludedOccurrences:
+		ids := make([]ent.Value, 0, len(m.removedincluded_occurrences))
+		for id := range m.removedincluded_occurrences {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *BillOfMaterialsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 6)
 	if m.cleared_package {
 		edges = append(edges, billofmaterials.EdgePackage)
 	}
 	if m.clearedartifact {
 		edges = append(edges, billofmaterials.EdgeArtifact)
+	}
+	if m.clearedincluded_software_packages {
+		edges = append(edges, billofmaterials.EdgeIncludedSoftwarePackages)
+	}
+	if m.clearedincluded_software_artifacts {
+		edges = append(edges, billofmaterials.EdgeIncludedSoftwareArtifacts)
+	}
+	if m.clearedincluded_dependencies {
+		edges = append(edges, billofmaterials.EdgeIncludedDependencies)
+	}
+	if m.clearedincluded_occurrences {
+		edges = append(edges, billofmaterials.EdgeIncludedOccurrences)
 	}
 	return edges
 }
@@ -1678,6 +2075,14 @@ func (m *BillOfMaterialsMutation) EdgeCleared(name string) bool {
 		return m.cleared_package
 	case billofmaterials.EdgeArtifact:
 		return m.clearedartifact
+	case billofmaterials.EdgeIncludedSoftwarePackages:
+		return m.clearedincluded_software_packages
+	case billofmaterials.EdgeIncludedSoftwareArtifacts:
+		return m.clearedincluded_software_artifacts
+	case billofmaterials.EdgeIncludedDependencies:
+		return m.clearedincluded_dependencies
+	case billofmaterials.EdgeIncludedOccurrences:
+		return m.clearedincluded_occurrences
 	}
 	return false
 }
@@ -1705,6 +2110,18 @@ func (m *BillOfMaterialsMutation) ResetEdge(name string) error {
 		return nil
 	case billofmaterials.EdgeArtifact:
 		m.ResetArtifact()
+		return nil
+	case billofmaterials.EdgeIncludedSoftwarePackages:
+		m.ResetIncludedSoftwarePackages()
+		return nil
+	case billofmaterials.EdgeIncludedSoftwareArtifacts:
+		m.ResetIncludedSoftwareArtifacts()
+		return nil
+	case billofmaterials.EdgeIncludedDependencies:
+		m.ResetIncludedDependencies()
+		return nil
+	case billofmaterials.EdgeIncludedOccurrences:
+		m.ResetIncludedOccurrences()
 		return nil
 	}
 	return fmt.Errorf("unknown BillOfMaterials edge %s", name)
@@ -6716,6 +7133,9 @@ type DependencyMutation struct {
 	cleareddependent_package_name    bool
 	dependent_package_version        *int
 	cleareddependent_package_version bool
+	included_in_sboms                map[int]struct{}
+	removedincluded_in_sboms         map[int]struct{}
+	clearedincluded_in_sboms         bool
 	done                             bool
 	oldValue                         func(context.Context) (*Dependency, error)
 	predicates                       []predicate.Dependency
@@ -7214,6 +7634,60 @@ func (m *DependencyMutation) ResetDependentPackageVersion() {
 	m.cleareddependent_package_version = false
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
+func (m *DependencyMutation) AddIncludedInSbomIDs(ids ...int) {
+	if m.included_in_sboms == nil {
+		m.included_in_sboms = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.included_in_sboms[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIncludedInSboms clears the "included_in_sboms" edge to the BillOfMaterials entity.
+func (m *DependencyMutation) ClearIncludedInSboms() {
+	m.clearedincluded_in_sboms = true
+}
+
+// IncludedInSbomsCleared reports if the "included_in_sboms" edge to the BillOfMaterials entity was cleared.
+func (m *DependencyMutation) IncludedInSbomsCleared() bool {
+	return m.clearedincluded_in_sboms
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (m *DependencyMutation) RemoveIncludedInSbomIDs(ids ...int) {
+	if m.removedincluded_in_sboms == nil {
+		m.removedincluded_in_sboms = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.included_in_sboms, ids[i])
+		m.removedincluded_in_sboms[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIncludedInSboms returns the removed IDs of the "included_in_sboms" edge to the BillOfMaterials entity.
+func (m *DependencyMutation) RemovedIncludedInSbomsIDs() (ids []int) {
+	for id := range m.removedincluded_in_sboms {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IncludedInSbomsIDs returns the "included_in_sboms" edge IDs in the mutation.
+func (m *DependencyMutation) IncludedInSbomsIDs() (ids []int) {
+	for id := range m.included_in_sboms {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIncludedInSboms resets all changes to the "included_in_sboms" edge.
+func (m *DependencyMutation) ResetIncludedInSboms() {
+	m.included_in_sboms = nil
+	m.clearedincluded_in_sboms = false
+	m.removedincluded_in_sboms = nil
+}
+
 // Where appends a list predicates to the DependencyMutation builder.
 func (m *DependencyMutation) Where(ps ...predicate.Dependency) {
 	m.predicates = append(m.predicates, ps...)
@@ -7484,7 +7958,7 @@ func (m *DependencyMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DependencyMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m._package != nil {
 		edges = append(edges, dependency.EdgePackage)
 	}
@@ -7493,6 +7967,9 @@ func (m *DependencyMutation) AddedEdges() []string {
 	}
 	if m.dependent_package_version != nil {
 		edges = append(edges, dependency.EdgeDependentPackageVersion)
+	}
+	if m.included_in_sboms != nil {
+		edges = append(edges, dependency.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -7513,25 +7990,42 @@ func (m *DependencyMutation) AddedIDs(name string) []ent.Value {
 		if id := m.dependent_package_version; id != nil {
 			return []ent.Value{*id}
 		}
+	case dependency.EdgeIncludedInSboms:
+		ids := make([]ent.Value, 0, len(m.included_in_sboms))
+		for id := range m.included_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DependencyMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
+	if m.removedincluded_in_sboms != nil {
+		edges = append(edges, dependency.EdgeIncludedInSboms)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *DependencyMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case dependency.EdgeIncludedInSboms:
+		ids := make([]ent.Value, 0, len(m.removedincluded_in_sboms))
+		for id := range m.removedincluded_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DependencyMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.cleared_package {
 		edges = append(edges, dependency.EdgePackage)
 	}
@@ -7540,6 +8034,9 @@ func (m *DependencyMutation) ClearedEdges() []string {
 	}
 	if m.cleareddependent_package_version {
 		edges = append(edges, dependency.EdgeDependentPackageVersion)
+	}
+	if m.clearedincluded_in_sboms {
+		edges = append(edges, dependency.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -7554,6 +8051,8 @@ func (m *DependencyMutation) EdgeCleared(name string) bool {
 		return m.cleareddependent_package_name
 	case dependency.EdgeDependentPackageVersion:
 		return m.cleareddependent_package_version
+	case dependency.EdgeIncludedInSboms:
+		return m.clearedincluded_in_sboms
 	}
 	return false
 }
@@ -7587,6 +8086,9 @@ func (m *DependencyMutation) ResetEdge(name string) error {
 		return nil
 	case dependency.EdgeDependentPackageVersion:
 		m.ResetDependentPackageVersion()
+		return nil
+	case dependency.EdgeIncludedInSboms:
+		m.ResetIncludedInSboms()
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency edge %s", name)
@@ -11370,22 +11872,25 @@ func (m *LicenseMutation) ResetEdge(name string) error {
 // OccurrenceMutation represents an operation that mutates the Occurrence nodes in the graph.
 type OccurrenceMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	justification   *string
-	origin          *string
-	collector       *string
-	clearedFields   map[string]struct{}
-	artifact        *int
-	clearedartifact bool
-	_package        *int
-	cleared_package bool
-	source          *int
-	clearedsource   bool
-	done            bool
-	oldValue        func(context.Context) (*Occurrence, error)
-	predicates      []predicate.Occurrence
+	op                       Op
+	typ                      string
+	id                       *int
+	justification            *string
+	origin                   *string
+	collector                *string
+	clearedFields            map[string]struct{}
+	artifact                 *int
+	clearedartifact          bool
+	_package                 *int
+	cleared_package          bool
+	source                   *int
+	clearedsource            bool
+	included_in_sboms        map[int]struct{}
+	removedincluded_in_sboms map[int]struct{}
+	clearedincluded_in_sboms bool
+	done                     bool
+	oldValue                 func(context.Context) (*Occurrence, error)
+	predicates               []predicate.Occurrence
 }
 
 var _ ent.Mutation = (*OccurrenceMutation)(nil)
@@ -11809,6 +12314,60 @@ func (m *OccurrenceMutation) ResetSource() {
 	m.clearedsource = false
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
+func (m *OccurrenceMutation) AddIncludedInSbomIDs(ids ...int) {
+	if m.included_in_sboms == nil {
+		m.included_in_sboms = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.included_in_sboms[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIncludedInSboms clears the "included_in_sboms" edge to the BillOfMaterials entity.
+func (m *OccurrenceMutation) ClearIncludedInSboms() {
+	m.clearedincluded_in_sboms = true
+}
+
+// IncludedInSbomsCleared reports if the "included_in_sboms" edge to the BillOfMaterials entity was cleared.
+func (m *OccurrenceMutation) IncludedInSbomsCleared() bool {
+	return m.clearedincluded_in_sboms
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (m *OccurrenceMutation) RemoveIncludedInSbomIDs(ids ...int) {
+	if m.removedincluded_in_sboms == nil {
+		m.removedincluded_in_sboms = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.included_in_sboms, ids[i])
+		m.removedincluded_in_sboms[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIncludedInSboms returns the removed IDs of the "included_in_sboms" edge to the BillOfMaterials entity.
+func (m *OccurrenceMutation) RemovedIncludedInSbomsIDs() (ids []int) {
+	for id := range m.removedincluded_in_sboms {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IncludedInSbomsIDs returns the "included_in_sboms" edge IDs in the mutation.
+func (m *OccurrenceMutation) IncludedInSbomsIDs() (ids []int) {
+	for id := range m.included_in_sboms {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIncludedInSboms resets all changes to the "included_in_sboms" edge.
+func (m *OccurrenceMutation) ResetIncludedInSboms() {
+	m.included_in_sboms = nil
+	m.clearedincluded_in_sboms = false
+	m.removedincluded_in_sboms = nil
+}
+
 // Where appends a list predicates to the OccurrenceMutation builder.
 func (m *OccurrenceMutation) Where(ps ...predicate.Occurrence) {
 	m.predicates = append(m.predicates, ps...)
@@ -12045,7 +12604,7 @@ func (m *OccurrenceMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *OccurrenceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.artifact != nil {
 		edges = append(edges, occurrence.EdgeArtifact)
 	}
@@ -12054,6 +12613,9 @@ func (m *OccurrenceMutation) AddedEdges() []string {
 	}
 	if m.source != nil {
 		edges = append(edges, occurrence.EdgeSource)
+	}
+	if m.included_in_sboms != nil {
+		edges = append(edges, occurrence.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -12074,25 +12636,42 @@ func (m *OccurrenceMutation) AddedIDs(name string) []ent.Value {
 		if id := m.source; id != nil {
 			return []ent.Value{*id}
 		}
+	case occurrence.EdgeIncludedInSboms:
+		ids := make([]ent.Value, 0, len(m.included_in_sboms))
+		for id := range m.included_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *OccurrenceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
+	if m.removedincluded_in_sboms != nil {
+		edges = append(edges, occurrence.EdgeIncludedInSboms)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *OccurrenceMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case occurrence.EdgeIncludedInSboms:
+		ids := make([]ent.Value, 0, len(m.removedincluded_in_sboms))
+		for id := range m.removedincluded_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *OccurrenceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedartifact {
 		edges = append(edges, occurrence.EdgeArtifact)
 	}
@@ -12101,6 +12680,9 @@ func (m *OccurrenceMutation) ClearedEdges() []string {
 	}
 	if m.clearedsource {
 		edges = append(edges, occurrence.EdgeSource)
+	}
+	if m.clearedincluded_in_sboms {
+		edges = append(edges, occurrence.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -12115,6 +12697,8 @@ func (m *OccurrenceMutation) EdgeCleared(name string) bool {
 		return m.cleared_package
 	case occurrence.EdgeSource:
 		return m.clearedsource
+	case occurrence.EdgeIncludedInSboms:
+		return m.clearedincluded_in_sboms
 	}
 	return false
 }
@@ -12148,6 +12732,9 @@ func (m *OccurrenceMutation) ResetEdge(name string) error {
 		return nil
 	case occurrence.EdgeSource:
 		m.ResetSource()
+		return nil
+	case occurrence.EdgeIncludedInSboms:
+		m.ResetIncludedInSboms()
 		return nil
 	}
 	return fmt.Errorf("unknown Occurrence edge %s", name)
@@ -13619,29 +14206,32 @@ func (m *PackageTypeMutation) ResetEdge(name string) error {
 // PackageVersionMutation represents an operation that mutates the PackageVersion nodes in the graph.
 type PackageVersionMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *int
-	version               *string
-	subpath               *string
-	qualifiers            *[]model.PackageQualifier
-	appendqualifiers      []model.PackageQualifier
-	hash                  *string
-	clearedFields         map[string]struct{}
-	name                  *int
-	clearedname           bool
-	occurrences           map[int]struct{}
-	removedoccurrences    map[int]struct{}
-	clearedoccurrences    bool
-	sbom                  map[int]struct{}
-	removedsbom           map[int]struct{}
-	clearedsbom           bool
-	equal_packages        map[int]struct{}
-	removedequal_packages map[int]struct{}
-	clearedequal_packages bool
-	done                  bool
-	oldValue              func(context.Context) (*PackageVersion, error)
-	predicates            []predicate.PackageVersion
+	op                       Op
+	typ                      string
+	id                       *int
+	version                  *string
+	subpath                  *string
+	qualifiers               *[]model.PackageQualifier
+	appendqualifiers         []model.PackageQualifier
+	hash                     *string
+	clearedFields            map[string]struct{}
+	name                     *int
+	clearedname              bool
+	occurrences              map[int]struct{}
+	removedoccurrences       map[int]struct{}
+	clearedoccurrences       bool
+	sbom                     map[int]struct{}
+	removedsbom              map[int]struct{}
+	clearedsbom              bool
+	equal_packages           map[int]struct{}
+	removedequal_packages    map[int]struct{}
+	clearedequal_packages    bool
+	included_in_sboms        map[int]struct{}
+	removedincluded_in_sboms map[int]struct{}
+	clearedincluded_in_sboms bool
+	done                     bool
+	oldValue                 func(context.Context) (*PackageVersion, error)
+	predicates               []predicate.PackageVersion
 }
 
 var _ ent.Mutation = (*PackageVersionMutation)(nil)
@@ -14140,6 +14730,60 @@ func (m *PackageVersionMutation) ResetEqualPackages() {
 	m.removedequal_packages = nil
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
+func (m *PackageVersionMutation) AddIncludedInSbomIDs(ids ...int) {
+	if m.included_in_sboms == nil {
+		m.included_in_sboms = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.included_in_sboms[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIncludedInSboms clears the "included_in_sboms" edge to the BillOfMaterials entity.
+func (m *PackageVersionMutation) ClearIncludedInSboms() {
+	m.clearedincluded_in_sboms = true
+}
+
+// IncludedInSbomsCleared reports if the "included_in_sboms" edge to the BillOfMaterials entity was cleared.
+func (m *PackageVersionMutation) IncludedInSbomsCleared() bool {
+	return m.clearedincluded_in_sboms
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (m *PackageVersionMutation) RemoveIncludedInSbomIDs(ids ...int) {
+	if m.removedincluded_in_sboms == nil {
+		m.removedincluded_in_sboms = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.included_in_sboms, ids[i])
+		m.removedincluded_in_sboms[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIncludedInSboms returns the removed IDs of the "included_in_sboms" edge to the BillOfMaterials entity.
+func (m *PackageVersionMutation) RemovedIncludedInSbomsIDs() (ids []int) {
+	for id := range m.removedincluded_in_sboms {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IncludedInSbomsIDs returns the "included_in_sboms" edge IDs in the mutation.
+func (m *PackageVersionMutation) IncludedInSbomsIDs() (ids []int) {
+	for id := range m.included_in_sboms {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIncludedInSboms resets all changes to the "included_in_sboms" edge.
+func (m *PackageVersionMutation) ResetIncludedInSboms() {
+	m.included_in_sboms = nil
+	m.clearedincluded_in_sboms = false
+	m.removedincluded_in_sboms = nil
+}
+
 // Where appends a list predicates to the PackageVersionMutation builder.
 func (m *PackageVersionMutation) Where(ps ...predicate.PackageVersion) {
 	m.predicates = append(m.predicates, ps...)
@@ -14353,7 +14997,7 @@ func (m *PackageVersionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PackageVersionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.name != nil {
 		edges = append(edges, packageversion.EdgeName)
 	}
@@ -14365,6 +15009,9 @@ func (m *PackageVersionMutation) AddedEdges() []string {
 	}
 	if m.equal_packages != nil {
 		edges = append(edges, packageversion.EdgeEqualPackages)
+	}
+	if m.included_in_sboms != nil {
+		edges = append(edges, packageversion.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -14395,13 +15042,19 @@ func (m *PackageVersionMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case packageversion.EdgeIncludedInSboms:
+		ids := make([]ent.Value, 0, len(m.included_in_sboms))
+		for id := range m.included_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PackageVersionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedoccurrences != nil {
 		edges = append(edges, packageversion.EdgeOccurrences)
 	}
@@ -14410,6 +15063,9 @@ func (m *PackageVersionMutation) RemovedEdges() []string {
 	}
 	if m.removedequal_packages != nil {
 		edges = append(edges, packageversion.EdgeEqualPackages)
+	}
+	if m.removedincluded_in_sboms != nil {
+		edges = append(edges, packageversion.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -14436,13 +15092,19 @@ func (m *PackageVersionMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case packageversion.EdgeIncludedInSboms:
+		ids := make([]ent.Value, 0, len(m.removedincluded_in_sboms))
+		for id := range m.removedincluded_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PackageVersionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedname {
 		edges = append(edges, packageversion.EdgeName)
 	}
@@ -14454,6 +15116,9 @@ func (m *PackageVersionMutation) ClearedEdges() []string {
 	}
 	if m.clearedequal_packages {
 		edges = append(edges, packageversion.EdgeEqualPackages)
+	}
+	if m.clearedincluded_in_sboms {
+		edges = append(edges, packageversion.EdgeIncludedInSboms)
 	}
 	return edges
 }
@@ -14470,6 +15135,8 @@ func (m *PackageVersionMutation) EdgeCleared(name string) bool {
 		return m.clearedsbom
 	case packageversion.EdgeEqualPackages:
 		return m.clearedequal_packages
+	case packageversion.EdgeIncludedInSboms:
+		return m.clearedincluded_in_sboms
 	}
 	return false
 }
@@ -14500,6 +15167,9 @@ func (m *PackageVersionMutation) ResetEdge(name string) error {
 		return nil
 	case packageversion.EdgeEqualPackages:
 		m.ResetEqualPackages()
+		return nil
+	case packageversion.EdgeIncludedInSboms:
+		m.ResetIncludedInSboms()
 		return nil
 	}
 	return fmt.Errorf("unknown PackageVersion edge %s", name)

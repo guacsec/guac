@@ -37,7 +37,7 @@ func lessSource(a, b *model.Source) int {
 func Test_IngestSources(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -71,7 +71,7 @@ func Test_IngestSources(t *testing.T) {
 func Test_Sources(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -155,7 +155,7 @@ func Test_Sources(t *testing.T) {
 func Test_SourceTypes(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -255,7 +255,7 @@ func Test_SourceTypes(t *testing.T) {
 func Test_SourceNamespaces(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -366,7 +366,7 @@ func Test_SourceNamespaces(t *testing.T) {
 func Test_buildSourceResponseFromID(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}

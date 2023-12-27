@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -141,6 +142,21 @@ func (ou *OccurrenceUpdate) SetSource(s *SourceName) *OccurrenceUpdate {
 	return ou.SetSourceID(s.ID)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (ou *OccurrenceUpdate) AddIncludedInSbomIDs(ids ...int) *OccurrenceUpdate {
+	ou.mutation.AddIncludedInSbomIDs(ids...)
+	return ou
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (ou *OccurrenceUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ou.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the OccurrenceMutation object of the builder.
 func (ou *OccurrenceUpdate) Mutation() *OccurrenceMutation {
 	return ou.mutation
@@ -162,6 +178,27 @@ func (ou *OccurrenceUpdate) ClearPackage() *OccurrenceUpdate {
 func (ou *OccurrenceUpdate) ClearSource() *OccurrenceUpdate {
 	ou.mutation.ClearSource()
 	return ou
+}
+
+// ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
+func (ou *OccurrenceUpdate) ClearIncludedInSboms() *OccurrenceUpdate {
+	ou.mutation.ClearIncludedInSboms()
+	return ou
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
+func (ou *OccurrenceUpdate) RemoveIncludedInSbomIDs(ids ...int) *OccurrenceUpdate {
+	ou.mutation.RemoveIncludedInSbomIDs(ids...)
+	return ou
+}
+
+// RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
+func (ou *OccurrenceUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ou.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -307,6 +344,51 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if ou.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   occurrence.IncludedInSbomsTable,
+			Columns: occurrence.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !ou.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   occurrence.IncludedInSbomsTable,
+			Columns: occurrence.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ou.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   occurrence.IncludedInSbomsTable,
+			Columns: occurrence.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ou.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{occurrence.Label}
@@ -438,6 +520,21 @@ func (ouo *OccurrenceUpdateOne) SetSource(s *SourceName) *OccurrenceUpdateOne {
 	return ouo.SetSourceID(s.ID)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (ouo *OccurrenceUpdateOne) AddIncludedInSbomIDs(ids ...int) *OccurrenceUpdateOne {
+	ouo.mutation.AddIncludedInSbomIDs(ids...)
+	return ouo
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (ouo *OccurrenceUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ouo.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the OccurrenceMutation object of the builder.
 func (ouo *OccurrenceUpdateOne) Mutation() *OccurrenceMutation {
 	return ouo.mutation
@@ -459,6 +556,27 @@ func (ouo *OccurrenceUpdateOne) ClearPackage() *OccurrenceUpdateOne {
 func (ouo *OccurrenceUpdateOne) ClearSource() *OccurrenceUpdateOne {
 	ouo.mutation.ClearSource()
 	return ouo
+}
+
+// ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
+func (ouo *OccurrenceUpdateOne) ClearIncludedInSboms() *OccurrenceUpdateOne {
+	ouo.mutation.ClearIncludedInSboms()
+	return ouo
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
+func (ouo *OccurrenceUpdateOne) RemoveIncludedInSbomIDs(ids ...int) *OccurrenceUpdateOne {
+	ouo.mutation.RemoveIncludedInSbomIDs(ids...)
+	return ouo
+}
+
+// RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
+func (ouo *OccurrenceUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return ouo.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Where appends a list predicates to the OccurrenceUpdate builder.
@@ -627,6 +745,51 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ouo.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   occurrence.IncludedInSbomsTable,
+			Columns: occurrence.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !ouo.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   occurrence.IncludedInSbomsTable,
+			Columns: occurrence.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ouo.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   occurrence.IncludedInSbomsTable,
+			Columns: occurrence.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

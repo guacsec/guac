@@ -32,7 +32,7 @@ import (
 func TestPkgEqual(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -632,7 +632,7 @@ func TestPkgEqual(t *testing.T) {
 func TestIngestPkgEquals(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -1034,7 +1034,7 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 func Test_buildPkgEqualByID(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}

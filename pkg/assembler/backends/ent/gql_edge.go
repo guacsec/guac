@@ -56,6 +56,18 @@ func (a *Artifact) Same(ctx context.Context) (result []*HashEqual, err error) {
 	return result, err
 }
 
+func (a *Artifact) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = a.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = a.Edges.IncludedInSbomsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = a.QueryIncludedInSboms().All(ctx)
+	}
+	return result, err
+}
+
 func (bom *BillOfMaterials) Package(ctx context.Context) (*PackageVersion, error) {
 	result, err := bom.Edges.PackageOrErr()
 	if IsNotLoaded(err) {
@@ -70,6 +82,54 @@ func (bom *BillOfMaterials) Artifact(ctx context.Context) (*Artifact, error) {
 		result, err = bom.QueryArtifact().Only(ctx)
 	}
 	return result, MaskNotFound(err)
+}
+
+func (bom *BillOfMaterials) IncludedSoftwarePackages(ctx context.Context) (result []*PackageVersion, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = bom.NamedIncludedSoftwarePackages(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = bom.Edges.IncludedSoftwarePackagesOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = bom.QueryIncludedSoftwarePackages().All(ctx)
+	}
+	return result, err
+}
+
+func (bom *BillOfMaterials) IncludedSoftwareArtifacts(ctx context.Context) (result []*Artifact, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = bom.NamedIncludedSoftwareArtifacts(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = bom.Edges.IncludedSoftwareArtifactsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = bom.QueryIncludedSoftwareArtifacts().All(ctx)
+	}
+	return result, err
+}
+
+func (bom *BillOfMaterials) IncludedDependencies(ctx context.Context) (result []*Dependency, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = bom.NamedIncludedDependencies(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = bom.Edges.IncludedDependenciesOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = bom.QueryIncludedDependencies().All(ctx)
+	}
+	return result, err
+}
+
+func (bom *BillOfMaterials) IncludedOccurrences(ctx context.Context) (result []*Occurrence, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = bom.NamedIncludedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = bom.Edges.IncludedOccurrencesOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = bom.QueryIncludedOccurrences().All(ctx)
+	}
+	return result, err
 }
 
 func (b *Builder) SlsaAttestations(ctx context.Context) (result []*SLSAAttestation, err error) {
@@ -236,6 +296,18 @@ func (d *Dependency) DependentPackageVersion(ctx context.Context) (*PackageVersi
 	return result, MaskNotFound(err)
 }
 
+func (d *Dependency) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = d.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = d.Edges.IncludedInSbomsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = d.QueryIncludedInSboms().All(ctx)
+	}
+	return result, err
+}
+
 func (hm *HasMetadata) Source(ctx context.Context) (*SourceName, error) {
 	result, err := hm.Edges.SourceOrErr()
 	if IsNotLoaded(err) {
@@ -368,6 +440,18 @@ func (o *Occurrence) Source(ctx context.Context) (*SourceName, error) {
 	return result, MaskNotFound(err)
 }
 
+func (o *Occurrence) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = o.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = o.Edges.IncludedInSbomsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = o.QueryIncludedInSboms().All(ctx)
+	}
+	return result, err
+}
+
 func (pn *PackageName) Namespace(ctx context.Context) (*PackageNamespace, error) {
 	result, err := pn.Edges.NamespaceOrErr()
 	if IsNotLoaded(err) {
@@ -460,6 +544,18 @@ func (pv *PackageVersion) EqualPackages(ctx context.Context) (result []*PkgEqual
 	}
 	if IsNotLoaded(err) {
 		result, err = pv.QueryEqualPackages().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.IncludedInSbomsOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryIncludedInSboms().All(ctx)
 	}
 	return result, err
 }

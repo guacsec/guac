@@ -47,11 +47,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Go
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version: '1.21'
       - name: Install cosign
-        uses:  sigstore/cosign-installer@1fc5bd396d372bee37d608f955b336615edf79c8 # main
+        uses:  sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # main
       - name: Install syft
         uses: anchore/sbom-action/download-syft@5ecf649a417b8ae17dc8383dc32d46c03f2312df # v0.15.1
 
@@ -116,13 +116,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Trivy in fs mode to generate SBOM
-        uses: aquasecurity/trivy-action@2b6a709cf9c4025c5438138008beaddbb02086f0 # master
+        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601 # master
         with:
           scan-type: 'fs'
           format: 'spdx-json'
           output: 'spdx.sbom.json'
       - name: Install cosign
-        uses: sigstore/cosign-installer@1fc5bd396d372bee37d608f955b336615edf79c8 # main
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # main
       - name: Sign image and sbom
         run: |
           #!/usr/bin/env bash

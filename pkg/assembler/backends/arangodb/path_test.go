@@ -31,7 +31,7 @@ import (
 func Test_Path(t *testing.T) {
 	ctx := context.Background()
 	arangoArg := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArg)
+	err := DeleteDatabase(ctx, arangoArg)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -255,7 +255,7 @@ func Test_Path(t *testing.T) {
 func Test_Nodes(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -994,7 +994,7 @@ func Test_Nodes(t *testing.T) {
 func Test_Neighbors(t *testing.T) {
 	ctx := context.Background()
 	arangoArgs := getArangoConfig()
-	err := deleteDatabase(ctx, arangoArgs)
+	err := DeleteDatabase(ctx, arangoArgs)
 	if err != nil {
 		t.Fatalf("error deleting arango database: %v", err)
 	}
@@ -1043,8 +1043,12 @@ func Test_Neighbors(t *testing.T) {
 		HM    *model.HasMetadataInputSpec
 	}
 	type hasSBOMCall struct {
-		Sub model.PackageOrArtifactInput
-		HS  *model.HasSBOMInputSpec
+		Sub    model.PackageOrArtifactInput
+		HS     *model.HasSBOMInputSpec
+		PkgArt *model.PackageOrArtifactInputs
+		InSrc  []*model.SourceInputSpec
+		IsDeps []testDependency
+		IsOccs []testOccurrence
 	}
 	type hasSlsaCall struct {
 		Sub  *model.ArtifactInputSpec
@@ -2279,6 +2283,62 @@ func Test_Neighbors(t *testing.T) {
 				DownloadLocation: "location two",
 			}},
 	}, {
+		name:  "hasSBOM - Includes",
+		inPkg: []*model.PkgInputSpec{testdata.P2},
+		hasSBOMCall: &hasSBOMCall{
+			Sub: model.PackageOrArtifactInput{
+				Package: testdata.P2,
+			},
+			HS: &model.HasSBOMInputSpec{
+				DownloadLocation: "location two",
+			},
+			PkgArt: includedPackageArtifacts,
+			InSrc:  includedSources,
+			IsDeps: includedTestDependencies,
+			IsOccs: includedTestOccurrences,
+		},
+		queryHasSbomID: true,
+		want: []model.Node{
+			testdata.P2out,
+			includedTestExpectedArtifact1,
+			includedTestExpectedArtifact2,
+			includedTestExpectedPackage1,
+			includedTestExpectedPackage2,
+			includedTestExpectedPackage3,
+			&model.IsDependency{
+				Package:           includedTestExpectedPackage1,
+				DependencyPackage: includedTestExpectedPackage2,
+				VersionRange:      "dep1_range",
+				DependencyType:    model.DependencyTypeDirect,
+				Justification:     "dep1_justification",
+				Origin:            "dep1_origin",
+				Collector:         "dep1_collector",
+			},
+			&model.IsDependency{
+				Package:           includedTestExpectedPackage1,
+				DependencyPackage: includedTestExpectedPackage3,
+				VersionRange:      "dep2_range",
+				DependencyType:    model.DependencyTypeIndirect,
+				Justification:     "dep2_justification",
+				Origin:            "dep2_origin",
+				Collector:         "dep2_collector",
+			},
+			&model.IsOccurrence{
+				Subject:       includedTestExpectedPackage1,
+				Artifact:      includedTestExpectedArtifact1,
+				Justification: "occ_justification",
+				Origin:        "occ_origin",
+				Collector:     "occ_collector",
+			},
+			&model.IsOccurrence{
+				Subject:       includedTestExpectedSource,
+				Artifact:      includedTestExpectedArtifact1,
+				Justification: "occ_justification",
+				Origin:        "occ_origin",
+				Collector:     "occ_collector",
+			},
+		},
+	}, {
 		name:  "hasSBOM - hasSbomID - artifact",
 		inArt: []*model.ArtifactInputSpec{testdata.A2},
 		hasSBOMCall: &hasSBOMCall{
@@ -3386,8 +3446,45 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			if tt.hasSBOMCall != nil {
-				// TODO (knrc) handle includes
-				hsID, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, model.HasSBOMIncludesInputSpec{})
+				includes := model.HasSBOMIncludesInputSpec{}
+				for _, s := range tt.hasSBOMCall.InSrc {
+					if _, err := b.IngestSource(ctx, *s); err != nil {
+						t.Fatalf("Could not ingest source: %v", err)
+					}
+				}
+				if tt.hasSBOMCall.PkgArt != nil {
+					if pkgs, err := b.IngestPackages(ctx, tt.hasSBOMCall.PkgArt.Packages); err != nil {
+						t.Fatalf("Could not ingest package: %v", err)
+					} else {
+						for _, pkg := range pkgs {
+							includes.Software = append(includes.Software, pkg.PackageVersionID)
+						}
+					}
+					if arts, err := b.IngestArtifacts(ctx, tt.hasSBOMCall.PkgArt.Artifacts); err != nil {
+						t.Fatalf("Could not ingest artifact: %v", err)
+					} else {
+						if arts != nil {
+							includes.Software = append(includes.Software, arts...)
+						}
+					}
+				}
+
+				for _, dep := range tt.hasSBOMCall.IsDeps {
+					if isDep, err := b.IngestDependency(ctx, *dep.pkg, *dep.depPkg, dep.matchType, *dep.isDep); err != nil {
+						t.Fatalf("Could not ingest dependency: %v", err)
+					} else {
+						includes.Dependencies = append(includes.Dependencies, isDep)
+					}
+				}
+
+				for _, occ := range tt.hasSBOMCall.IsOccs {
+					if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, *occ.Art, *occ.isOcc); err != nil {
+						t.Fatalf("Could not ingest occurrence: %v", err)
+					} else {
+						includes.Occurrences = append(includes.Occurrences, isOcc)
+					}
+				}
+				hsID, err := b.IngestHasSbom(ctx, tt.hasSBOMCall.Sub, *tt.hasSBOMCall.HS, includes)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}

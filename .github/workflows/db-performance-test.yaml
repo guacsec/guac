@@ -30,9 +30,9 @@ jobs:
   build:
     uses: ./.github/workflows/reusable-local-build.yaml
     with:
-      repository: 'guacsec/guac'
-      ref: 'main'
-  
+      repository: ${{ github.repository}}
+      ref: ${{ github.ref }}
+
   db-performance:
     needs: [build]
     runs-on: ubuntu-latest
@@ -40,6 +40,8 @@ jobs:
       matrix:
         database:
           - inmem
+          - redis
+          - tikv
           - arango
           - ent
     outputs:
@@ -56,7 +58,7 @@ jobs:
           ref: 'main'
           path: 'guac-data'
       - name: Download artifact files
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: guac-artifacts
           path: ./bin
@@ -65,7 +67,7 @@ jobs:
           chmod +x *
           ls -la
         working-directory: ./bin
-      - name: Load images 
+      - name: Load images
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
@@ -77,8 +79,14 @@ jobs:
             GUAC_IMAGE: 'local-organic-guac'
             GUAC_API_PORT: '8080'
         run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
           if [ ${{ matrix.database }} == "inmem" ]; then
             make start-inmem-db
+          elif [ ${{ matrix.database }} == redis ]; then
+            make start-redis-db
+          elif [ ${{ matrix.database }} == tikv ]; then
+            make start-tikv-db
           elif [ ${{ matrix.database }} == "arango" ]; then
             make start-arango-db
           elif [ ${{ matrix.database }} == "ent" ]; then
@@ -97,10 +105,9 @@ jobs:
           grep "completed ingesting" output
           end=$(date -u +%s)
           elapsed_time=$((end - start))
-  
           printf "%-15s%-20s%-15s%s seconds\n" "Ingestion" "${{ matrix.database }}" "$elapsed_time"
           echo "elapsed_time=$elapsed_time" >> $GITHUB_OUTPUT
-      ## Write for matrix outputs workaround 
+      ## Write for matrix outputs workaround
       - uses: cloudposse/github-action-matrix-outputs-write@main
         id: out-ingestion
         with:
@@ -111,21 +118,18 @@ jobs:
       - name: Run query tests with ${{ matrix.database }}
         id: query_test
         run: |
-          if [ ${{ matrix.database }} == "inmem" ]; then
-            #!/usr/bin/env bash
-            set -euo pipefail
-            echo "Running query tests..."
-            start=$(date -u +%s)
-            ./bin/guacone certifier osv > output 2>&1
-            ./bin/guacone query vuln "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" > output 2>&1
-            grep "Visualizer url" output
-            end=$(date -u +%s)
-            query_time=$((end - start))
-  
-            printf "%-15s%-20s%-15s%s seconds\n" "Query" "${{ matrix.database }}" "$query_time"
-            echo "query_time=$query_time" >> $GITHUB_OUTPUT
-          fi
-      ## Write for matrix outputs workaround 
+          #!/usr/bin/env bash
+          set -euo pipefail
+          echo "Running query tests..."
+          start=$(date -u +%s)
+          ./bin/guacone certifier osv --poll=false > output 2>&1
+          ./bin/guacone query vuln "pkg:guac/spdx/ghcr.io/guacsec/vul-image-latest" > output 2>&1
+          grep "Visualizer url" output
+          end=$(date -u +%s)
+          query_time=$((end - start))
+          printf "%-15s%-20s%-15s%s seconds\n" "Query" "${{ matrix.database }}" "$query_time"
+          echo "query_time=$query_time" >> $GITHUB_OUTPUT
+      ## Write for matrix outputs workaround
       - uses: cloudposse/github-action-matrix-outputs-write@main
         id: out-query
         with:
@@ -133,7 +137,7 @@ jobs:
           matrix-key: ${{ matrix.database }}
           outputs: |-
             query_time: ${{ steps.query_test.outputs.query_time }}
-  ## Read matrix outputs 
+  ## Read matrix outputs
   read:
     runs-on: ubuntu-latest
     needs: [db-performance]
@@ -143,13 +147,13 @@ jobs:
         with:
           matrix-step-name: run_test
       - run: |
-          echo "result: ${{ steps.ingestion.outputs.result }}" 
+          echo "result: ${{ steps.ingestion.outputs.result }}"
       - uses: cloudposse/github-action-matrix-outputs-read@main
         id: query
         with:
           matrix-step-name: query_test
       - run: |
-          echo "result: ${{ steps.query.outputs.result }}" 
+          echo "result: ${{ steps.query.outputs.result }}"
     outputs:
       result: "${{ steps.ingestion.outputs.result }}"
       query_result: "${{ steps.query.outputs.result }}"
@@ -163,14 +167,22 @@ jobs:
           printf "%-15s%-20s%s\n" "----" "--------------" "----"
           printf "%-15s%-20s%s seconds\n" "Ingestion" "inmem" "${{ env.inmem }}"
           printf "%-15s%-20s%s seconds\n" "Ingestion" "arango" "${{ env.arango }}"
+          printf "%-15s%-20s%s seconds\n" "Ingestion" "redis" "${{ env.redis }}"
+          printf "%-15s%-20s%s seconds\n" "Ingestion" "tikv" "${{ env.tikv }}"
           printf "%-15s%-20s%s seconds\n" "Ingestion" "ent" "${{ env.ent }}"
           printf "%-15s%-20s%s seconds\n" "Query" "inmem" "${{ env.inmem_query }}"
           printf "%-15s%-20s%s seconds\n" "Query" "arango" "${{ env.arango_query }}"
+          printf "%-15s%-20s%s seconds\n" "Query" "redis" "${{ env.redis_query }}"
+          printf "%-15s%-20s%s seconds\n" "Query" "tikv" "${{ env.tikv_query }}"
           printf "%-15s%-20s%s seconds\n" "Query" "ent" "${{ env.ent_query }}"
         env:
           inmem: ${{ fromJson(needs.read.outputs.result).elapsed_time.inmem }}
           arango: ${{ fromJson(needs.read.outputs.result).elapsed_time.arango }}
+          redis: ${{ fromJson(needs.read.outputs.result).elapsed_time.redis }}
+          tikv: ${{ fromJson(needs.read.outputs.result).elapsed_time.tikv }}
           ent: ${{ fromJson(needs.read.outputs.result).elapsed_time.ent }}
           inmem_query: ${{ fromJson(needs.read.outputs.query_result).query_time.inmem }}
           arango_query: ${{ fromJson(needs.read.outputs.query_result).query_time.arango }}
+          redis_query: ${{ fromJson(needs.read.outputs.query_result).query_time.redis }}
+          tikv_query: ${{ fromJson(needs.read.outputs.query_result).query_time.tikv }}
           ent_query: ${{ fromJson(needs.read.outputs.query_result).query_time.ent }}

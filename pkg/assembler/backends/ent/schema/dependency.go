@@ -64,6 +64,7 @@ func (Dependency) Edges() []ent.Edge {
 		edge.To("dependent_package_version", PackageVersion.Type).
 			Field("dependent_package_version_id").
 			Unique(),
+		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_dependencies"),
 	}
 }
 

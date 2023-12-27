@@ -38,6 +38,8 @@ const (
 	EdgeDependentPackageName = "dependent_package_name"
 	// EdgeDependentPackageVersion holds the string denoting the dependent_package_version edge name in mutations.
 	EdgeDependentPackageVersion = "dependent_package_version"
+	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
+	EdgeIncludedInSboms = "included_in_sboms"
 	// Table holds the table name of the dependency in the database.
 	Table = "dependencies"
 	// PackageTable is the table that holds the package relation/edge.
@@ -61,6 +63,11 @@ const (
 	DependentPackageVersionInverseTable = "package_versions"
 	// DependentPackageVersionColumn is the table column denoting the dependent_package_version relation/edge.
 	DependentPackageVersionColumn = "dependent_package_version_id"
+	// IncludedInSbomsTable is the table that holds the included_in_sboms relation/edge. The primary key declared below.
+	IncludedInSbomsTable = "bill_of_materials_included_dependencies"
+	// IncludedInSbomsInverseTable is the table name for the BillOfMaterials entity.
+	// It exists in this package in order to avoid circular dependency with the "billofmaterials" package.
+	IncludedInSbomsInverseTable = "bill_of_materials"
 )
 
 // Columns holds all SQL columns for dependency fields.
@@ -75,6 +82,12 @@ var Columns = []string{
 	FieldOrigin,
 	FieldCollector,
 }
+
+var (
+	// IncludedInSbomsPrimaryKey and IncludedInSbomsColumn2 are the table columns denoting the
+	// primary key for the included_in_sboms relation (M2M).
+	IncludedInSbomsPrimaryKey = []string{"bill_of_materials_id", "dependency_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -178,6 +191,20 @@ func ByDependentPackageVersionField(field string, opts ...sql.OrderTermOption) O
 		sqlgraph.OrderByNeighborTerms(s, newDependentPackageVersionStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByIncludedInSbomsCount orders the results by included_in_sboms count.
+func ByIncludedInSbomsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIncludedInSbomsStep(), opts...)
+	}
+}
+
+// ByIncludedInSboms orders the results by included_in_sboms terms.
+func ByIncludedInSboms(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIncludedInSbomsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newPackageStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -197,6 +224,13 @@ func newDependentPackageVersionStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(DependentPackageVersionInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, DependentPackageVersionTable, DependentPackageVersionColumn),
+	)
+}
+func newIncludedInSbomsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IncludedInSbomsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, IncludedInSbomsTable, IncludedInSbomsPrimaryKey...),
 	)
 }
 

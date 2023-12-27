@@ -22,6 +22,7 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -679,4 +680,65 @@ func (c *arangoClient) isOccurrenceNeighbors(ctx context.Context, nodeID string,
 	}
 
 	return out, nil
+}
+
+func matchOccurrences(ctx context.Context, filters []*model.IsOccurrenceSpec, occurs []*model.IsOccurrence) bool {
+	if len(filters) > 0 {
+		var occurIDs []string
+		for _, occur := range occurs {
+			occurIDs = append(occurIDs, occur.ID)
+		}
+
+		for _, filter := range filters {
+			if filter == nil {
+				continue
+			}
+			if filter.ID != nil {
+				// Check by ID if present
+				if !helper.IsIDPresent(*filter.ID, occurIDs) {
+					return false
+				}
+			} else {
+				// Otherwise match spec information
+				match := false
+				for _, link := range occurs {
+					if !noMatch(filter.Justification, link.Justification) &&
+						!noMatch(filter.Origin, link.Origin) &&
+						!noMatch(filter.Collector, link.Collector) {
+
+						if filter.Artifact != nil && !containsMatchingArtifact([]*model.Artifact{link.Artifact}, filter.Artifact.ID, filter.Artifact.Algorithm, filter.Artifact.Digest) {
+							continue
+						}
+
+						matchSubject := false
+						if filter.Subject != nil {
+							switch subject := link.Subject.(type) {
+							case *model.Package:
+								if filter.Subject.Source != nil || (filter.Subject.Package != nil && !matchPackages(ctx, []*model.PkgSpec{filter.Subject.Package}, []*model.Package{subject})) {
+									matchSubject = false
+								} else {
+									matchSubject = true
+								}
+							case *model.Source:
+								if filter.Subject.Package != nil || (filter.Subject.Source != nil && !matchSources(ctx, []*model.SourceSpec{filter.Subject.Source}, []*model.Source{subject})) {
+									matchSubject = false
+								} else {
+									matchSubject = true
+								}
+							}
+							if !matchSubject {
+								continue
+							}
+						}
+						match = true
+						break
+					}
+				}
+				if !match {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }

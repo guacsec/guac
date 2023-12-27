@@ -1,0 +1,40 @@
+version: "3.9"
+
+volumes:
+  redis_guac_data:
+services:
+  guac-graphql:
+    networks: [frontend]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacgql"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      nats:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "$GUAC_API_PORT:8080"
+    volumes:
+      - ./container_files/redis:/guac:z
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+  redis:
+    networks: [frontend]
+    image: cgr.dev/chainguard/redis
+    ports:
+    - "6379:6379"
+    restart: on-failure
+    volumes:
+    - redis_guac_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 1s

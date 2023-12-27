@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 )
 
@@ -102,6 +104,66 @@ func (bomc *BillOfMaterialsCreate) SetPackage(p *PackageVersion) *BillOfMaterial
 // SetArtifact sets the "artifact" edge to the Artifact entity.
 func (bomc *BillOfMaterialsCreate) SetArtifact(a *Artifact) *BillOfMaterialsCreate {
 	return bomc.SetArtifactID(a.ID)
+}
+
+// AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by IDs.
+func (bomc *BillOfMaterialsCreate) AddIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsCreate {
+	bomc.mutation.AddIncludedSoftwarePackageIDs(ids...)
+	return bomc
+}
+
+// AddIncludedSoftwarePackages adds the "included_software_packages" edges to the PackageVersion entity.
+func (bomc *BillOfMaterialsCreate) AddIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return bomc.AddIncludedSoftwarePackageIDs(ids...)
+}
+
+// AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by IDs.
+func (bomc *BillOfMaterialsCreate) AddIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsCreate {
+	bomc.mutation.AddIncludedSoftwareArtifactIDs(ids...)
+	return bomc
+}
+
+// AddIncludedSoftwareArtifacts adds the "included_software_artifacts" edges to the Artifact entity.
+func (bomc *BillOfMaterialsCreate) AddIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return bomc.AddIncludedSoftwareArtifactIDs(ids...)
+}
+
+// AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by IDs.
+func (bomc *BillOfMaterialsCreate) AddIncludedDependencyIDs(ids ...int) *BillOfMaterialsCreate {
+	bomc.mutation.AddIncludedDependencyIDs(ids...)
+	return bomc
+}
+
+// AddIncludedDependencies adds the "included_dependencies" edges to the Dependency entity.
+func (bomc *BillOfMaterialsCreate) AddIncludedDependencies(d ...*Dependency) *BillOfMaterialsCreate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return bomc.AddIncludedDependencyIDs(ids...)
+}
+
+// AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by IDs.
+func (bomc *BillOfMaterialsCreate) AddIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsCreate {
+	bomc.mutation.AddIncludedOccurrenceIDs(ids...)
+	return bomc
+}
+
+// AddIncludedOccurrences adds the "included_occurrences" edges to the Occurrence entity.
+func (bomc *BillOfMaterialsCreate) AddIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsCreate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return bomc.AddIncludedOccurrenceIDs(ids...)
 }
 
 // Mutation returns the BillOfMaterialsMutation object of the builder.
@@ -246,6 +308,70 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ArtifactID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bomc.mutation.IncludedSoftwarePackagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwarePackagesTable,
+			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bomc.mutation.IncludedSoftwareArtifactsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedSoftwareArtifactsTable,
+			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bomc.mutation.IncludedDependenciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedDependenciesTable,
+			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bomc.mutation.IncludedOccurrencesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   billofmaterials.IncludedOccurrencesTable,
+			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

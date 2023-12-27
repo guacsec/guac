@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
@@ -32,38 +33,13 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 		return nil, nil
 	}
 
-	query := b.client.Dependency.Query().Order(ent.Asc(dependency.FieldID)).Limit(MaxPageSize)
-	query.Where(
-		optionalPredicate(spec.ID, IDEQ),
-		optionalPredicate(spec.VersionRange, dependency.VersionRange),
-		optionalPredicate(spec.Justification, dependency.Justification),
-		optionalPredicate(spec.Origin, dependency.Origin),
-		optionalPredicate(spec.Collector, dependency.Collector),
-	)
-	if spec.DependencyPackage != nil {
-		if spec.DependencyPackage.Version == nil {
-			query.Where(
-				dependency.Or(
-					dependency.HasDependentPackageNameWith(packageNameQuery(spec.DependencyPackage)),
-					dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependencyPackage)),
-				),
-			)
-		} else {
-			query.Where(dependency.HasDependentPackageVersionWith(packageVersionQuery(spec.DependencyPackage)))
-		}
-	}
-	if spec.Package != nil {
-		query.Where(dependency.HasPackageWith(packageVersionQuery(spec.Package)))
-	}
-
-	if spec.DependencyType != nil {
-		query.Where(dependency.DependencyTypeEQ(dependencyTypeToEnum(*spec.DependencyType)))
-	}
-
-	deps, err := query.
+	deps, err := b.client.Dependency.Query().
+		Where(isDependencyQuery(spec)).
 		WithPackage(withPackageVersionTree()).
 		WithDependentPackageName(withPackageNameTree()).
 		WithDependentPackageVersion(withPackageVersionTree()).
+		Order(ent.Asc(dependency.FieldID)).
+		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, funcName)
@@ -177,4 +153,39 @@ func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
 	default:
 		return dependency.DependencyTypeUNKNOWN
 	}
+}
+
+func isDependencyQuery(filter *model.IsDependencySpec) predicate.Dependency {
+	if filter == nil {
+		return NoOpSelector()
+	}
+
+	predicates := []predicate.Dependency{
+		optionalPredicate(filter.ID, IDEQ),
+		optionalPredicate(filter.VersionRange, dependency.VersionRange),
+		optionalPredicate(filter.Justification, dependency.Justification),
+		optionalPredicate(filter.Origin, dependency.Origin),
+		optionalPredicate(filter.Collector, dependency.Collector),
+	}
+	if filter.DependencyPackage != nil {
+		if filter.DependencyPackage.Version == nil {
+			predicates = append(predicates,
+				dependency.Or(
+					dependency.HasDependentPackageNameWith(packageNameQuery(filter.DependencyPackage)),
+					dependency.HasDependentPackageVersionWith(packageVersionQuery(filter.DependencyPackage)),
+				),
+			)
+		} else {
+			predicates = append(predicates, dependency.HasDependentPackageVersionWith(packageVersionQuery(filter.DependencyPackage)))
+		}
+	}
+	if filter.Package != nil {
+		predicates = append(predicates, dependency.HasPackageWith(packageVersionQuery(filter.Package)))
+	}
+
+	if filter.DependencyType != nil {
+		predicates = append(predicates, dependency.DependencyTypeEQ(dependencyTypeToEnum(*filter.DependencyType)))
+	}
+
+	return dependency.And(predicates...)
 }

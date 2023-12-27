@@ -34,6 +34,14 @@ const (
 	EdgePackage = "package"
 	// EdgeArtifact holds the string denoting the artifact edge name in mutations.
 	EdgeArtifact = "artifact"
+	// EdgeIncludedSoftwarePackages holds the string denoting the included_software_packages edge name in mutations.
+	EdgeIncludedSoftwarePackages = "included_software_packages"
+	// EdgeIncludedSoftwareArtifacts holds the string denoting the included_software_artifacts edge name in mutations.
+	EdgeIncludedSoftwareArtifacts = "included_software_artifacts"
+	// EdgeIncludedDependencies holds the string denoting the included_dependencies edge name in mutations.
+	EdgeIncludedDependencies = "included_dependencies"
+	// EdgeIncludedOccurrences holds the string denoting the included_occurrences edge name in mutations.
+	EdgeIncludedOccurrences = "included_occurrences"
 	// Table holds the table name of the billofmaterials in the database.
 	Table = "bill_of_materials"
 	// PackageTable is the table that holds the package relation/edge.
@@ -50,6 +58,26 @@ const (
 	ArtifactInverseTable = "artifacts"
 	// ArtifactColumn is the table column denoting the artifact relation/edge.
 	ArtifactColumn = "artifact_id"
+	// IncludedSoftwarePackagesTable is the table that holds the included_software_packages relation/edge. The primary key declared below.
+	IncludedSoftwarePackagesTable = "bill_of_materials_included_software_packages"
+	// IncludedSoftwarePackagesInverseTable is the table name for the PackageVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "packageversion" package.
+	IncludedSoftwarePackagesInverseTable = "package_versions"
+	// IncludedSoftwareArtifactsTable is the table that holds the included_software_artifacts relation/edge. The primary key declared below.
+	IncludedSoftwareArtifactsTable = "bill_of_materials_included_software_artifacts"
+	// IncludedSoftwareArtifactsInverseTable is the table name for the Artifact entity.
+	// It exists in this package in order to avoid circular dependency with the "artifact" package.
+	IncludedSoftwareArtifactsInverseTable = "artifacts"
+	// IncludedDependenciesTable is the table that holds the included_dependencies relation/edge. The primary key declared below.
+	IncludedDependenciesTable = "bill_of_materials_included_dependencies"
+	// IncludedDependenciesInverseTable is the table name for the Dependency entity.
+	// It exists in this package in order to avoid circular dependency with the "dependency" package.
+	IncludedDependenciesInverseTable = "dependencies"
+	// IncludedOccurrencesTable is the table that holds the included_occurrences relation/edge. The primary key declared below.
+	IncludedOccurrencesTable = "bill_of_materials_included_occurrences"
+	// IncludedOccurrencesInverseTable is the table name for the Occurrence entity.
+	// It exists in this package in order to avoid circular dependency with the "occurrence" package.
+	IncludedOccurrencesInverseTable = "occurrences"
 )
 
 // Columns holds all SQL columns for billofmaterials fields.
@@ -65,6 +93,21 @@ var Columns = []string{
 	FieldCollector,
 	FieldKnownSince,
 }
+
+var (
+	// IncludedSoftwarePackagesPrimaryKey and IncludedSoftwarePackagesColumn2 are the table columns denoting the
+	// primary key for the included_software_packages relation (M2M).
+	IncludedSoftwarePackagesPrimaryKey = []string{"bill_of_materials_id", "package_version_id"}
+	// IncludedSoftwareArtifactsPrimaryKey and IncludedSoftwareArtifactsColumn2 are the table columns denoting the
+	// primary key for the included_software_artifacts relation (M2M).
+	IncludedSoftwareArtifactsPrimaryKey = []string{"bill_of_materials_id", "artifact_id"}
+	// IncludedDependenciesPrimaryKey and IncludedDependenciesColumn2 are the table columns denoting the
+	// primary key for the included_dependencies relation (M2M).
+	IncludedDependenciesPrimaryKey = []string{"bill_of_materials_id", "dependency_id"}
+	// IncludedOccurrencesPrimaryKey and IncludedOccurrencesColumn2 are the table columns denoting the
+	// primary key for the included_occurrences relation (M2M).
+	IncludedOccurrencesPrimaryKey = []string{"bill_of_materials_id", "occurrence_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -142,6 +185,62 @@ func ByArtifactField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newArtifactStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByIncludedSoftwarePackagesCount orders the results by included_software_packages count.
+func ByIncludedSoftwarePackagesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIncludedSoftwarePackagesStep(), opts...)
+	}
+}
+
+// ByIncludedSoftwarePackages orders the results by included_software_packages terms.
+func ByIncludedSoftwarePackages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIncludedSoftwarePackagesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByIncludedSoftwareArtifactsCount orders the results by included_software_artifacts count.
+func ByIncludedSoftwareArtifactsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIncludedSoftwareArtifactsStep(), opts...)
+	}
+}
+
+// ByIncludedSoftwareArtifacts orders the results by included_software_artifacts terms.
+func ByIncludedSoftwareArtifacts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIncludedSoftwareArtifactsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByIncludedDependenciesCount orders the results by included_dependencies count.
+func ByIncludedDependenciesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIncludedDependenciesStep(), opts...)
+	}
+}
+
+// ByIncludedDependencies orders the results by included_dependencies terms.
+func ByIncludedDependencies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIncludedDependenciesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByIncludedOccurrencesCount orders the results by included_occurrences count.
+func ByIncludedOccurrencesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIncludedOccurrencesStep(), opts...)
+	}
+}
+
+// ByIncludedOccurrences orders the results by included_occurrences terms.
+func ByIncludedOccurrences(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIncludedOccurrencesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newPackageStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -154,5 +253,33 @@ func newArtifactStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ArtifactInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, ArtifactTable, ArtifactColumn),
+	)
+}
+func newIncludedSoftwarePackagesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IncludedSoftwarePackagesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, IncludedSoftwarePackagesTable, IncludedSoftwarePackagesPrimaryKey...),
+	)
+}
+func newIncludedSoftwareArtifactsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IncludedSoftwareArtifactsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, IncludedSoftwareArtifactsTable, IncludedSoftwareArtifactsPrimaryKey...),
+	)
+}
+func newIncludedDependenciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IncludedDependenciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, IncludedDependenciesTable, IncludedDependenciesPrimaryKey...),
+	)
+}
+func newIncludedOccurrencesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IncludedOccurrencesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, IncludedOccurrencesTable, IncludedOccurrencesPrimaryKey...),
 	)
 }

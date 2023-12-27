@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -168,6 +169,21 @@ func (du *DependencyUpdate) SetDependentPackageVersion(p *PackageVersion) *Depen
 	return du.SetDependentPackageVersionID(p.ID)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (du *DependencyUpdate) AddIncludedInSbomIDs(ids ...int) *DependencyUpdate {
+	du.mutation.AddIncludedInSbomIDs(ids...)
+	return du
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (du *DependencyUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return du.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the DependencyMutation object of the builder.
 func (du *DependencyUpdate) Mutation() *DependencyMutation {
 	return du.mutation
@@ -189,6 +205,27 @@ func (du *DependencyUpdate) ClearDependentPackageName() *DependencyUpdate {
 func (du *DependencyUpdate) ClearDependentPackageVersion() *DependencyUpdate {
 	du.mutation.ClearDependentPackageVersion()
 	return du
+}
+
+// ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
+func (du *DependencyUpdate) ClearIncludedInSboms() *DependencyUpdate {
+	du.mutation.ClearIncludedInSboms()
+	return du
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
+func (du *DependencyUpdate) RemoveIncludedInSbomIDs(ids ...int) *DependencyUpdate {
+	du.mutation.RemoveIncludedInSbomIDs(ids...)
+	return du
+}
+
+// RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
+func (du *DependencyUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return du.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -338,6 +375,51 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if du.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dependency.IncludedInSbomsTable,
+			Columns: dependency.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !du.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dependency.IncludedInSbomsTable,
+			Columns: dependency.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dependency.IncludedInSbomsTable,
+			Columns: dependency.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -504,6 +586,21 @@ func (duo *DependencyUpdateOne) SetDependentPackageVersion(p *PackageVersion) *D
 	return duo.SetDependentPackageVersionID(p.ID)
 }
 
+// AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
+func (duo *DependencyUpdateOne) AddIncludedInSbomIDs(ids ...int) *DependencyUpdateOne {
+	duo.mutation.AddIncludedInSbomIDs(ids...)
+	return duo
+}
+
+// AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
+func (duo *DependencyUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return duo.AddIncludedInSbomIDs(ids...)
+}
+
 // Mutation returns the DependencyMutation object of the builder.
 func (duo *DependencyUpdateOne) Mutation() *DependencyMutation {
 	return duo.mutation
@@ -525,6 +622,27 @@ func (duo *DependencyUpdateOne) ClearDependentPackageName() *DependencyUpdateOne
 func (duo *DependencyUpdateOne) ClearDependentPackageVersion() *DependencyUpdateOne {
 	duo.mutation.ClearDependentPackageVersion()
 	return duo
+}
+
+// ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
+func (duo *DependencyUpdateOne) ClearIncludedInSboms() *DependencyUpdateOne {
+	duo.mutation.ClearIncludedInSboms()
+	return duo
+}
+
+// RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
+func (duo *DependencyUpdateOne) RemoveIncludedInSbomIDs(ids ...int) *DependencyUpdateOne {
+	duo.mutation.RemoveIncludedInSbomIDs(ids...)
+	return duo
+}
+
+// RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
+func (duo *DependencyUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return duo.RemoveIncludedInSbomIDs(ids...)
 }
 
 // Where appends a list predicates to the DependencyUpdate builder.
@@ -704,6 +822,51 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if duo.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dependency.IncludedInSbomsTable,
+			Columns: dependency.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.RemovedIncludedInSbomsIDs(); len(nodes) > 0 && !duo.mutation.IncludedInSbomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dependency.IncludedInSbomsTable,
+			Columns: dependency.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dependency.IncludedInSbomsTable,
+			Columns: dependency.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

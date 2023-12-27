@@ -49,11 +49,24 @@ type BillOfMaterialsEdges struct {
 	Package *PackageVersion `json:"package,omitempty"`
 	// Artifact holds the value of the artifact edge.
 	Artifact *Artifact `json:"artifact,omitempty"`
+	// IncludedSoftwarePackages holds the value of the included_software_packages edge.
+	IncludedSoftwarePackages []*PackageVersion `json:"included_software_packages,omitempty"`
+	// IncludedSoftwareArtifacts holds the value of the included_software_artifacts edge.
+	IncludedSoftwareArtifacts []*Artifact `json:"included_software_artifacts,omitempty"`
+	// IncludedDependencies holds the value of the included_dependencies edge.
+	IncludedDependencies []*Dependency `json:"included_dependencies,omitempty"`
+	// IncludedOccurrences holds the value of the included_occurrences edge.
+	IncludedOccurrences []*Occurrence `json:"included_occurrences,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [6]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]map[string]int
+	totalCount [6]map[string]int
+
+	namedIncludedSoftwarePackages  map[string][]*PackageVersion
+	namedIncludedSoftwareArtifacts map[string][]*Artifact
+	namedIncludedDependencies      map[string][]*Dependency
+	namedIncludedOccurrences       map[string][]*Occurrence
 }
 
 // PackageOrErr returns the Package value or an error if the edge
@@ -80,6 +93,42 @@ func (e BillOfMaterialsEdges) ArtifactOrErr() (*Artifact, error) {
 		return e.Artifact, nil
 	}
 	return nil, &NotLoadedError{edge: "artifact"}
+}
+
+// IncludedSoftwarePackagesOrErr returns the IncludedSoftwarePackages value or an error if the edge
+// was not loaded in eager-loading.
+func (e BillOfMaterialsEdges) IncludedSoftwarePackagesOrErr() ([]*PackageVersion, error) {
+	if e.loadedTypes[2] {
+		return e.IncludedSoftwarePackages, nil
+	}
+	return nil, &NotLoadedError{edge: "included_software_packages"}
+}
+
+// IncludedSoftwareArtifactsOrErr returns the IncludedSoftwareArtifacts value or an error if the edge
+// was not loaded in eager-loading.
+func (e BillOfMaterialsEdges) IncludedSoftwareArtifactsOrErr() ([]*Artifact, error) {
+	if e.loadedTypes[3] {
+		return e.IncludedSoftwareArtifacts, nil
+	}
+	return nil, &NotLoadedError{edge: "included_software_artifacts"}
+}
+
+// IncludedDependenciesOrErr returns the IncludedDependencies value or an error if the edge
+// was not loaded in eager-loading.
+func (e BillOfMaterialsEdges) IncludedDependenciesOrErr() ([]*Dependency, error) {
+	if e.loadedTypes[4] {
+		return e.IncludedDependencies, nil
+	}
+	return nil, &NotLoadedError{edge: "included_dependencies"}
+}
+
+// IncludedOccurrencesOrErr returns the IncludedOccurrences value or an error if the edge
+// was not loaded in eager-loading.
+func (e BillOfMaterialsEdges) IncludedOccurrencesOrErr() ([]*Occurrence, error) {
+	if e.loadedTypes[5] {
+		return e.IncludedOccurrences, nil
+	}
+	return nil, &NotLoadedError{edge: "included_occurrences"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -193,6 +242,26 @@ func (bom *BillOfMaterials) QueryArtifact() *ArtifactQuery {
 	return NewBillOfMaterialsClient(bom.config).QueryArtifact(bom)
 }
 
+// QueryIncludedSoftwarePackages queries the "included_software_packages" edge of the BillOfMaterials entity.
+func (bom *BillOfMaterials) QueryIncludedSoftwarePackages() *PackageVersionQuery {
+	return NewBillOfMaterialsClient(bom.config).QueryIncludedSoftwarePackages(bom)
+}
+
+// QueryIncludedSoftwareArtifacts queries the "included_software_artifacts" edge of the BillOfMaterials entity.
+func (bom *BillOfMaterials) QueryIncludedSoftwareArtifacts() *ArtifactQuery {
+	return NewBillOfMaterialsClient(bom.config).QueryIncludedSoftwareArtifacts(bom)
+}
+
+// QueryIncludedDependencies queries the "included_dependencies" edge of the BillOfMaterials entity.
+func (bom *BillOfMaterials) QueryIncludedDependencies() *DependencyQuery {
+	return NewBillOfMaterialsClient(bom.config).QueryIncludedDependencies(bom)
+}
+
+// QueryIncludedOccurrences queries the "included_occurrences" edge of the BillOfMaterials entity.
+func (bom *BillOfMaterials) QueryIncludedOccurrences() *OccurrenceQuery {
+	return NewBillOfMaterialsClient(bom.config).QueryIncludedOccurrences(bom)
+}
+
 // Update returns a builder for updating this BillOfMaterials.
 // Note that you need to call BillOfMaterials.Unwrap() before calling this method if this BillOfMaterials
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -248,6 +317,102 @@ func (bom *BillOfMaterials) String() string {
 	builder.WriteString(bom.KnownSince.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedIncludedSoftwarePackages returns the IncludedSoftwarePackages named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (bom *BillOfMaterials) NamedIncludedSoftwarePackages(name string) ([]*PackageVersion, error) {
+	if bom.Edges.namedIncludedSoftwarePackages == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := bom.Edges.namedIncludedSoftwarePackages[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (bom *BillOfMaterials) appendNamedIncludedSoftwarePackages(name string, edges ...*PackageVersion) {
+	if bom.Edges.namedIncludedSoftwarePackages == nil {
+		bom.Edges.namedIncludedSoftwarePackages = make(map[string][]*PackageVersion)
+	}
+	if len(edges) == 0 {
+		bom.Edges.namedIncludedSoftwarePackages[name] = []*PackageVersion{}
+	} else {
+		bom.Edges.namedIncludedSoftwarePackages[name] = append(bom.Edges.namedIncludedSoftwarePackages[name], edges...)
+	}
+}
+
+// NamedIncludedSoftwareArtifacts returns the IncludedSoftwareArtifacts named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (bom *BillOfMaterials) NamedIncludedSoftwareArtifacts(name string) ([]*Artifact, error) {
+	if bom.Edges.namedIncludedSoftwareArtifacts == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := bom.Edges.namedIncludedSoftwareArtifacts[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (bom *BillOfMaterials) appendNamedIncludedSoftwareArtifacts(name string, edges ...*Artifact) {
+	if bom.Edges.namedIncludedSoftwareArtifacts == nil {
+		bom.Edges.namedIncludedSoftwareArtifacts = make(map[string][]*Artifact)
+	}
+	if len(edges) == 0 {
+		bom.Edges.namedIncludedSoftwareArtifacts[name] = []*Artifact{}
+	} else {
+		bom.Edges.namedIncludedSoftwareArtifacts[name] = append(bom.Edges.namedIncludedSoftwareArtifacts[name], edges...)
+	}
+}
+
+// NamedIncludedDependencies returns the IncludedDependencies named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (bom *BillOfMaterials) NamedIncludedDependencies(name string) ([]*Dependency, error) {
+	if bom.Edges.namedIncludedDependencies == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := bom.Edges.namedIncludedDependencies[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (bom *BillOfMaterials) appendNamedIncludedDependencies(name string, edges ...*Dependency) {
+	if bom.Edges.namedIncludedDependencies == nil {
+		bom.Edges.namedIncludedDependencies = make(map[string][]*Dependency)
+	}
+	if len(edges) == 0 {
+		bom.Edges.namedIncludedDependencies[name] = []*Dependency{}
+	} else {
+		bom.Edges.namedIncludedDependencies[name] = append(bom.Edges.namedIncludedDependencies[name], edges...)
+	}
+}
+
+// NamedIncludedOccurrences returns the IncludedOccurrences named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (bom *BillOfMaterials) NamedIncludedOccurrences(name string) ([]*Occurrence, error) {
+	if bom.Edges.namedIncludedOccurrences == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := bom.Edges.namedIncludedOccurrences[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (bom *BillOfMaterials) appendNamedIncludedOccurrences(name string, edges ...*Occurrence) {
+	if bom.Edges.namedIncludedOccurrences == nil {
+		bom.Edges.namedIncludedOccurrences = make(map[string][]*Occurrence)
+	}
+	if len(edges) == 0 {
+		bom.Edges.namedIncludedOccurrences[name] = []*Occurrence{}
+	} else {
+		bom.Edges.namedIncludedOccurrences[name] = append(bom.Edges.namedIncludedOccurrences[name], edges...)
+	}
 }
 
 // BillOfMaterialsSlice is a parsable slice of BillOfMaterials.

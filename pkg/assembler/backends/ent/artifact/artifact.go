@@ -24,6 +24,8 @@ const (
 	EdgeAttestations = "attestations"
 	// EdgeSame holds the string denoting the same edge name in mutations.
 	EdgeSame = "same"
+	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
+	EdgeIncludedInSboms = "included_in_sboms"
 	// Table holds the table name of the artifact in the database.
 	Table = "artifacts"
 	// OccurrencesTable is the table that holds the occurrences relation/edge.
@@ -50,6 +52,11 @@ const (
 	// SameInverseTable is the table name for the HashEqual entity.
 	// It exists in this package in order to avoid circular dependency with the "hashequal" package.
 	SameInverseTable = "hash_equals"
+	// IncludedInSbomsTable is the table that holds the included_in_sboms relation/edge. The primary key declared below.
+	IncludedInSbomsTable = "bill_of_materials_included_software_artifacts"
+	// IncludedInSbomsInverseTable is the table name for the BillOfMaterials entity.
+	// It exists in this package in order to avoid circular dependency with the "billofmaterials" package.
+	IncludedInSbomsInverseTable = "bill_of_materials"
 )
 
 // Columns holds all SQL columns for artifact fields.
@@ -66,6 +73,9 @@ var (
 	// SamePrimaryKey and SameColumn2 are the table columns denoting the
 	// primary key for the same relation (M2M).
 	SamePrimaryKey = []string{"hash_equal_id", "artifact_id"}
+	// IncludedInSbomsPrimaryKey and IncludedInSbomsColumn2 are the table columns denoting the
+	// primary key for the included_in_sboms relation (M2M).
+	IncludedInSbomsPrimaryKey = []string{"bill_of_materials_id", "artifact_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -151,6 +161,20 @@ func BySame(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSameStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByIncludedInSbomsCount orders the results by included_in_sboms count.
+func ByIncludedInSbomsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newIncludedInSbomsStep(), opts...)
+	}
+}
+
+// ByIncludedInSboms orders the results by included_in_sboms terms.
+func ByIncludedInSboms(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newIncludedInSbomsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newOccurrencesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -177,5 +201,12 @@ func newSameStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SameInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, SameTable, SamePrimaryKey...),
+	)
+}
+func newIncludedInSbomsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(IncludedInSbomsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, IncludedInSbomsTable, IncludedInSbomsPrimaryKey...),
 	)
 }
