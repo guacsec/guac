@@ -492,9 +492,9 @@ type HasSBOMSpec struct {
 	Origin               *string                  `json:"origin,omitempty"`
 	Collector            *string                  `json:"collector,omitempty"`
 	KnownSince           *time.Time               `json:"knownSince,omitempty"`
-	IncludedSoftware     []*PackageOrArtifactSpec `json:"includedSoftware"`
-	IncludedDependencies []*IsDependencySpec      `json:"includedDependencies"`
-	IncludedOccurrences  []*IsOccurrenceSpec      `json:"includedOccurrences"`
+	IncludedSoftware     []*PackageOrArtifactSpec `json:"includedSoftware,omitempty"`
+	IncludedDependencies []*IsDependencySpec      `json:"includedDependencies,omitempty"`
+	IncludedOccurrences  []*IsOccurrenceSpec      `json:"includedOccurrences,omitempty"`
 }
 
 // HasSLSA records that a subject node has a SLSA attestation.

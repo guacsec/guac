@@ -783,21 +783,21 @@ func (ec *executionContext) unmarshalInputHasSBOMSpec(ctx context.Context, obj i
 			it.KnownSince = data
 		case "includedSoftware":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includedSoftware"))
-			data, err := ec.unmarshalNPackageOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx, v)
+			data, err := ec.unmarshalOPackageOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.IncludedSoftware = data
 		case "includedDependencies":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includedDependencies"))
-			data, err := ec.unmarshalNIsDependencySpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, v)
+			data, err := ec.unmarshalOIsDependencySpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.IncludedDependencies = data
 		case "includedOccurrences":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includedOccurrences"))
-			data, err := ec.unmarshalNIsOccurrenceSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, v)
+			data, err := ec.unmarshalOIsOccurrenceSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -3862,9 +3862,9 @@ input HasSBOMSpec {
   origin: String
   collector: String
   knownSince: Time
-  includedSoftware: [PackageOrArtifactSpec]!
-  includedDependencies: [IsDependencySpec]!
-  includedOccurrences: [IsOccurrenceSpec]!
+  includedSoftware: [PackageOrArtifactSpec]
+  includedDependencies: [IsDependencySpec]
+  includedOccurrences: [IsOccurrenceSpec]
 }
 
 input HasSBOMIncludesInputSpec {

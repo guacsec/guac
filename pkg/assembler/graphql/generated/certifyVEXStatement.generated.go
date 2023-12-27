@@ -985,23 +985,6 @@ func (ec *executionContext) unmarshalNPackageOrArtifactInputs2githubᚗcomᚋgua
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNPackageOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx context.Context, v interface{}) ([]*model.PackageOrArtifactSpec, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]*model.PackageOrArtifactSpec, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
 func (ec *executionContext) unmarshalNVexJustification2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexJustification(ctx context.Context, v interface{}) (model.VexJustification, error) {
 	var res model.VexJustification
 	err := res.UnmarshalGQL(v)
@@ -1047,6 +1030,26 @@ func (ec *executionContext) unmarshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋ
 
 func (ec *executionContext) marshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, sel ast.SelectionSet, v model.VexStatus) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx context.Context, v interface{}) ([]*model.PackageOrArtifactSpec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.PackageOrArtifactSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpec(ctx context.Context, v interface{}) (*model.PackageOrArtifactSpec, error) {

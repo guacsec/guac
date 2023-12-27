@@ -42,3 +42,11 @@ mutation HasSBOMArtifacts(
 ) {
   ingestHasSBOMs(subjects: { artifacts: $artifacts }, hasSBOMs: $hasSBOMs, includes: $includes)
 }
+
+# Exposes GraphQL queries to retrieve hasSBOMs
+
+query HasSBOMs($filter: HasSBOMSpec!) {
+  HasSBOM(hasSBOMSpec: $filter) {
+    ...AllHasSBOMTree
+  }
+}

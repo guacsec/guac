@@ -8005,6 +8005,226 @@ type HasSBOMPkgsResponse struct {
 // GetIngestHasSBOMs returns HasSBOMPkgsResponse.IngestHasSBOMs, and is useful for accessing the field via an interface.
 func (v *HasSBOMPkgsResponse) GetIngestHasSBOMs() []string { return v.IngestHasSBOMs }
 
+// HasSBOMSpec allows filtering the list of HasSBOM to return.
+//
+// Only the package or artifact can be added, not both.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
+type HasSBOMSpec struct {
+	Id                   *string                  `json:"id"`
+	Subject              *PackageOrArtifactSpec   `json:"subject"`
+	Uri                  *string                  `json:"uri"`
+	Algorithm            *string                  `json:"algorithm"`
+	Digest               *string                  `json:"digest"`
+	DownloadLocation     *string                  `json:"downloadLocation"`
+	Origin               *string                  `json:"origin"`
+	Collector            *string                  `json:"collector"`
+	KnownSince           *time.Time               `json:"knownSince"`
+	IncludedSoftware     []*PackageOrArtifactSpec `json:"includedSoftware"`
+	IncludedDependencies []*IsDependencySpec      `json:"includedDependencies"`
+	IncludedOccurrences  []*IsOccurrenceSpec      `json:"includedOccurrences"`
+}
+
+// GetId returns HasSBOMSpec.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetId() *string { return v.Id }
+
+// GetSubject returns HasSBOMSpec.Subject, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetSubject() *PackageOrArtifactSpec { return v.Subject }
+
+// GetUri returns HasSBOMSpec.Uri, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetUri() *string { return v.Uri }
+
+// GetAlgorithm returns HasSBOMSpec.Algorithm, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetAlgorithm() *string { return v.Algorithm }
+
+// GetDigest returns HasSBOMSpec.Digest, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetDigest() *string { return v.Digest }
+
+// GetDownloadLocation returns HasSBOMSpec.DownloadLocation, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetDownloadLocation() *string { return v.DownloadLocation }
+
+// GetOrigin returns HasSBOMSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns HasSBOMSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetCollector() *string { return v.Collector }
+
+// GetKnownSince returns HasSBOMSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetKnownSince() *time.Time { return v.KnownSince }
+
+// GetIncludedSoftware returns HasSBOMSpec.IncludedSoftware, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetIncludedSoftware() []*PackageOrArtifactSpec { return v.IncludedSoftware }
+
+// GetIncludedDependencies returns HasSBOMSpec.IncludedDependencies, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetIncludedDependencies() []*IsDependencySpec { return v.IncludedDependencies }
+
+// GetIncludedOccurrences returns HasSBOMSpec.IncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetIncludedOccurrences() []*IsOccurrenceSpec { return v.IncludedOccurrences }
+
+// HasSBOMsHasSBOM includes the requested fields of the GraphQL type HasSBOM.
+type HasSBOMsHasSBOM struct {
+	AllHasSBOMTree `json:"-"`
+}
+
+// GetId returns HasSBOMsHasSBOM.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetId() string { return v.AllHasSBOMTree.Id }
+
+// GetSubject returns HasSBOMsHasSBOM.Subject, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetSubject() AllHasSBOMTreeSubjectPackageOrArtifact {
+	return v.AllHasSBOMTree.Subject
+}
+
+// GetUri returns HasSBOMsHasSBOM.Uri, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetUri() string { return v.AllHasSBOMTree.Uri }
+
+// GetAlgorithm returns HasSBOMsHasSBOM.Algorithm, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetAlgorithm() string { return v.AllHasSBOMTree.Algorithm }
+
+// GetDigest returns HasSBOMsHasSBOM.Digest, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetDigest() string { return v.AllHasSBOMTree.Digest }
+
+// GetDownloadLocation returns HasSBOMsHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetDownloadLocation() string { return v.AllHasSBOMTree.DownloadLocation }
+
+// GetOrigin returns HasSBOMsHasSBOM.Origin, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetOrigin() string { return v.AllHasSBOMTree.Origin }
+
+// GetCollector returns HasSBOMsHasSBOM.Collector, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collector }
+
+// GetKnownSince returns HasSBOMsHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
+
+// GetIncludedSoftware returns HasSBOMsHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
+	return v.AllHasSBOMTree.IncludedSoftware
+}
+
+// GetIncludedDependencies returns HasSBOMsHasSBOM.IncludedDependencies, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetIncludedDependencies() []AllHasSBOMTreeIncludedDependenciesIsDependency {
+	return v.AllHasSBOMTree.IncludedDependencies
+}
+
+// GetIncludedOccurrences returns HasSBOMsHasSBOM.IncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *HasSBOMsHasSBOM) GetIncludedOccurrences() []AllHasSBOMTreeIncludedOccurrencesIsOccurrence {
+	return v.AllHasSBOMTree.IncludedOccurrences
+}
+
+func (v *HasSBOMsHasSBOM) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSBOMsHasSBOM
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSBOMsHasSBOM = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSBOMTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSBOMsHasSBOM struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Uri string `json:"uri"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+
+	DownloadLocation string `json:"downloadLocation"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
+
+	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
+
+	IncludedOccurrences []AllHasSBOMTreeIncludedOccurrencesIsOccurrence `json:"includedOccurrences"`
+}
+
+func (v *HasSBOMsHasSBOM) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSBOMsHasSBOM) __premarshalJSON() (*__premarshalHasSBOMsHasSBOM, error) {
+	var retval __premarshalHasSBOMsHasSBOM
+
+	retval.Id = v.AllHasSBOMTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasSBOMTree.Subject
+		var err error
+		*dst, err = __marshalAllHasSBOMTreeSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasSBOMsHasSBOM.AllHasSBOMTree.Subject: %w", err)
+		}
+	}
+	retval.Uri = v.AllHasSBOMTree.Uri
+	retval.Algorithm = v.AllHasSBOMTree.Algorithm
+	retval.Digest = v.AllHasSBOMTree.Digest
+	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
+	retval.Origin = v.AllHasSBOMTree.Origin
+	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	{
+
+		dst := &retval.IncludedSoftware
+		src := v.AllHasSBOMTree.IncludedSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal HasSBOMsHasSBOM.AllHasSBOMTree.IncludedSoftware: %w", err)
+			}
+		}
+	}
+	retval.IncludedDependencies = v.AllHasSBOMTree.IncludedDependencies
+	retval.IncludedOccurrences = v.AllHasSBOMTree.IncludedOccurrences
+	return &retval, nil
+}
+
+// HasSBOMsResponse is returned by HasSBOMs on success.
+type HasSBOMsResponse struct {
+	// Returns all SBOM certifications.
+	HasSBOM []HasSBOMsHasSBOM `json:"HasSBOM"`
+}
+
+// GetHasSBOM returns HasSBOMsResponse.HasSBOM, and is useful for accessing the field via an interface.
+func (v *HasSBOMsResponse) GetHasSBOM() []HasSBOMsHasSBOM { return v.HasSBOM }
+
 // HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
 type HasSourceAtInputSpec struct {
 	KnownSince    time.Time `json:"knownSince"`
@@ -8408,6 +8628,47 @@ type IsDependencyResponse struct {
 // GetIngestDependency returns IsDependencyResponse.IngestDependency, and is useful for accessing the field via an interface.
 func (v *IsDependencyResponse) GetIngestDependency() string { return v.IngestDependency }
 
+// IsDependencySpec allows filtering the list of dependencies to return.
+//
+// To obtain the list of dependency packages, caller must fill in the package
+// field.
+//
+// Dependency packages must be defined at PackageName, not PackageVersion.
+type IsDependencySpec struct {
+	Id                *string         `json:"id"`
+	Package           *PkgSpec        `json:"package"`
+	DependencyPackage *PkgSpec        `json:"dependencyPackage"`
+	VersionRange      *string         `json:"versionRange"`
+	DependencyType    *DependencyType `json:"dependencyType"`
+	Justification     *string         `json:"justification"`
+	Origin            *string         `json:"origin"`
+	Collector         *string         `json:"collector"`
+}
+
+// GetId returns IsDependencySpec.Id, and is useful for accessing the field via an interface.
+func (v *IsDependencySpec) GetId() *string { return v.Id }
+
+// GetPackage returns IsDependencySpec.Package, and is useful for accessing the field via an interface.
+func (v *IsDependencySpec) GetPackage() *PkgSpec { return v.Package }
+
+// GetDependencyPackage returns IsDependencySpec.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *IsDependencySpec) GetDependencyPackage() *PkgSpec { return v.DependencyPackage }
+
+// GetVersionRange returns IsDependencySpec.VersionRange, and is useful for accessing the field via an interface.
+func (v *IsDependencySpec) GetVersionRange() *string { return v.VersionRange }
+
+// GetDependencyType returns IsDependencySpec.DependencyType, and is useful for accessing the field via an interface.
+func (v *IsDependencySpec) GetDependencyType() *DependencyType { return v.DependencyType }
+
+// GetJustification returns IsDependencySpec.Justification, and is useful for accessing the field via an interface.
+func (v *IsDependencySpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns IsDependencySpec.Origin, and is useful for accessing the field via an interface.
+func (v *IsDependencySpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns IsDependencySpec.Collector, and is useful for accessing the field via an interface.
+func (v *IsDependencySpec) GetCollector() *string { return v.Collector }
+
 // IsOccurrenceInputSpec represents the input to record an artifact's origin.
 type IsOccurrenceInputSpec struct {
 	Justification string `json:"justification"`
@@ -8432,6 +8693,35 @@ type IsOccurrencePkgResponse struct {
 
 // GetIngestOccurrence returns IsOccurrencePkgResponse.IngestOccurrence, and is useful for accessing the field via an interface.
 func (v *IsOccurrencePkgResponse) GetIngestOccurrence() string { return v.IngestOccurrence }
+
+// IsOccurrenceSpec allows filtering the list of artifact occurences to return in
+// a query.
+type IsOccurrenceSpec struct {
+	Id            *string              `json:"id"`
+	Subject       *PackageOrSourceSpec `json:"subject"`
+	Artifact      *ArtifactSpec        `json:"artifact"`
+	Justification *string              `json:"justification"`
+	Origin        *string              `json:"origin"`
+	Collector     *string              `json:"collector"`
+}
+
+// GetId returns IsOccurrenceSpec.Id, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceSpec) GetId() *string { return v.Id }
+
+// GetSubject returns IsOccurrenceSpec.Subject, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceSpec) GetSubject() *PackageOrSourceSpec { return v.Subject }
+
+// GetArtifact returns IsOccurrenceSpec.Artifact, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceSpec) GetArtifact() *ArtifactSpec { return v.Artifact }
+
+// GetJustification returns IsOccurrenceSpec.Justification, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns IsOccurrenceSpec.Origin, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns IsOccurrenceSpec.Collector, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceSpec) GetCollector() *string { return v.Collector }
 
 // IsOccurrenceSrcResponse is returned by IsOccurrenceSrc on success.
 type IsOccurrenceSrcResponse struct {
@@ -17720,6 +18010,21 @@ func (v *PackageNamespacesResponse) GetPackages() []PackageNamespacesPackagesPac
 	return v.Packages
 }
 
+// PackageOrArtifactSpec allows using PackageOrArtifact union as
+// input type to be used in read queries.
+//
+// Exactly one of the value must be set to non-nil.
+type PackageOrArtifactSpec struct {
+	Package  *PkgSpec      `json:"package"`
+	Artifact *ArtifactSpec `json:"artifact"`
+}
+
+// GetPackage returns PackageOrArtifactSpec.Package, and is useful for accessing the field via an interface.
+func (v *PackageOrArtifactSpec) GetPackage() *PkgSpec { return v.Package }
+
+// GetArtifact returns PackageOrArtifactSpec.Artifact, and is useful for accessing the field via an interface.
+func (v *PackageOrArtifactSpec) GetArtifact() *ArtifactSpec { return v.Artifact }
+
 // PackageOrSourceSpec allows using PackageOrSource union as input for queries.
 //
 // Exactly one field must be specified.
@@ -22394,6 +22699,14 @@ func (v *__HasSBOMPkgsInput) GetHasSBOMs() []HasSBOMInputSpec { return v.HasSBOM
 // GetIncludes returns __HasSBOMPkgsInput.Includes, and is useful for accessing the field via an interface.
 func (v *__HasSBOMPkgsInput) GetIncludes() []HasSBOMIncludesInputSpec { return v.Includes }
 
+// __HasSBOMsInput is used internally by genqlient
+type __HasSBOMsInput struct {
+	Filter HasSBOMSpec `json:"filter"`
+}
+
+// GetFilter returns __HasSBOMsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSBOMsInput) GetFilter() HasSBOMSpec { return v.Filter }
+
 // __IngestArtifactInput is used internally by genqlient
 type __IngestArtifactInput struct {
 	Artifact ArtifactInputSpec `json:"artifact"`
@@ -24575,6 +24888,147 @@ func HasSBOMPkgs(
 	var err error
 
 	var data HasSBOMPkgsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by HasSBOMs.
+const HasSBOMs_Operation = `
+query HasSBOMs ($filter: HasSBOMSpec!) {
+	HasSBOM(hasSBOMSpec: $filter) {
+		... AllHasSBOMTree
+	}
+}
+fragment AllHasSBOMTree on HasSBOM {
+	id
+	subject {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	uri
+	algorithm
+	digest
+	downloadLocation
+	origin
+	collector
+	knownSince
+	includedSoftware {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	includedDependencies {
+		... AllIsDependencyTree
+	}
+	includedOccurrences {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... AllPkgTree
+	}
+	dependencyPackage {
+		... AllPkgTree
+	}
+	dependencyType
+	versionRange
+	origin
+	collector
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func HasSBOMs(
+	ctx context.Context,
+	client graphql.Client,
+	filter HasSBOMSpec,
+) (*HasSBOMsResponse, error) {
+	req := &graphql.Request{
+		OpName: "HasSBOMs",
+		Query:  HasSBOMs_Operation,
+		Variables: &__HasSBOMsInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data HasSBOMsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
