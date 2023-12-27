@@ -943,7 +943,7 @@ func (c *demoClient) exactPackageName(ctx context.Context, filter *model.PkgSpec
 			return nil, nil
 		}
 	}
-	if filter.Type == nil || filter.Namespace != nil || filter.Name == nil {
+	if filter.Type == nil || filter.Namespace == nil || filter.Name == nil {
 		return nil, nil
 	}
 	inType := &pkgType{
