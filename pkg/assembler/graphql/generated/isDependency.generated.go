@@ -714,6 +714,11 @@ func (ec *executionContext) unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v interface{}) (*model.IsDependencySpec, error) {
+	res, err := ec.unmarshalInputIsDependencySpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalODependencyType2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐDependencyType(ctx context.Context, v interface{}) (*model.DependencyType, error) {
 	if v == nil {
 		return nil, nil
@@ -730,7 +735,7 @@ func (ec *executionContext) marshalODependencyType2ᚖgithubᚗcomᚋguacsecᚋg
 	return v
 }
 
-func (ec *executionContext) unmarshalOIsDependencySpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v interface{}) ([]*model.IsDependencySpec, error) {
+func (ec *executionContext) unmarshalOIsDependencySpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpecᚄ(ctx context.Context, v interface{}) ([]*model.IsDependencySpec, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -742,20 +747,12 @@ func (ec *executionContext) unmarshalOIsDependencySpec2ᚕᚖgithubᚗcomᚋguac
 	res := make([]*model.IsDependencySpec, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
-}
-
-func (ec *executionContext) unmarshalOIsDependencySpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx context.Context, v interface{}) (*model.IsDependencySpec, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputIsDependencySpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 // endregion ***************************** type.gotpl *****************************

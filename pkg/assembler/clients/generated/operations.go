@@ -8012,18 +8012,18 @@ func (v *HasSBOMPkgsResponse) GetIngestHasSBOMs() []string { return v.IngestHasS
 // If KnownSince is specified, the returned value will be after or equal to the specified time.
 // Any nodes time that is before KnownSince is excluded.
 type HasSBOMSpec struct {
-	Id                   *string                  `json:"id"`
-	Subject              *PackageOrArtifactSpec   `json:"subject"`
-	Uri                  *string                  `json:"uri"`
-	Algorithm            *string                  `json:"algorithm"`
-	Digest               *string                  `json:"digest"`
-	DownloadLocation     *string                  `json:"downloadLocation"`
-	Origin               *string                  `json:"origin"`
-	Collector            *string                  `json:"collector"`
-	KnownSince           *time.Time               `json:"knownSince"`
-	IncludedSoftware     []*PackageOrArtifactSpec `json:"includedSoftware"`
-	IncludedDependencies []*IsDependencySpec      `json:"includedDependencies"`
-	IncludedOccurrences  []*IsOccurrenceSpec      `json:"includedOccurrences"`
+	Id                   *string                 `json:"id"`
+	Subject              *PackageOrArtifactSpec  `json:"subject"`
+	Uri                  *string                 `json:"uri"`
+	Algorithm            *string                 `json:"algorithm"`
+	Digest               *string                 `json:"digest"`
+	DownloadLocation     *string                 `json:"downloadLocation"`
+	Origin               *string                 `json:"origin"`
+	Collector            *string                 `json:"collector"`
+	KnownSince           *time.Time              `json:"knownSince"`
+	IncludedSoftware     []PackageOrArtifactSpec `json:"includedSoftware"`
+	IncludedDependencies []IsDependencySpec      `json:"includedDependencies"`
+	IncludedOccurrences  []IsOccurrenceSpec      `json:"includedOccurrences"`
 }
 
 // GetId returns HasSBOMSpec.Id, and is useful for accessing the field via an interface.
@@ -8054,13 +8054,13 @@ func (v *HasSBOMSpec) GetCollector() *string { return v.Collector }
 func (v *HasSBOMSpec) GetKnownSince() *time.Time { return v.KnownSince }
 
 // GetIncludedSoftware returns HasSBOMSpec.IncludedSoftware, and is useful for accessing the field via an interface.
-func (v *HasSBOMSpec) GetIncludedSoftware() []*PackageOrArtifactSpec { return v.IncludedSoftware }
+func (v *HasSBOMSpec) GetIncludedSoftware() []PackageOrArtifactSpec { return v.IncludedSoftware }
 
 // GetIncludedDependencies returns HasSBOMSpec.IncludedDependencies, and is useful for accessing the field via an interface.
-func (v *HasSBOMSpec) GetIncludedDependencies() []*IsDependencySpec { return v.IncludedDependencies }
+func (v *HasSBOMSpec) GetIncludedDependencies() []IsDependencySpec { return v.IncludedDependencies }
 
 // GetIncludedOccurrences returns HasSBOMSpec.IncludedOccurrences, and is useful for accessing the field via an interface.
-func (v *HasSBOMSpec) GetIncludedOccurrences() []*IsOccurrenceSpec { return v.IncludedOccurrences }
+func (v *HasSBOMSpec) GetIncludedOccurrences() []IsOccurrenceSpec { return v.IncludedOccurrences }
 
 // HasSBOMsHasSBOM includes the requested fields of the GraphQL type HasSBOM.
 type HasSBOMsHasSBOM struct {
