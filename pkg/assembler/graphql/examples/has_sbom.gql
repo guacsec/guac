@@ -39,29 +39,57 @@ fragment allHasSBOMTree on HasSBOM {
 }
 
 query HasSBOMQ1 {
-  HasSBOM(hasSBOMSpec: {}) {
+  HasSBOM(hasSBOMSpec: {
+    includedSoftware: {}
+    includedOccurrences: {}
+    includedDependencies: {}
+  }) {
     ...allHasSBOMTree
   }
 }
 
 query HasSBOMQ2 {
-  HasSBOM(hasSBOMSpec: { origin: "Demo ingestion" }) {
+  HasSBOM(hasSBOMSpec: { 
+    origin: "Demo ingestion" 
+    includedSoftware: {}
+    includedOccurrences: {}
+    includedDependencies: {}
+  }) {
     ...allHasSBOMTree
   }
 }
 
 query HasSBOMQ3 {
-  HasSBOM(hasSBOMSpec: { subject: { package: { name: "openssl" } } }) {
+  HasSBOM(hasSBOMSpec: { 
+    subject: { 
+      package: { 
+        name: "openssl" 
+      } 
+    } 
+    includedSoftware: {}
+    includedOccurrences: {}
+    includedDependencies: {}
+  }) {
     ...allHasSBOMTree
   }
 }
 
 query HasSBOMQ4 {
-  HasSBOM(hasSBOMSpec: { subject: { artifact: { algorithm: "sha256" } } }) {
+  HasSBOM(hasSBOMSpec: { 
+    subject: { 
+      artifact: { 
+        algorithm: "sha256" 
+      }
+    }
+    includedSoftware: {}
+    includedOccurrences: {}
+    includedDependencies: {}
+  }) {
     ...allHasSBOMTree
   }
 }
 
+# Invalid Example Query, only one subject should be ingested, a package or an artifact
 query HasSBOMQ5 {
   HasSBOM(
     hasSBOMSpec: {
@@ -69,6 +97,9 @@ query HasSBOMQ5 {
         package: { name: "openssl" }
         artifact: { algorithm: "sha256" }
       }
+      includedSoftware: {}
+    	includedOccurrences: {}
+    	includedDependencies: {}
     }
   ) {
     ...allHasSBOMTree
