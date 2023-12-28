@@ -94,6 +94,7 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgI
 		Origin:         dependency.Origin,
 		Collector:      dependency.Collector,
 	}
+	helper.FixDependencyType(&inLink.DependencyType)
 
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)

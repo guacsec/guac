@@ -16,6 +16,9 @@ Also, these tests run in CI. See the "CI for integration tests" job in
 All the files here must use the `//go:build integration` tag, so they are not
 run with normal unit tests.
 
+To run a single test, use something like: `go test -v --tags=integration -run
+TestHasSBOM`
+
 ## Writing more tests
 
 * Write normal go test functions. For example

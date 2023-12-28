@@ -102,3 +102,12 @@ func ConvertLicenseInputSpecToLicenseSpec(licenseInput *model.LicenseInputSpec) 
 		ListVersion: licenseInput.ListVersion,
 	}
 }
+
+func FixDependencyType(dt *model.DependencyType) {
+	if dt == nil {
+		return
+	}
+	if *dt != model.DependencyTypeDirect && *dt != model.DependencyTypeIndirect {
+		*dt = model.DependencyTypeUnknown
+	}
+}

@@ -910,6 +910,9 @@ func (c *demoClient) findPackageVersion(ctx context.Context, filter *model.PkgSp
 
 	pkgN, err := c.exactPackageName(ctx, filter)
 	if err != nil {
+		return nil, err
+	}
+	if pkgN == nil {
 		return nil, nil
 	}
 

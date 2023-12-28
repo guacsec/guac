@@ -230,6 +230,8 @@ func (c *demoClient) addCPIfMatch(ctx context.Context, out []*model.PkgEqual,
 		}
 		found := false
 		for _, pid := range link.Pkgs {
+			// FIXME(jeffmendoza) - the same link packages could satisfy multiple
+			// filter packages here
 			p, err := c.buildPackageResponse(ctx, pid, ps)
 			if err != nil {
 				return nil, err
