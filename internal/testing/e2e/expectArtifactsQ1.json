@@ -1,0 +1,17 @@
+{
+    "artifacts": [
+      {
+        "algorithm": "sha1",
+        "digest": "322b3f191dfd5466d70182b3c67d8eb129a3a31d"
+      },
+      {
+        "algorithm": "sha1",
+        "digest": "322e9e02c44dd985a93c4729b8ec3ca0aa4a7a20"
+      },
+      {
+        "algorithm": "sha256",
+        "digest": "322c1cc5dd5f59492c06523095f377e095e6dd9d8690c0c1992bb06b1cb9555d"
+      }
+    ]
+  }
+  
