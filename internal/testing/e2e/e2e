@@ -23,7 +23,7 @@ GUAC_DIR=$(cd ${SCRIPT_DIR}/../../..; pwd)
 guac_data_hash="254d737ebc42ca32f95033e93370f5427e3fce64"
 
 echo @@@@ Installing gql Python package
-pip install gql[all]
+pip3 install gql[all]
 
 echo @@@@ Cloning guac-data
 pushd "$GUAC_DIR"
@@ -101,4 +101,5 @@ diff -u "${SCRIPT_DIR}/expectPathPy.json" "${GUAC_DIR}/gotPathPy.json"
 
 cat "$queries" | gql-cli http://localhost:8080/query -o ArtifactsQ1 | jq ' .artifacts |= sort '> "${GUAC_DIR}/gotArtifactsQ1.json"
 diff -u "${SCRIPT_DIR}/expectArtifactsQ1.json" "${GUAC_DIR}/gotArtifactsQ1.json"
+
 # Note: graphql_playground is left running, CI will clean it up
