@@ -23,7 +23,7 @@ GUAC_DIR=$(cd ${SCRIPT_DIR}/../../..; pwd)
 guac_data_hash="254d737ebc42ca32f95033e93370f5427e3fce64"
 
 echo @@@@ Installing gql Python package
-pip3 install gql[all]
+pip install gql[all]
 
 echo @@@@ Cloning guac-data
 pushd "$GUAC_DIR"
