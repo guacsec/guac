@@ -50,3 +50,7 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int32
       - github.com/99designs/gqlgen/graphql.Int64
+  Package:
+    fields:
+      namespaces:
+        resolver: true

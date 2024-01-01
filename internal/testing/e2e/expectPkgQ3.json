@@ -10,6 +10,7 @@
               "name": "libp11-kit0",
               "versions": [
                 {
+                  "purl": "pkg:deb/debian/libp11-kit0",
                   "version": "0.23.22-1",
                   "qualifiers": [
                     {
@@ -28,6 +29,7 @@
                   "subpath": ""
                 },
                 {
+                  "purl": "pkg:deb/debian/libp11-kit0",
                   "version": "0.23.22-1",
                   "qualifiers": [
                     {
@@ -56,6 +58,7 @@
               "name": "libp11-kit0",
               "versions": [
                 {
+                  "purl": "pkg:deb/ubuntu/libp11-kit0",
                   "version": "0.23.20-1ubuntu0.1",
                   "qualifiers": [
                     {
@@ -74,6 +77,7 @@
                   "subpath": ""
                 },
                 {
+                  "purl": "pkg:deb/ubuntu/libp11-kit0",
                   "version": "0.24.0-6build1",
                   "qualifiers": [
                     {

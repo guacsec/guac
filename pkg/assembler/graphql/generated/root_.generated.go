@@ -34,6 +34,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
+	Package() PackageResolver
 	Query() QueryResolver
 }
 
@@ -268,6 +269,7 @@ type ComplexityRoot struct {
 
 	PackageVersion struct {
 		ID         func(childComplexity int) int
+		Purl       func(childComplexity int) int
 		Qualifiers func(childComplexity int) int
 		Subpath    func(childComplexity int) int
 		Version    func(childComplexity int) int
@@ -1793,6 +1795,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PackageVersion.ID(childComplexity), true
+
+	case "PackageVersion.purl":
+		if e.complexity.PackageVersion.Purl == nil {
+			break
+		}
+
+		return e.complexity.PackageVersion.Purl(childComplexity), true
 
 	case "PackageVersion.qualifiers":
 		if e.complexity.PackageVersion.Qualifiers == nil {
@@ -4698,6 +4707,7 @@ the trie.
 """
 type PackageVersion {
   id: ID!
+  purl: String!
   version: String!
   qualifiers: [PackageQualifier!]!
   subpath: String!

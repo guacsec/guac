@@ -931,6 +931,7 @@ type PackageSourceOrArtifactSpec struct {
 // the trie.
 type PackageVersion struct {
 	ID         string              `json:"id"`
+	Purl       string              `json:"purl"`
 	Version    string              `json:"version"`
 	Qualifiers []*PackageQualifier `json:"qualifiers"`
 	Subpath    string              `json:"subpath"`

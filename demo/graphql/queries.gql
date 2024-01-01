@@ -9,6 +9,7 @@ fragment allPkgTree on Package {
       name
       versions {
         id
+        purl
         version
         qualifiers {
           key
