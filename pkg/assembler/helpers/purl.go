@@ -232,5 +232,3 @@ func GuacGenericPurl(s string) string {
 		return fmt.Sprintf("pkg:guac/generic/%s", sanitizedString)
 	}
 }
-
-
