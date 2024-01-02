@@ -7,7 +7,9 @@ package resolvers
 import (
 	"context"
 
+	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 // IngestPackage is the resolver for the ingestPackage field.
@@ -22,7 +24,17 @@ func (r *mutationResolver) IngestPackages(ctx context.Context, pkgs []*model.Pkg
 	return r.Backend.IngestPackages(ctx, pkgs)
 }
 
+// Namespaces is the resolver for the namespaces field.
+func (r *packageResolver) Namespaces(ctx context.Context, obj *model.Package) ([]*model.PackageNamespace, error) {
+	return helpers.UpdatePurlForPackageNamespaces(obj)
+}
+
 // Packages is the resolver for the packages field.
 func (r *queryResolver) Packages(ctx context.Context, pkgSpec model.PkgSpec) ([]*model.Package, error) {
 	return r.Backend.Packages(ctx, &pkgSpec)
 }
+
+// Package returns generated.PackageResolver implementation.
+func (r *Resolver) Package() generated.PackageResolver { return &packageResolver{r} }
+
+type packageResolver struct{ *Resolver }

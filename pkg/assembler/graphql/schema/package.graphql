@@ -94,6 +94,7 @@ the trie.
 """
 type PackageVersion {
   id: ID!
+  purl: String!
   version: String!
   qualifiers: [PackageQualifier!]!
   subpath: String!
