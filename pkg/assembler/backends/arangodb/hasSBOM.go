@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/arangodb/go-driver"
@@ -599,33 +600,17 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 			}
 
 			var collectedSoftware []model.PackageOrArtifact
-			var collectedDeps []*model.IsDependency
-			var collectedOccurs []*model.IsOccurrence
-
-			// collect packages and artifacts from included software
-			collectedPkgs, collectedArts, err := c.getPackageVersionAndArtifacts(ctx, createdValue.IncludedSoftware)
+			collectedPkgs, collectedArts, collectedDeps, collectedOccurs, err := getHasSBOMIncludes(c, ctx, createdValue.IncludedSoftware, createdValue.IncludedDependencies, createdValue.IncludesOccurrences)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to getHasSBOMIncludes with error: %w", err)
 			}
+
 			for _, cPkg := range collectedPkgs {
 				collectedSoftware = append(collectedSoftware, cPkg)
 			}
+
 			for _, cArt := range collectedArts {
 				collectedSoftware = append(collectedSoftware, cArt)
-			}
-			for _, id := range createdValue.IncludedDependencies {
-				isDep, err := c.buildIsDependencyByID(ctx, id, nil)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get isDependency from ID: %w", err)
-				}
-				collectedDeps = append(collectedDeps, isDep)
-			}
-			for _, id := range createdValue.IncludesOccurrences {
-				isOccur, err := c.buildIsOccurrenceByID(ctx, id, nil)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get isOccurrence from ID: %w", err)
-				}
-				collectedOccurs = append(collectedOccurs, isOccur)
 			}
 
 			matchingSoftware, matchingDeps, matchingOccur := checkMatchingIncludes(ctx, filter, collectedPkgs, collectedArts,
@@ -662,32 +647,123 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 	return hasSBOMList, nil
 }
 
-func (c *arangoClient) getPackageVersionAndArtifacts(ctx context.Context, includesSoftware []string) ([]*model.Package, []*model.Artifact, error) {
+func getHasSBOMIncludes(c *arangoClient, ctx context.Context, includedSoftware []string, includedDependencies []string, includedOccurrences []string) ([]*model.Package, []*model.Artifact, []*model.IsDependency, []*model.IsOccurrence, error) {
+	var wg sync.WaitGroup
+
+	errChan := make(chan error)
+	pkgChan := make(chan *model.Package, len(includedSoftware))
+	artChan := make(chan *model.Artifact, len(includedSoftware))
+	isDepChan := make(chan *model.IsDependency, len(includedDependencies))
+	isOccurChan := make(chan *model.IsOccurrence, len(includedOccurrences))
+
+	var collectedDeps []*model.IsDependency
+	var collectedOccurs []*model.IsOccurrence
+
 	var collectedPkgs []*model.Package
 	var collectedArts []*model.Artifact
-	for _, id := range includesSoftware {
+
+	for _, id := range includedSoftware {
 		idSplit := strings.Split(id, "/")
 		if len(idSplit) != 2 {
-			return nil, nil, fmt.Errorf("invalid ID: %s", id)
+			return nil, nil, nil, nil, fmt.Errorf("invalid ID: %s", id)
 		}
 		switch idSplit[0] {
 		case pkgVersionsStr:
-			if pkg, err := c.buildPackageResponseFromID(ctx, id, nil); err != nil {
-				return nil, nil, fmt.Errorf("failed to get package from ID: %w", err)
-			} else {
-				collectedPkgs = append(collectedPkgs, pkg)
-			}
+			wg.Add(1)
+			go concurrentBuildPackage(c, ctx, id, pkgChan, errChan, &wg)
 		case artifactsStr:
-			if art, err := c.buildArtifactResponseByID(ctx, id, nil); err != nil {
-				return nil, nil, fmt.Errorf("failed to get artifact from ID: %w", err)
-			} else {
-				collectedArts = append(collectedArts, art)
-			}
+			wg.Add(1)
+			go concurrentBuildArtifact(c, ctx, id, artChan, errChan, &wg)
 		default:
-			return nil, nil, fmt.Errorf("expected Package or Artifact, found %s", idSplit[0])
+			return nil, nil, nil, nil, fmt.Errorf("expected Package or Artifact, found %s", idSplit[0])
 		}
 	}
-	return collectedPkgs, collectedArts, nil
+
+	for _, id := range includedDependencies {
+		wg.Add(1)
+		go concurrentBuildIsDep(c, ctx, id, isDepChan, errChan, &wg)
+	}
+
+	for _, id := range includedOccurrences {
+		wg.Add(1)
+		go concurrentBuildIsOccur(c, ctx, id, isOccurChan, errChan, &wg)
+	}
+
+	// Close the result channel once all goroutines are done
+	go func() {
+		wg.Wait()
+		close(pkgChan)
+		close(artChan)
+		close(isDepChan)
+		close(isOccurChan)
+		close(errChan)
+	}()
+
+	// check if any error and return
+	for err := range errChan {
+		return nil, nil, nil, nil, err
+	}
+
+	// Collect results from the pkgChan
+	for cPkg := range pkgChan {
+		collectedPkgs = append(collectedPkgs, cPkg)
+	}
+
+	// Collect results from the artChan
+	for cArt := range artChan {
+		collectedArts = append(collectedArts, cArt)
+	}
+
+	// Collect results from the isDepChan
+	for cIsDep := range isDepChan {
+		collectedDeps = append(collectedDeps, cIsDep)
+	}
+
+	// Collect results from the isOccurChan
+	for cIsOccur := range isOccurChan {
+		collectedOccurs = append(collectedOccurs, cIsOccur)
+	}
+	return collectedPkgs, collectedArts, collectedDeps, collectedOccurs, nil
+}
+
+func concurrentBuildPackage(c *arangoClient, ctx context.Context, pkgID string, resultPkgChan chan<- *model.Package, errChan chan<- error, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if pkg, err := c.buildPackageResponseFromID(ctx, pkgID, nil); err != nil {
+		errChan <- fmt.Errorf("failed to get package from ID: %w", err)
+	} else {
+		// Send the results to the resultChan
+		resultPkgChan <- pkg
+	}
+}
+
+func concurrentBuildArtifact(c *arangoClient, ctx context.Context, artID string, resultArtChan chan<- *model.Artifact, errChan chan<- error, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if art, err := c.buildArtifactResponseByID(ctx, artID, nil); err != nil {
+		errChan <- fmt.Errorf("failed to get artifact from ID: %w", err)
+	} else {
+		// Send the results to the resultChan
+		resultArtChan <- art
+	}
+}
+
+func concurrentBuildIsDep(c *arangoClient, ctx context.Context, isDepID string, resultDepChan chan<- *model.IsDependency, errChan chan<- error, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if isDep, err := c.buildIsDependencyByID(ctx, isDepID, nil); err != nil {
+		errChan <- fmt.Errorf("failed to get isDependency from ID: %w", err)
+	} else {
+		// Send the results to the resultChan
+		resultDepChan <- isDep
+	}
+}
+
+func concurrentBuildIsOccur(c *arangoClient, ctx context.Context, isOccurID string, resultOccurChan chan<- *model.IsOccurrence, errChan chan<- error, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if isOccur, err := c.buildIsOccurrenceByID(ctx, isOccurID, nil); err != nil {
+		errChan <- fmt.Errorf("failed to get isOccurrence from ID: %w", err)
+	} else {
+		// Send the results to the resultChan
+		resultOccurChan <- isOccur
+	}
 }
 
 func checkMatchingIncludes(ctx context.Context, filter *model.HasSBOMSpec, collectedPkgs []*model.Package, collectedArts []*model.Artifact,
@@ -791,33 +867,17 @@ func (c *arangoClient) queryHasSbomNodeByID(ctx context.Context, filter *model.H
 	}
 
 	var collectedSoftware []model.PackageOrArtifact
-	var collectedDeps []*model.IsDependency
-	var collectedOccurs []*model.IsOccurrence
-
-	// collect packages and artifacts from included software
-	collectedPkgs, collectedArts, err := c.getPackageVersionAndArtifacts(ctx, collectedValues[0].IncludedSoftware)
+	collectedPkgs, collectedArts, collectedDeps, collectedOccurs, err := getHasSBOMIncludes(c, ctx, collectedValues[0].IncludedSoftware, collectedValues[0].IncludedDependencies, collectedValues[0].IncludesOccurrences)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to getHasSBOMIncludes with error: %w", err)
 	}
+
 	for _, cPkg := range collectedPkgs {
 		collectedSoftware = append(collectedSoftware, cPkg)
 	}
+
 	for _, cArt := range collectedArts {
 		collectedSoftware = append(collectedSoftware, cArt)
-	}
-	for _, id := range collectedValues[0].IncludedDependencies {
-		isDep, err := c.buildIsDependencyByID(ctx, id, nil)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get isDependency from ID: %w", err)
-		}
-		collectedDeps = append(collectedDeps, isDep)
-	}
-	for _, id := range collectedValues[0].IncludesOccurrences {
-		isOccur, err := c.buildIsOccurrenceByID(ctx, id, nil)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get isOccurrence from ID: %w", err)
-		}
-		collectedOccurs = append(collectedOccurs, isOccur)
 	}
 
 	matchingSoftware, matchingDeps, matchingOccur := checkMatchingIncludes(ctx, filter, collectedPkgs, collectedArts,
