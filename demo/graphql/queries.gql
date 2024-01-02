@@ -239,3 +239,10 @@ query PkgQ8 {
     }
   }
 }
+
+query ArtifactsQ1 {
+  artifacts(artifactSpec: {}) @filter(keyName: "digest", operation: STARTSWITH, value: "322") {
+    algorithm
+    digest
+  }
+}

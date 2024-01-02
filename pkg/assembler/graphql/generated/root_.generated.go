@@ -39,6 +39,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Filter func(ctx context.Context, obj interface{}, next graphql.Resolver, keyName *string, operation *model.FilterOperation, value *string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -3808,6 +3809,11 @@ extend type Mutation {
   ): [ID!]!
 }
 `, BuiltIn: false},
+	{Name: "../schema/directive.graphql", Input: `directive @filter(keyName: String = "id", operation: FilterOperation = CONTAINS, value: String = "") on FIELD
+enum FilterOperation {
+  CONTAINS
+  STARTSWITH
+}`, BuiltIn: false},
 	{Name: "../schema/hasSBOM.graphql", Input: `#
 # Copyright 2023 The GUAC Authors.
 #
