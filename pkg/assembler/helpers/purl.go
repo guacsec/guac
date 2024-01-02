@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	assemblerModel "github.com/guacsec/guac/pkg/assembler/graphql/model"
 	purl "github.com/package-url/packageurl-go"
 )
 
@@ -231,4 +232,46 @@ func GuacGenericPurl(s string) string {
 	} else {
 		return fmt.Sprintf("pkg:guac/generic/%s", sanitizedString)
 	}
+}
+
+func UpdatePurlForPackageNamespaces(packageObj *assemblerModel.Package) ([]*assemblerModel.PackageNamespace, error) {
+	updatedNamespaces := make([]*assemblerModel.PackageNamespace, len(packageObj.Namespaces))
+
+	for i, namespace := range packageObj.Namespaces {
+		modifiedNamespace := &assemblerModel.PackageNamespace{
+			ID:        namespace.ID,
+			Namespace: namespace.Namespace,
+		}
+		names := make([]*assemblerModel.PackageName, len(namespace.Names))
+		for j, name := range namespace.Names {
+			names[j] = name
+			versions := make([]*assemblerModel.PackageVersion, len(name.Versions))
+			for k, version := range name.Versions {
+				versions[k] = version
+
+				subpath := ""
+				if version.Subpath != "" {
+					subpath = "#" + version.Subpath
+				}
+
+				var qualifiers []string
+				for _, qualifier := range version.Qualifiers {
+					qualifiers = append(qualifiers, fmt.Sprintf("%s=%s", qualifier.Key, qualifier.Value))
+				}
+
+				qualifiersStr := ""
+				if len(qualifiers) > 0 {
+					sort.Strings(qualifiers)
+					qualifiersStr = "?" + strings.Join(qualifiers, "&")
+				}
+
+				version.Purl = fmt.Sprintf("pkg:%s/%s/%s:%s%s%s", packageObj.Type, namespace.Namespace, name.Name, version.Version, subpath, qualifiersStr)
+
+			}
+		}
+		modifiedNamespace.Names = names
+		updatedNamespaces[i] = modifiedNamespace
+	}
+
+	return updatedNamespaces, nil
 }

@@ -26,7 +26,7 @@ func (r *mutationResolver) IngestPackages(ctx context.Context, pkgs []*model.Pkg
 
 // Namespaces is the resolver for the namespaces field.
 func (r *packageResolver) Namespaces(ctx context.Context, obj *model.Package) ([]*model.PackageNamespace, error) {
-	return helpers.UpdatePurlForNamespaces(obj)
+	return helpers.UpdatePurlForPackageNamespaces(obj)
 }
 
 // Packages is the resolver for the packages field.

@@ -10,7 +10,7 @@
               "name": "consul",
               "versions": [
                 {
-                  "purl": "pkg:guac/cdx/docker.io/library/consul",
+                  "purl": "pkg:guac/cdx/docker.io/library/consul:sha256:22ab19cf1326abbfaafec6a14eb68f96e899e88ffe9ce26fa36affcf8ffb582c?tag=latest",
                   "version": "sha256:22ab19cf1326abbfaafec6a14eb68f96e899e88ffe9ce26fa36affcf8ffb582c",
                   "qualifiers": [
                     {
