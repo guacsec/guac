@@ -1837,6 +1837,47 @@ func (e Edge) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type FilterOperation string
+
+const (
+	FilterOperationContains   FilterOperation = "CONTAINS"
+	FilterOperationStartswith FilterOperation = "STARTSWITH"
+)
+
+var AllFilterOperation = []FilterOperation{
+	FilterOperationContains,
+	FilterOperationStartswith,
+}
+
+func (e FilterOperation) IsValid() bool {
+	switch e {
+	case FilterOperationContains, FilterOperationStartswith:
+		return true
+	}
+	return false
+}
+
+func (e FilterOperation) String() string {
+	return string(e)
+}
+
+func (e *FilterOperation) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FilterOperation(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FilterOperation", str)
+	}
+	return nil
+}
+
+func (e FilterOperation) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // PkgMatchType is an enum to determine if the attestation should be done at the
 // specific version or package name.
 type PkgMatchType string

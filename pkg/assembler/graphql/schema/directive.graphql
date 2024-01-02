@@ -1,0 +1,5 @@
+directive @filter(keyName: String = "id", operation: FilterOperation = CONTAINS, value: String = "") on FIELD
+enum FilterOperation {
+  CONTAINS
+  STARTSWITH
+}

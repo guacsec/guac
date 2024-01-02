@@ -437,3 +437,34 @@ var L4out = &model.License{
 	Name:   "LicenseRef-d58b4101",
 	Inline: &InlineLicense,
 }
+
+var ArtifactData = []*model.Artifact{
+	{
+		ID:        "artifacts/7086201",
+		Algorithm: "sha256",
+		Digest:    "fac901167c6638ec9c7ffd682fbac8483219d5328f709f1e052135232d72e2de",
+	},{
+		ID:        "artifacts/7086296",
+		Algorithm: "sha256",
+		Digest:    "fadf546602de3973d230a6b50a27a4df780a082acda2f7fe6d9a7e67e419ba1e",
+	},
+}
+
+var Metadata = []*model.HasMetadata{
+	{
+		ID:            "hasMetadataCollection/7098935",
+		Key:           "cpe",
+		Value:         "cpe:2.3:a:dpkg:dpkg:1.20.11:*:*:*:*:*:*:*",
+		Justification: "spdx cpe external reference",
+		Origin:        "GUAC SPDX",
+		Collector:     "GUAC",
+	},
+	{
+		ID:            "hasMetadataCollection/7099035",
+		Key:           "cpe",
+		Value:         "cpe:2.3:a:libgcc_s1:libgcc_s1:10.2.1-6:*:*:*:*:*:*:*",
+		Justification: "spdx cpe external reference",
+		Origin:        "GUAC SPDX",
+		Collector:     "GUAC",
+	},
+}

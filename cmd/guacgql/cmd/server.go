@@ -149,6 +149,7 @@ func getGraphqlServer(ctx context.Context) (*handler.Server, error) {
 	topResolver = resolvers.Resolver{Backend: backend}
 
 	config := generated.Config{Resolvers: &topResolver}
+	config.Directives.Filter = resolvers.Filter
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
 	return srv, nil
