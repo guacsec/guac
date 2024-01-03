@@ -65,6 +65,7 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 		if deregister, ok := c.(DeregisterCollector); ok {
 			return deregister.DeregisterCollector(collectorType)
 		}
+		// do not overwrite the collector
 		documentCollectors[collectorType] = c
 		return fmt.Errorf("%w: %s", ErrCollectorOverwrite, collectorType)
 	}

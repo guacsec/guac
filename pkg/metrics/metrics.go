@@ -49,10 +49,10 @@ type MetricCollector interface {
 	MetricsHandler() http.Handler
 	// MeasureFunctionExecutionTime measures the execution time of a function with the given name.
 	MeasureFunctionExecutionTime(ctx context.Context, name string) (func(), error)
-	// UnRegisterCounter unregisters the counter metric with the given name and labels.
-	UnRegisterCounter(ctx context.Context, name string, labels ...string) error
-	// UnRegisterHistogram unregisters the histogram metric with the given name and labels.
-	UnRegisterHistogram(ctx context.Context, name string, labels ...string) error
-	// UnRegisterGauge unregisters the gauge metric with the given name and labels.
-	UnRegisterGauge(ctx context.Context, name string, labels ...string) error
+	// UnregisterCounter unregisters the counter metric with the given name and labels.
+	UnregisterCounter(ctx context.Context, name string, labels ...string) error
+	// UnregisterHistogram unregisters the histogram metric with the given name and labels.
+	UnregisterHistogram(ctx context.Context, name string, labels ...string) error
+	// UnregisterGauge unregisters the gauge metric with the given name and labels.
+	UnregisterGauge(ctx context.Context, name string, labels ...string) error
 }
