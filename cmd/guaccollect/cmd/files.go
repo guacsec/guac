@@ -24,6 +24,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -66,6 +67,14 @@ var filesCmd = &cobra.Command{
 		if err != nil {
 			logger.Errorf("unable to register file collector: %v", err)
 		}
+
+		blobStore, err := blob.NewBlobStore(ctx, "file:///Users/parth/tmp")
+		if err != nil {
+			logger.Errorf("unable to connect to blog store: %v", err)
+		}
+
+		ctx = blob.WithBlobStore(ctx, blobStore)
+
 		initializeNATsandCollector(ctx, opts.natsAddr)
 	},
 }

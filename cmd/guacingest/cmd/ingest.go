@@ -23,6 +23,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -67,6 +68,13 @@ func ingest(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	defer jetStream.Close()
+
+	blobStore, err := blob.NewBlobStore(ctx, "file:///Users/parth/tmp")
+	if err != nil {
+		logger.Errorf("unable to connect to blog store: %v", err)
+	}
+
+	ctx = blob.WithBlobStore(ctx, blobStore)
 
 	// initialize collectsub client
 	csubClient, err := csub_client.NewClient(opts.csubClientOptions)

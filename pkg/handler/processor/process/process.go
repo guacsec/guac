@@ -26,7 +26,9 @@ import (
 	"strings"
 
 	uuid "github.com/gofrs/uuid"
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/csaf"
@@ -74,6 +76,7 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 // and process them them via Process
 func Subscribe(ctx context.Context, em collector.Emitter) error {
 	logger := logging.FromContext(ctx)
+	blobStore := blob.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
 	if err != nil {
@@ -88,11 +91,24 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d []byte) error {
 
-		doc := processor.Document{}
-		err := json.Unmarshal(d, &doc)
+		blobStoreKey, err := events.DecodeEvent(ctx, d)
 		if err != nil {
-			logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
-			return nil
+			return fmt.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
+			//logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
+			//return nil
+		}
+
+		documentBytes, err := blobStore.Read(ctx, blobStoreKey)
+		if err != nil {
+			return fmt.Errorf("failed read document to blob store: %w", err)
+		}
+
+		doc := processor.Document{}
+		err = json.Unmarshal(documentBytes, &doc)
+		if err != nil {
+			return fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
+			//logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
+			//return nil
 		}
 
 		err = em(&doc)

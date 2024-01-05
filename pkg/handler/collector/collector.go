@@ -17,9 +17,13 @@ package collector
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	jsoniter "github.com/json-iterator/go"
@@ -116,14 +120,37 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 // Publish is used by NATS JetStream to stream the documents and send them to the processor
 func Publish(ctx context.Context, d *processor.Document) error {
 	logger := logging.FromContext(ctx)
+	blobStore := blob.FromContext(ctx)
+
 	docByte, err := json.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
-	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, docByte)
+
+	err = blobStore.Write(ctx, getHash(docByte), docByte)
+	if err != nil {
+		return fmt.Errorf("failed write document to blob store: %w", err)
+	}
+
+	cdEvent, err := events.CreateEvent(ctx, getHash(docByte))
+	if err != nil {
+		return fmt.Errorf("failed create an event: %w", err)
+	}
+
+	keyByte, err := json.Marshal(cdEvent)
+	if err != nil {
+		return fmt.Errorf("failed marshal of document key: %w", err)
+	}
+
+	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, keyByte)
 	if err != nil {
 		return err
 	}
 	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil
+}
+
+func getHash(data []byte) string {
+	sha256sum := sha256.Sum256(data)
+	return hex.EncodeToString(sha256sum[:])
 }
