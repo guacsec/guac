@@ -74,7 +74,7 @@ func TestFilter(t *testing.T) {
 			ExpectedError:  false,
 		},
 		{
-			Name:      "Filter Artifacts by Algorithm StartsWith 'sha'",
+			Name:      "Filter HasSlsa by Subject.Algorithm StartsWith 'sha'",
 			KeyName:   "subject.Algorithm",
 			Operation: model.FilterOperationStartswith,
 			Value:     "sha2",
@@ -85,7 +85,7 @@ func TestFilter(t *testing.T) {
 			ExpectedError:  false,
 		},
 		{
-			Name:      "Filter Artifacts by Algorithm StartsWith 'sha'",
+			Name:      "Filter then Package by Namespaces[].Names[].name StartsWith 'github'",
 			KeyName:   "Namespaces[].Names[].name",
 			Operation: model.FilterOperationStartswith,
 			Value:     "github",
