@@ -245,3 +245,9 @@ query ArtifactsQ1 {
     digest
   }
 }
+
+query PkgQ9 {
+  packages (pkgSpec: { type: "deb"}) @filter(keyName: "namespaces[].names[].name", operation: CONTAINS, value: "libaudit-") {
+    ...allPkgTree
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "packages": [
+    {
+      "type": "deb",
+      "namespaces": [
+        {
+          "namespace": "debian",
+          "names": [
+            {
+              "name": "libaudit-common",
+              "versions": [
+                {
+                  "version": "1:3.0-2",
+                  "qualifiers": [
+                    {
+                      "key": "arch",
+                      "value": "all"
+                    },
+                    {
+                      "key": "distro",
+                      "value": "debian-11"
+                    },
+                    {
+                      "key": "upstream",
+                      "value": "audit"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "namespace": "ubuntu",
+          "names": [
+            {
+              "name": "libaudit-common",
+              "versions": [
+                {
+                  "version": "1:2.8.5-2ubuntu6",
+                  "qualifiers": [
+                    {
+                      "key": "arch",
+                      "value": "all"
+                    },
+                    {
+                      "key": "distro",
+                      "value": "ubuntu-20.04"
+                    },
+                    {
+                      "key": "upstream",
+                      "value": "audit"
+                    }
+                  ],
+                  "subpath": ""
+                },
+                {
+                  "version": "1:3.0.7-1build1",
+                  "qualifiers": [
+                    {
+                      "key": "arch",
+                      "value": "all"
+                    },
+                    {
+                      "key": "distro",
+                      "value": "ubuntu-22.04"
+                    },
+                    {
+                      "key": "upstream",
+                      "value": "audit"
+                    }
+                  ],
+                  "subpath": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

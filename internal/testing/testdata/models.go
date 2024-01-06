@@ -443,7 +443,7 @@ var ArtifactData = []*model.Artifact{
 		ID:        "artifacts/7086201",
 		Algorithm: "sha256",
 		Digest:    "fac901167c6638ec9c7ffd682fbac8483219d5328f709f1e052135232d72e2de",
-	},{
+	}, {
 		ID:        "artifacts/7086296",
 		Algorithm: "sha256",
 		Digest:    "fadf546602de3973d230a6b50a27a4df780a082acda2f7fe6d9a7e67e419ba1e",
@@ -468,3 +468,87 @@ var Metadata = []*model.HasMetadata{
 		Collector:     "GUAC",
 	},
 }
+
+var H1 = []*model.HasSlsa{{
+	Subject: &model.Artifact{
+		Algorithm: "sha256",
+		Digest:    "2d86b329a6a9fd3b65afbdca3e35f25823ee8b39b2479cbae0ce7a4aff417454",
+	}}, {
+	Subject: &model.Artifact{
+		Algorithm: "sha1",
+		Digest:    "efb60583822daea996ed487f862d970f64509143",
+	}}, {
+	Subject: &model.Artifact{
+		Algorithm: "sha256",
+		Digest:    "907260e18ac13cdfc47077e621567e990a2a988acebc8fcbb38674001e76c210",
+	}},
+}
+
+var H1out = []*model.HasSlsa{{
+	Subject: &model.Artifact{
+		Algorithm: "sha256",
+		Digest:    "2d86b329a6a9fd3b65afbdca3e35f25823ee8b39b2479cbae0ce7a4aff417454",
+	}}, {
+	Subject: &model.Artifact{
+		Algorithm: "sha256",
+		Digest:    "907260e18ac13cdfc47077e621567e990a2a988acebc8fcbb38674001e76c210",
+	}},
+}
+
+var P6 = []*model.Package{{
+	Type: "golang",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name: "github.com/opentracing",
+			Versions: []*model.PackageVersion{{
+				Version: "v1.1.0",
+				Qualifiers: []*model.PackageQualifier{{
+					Key:   "arch",
+					Value: "x86_64",
+				},
+					{
+						Key:   "distro",
+						Value: "alpine-3.16.2",
+					}},
+			}},
+		},
+		{
+			Name: "github.com/oklog",
+			Versions: []*model.PackageVersion{{
+				Version:    "v1.3.1",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		},
+		{
+			Name:     "golang",
+			Versions: []*model.PackageVersion{},
+		}},
+	}},
+}}
+
+var P6out = []*model.Package{{
+	Type: "golang",
+	Namespaces: []*model.PackageNamespace{{
+		Names: []*model.PackageName{{
+			Name: "github.com/opentracing",
+			Versions: []*model.PackageVersion{{
+				Version: "v1.1.0",
+				Qualifiers: []*model.PackageQualifier{{
+					Key:   "arch",
+					Value: "x86_64",
+				},
+					{
+						Key:   "distro",
+						Value: "alpine-3.16.2",
+					}},
+			}},
+		},
+		{
+			Name: "github.com/oklog",
+			Versions: []*model.PackageVersion{{
+				Version:    "v1.3.1",
+				Qualifiers: []*model.PackageQualifier{},
+			}},
+		}},
+	}},
+}}
