@@ -458,8 +458,7 @@ var Metadata = []*model.HasMetadata{
 		Justification: "spdx cpe external reference",
 		Origin:        "GUAC SPDX",
 		Collector:     "GUAC",
-	},
-	{
+	}, {
 		ID:            "hasMetadataCollection/7099035",
 		Key:           "cpe",
 		Value:         "cpe:2.3:a:libgcc_s1:libgcc_s1:10.2.1-6:*:*:*:*:*:*:*",
@@ -505,21 +504,18 @@ var P6 = []*model.Package{{
 				Qualifiers: []*model.PackageQualifier{{
 					Key:   "arch",
 					Value: "x86_64",
-				},
-					{
-						Key:   "distro",
-						Value: "alpine-3.16.2",
-					}},
+				}, {
+					Key:   "distro",
+					Value: "alpine-3.16.2",
+				}},
 			}},
-		},
-		{
+		}, {
 			Name: "github.com/oklog",
 			Versions: []*model.PackageVersion{{
 				Version:    "v1.3.1",
 				Qualifiers: []*model.PackageQualifier{},
 			}},
-		},
-		{
+		}, {
 			Name:     "golang",
 			Versions: []*model.PackageVersion{},
 		}},
@@ -536,14 +532,12 @@ var P6out = []*model.Package{{
 				Qualifiers: []*model.PackageQualifier{{
 					Key:   "arch",
 					Value: "x86_64",
-				},
-					{
-						Key:   "distro",
-						Value: "alpine-3.16.2",
-					}},
+				}, {
+					Key:   "distro",
+					Value: "alpine-3.16.2",
+				}},
 			}},
-		},
-		{
+		}, {
 			Name: "github.com/oklog",
 			Versions: []*model.PackageVersion{{
 				Version:    "v1.3.1",
