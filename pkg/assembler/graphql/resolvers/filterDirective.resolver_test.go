@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/internal/testing/mocks"
+	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -74,16 +74,28 @@ func TestFilter(t *testing.T) {
 			ExpectedError:  false,
 		},
 		{
-			Name:      "Filter Artifacts by Algorithm StartsWith 'sha'",
-			KeyName:   "Algorithm",
+			Name:      "Filter HasSlsa by Subject.Algorithm StartsWith 'sha'",
+			KeyName:   "subject.Algorithm",
 			Operation: model.FilterOperationStartswith,
-			Value:     "sha",
+			Value:     "sha2",
 			Resolver: createMockResolver(func(ctx context.Context) (interface{}, error) {
-				return testdata.ArtifactData, nil
+				return testdata.H1, nil
 			}),
-			ExpectedResult: testdata.ArtifactData,
+			ExpectedResult: testdata.H1out,
 			ExpectedError:  false,
 		},
+		{
+			Name:      "Filter then Package by Namespaces[].Names[].name StartsWith 'github'",
+			KeyName:   "Namespaces[].Names[].name",
+			Operation: model.FilterOperationStartswith,
+			Value:     "github",
+			Resolver: createMockResolver(func(ctx context.Context) (interface{}, error) {
+				return testdata.P6, nil
+			}),
+			ExpectedResult: testdata.P6out,
+			ExpectedError:  false,
+		},
+		
 	}
 
 	for _, test := range tests {
@@ -103,7 +115,6 @@ func TestFilter(t *testing.T) {
 				}
 				return
 			}
-
 			if !reflect.DeepEqual(result, test.ExpectedResult) {
 				t.Fatalf("Expected result %v, but got %v", test.ExpectedResult, result)
 			}

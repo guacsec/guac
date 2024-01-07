@@ -102,4 +102,7 @@ diff -u "${SCRIPT_DIR}/expectPathPy.json" "${GUAC_DIR}/gotPathPy.json"
 cat "$queries" | gql-cli http://localhost:8080/query -o ArtifactsQ1 | jq ' .artifacts |= sort '> "${GUAC_DIR}/gotArtifactsQ1.json"
 diff -u "${SCRIPT_DIR}/expectArtifactsQ1.json" "${GUAC_DIR}/gotArtifactsQ1.json"
 
+cat "$queries" | gql-cli http://localhost:8080/query -o PkgQ9 | jq ' .packages[].namespaces |= sort_by(.namespace) | .packages[].namespaces[].names[].versions |= sort_by(.id) | .packages[].namespaces[].names[].versions[].qualifiers |= sort_by(.key) | del(.. | .id?) ' > "${GUAC_DIR}/gotPkgQ9.json"
+diff -u "${SCRIPT_DIR}/expectPkgQ9.json" "${GUAC_DIR}/gotPkgQ9.json"
+
 # Note: graphql_playground is left running, CI will clean it up
