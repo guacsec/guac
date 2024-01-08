@@ -119,8 +119,17 @@ query PkgQD {
   }
 }
 
+fragment allPkgIDs on PackageIDs {
+  packageTypeID
+  packageNamespaceID
+  packageNameID
+  packageVersionID
+}
+
 mutation PkgM1 {
-  ingestPackage(pkg: { type: "pypi", name: "tensorflow" })
+  ingestPackage(pkg: { type: "pypi", name: "tensorflow" }) {
+    ...allPkgIDs
+  }
 }
 
 mutation PkgM2 {
@@ -133,11 +142,15 @@ mutation PkgM2 {
         { key: "distro", value: "stretch" }
       ]
     }
-  )
+  ) {
+    ...allPkgIDs
+  }
 }
 
 mutation PkgM3 {
-  ingestPackage(pkg: { type: "pypi", name: "tensorflow", version: "2.12.0" })
+  ingestPackage(pkg: { type: "pypi", name: "tensorflow", version: "2.12.0" }) {
+    ...allPkgIDs
+  }
 }
 
 mutation PkgM4 {
@@ -151,7 +164,9 @@ mutation PkgM4 {
         { key: "distro", value: "stretch" }
       ]
     }
-  )
+  ) {
+    ...allPkgIDs
+  }
 }
 
 mutation PkgM5 {
@@ -165,7 +180,9 @@ mutation PkgM5 {
         { key: "arch", value: "amd64" }
       ]
     }
-  )
+  ) {
+    ...allPkgIDs
+  }
 }
 
 mutation PkgM6 {
@@ -180,7 +197,9 @@ mutation PkgM6 {
         { key: "arch", value: "amd64" }
       ]
     }
-  )
+  ) {
+    ...allPkgIDs
+  }
 }
 
 mutation PkgM7 {
@@ -195,5 +214,7 @@ mutation PkgM7 {
         { key: "arch", value: "amd64" }
       ]
     }
-  )
+  ) {
+    ...allPkgIDs
+  }
 }

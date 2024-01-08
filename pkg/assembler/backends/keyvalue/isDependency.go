@@ -177,27 +177,7 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 			search = append(search, pkg.IsDependencyLinks...)
 		}
 	}
-	if !foundOne && filter != nil && filter.DependencyPackage != nil {
-		if filter.DependencyPackage.Version == nil { // FIXME this logic isn't exactly correct
-			exactPackage, err := c.exactPackageName(ctx, filter.DependencyPackage)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-			}
-			if exactPackage != nil {
-				search = append(search, exactPackage.IsDependencyLinks...)
-				foundOne = true
-			}
-		} else {
-			pkgs, err := c.findPackageVersion(ctx, filter.DependencyPackage)
-			if err != nil {
-				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
-			}
-			foundOne = len(pkgs) > 0
-			for _, pkg := range pkgs {
-				search = append(search, pkg.IsDependencyLinks...)
-			}
-		}
-	}
+	// Dont search on DependencyPackage as it can be either package-name or package-version
 
 	var out []*model.IsDependency
 	if foundOne {
@@ -243,27 +223,19 @@ func (c *demoClient) buildIsDependency(ctx context.Context, link *isDependencyLi
 	var err error
 	if filter != nil {
 		p, err = c.buildPackageResponse(ctx, link.PackageID, filter.Package)
-		if err != nil {
-			return nil, err
-		}
 	} else {
 		p, err = c.buildPackageResponse(ctx, link.PackageID, nil)
-		if err != nil {
-			return nil, err
-		}
 	}
-	if filter != nil && filter.DependencyPackage != nil {
-		depPkgFilter := &model.PkgSpec{Type: filter.DependencyPackage.Type, Namespace: filter.DependencyPackage.Namespace,
-			Name: filter.DependencyPackage.Name}
-		dep, err = c.buildPackageResponse(ctx, link.DepPackageID, depPkgFilter)
-		if err != nil {
-			return nil, err
-		}
+	if err != nil {
+		return nil, err
+	}
+	if filter != nil {
+		dep, err = c.buildPackageResponse(ctx, link.DepPackageID, filter.DependencyPackage)
 	} else {
 		dep, err = c.buildPackageResponse(ctx, link.DepPackageID, nil)
-		if err != nil {
-			return nil, err
-		}
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	// if package not found during ingestion or if ID is provided in filter, send error. On query do not send error to continue search
