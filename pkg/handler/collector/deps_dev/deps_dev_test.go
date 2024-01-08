@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package deps_dev
 
 import (
@@ -328,7 +330,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 			"pkg:golang/github.com/caarlos0/env/v6@v6.10.0",
 		},
 		poll:                 true,
-		interval:             time.Second * 3,
+		interval:             time.Second * 5,
 		wantErr:              false,
 		ignoreResultsForPerf: true,
 	}
