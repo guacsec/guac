@@ -106,9 +106,8 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 		doc := processor.Document{}
 		err = json.Unmarshal(documentBytes, &doc)
 		if err != nil {
-			return fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
-			//logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
-			//return nil
+			logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
+			return nil
 		}
 
 		err = em(&doc)

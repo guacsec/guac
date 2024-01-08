@@ -39,6 +39,8 @@ type ociOptions struct {
 	dataSource datasource.CollectSource
 	// address for NATS connection
 	natsAddr string
+	// address for blob store
+	blobAddr string
 	// run as poll collector
 	poll bool
 }
@@ -53,6 +55,7 @@ var ociCmd = &cobra.Command{
 
 		opts, err := validateOCIFlags(
 			viper.GetString("nats-addr"),
+			viper.GetString("blob-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
@@ -75,13 +78,14 @@ var ociCmd = &cobra.Command{
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.natsAddr)
+		initializeNATsandCollector(ctx, opts.natsAddr, opts.blobAddr)
 	},
 }
 
-func validateOCIFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (ociOptions, error) {
+func validateOCIFlags(natsAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (ociOptions, error) {
 	var opts ociOptions
 	opts.natsAddr = natsAddr
+	opts.blobAddr = blobAddr
 	opts.poll = poll
 
 	if useCsub {

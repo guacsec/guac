@@ -37,6 +37,7 @@ import (
 
 type options struct {
 	natsAddr          string
+	blobAddr          string
 	csubClientOptions client.CsubClientOptions
 	graphqlEndpoint   string
 }
@@ -45,6 +46,7 @@ func ingest(cmd *cobra.Command, args []string) {
 
 	opts, err := validateFlags(
 		viper.GetString("nats-addr"),
+		viper.GetString("blob-addr"),
 		viper.GetString("csub-addr"),
 		viper.GetBool("csub-tls"),
 		viper.GetBool("csub-tls-skip-verify"),
@@ -69,7 +71,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	}
 	defer jetStream.Close()
 
-	blobStore, err := blob.NewBlobStore(ctx, "file:///Users/parth/tmp")
+	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)
 	if err != nil {
 		logger.Errorf("unable to connect to blog store: %v", err)
 	}
@@ -108,9 +110,10 @@ func ingest(cmd *cobra.Command, args []string) {
 	wg.Wait()
 }
 
-func validateFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, graphqlEndpoint string, args []string) (options, error) {
+func validateFlags(natsAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, graphqlEndpoint string, args []string) (options, error) {
 	var opts options
 	opts.natsAddr = natsAddr
+	opts.blobAddr = blobAddr
 	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)

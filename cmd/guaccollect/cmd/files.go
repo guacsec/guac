@@ -39,6 +39,8 @@ type filesOptions struct {
 	path string
 	// address for NATS connection
 	natsAddr string
+	// address for blob store
+	blobAddr string
 	// poll location
 	poll bool
 }
@@ -50,6 +52,7 @@ var filesCmd = &cobra.Command{
 
 		opts, err := validateFilesFlags(
 			viper.GetString("nats-addr"),
+			viper.GetString("blob-addr"),
 			viper.GetBool("service-poll"),
 			args)
 		if err != nil {
@@ -68,21 +71,15 @@ var filesCmd = &cobra.Command{
 			logger.Errorf("unable to register file collector: %v", err)
 		}
 
-		blobStore, err := blob.NewBlobStore(ctx, "file:///Users/parth/tmp")
-		if err != nil {
-			logger.Errorf("unable to connect to blog store: %v", err)
-		}
-
-		ctx = blob.WithBlobStore(ctx, blobStore)
-
-		initializeNATsandCollector(ctx, opts.natsAddr)
+		initializeNATsandCollector(ctx, opts.natsAddr, opts.blobAddr)
 	},
 }
 
-func validateFilesFlags(natsAddr string, poll bool, args []string) (filesOptions, error) {
+func validateFilesFlags(natsAddr string, blobAddr string, poll bool, args []string) (filesOptions, error) {
 	var opts filesOptions
 
 	opts.natsAddr = natsAddr
+	opts.blobAddr = blobAddr
 	opts.poll = poll
 
 	if len(args) != 1 {
@@ -100,7 +97,7 @@ func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, 
 	}, nil
 }
 
-func initializeNATsandCollector(ctx context.Context, natsAddr string) {
+func initializeNATsandCollector(ctx context.Context, natsAddr string, blobAddr string) {
 	logger := logging.FromContext(ctx)
 	// initialize jetstream
 	// TODO: pass in credentials file for NATS secure login
@@ -111,6 +108,13 @@ func initializeNATsandCollector(ctx context.Context, natsAddr string) {
 		os.Exit(1)
 	}
 	defer jetStream.Close()
+
+	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
+	if err != nil {
+		logger.Errorf("unable to connect to blog store: %v", err)
+	}
+
+	ctx = blob.WithBlobStore(ctx, blobStore)
 
 	// Get pipeline of components
 	collectorPubFunc, err := getCollectorPublish(ctx)

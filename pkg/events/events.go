@@ -26,7 +26,8 @@ import (
 
 // CreateArtifactPubEvent creates a NewArtifactPublishedEvent CDEvent that is published as a CloudEvent.
 // The key is the sha256 of the *processor.Document bytes that will be used to retrieve the processor.Document
-// stored in the blob store
+// stored in the blob store.
+// TODO (pxp928): change to use URI Reference field once the PR merges: https://github.com/cdevents/spec/pull/171
 func CreateArtifactPubEvent(ctx context.Context, key string) (*cloudevents.Event, error) {
 	// Create the base event
 	event, err := cdevents.NewArtifactPublishedEvent()

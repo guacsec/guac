@@ -162,9 +162,8 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 
 		blobStoreKey, err := events.DecodeEvent(ctx, d)
 		if err != nil {
-			return fmt.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
-			//logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
-			//return nil
+			logger.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
+			return nil
 		}
 
 		documentBytes, err := blobStore.Read(ctx, blobStoreKey)
@@ -175,9 +174,9 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		doc := processor.Document{}
 		err = json.Unmarshal(documentBytes, &doc)
 		if err != nil {
-			return fmt.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
-			//logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
-			//return nil
+			fmtErrString := fmt.Sprintf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
+			logger.Errorf(fmtErrString+": %v", err)
+			return fmt.Errorf(fmtErrString+": %w", err)
 		}
 
 		docNode := &processor.DocumentNode{

@@ -130,7 +130,7 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
 
-	err = blobStore.Write(ctx, getHash(docByte), docByte)
+	err = blobStore.Write(ctx, getHash(d.Blob), docByte)
 	if err != nil {
 		return fmt.Errorf("failed write document to blob store: %w", err)
 	}

@@ -39,6 +39,8 @@ type githubOptions struct {
 	dataSource datasource.CollectSource
 	// address for NATS connection
 	natsAddr string
+	// address for blob store
+	blobAddr string
 	// run as poll collector
 	poll bool
 }
@@ -53,6 +55,7 @@ var githubCmd = &cobra.Command{
 
 		opts, err := validateGithubFlags(
 			viper.GetString("nats-addr"),
+			viper.GetString("blob-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
@@ -92,13 +95,14 @@ var githubCmd = &cobra.Command{
 			logger.Errorf("unable to register Github collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.natsAddr)
+		initializeNATsandCollector(ctx, opts.natsAddr, opts.blobAddr)
 	},
 }
 
-func validateGithubFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(natsAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (githubOptions, error) {
 	var opts githubOptions
 	opts.natsAddr = natsAddr
+	opts.blobAddr = blobAddr
 	opts.poll = poll
 
 	if useCsub {

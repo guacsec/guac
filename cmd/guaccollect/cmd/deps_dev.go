@@ -40,6 +40,8 @@ type depsDevOptions struct {
 	dataSource datasource.CollectSource
 	// address for NATS connection
 	natsAddr string
+	// address for blob store
+	blobAddr string
 	// run as poll collector
 	poll bool
 	// query for dependencies
@@ -60,6 +62,7 @@ var depsDevCmd = &cobra.Command{
 
 		opts, err := validateDepsDevFlags(
 			viper.GetString("nats-addr"),
+			viper.GetString("blob-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
@@ -94,15 +97,16 @@ var depsDevCmd = &cobra.Command{
 			}()
 		}
 
-		initializeNATsandCollector(ctx, opts.natsAddr)
+		initializeNATsandCollector(ctx, opts.natsAddr, opts.blobAddr)
 	},
 }
 
-func validateDepsDevFlags(natsAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, retrieveDependencies bool, args []string,
+func validateDepsDevFlags(natsAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, retrieveDependencies bool, args []string,
 	enablePrometheus bool, prometheusPort int,
 ) (depsDevOptions, error) {
 	var opts depsDevOptions
 	opts.natsAddr = natsAddr
+	opts.blobAddr = blobAddr
 	opts.poll = poll
 	opts.retrieveDependencies = retrieveDependencies
 	opts.enablePrometheus = enablePrometheus
