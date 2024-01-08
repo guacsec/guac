@@ -33,6 +33,11 @@ type blobStore struct {
 	bucket *blob.Bucket
 }
 
+// NewBlobStore initializes the blob store based on the url.
+// utilizing gocloud (https://gocloud.dev/howto/blob/) various blob stores
+// such as S3, google cloud bucket, azure blob store can be used.
+// Authentication is setup via environment variables. Please refer to for
+// full documentation https://gocloud.dev/howto/blob/
 func NewBlobStore(ctx context.Context, url string) (*blobStore, error) {
 	bucket, err := blob.OpenBucket(ctx, url)
 	if err != nil {
@@ -44,8 +49,8 @@ func NewBlobStore(ctx context.Context, url string) (*blobStore, error) {
 	}, nil
 }
 
+// Write uses the key and value to write the data to the initialized blob store (via the authentication provided)
 func (b *blobStore) Write(ctx context.Context, key string, value []byte) error {
-	// Open the key "foo.txt" for writing with the default options.
 	w, err := b.bucket.NewWriter(ctx, key, nil)
 	if err != nil {
 		return err
@@ -63,8 +68,8 @@ func (b *blobStore) Write(ctx context.Context, key string, value []byte) error {
 	return nil
 }
 
+// Read uses the key read the data from the initialized blob store (via the authentication provided)
 func (b *blobStore) Read(ctx context.Context, key string) ([]byte, error) {
-	// Open the key "foo.txt" for reading with the default options.
 	r, err := b.bucket.NewReader(ctx, key, nil)
 	if err != nil {
 		return nil, err
@@ -79,11 +84,12 @@ func (b *blobStore) Read(ctx context.Context, key string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// WithBlobStore stores the initialized blobStore in the context such that it can be retrieved later when needed
 func WithBlobStore(ctx context.Context, bs *blobStore) context.Context {
 	return context.WithValue(ctx, blobStore{}, bs)
 }
 
-// FromContext allows for the JetStreamContext to be pulled from the context
+// FromContext allows for the blobStore to be pulled from the context
 func FromContext(ctx context.Context) *blobStore {
 	if bs, ok := ctx.Value(blobStore{}).(*blobStore); ok {
 		return bs

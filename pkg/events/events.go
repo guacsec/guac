@@ -24,7 +24,10 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
-func CreateEvent(ctx context.Context, key string) (*cloudevents.Event, error) {
+// CreateArtifactPubEvent creates a NewArtifactPublishedEvent CDEvent that is published as a CloudEvent.
+// The key is the sha256 of the *processor.Document bytes that will be used to retrieve the processor.Document
+// stored in the blob store
+func CreateArtifactPubEvent(ctx context.Context, key string) (*cloudevents.Event, error) {
 	// Create the base event
 	event, err := cdevents.NewArtifactPublishedEvent()
 	if err != nil {
@@ -41,6 +44,8 @@ func CreateEvent(ctx context.Context, key string) (*cloudevents.Event, error) {
 	return ce, nil
 }
 
+// DecodeEvent takes in the collectedEvent bytes and converts it back into a CloudEvent to retrieve the necessary fields.
+// The returned value is the subject of the event.
 func DecodeEvent(ctx context.Context, collectedEvent []byte) (string, error) {
 	decodedEvent := cloudevents.NewEvent()
 

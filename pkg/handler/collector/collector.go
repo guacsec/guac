@@ -117,7 +117,10 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	return nil
 }
 
-// Publish is used by NATS JetStream to stream the documents and send them to the processor
+// Publish takes the "document" collected by the collectors and stores it into a blob store for
+// retrieval by the processor/ingestor. A CDEvent is created to transmit the key (which is the
+// sha256 of the collected "document"). This also fixes the issues where the "document" was too large
+// to be sent across the event stream.
 func Publish(ctx context.Context, d *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	blobStore := blob.FromContext(ctx)
@@ -132,7 +135,7 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		return fmt.Errorf("failed write document to blob store: %w", err)
 	}
 
-	cdEvent, err := events.CreateEvent(ctx, getHash(docByte))
+	cdEvent, err := events.CreateArtifactPubEvent(ctx, getHash(docByte))
 	if err != nil {
 		return fmt.Errorf("failed create an event: %w", err)
 	}
