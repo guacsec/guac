@@ -276,7 +276,7 @@ require (
 	github.com/package-url/packageurl-go v0.1.2
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.17.0
-	github.com/redis/go-redis/v9 v9.3.1
+	github.com/redis/go-redis/v9 v9.4.0
 	github.com/regclient/regclient v0.5.5
 	github.com/segmentio/kafka-go v0.4.46
 	github.com/segmentio/ksuid v1.0.4
