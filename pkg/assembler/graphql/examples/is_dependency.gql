@@ -82,7 +82,7 @@ query IsDependencyQ5 {
 }
 
 query IsDependencyQ6 {
-  IsDependency(isDependencySpec: { dependentPackage: { name: "openssl" } }) {
+  IsDependency(isDependencySpec: { dependencyPackage: { name: "openssl" } }) {
     ...allIsDependencyTree
   }
 }
