@@ -135,7 +135,7 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		return fmt.Errorf("failed write document to blob store: %w", err)
 	}
 
-	cdEvent, err := events.CreateArtifactPubEvent(ctx, getHash(docByte))
+	cdEvent, err := events.CreateArtifactPubEvent(ctx, getHash(d.Blob))
 	if err != nil {
 		return fmt.Errorf("failed create an event: %w", err)
 	}
