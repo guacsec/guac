@@ -21,7 +21,7 @@ At any one time, there should be at least 3 maintainers.
 
 ## Code of Conduct
 
-Please refer to the [Code of Conduct](CODE_OF_CONDUCT) for full details.
+Please refer to the [Code of Conduct](CODE_OF_CONDUCT.md) for full details.
 
 ## Technical Advisory Members
 
