@@ -775,8 +775,9 @@ func registerMetrics(ctx context.Context, m metrics.MetricCollector) error {
 
 // DeregisterCollector deregisters the collector
 func (d *depsCollector) DeregisterCollector(collectorType string) error {
+	// The DeregisterCollector is a placeholder for removing the metrics from the collector.
+	// This is also placeholder for removing state from the collector reference.
 	return nil
-	// return unregisterMetrics(context.Background(), d.Metrics, collectorType)
 }
 
 // registerMetricsOnce registers the Metrics for the collector once.
