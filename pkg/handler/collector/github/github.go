@@ -179,14 +179,14 @@ func (g *githubCollector) RetrieveArtifacts(ctx context.Context, docChannel chan
 		}
 	} else {
 		if g.poll {
-			g.fetchWorkflowRunArtifacts(ctx, g.owner, g.repo, docChannel)
+			g.fetchWorkflowRunArtifacts(ctx, docChannel)
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			case <-time.After(g.interval):
 			}
 		} else {
-			g.fetchWorkflowRunArtifacts(ctx, g.owner, g.repo, docChannel)
+			g.fetchWorkflowRunArtifacts(ctx, docChannel)
 		}
 	}
 
@@ -281,10 +281,10 @@ func (g *githubCollector) collectAssetsForRelease(ctx context.Context, release c
 // fetchWorkflowRunArtifacts fetches the artifacts from the GitHub Action Workflow runs for a given owner and repo.
 // The artifacts are then sent to the provided docChannel.
 // If an error occurs while fetching a workflow run or its artifacts, it is logged and the function continues to the next workflow run.
-func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner string, repo string, docChannel chan<- *processor.Document) {
+func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChannel chan<- *processor.Document) {
 	logger := logging.FromContext(ctx)
 
-	workflows, err := g.client.GetWorkflow(ctx, owner, repo, g.workflowFileName)
+	workflows, err := g.client.GetWorkflow(ctx, g.owner, g.repo, g.workflowFileName)
 	if err != nil {
 		logger.Warnf("unable to fetch workflows: %v", err)
 		return
@@ -292,7 +292,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner s
 
 	for _, workflow := range workflows {
 		// get the latest workflow run
-		run, err := g.client.GetLatestWorkflowRun(ctx, owner, repo, workflow.Id)
+		run, err := g.client.GetLatestWorkflowRun(ctx, g.owner, g.repo, workflow.Id)
 		if err != nil {
 			logger.Errorf("unable to fetch workflow runs for workflow %v: %v", workflow.Id, err)
 			continue
@@ -307,7 +307,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, owner s
 			continue
 		}
 
-		artifacts, err := g.client.GetWorkflowRunArtifacts(ctx, owner, repo, g.sbomName, run.RunId)
+		artifacts, err := g.client.GetWorkflowRunArtifacts(ctx, g.owner, g.repo, g.sbomName, run.RunId)
 		if err != nil {
 			logger.Errorf("unable to fetch workflow run artifacts for run %v: %v", run.RunId, err)
 			continue

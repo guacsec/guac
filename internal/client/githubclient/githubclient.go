@@ -16,16 +16,16 @@
 package githubclient
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"net/http"
-	"os"
-
 	"github.com/google/go-github/v50/github"
 	"github.com/guacsec/guac/internal/client"
 	"github.com/guacsec/guac/pkg/version"
 	"golang.org/x/oauth2"
+	"io"
+	"net/http"
 )
 
 // TODO (mlieberman85): This interface will probably be pulled out into an interface that can support other
@@ -181,64 +181,76 @@ func (gc *githubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo
 		return nil, fmt.Errorf("unable to list workflow run artifacts: %w", err)
 	}
 	for _, j := range artifacts.Artifacts {
+		// If the githubSBOMName is empty, we want to return all artifacts
+		// Otherwise, we only want to return the artifacts that have the name of githubSBOMName
+		if githubSBOMName != "" && *j.Name != githubSBOMName {
+			continue
+		}
+
 		// download artifact
 		file, _, err := gc.ghClient.Actions.DownloadArtifact(ctx, owner, repo, j.GetID(), true)
 		if err != nil {
 			return nil, fmt.Errorf("unable to download artifact: %w", err)
 		}
 
-		// Create a new file in the local filesystem
-		out, err := os.Create(*j.Name)
+		arr, err := DownloadAndExtractZip(file.String(), runID)
 		if err != nil {
-			return nil, fmt.Errorf("unable to create file: %w", err)
-		}
-		defer out.Close()
-
-		// Create a new HTTP client and request
-		httpClient := &http.Client{}
-		req, err := http.NewRequest("GET", file.String(), nil)
-		if err != nil {
-			return nil, fmt.Errorf("unable to create new request: %w", err)
+			return nil, fmt.Errorf("unable to download and extract zip: %w", err)
 		}
 
-		// Send the request
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			return nil, fmt.Errorf("unable to send request: %w", err)
-		}
-		defer resp.Body.Close()
-
-		// Write the contents of the response body to the new file
-		_, err = io.Copy(out, resp.Body)
-		if err != nil {
-			return nil, fmt.Errorf("unable to write file: %w", err)
-		}
-
-		// If the githubSBOMName is empty, we want to return all artifacts
-		// Otherwise, we only want to return the artifacts that have the name of githubSBOMName
-		if githubSBOMName == "" || (githubSBOMName != "" && *j.Name == githubSBOMName) {
-			// Read the contents of the file
-			fileContents, err := os.Open(*j.Name)
-			if err != nil {
-				return nil, fmt.Errorf("unable to open file: %w", err)
-			}
-			defer fileContents.Close()
-
-			bytes, err := io.ReadAll(fileContents)
-			if err != nil {
-				return nil, fmt.Errorf("unable to read file: %w", err)
-			}
-
-			// Write the file contents to res
-			res = append(res, &client.WorkflowArtifactContent{
-				Name:  *j.Name,
-				Bytes: bytes,
-				RunId: runID,
-			})
-		}
+		res = append(res, arr...)
 	}
 
 	return res, nil
+}
+
+// DownloadAndExtractZip downloads a zip file from the given URL, extracts its contents,
+// and returns only those files that are valid JSON.
+func DownloadAndExtractZip(url string, runID int64) ([]*client.WorkflowArtifactContent, error) {
+	// Download the zip file
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("error getting zip file: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("bad status: %s", resp.Status)
+	}
+
+	// Read the body into a buffer
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+
+	// Read the zip archive
+	zipReader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+	if err != nil {
+		return nil, fmt.Errorf("error reading zip file: %w", err)
+	}
+
+	var files []*client.WorkflowArtifactContent
+
+	// Iterate through each file in the archive
+	for _, zipFile := range zipReader.File {
+		f, err := zipFile.Open()
+		if err != nil {
+			return nil, fmt.Errorf("error opening file in zip: %w", err)
+		}
+		defer f.Close()
+
+		fileData := make([]byte, zipFile.UncompressedSize64)
+		_, err = io.ReadFull(f, fileData)
+		if err != nil {
+			return nil, fmt.Errorf("error reading file data: %w", err)
+		}
+
+		files = append(files, &client.WorkflowArtifactContent{Name: zipFile.Name, Bytes: fileData, RunId: runID})
+	}
+
+	return files, nil
 }
 
 func (gc *githubClient) GetCommitSHA1(ctx context.Context, owner string, repo string, ref string) (string, error) {
