@@ -20,7 +20,7 @@ neptune-realm: neptune
 # Nats setup
 nats-addr: nats://localhost:4222
 
-# blob store setup
+# blob store setup. Setup with blob store of choice via https://gocloud.dev/howto/blob/
 blob-addr: file:///path/to/dir
 
 # CSub setup

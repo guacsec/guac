@@ -47,7 +47,22 @@ type filesOptions struct {
 
 var filesCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
-	Short: "take a folder of files and create a GUAC graph utilizing Nats pubsub",
+	Short: "take a folder of files and create a GUAC graph utilizing Nats pubsub and blob store",
+	Long: `
+guaccollect files takes in a file path to ingest all documents that are found
+via the GUAC files collector. Ingestion to GUAC happens via an event stream (NATS)
+to allow for decoupling of the collectors from the ingestion into GUAC. 
+
+Each collector collects the "document" and stores it in the blob store for further
+evaluation. The collector creates a CDEvent (https://cdevents.dev/) that is published via 
+the event stream. The downstream guacingest subscribes to the stream and retrieves the "document" from the blob store for 
+processing and ingestion.
+
+Various blob stores can be used (such as S3, Azure Blob, Google Cloud Bucket) as documented here: https://gocloud.dev/howto/blob/
+For example: "s3://my-bucket?region=us-west-1"
+
+Specific authentication method vary per cloud provider. Please follow the documentation per implementation to ensure
+you have access to read and write to the respective blob store.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		opts, err := validateFilesFlags(
