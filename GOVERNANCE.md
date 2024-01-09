@@ -19,8 +19,9 @@ project and the decision documented.
 
 At any one time, there should be at least 3 maintainers.
 
-In general this is a developer driven project/community, be nice and respectful!
-:)
+## Code of Conduct
+
+Please refer to the [Code of Conduct](CODE_OF_CONDUCT) for full details.
 
 ## Technical Advisory Members
 
