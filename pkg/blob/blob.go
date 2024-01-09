@@ -41,7 +41,7 @@ type blobStore struct {
 func NewBlobStore(ctx context.Context, url string) (*blobStore, error) {
 	bucket, err := blob.OpenBucket(ctx, url)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open bucket with error: %w", err)
 	}
 	return &blobStore{
 		url:    url,
@@ -53,17 +53,17 @@ func NewBlobStore(ctx context.Context, url string) (*blobStore, error) {
 func (b *blobStore) Write(ctx context.Context, key string, value []byte) error {
 	w, err := b.bucket.NewWriter(ctx, key, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write to bucket with error: %w", err)
 	}
 
 	_, writeErr := w.Write(value)
 	// Always check the return value of Close when writing.
 	closeErr := w.Close()
 	if writeErr != nil {
-		return writeErr
+		return fmt.Errorf("failed to write the value with error: %w", writeErr)
 	}
 	if closeErr != nil {
-		return closeErr
+		return fmt.Errorf("failed to close the bucket writer with error: %w", closeErr)
 	}
 	return nil
 }
@@ -72,7 +72,7 @@ func (b *blobStore) Write(ctx context.Context, key string, value []byte) error {
 func (b *blobStore) Read(ctx context.Context, key string) ([]byte, error) {
 	r, err := b.bucket.NewReader(ctx, key, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read to bucket with error: %w", err)
 	}
 	defer r.Close()
 	// Readers also have a limited view of the blob's metadata.
@@ -80,7 +80,10 @@ func (b *blobStore) Read(ctx context.Context, key string) ([]byte, error) {
 	fmt.Println()
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(r)
+	_, err = buf.ReadFrom(r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read bytes with error: %w", err)
+	}
 	return buf.Bytes(), nil
 }
 
