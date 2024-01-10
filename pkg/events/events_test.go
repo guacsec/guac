@@ -43,7 +43,7 @@ func TestCreateEvent(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed marshal of document key: %v", err)
 			}
-			got, err := DecodeEvent(ctx, eventBytes)
+			got, err := DecodeEventSubject(ctx, eventBytes)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DecodeEvent() error = %v, wantErr %v", err, tt.wantErr)
 				return

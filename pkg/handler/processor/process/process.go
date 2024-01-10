@@ -91,7 +91,7 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d []byte) error {
 
-		blobStoreKey, err := events.DecodeEvent(ctx, d)
+		blobStoreKey, err := events.DecodeEventSubject(ctx, d)
 		if err != nil {
 			logger.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
 			return nil

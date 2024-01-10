@@ -45,9 +45,9 @@ func CreateArtifactPubEvent(ctx context.Context, key string) (*cloudevents.Event
 	return ce, nil
 }
 
-// DecodeEvent takes in the collectedEvent bytes and converts it back into a CloudEvent to retrieve the necessary fields.
+// DecodeEventSubject takes in the collectedEvent bytes and converts it back into a CloudEvent to retrieve the necessary fields.
 // The returned value is the subject of the event.
-func DecodeEvent(ctx context.Context, collectedEvent []byte) (string, error) {
+func DecodeEventSubject(ctx context.Context, collectedEvent []byte) (string, error) {
 	decodedEvent := cloudevents.NewEvent()
 
 	err := json.Unmarshal(collectedEvent, &decodedEvent)

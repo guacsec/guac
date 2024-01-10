@@ -160,7 +160,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 
 	processFunc := func(d []byte) error {
 
-		blobStoreKey, err := events.DecodeEvent(ctx, d)
+		blobStoreKey, err := events.DecodeEventSubject(ctx, d)
 		if err != nil {
 			logger.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
 			return nil
