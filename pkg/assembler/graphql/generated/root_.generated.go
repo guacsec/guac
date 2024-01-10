@@ -4752,6 +4752,9 @@ Each field matches a qualifier from pURL. Use null to match on all values at
 that level. For example, to get all packages in GUAC backend, use a PkgSpec
 where every field is null.
 
+The id field can be used to match on a specific node in the trie to match packageTypeID, 
+packageNamespaceID, packageNameID, or packageVersionID.
+
 Empty string at a field means matching with the empty string. If passing in
 qualifiers, all of the values in the list must match. Since we want to return
 nodes with any number of qualifiers if no qualifiers are passed in the input,
