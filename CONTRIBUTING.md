@@ -37,8 +37,7 @@ practices. For reasoning, see
 
 ## Community Guidelines
 
-This project follows
-[Google's Open Source Community Guidelines](https://opensource.google/conduct/).
+Please refer to the [Code of Conduct](CODE_OF_CONDUCT.md) for full details.
 
 ## Getting Started
 
