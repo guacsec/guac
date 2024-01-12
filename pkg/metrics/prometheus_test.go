@@ -16,212 +16,109 @@
 package metrics
 
 import (
-	"fmt"
+	"context"
 	"net/http"
-	"net/http/httputil"
-	"reflect"
+	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
-func TestNewPrometheus(t *testing.T) {
-	test := struct {
-		name string
-		want Metrics
-	}{
-		name: "default",
-		want: &prom{
-			counters: make(map[string]prometheus.Counter),
-			summary:  make(map[string]prometheus.Summary),
-		},
-	}
-	t.Run(test.name, func(t *testing.T) {
-		if got := NewPrometheus(); !reflect.DeepEqual(got, test.want) {
-			t.Errorf("NewPrometheus() = %v, want %v", got, test.want)
-		}
-	})
+func TestRegisterCounter(t *testing.T) {
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
 
-}
+	counter, err := collector.RegisterCounter(ctx, "test_counter", "label1")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-func Test_prom_NewCounter(t *testing.T) {
-	type fields struct {
-		counters map[string]prometheus.Counter
-		summary  map[string]prometheus.Summary
+	err = collector.AddCounter(ctx, "test_counter", 1, "label1")
+	if err != nil {
+		t.Fatal(err)
 	}
-	type args struct {
-		name string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "default",
-			fields: fields{
-				counters: make(map[string]prometheus.Counter),
-				summary:  make(map[string]prometheus.Summary),
-			},
-			args:    args{name: "test"},
-			wantErr: false,
-		},
-		{
-			name: "default",
-			fields: fields{
-				counters: make(map[string]prometheus.Counter),
-				summary:  make(map[string]prometheus.Summary),
-			},
-			args:    args{name: "test"},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			stop := make(chan struct{})
-			p := &prom{
-				counters: tt.fields.counters,
-				summary:  tt.fields.summary,
-			}
-			// this is a hack to make the test pass when the counter already exists
-			if tt.wantErr {
-				p.counters[tt.args.name] = prometheus.NewCounter(prometheus.CounterOpts{})
-			}
-			if err := p.NewCounter(tt.args.name); (err != nil) != tt.wantErr {
-				t.Errorf("NewCounter() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if tt.wantErr {
-				return
-			}
 
-			// start a server to get the metrics
-			http.Handle(
-				"/summary",
-				promhttp.Handler(),
-			)
-			go func() {
-				err := http.ListenAndServe(":2113", nil)
-				if err != nil {
-					fmt.Println(err)
-				}
-				close(stop)
-			}()
-			//increment the counter
-			p.IncrementCounter(tt.args.name)
-			// wait for the server to start
-			time.Sleep(1 * time.Second)
-			// get the metrics
-			resp, err := http.Get("http://localhost:2113/summary")
-			if err != nil {
-				t.Errorf("error getting metrics: %v", err)
-			}
-			body, err := httputil.DumpResponse(resp, true)
-			if err != nil {
-				t.Errorf("error reading response: %v", err)
-			}
-			found := false
-			for _, line := range strings.Split(string(body), "\n") {
-				if strings.Contains(line, fmt.Sprintf("%s_total", tt.args.name)) {
-					found = true
-				}
-			}
-			if !found {
-				t.Errorf("counter not found: %v", tt.args.name)
-			}
-		})
+	// Validate the counter
+	counterVec, ok := counter.(prometheus.Collector)
+	if !ok {
+		t.Fatal("counter is not a Collector")
+	}
+	err = testutil.CollectAndCompare(counterVec, strings.NewReader(`
+	    # HELP guac_guac_test_test_counter Counter for guac_test_test_counter
+		# TYPE guac_guac_test_test_counter counter
+		guac_guac_test_test_counter{label1="label1"} 1
+	`))
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
-func Test_prom_NewSummary(t *testing.T) {
-	type fields struct {
-		counters map[string]prometheus.Counter
-		summary  map[string]prometheus.Summary
-	}
-	type args struct {
-		name string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "default",
-			fields: fields{
-				counters: make(map[string]prometheus.Counter),
-				summary:  make(map[string]prometheus.Summary),
-			},
-			args:    args{name: "test"},
-			wantErr: false,
-		},
-		{
-			name: "default",
-			fields: fields{
-				counters: make(map[string]prometheus.Counter),
-				summary:  make(map[string]prometheus.Summary),
-			},
-			args:    args{name: "test"},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		stop := make(chan struct{})
-		t.Run(tt.name, func(t *testing.T) {
-			p := &prom{
-				counters: tt.fields.counters,
-				summary:  tt.fields.summary,
-			}
-			// this is a hack to make the test pass when the summary already exists
-			if tt.wantErr {
-				p.summary[tt.args.name] = prometheus.NewSummary(prometheus.SummaryOpts{})
-			}
-			if err := p.NewSummary(tt.args.name); (err != nil) != tt.wantErr {
-				t.Errorf("NewSummary() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if tt.wantErr {
-				return
-			}
+func TestRegisterHistogram(t *testing.T) {
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
 
-			// start a server to get the metrics
-			http.Handle(
-				"/metrics",
-				promhttp.Handler(),
-			)
-			go func() {
-				err := http.ListenAndServe(":2112", nil)
-				if err != nil {
-					fmt.Println(err)
-				}
-				close(stop)
-			}()
-			//increment the summary
-			p.ObserveSummary(tt.args.name, 1)
-			// wait for the server to start
-			time.Sleep(1 * time.Second)
-			// get the metrics
-			resp, err := http.Get("http://localhost:2112/metrics")
-			if err != nil {
-				t.Errorf("error getting metrics: %v", err)
-			}
-			body, err := httputil.DumpResponse(resp, true)
-			if err != nil {
-				t.Errorf("error reading response: %v", err)
-			}
-			found := false
-			for _, line := range strings.Split(string(body), "\n") {
-				if strings.Contains(line, fmt.Sprintf("%s_sum", tt.args.name)) {
-					found = true
-				}
-			}
-			if !found {
-				t.Errorf("summary not found: %v", tt.args.name)
-			}
-			close(stop)
-		})
+	_, err := collector.RegisterHistogram(ctx, "test_histogram", "label1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = collector.ObserveHistogram(ctx, "test_histogram", 2.5, "label1")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRegisterGauge(t *testing.T) {
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
+
+	gaugeVec, err := collector.RegisterGauge(ctx, "test_gauge", "label1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	a, ok := gaugeVec.(prometheus.Collector)
+	if !ok {
+		t.Fatal("gaugeVec is not a Collector")
+	}
+	gaugeVec.Add(1)
+	err = testutil.CollectAndCompare(a, strings.NewReader(`
+	    # HELP guac_guac_test_test_gauge Gauge for guac_test_test_gauge
+		# TYPE guac_guac_test_test_gauge gauge
+		guac_guac_test_test_gauge{label1="label1"} 1
+	`))
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestMetricsHandler(t *testing.T) {
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
+
+	handler := collector.MetricsHandler()
+
+	req, err := http.NewRequest("GET", "/metrics", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
+
+func TestNonExistingCounter(t *testing.T) {
+	ctx := WithMetrics(context.Background(), "guac_test")
+	collector := FromContext(ctx, "guac_test")
+
+	err := collector.AddCounter(ctx, "non_existing_counter", 1, "label1")
+	if err == nil {
+		t.Fatal("expected error for non-existing counter")
 	}
 }

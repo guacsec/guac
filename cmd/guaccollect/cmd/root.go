@@ -22,7 +22,6 @@ import (
 
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/version"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -30,7 +29,7 @@ import (
 func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
-	set, err := cli.BuildFlags([]string{"nats-addr", "csub-addr", "use-csub", "service-poll"})
+	set, err := cli.BuildFlags([]string{"nats-addr", "csub-addr", "use-csub", "service-poll", "enable-prometheus", "prometheus-addr"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

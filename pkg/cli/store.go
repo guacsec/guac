@@ -82,6 +82,10 @@ func init() {
 
 	set.Bool("retrieve-dependencies", true, "enable the deps.dev collector to retrieve package dependencies")
 
+	set.Bool("enable-prometheus", true, "enable prometheus metrics")
+
+	set.Int("prometheus-addr", 9091, "port to listen to on prometheus server")
+
 	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
 
 	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")

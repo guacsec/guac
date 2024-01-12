@@ -19,11 +19,10 @@ import (
 	"context"
 	"fmt"
 
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	jsoniter "github.com/json-iterator/go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -44,6 +43,10 @@ type Collector interface {
 	Type() string
 }
 
+type DeregisterCollector interface {
+	DeregisterCollector(collectorType string) error
+}
+
 // Emitter processes a document
 type Emitter func(*processor.Document) error
 
@@ -58,6 +61,7 @@ var (
 
 func RegisterDocumentCollector(c Collector, collectorType string) error {
 	if _, ok := documentCollectors[collectorType]; ok {
+		// do not overwrite the collector
 		documentCollectors[collectorType] = c
 		return fmt.Errorf("%w: %s", ErrCollectorOverwrite, collectorType)
 	}
