@@ -7266,6 +7266,122 @@ type CertifyVulnPkgsResponse struct {
 // GetIngestCertifyVulns returns CertifyVulnPkgsResponse.IngestCertifyVulns, and is useful for accessing the field via an interface.
 func (v *CertifyVulnPkgsResponse) GetIngestCertifyVulns() []string { return v.IngestCertifyVulns }
 
+// DependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
+// The GraphQL type's documentation follows.
+//
+// IsDependency is an attestation to record that a package depends on another.
+type DependenciesIsDependency struct {
+	AllIsDependencyTree `json:"-"`
+}
+
+// GetId returns DependenciesIsDependency.Id, and is useful for accessing the field via an interface.
+func (v *DependenciesIsDependency) GetId() string { return v.AllIsDependencyTree.Id }
+
+// GetJustification returns DependenciesIsDependency.Justification, and is useful for accessing the field via an interface.
+func (v *DependenciesIsDependency) GetJustification() string {
+	return v.AllIsDependencyTree.Justification
+}
+
+// GetPackage returns DependenciesIsDependency.Package, and is useful for accessing the field via an interface.
+func (v *DependenciesIsDependency) GetPackage() AllIsDependencyTreePackage {
+	return v.AllIsDependencyTree.Package
+}
+
+// GetDependencyPackage returns DependenciesIsDependency.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *DependenciesIsDependency) GetDependencyPackage() AllIsDependencyTreeDependencyPackage {
+	return v.AllIsDependencyTree.DependencyPackage
+}
+
+// GetDependencyType returns DependenciesIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *DependenciesIsDependency) GetDependencyType() DependencyType {
+	return v.AllIsDependencyTree.DependencyType
+}
+
+// GetVersionRange returns DependenciesIsDependency.VersionRange, and is useful for accessing the field via an interface.
+func (v *DependenciesIsDependency) GetVersionRange() string {
+	return v.AllIsDependencyTree.VersionRange
+}
+
+// GetOrigin returns DependenciesIsDependency.Origin, and is useful for accessing the field via an interface.
+func (v *DependenciesIsDependency) GetOrigin() string { return v.AllIsDependencyTree.Origin }
+
+// GetCollector returns DependenciesIsDependency.Collector, and is useful for accessing the field via an interface.
+func (v *DependenciesIsDependency) GetCollector() string { return v.AllIsDependencyTree.Collector }
+
+func (v *DependenciesIsDependency) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*DependenciesIsDependency
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.DependenciesIsDependency = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsDependencyTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalDependenciesIsDependency struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Package AllIsDependencyTreePackage `json:"package"`
+
+	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
+
+	DependencyType DependencyType `json:"dependencyType"`
+
+	VersionRange string `json:"versionRange"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *DependenciesIsDependency) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *DependenciesIsDependency) __premarshalJSON() (*__premarshalDependenciesIsDependency, error) {
+	var retval __premarshalDependenciesIsDependency
+
+	retval.Id = v.AllIsDependencyTree.Id
+	retval.Justification = v.AllIsDependencyTree.Justification
+	retval.Package = v.AllIsDependencyTree.Package
+	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
+	retval.DependencyType = v.AllIsDependencyTree.DependencyType
+	retval.VersionRange = v.AllIsDependencyTree.VersionRange
+	retval.Origin = v.AllIsDependencyTree.Origin
+	retval.Collector = v.AllIsDependencyTree.Collector
+	return &retval, nil
+}
+
+// DependenciesResponse is returned by Dependencies on success.
+type DependenciesResponse struct {
+	// Returns all package dependencies that match the filter.
+	IsDependency []DependenciesIsDependency `json:"IsDependency"`
+}
+
+// GetIsDependency returns DependenciesResponse.IsDependency, and is useful for accessing the field via an interface.
+func (v *DependenciesResponse) GetIsDependency() []DependenciesIsDependency { return v.IsDependency }
+
 // DependencyType determines the type of the dependency.
 type DependencyType string
 
@@ -22544,6 +22660,14 @@ func (v *__CertifyVulnPkgsInput) GetVulnerabilities() []VulnerabilityInputSpec {
 // GetCertifyVulns returns __CertifyVulnPkgsInput.CertifyVulns, and is useful for accessing the field via an interface.
 func (v *__CertifyVulnPkgsInput) GetCertifyVulns() []ScanMetadataInput { return v.CertifyVulns }
 
+// __DependenciesInput is used internally by genqlient
+type __DependenciesInput struct {
+	Filter IsDependencySpec `json:"filter"`
+}
+
+// GetFilter returns __DependenciesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__DependenciesInput) GetFilter() IsDependencySpec { return v.Filter }
+
 // __FindSoftwareInput is used internally by genqlient
 type __FindSoftwareInput struct {
 	SearchText string `json:"searchText"`
@@ -24445,6 +24569,76 @@ func CertifyVulnPkgs(
 	var err error
 
 	var data CertifyVulnPkgsResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+// The query or mutation executed by Dependencies.
+const Dependencies_Operation = `
+query Dependencies ($filter: IsDependencySpec!) {
+	IsDependency(isDependencySpec: $filter) {
+		... AllIsDependencyTree
+	}
+}
+fragment AllIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... AllPkgTree
+	}
+	dependencyPackage {
+		... AllPkgTree
+	}
+	dependencyType
+	versionRange
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func Dependencies(
+	ctx context.Context,
+	client graphql.Client,
+	filter IsDependencySpec,
+) (*DependenciesResponse, error) {
+	req := &graphql.Request{
+		OpName: "Dependencies",
+		Query:  Dependencies_Operation,
+		Variables: &__DependenciesInput{
+			Filter: filter,
+		},
+	}
+	var err error
+
+	var data DependenciesResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
