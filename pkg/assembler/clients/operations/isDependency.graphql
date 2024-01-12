@@ -46,3 +46,11 @@ mutation IsDependencies(
     dependencies: $dependencies
   )
 }
+
+# Exposes GraphQL queries to retrieve Dependencies
+
+query Dependencies($filter: IsDependencySpec!) {
+  IsDependency(isDependencySpec: $filter) {
+    ...AllIsDependencyTree
+  }
+}

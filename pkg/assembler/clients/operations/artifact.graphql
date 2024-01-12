@@ -26,7 +26,8 @@ mutation IngestArtifact($artifact: ArtifactInputSpec!) {
 mutation IngestArtifacts($artifacts: [ArtifactInputSpec!]!) {
   ingestArtifacts(artifacts: $artifacts)
 }
-# Exposes GraphQL queries to retrieve GUAC sources
+
+# Exposes GraphQL queries to retrieve GUAC artifacts
 
 query Artifacts($filter: ArtifactSpec!) {
   artifacts(artifactSpec: $filter) {
