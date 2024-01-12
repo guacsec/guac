@@ -1627,7 +1627,8 @@ func (e DependencyType) MarshalGQL(w io.Writer) {
 //
 // Each member of the enum is formed by merging two Node names with _. Each name
 // is converted from CamelCase to CAPITALS_WITH_UNDERSCORES. Only valid edges
-// (pairs from Node to Node) are included.
+// (pairs from Node to Node) are included. Edges are defined in both directions,
+// which means nodes can be traversed from either direction.
 //
 // The only exception to the above rule is for links out of HasSLSA. The names are
 // HAS_SLSA_SUBJECT, HAS_SLSA_BUILT_BY, and HAS_SLSA_MATERIALS. This is because
