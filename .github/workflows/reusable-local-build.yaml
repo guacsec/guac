@@ -53,7 +53,7 @@ jobs:
           docker tag ghcr.io/${{ github.repository }}:v0.0.0-local-organic-guac-amd64 local-organic-guac
           docker save -o ./bin/local-organic-guac.tar local-organic-guac
         shell: bash
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: guac-artifacts
           path: ./bin
