@@ -17,6 +17,8 @@ package events
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 
@@ -50,9 +52,19 @@ func CreateArtifactPubEvent(ctx context.Context, key string) (*cloudevents.Event
 func DecodeEventSubject(ctx context.Context, collectedEvent []byte) (string, error) {
 	decodedEvent := cloudevents.NewEvent()
 
-	err := json.Unmarshal(collectedEvent, &decodedEvent)
-	if err != nil {
+	if err := json.Unmarshal(collectedEvent, &decodedEvent); err != nil {
 		return "", fmt.Errorf("failed unmarshal the event: %v", err)
 	}
+
 	return decodedEvent.Subject(), nil
+}
+
+func GetKey(blob []byte) string {
+	generatedHash := getHash(blob)
+	return fmt.Sprintf("sha256:%s", generatedHash)
+}
+
+func getHash(data []byte) string {
+	sha256sum := sha256.Sum256(data)
+	return hex.EncodeToString(sha256sum[:])
 }

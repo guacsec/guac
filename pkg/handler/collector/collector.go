@@ -17,8 +17,6 @@ package collector
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 
 	"github.com/guacsec/guac/pkg/blob"
@@ -130,12 +128,13 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
 
-	err = blobStore.Write(ctx, getHash(d.Blob), docByte)
-	if err != nil {
+	key := events.GetKey(d.Blob)
+
+	if err = blobStore.Write(ctx, key, docByte); err != nil {
 		return fmt.Errorf("failed write document to blob store: %w", err)
 	}
 
-	cdEvent, err := events.CreateArtifactPubEvent(ctx, getHash(d.Blob))
+	cdEvent, err := events.CreateArtifactPubEvent(ctx, key)
 	if err != nil {
 		return fmt.Errorf("failed create an event: %w", err)
 	}
@@ -145,15 +144,12 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		return fmt.Errorf("failed marshal of document key: %w", err)
 	}
 
-	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, keyByte)
-	if err != nil {
-		return err
+	if err := emitter.Publish(ctx, emitter.SubjectNameDocCollected, keyByte); err != nil {
+		if err != nil {
+			return fmt.Errorf("failed to publish event with error: %w", err)
+		}
 	}
+
 	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil
-}
-
-func getHash(data []byte) string {
-	sha256sum := sha256.Sum256(data)
-	return hex.EncodeToString(sha256sum[:])
 }

@@ -104,14 +104,12 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 		}
 
 		doc := processor.Document{}
-		err = json.Unmarshal(documentBytes, &doc)
-		if err != nil {
+		if err = json.Unmarshal(documentBytes, &doc); err != nil {
 			logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
 			return nil
 		}
 
-		err = em(&doc)
-		if err != nil {
+		if err := em(&doc); err != nil {
 			logger.Error("[processor: %s] failed transportFunc: %v", uuidString, err)
 			return nil
 		}

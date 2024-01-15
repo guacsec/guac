@@ -29,7 +29,6 @@ import (
 )
 
 type blobStore struct {
-	url    string
 	bucket *blob.Bucket
 }
 
@@ -44,7 +43,6 @@ func NewBlobStore(ctx context.Context, url string) (*blobStore, error) {
 		return nil, fmt.Errorf("failed to open bucket with error: %w", err)
 	}
 	return &blobStore{
-		url:    url,
 		bucket: bucket,
 	}, nil
 }
@@ -75,13 +73,9 @@ func (b *blobStore) Read(ctx context.Context, key string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to read to bucket with error: %w", err)
 	}
 	defer r.Close()
-	// Readers also have a limited view of the blob's metadata.
-	fmt.Println("Content-Type:", r.ContentType())
-	fmt.Println()
 
 	buf := new(bytes.Buffer)
-	_, err = buf.ReadFrom(r)
-	if err != nil {
+	if _, err := buf.ReadFrom(r); err != nil {
 		return nil, fmt.Errorf("failed to read bytes with error: %w", err)
 	}
 	return buf.Bytes(), nil
