@@ -183,5 +183,6 @@ func init() {
 		os.Exit(1)
 	}
 
-	collectCmd.AddCommand(s3Cmd)
+	// TODO (pxp928): S3 command is removed from guacone until further testing and re-review is done for the S3 collector
+	//collectCmd.AddCommand(s3Cmd)
 }
