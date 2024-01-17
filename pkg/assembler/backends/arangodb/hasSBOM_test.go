@@ -159,14 +159,14 @@ var includedTestOccurrences = []testOccurrence{{
 	isOcc: includedOccurrence,
 }}
 
-var includedHasSBOM = &model.HasSBOMInputSpec{
-	URI:              "sbom_URI",
-	Algorithm:        "sbom_algorithm",
-	Digest:           "sbom_digest",
-	DownloadLocation: "sbom_download_location",
-	Origin:           "sbom_origin",
-	Collector:        "sbom_collector",
-}
+// var includedHasSBOM = &model.HasSBOMInputSpec{
+// 	URI:              "sbom_URI",
+// 	Algorithm:        "sbom_algorithm",
+// 	Digest:           "sbom_digest",
+// 	DownloadLocation: "sbom_download_location",
+// 	Origin:           "sbom_origin",
+// 	Collector:        "sbom_collector",
+// }
 
 var includedTestExpectedPackage1 = &model.Package{
 	Type: "p1_type",
@@ -241,52 +241,52 @@ var includedTestExpectedSource = &model.Source{
 	}},
 }
 
-var includedTestExpectedSBOM = &model.HasSbom{
-	Subject:          includedTestExpectedPackage1,
-	URI:              "sbom_URI",
-	Algorithm:        "sbom_algorithm",
-	Digest:           "sbom_digest",
-	DownloadLocation: "sbom_download_location",
-	Origin:           "sbom_origin",
-	Collector:        "sbom_collector",
-	IncludedSoftware: []model.PackageOrArtifact{
-		includedTestExpectedPackage1,
-		includedTestExpectedPackage2,
-		includedTestExpectedPackage3,
-		includedTestExpectedArtifact1,
-		includedTestExpectedArtifact2,
-	},
-	IncludedDependencies: []*model.IsDependency{{
-		Package:           includedTestExpectedPackage1,
-		DependencyPackage: includedTestExpectedPackage2,
-		VersionRange:      "dep1_range",
-		DependencyType:    model.DependencyTypeDirect,
-		Justification:     "dep1_justification",
-		Origin:            "dep1_origin",
-		Collector:         "dep1_collector",
-	}, {
-		Package:           includedTestExpectedPackage1,
-		DependencyPackage: includedTestExpectedPackage3,
-		VersionRange:      "dep2_range",
-		DependencyType:    model.DependencyTypeIndirect,
-		Justification:     "dep2_justification",
-		Origin:            "dep2_origin",
-		Collector:         "dep2_collector",
-	}},
-	IncludedOccurrences: []*model.IsOccurrence{{
-		Subject:       includedTestExpectedPackage1,
-		Artifact:      includedTestExpectedArtifact1,
-		Justification: "occ_justification",
-		Origin:        "occ_origin",
-		Collector:     "occ_collector",
-	}, {
-		Subject:       includedTestExpectedSource,
-		Artifact:      includedTestExpectedArtifact1,
-		Justification: "occ_justification",
-		Origin:        "occ_origin",
-		Collector:     "occ_collector",
-	}},
-}
+// var includedTestExpectedSBOM = &model.HasSbom{
+// 	Subject:          includedTestExpectedPackage1,
+// 	URI:              "sbom_URI",
+// 	Algorithm:        "sbom_algorithm",
+// 	Digest:           "sbom_digest",
+// 	DownloadLocation: "sbom_download_location",
+// 	Origin:           "sbom_origin",
+// 	Collector:        "sbom_collector",
+// 	IncludedSoftware: []model.PackageOrArtifact{
+// 		includedTestExpectedPackage1,
+// 		includedTestExpectedPackage2,
+// 		includedTestExpectedPackage3,
+// 		includedTestExpectedArtifact1,
+// 		includedTestExpectedArtifact2,
+// 	},
+// 	IncludedDependencies: []*model.IsDependency{{
+// 		Package:           includedTestExpectedPackage1,
+// 		DependencyPackage: includedTestExpectedPackage2,
+// 		VersionRange:      "dep1_range",
+// 		DependencyType:    model.DependencyTypeDirect,
+// 		Justification:     "dep1_justification",
+// 		Origin:            "dep1_origin",
+// 		Collector:         "dep1_collector",
+// 	}, {
+// 		Package:           includedTestExpectedPackage1,
+// 		DependencyPackage: includedTestExpectedPackage3,
+// 		VersionRange:      "dep2_range",
+// 		DependencyType:    model.DependencyTypeIndirect,
+// 		Justification:     "dep2_justification",
+// 		Origin:            "dep2_origin",
+// 		Collector:         "dep2_collector",
+// 	}},
+// 	IncludedOccurrences: []*model.IsOccurrence{{
+// 		Subject:       includedTestExpectedPackage1,
+// 		Artifact:      includedTestExpectedArtifact1,
+// 		Justification: "occ_justification",
+// 		Origin:        "occ_origin",
+// 		Collector:     "occ_collector",
+// 	}, {
+// 		Subject:       includedTestExpectedSource,
+// 		Artifact:      includedTestExpectedArtifact1,
+// 		Justification: "occ_justification",
+// 		Origin:        "occ_origin",
+// 		Collector:     "occ_collector",
+// 	}},
+// }
 
 // End of Test resources
 
