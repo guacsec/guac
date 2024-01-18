@@ -256,5 +256,3 @@ func decompressDocument(i *processor.Document, reader io.Reader) error {
 	i.Blob = uncompressed
 	return nil
 }
-
-
