@@ -223,6 +223,11 @@ func decodeDocument(ctx context.Context, i *processor.Document) error {
 		encoding, ok := processor.EncodingExts[strings.ToLower(ext)]
 		if ok {
 			i.Encoding = encoding
+		} else {
+			err := guesser.GuessEncoding(ctx, i)
+			if err != nil {
+				return fmt.Errorf("failure while attempting to detect file encoding: %w", err)
+			}
 		}
 	}
 	logger.Infof("Decoding document with encoding:  %v", i.Encoding)
