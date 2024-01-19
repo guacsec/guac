@@ -17,9 +17,9 @@ package dsse
 
 import (
 	"encoding/base64"
-	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
@@ -97,8 +97,8 @@ var (
 	}
 	ite6SLSADoc = processor.Document{
 		Blob:   []byte(ite6SLSA),
-		Type:   processor.DocumentITE6Generic,
-		Format: processor.FormatJSON,
+		Type:   processor.DocumentUnknown,
+		Format: processor.FormatUnknown,
 		SourceInformation: processor.SourceInformation{
 			Collector: "TestCollector",
 			Source:    "TestSource",
@@ -127,6 +127,7 @@ func TestDSSEProcessor_Unpack(t *testing.T) {
 		expected:  []*processor.Document{&unpackedUnknownDSSEDoc},
 		expectErr: false,
 	}, {
+		// DSSE should not worry about internal payload details
 		name:      "DSSE Envelope with ITE6",
 		doc:       ite6DSSEDoc,
 		expected:  []*processor.Document{&ite6SLSADoc},
@@ -144,8 +145,8 @@ func TestDSSEProcessor_Unpack(t *testing.T) {
 			if (err != nil) != tt.expectErr {
 				t.Errorf("DSSEProcessor.Unpack() error = %v, expectErr %v", err, tt.expectErr)
 			}
-			if !reflect.DeepEqual(actual, tt.expected) {
-				t.Errorf("DSSEProcessor.Unpack() = %v, expected %v", actual, tt.expected)
+			if diff := cmp.Diff(tt.expected, actual); diff != "" {
+				t.Errorf("Unexpected DSSEProcessor.Unpack() results. (-want +got):\n%s", diff)
 			}
 		})
 	}
