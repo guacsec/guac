@@ -172,7 +172,7 @@ start-inmem-db: check-docker-compose-tool-check
 		sleep 1; \
 		counter=$$((counter+1)); \
 	done; \
-	[ $$counter -eq 15 ] && { echo "Arango GUAC service did not start in time"; exit 1; } || echo "Inmem GUAC service is up!"
+	[ $$counter -eq 15 ] && { echo "Inmem GUAC service did not start in time"; exit 1; } || echo "Inmem GUAC service is up!"
 
 # start graphQL server with keyvalue-redis backend
 .PHONY: start-redis-db
