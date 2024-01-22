@@ -24,6 +24,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -38,17 +39,35 @@ type filesOptions struct {
 	path string
 	// address for NATS connection
 	natsAddr string
+	// address for blob store
+	blobAddr string
 	// poll location
 	poll bool
 }
 
 var filesCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
-	Short: "take a folder of files and create a GUAC graph utilizing Nats pubsub",
+	Short: "take a folder of files and create a GUAC graph utilizing Nats pubsub and blob store",
+	Long: `
+guaccollect files takes in a file path to ingest all documents that are found
+via the GUAC files collector. Ingestion to GUAC happens via an event stream (NATS)
+to allow for decoupling of the collectors from the ingestion into GUAC. 
+
+Each collector collects the "document" and stores it in the blob store for further
+evaluation. The collector creates a CDEvent (https://cdevents.dev/) that is published via 
+the event stream. The downstream guacingest subscribes to the stream and retrieves the "document" from the blob store for 
+processing and ingestion.
+
+Various blob stores can be used (such as S3, Azure Blob, Google Cloud Bucket) as documented here: https://gocloud.dev/howto/blob/
+For example: "s3://my-bucket?region=us-west-1"
+
+Specific authentication method vary per cloud provider. Please follow the documentation per implementation to ensure
+you have access to read and write to the respective blob store.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		opts, err := validateFilesFlags(
 			viper.GetString("nats-addr"),
+			viper.GetString("blob-addr"),
 			viper.GetBool("service-poll"),
 			args)
 		if err != nil {
@@ -66,14 +85,16 @@ var filesCmd = &cobra.Command{
 		if err != nil {
 			logger.Errorf("unable to register file collector: %v", err)
 		}
-		initializeNATsandCollector(ctx, opts.natsAddr)
+
+		initializeNATsandCollector(ctx, opts.natsAddr, opts.blobAddr)
 	},
 }
 
-func validateFilesFlags(natsAddr string, poll bool, args []string) (filesOptions, error) {
+func validateFilesFlags(natsAddr string, blobAddr string, poll bool, args []string) (filesOptions, error) {
 	var opts filesOptions
 
 	opts.natsAddr = natsAddr
+	opts.blobAddr = blobAddr
 	opts.poll = poll
 
 	if len(args) != 1 {
@@ -91,7 +112,7 @@ func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, 
 	}, nil
 }
 
-func initializeNATsandCollector(ctx context.Context, natsAddr string) {
+func initializeNATsandCollector(ctx context.Context, natsAddr string, blobAddr string) {
 	logger := logging.FromContext(ctx)
 	// initialize jetstream
 	// TODO: pass in credentials file for NATS secure login
@@ -102,6 +123,13 @@ func initializeNATsandCollector(ctx context.Context, natsAddr string) {
 		os.Exit(1)
 	}
 	defer jetStream.Close()
+
+	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
+	if err != nil {
+		logger.Errorf("unable to connect to blog store: %v", err)
+	}
+
+	ctx = blob.WithBlobStore(ctx, blobStore)
 
 	// Get pipeline of components
 	collectorPubFunc, err := getCollectorPublish(ctx)

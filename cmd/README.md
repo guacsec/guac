@@ -47,6 +47,7 @@ services:
 - what it does: runs the ingestor connected to nats and GraphQL
 - options:
   - nats addr
+  - blob addr
   - gql endpoint
 
 **guaccollect**
@@ -55,6 +56,7 @@ services:
   nats
 - options:
   - nats addr
+  - blob addr
   - gql addr
   - colsub addr
   - collector/certifier name

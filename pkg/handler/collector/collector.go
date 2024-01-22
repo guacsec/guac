@@ -19,7 +19,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	jsoniter "github.com/json-iterator/go"
@@ -113,17 +115,41 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	return nil
 }
 
-// Publish is used by NATS JetStream to stream the documents and send them to the processor
+// Publish takes the "document" collected by the collectors and stores it into a blob store for
+// retrieval by the processor/ingestor. A CDEvent is created to transmit the key (which is the
+// sha256 of the collected "document"). This also fixes the issues where the "document" was too large
+// to be sent across the event stream.
 func Publish(ctx context.Context, d *processor.Document) error {
 	logger := logging.FromContext(ctx)
+	blobStore := blob.FromContext(ctx)
+
 	docByte, err := json.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
-	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, docByte)
-	if err != nil {
-		return err
+
+	key := events.GetKey(d.Blob)
+
+	if err = blobStore.Write(ctx, key, docByte); err != nil {
+		return fmt.Errorf("failed write document to blob store: %w", err)
 	}
+
+	cdEvent, err := events.CreateArtifactPubEvent(ctx, key)
+	if err != nil {
+		return fmt.Errorf("failed create an event: %w", err)
+	}
+
+	keyByte, err := json.Marshal(cdEvent)
+	if err != nil {
+		return fmt.Errorf("failed marshal of document key: %w", err)
+	}
+
+	if err := emitter.Publish(ctx, emitter.SubjectNameDocCollected, keyByte); err != nil {
+		if err != nil {
+			return fmt.Errorf("failed to publish event with error: %w", err)
+		}
+	}
+
 	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil
 }

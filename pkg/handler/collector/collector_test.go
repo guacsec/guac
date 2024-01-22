@@ -27,7 +27,9 @@ import (
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -109,6 +111,14 @@ func Test_Publish(t *testing.T) {
 		t.Fatalf("unexpected error recreating jetstream: %v", err)
 	}
 	defer jetStream.Close()
+
+	blobStore, err := blob.NewBlobStore(ctx, "mem://")
+	if err != nil {
+		t.Fatalf("unable to connect to blog store: %v", err)
+	}
+
+	ctx = blob.WithBlobStore(ctx, blobStore)
+
 	err = Publish(ctx, &testdata.Ite6SLSADoc)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
@@ -136,6 +146,8 @@ func Test_Publish(t *testing.T) {
 
 func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
 	logger := logging.FromContext(ctx)
+	blobStore := blob.FromContext(ctx)
+
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
@@ -147,10 +159,22 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 	}
 
 	processFunc := func(d []byte) error {
-		doc := processor.Document{}
-		err := json.Unmarshal(d, &doc)
+
+		blobStoreKey, err := events.DecodeEventSubject(ctx, d)
 		if err != nil {
-			fmtErrString := fmt.Sprintf("[processor: %s] failed unmarshal the document bytes", uuidString)
+			logger.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
+			return nil
+		}
+
+		documentBytes, err := blobStore.Read(ctx, blobStoreKey)
+		if err != nil {
+			return fmt.Errorf("failed read document to blob store: %w", err)
+		}
+
+		doc := processor.Document{}
+		err = json.Unmarshal(documentBytes, &doc)
+		if err != nil {
+			fmtErrString := fmt.Sprintf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
 			logger.Errorf(fmtErrString+": %v", err)
 			return fmt.Errorf(fmtErrString+": %w", err)
 		}

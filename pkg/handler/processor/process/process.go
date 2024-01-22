@@ -26,7 +26,9 @@ import (
 	"strings"
 
 	uuid "github.com/gofrs/uuid"
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/csaf"
@@ -70,10 +72,11 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 	return nil
 }
 
-// Subscribe is used by NATS JetStream to stream the documents received from the collector
-// and process them them via Process
+// Subscribe receives the CD event and decodes the event to obtain the blob store key.
+// The key is used to retrieve the "document" from the blob store to be processed and ingested.
 func Subscribe(ctx context.Context, em collector.Emitter) error {
 	logger := logging.FromContext(ctx)
+	blobStore := blob.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
 	if err != nil {
@@ -88,15 +91,25 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d []byte) error {
 
-		doc := processor.Document{}
-		err := json.Unmarshal(d, &doc)
+		blobStoreKey, err := events.DecodeEventSubject(ctx, d)
 		if err != nil {
+			logger.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
+			return nil
+		}
+
+		documentBytes, err := blobStore.Read(ctx, blobStoreKey)
+		if err != nil {
+			logger.Errorf("[processor: %s] failed read document to blob store: %v", uuidString, err)
+			return nil
+		}
+
+		doc := processor.Document{}
+		if err = json.Unmarshal(documentBytes, &doc); err != nil {
 			logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
 			return nil
 		}
 
-		err = em(&doc)
-		if err != nil {
+		if err := em(&doc); err != nil {
 			logger.Error("[processor: %s] failed transportFunc: %v", uuidString, err)
 			return nil
 		}
