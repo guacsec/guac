@@ -76,7 +76,7 @@ func (d *s3Bucket) ListFiles(ctx context.Context, bucket string, token *string, 
 	input := &s3.ListObjectsV2Input{
 		Bucket:            &bucket,
 		ContinuationToken: token,
-		MaxKeys:           max,
+		MaxKeys:           aws.Int32(max),
 	}
 	resp, err := client.ListObjectsV2(ctx, input)
 	if err != nil {
@@ -115,7 +115,7 @@ func (d *s3Bucket) DownloadFile(ctx context.Context, bucket string, item string)
 
 	resp, err := client.GetObject(ctx, input)
 	if err != nil {
-		return nil, fmt.Errorf("unable to download file: %w", err)
+		return nil, fmt.Errorf("unable to download file: %s %w", item, err)
 	}
 	defer resp.Body.Close()
 

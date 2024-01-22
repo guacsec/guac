@@ -56,7 +56,6 @@ func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
 }
 
 func (s *S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-
 	if s.config.Poll {
 		retrieveWithPoll(*s, ctx, docChannel)
 	} else {
