@@ -122,6 +122,7 @@ require (
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/getkin/kin-openapi v0.122.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.5.0 // indirect
@@ -159,6 +160,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/ianlancetaylor/demangle v0.0.0-20231023195312-e2daf7ba7156 // indirect
+	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
@@ -185,6 +187,7 @@ require (
 	github.com/moby/buildkit v0.12.5 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/nats-io/jwt/v2 v2.5.3 // indirect
 	github.com/nats-io/nkeys v0.4.7 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
@@ -197,6 +200,7 @@ require (
 	github.com/owenrumney/go-sarif/v2 v2.3.0 // indirect
 	github.com/pandatix/go-cvss v0.6.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
+	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/pingcap/errors v0.11.5-0.20211224045212-9687c2b0f87c // indirect
 	github.com/pingcap/failpoint v0.0.0-20220801062533-2eaa32854a6c // indirect
@@ -288,6 +292,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.29.7
 	github.com/cdevents/sdk-go v0.3.2
 	github.com/cloudevents/sdk-go/v2 v2.15.0
+	github.com/deepmap/oapi-codegen/v2 v2.0.1-0.20240123090344-d326c01d279a
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-git/go-git/v5 v5.11.0
