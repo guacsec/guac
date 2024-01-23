@@ -236,6 +236,11 @@ func Test_Publish(t *testing.T) {
 		t.Fatalf("unexpected error recreating jetstream: %v", err)
 	}
 	defer jetStream.Close()
+
+	pubsub := emitter.NewEmitterPubSub(ctx, "mem://")
+
+	ctx = emitter.WithEmitter(ctx, pubsub)
+
 	err = Publish(ctx, &testdata.Ite6SLSADoc)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
@@ -263,12 +268,14 @@ func Test_Publish(t *testing.T) {
 
 func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
 	logger := logging.FromContext(ctx)
+	pubsub := emitter.FromContext(ctx)
+
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	psub, err := emitter.NewPubSub(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	psub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
 	if err != nil {
 		return err
 	}

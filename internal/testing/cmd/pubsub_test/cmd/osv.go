@@ -85,6 +85,9 @@ var osvCmd = &cobra.Command{
 		}
 		defer jetStream.Close()
 
+		pubsub := emitter.NewEmitterPubSub(ctx, "mem://")
+		ctx = emitter.WithEmitter(ctx, pubsub)
+
 		certifierPubFunc, err := getCertifierPublish(ctx)
 		if err != nil {
 			logger.Errorf("error: %v", err)
@@ -108,7 +111,7 @@ var osvCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed marshal of document: %w", err)
 			}
-			err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
+			err = pubsub.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
 			if err != nil {
 				logger.Error("[processor] failed transportFunc: %v", err)
 				return nil

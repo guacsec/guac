@@ -122,6 +122,7 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 func Publish(ctx context.Context, d *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	blobStore := blob.FromContext(ctx)
+	pubsub := emitter.FromContext(ctx)
 
 	docByte, err := json.Marshal(d)
 	if err != nil {
@@ -144,7 +145,7 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		return fmt.Errorf("failed marshal of document key: %w", err)
 	}
 
-	if err := emitter.Publish(ctx, emitter.SubjectNameDocCollected, keyByte); err != nil {
+	if err := pubsub.Publish(ctx, emitter.SubjectNameDocCollected, keyByte); err != nil {
 		if err != nil {
 			return fmt.Errorf("failed to publish event with error: %w", err)
 		}

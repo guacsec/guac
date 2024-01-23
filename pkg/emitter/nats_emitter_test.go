@@ -100,6 +100,10 @@ func TestNatsEmitter_PublishOnEmit(t *testing.T) {
 		t.Fatalf("unexpected error recreating jetstream: %v", err)
 	}
 	defer jetStream.Close()
+
+	pubsub := NewEmitterPubSub(ctx, "mem://")
+	ctx = WithEmitter(ctx, pubsub)
+
 	err = testPublish(ctx, &ite6SLSADoc)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
@@ -146,6 +150,9 @@ func TestNatsEmitter_PublishOnEmit_DeDuplication(t *testing.T) {
 		t.Fatalf("unexpected error recreating jetstream: %v", err)
 	}
 	defer jetStream.Close()
+
+	pubsub := NewEmitterPubSub(ctx, "mem://")
+	ctx = WithEmitter(ctx, pubsub)
 
 	// publish document once
 	err = testPublish(ctx, &ite6SLSADoc)
@@ -249,11 +256,13 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 
 func testPublish(ctx context.Context, d *processor.Document) error {
 	logger := logging.FromContext(ctx)
+	pubsub := FromContext(ctx)
+
 	docByte, err := json.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
-	err = Publish(ctx, SubjectNameDocCollected, docByte)
+	err = pubsub.Publish(ctx, SubjectNameDocCollected, docByte)
 	if err != nil {
 		return fmt.Errorf("failed to publish document on stream: %w", err)
 	}
@@ -263,12 +272,14 @@ func testPublish(ctx context.Context, d *processor.Document) error {
 
 func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
 	logger := logging.FromContext(ctx)
+	pubsub := FromContext(ctx)
+
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	psub, err := NewPubSub(ctx, uuidString, SubjectNameDocCollected, DurableProcessor, BackOffTimer)
+	psub, err := pubsub.Subscribe(ctx, uuidString, SubjectNameDocCollected, DurableProcessor, BackOffTimer)
 	if err != nil {
 		return err
 	}

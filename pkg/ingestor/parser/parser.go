@@ -82,13 +82,14 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 // The context contains the jetstream.
 func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredicates, []*common.IdentifierStrings) error) error {
 	logger := logging.FromContext(ctx)
+	pubsub := emitter.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	psub, err := emitter.NewPubSub(ctx, uuidString, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
+	psub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
 	if err != nil {
 		return err
 	}

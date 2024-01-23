@@ -411,11 +411,14 @@ func TestSubscribe(t *testing.T) {
 }
 
 func testPublish(ctx context.Context, documentTree processor.DocumentTree) error {
+
+	pubsub := emitter.NewEmitterPubSub(ctx, "mem://")
+
 	docTreeJSON, err := json.Marshal(documentTree)
 	if err != nil {
 		return err
 	}
-	err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeJSON)
+	err = pubsub.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeJSON)
 	if err != nil {
 		return err
 	}

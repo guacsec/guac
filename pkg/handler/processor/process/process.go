@@ -77,13 +77,14 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 func Subscribe(ctx context.Context, em collector.Emitter) error {
 	logger := logging.FromContext(ctx)
 	blobStore := blob.FromContext(ctx)
+	pubsub := emitter.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	psub, err := emitter.NewPubSub(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	psub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}

@@ -17,8 +17,9 @@ package emitter
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
+	"time"
 
 	"gocloud.dev/pubsub"
 
@@ -35,6 +36,14 @@ type emitterPubSub struct {
 	serviceURL string
 }
 
+// DataFunc determines how the data return from NATS is transformed based on implementation per module
+type DataFunc func([]byte) error
+
+type subscriber struct {
+	dataChan <-chan []byte
+	errChan  <-chan error
+}
+
 // NewBlobStore initializes the blob store based on the url.
 // utilizing gocloud (https://gocloud.dev/howto/blob/) various blob stores
 // such as S3, google cloud bucket, azure blob store can be used.
@@ -47,8 +56,21 @@ func NewEmitterPubSub(_ context.Context, serviceURL string) *emitterPubSub {
 }
 
 // buildURL constructs the full URL for a topic or subscription.
-func buildURL(baseURL, name string) string {
-	return fmt.Sprintf("%s%s", baseURL, name)
+func buildTopicURL(baseURL, name string) string {
+	if baseURL == "nats://" {
+		return fmt.Sprintf("%s%s?%s", baseURL, name, "jetstream=true")
+	} else {
+		return fmt.Sprintf("%s%s", baseURL, name)
+	}
+}
+
+// buildURL constructs the full URL for a topic or subscription.
+func buildSubscriptionURL(baseURL, name string, durable string) string {
+	if baseURL == "nats://" {
+		return fmt.Sprintf("%s%s?%s&consumer_durable=%s", baseURL, name, "jetstream=true", durable)
+	} else {
+		return fmt.Sprintf("%s%s", baseURL, name)
+	}
 }
 
 // Publish publishes the data onto the NATS stream for consumption by upstream services
@@ -56,7 +78,7 @@ func (e *emitterPubSub) Publish(ctx context.Context, subj string, data []byte) e
 	// pubsub.OpenTopic creates a *pubsub.Topic from a URL.
 	// This URL will Dial the NATS server at the URL in the environment variable
 	// NATS_SERVER_URL and send messages with subject "example.mysubject".
-	topicURL := buildURL(e.serviceURL, subj)
+	topicURL := buildTopicURL(e.serviceURL, subj)
 
 	// Initialize a topic
 	topic, err := pubsub.OpenTopic(ctx, topicURL)
@@ -74,8 +96,8 @@ func (e *emitterPubSub) Publish(ctx context.Context, subj string, data []byte) e
 }
 
 // Read uses the key read the data from the initialized blob store (via the authentication provided)
-func (e *emitterPubSub) Subscribe(ctx context.Context, subj string) ([]byte, error) {
-	subscriptionURL := buildURL(e.serviceURL, subj)
+func (e *emitterPubSub) Subscribe(ctx context.Context, id string, subj string, durable string, backOffTimer time.Duration) (*subscriber, error) {
+	subscriptionURL := buildSubscriptionURL(e.serviceURL, subj, durable)
 
 	// Initialize a subscription
 	subscription, err := pubsub.OpenSubscription(ctx, subscriptionURL)
@@ -84,17 +106,78 @@ func (e *emitterPubSub) Subscribe(ctx context.Context, subj string) ([]byte, err
 	}
 	defer subscription.Shutdown(ctx)
 
-	// Subscribe to messages
-	for {
-		msg, err := subscription.Receive(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to open receive on subscription with url: %s, with error: %w", subscriptionURL, err)
-		}
-		log.Printf("Received message: %s\n", string(msg.Body))
-
-		msg.Ack()
+	dataChan, errchan, err := createSubscriber(ctx, subscription, id, subj, durable, backOffTimer)
+	if err != nil {
+		return nil, err
 	}
+	return &subscriber{
+		dataChan: dataChan,
+		errChan:  errchan,
+	}, nil
+}
 
+// GetDataFromNats retrieves the data from the channels and transforms it via the DataFunc defined per module
+func (s *subscriber) GetDataFromNats(ctx context.Context, dataFunc DataFunc) error {
+	for {
+		select {
+		case d := <-s.dataChan:
+			if err := dataFunc(d); err != nil {
+				return err
+			}
+		case err := <-s.errChan:
+			for len(s.dataChan) > 0 {
+				d := <-s.dataChan
+				if err := dataFunc(d); err != nil {
+					return err
+				}
+			}
+			return err
+		case <-ctx.Done():
+			for len(s.dataChan) > 0 {
+				d := <-s.dataChan
+				if err := dataFunc(d); err != nil {
+					return err
+				}
+			}
+			return ctx.Err()
+		}
+	}
+}
+
+func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id string, subj string, durable string, backOffTimer time.Duration) (<-chan []byte, <-chan error, error) {
+	// docChan to collect artifacts
+	dataChan := make(chan []byte, BufferChannelSize)
+	// errChan to receive error from collectors
+	errChan := make(chan error, 1)
+	go func() {
+		for {
+			// if the context is canceled we want to break out of the loop
+			if ctx.Err() != nil {
+				errChan <- ctx.Err()
+				return
+			}
+			msg, err := subscription.Receive(ctx)
+			if err != nil {
+				if errors.Is(err, context.DeadlineExceeded) {
+					// if we get a timeout, we want to try again
+					select {
+					case <-ctx.Done():
+						errChan <- ctx.Err()
+						return
+					case <-time.After(backOffTimer):
+					}
+					continue
+				} else {
+					errChan <- fmt.Errorf("[%s: %s] unexpected Receive error: %w", durable, id, err)
+					return
+				}
+			}
+
+			msg.Ack()
+			dataChan <- msg.Body
+		}
+	}()
+	return dataChan, errChan, nil
 }
 
 // WithBlobStore stores the initialized blobStore in the context such that it can be retrieved later when needed
