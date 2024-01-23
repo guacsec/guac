@@ -433,7 +433,7 @@ func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]
 		return []*model.Package{p}, nil
 	}
 
-	if _, ok := ctx.Value("graphql").(graphql.OperationContext); ok {
+	if graphql.HasOperationContext(ctx) {
 		// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
 		// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key
 		// namespaces.names.versions.qualifiers.value namespaces.names.versions.subpath]
