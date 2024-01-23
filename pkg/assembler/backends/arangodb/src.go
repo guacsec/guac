@@ -319,7 +319,7 @@ func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec
 	}
 
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]
-	if _, ok := ctx.Value("graphql").(graphql.OperationContext); ok {
+	if graphql.HasOperationContext(ctx) {
 		fields := getPreloads(ctx)
 
 		nameRequired := false
