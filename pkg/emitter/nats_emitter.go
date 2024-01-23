@@ -161,14 +161,6 @@ func withJetstream(ctx context.Context, js nats.JetStreamContext) context.Contex
 	return context.WithValue(ctx, jetStream{}, js)
 }
 
-// FromContext allows for the JetStreamContext to be pulled from the context
-func FromContext(ctx context.Context) nats.JetStreamContext {
-	if js, ok := ctx.Value(jetStream{}).(nats.JetStreamContext); ok {
-		return js
-	}
-	return nil
-}
-
 func createSubscriber(ctx context.Context, id string, subj string, durable string, backOffTimer time.Duration) (<-chan []byte, <-chan error, error) {
 	// docChan to collect artifacts
 	dataChan := make(chan []byte, BufferChannelSize)
