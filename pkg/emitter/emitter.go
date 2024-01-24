@@ -118,8 +118,8 @@ func (e *emitterPubSub) Subscribe(ctx context.Context, id string, subj string, d
 	}, nil
 }
 
-// GetDataFromNats retrieves the data from the channels and transforms it via the DataFunc defined per module
-func (s *subscriber) GetDataFromNats(ctx context.Context, dataFunc DataFunc) error {
+// GetDataFromSubscriber retrieves the data from the channels and transforms it via the DataFunc defined per module
+func (s *subscriber) GetDataFromSubscriber(ctx context.Context, dataFunc DataFunc) error {
 	for {
 		select {
 		case d := <-s.dataChan:

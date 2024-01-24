@@ -63,7 +63,7 @@ func NewJetStream(url string, creds string, nKeyFile string) *jetStream {
 }
 
 // JetStreamInit initializes NATS and enabled Jet Stream to be used for GUAC
-func (j *jetStream) JetStreamInit(ctx context.Context) (context.Context, error) {
+func (j *jetStream) JetStreamInit(ctx context.Context) error {
 	var err error
 	// Connect Options.
 	var opts []nats.Option
@@ -77,7 +77,7 @@ func (j *jetStream) JetStreamInit(ctx context.Context) (context.Context, error) 
 	if j.nKeyFile != "" {
 		opt, err := nats.NkeyOptionFromSeed(j.nKeyFile)
 		if err != nil {
-			return ctx, fmt.Errorf("failed to load nKeyFile for nats: %w", err)
+			return fmt.Errorf("failed to load nKeyFile for nats: %w", err)
 		}
 		opts = append(opts, opt)
 	}
@@ -85,25 +85,25 @@ func (j *jetStream) JetStreamInit(ctx context.Context) (context.Context, error) 
 	// Connect to NATS
 	nc, err := nats.Connect(j.url, opts...)
 	if err != nil {
-		return ctx, fmt.Errorf("unable to connect to nats server: %w", err)
+		return fmt.Errorf("unable to connect to nats server: %w", err)
 	}
 	// Create JetStream Context
 	js, err := nc.JetStream()
 
 	if err != nil {
 		nc.Close()
-		return ctx, fmt.Errorf("unable to connect to nats jetstream: %w", err)
+		return fmt.Errorf("unable to connect to nats jetstream: %w", err)
 	}
 	err = createStreamOrExists(ctx, js)
 	if err != nil {
 		nc.Close()
-		return ctx, fmt.Errorf("failed to create stream: %w", err)
+		return fmt.Errorf("failed to create stream: %w", err)
 	}
 
 	j.nc = nc
 	j.js = js
 
-	return withJetstream(ctx, js), nil
+	return nil
 }
 
 func createStreamOrExists(ctx context.Context, js nats.JetStreamContext) error {
@@ -152,8 +152,4 @@ func (j *jetStream) RecreateStream(ctx context.Context) error {
 		return fmt.Errorf("failed to create stream: %w", err)
 	}
 	return nil
-}
-
-func withJetstream(ctx context.Context, js nats.JetStreamContext) context.Context {
-	return context.WithValue(ctx, jetStream{}, js)
 }

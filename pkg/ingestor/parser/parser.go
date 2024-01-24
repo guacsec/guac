@@ -118,7 +118,7 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredica
 		return nil
 	}
 
-	err = sub.GetDataFromNats(ctx, parserFunc)
+	err = sub.GetDataFromSubscriber(ctx, parserFunc)
 	if err != nil {
 		return err
 	}

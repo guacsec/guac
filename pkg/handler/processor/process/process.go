@@ -117,7 +117,7 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 		return nil
 	}
 
-	err = sub.GetDataFromNats(ctx, processFunc)
+	err = sub.GetDataFromSubscriber(ctx, processFunc)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to get data from nats: %w", uuidString, err)
 	}

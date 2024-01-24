@@ -64,8 +64,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	// initialize jetstream
 	// TODO: pass in credentials file for NATS secure login
 	jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
-	ctx, err = jetStream.JetStreamInit(ctx)
-	if err != nil {
+	if err := jetStream.JetStreamInit(ctx); err != nil {
 		logger.Errorf("jetStream initialization failed with error: %v", err)
 		os.Exit(1)
 	}

@@ -352,8 +352,7 @@ func TestSubscribe(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			jetStream := emitter.NewJetStream(url, "", "")
-			ctx, err = jetStream.JetStreamInit(ctx)
-			if err != nil {
+			if err := jetStream.JetStreamInit(ctx); err != nil {
 				t.Fatalf("unexpected error initializing jetstream: %v", err)
 			}
 			err = jetStream.RecreateStream(ctx)
