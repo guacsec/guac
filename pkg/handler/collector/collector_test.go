@@ -118,7 +118,7 @@ func Test_Publish(t *testing.T) {
 
 	ctx = blob.WithBlobStore(ctx, blobStore)
 
-	pubsub := emitter.NewEmitterPubSub(ctx, "mem://")
+	pubsub := emitter.NewEmitterPubSub(ctx, url)
 
 	ctx = emitter.WithEmitter(ctx, pubsub)
 

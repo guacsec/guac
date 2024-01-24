@@ -98,7 +98,7 @@ var filesCmd = &cobra.Command{
 		}
 		defer jetStream.Close()
 
-		pubsub := emitter.NewEmitterPubSub(ctx, "mem://")
+		pubsub := emitter.NewEmitterPubSub(ctx, opts.natsAddr)
 		ctx = emitter.WithEmitter(ctx, pubsub)
 
 		// Get pipeline of components

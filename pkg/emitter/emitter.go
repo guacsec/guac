@@ -62,7 +62,7 @@ func buildTopicURL(baseURL, name string) string {
 	if strings.Contains(baseURL, "nats://") {
 		return fmt.Sprintf("%s?subject=%s", baseURL, name)
 	} else {
-		return fmt.Sprintf("%s/%s", baseURL, name)
+		return fmt.Sprintf("%s%s", baseURL, name)
 	}
 }
 
@@ -71,7 +71,7 @@ func buildSubscriptionURL(baseURL, name string, durable string) string {
 	if strings.Contains(baseURL, "nats://") {
 		return fmt.Sprintf("%s?%s&subject=%s&consumer_durable=%s&stream_name=%s&stream_subjects=%s", baseURL, "jetstream", name, durable, streamName, streamSubjects)
 	} else {
-		return fmt.Sprintf("%s/%s", baseURL, name)
+		return fmt.Sprintf("%s%s", baseURL, name)
 	}
 }
 

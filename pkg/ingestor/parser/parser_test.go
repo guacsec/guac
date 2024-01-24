@@ -325,6 +325,9 @@ func TestSubscribe(t *testing.T) {
 	}
 	defer natsTest.Shutdown()
 
+	pubsub := emitter.NewEmitterPubSub(ctx, url)
+	ctx = emitter.WithEmitter(ctx, pubsub)
+
 	tests := []struct {
 		name            string
 		registerDocType processor.DocumentType
@@ -410,8 +413,7 @@ func TestSubscribe(t *testing.T) {
 }
 
 func testPublish(ctx context.Context, documentTree processor.DocumentTree) error {
-
-	pubsub := emitter.NewEmitterPubSub(ctx, "mem://")
+	pubsub := emitter.FromContext(ctx)
 
 	docTreeJSON, err := json.Marshal(documentTree)
 	if err != nil {

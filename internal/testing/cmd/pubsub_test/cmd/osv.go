@@ -84,7 +84,7 @@ var osvCmd = &cobra.Command{
 		}
 		defer jetStream.Close()
 
-		pubsub := emitter.NewEmitterPubSub(ctx, "mem://")
+		pubsub := emitter.NewEmitterPubSub(ctx, opts.natsAddr)
 		ctx = emitter.WithEmitter(ctx, pubsub)
 
 		certifierPubFunc, err := getCertifierPublish(ctx)
