@@ -548,6 +548,7 @@ func TestHasSBOM(t *testing.T) {
 						Package:           p2out,
 						DependencyPackage: p4out,
 						Justification:     "test justification",
+						DependencyType:    model.DependencyTypeUnknown,
 					}},
 					IncludedOccurrences: []*model.IsOccurrence{{
 						Subject:       p4out,
@@ -691,6 +692,7 @@ func TestHasSBOM(t *testing.T) {
 						Package:           p2out,
 						DependencyPackage: p4out,
 						Justification:     "test justification",
+						DependencyType:    model.DependencyTypeUnknown,
 					}},
 					IncludedOccurrences: []*model.IsOccurrence{{
 						Subject:       p4out,
@@ -2864,6 +2866,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 						Package:           p2out,
 						DependencyPackage: p4out,
 						Justification:     "test justification",
+						DependencyType:    model.DependencyTypeUnknown,
 					}},
 					IncludedOccurrences: []*model.IsOccurrence{{
 						Subject:       p4out,
