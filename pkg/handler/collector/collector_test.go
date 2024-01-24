@@ -158,11 +158,11 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	psub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	sub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
 	if err != nil {
 		return err
 	}
-
+	defer sub.CloseSubscriber(ctx)
 	processFunc := func(d []byte) error {
 
 		blobStoreKey, err := events.DecodeEventSubject(ctx, d)
@@ -200,7 +200,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return nil
 	}
 
-	err = psub.GetDataFromNats(ctx, processFunc)
+	err = sub.GetDataFromNats(ctx, processFunc)
 	if err != nil {
 		return err
 	}

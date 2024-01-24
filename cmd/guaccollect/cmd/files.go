@@ -131,6 +131,13 @@ func initializeNATsandCollector(ctx context.Context, natsAddr string, blobAddr s
 
 	ctx = blob.WithBlobStore(ctx, blobStore)
 
+	// // This URL will Dial the NATS server at the URL in the environment variable
+	// // NATS_SERVER_URL
+	// os.Setenv("NATS_SERVER_URL", opts.natsAddr)
+
+	pubsub := emitter.NewEmitterPubSub(ctx, natsAddr)
+	ctx = emitter.WithEmitter(ctx, pubsub)
+
 	// Get pipeline of components
 	collectorPubFunc, err := getCollectorPublish(ctx)
 	if err != nil {

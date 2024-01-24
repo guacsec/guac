@@ -84,11 +84,11 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	psub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	sub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}
-
+	defer sub.CloseSubscriber(ctx)
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d []byte) error {
 
@@ -117,10 +117,11 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 		return nil
 	}
 
-	err = psub.GetDataFromNats(ctx, processFunc)
+	err = sub.GetDataFromNats(ctx, processFunc)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to get data from nats: %w", uuidString, err)
 	}
+
 	return nil
 }
 

@@ -78,6 +78,13 @@ func ingest(cmd *cobra.Command, args []string) {
 
 	ctx = blob.WithBlobStore(ctx, blobStore)
 
+	// // This URL will Dial the NATS server at the URL in the environment variable
+	// // NATS_SERVER_URL
+	// os.Setenv("NATS_SERVER_URL", opts.natsAddr)
+
+	pubsub := emitter.NewEmitterPubSub(ctx, opts.natsAddr)
+	ctx = emitter.WithEmitter(ctx, pubsub)
+
 	// initialize collectsub client
 	csubClient, err := csub_client.NewClient(opts.csubClientOptions)
 	if err != nil {

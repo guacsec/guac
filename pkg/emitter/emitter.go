@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"gocloud.dev/pubsub"
@@ -40,8 +41,9 @@ type emitterPubSub struct {
 type DataFunc func([]byte) error
 
 type subscriber struct {
-	dataChan <-chan []byte
-	errChan  <-chan error
+	dataChan     <-chan []byte
+	errChan      <-chan error
+	subscription *pubsub.Subscription
 }
 
 // NewBlobStore initializes the blob store based on the url.
@@ -57,19 +59,19 @@ func NewEmitterPubSub(_ context.Context, serviceURL string) *emitterPubSub {
 
 // buildURL constructs the full URL for a topic or subscription.
 func buildTopicURL(baseURL, name string) string {
-	if baseURL == "nats://" {
-		return fmt.Sprintf("%s%s?%s", baseURL, name, "jetstream=true")
+	if strings.Contains(baseURL, "nats://") {
+		return fmt.Sprintf("%s/%s?%s", baseURL, name, "jetstream=true")
 	} else {
-		return fmt.Sprintf("%s%s", baseURL, name)
+		return fmt.Sprintf("%s/%s", baseURL, name)
 	}
 }
 
 // buildURL constructs the full URL for a topic or subscription.
 func buildSubscriptionURL(baseURL, name string, durable string) string {
-	if baseURL == "nats://" {
-		return fmt.Sprintf("%s%s?%s&consumer_durable=%s", baseURL, name, "jetstream=true", durable)
+	if strings.Contains(baseURL, "nats://") {
+		return fmt.Sprintf("%s/%s?%s&consumer_durable=%s&stream_name=%s", baseURL, name, "jetstream=true", durable, StreamName)
 	} else {
-		return fmt.Sprintf("%s%s", baseURL, name)
+		return fmt.Sprintf("%s/%s", baseURL, name)
 	}
 }
 
@@ -104,15 +106,15 @@ func (e *emitterPubSub) Subscribe(ctx context.Context, id string, subj string, d
 	if err != nil {
 		return nil, fmt.Errorf("failed to open subscription with url: %s, with error: %w", subscriptionURL, err)
 	}
-	defer subscription.Shutdown(ctx)
 
 	dataChan, errchan, err := createSubscriber(ctx, subscription, id, subj, durable, backOffTimer)
 	if err != nil {
 		return nil, err
 	}
 	return &subscriber{
-		dataChan: dataChan,
-		errChan:  errchan,
+		dataChan:     dataChan,
+		errChan:      errchan,
+		subscription: subscription,
 	}, nil
 }
 
@@ -142,6 +144,10 @@ func (s *subscriber) GetDataFromNats(ctx context.Context, dataFunc DataFunc) err
 			return ctx.Err()
 		}
 	}
+}
+
+func (s *subscriber) CloseSubscriber(ctx context.Context) error {
+	return s.subscription.Shutdown(ctx)
 }
 
 func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id string, subj string, durable string, backOffTimer time.Duration) (<-chan []byte, <-chan error, error) {

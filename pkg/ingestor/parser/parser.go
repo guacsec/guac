@@ -89,11 +89,11 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredica
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	psub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
+	sub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
 	if err != nil {
 		return err
 	}
-
+	defer sub.CloseSubscriber(ctx)
 	// should still continue if there are errors since problem is with individual documents
 	parserFunc := func(d []byte) error {
 		docNode := processor.DocumentNode{}
@@ -118,7 +118,7 @@ func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredica
 		return nil
 	}
 
-	err = psub.GetDataFromNats(ctx, parserFunc)
+	err = sub.GetDataFromNats(ctx, parserFunc)
 	if err != nil {
 		return err
 	}
