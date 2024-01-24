@@ -60,7 +60,7 @@ func NewEmitterPubSub(_ context.Context, serviceURL string) *emitterPubSub {
 // buildURL constructs the full URL for a topic or subscription.
 func buildTopicURL(baseURL, name string) string {
 	if strings.Contains(baseURL, "nats://") {
-		return fmt.Sprintf("%s/%s?%s", baseURL, name, "jetstream=true")
+		return fmt.Sprintf("%s?subject=%s", baseURL, name)
 	} else {
 		return fmt.Sprintf("%s/%s", baseURL, name)
 	}
@@ -69,7 +69,7 @@ func buildTopicURL(baseURL, name string) string {
 // buildURL constructs the full URL for a topic or subscription.
 func buildSubscriptionURL(baseURL, name string, durable string) string {
 	if strings.Contains(baseURL, "nats://") {
-		return fmt.Sprintf("%s/%s?%s&consumer_durable=%s&stream_name=%s", baseURL, name, "jetstream=true", durable, StreamName)
+		return fmt.Sprintf("%s?%s&subject=%s&consumer_durable=%s&stream_name=%s&stream_subjects=%s", baseURL, "jetstream", name, durable, streamName, streamSubjects)
 	} else {
 		return fmt.Sprintf("%s/%s", baseURL, name)
 	}
@@ -178,7 +178,6 @@ func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id
 					return
 				}
 			}
-
 			msg.Ack()
 			dataChan <- msg.Body
 		}

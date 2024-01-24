@@ -231,11 +231,11 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.deleteStream {
-				err := jetStream.js.DeleteStream(StreamName)
+				err := jetStream.js.DeleteStream(streamName)
 				if err != nil {
 					t.Errorf("failed to delete stream: %v", err)
 				}
-				_, err = jetStream.js.StreamInfo(StreamName)
+				_, err = jetStream.js.StreamInfo(streamName)
 				if err == nil || (err != nil) && !errors.Is(err, tt.wantErrMessage) {
 					t.Errorf("RecreateStream() error = %v, wantErr %v", err, tt.wantErrMessage)
 					return
@@ -245,7 +245,7 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error recreating jetstream: %v", err)
 			}
-			_, err = jetStream.js.StreamInfo(StreamName)
+			_, err = jetStream.js.StreamInfo(streamName)
 			if err != nil {
 				t.Errorf("RecreateStream() failed to create stream with error = %v", err)
 				return

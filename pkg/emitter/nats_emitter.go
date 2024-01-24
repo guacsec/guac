@@ -27,9 +27,8 @@ import (
 
 // NATS stream
 const (
-	NatsName                string        = "GUAC"
-	StreamName              string        = "DOCUMENTS"
-	StreamSubjects          string        = "DOCUMENTS.*"
+	streamName              string        = "DOCUMENTS"
+	streamSubjects          string        = "DOCUMENTS.*"
 	SubjectNameDocCollected string        = "DOCUMENTS.collected"
 	SubjectNameDocProcessed string        = "DOCUMENTS.processed"
 	SubjectNameDocParsed    string        = "DOCUMENTS.parsed"
@@ -67,11 +66,11 @@ func NewJetStream(url string, creds string, nKeyFile string) *jetStream {
 func (j *jetStream) JetStreamInit(ctx context.Context) (context.Context, error) {
 	var err error
 	// Connect Options.
-	opts := []nats.Option{nats.Name(NatsName)}
+	var opts []nats.Option
 
 	// Use UserCredentials
 	if j.creds != "" {
-		opts = append(opts, nats.UserCredentials(j.creds))
+		opts = []nats.Option{nats.UserCredentials(j.creds)}
 	}
 
 	// Use Nkey authentication.
@@ -109,17 +108,17 @@ func (j *jetStream) JetStreamInit(ctx context.Context) (context.Context, error) 
 
 func createStreamOrExists(ctx context.Context, js nats.JetStreamContext) error {
 	logger := logging.FromContext(ctx)
-	_, err := js.StreamInfo(StreamName)
+	_, err := js.StreamInfo(streamName)
 
 	if err != nil && !errors.Is(err, nats.ErrStreamNotFound) {
 		return err
 	}
 	// stream not found, create it
 	if errors.Is(err, nats.ErrStreamNotFound) {
-		logger.Infof("creating stream %q and subjects %q", StreamName, StreamSubjects)
+		logger.Infof("creating stream %q and subjects %q", streamName, streamSubjects)
 		_, err = js.AddStream(&nats.StreamConfig{
-			Name:      StreamName,
-			Subjects:  []string{StreamSubjects},
+			Name:      streamName,
+			Subjects:  []string{streamSubjects},
 			Retention: nats.WorkQueuePolicy,
 			// window to track duplicates in the stream.
 			// see https://github.com/nats-io/nats.docs/blob/master/using-nats/jetstream/model_deep_dive.md#message-deduplication
@@ -142,7 +141,7 @@ func (j *jetStream) Close() {
 // RecreateStream deletes the current existing stream and recreates it
 func (j *jetStream) RecreateStream(ctx context.Context) error {
 	if j.js != nil {
-		err := j.js.DeleteStream(StreamName)
+		err := j.js.DeleteStream(streamName)
 		if err != nil && !errors.Is(err, nats.ErrStreamNotFound) {
 			return fmt.Errorf("failed to delete stream: %w", err)
 		}
