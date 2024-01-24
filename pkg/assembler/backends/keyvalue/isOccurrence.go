@@ -206,24 +206,27 @@ func (c *demoClient) convOccurrence(ctx context.Context, in *isOccurrenceStruct)
 }
 
 func (c *demoClient) artifactMatch(ctx context.Context, aID string, artifactSpec *model.ArtifactSpec) bool {
-	if artifactSpec.Digest == nil && artifactSpec.Algorithm == nil {
-		return true
-	}
 	a, _ := c.artifactExact(ctx, artifactSpec)
 	if a != nil && a.ID() == aID {
 		return true
+	}
+	if a != nil && a.ID() != aID {
+		return false
+	}
+	if artifactSpec.ID != nil {
+		return false
 	}
 	m, err := byIDkv[*artStruct](ctx, aID, c)
 	if err != nil {
 		return false
 	}
-	if artifactSpec.Digest != nil && strings.ToLower(*artifactSpec.Digest) == m.Digest {
-		return true
+	if artifactSpec.Digest != nil && strings.ToLower(*artifactSpec.Digest) != m.Digest {
+		return false
 	}
-	if artifactSpec.Algorithm != nil && strings.ToLower(*artifactSpec.Algorithm) == m.Algorithm {
-		return true
+	if artifactSpec.Algorithm != nil && strings.ToLower(*artifactSpec.Algorithm) != m.Algorithm {
+		return false
 	}
-	return false
+	return true
 }
 
 // Query IsOccurrence
@@ -363,52 +366,72 @@ func (c *demoClient) addOccIfMatch(ctx context.Context, out []*model.IsOccurrenc
 }
 
 func (c *demoClient) matchOccurrences(ctx context.Context, filters []*model.IsOccurrenceSpec, occLinkIDs []string) bool {
+	if len(filters) == 0 {
+		return true
+	}
 	var occLinks []*isOccurrenceStruct
-	if len(filters) > 0 {
-		for _, occLinkID := range occLinkIDs {
-			link, err := byIDkv[*isOccurrenceStruct](ctx, occLinkID, c)
-			if err != nil {
+	for _, occLinkID := range occLinkIDs {
+		link, err := byIDkv[*isOccurrenceStruct](ctx, occLinkID, c)
+		if err != nil {
+			return false
+		}
+		occLinks = append(occLinks, link)
+	}
+
+	for _, filter := range filters {
+		if filter == nil {
+			continue
+		}
+		if filter.ID != nil {
+			// Check by ID if present
+			if !helper.IsIDPresent(*filter.ID, occLinkIDs) {
 				return false
 			}
-			occLinks = append(occLinks, link)
+			continue
 		}
-
-		for _, filter := range filters {
-			if filter == nil {
+		// Otherwise match spec information
+		match := false
+		for _, link := range occLinks {
+			if noMatch(filter.Justification, link.Justification) ||
+				noMatch(filter.Origin, link.Origin) ||
+				noMatch(filter.Collector, link.Collector) {
 				continue
 			}
-			if filter.ID != nil {
-				// Check by ID if present
-				if !helper.IsIDPresent(*filter.ID, occLinkIDs) {
-					return false
-				}
-			} else {
-				// Otherwise match spec information
-				match := false
-				for _, link := range occLinks {
-					if !noMatch(filter.Justification, link.Justification) &&
-						!noMatch(filter.Origin, link.Origin) &&
-						!noMatch(filter.Collector, link.Collector) &&
-						c.matchArtifacts(ctx, []*model.ArtifactSpec{filter.Artifact}, []string{link.Artifact}) {
-
-						if filter.Subject != nil {
-							if filter.Subject.Package != nil && !c.matchPackages(ctx, []*model.PkgSpec{filter.Subject.Package}, []string{link.Pkg}) {
-								continue
-							} else if filter.Subject.Source != nil {
-								src, err := c.exactSource(ctx, filter.Subject.Source)
-								if err != nil || src == nil {
-									continue
-								}
-							}
-						}
-						match = true
-						break
+			if filter.Artifact != nil && !c.artifactMatch(ctx, link.Artifact, filter.Artifact) {
+				continue
+			}
+			if filter.Subject != nil {
+				if filter.Subject.Package != nil {
+					if link.Pkg == "" {
+						continue
+					}
+					p, err := c.buildPackageResponse(ctx, link.Pkg, filter.Subject.Package)
+					if err != nil {
+						// error!
+						continue
+					}
+					if p == nil {
+						continue
+					}
+				} else if filter.Subject.Source != nil {
+					if link.Source == "" {
+						continue
+					}
+					s, err := c.buildSourceResponse(ctx, link.Source, filter.Subject.Source)
+					if err != nil {
+						// error!
+						continue
+					}
+					if s == nil {
+						continue
 					}
 				}
-				if !match {
-					return false
-				}
 			}
+			match = true
+			break
+		}
+		if !match {
+			return false
 		}
 	}
 	return true

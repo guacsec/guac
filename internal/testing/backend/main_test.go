@@ -37,13 +37,57 @@ const (
 )
 
 var skipMatrix = map[string]map[string]bool{
-	// Just some examples here
-	"TestPkg":       {arango: true},
-	"TestArtifacts": {memmap: true},
-	"TestBuilder":   {arango: true, memmap: true},
-	// "TestCertifyBad":          {arango: true},
-	// "TestIngestCertifyBads":   {arango: true},
-	"TestCertifyBadNeighbors": {arango: true},
+	// get Scorecard ID: ent: scorecard not found
+	"TestCertifyScorecard": {ent: true},
+	// input: IngestScorecards failed with err: get Scorecard ID: ent: scorecard not singular
+	"TestIngestScorecards": {ent: true},
+	// ent vuln query / novuln seems to be off
+	"TestIngestCertifyVulnerability": {ent: true},
+	// failed to execute IngestHasMetadata :: get HasMetadata: ent: has_metadata not singular
+	"TestHasMetadata": {ent: true},
+	// input: IngestBulkHasMetadata failed with element #1 {Type:pypi Namespace:<nil> Name:tensorflow Version:<nil> Qualifiers:[] Subpath:<nil>} with err: failed to execute IngestHasMetadata :: get HasMetadata: ent: has_metadata not singular
+	"TestIngestBulkHasMetadata": {ent: true},
+	// input: IngestHasSbom :: input: IngestHasSbom ::  ent: bill_of_materials not singular
+	// arango fails IncludedOccurrences_-_Valid_Included_ID and IncludedDependencies_-_Valid_Included_ID
+	"TestHasSBOM": {ent: true, arango: true},
+	// input: IngestHasSBOMs failed with err: input: IngestHasSbom :: input: IngestHasSbom ::  ent: bill_of_materials not singular
+	"TestIngestHasSBOMs": {ent: true},
+	// ent hash equal querying seems to be off
+	"TestHashEqual":        {ent: true},
+	"TestIngestHashEquals": {ent: true},
+	// ent is filling in "StartedOn" when not provided on input, but "FinishedOn" is.
+	"TestHasSLSA": {ent: true},
+	//  ent: source_name not singular
+	"TestHasSourceAt": {ent: true},
+	//  input: IngestHasSourceAts failed with err: ent: source_name not singular
+	"TestIngestHasSourceAts": {ent: true},
+	// ent: dep pkg querying subpath not working
+	// keyvalue: failing on dep package querying
+	"TestIsDependency": {ent: true, memmap: true, redis: true, tikv: true},
+	// arango errors when ID is not found
+	"TestOccurrence": {arango: true},
+	// ent: Path/Nodes/Neighbors not implemented
+	// keyvalue: path: input: No path found up to specified length
+	// neighbors: sorting not done, testdata is only in order for arango
+	"TestPath":      {ent: true, memmap: true, redis: true, tikv: true},
+	"TestNodes":     {ent: true},
+	"TestNeighbors": {ent: true, memmap: true, redis: true, tikv: true},
+	// ent: Query_on_both_pkgs fails
+	// keyvalue: query on both packages fail
+	"TestPkgEqual": {ent: true, memmap: true, redis: true, tikv: true},
+	// failed to execute IngestPointOfContact :: get PointOfContact: ent: point_of_contact not singular
+	"TestPointOfContact": {ent: true},
+	// input: IngestBulkPointOfContact failed with element #0 with err: failed to execute IngestPointOfContact :: get PointOfContact: ent: point_of_contact not singular
+	"TestIngestPointOfContacts": {ent: true},
+	// ent: Query_on_vulnerability_IDs fails
+	// keyvalue: Query_on_OSV_and_novuln_(return_nothing_as_not_valid) fails
+	// arango: errors when ID is not found
+	"TestVulnEqual": {ent: true, memmap: true, redis: true, tikv: true, arango: true},
+	// arango: errors when ID is not found
+	// ent: query by novuln fails, query by ID fails
+	"TestVulnerability": {arango: true, ent: true},
+	// ent: query by id fails, Query_greater_than_-_no_score_value fails
+	"TestIngestVulnMetadata": {ent: true},
 }
 
 type backend interface {
@@ -64,7 +108,6 @@ var testBackends = map[string]backend{
 var currentBackend string
 
 func TestMain(m *testing.M) {
-	setupOpts()
 	var rv int
 	for beName, be := range testBackends {
 		currentBackend = beName

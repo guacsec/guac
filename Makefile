@@ -23,7 +23,9 @@ test: generate
 # To run it locally you can run the following command: make start-integration-service
 .PHONY: integration-test
 integration-test: generate check-env
-	go test -tags=integration ./...
+	# "-p 1" because We don't want the tests in internal/testing/backend
+	# and pkg/assembler/backend running at same time
+	go test -p 1 -tags=integration ./...
 
 # Runs the integration tests locally using docker-compose to start the dependencies and cleans up after itself.
 .PHONY: integration-test-local
@@ -37,7 +39,7 @@ integration-test-local: generate check-env start-integration-service
 		counter=$$((counter+1)); \
 	done; \
 	[ $$counter -eq 15 ] && { echo "Service did not start in time"; exit 1; } || echo "Service is up!"
-	ENT_TEST_DATABASE_URL='postgresql://guac:guac@localhost/guac?sslmode=disable' go test -tags=integration ./...
+	ENT_TEST_DATABASE_URL='postgresql://guac:guac@localhost/guac?sslmode=disable' go test -p 1 -tags=integration ./...
 	$(CONTAINER) compose down
 
 .PHONY: integration-merge-test
@@ -227,7 +229,7 @@ start-ent-db: check-docker-compose-tool-check
 	[ $$counter -eq 15 ] && { echo "Ent GUAC service did not start in time"; exit 1; } || echo "Ent GUAC service is up!"
 
 
-# This is a helper target to run the integration tests locally. 
+# This is a helper target to run the integration tests locally.
 .PHONY: start-integration-service
 start-integration-service: check-docker-compose-tool-check
 	$(CONTAINER) compose -f integration.docker-compose.yaml up 	--force-recreate -d

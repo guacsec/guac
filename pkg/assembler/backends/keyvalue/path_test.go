@@ -371,6 +371,7 @@ func Test_Nodes(t *testing.T) {
 				Package:           testdata.P2out,
 				DependencyPackage: testdata.P4out,
 				Justification:     "test justification",
+				DependencyType:    model.DependencyTypeUnknown,
 			}},
 			IncludedOccurrences: []*model.IsOccurrence{{
 				Subject:       testdata.P4out,
@@ -424,6 +425,7 @@ func Test_Nodes(t *testing.T) {
 		want: []model.Node{&model.IsDependency{
 			Package:           testdata.P1out,
 			DependencyPackage: testdata.P2outName,
+			DependencyType:    model.DependencyTypeUnknown,
 		}},
 	}, {
 		name:  "isOccurrence",

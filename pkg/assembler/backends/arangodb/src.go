@@ -1000,7 +1000,19 @@ func matchSources(ctx context.Context, filter []*model.SourceSpec, sources []*mo
 				match := false
 				for _, src := range sources {
 					srcName := src.Namespaces[0].Names[0]
-					if noMatch(srSpec.Name, srcName.Name) || noMatch(srSpec.Tag, *srcName.Tag) || noMatch(srSpec.Commit, *srcName.Commit) {
+					if noMatch(srSpec.Name, srcName.Name) {
+						continue
+					}
+					if srcName.Tag != nil && noMatch(srSpec.Tag, *srcName.Tag) {
+						continue
+					}
+					if srcName.Tag == nil && srSpec.Tag != nil {
+						continue
+					}
+					if srcName.Commit != nil && noMatch(srSpec.Commit, *srcName.Commit) {
+						continue
+					}
+					if srcName.Commit == nil && srSpec.Commit != nil {
 						continue
 					}
 					srcNamespace := src.Namespaces[0]
@@ -1010,10 +1022,9 @@ func matchSources(ctx context.Context, filter []*model.SourceSpec, sources []*mo
 					srcType := src.Type
 					if noMatch(srSpec.Type, srcType) {
 						continue
-					} else {
-						match = true
-						break
 					}
+					match = true
+					break
 				}
 				if !match {
 					return false
