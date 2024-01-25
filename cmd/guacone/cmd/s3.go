@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/guacsec/guac/pkg/cli"
@@ -49,8 +50,29 @@ type s3Options struct {
 
 var s3Cmd = &cobra.Command{
 	Use:   "s3 [flags]",
-	Short: "listens to kafka/sqs s3 events to download documents and add them to the GUAC graph, or directly downloads from s3",
-	Args:  cobra.MinimumNArgs(0),
+	Short: "takes SBOMs and attestations from S3 compatible bucket and injects them to GUAC graph",
+	Long: `S3 collector can download one item from the storage, the whole bucket or listen to storage events using sqs/kafka (poll) and download the files as they are uploaded.
+Make sure that access credentials variables are properly set.`,
+	Example: `Create example bucket:
+
+$ mc mb play/guac-test
+$ mc cp --recursive internal/testing/testdata/exampledata/* play/guac-test
+
+Set access variables:
+
+$ export AWS_ACCESS_KEY_ID=Q3AM3UQ867SPQQA43P2Fe
+$ export AWS_SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+
+Ingest:
+
+$ guacone collect s3 --s3-url https://play.min.io --s3-bucket guac-test
+$ guacone collect s3 --s3-url play.min.io --s3-bucket guac-test --s3-item alpine-cyclonedx.json
+
+For the polling option, you need to define event bus endpoint for bucket notifications:
+
+$ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll --s3-mp-endpoint localhost:9092 --s3-queues sboms
+	`,
+	Args: cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
 		logger := logging.FromContext(ctx)
@@ -70,7 +92,7 @@ var s3Cmd = &cobra.Command{
 			viper.GetBool("poll"),
 		)
 		if err != nil {
-			logger.Errorf("failed to validate flags: %v", err)
+			fmt.Printf("failed to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
@@ -123,23 +145,31 @@ var s3Cmd = &cobra.Command{
 			return false
 		}
 
-		cancelCtx, cancel := context.WithCancel(ctx)
-		defer cancel()
-
-		// Send cancellation in case of receiving SIGINT/SIGTERM
-		go func(cancel context.CancelFunc) {
-			cancel()
-		}(cancel)
-
-		if err := collector.Collect(cancelCtx, emit, errHandler); err != nil {
-			logger.Fatal(err)
+		ctx, cf := context.WithCancel(ctx)
+		var wg sync.WaitGroup
+		done := make(chan bool, 1)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := collector.Collect(ctx, emit, errHandler); err != nil {
+				logger.Errorf("Unhandled error in the collector: %s", err)
+			}
+			done <- true
+		}()
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+		select {
+		case s := <-sigs:
+			logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+		case <-done:
+			if errFound {
+				logger.Fatalf("completed ingestion with error")
+			} else {
+				logger.Infof("completed ingestion")
+			}
 		}
-
-		if errFound {
-			logger.Fatalf("completed ingestion with error")
-		} else {
-			logger.Infof("completed ingestion")
-		}
+		cf()
+		wg.Wait()
 	},
 }
 
@@ -166,7 +196,7 @@ func validateS3Opts(graphqlEndpoint string, csubAddr string, csubTls bool, csubT
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
 
-	opts = s3Options{s3url, s3bucket, region, s3item, queues, mp, mpEndpoint, poll, graphqlEndpoint, csubClientOptions}
+	opts = s3Options{s3url, s3bucket, s3item, region, queues, mp, mpEndpoint, poll, graphqlEndpoint, csubClientOptions}
 
 	return opts, nil
 }
@@ -183,6 +213,5 @@ func init() {
 		os.Exit(1)
 	}
 
-	// TODO (pxp928): S3 command is removed from guacone until further testing and re-review is done for the S3 collector
-	//collectCmd.AddCommand(s3Cmd)
+	collectCmd.AddCommand(s3Cmd)
 }
