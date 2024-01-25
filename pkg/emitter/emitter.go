@@ -90,13 +90,15 @@ func (e *EmitterPubSub) Publish(ctx context.Context, data []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to open topic with url: %s, with error: %w", topicURL, err)
 	}
-	defer topic.Shutdown(ctx)
 
 	// Publish a message
 	if err := topic.Send(ctx, &pubsub.Message{Body: data}); err != nil {
 		return fmt.Errorf("failed to open publish with url: %s, with error: %w", topicURL, err)
 	}
 
+	if err := topic.Shutdown(ctx); err != nil {
+		return fmt.Errorf("failed to shutdown topic: %s, with error: %w", e.ServiceURL, err)
+	}
 	return nil
 }
 

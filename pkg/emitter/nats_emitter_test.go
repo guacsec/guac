@@ -157,7 +157,6 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 	if err != nil {
 		return err
 	}
-	defer sub.CloseSubscriber(ctx)
 	processFunc := func(d []byte) error {
 		doc := processor.Document{}
 		err := json.Unmarshal(d, &doc)
@@ -183,9 +182,11 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return nil
 	}
 
-	err = sub.GetDataFromSubscriber(ctx, processFunc)
-	if err != nil {
-		return err
+	if err := sub.GetDataFromSubscriber(ctx, processFunc); err != nil {
+		return fmt.Errorf("failed to get data from subscriber with error: %w", err)
+	}
+	if err := sub.CloseSubscriber(ctx); err != nil {
+		return fmt.Errorf("failed to close subscriber with error: %w", err)
 	}
 	return nil
 }

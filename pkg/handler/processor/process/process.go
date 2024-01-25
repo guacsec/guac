@@ -86,7 +86,6 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}
-	defer sub.CloseSubscriber(ctx)
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d []byte) error {
 
@@ -118,6 +117,10 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 	err = sub.GetDataFromSubscriber(ctx, processFunc)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to get data from %s: %w", uuidString, pubsub.ServiceURL, err)
+	}
+
+	if err := sub.CloseSubscriber(ctx); err != nil {
+		return fmt.Errorf("[processor: %s] failed to close subscriber: %s,  with error: %w", uuidString, pubsub.ServiceURL, err)
 	}
 
 	return nil
