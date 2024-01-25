@@ -80,16 +80,3 @@ func (b *BlobStore) Read(ctx context.Context, key string) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-
-// // WithBlobStore stores the initialized blobStore in the context such that it can be retrieved later when needed
-// func WithBlobStore(ctx context.Context, bs *BlobStore) context.Context {
-// 	return context.WithValue(ctx, BlobStore{}, bs)
-// }
-
-// // FromContext allows for the blobStore to be pulled from the context
-// func FromContext(ctx context.Context) *BlobStore {
-// 	if bs, ok := ctx.Value(BlobStore{}).(*BlobStore); ok {
-// 		return bs
-// 	}
-// 	return nil
-// }
