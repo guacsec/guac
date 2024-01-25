@@ -267,7 +267,7 @@ require (
 	github.com/aws/aws-sdk-go v1.49.17
 	github.com/aws/aws-sdk-go-v2 v1.24.1
 	github.com/aws/aws-sdk-go-v2/config v1.26.6
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.48.0
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.48.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.29.7
 	github.com/cdevents/sdk-go v0.3.2
 	github.com/cloudevents/sdk-go/v2 v2.10.1
