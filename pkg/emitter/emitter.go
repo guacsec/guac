@@ -35,7 +35,7 @@ import (
 
 // EmitterPubSub stores the serviceURL such that the topic and subscription can be reopened
 type EmitterPubSub struct {
-	serviceURL string
+	ServiceURL string
 }
 
 // DataFunc determines how the data return from NATS is transformed based on implementation per module
@@ -56,7 +56,7 @@ type subscriber struct {
 // full documentation https://gocloud.dev/howto/pubsub/
 func NewEmitterPubSub(_ context.Context, serviceURL string) *EmitterPubSub {
 	return &EmitterPubSub{
-		serviceURL: serviceURL,
+		ServiceURL: serviceURL,
 	}
 }
 
@@ -83,7 +83,7 @@ func buildSubscriptionURL(serviceURL string) string {
 // Publish publishes the data onto the pubsub stream for consumption by upstream services
 func (e *EmitterPubSub) Publish(ctx context.Context, data []byte) error {
 	// pubsub.OpenTopic creates a *pubsub.Topic from a URL.
-	topicURL := buildTopicURL(e.serviceURL)
+	topicURL := buildTopicURL(e.ServiceURL)
 
 	// Initialize a topic
 	topic, err := pubsub.OpenTopic(ctx, topicURL)
@@ -102,7 +102,7 @@ func (e *EmitterPubSub) Publish(ctx context.Context, data []byte) error {
 
 // Subscribe subscribes to the pubsub stream and receives events as they flow through
 func (e *EmitterPubSub) Subscribe(ctx context.Context, id string) (*subscriber, error) {
-	subscriptionURL := buildSubscriptionURL(e.serviceURL)
+	subscriptionURL := buildSubscriptionURL(e.ServiceURL)
 
 	// Initialize a subscription
 	subscription, err := pubsub.OpenSubscription(ctx, subscriptionURL)

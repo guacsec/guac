@@ -117,7 +117,7 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 
 	err = sub.GetDataFromSubscriber(ctx, processFunc)
 	if err != nil {
-		return fmt.Errorf("[processor: %s] failed to get data from nats: %w", uuidString, err)
+		return fmt.Errorf("[processor: %s] failed to get data from %s: %w", uuidString, pubsub.ServiceURL, err)
 	}
 
 	return nil
