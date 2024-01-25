@@ -116,10 +116,10 @@ var depsDevCmd = &cobra.Command{
 		select {
 		case s := <-sigs:
 			logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
-			cf()
 		case <-done:
 			logger.Infof("Deps dev collector completed")
 		}
+		cf()
 		wg.Wait()
 
 		if gotErr {
