@@ -58,29 +58,29 @@ func NewEmitterPubSub(_ context.Context, serviceURL string) *emitterPubSub {
 }
 
 // buildURL constructs the full URL for a topic or subscription.
-func buildTopicURL(baseURL, name string) string {
-	if strings.Contains(baseURL, "nats://") {
-		return fmt.Sprintf("%s?subject=%s", baseURL, name)
+func buildTopicURL(serviceURL string) string {
+	if strings.Contains(serviceURL, "nats://") {
+		return fmt.Sprintf("%s?subject=%s", serviceURL, subjectNameDocCollected)
 	} else {
-		return fmt.Sprintf("%s%s", baseURL, name)
+		return serviceURL
 	}
 }
 
 // buildURL constructs the full URL for a topic or subscription.
-func buildSubscriptionURL(baseURL, name string, durable string) string {
-	if strings.Contains(baseURL, "nats://") {
-		return fmt.Sprintf("%s?%s&subject=%s&consumer_durable=%s&stream_name=%s&stream_subjects=%s", baseURL, "jetstream", name, durable, streamName, streamSubjects)
+func buildSubscriptionURL(serviceURL string) string {
+	if strings.Contains(serviceURL, "nats://") {
+		return fmt.Sprintf("%s?%s&subject=%s&consumer_durable=%s&stream_name=%s&stream_subjects=%s", serviceURL, "jetstream", subjectNameDocCollected, durableProcessor, streamName, streamSubjects)
 	} else {
-		return fmt.Sprintf("%s%s", baseURL, name)
+		return serviceURL
 	}
 }
 
 // Publish publishes the data onto the NATS stream for consumption by upstream services
-func (e *emitterPubSub) Publish(ctx context.Context, subj string, data []byte) error {
+func (e *emitterPubSub) Publish(ctx context.Context, data []byte) error {
 	// pubsub.OpenTopic creates a *pubsub.Topic from a URL.
 	// This URL will Dial the NATS server at the URL in the environment variable
 	// NATS_SERVER_URL and send messages with subject "example.mysubject".
-	topicURL := buildTopicURL(e.serviceURL, subj)
+	topicURL := buildTopicURL(e.serviceURL)
 
 	// Initialize a topic
 	topic, err := pubsub.OpenTopic(ctx, topicURL)
@@ -98,8 +98,8 @@ func (e *emitterPubSub) Publish(ctx context.Context, subj string, data []byte) e
 }
 
 // Read uses the key read the data from the initialized blob store (via the authentication provided)
-func (e *emitterPubSub) Subscribe(ctx context.Context, id string, subj string, durable string, backOffTimer time.Duration) (*subscriber, error) {
-	subscriptionURL := buildSubscriptionURL(e.serviceURL, subj, durable)
+func (e *emitterPubSub) Subscribe(ctx context.Context, id string) (*subscriber, error) {
+	subscriptionURL := buildSubscriptionURL(e.serviceURL)
 
 	// Initialize a subscription
 	subscription, err := pubsub.OpenSubscription(ctx, subscriptionURL)
@@ -107,7 +107,7 @@ func (e *emitterPubSub) Subscribe(ctx context.Context, id string, subj string, d
 		return nil, fmt.Errorf("failed to open subscription with url: %s, with error: %w", subscriptionURL, err)
 	}
 
-	dataChan, errchan, err := createSubscriber(ctx, subscription, id, subj, durable, backOffTimer)
+	dataChan, errchan, err := createSubscriber(ctx, subscription, id)
 	if err != nil {
 		return nil, err
 	}
@@ -150,9 +150,9 @@ func (s *subscriber) CloseSubscriber(ctx context.Context) error {
 	return s.subscription.Shutdown(ctx)
 }
 
-func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id string, subj string, durable string, backOffTimer time.Duration) (<-chan []byte, <-chan error, error) {
+func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id string) (<-chan []byte, <-chan error, error) {
 	// docChan to collect artifacts
-	dataChan := make(chan []byte, BufferChannelSize)
+	dataChan := make(chan []byte, bufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, 1)
 	go func() {
@@ -174,7 +174,7 @@ func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id
 					}
 					continue
 				} else {
-					errChan <- fmt.Errorf("[%s: %s] unexpected Receive error: %w", durable, id, err)
+					errChan <- fmt.Errorf("[%s: %s] unexpected Receive error: %w", durableProcessor, id, err)
 					return
 				}
 			}

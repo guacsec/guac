@@ -274,7 +274,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	sub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	sub, err := pubsub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return err
 	}

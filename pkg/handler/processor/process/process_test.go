@@ -17,12 +17,18 @@ package process
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/guacsec/guac/internal/testing/dochelper"
+	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/simpledoc"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/blob"
+	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"github.com/guacsec/guac/pkg/logging"
@@ -600,9 +606,6 @@ func Test_validateFormat(t *testing.T) {
 	}
 }
 
-/*
-// TODO: Fix tests to check for logger messages instead of err text
-// https://github.com/guacsec/guac/issues/765
 func Test_ProcessSubscribe(t *testing.T) {
 	natsTest := nats_test.NewNatsTestServer()
 	url, err := natsTest.EnableJetStreamForTest()
@@ -628,7 +631,7 @@ func Test_ProcessSubscribe(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		wantErr: true,
+		wantErr: false,
 		expected: dochelper.DocNode(&processor.Document{
 			Blob: []byte(`{
 						"issuer": "google.com",
@@ -638,7 +641,6 @@ func Test_ProcessSubscribe(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		}),
-		errMessage: "context deadline exceeded",
 	}, {
 		name: "unpack test",
 		doc: processor.Document{
@@ -657,7 +659,7 @@ func Test_ProcessSubscribe(t *testing.T) {
 			Format:            processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{},
 		},
-		wantErr: true,
+		wantErr: false,
 		expected: dochelper.DocNode(
 			&processor.Document{ //root
 				Blob: []byte(`{
@@ -693,7 +695,6 @@ func Test_ProcessSubscribe(t *testing.T) {
 				Format:            processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{},
 			})),
-		errMessage: "context deadline exceeded",
 	}, {
 		name: "bad format",
 		doc: processor.Document{
@@ -706,7 +707,7 @@ func Test_ProcessSubscribe(t *testing.T) {
 			SourceInformation: processor.SourceInformation{},
 		},
 		wantErr:    true,
-		errMessage: "failed process document: invalid JSON document",
+		errMessage: "invalid JSON document",
 	}}
 
 	// Register
@@ -726,8 +727,7 @@ func Test_ProcessSubscribe(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			jetStream := emitter.NewJetStream(url, "", "")
-			ctx, err = jetStream.JetStreamInit(ctx)
-			if err != nil {
+			if err := jetStream.JetStreamInit(ctx); err != nil {
 				t.Fatalf("unexpected error initializing jetstream: %v", err)
 			}
 			err = jetStream.RecreateStream(ctx)
@@ -736,8 +736,17 @@ func Test_ProcessSubscribe(t *testing.T) {
 			}
 			defer jetStream.Close()
 
-			err := testPublish(ctx, &tt.doc)
+			blobStore, err := blob.NewBlobStore(ctx, "mem://")
 			if err != nil {
+				t.Fatalf("unable to connect to blog store: %v", err)
+			}
+
+			ctx = blob.WithBlobStore(ctx, blobStore)
+
+			pubsub := emitter.NewEmitterPubSub(ctx, url)
+			ctx = emitter.WithEmitter(ctx, pubsub)
+
+			if err := testPublish(ctx, &tt.doc); err != nil {
 				t.Fatalf("unexpected error on emit: %v", err)
 			}
 			var cancel context.CancelFunc
@@ -745,19 +754,26 @@ func Test_ProcessSubscribe(t *testing.T) {
 			ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
 			defer cancel()
 
-			transportFunc := func(d processor.DocumentTree) error {
-				if !dochelper.DocTreeEqual(d, tt.expected) {
-					t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(tt.expected))
+			emit := func(d *processor.Document) error {
+				processedTree, err := Process(ctx, d)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
+				}
+				if err != nil {
+					if !strings.Contains(err.Error(), tt.errMessage) {
+						t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)
+					}
+				} else {
+					if !dochelper.DocTreeEqual(processedTree, tt.expected) {
+						t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(processedTree), dochelper.StringTree(tt.expected))
+					}
 				}
 				return nil
 			}
 
-			err = Subscribe(ctx, transportFunc)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.wantErr)
-			}
+			err = Subscribe(ctx, emit)
 			if err != nil {
-				if !strings.Contains(err.Error(), tt.errMessage) {
+				if !strings.Contains(err.Error(), "context deadline exceeded") {
 					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)
 				}
 			}
@@ -766,14 +782,37 @@ func Test_ProcessSubscribe(t *testing.T) {
 }
 
 func testPublish(ctx context.Context, d *processor.Document) error {
+	logger := logging.FromContext(ctx)
+	blobStore := blob.FromContext(ctx)
+	pubsub := emitter.FromContext(ctx)
+
 	docByte, err := json.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
-	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, docByte)
-	if err != nil {
-		return fmt.Errorf("failed to publish document on stream: %w", err)
+
+	key := events.GetKey(d.Blob)
+
+	if err = blobStore.Write(ctx, key, docByte); err != nil {
+		return fmt.Errorf("failed write document to blob store: %w", err)
 	}
+
+	cdEvent, err := events.CreateArtifactPubEvent(ctx, key)
+	if err != nil {
+		return fmt.Errorf("failed create an event: %w", err)
+	}
+
+	keyByte, err := json.Marshal(cdEvent)
+	if err != nil {
+		return fmt.Errorf("failed marshal of document key: %w", err)
+	}
+
+	if err := pubsub.Publish(ctx, keyByte); err != nil {
+		if err != nil {
+			return fmt.Errorf("failed to publish event with error: %w", err)
+		}
+	}
+
+	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil
 }
-*/

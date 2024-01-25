@@ -20,19 +20,19 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
-	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/handler/processor/process"
-	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -65,127 +65,7 @@ var osvCmd = &cobra.Command{
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
 
-		// TODO: Fix this with the graphQL endpoint
-		httpClient := http.Client{}
-		gqlclient := graphql.NewClient("", &httpClient)
-
-		// initialize jetstream
-		// TODO: pass in credentials file for NATS secure login
-		jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
-		if err := jetStream.JetStreamInit(ctx); err != nil {
-			logger.Errorf("jetStream initialization failed with error: %v", err)
-			os.Exit(1)
-		}
-		// recreate stream to remove any old lingering documents
-		// NOT TO BE USED IN PRODUCTION
-		err = jetStream.RecreateStream(ctx)
-		if err != nil {
-			logger.Errorf("unexpected error recreating jetstream: %v", err)
-		}
-		defer jetStream.Close()
-
-		pubsub := emitter.NewEmitterPubSub(ctx, opts.natsAddr)
-		ctx = emitter.WithEmitter(ctx, pubsub)
-
-		certifierPubFunc, err := getCertifierPublish(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		assemblerFunc, err := getAssembler(opts)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		ingest := func(d *processor.Document) error {
-			docTree, err := process.Process(ctx, d)
-			if err != nil {
-				logger.Error("[processor] failed process document: %v", err)
-				return nil
-			}
-
-			docTreeBytes, err := json.Marshal(d)
-			if err != nil {
-				return fmt.Errorf("failed marshal of document: %w", err)
-			}
-			err = pubsub.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
-			if err != nil {
-				logger.Error("[processor] failed transportFunc: %v", err)
-				return nil
-			}
-
-			logger.Infof("[processor] docTree Processed: %+v", docTree.Document.SourceInformation)
-			return nil
-		}
-
-		// for pubsub_test we ignore identifier strings as we don't connect to a collectsub service
-		ingestorTransportFunc := func(d []assembler.IngestPredicates, i []*parser_common.IdentifierStrings) error {
-			err := assemblerFunc(d)
-			if err != nil {
-				return err
-			}
-			return nil
-		}
-
-		ingestorFunc, err := getIngestor(ctx, ingestorTransportFunc)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		packageQueryFunc, err := getPackageQuery(gqlclient)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		// Set emit function to go through the entire pipeline
-		emit := func(d *processor.Document) error {
-			err = certifierPubFunc(d)
-			if err != nil {
-				logger.Errorf("collector ended with error: %v", err)
-				os.Exit(1)
-			}
-			return nil
-		}
-
-		// Collect
-		errHandler := func(err error) bool {
-			if err == nil {
-				logger.Info("collector ended gracefully")
-				return true
-			}
-			logger.Errorf("collector ended with error: %v", err)
-			return false
-		}
-
-		// Assuming that publisher and consumer are different processes.
-		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			err := process.Subscribe(ctx, ingest)
-			if err != nil {
-				logger.Errorf("processor ended with error: %v", err)
-			}
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			err := ingestorFunc()
-			if err != nil {
-				logger.Errorf("parser ended with error: %v", err)
-			}
-		}()
-
-		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, opts.poll, time.Minute*time.Duration(opts.interval)); err != nil {
-			logger.Fatal(err)
-		}
-
-		wg.Wait()
+		initializeNATsandCertifier(ctx, opts)
 	},
 }
 
@@ -213,6 +93,86 @@ func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, e
 		packageQuery := root_package.NewPackageQuery(client, 0)
 		return packageQuery
 	}, nil
+}
+
+func initializeNATsandCertifier(ctx context.Context, opts options) {
+	logger := logging.FromContext(ctx)
+	// initialize jetstream
+	// TODO: pass in credentials file for NATS secure login
+	jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
+	if err := jetStream.JetStreamInit(ctx); err != nil {
+		logger.Errorf("jetStream initialization failed with error: %v", err)
+		os.Exit(1)
+	}
+	defer jetStream.Close()
+
+	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)
+	if err != nil {
+		logger.Errorf("unable to connect to blog store: %v", err)
+	}
+
+	ctx = blob.WithBlobStore(ctx, blobStore)
+
+	pubsub := emitter.NewEmitterPubSub(ctx, opts.natsAddr)
+	ctx = emitter.WithEmitter(ctx, pubsub)
+
+	httpClient := http.Client{}
+	gqlclient := graphql.NewClient(opts.dbAddr, &httpClient)
+
+	certifierPubFunc, err := getCertifierPublish(ctx)
+	if err != nil {
+		logger.Errorf("error: %v", err)
+		os.Exit(1)
+	}
+
+	packageQueryFunc, err := getPackageQuery(gqlclient)
+	if err != nil {
+		logger.Errorf("error: %v", err)
+		os.Exit(1)
+	}
+
+	// Set emit function to go through the entire pipeline
+	emit := func(d *processor.Document) error {
+		err = certifierPubFunc(d)
+		if err != nil {
+			logger.Errorf("error publishing document from collector: %v", err)
+			os.Exit(1)
+		}
+		return nil
+	}
+
+	// Collect
+	errHandler := func(err error) bool {
+		if err == nil {
+			logger.Info("collector ended gracefully")
+			return true
+		}
+		logger.Errorf("collector ended with error: %v", err)
+		// Continue to emit any documents still in the docChan
+		return true
+	}
+
+	ctx, cf := context.WithCancel(ctx)
+	var wg sync.WaitGroup
+	done := make(chan bool, 1)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := certify.Certify(ctx, packageQueryFunc(), emit, errHandler, opts.poll, time.Minute*time.Duration(opts.interval)); err != nil {
+			logger.Fatal(err)
+		}
+		done <- true
+	}()
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case s := <-sigs:
+		logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+	case <-done:
+		logger.Infof("All Collectors completed")
+	}
+	cf()
+	wg.Wait()
 }
 
 func init() {

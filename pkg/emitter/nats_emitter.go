@@ -29,13 +29,10 @@ import (
 const (
 	streamName              string        = "DOCUMENTS"
 	streamSubjects          string        = "DOCUMENTS.*"
-	SubjectNameDocCollected string        = "DOCUMENTS.collected"
-	SubjectNameDocProcessed string        = "DOCUMENTS.processed"
-	SubjectNameDocParsed    string        = "DOCUMENTS.parsed"
-	DurableProcessor        string        = "processor"
-	DurableIngestor         string        = "ingestor"
-	BufferChannelSize       int           = 1000
-	BackOffTimer            time.Duration = 1 * time.Second
+	subjectNameDocCollected string        = "DOCUMENTS.collected"
+	durableProcessor        string        = "processor"
+	bufferChannelSize       int           = 1000
+	backOffTimer            time.Duration = 1 * time.Second
 )
 
 type jetStream struct {

@@ -84,7 +84,7 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	sub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	sub, err := pubsub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}

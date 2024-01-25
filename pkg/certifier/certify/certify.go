@@ -192,7 +192,7 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		return fmt.Errorf("failed marshal of document key: %w", err)
 	}
 
-	if err := pubsub.Publish(ctx, emitter.SubjectNameDocCollected, keyByte); err != nil {
+	if err := pubsub.Publish(ctx, keyByte); err != nil {
 		if err != nil {
 			return fmt.Errorf("failed to publish event with error: %w", err)
 		}

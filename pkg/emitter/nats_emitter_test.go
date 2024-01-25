@@ -138,7 +138,7 @@ func testPublish(ctx context.Context, d *processor.Document) error {
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
-	err = pubsub.Publish(ctx, SubjectNameDocCollected, docByte)
+	err = pubsub.Publish(ctx, docByte)
 	if err != nil {
 		return fmt.Errorf("failed to publish document on stream: %w", err)
 	}
@@ -155,7 +155,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	sub, err := pubsub.Subscribe(ctx, uuidString, SubjectNameDocCollected, DurableProcessor, BackOffTimer)
+	sub, err := pubsub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return err
 	}
