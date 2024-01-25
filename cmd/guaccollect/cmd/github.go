@@ -37,8 +37,8 @@ import (
 type githubOptions struct {
 	// datasource for the collector
 	dataSource datasource.CollectSource
-	// address for NATS connection
-	natsAddr string
+	// address for pubsub connection
+	pubsubAddr string
 	// address for blob store
 	blobAddr string
 	// run as poll collector
@@ -68,7 +68,7 @@ you have access to read and write to the respective blob store.`,
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateGithubFlags(
-			viper.GetString("nats-addr"),
+			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
@@ -109,13 +109,13 @@ you have access to read and write to the respective blob store.`,
 			logger.Errorf("unable to register Github collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.natsAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
 	},
 }
 
-func validateGithubFlags(natsAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (githubOptions, error) {
 	var opts githubOptions
-	opts.natsAddr = natsAddr
+	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
 

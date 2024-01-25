@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -46,7 +47,7 @@ type options struct {
 	// path to folder with documents to collect
 	path string
 	// nats
-	natsAddr string
+	pubsubAddr string
 	// address for blob store
 	blobAddr string
 
@@ -65,7 +66,7 @@ var filesCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
-			viper.GetString("natsaddr"),
+			viper.GetString("pubsubAddr"),
 			viper.GetString("blob-addr"),
 			args)
 		if err != nil {
@@ -84,18 +85,18 @@ var filesCmd = &cobra.Command{
 			logger.Errorf("unable to register file collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.natsAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, blobAddr string, args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, pubsubAddr string, blobAddr string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.blobAddr = blobAddr
 	opts.dbAddr = dbAddr
 	opts.realm = realm
-	opts.natsAddr = natsAddr
+	opts.pubsubAddr = pubsubAddr
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")
@@ -112,16 +113,19 @@ func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, 
 	}, nil
 }
 
-func initializeNATsandCollector(ctx context.Context, natsAddr string, blobAddr string) {
+func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string) {
 	logger := logging.FromContext(ctx)
-	// initialize jetstream
-	// TODO: pass in credentials file for NATS secure login
-	jetStream := emitter.NewJetStream(natsAddr, "", "")
-	if err := jetStream.JetStreamInit(ctx); err != nil {
-		logger.Errorf("jetStream initialization failed with error: %v", err)
-		os.Exit(1)
+
+	if strings.Contains(pubsubAddr, "nats://") {
+		// initialize jetstream
+		// TODO: pass in credentials file for NATS secure login
+		jetStream := emitter.NewJetStream(pubsubAddr, "", "")
+		if err := jetStream.JetStreamInit(ctx); err != nil {
+			logger.Errorf("jetStream initialization failed with error: %v", err)
+			os.Exit(1)
+		}
+		defer jetStream.Close()
 	}
-	defer jetStream.Close()
 
 	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
 	if err != nil {
@@ -130,11 +134,7 @@ func initializeNATsandCollector(ctx context.Context, natsAddr string, blobAddr s
 
 	ctx = blob.WithBlobStore(ctx, blobStore)
 
-	// // This URL will Dial the NATS server at the URL in the environment variable
-	// // NATS_SERVER_URL
-	// os.Setenv("NATS_SERVER_URL", opts.natsAddr)
-
-	pubsub := emitter.NewEmitterPubSub(ctx, natsAddr)
+	pubsub := emitter.NewEmitterPubSub(ctx, pubsubAddr)
 	ctx = emitter.WithEmitter(ctx, pubsub)
 
 	// Get pipeline of components

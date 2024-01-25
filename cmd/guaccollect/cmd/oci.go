@@ -37,8 +37,8 @@ import (
 type ociOptions struct {
 	// datasource for the collector
 	dataSource datasource.CollectSource
-	// address for NATS connection
-	natsAddr string
+	// address for pubsub connection
+	pubsubAddr string
 	// address for blob store
 	blobAddr string
 	// run as poll collector
@@ -68,7 +68,7 @@ you have access to read and write to the respective blob store.`,
 		logger := logging.FromContext(ctx)
 
 		opts, err := validateOCIFlags(
-			viper.GetString("nats-addr"),
+			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
@@ -92,13 +92,13 @@ you have access to read and write to the respective blob store.`,
 			logger.Errorf("unable to register oci collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.natsAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
 	},
 }
 
-func validateOCIFlags(natsAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (ociOptions, error) {
+func validateOCIFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (ociOptions, error) {
 	var opts ociOptions
-	opts.natsAddr = natsAddr
+	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
 

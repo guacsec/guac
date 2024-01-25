@@ -36,7 +36,7 @@ var flags = struct {
 	realm   string
 
 	// nats
-	natsAddr string
+	pubsubAddr string
 
 	// run as poll certifier
 	poll     bool
@@ -50,12 +50,12 @@ func init() {
 	persistentFlags.StringVar(&flags.gdbuser, "gdbuser", "", "neo4j user credential to connect to graph db")
 	persistentFlags.StringVar(&flags.gdbpass, "gdbpass", "", "neo4j password credential to connect to graph db")
 	persistentFlags.StringVar(&flags.realm, "realm", "neo4j", "realm to connect to graph db")
-	persistentFlags.StringVar(&flags.natsAddr, "natsaddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
+	persistentFlags.StringVar(&flags.pubsubAddr, "pubsubAddr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
 	// certifier flags
 	persistentFlags.BoolVarP(&flags.poll, "poll", "p", true, "sets the certifier to polling mode")
 	persistentFlags.IntVarP(&flags.interval, "interval", "i", 5, "if polling set interval in minutes")
 
-	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "natsaddr", "poll", "interval"}
+	flagNames := []string{"gdbaddr", "gdbuser", "gdbpass", "realm", "pubsubAddr", "poll", "interval"}
 	for _, name := range flagNames {
 		if flag := persistentFlags.Lookup(name); flag != nil {
 			if err := viper.BindPFlag(name, flag); err != nil {

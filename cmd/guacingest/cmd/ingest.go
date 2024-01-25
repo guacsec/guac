@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -36,7 +37,7 @@ import (
 )
 
 type options struct {
-	natsAddr          string
+	pubsubAddr        string
 	blobAddr          string
 	csubClientOptions client.CsubClientOptions
 	graphqlEndpoint   string
@@ -45,7 +46,7 @@ type options struct {
 func ingest(cmd *cobra.Command, args []string) {
 
 	opts, err := validateFlags(
-		viper.GetString("nats-addr"),
+		viper.GetString("pubsub-addr"),
 		viper.GetString("blob-addr"),
 		viper.GetString("csub-addr"),
 		viper.GetBool("csub-tls"),
@@ -61,14 +62,16 @@ func ingest(cmd *cobra.Command, args []string) {
 	ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
 	logger := logging.FromContext(ctx)
 
-	// initialize jetstream
-	// TODO: pass in credentials file for NATS secure login
-	jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
-	if err := jetStream.JetStreamInit(ctx); err != nil {
-		logger.Errorf("jetStream initialization failed with error: %v", err)
-		os.Exit(1)
+	if strings.Contains(opts.pubsubAddr, "nats://") {
+		// initialize jetstream
+		// TODO: pass in credentials file for NATS secure login
+		jetStream := emitter.NewJetStream(opts.pubsubAddr, "", "")
+		if err := jetStream.JetStreamInit(ctx); err != nil {
+			logger.Errorf("jetStream initialization failed with error: %v", err)
+			os.Exit(1)
+		}
+		defer jetStream.Close()
 	}
-	defer jetStream.Close()
 
 	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)
 	if err != nil {
@@ -77,11 +80,7 @@ func ingest(cmd *cobra.Command, args []string) {
 
 	ctx = blob.WithBlobStore(ctx, blobStore)
 
-	// // This URL will Dial the NATS server at the URL in the environment variable
-	// // NATS_SERVER_URL
-	// os.Setenv("NATS_SERVER_URL", opts.natsAddr)
-
-	pubsub := emitter.NewEmitterPubSub(ctx, opts.natsAddr)
+	pubsub := emitter.NewEmitterPubSub(ctx, opts.pubsubAddr)
 	ctx = emitter.WithEmitter(ctx, pubsub)
 
 	// initialize collectsub client
@@ -116,9 +115,9 @@ func ingest(cmd *cobra.Command, args []string) {
 	wg.Wait()
 }
 
-func validateFlags(natsAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, graphqlEndpoint string, args []string) (options, error) {
+func validateFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, graphqlEndpoint string, args []string) (options, error) {
 	var opts options
-	opts.natsAddr = natsAddr
+	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {

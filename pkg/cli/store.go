@@ -35,7 +35,7 @@ func init() {
 
 	// Set of all flags used across GUAC clis and subcommands. Use consistent
 	// names for config file.
-	set.String("nats-addr", "nats://127.0.0.1:4222", "address to connect to NATs Server")
+	set.String("pubsub-addr", "nats://127.0.0.1:4222", "address to connect to a pubsub (default is NATS)")
 	set.String("csub-addr", "localhost:2782", "address to connect to collect-sub service")
 	set.Bool("csub-tls", false, "enable tls connection to the server")
 	set.Bool("csub-tls-skip-verify", false, "skip verifying server certificate (for self-signed certificates for example)")

@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -50,7 +51,7 @@ var osvCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
-			viper.GetString("natsaddr"),
+			viper.GetString("pubsubAddr"),
 			viper.GetBool("poll"),
 			viper.GetInt("interval"),
 		)
@@ -69,13 +70,13 @@ var osvCmd = &cobra.Command{
 	},
 }
 
-func validateOsvFlags(user string, pass string, dbAddr string, realm string, natsAddr string, poll bool, interval int) (options, error) {
+func validateOsvFlags(user string, pass string, dbAddr string, realm string, pubsubAddr string, poll bool, interval int) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
 	opts.dbAddr = dbAddr
 	opts.realm = realm
-	opts.natsAddr = natsAddr
+	opts.pubsubAddr = pubsubAddr
 	opts.poll = poll
 	opts.interval = interval
 
@@ -97,14 +98,17 @@ func getPackageQuery(client graphql.Client) (func() certifier.QueryComponents, e
 
 func initializeNATsandCertifier(ctx context.Context, opts options) {
 	logger := logging.FromContext(ctx)
-	// initialize jetstream
-	// TODO: pass in credentials file for NATS secure login
-	jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
-	if err := jetStream.JetStreamInit(ctx); err != nil {
-		logger.Errorf("jetStream initialization failed with error: %v", err)
-		os.Exit(1)
+
+	if strings.Contains(opts.pubsubAddr, "nats://") {
+		// initialize jetstream
+		// TODO: pass in credentials file for NATS secure login
+		jetStream := emitter.NewJetStream(opts.pubsubAddr, "", "")
+		if err := jetStream.JetStreamInit(ctx); err != nil {
+			logger.Errorf("jetStream initialization failed with error: %v", err)
+			os.Exit(1)
+		}
+		defer jetStream.Close()
 	}
-	defer jetStream.Close()
 
 	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)
 	if err != nil {
@@ -113,7 +117,7 @@ func initializeNATsandCertifier(ctx context.Context, opts options) {
 
 	ctx = blob.WithBlobStore(ctx, blobStore)
 
-	pubsub := emitter.NewEmitterPubSub(ctx, opts.natsAddr)
+	pubsub := emitter.NewEmitterPubSub(ctx, opts.pubsubAddr)
 	ctx = emitter.WithEmitter(ctx, pubsub)
 
 	httpClient := http.Client{}
