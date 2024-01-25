@@ -82,14 +82,14 @@ func (j *jetStream) JetStreamInit(ctx context.Context) error {
 	// Connect to NATS
 	nc, err := nats.Connect(j.url, opts...)
 	if err != nil {
-		return fmt.Errorf("unable to connect to nats server: %w", err)
+		return fmt.Errorf("unable to connect to nats server with address: %s, with error: %w", j.url, err)
 	}
 	// Create JetStream Context
 	js, err := nc.JetStream()
 
 	if err != nil {
 		nc.Close()
-		return fmt.Errorf("unable to connect to nats jetstream: %w", err)
+		return fmt.Errorf("unable to connect to nats jetstream with address: %s, with error: %w", j.url, err)
 	}
 	err = createStreamOrExists(ctx, js)
 	if err != nil {
