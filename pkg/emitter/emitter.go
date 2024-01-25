@@ -33,6 +33,7 @@ import (
 	_ "gocloud.dev/pubsub/rabbitpubsub"
 )
 
+// EmitterPubSub stores the serviceURL such that the topic and subscription can be reopened
 type EmitterPubSub struct {
 	serviceURL string
 }
@@ -40,24 +41,27 @@ type EmitterPubSub struct {
 // DataFunc determines how the data return from NATS is transformed based on implementation per module
 type DataFunc func([]byte) error
 
+// subscriber provides dataChan to read the collected data from the stream, errChan for any error that return and
+// the pubsub.Subscription to close the subscription once complete
 type subscriber struct {
 	dataChan     <-chan []byte
 	errChan      <-chan error
 	subscription *pubsub.Subscription
 }
 
-// NewBlobStore initializes the blob store based on the url.
-// utilizing gocloud (https://gocloud.dev/howto/blob/) various blob stores
-// such as S3, google cloud bucket, azure blob store can be used.
+// NewEmitterPubSub initializes the blob store based on the url.
+// utilizing gocloud (https://gocloud.dev/howto/pubsub/publish/) various pubsub providers
+// such as sqs, google pubsub, azure service bus, NATS and Kafka can be used.
 // Authentication is setup via environment variables. Please refer to for
-// full documentation https://gocloud.dev/howto/blob/
+// full documentation https://gocloud.dev/howto/pubsub/
 func NewEmitterPubSub(_ context.Context, serviceURL string) *EmitterPubSub {
 	return &EmitterPubSub{
 		serviceURL: serviceURL,
 	}
 }
 
-// buildURL constructs the full URL for a topic or subscription.
+// buildTopicURL constructs the full URL for a topic.
+// If using NATS, additional parameters are needed for jetstream
 func buildTopicURL(serviceURL string) string {
 	if strings.Contains(serviceURL, "nats://") {
 		return fmt.Sprintf("%s?subject=%s", serviceURL, subjectNameDocCollected)
@@ -66,7 +70,8 @@ func buildTopicURL(serviceURL string) string {
 	}
 }
 
-// buildURL constructs the full URL for a topic or subscription.
+// buildSubscriptionURL constructs the full URL for subscription.
+// If using NATS, additional parameters are needed for jetstream
 func buildSubscriptionURL(serviceURL string) string {
 	if strings.Contains(serviceURL, "nats://") {
 		return fmt.Sprintf("%s?%s&subject=%s&consumer_durable=%s&stream_name=%s&stream_subjects=%s", serviceURL, "jetstream", subjectNameDocCollected, durableProcessor, streamName, streamSubjects)
@@ -75,11 +80,9 @@ func buildSubscriptionURL(serviceURL string) string {
 	}
 }
 
-// Publish publishes the data onto the NATS stream for consumption by upstream services
+// Publish publishes the data onto the pubsub stream for consumption by upstream services
 func (e *EmitterPubSub) Publish(ctx context.Context, data []byte) error {
 	// pubsub.OpenTopic creates a *pubsub.Topic from a URL.
-	// This URL will Dial the NATS server at the URL in the environment variable
-	// NATS_SERVER_URL and send messages with subject "example.mysubject".
 	topicURL := buildTopicURL(e.serviceURL)
 
 	// Initialize a topic
@@ -97,7 +100,7 @@ func (e *EmitterPubSub) Publish(ctx context.Context, data []byte) error {
 	return nil
 }
 
-// Read uses the key read the data from the initialized blob store (via the authentication provided)
+// Subscribe subscribes to the pubsub stream and receives events as they flow through
 func (e *EmitterPubSub) Subscribe(ctx context.Context, id string) (*subscriber, error) {
 	subscriptionURL := buildSubscriptionURL(e.serviceURL)
 
@@ -146,10 +149,12 @@ func (s *subscriber) GetDataFromSubscriber(ctx context.Context, dataFunc DataFun
 	}
 }
 
+// CloseSubscriber closes the pubsub.Subscription
 func (s *subscriber) CloseSubscriber(ctx context.Context) error {
 	return s.subscription.Shutdown(ctx)
 }
 
+// createSubscriber receives from the subscription and use the dataChan and errChan to continuously send collected data or errors
 func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id string) (<-chan []byte, <-chan error, error) {
 	// docChan to collect artifacts
 	dataChan := make(chan []byte, bufferChannelSize)
@@ -184,16 +189,3 @@ func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id
 	}()
 	return dataChan, errChan, nil
 }
-
-// // WithBlobStore stores the initialized blobStore in the context such that it can be retrieved later when needed
-// func WithEmitter(ctx context.Context, e *emitterPubSub) context.Context {
-// 	return context.WithValue(ctx, emitterPubSub{}, e)
-// }
-
-// // FromContext allows for the blobStore to be pulled from the context
-// func FromContext(ctx context.Context) *emitterPubSub {
-// 	if bs, ok := ctx.Value(emitterPubSub{}).(*emitterPubSub); ok {
-// 		return bs
-// 	}
-// 	return nil
-// }
