@@ -55,9 +55,8 @@ func TestEmitter_PublishOnEmit(t *testing.T) {
 	defer jetStream.Close()
 
 	pubsub := NewEmitterPubSub(ctx, url)
-	ctx = WithEmitter(ctx, pubsub)
 
-	err = testPublish(ctx, &ite6SLSADoc)
+	err = testPublish(ctx, &ite6SLSADoc, pubsub)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
@@ -74,7 +73,7 @@ func TestEmitter_PublishOnEmit(t *testing.T) {
 		return nil
 	}
 
-	err = testSubscribe(ctx, transportFunc)
+	err = testSubscribe(ctx, transportFunc, pubsub)
 	if err != nil {
 		if err != nil && !errors.Is(err, context.DeadlineExceeded) {
 			t.Errorf("nats emitter Subscribe test errored = %v", err)

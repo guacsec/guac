@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
@@ -126,7 +125,7 @@ func validateDepsDevFlags(pubsubAddr string, blobAddr string, csubAddr string, c
 	opts.enablePrometheus = enablePrometheus
 	opts.prometheusPort = prometheusPort
 	if useCsub {
-		csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 		if err != nil {
 			return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 		}

@@ -741,12 +741,9 @@ func Test_ProcessSubscribe(t *testing.T) {
 				t.Fatalf("unable to connect to blog store: %v", err)
 			}
 
-			ctx = blob.WithBlobStore(ctx, blobStore)
-
 			pubsub := emitter.NewEmitterPubSub(ctx, url)
-			ctx = emitter.WithEmitter(ctx, pubsub)
 
-			if err := testPublish(ctx, &tt.doc); err != nil {
+			if err := testPublish(ctx, &tt.doc, blobStore, pubsub); err != nil {
 				t.Fatalf("unexpected error on emit: %v", err)
 			}
 			var cancel context.CancelFunc
@@ -771,7 +768,7 @@ func Test_ProcessSubscribe(t *testing.T) {
 				return nil
 			}
 
-			err = Subscribe(ctx, emit)
+			err = Subscribe(ctx, emit, blobStore, pubsub)
 			if err != nil {
 				if !strings.Contains(err.Error(), "context deadline exceeded") {
 					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)
@@ -781,10 +778,8 @@ func Test_ProcessSubscribe(t *testing.T) {
 	}
 }
 
-func testPublish(ctx context.Context, d *processor.Document) error {
+func testPublish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
-	blobStore := blob.FromContext(ctx)
-	pubsub := emitter.FromContext(ctx)
 
 	docByte, err := json.Marshal(d)
 	if err != nil {

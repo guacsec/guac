@@ -116,13 +116,9 @@ func Test_Publish(t *testing.T) {
 		t.Fatalf("unable to connect to blog store: %v", err)
 	}
 
-	ctx = blob.WithBlobStore(ctx, blobStore)
-
 	pubsub := emitter.NewEmitterPubSub(ctx, url)
 
-	ctx = emitter.WithEmitter(ctx, pubsub)
-
-	err = Publish(ctx, &testdata.Ite6SLSADoc)
+	err = Publish(ctx, &testdata.Ite6SLSADoc, blobStore, pubsub)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
@@ -139,7 +135,7 @@ func Test_Publish(t *testing.T) {
 		return nil
 	}
 
-	err = testSubscribe(ctx, transportFunc)
+	err = testSubscribe(ctx, transportFunc, blobStore, pubsub)
 	if err != nil {
 		if err != nil && !errors.Is(err, context.DeadlineExceeded) {
 			t.Errorf("nats emitter Subscribe test errored = %v", err)
@@ -147,10 +143,8 @@ func Test_Publish(t *testing.T) {
 	}
 }
 
-func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
+func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
-	blobStore := blob.FromContext(ctx)
-	pubsub := emitter.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
 	if err != nil {

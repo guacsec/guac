@@ -73,15 +73,14 @@ func ingest(cmd *cobra.Command, args []string) {
 		defer jetStream.Close()
 	}
 
+	// initialize blob store
 	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)
 	if err != nil {
 		logger.Errorf("unable to connect to blog store: %v", err)
 	}
 
-	ctx = blob.WithBlobStore(ctx, blobStore)
-
+	// initialize pubsub
 	pubsub := emitter.NewEmitterPubSub(ctx, opts.pubsubAddr)
-	ctx = emitter.WithEmitter(ctx, pubsub)
 
 	// initialize collectsub client
 	csubClient, err := csub_client.NewClient(opts.csubClientOptions)
@@ -100,7 +99,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := process.Subscribe(ctx, emit); err != nil {
+		if err := process.Subscribe(ctx, emit, blobStore, pubsub); err != nil {
 			logger.Errorf("processor ended with error: %v", err)
 		}
 	}()

@@ -74,10 +74,8 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 
 // Subscribe receives the CD event and decodes the event to obtain the blob store key.
 // The key is used to retrieve the "document" from the blob store to be processed and ingested.
-func Subscribe(ctx context.Context, em collector.Emitter) error {
+func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
-	blobStore := blob.FromContext(ctx)
-	pubsub := emitter.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
 	if err != nil {

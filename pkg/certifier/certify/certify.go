@@ -166,10 +166,8 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 }
 
 // Publish is used by NATS JetStream to stream the documents and send them to the processor
-func Publish(ctx context.Context, d *processor.Document) error {
+func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
-	blobStore := blob.FromContext(ctx)
-	pubsub := emitter.FromContext(ctx)
 
 	docByte, err := json.Marshal(d)
 	if err != nil {

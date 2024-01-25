@@ -130,9 +130,8 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 	}
 }
 
-func testPublish(ctx context.Context, d *processor.Document) error {
+func testPublish(ctx context.Context, d *processor.Document, pubsub *EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
-	pubsub := FromContext(ctx)
 
 	docByte, err := json.Marshal(d)
 	if err != nil {
@@ -146,9 +145,8 @@ func testPublish(ctx context.Context, d *processor.Document) error {
 	return nil
 }
 
-func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
+func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error, pubsub *EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
-	pubsub := FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
 	if err != nil {

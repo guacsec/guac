@@ -107,9 +107,9 @@ func validateFilesFlags(pubsubAddr string, blobAddr string, poll bool, args []st
 	return opts, nil
 }
 
-func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, error) {
+func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return collector.Publish(ctx, d)
+		return collector.Publish(ctx, d, blobStore, pubsub)
 	}, nil
 }
 
@@ -127,18 +127,17 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 		defer jetStream.Close()
 	}
 
+	// initialize blob store
 	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
 	if err != nil {
 		logger.Errorf("unable to connect to blog store: %v", err)
 	}
 
-	ctx = blob.WithBlobStore(ctx, blobStore)
-
+	// initialize pubsub
 	pubsub := emitter.NewEmitterPubSub(ctx, pubsubAddr)
-	ctx = emitter.WithEmitter(ctx, pubsub)
 
 	// Get pipeline of components
-	collectorPubFunc, err := getCollectorPublish(ctx)
+	collectorPubFunc, err := getCollectorPublish(ctx, blobStore, pubsub)
 	if err != nil {
 		logger.Errorf("error: %v", err)
 		os.Exit(1)

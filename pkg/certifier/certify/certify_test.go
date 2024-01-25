@@ -26,10 +26,12 @@ import (
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -236,11 +238,14 @@ func Test_Publish(t *testing.T) {
 	}
 	defer jetStream.Close()
 
-	pubsub := emitter.NewEmitterPubSub(ctx, "mem://")
+	blobStore, err := blob.NewBlobStore(ctx, "mem://")
+	if err != nil {
+		t.Fatalf("unable to connect to blog store: %v", err)
+	}
 
-	ctx = emitter.WithEmitter(ctx, pubsub)
+	pubsub := emitter.NewEmitterPubSub(ctx, url)
 
-	err = Publish(ctx, &testdata.Ite6SLSADoc)
+	err = Publish(ctx, &testdata.Ite6SLSADoc, blobStore, pubsub)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
@@ -257,7 +262,7 @@ func Test_Publish(t *testing.T) {
 		return nil
 	}
 
-	err = testSubscribe(ctx, transportFunc)
+	err = testSubscribe(ctx, transportFunc, blobStore, pubsub)
 	if err != nil {
 		if err != nil && !errors.Is(err, context.DeadlineExceeded) {
 			t.Errorf("nats emitter Subscribe test errored = %v", err)
@@ -265,9 +270,8 @@ func Test_Publish(t *testing.T) {
 	}
 }
 
-func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
+func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
-	pubsub := emitter.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
 	if err != nil {
@@ -280,10 +284,22 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 	}
 	defer sub.CloseSubscriber(ctx)
 	processFunc := func(d []byte) error {
-		doc := processor.Document{}
-		err := json.Unmarshal(d, &doc)
+
+		blobStoreKey, err := events.DecodeEventSubject(ctx, d)
 		if err != nil {
-			fmtErrString := fmt.Sprintf("[processor: %s] failed unmarshal the document bytes", uuidString)
+			logger.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
+			return nil
+		}
+
+		documentBytes, err := blobStore.Read(ctx, blobStoreKey)
+		if err != nil {
+			return fmt.Errorf("failed read document to blob store: %w", err)
+		}
+
+		doc := processor.Document{}
+		err = json.Unmarshal(documentBytes, &doc)
+		if err != nil {
+			fmtErrString := fmt.Sprintf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
 			logger.Errorf(fmtErrString+": %v", err)
 			return fmt.Errorf(fmtErrString+": %w", err)
 		}
@@ -300,6 +316,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 			logger.Errorf(fmtErrString+": %v", err)
 			return fmt.Errorf(fmtErrString+": %w", err)
 		}
+
 		logger.Infof("[processor: %s] docTree Processed: %+v", uuidString, docTree.Document.SourceInformation)
 		return nil
 	}

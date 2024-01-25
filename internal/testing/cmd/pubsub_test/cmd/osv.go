@@ -83,9 +83,9 @@ func validateOsvFlags(user string, pass string, dbAddr string, realm string, pub
 	return opts, nil
 }
 
-func getCertifierPublish(ctx context.Context) (func(*processor.Document) error, error) {
+func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return certify.Publish(ctx, d)
+		return certify.Publish(ctx, d, blobStore, pubsub)
 	}, nil
 }
 
@@ -115,15 +115,12 @@ func initializeNATsandCertifier(ctx context.Context, opts options) {
 		logger.Errorf("unable to connect to blog store: %v", err)
 	}
 
-	ctx = blob.WithBlobStore(ctx, blobStore)
-
 	pubsub := emitter.NewEmitterPubSub(ctx, opts.pubsubAddr)
-	ctx = emitter.WithEmitter(ctx, pubsub)
 
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient(opts.dbAddr, &httpClient)
 
-	certifierPubFunc, err := getCertifierPublish(ctx)
+	certifierPubFunc, err := getCertifierPublish(ctx, blobStore, pubsub)
 	if err != nil {
 		logger.Errorf("error: %v", err)
 		os.Exit(1)
