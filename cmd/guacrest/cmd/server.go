@@ -76,7 +76,7 @@ func startServer() {
 	done := make(chan bool, 1)
 	ctx, cf := context.WithCancel(ctx)
 	go func() {
-		server.Shutdown(ctx)
+		_ = server.Shutdown(ctx)
 		done <- true
 	}()
 	select {
