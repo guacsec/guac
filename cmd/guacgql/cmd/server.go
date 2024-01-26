@@ -37,6 +37,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/guacsec/guac/pkg/assembler/kv/redis"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
@@ -95,6 +96,11 @@ func startServer(cmd *cobra.Command) {
 	if flags.debug {
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		logger.Infof("connect to %s://localhost:%d/ for GraphQL playground", proto, flags.port)
+	}
+	// Setup Prometheus metrics handler
+	err = cli.SetupPrometheus(ctx, logger, "guacgql")
+	if err != nil {
+		logger.Fatalf("Error setting up Prometheus: %v", err)
 	}
 
 	server := &http.Server{Addr: fmt.Sprintf(":%d", flags.port)}
