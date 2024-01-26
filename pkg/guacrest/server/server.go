@@ -18,10 +18,18 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 )
 
-type DefaultServer struct{}
+// DefaultServer implements the API, backed by the GraphQL Server
+type DefaultServer struct {
+	gqlClient graphql.Client
+}
+
+func NewDefaultServer(gqlClient graphql.Client) *DefaultServer {
+	return &DefaultServer{gqlClient: gqlClient}
+}
 
 func (s *DefaultServer) HealthCheck(ctx context.Context, request gen.HealthCheckRequestObject) (gen.HealthCheckResponseObject, error) {
 	return gen.HealthCheck200JSONResponse("Server is healthy"), nil
