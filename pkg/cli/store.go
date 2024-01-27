@@ -58,7 +58,7 @@ func init() {
 	set.String("neo4j-realm", "neo4j", "realm to connect to graph db")
 
 	// blob store address
-	set.String("blob-addr", "file:///tmp/blobstore", "gocloud connection string for blob store configured via https://gocloud.dev/howto/blob/")
+	set.String("blob-addr", "file:///tmp/blobstore?no_tmp_dir=true", "gocloud connection string for blob store configured via https://gocloud.dev/howto/blob/ (defualt: filesystem)")
 
 	set.String("neptune-endpoint", "localhost", "address to neptune db")
 	set.Int("neptune-port", 8182, "port used for neptune db connection")
