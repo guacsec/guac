@@ -63,7 +63,7 @@ func NewEmitterPubSub(_ context.Context, serviceURL string) *EmitterPubSub {
 // buildTopicURL constructs the full URL for a topic.
 // If using NATS, additional parameters are needed for jetstream
 func buildTopicURL(serviceURL string) string {
-	if strings.Contains(serviceURL, "nats://") {
+	if strings.HasPrefix(serviceURL, "nats://") {
 		return fmt.Sprintf("%s?subject=%s", serviceURL, subjectNameDocCollected)
 	} else {
 		return serviceURL
@@ -73,7 +73,7 @@ func buildTopicURL(serviceURL string) string {
 // buildSubscriptionURL constructs the full URL for subscription.
 // If using NATS, additional parameters are needed for jetstream
 func buildSubscriptionURL(serviceURL string) string {
-	if strings.Contains(serviceURL, "nats://") {
+	if strings.HasPrefix(serviceURL, "nats://") {
 		return fmt.Sprintf("%s?%s&subject=%s&consumer_durable=%s&stream_name=%s&stream_subjects=%s", serviceURL, "jetstream", subjectNameDocCollected, durableProcessor, streamName, streamSubjects)
 	} else {
 		return serviceURL

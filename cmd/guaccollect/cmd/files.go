@@ -116,7 +116,7 @@ func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub 
 func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string) {
 	logger := logging.FromContext(ctx)
 
-	if strings.Contains(pubsubAddr, "nats://") {
+	if strings.HasPrefix(pubsubAddr, "nats://") {
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
 		jetStream := emitter.NewJetStream(pubsubAddr, "", "")

@@ -62,7 +62,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
 	logger := logging.FromContext(ctx)
 
-	if strings.Contains(opts.pubsubAddr, "nats://") {
+	if strings.HasPrefix(opts.pubsubAddr, "nats://") {
 		// initialize jetstream
 		// TODO: pass in credentials file for NATS secure login
 		jetStream := emitter.NewJetStream(opts.pubsubAddr, "", "")
