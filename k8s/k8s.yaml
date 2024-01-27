@@ -13,6 +13,10 @@ spec:
       labels:
         app: guac-collectsub
     spec:
+      volumes:
+        - name: pv-storage
+          persistentVolumeClaim:
+            claimName: pv-claim
       containers:
         - name: guac-collectsub
           image: local-organic-guac
@@ -107,6 +111,10 @@ spec:
       labels:
         app: guac-ingestor
     spec:
+      volumes:
+        - name: pv-storage
+          persistentVolumeClaim:
+            claimName: pv-claim
       containers:
         - name: guac-ingestor
           image: local-organic-guac
@@ -115,6 +123,9 @@ spec:
           env:
             - name: GUAC_PUBSUB_ADDR
               value: nats://nats:4222
+          volumeMounts:
+            - mountPath: "/tmp/blobstore"
+              name: pv-storage
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -130,6 +141,10 @@ spec:
       labels:
         app: oci-collector
     spec:
+      volumes:
+        - name: pv-storage
+          persistentVolumeClaim:
+            claimName: pv-claim
       containers:
         - name: oci-collector
           image: local-organic-guac
@@ -140,6 +155,9 @@ spec:
               value: nats://nats:4222
             - name: GUAC_CSUB_ADDR
               value: guac-collectsub:2782
+          volumeMounts:
+            - mountPath: "/tmp/blobstore"
+              name: pv-storage
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -155,6 +173,10 @@ spec:
       labels:
         app: depsdev-collector
     spec:
+      volumes:
+        - name: pv-storage
+          persistentVolumeClaim:
+            claimName: pv-claim
       containers:
         - name: depsdev-collector
           image: local-organic-guac
@@ -165,3 +187,33 @@ spec:
               value: nats://nats:4222
             - name: GUAC_CSUB_ADDR
               value: guac-collectsub:2782
+          volumeMounts:
+            - mountPath: "/tmp/blobstore"
+              name: pv-storage
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/tmp"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
