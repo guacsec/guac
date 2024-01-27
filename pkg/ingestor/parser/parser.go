@@ -71,55 +71,6 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 	return nil
 }
 
-// TODO (pxp928): This is not used. Should it be removed?
-// // Subscribe is used by NATS JetStream to stream the documents received from the processor
-// // and parse them via ParseDocumentTree
-// // The context contains the jetstream.
-// func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredicates, []*common.IdentifierStrings) error) error {
-// 	logger := logging.FromContext(ctx)
-// 	pubsub := emitter.FromContext(ctx)
-
-// 	uuid, err := uuid.NewV4()
-// 	if err != nil {
-// 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
-// 	}
-// 	uuidString := uuid.String()
-// 	sub, err := pubsub.Subscribe(ctx, uuidString, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer sub.CloseSubscriber(ctx)
-// 	// should still continue if there are errors since problem is with individual documents
-// 	parserFunc := func(d []byte) error {
-// 		docNode := processor.DocumentNode{}
-// 		err = json.Unmarshal(d, &docNode)
-// 		if err != nil {
-// 			logger.Error("[ingestor: %s] failed unmarshal the document tree bytes: %v", uuidString, err)
-// 			return nil
-// 		}
-// 		assemblerInputs, idStrings, err := ParseDocumentTree(ctx, &docNode)
-// 		if err != nil {
-// 			logger.Error("[ingestor: %s] failed parse document: %v", uuidString, err)
-// 			return nil
-// 		}
-
-// 		err = transportFunc(assemblerInputs, idStrings)
-// 		if err != nil {
-// 			logger.Error("[ingestor: %s] failed transportFunc: %v", uuidString, err)
-// 			return nil
-// 		}
-
-// 		logger.Infof("[ingestor: %s] ingested docTree: %+v", uuidString, processor.DocumentTree(&docNode).Document.SourceInformation)
-// 		return nil
-// 	}
-
-// 	err = sub.GetDataFromSubscriber(ctx, parserFunc)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
 func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
 	assemblerInputs := []assembler.IngestPredicates{}
