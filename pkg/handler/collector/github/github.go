@@ -49,6 +49,12 @@ type githubCollector struct {
 	repoToReleaseTags map[client.Repo][]TagOrLatest
 	assetSuffixes     []string
 	collectDataSource datasource.CollectSource
+	isRelease         bool
+	sbomName          string
+	workflowFileName  string
+	owner             string
+	repo              string
+	lastIngestedRun   int64
 }
 
 type Config struct {
@@ -70,6 +76,7 @@ func NewGithubCollector(opts ...Opt) (*githubCollector, error) {
 		repoToReleaseTags: map[client.Repo][]TagOrLatest{},
 		assetSuffixes:     defaultAssetSuffixes(),
 		collectDataSource: nil,
+		isRelease:         true,
 	}
 
 	for _, opt := range opts {
@@ -82,7 +89,7 @@ func NewGithubCollector(opts ...Opt) (*githubCollector, error) {
 	if len(g.assetSuffixes) == 0 {
 		return nil, fmt.Errorf("no asset suffixes for github collector")
 	}
-	if len(g.repoToReleaseTags) == 0 && g.collectDataSource == nil {
+	if g.isRelease && len(g.repoToReleaseTags) == 0 && g.collectDataSource == nil {
 		return nil, fmt.Errorf("no repos and releases to collect nor any data source for future subscriptions")
 	}
 	return g, nil
@@ -92,6 +99,36 @@ func WithPolling(interval time.Duration) Opt {
 	return func(g *githubCollector) {
 		g.poll = true
 		g.interval = interval
+	}
+}
+
+func WithMode(githubMode string) Opt {
+	return func(g *githubCollector) {
+		g.isRelease = githubMode == "release"
+	}
+}
+
+func WithSbomName(sbomName string) Opt {
+	return func(g *githubCollector) {
+		g.sbomName = sbomName
+	}
+}
+
+func WithWorkflowName(workflowName string) Opt {
+	return func(g *githubCollector) {
+		g.workflowFileName = workflowName
+	}
+}
+
+func WithOwner(owner string) Opt {
+	return func(g *githubCollector) {
+		g.owner = owner
+	}
+}
+
+func WithRepo(repo string) Opt {
+	return func(g *githubCollector) {
+		g.repo = repo
 	}
 }
 
@@ -121,22 +158,35 @@ func WithCollectDataSource(collectDataSource datasource.CollectSource) Opt {
 
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
 func (g *githubCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	err := g.populateRepoToReleaseTags(ctx)
-	if err != nil {
-		return err
-	}
-	if g.poll {
-		for repo, tags := range g.repoToReleaseTags {
-			g.fetchAssets(ctx, repo.Owner, repo.Repo, tags, docChannel)
+	if g.isRelease {
+		err := g.populateRepoToReleaseTags(ctx)
+		if err != nil {
+			return err
 		}
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(g.interval):
+		if g.poll {
+			for repo, tags := range g.repoToReleaseTags {
+				g.fetchAssets(ctx, repo.Owner, repo.Repo, tags, docChannel)
+			}
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(g.interval):
+			}
+		} else {
+			for repo, tags := range g.repoToReleaseTags {
+				g.fetchAssets(ctx, repo.Owner, repo.Repo, tags, docChannel)
+			}
 		}
 	} else {
-		for repo, tags := range g.repoToReleaseTags {
-			g.fetchAssets(ctx, repo.Owner, repo.Repo, tags, docChannel)
+		if g.poll {
+			g.fetchWorkflowRunArtifacts(ctx, docChannel)
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(g.interval):
+			}
+		} else {
+			g.fetchWorkflowRunArtifacts(ctx, docChannel)
 		}
 	}
 
@@ -170,6 +220,7 @@ func (g *githubCollector) populateRepoToReleaseTags(ctx context.Context) error {
 		r, t, err := ParseGitDataSource(gds)
 		if err != nil {
 			logger.Warnf("unable to parse git datasource: %v", err)
+			continue
 		}
 		g.repoToReleaseTags[*r] = append(g.repoToReleaseTags[*r], t)
 	}
@@ -224,6 +275,58 @@ func (g *githubCollector) collectAssetsForRelease(ctx context.Context, release c
 			}
 			docChannel <- doc
 		}
+	}
+}
+
+// fetchWorkflowRunArtifacts fetches the artifacts from the GitHub Action Workflow runs for a given owner and repo.
+// The artifacts are then sent to the provided docChannel.
+// If an error occurs while fetching a workflow run or its artifacts, it is logged and the function continues to the next workflow run.
+func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChannel chan<- *processor.Document) {
+	logger := logging.FromContext(ctx)
+
+	workflows, err := g.client.GetWorkflow(ctx, g.owner, g.repo, g.workflowFileName)
+	if err != nil {
+		logger.Warnf("unable to fetch workflows: %v", err)
+		return
+	}
+
+	for _, workflow := range workflows {
+		// get the latest workflow run
+		run, err := g.client.GetLatestWorkflowRun(ctx, g.owner, g.repo, workflow.Id)
+		if err != nil {
+			logger.Errorf("unable to fetch workflow runs for workflow %v: %v", workflow.Id, err)
+			continue
+		}
+		if run == nil {
+			logger.Errorf("no workflow runs found for workflow %v", workflow.Id)
+			continue
+		}
+
+		// don't re-ingest the same run
+		if run.RunId == g.lastIngestedRun {
+			continue
+		}
+
+		artifacts, err := g.client.GetWorkflowRunArtifacts(ctx, g.owner, g.repo, g.sbomName, run.RunId)
+		if err != nil {
+			logger.Errorf("unable to fetch workflow run artifacts for run %v: %v", run.RunId, err)
+			continue
+		}
+
+		for _, artifact := range artifacts {
+			doc := &processor.Document{
+				Blob:   artifact.Bytes,
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: GithubCollector,
+					Source:    artifact.Name,
+				},
+			}
+			docChannel <- doc
+		}
+
+		g.lastIngestedRun = run.RunId
 	}
 }
 

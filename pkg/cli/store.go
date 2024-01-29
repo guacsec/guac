@@ -120,6 +120,11 @@ func init() {
 	set.String("kv-redis", "redis://user@localhost:6379/0", "Experimental: Redis connection string for keyvalue backend")
 	set.String("kv-tikv", "127.0.0.1:2379", "Experimental: TiKV address and port")
 
+	// GitHub collector options
+	set.String("github-mode", "release", "mode to run github collector in: [release | workflow]")
+	set.String("github-sbom", "", "name of sbom file to look for in github release.")
+	set.String("github-workflow-file", "", "name of workflow file to look for in github workflow. \nThis will be the name of the actual file, not the workflow name (i.e. ci.yaml).")
+
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f
 	})

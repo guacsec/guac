@@ -381,3 +381,67 @@ func Test_githubClient_GetReleaseAsset(t *testing.T) {
 		})
 	}
 }
+
+func Test_githubClient_GetWorkflow(t *testing.T) {
+	gc := testGithubClient()
+
+	type args struct {
+		ctx                context.Context
+		owner              string
+		repo               string
+		githubWorkflowName string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []client.Workflow
+		wantErr bool
+	}{
+		{
+			name: "get all workflows",
+			args: args{
+				ctx:                context.Background(),
+				owner:              "guacsec",
+				repo:               "guac-test",
+				githubWorkflowName: "",
+			},
+			want: []client.Workflow{
+				{
+					Name: "Test Workflow",
+					Id:   77746986,
+				},
+				{
+					Name: "Test Workflow - Version 2",
+					Id:   77748205,
+				},
+			},
+		},
+		{
+			name: "with workflow name parameter",
+			args: args{
+				ctx:                context.Background(),
+				owner:              "guacsec",
+				repo:               "guac-test",
+				githubWorkflowName: "Test Workflow",
+			},
+			want: []client.Workflow{
+				{
+					Name: "Test Workflow",
+					Id:   77746986,
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := gc.GetWorkflow(test.args.ctx, test.args.owner, test.args.repo, test.args.githubWorkflowName)
+			if (err != nil) != test.wantErr {
+				t.Errorf("GetWorkflow() error = %v, wantErr %v", err, test.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("GetWorkflow() got = %v, want %v", got, test.want)
+			}
+		})
+	}
+}

@@ -144,6 +144,18 @@ func (m *MockGithubClient) GetReleaseAsset(asset client.ReleaseAsset) (*client.R
 	return &rac, nil
 }
 
+func (m *MockGithubClient) GetWorkflow(ctx context.Context, owner string, repo string, githubWorkflowName string) ([]*client.Workflow, error) {
+	return nil, nil
+}
+
+func (m *MockGithubClient) GetLatestWorkflowRun(ctx context.Context, owner, repo string, workflowId int64) (*client.WorkflowRun, error) {
+	return nil, nil
+}
+
+func (m *MockGithubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName string, runID int64) ([]*client.WorkflowArtifactContent, error) {
+	return nil, nil
+}
+
 func TestNewGithubCollector(t *testing.T) {
 	mockClient := &MockGithubClient{}
 	mockData := mockDataSource()
@@ -175,6 +187,7 @@ func TestNewGithubCollector(t *testing.T) {
 				repoToReleaseTags: map[client.Repo][]TagOrLatest{},
 				assetSuffixes:     defaultAssetSuffixes(),
 				collectDataSource: mockData,
+				isRelease:         true,
 			},
 			wantErr: false,
 		},
@@ -193,6 +206,7 @@ func TestNewGithubCollector(t *testing.T) {
 				repoToReleaseTags: mockLatest,
 				assetSuffixes:     defaultAssetSuffixes(),
 				collectDataSource: nil,
+				isRelease:         true,
 			},
 			wantErr: false,
 		},
@@ -211,6 +225,7 @@ func TestNewGithubCollector(t *testing.T) {
 				repoToReleaseTags: mockTag,
 				assetSuffixes:     defaultAssetSuffixes(),
 				collectDataSource: nil,
+				isRelease:         true,
 			},
 			wantErr: false,
 		},
