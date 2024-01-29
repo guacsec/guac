@@ -28,7 +28,7 @@ import (
 	_ "gocloud.dev/blob/s3blob"
 )
 
-func initializeInMemBlobStore(ctx context.Context) (*blobStore, error) {
+func initializeInMemBlobStore(ctx context.Context) (*BlobStore, error) {
 	blobStore, err := NewBlobStore(ctx, "mem://")
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to blog store: %w", err)
@@ -42,7 +42,6 @@ func Test_blobStore_Write_Read(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to initialize blob store with error: %v", err)
 	}
-	ctx = WithBlobStore(ctx, inmemBlog)
 	type args struct {
 		key   string
 		value []byte
@@ -74,11 +73,10 @@ func Test_blobStore_Write_Read(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := FromContext(ctx)
-			if err := b.Write(ctx, tt.args.key, tt.args.value); err != nil {
+			if err := inmemBlog.Write(ctx, tt.args.key, tt.args.value); err != nil {
 				t.Errorf("blobStore.Write() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			got, err := b.Read(ctx, tt.searchKey)
+			got, err := inmemBlog.Read(ctx, tt.searchKey)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("blobStore.Read() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -37,8 +38,8 @@ import (
 type filesOptions struct {
 	// path to folder with documents to collect
 	path string
-	// address for NATS connection
-	natsAddr string
+	// address for pubsub connection
+	pubsubAddr string
 	// address for blob store
 	blobAddr string
 	// poll location
@@ -66,7 +67,7 @@ you have access to read and write to the respective blob store.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		opts, err := validateFilesFlags(
-			viper.GetString("nats-addr"),
+			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
 			viper.GetBool("service-poll"),
 			args)
@@ -86,14 +87,14 @@ you have access to read and write to the respective blob store.`,
 			logger.Errorf("unable to register file collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.natsAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
 	},
 }
 
-func validateFilesFlags(natsAddr string, blobAddr string, poll bool, args []string) (filesOptions, error) {
+func validateFilesFlags(pubsubAddr string, blobAddr string, poll bool, args []string) (filesOptions, error) {
 	var opts filesOptions
 
-	opts.natsAddr = natsAddr
+	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
 
@@ -106,33 +107,37 @@ func validateFilesFlags(natsAddr string, blobAddr string, poll bool, args []stri
 	return opts, nil
 }
 
-func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, error) {
+func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return collector.Publish(ctx, d)
+		return collector.Publish(ctx, d, blobStore, pubsub)
 	}, nil
 }
 
-func initializeNATsandCollector(ctx context.Context, natsAddr string, blobAddr string) {
+func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string) {
 	logger := logging.FromContext(ctx)
-	// initialize jetstream
-	// TODO: pass in credentials file for NATS secure login
-	jetStream := emitter.NewJetStream(natsAddr, "", "")
-	ctx, err := jetStream.JetStreamInit(ctx)
-	if err != nil {
-		logger.Errorf("jetStream initialization failed with error: %v", err)
-		os.Exit(1)
-	}
-	defer jetStream.Close()
 
+	if strings.HasPrefix(pubsubAddr, "nats://") {
+		// initialize jetstream
+		// TODO: pass in credentials file for NATS secure login
+		jetStream := emitter.NewJetStream(pubsubAddr, "", "")
+		if err := jetStream.JetStreamInit(ctx); err != nil {
+			logger.Errorf("jetStream initialization failed with error: %v", err)
+			os.Exit(1)
+		}
+		defer jetStream.Close()
+	}
+
+	// initialize blob store
 	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
 	if err != nil {
 		logger.Errorf("unable to connect to blog store: %v", err)
 	}
 
-	ctx = blob.WithBlobStore(ctx, blobStore)
+	// initialize pubsub
+	pubsub := emitter.NewEmitterPubSub(ctx, pubsubAddr)
 
 	// Get pipeline of components
-	collectorPubFunc, err := getCollectorPublish(ctx)
+	collectorPubFunc, err := getCollectorPublish(ctx, blobStore, pubsub)
 	if err != nil {
 		logger.Errorf("error: %v", err)
 		os.Exit(1)

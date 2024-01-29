@@ -74,20 +74,18 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 
 // Subscribe receives the CD event and decodes the event to obtain the blob store key.
 // The key is used to retrieve the "document" from the blob store to be processed and ingested.
-func Subscribe(ctx context.Context, em collector.Emitter) error {
+func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
-	blobStore := blob.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	psub, err := emitter.NewPubSub(ctx, uuidString, emitter.SubjectNameDocCollected, emitter.DurableProcessor, emitter.BackOffTimer)
+	sub, err := pubsub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}
-
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d []byte) error {
 
@@ -116,10 +114,15 @@ func Subscribe(ctx context.Context, em collector.Emitter) error {
 		return nil
 	}
 
-	err = psub.GetDataFromNats(ctx, processFunc)
+	err = sub.GetDataFromSubscriber(ctx, processFunc)
 	if err != nil {
-		return fmt.Errorf("[processor: %s] failed to get data from nats: %w", uuidString, err)
+		return fmt.Errorf("[processor: %s] failed to get data from %s: %w", uuidString, pubsub.ServiceURL, err)
 	}
+
+	if err := sub.CloseSubscriber(ctx); err != nil {
+		return fmt.Errorf("[processor: %s] failed to close subscriber: %s,  with error: %w", uuidString, pubsub.ServiceURL, err)
+	}
+
 	return nil
 }
 

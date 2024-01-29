@@ -1,5 +1,5 @@
-# nats
-nats-addr: nats://nats:4222
+# pubsub - default nats
+pubsub-addr: nats://nats:4222
 
 # blob store setup. Setup with blob store of choice via https://gocloud.dev/howto/blob/
 blob-addr: file:///path/to/dir

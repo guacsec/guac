@@ -19,11 +19,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gofrs/uuid"
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/ingestor/parser/csaf"
@@ -37,8 +33,6 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
 	"github.com/guacsec/guac/pkg/logging"
 )
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func init() {
 	_ = RegisterDocumentParser(dsse.NewDSSEParser, processor.DocumentDSSE)
@@ -74,53 +68,6 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 		return fmt.Errorf("the document parser is being overwritten: %s", d)
 	}
 	documentParser[d] = p
-	return nil
-}
-
-// Subscribe is used by NATS JetStream to stream the documents received from the processor
-// and parse them via ParseDocumentTree
-// The context contains the jetstream.
-func Subscribe(ctx context.Context, transportFunc func([]assembler.IngestPredicates, []*common.IdentifierStrings) error) error {
-	logger := logging.FromContext(ctx)
-
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		return fmt.Errorf("failed to get uuid with the following error: %w", err)
-	}
-	uuidString := uuid.String()
-	psub, err := emitter.NewPubSub(ctx, uuidString, emitter.SubjectNameDocProcessed, emitter.DurableIngestor, emitter.BackOffTimer)
-	if err != nil {
-		return err
-	}
-
-	// should still continue if there are errors since problem is with individual documents
-	parserFunc := func(d []byte) error {
-		docNode := processor.DocumentNode{}
-		err = json.Unmarshal(d, &docNode)
-		if err != nil {
-			logger.Error("[ingestor: %s] failed unmarshal the document tree bytes: %v", uuidString, err)
-			return nil
-		}
-		assemblerInputs, idStrings, err := ParseDocumentTree(ctx, &docNode)
-		if err != nil {
-			logger.Error("[ingestor: %s] failed parse document: %v", uuidString, err)
-			return nil
-		}
-
-		err = transportFunc(assemblerInputs, idStrings)
-		if err != nil {
-			logger.Error("[ingestor: %s] failed transportFunc: %v", uuidString, err)
-			return nil
-		}
-
-		logger.Infof("[ingestor: %s] ingested docTree: %+v", uuidString, processor.DocumentTree(&docNode).Document.SourceInformation)
-		return nil
-	}
-
-	err = psub.GetDataFromNats(ctx, parserFunc)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

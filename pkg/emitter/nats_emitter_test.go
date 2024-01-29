@@ -20,12 +20,10 @@ import (
 	"errors"
 	"fmt"
 	"testing"
-	"time"
 
 	jsoniter "github.com/json-iterator/go"
 
 	uuid "github.com/gofrs/uuid"
-	"github.com/guacsec/guac/internal/testing/dochelper"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
@@ -79,120 +77,6 @@ var (
 	}
 )
 
-func TestNatsEmitter_PublishOnEmit(t *testing.T) {
-	expectedDocTree := dochelper.DocNode(&ite6SLSADoc)
-
-	natsTest := nats_test.NewNatsTestServer()
-	url, err := natsTest.EnableJetStreamForTest()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer natsTest.Shutdown()
-
-	ctx := context.Background()
-	jetStream := NewJetStream(url, "", "")
-	ctx, err = jetStream.JetStreamInit(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error initializing jetstream: %v", err)
-	}
-	err = jetStream.RecreateStream(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error recreating jetstream: %v", err)
-	}
-	defer jetStream.Close()
-	err = testPublish(ctx, &ite6SLSADoc)
-	if err != nil {
-		t.Fatalf("unexpected error on emit: %v", err)
-	}
-
-	var cancel context.CancelFunc
-
-	ctx, cancel = context.WithTimeout(ctx, time.Second)
-	defer cancel()
-
-	transportFunc := func(d processor.DocumentTree) error {
-		if !dochelper.DocTreeEqual(d, expectedDocTree) {
-			t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
-		}
-		return nil
-	}
-
-	err = testSubscribe(ctx, transportFunc)
-	if err != nil {
-		if err != nil && !errors.Is(err, context.DeadlineExceeded) {
-			t.Errorf("nats emitter Subscribe test errored = %v", err)
-		}
-	}
-}
-
-func TestNatsEmitter_PublishOnEmit_DeDuplication(t *testing.T) {
-	expectedDocTree := dochelper.DocNode(&ite6SLSADoc)
-
-	natsTest := nats_test.NewNatsTestServer()
-	url, err := natsTest.EnableJetStreamForTest()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer natsTest.Shutdown()
-
-	ctx := context.Background()
-	jetStream := NewJetStream(url, "", "")
-	ctx, err = jetStream.JetStreamInit(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error initializing jetstream: %v", err)
-	}
-	err = jetStream.RecreateStream(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error recreating jetstream: %v", err)
-	}
-	defer jetStream.Close()
-
-	// publish document once
-	err = testPublish(ctx, &ite6SLSADoc)
-	if err != nil {
-		t.Fatalf("unexpected error on emit: %v", err)
-	}
-
-	// publish same document again to check that data deduplication works
-	err = testPublish(ctx, &ite6SLSADoc)
-	if err != nil {
-		t.Fatalf("unexpected error on emit: %v", err)
-	}
-
-	// publish third time the same document to check that data deduplication works
-	err = testPublish(ctx, &ite6SLSADoc)
-	if err != nil {
-		t.Fatalf("unexpected error on emit: %v", err)
-	}
-
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(ctx, 2*time.Second)
-	defer cancel()
-
-	listDocument := []processor.DocumentTree{}
-
-	transportFunc := func(d processor.DocumentTree) error {
-		listDocument = append(listDocument, d)
-		return nil
-	}
-
-	err = testSubscribe(ctx, transportFunc)
-	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			if len(listDocument) != 1 {
-				t.Error("expected only 1 document fetched")
-			}
-			for _, d := range listDocument {
-				if !dochelper.DocTreeEqual(d, expectedDocTree) {
-					t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
-				}
-			}
-		} else {
-			t.Errorf("nats emitter Subscribe test errored = %v", err)
-		}
-	}
-}
-
 func TestNatsEmitter_RecreateStream(t *testing.T) {
 	natsTest := nats_test.NewNatsTestServer()
 	url, err := natsTest.EnableJetStreamForTest()
@@ -203,8 +87,7 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 
 	ctx := context.Background()
 	jetStream := NewJetStream(url, "", "")
-	ctx, err = jetStream.JetStreamInit(ctx)
-	if err != nil {
+	if err := jetStream.JetStreamInit(ctx); err != nil {
 		t.Fatalf("unexpected error initializing jetstream: %v", err)
 	}
 	defer jetStream.Close()
@@ -224,11 +107,11 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.deleteStream {
-				err := jetStream.js.DeleteStream(StreamName)
+				err := jetStream.js.DeleteStream(streamName)
 				if err != nil {
 					t.Errorf("failed to delete stream: %v", err)
 				}
-				_, err = jetStream.js.StreamInfo(StreamName)
+				_, err = jetStream.js.StreamInfo(streamName)
 				if err == nil || (err != nil) && !errors.Is(err, tt.wantErrMessage) {
 					t.Errorf("RecreateStream() error = %v, wantErr %v", err, tt.wantErrMessage)
 					return
@@ -238,7 +121,7 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error recreating jetstream: %v", err)
 			}
-			_, err = jetStream.js.StreamInfo(StreamName)
+			_, err = jetStream.js.StreamInfo(streamName)
 			if err != nil {
 				t.Errorf("RecreateStream() failed to create stream with error = %v", err)
 				return
@@ -247,13 +130,14 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 	}
 }
 
-func testPublish(ctx context.Context, d *processor.Document) error {
+func testPublish(ctx context.Context, d *processor.Document, pubsub *EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
+
 	docByte, err := json.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
-	err = Publish(ctx, SubjectNameDocCollected, docByte)
+	err = pubsub.Publish(ctx, docByte)
 	if err != nil {
 		return fmt.Errorf("failed to publish document on stream: %w", err)
 	}
@@ -261,18 +145,18 @@ func testPublish(ctx context.Context, d *processor.Document) error {
 	return nil
 }
 
-func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error) error {
+func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error, pubsub *EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
+
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	psub, err := NewPubSub(ctx, uuidString, SubjectNameDocCollected, DurableProcessor, BackOffTimer)
+	sub, err := pubsub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return err
 	}
-
 	processFunc := func(d []byte) error {
 		doc := processor.Document{}
 		err := json.Unmarshal(d, &doc)
@@ -298,9 +182,11 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return nil
 	}
 
-	err = psub.GetDataFromNats(ctx, processFunc)
-	if err != nil {
-		return err
+	if err := sub.GetDataFromSubscriber(ctx, processFunc); err != nil {
+		return fmt.Errorf("failed to get data from subscriber with error: %w", err)
+	}
+	if err := sub.CloseSubscriber(ctx); err != nil {
+		return fmt.Errorf("failed to close subscriber with error: %w", err)
 	}
 	return nil
 }

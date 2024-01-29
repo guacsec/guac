@@ -22,8 +22,10 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -164,15 +166,34 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 }
 
 // Publish is used by NATS JetStream to stream the documents and send them to the processor
-func Publish(ctx context.Context, d *processor.Document) error {
+func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
+
 	docByte, err := json.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
-	err = emitter.Publish(ctx, emitter.SubjectNameDocCollected, docByte)
+
+	key := events.GetKey(d.Blob)
+
+	if err = blobStore.Write(ctx, key, docByte); err != nil {
+		return fmt.Errorf("failed write document to blob store: %w", err)
+	}
+
+	cdEvent, err := events.CreateArtifactPubEvent(ctx, key)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed create an event: %w", err)
+	}
+
+	keyByte, err := json.Marshal(cdEvent)
+	if err != nil {
+		return fmt.Errorf("failed marshal of document key: %w", err)
+	}
+
+	if err := pubsub.Publish(ctx, keyByte); err != nil {
+		if err != nil {
+			return fmt.Errorf("failed to publish event with error: %w", err)
+		}
 	}
 	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil

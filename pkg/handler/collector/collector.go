@@ -119,9 +119,8 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 // retrieval by the processor/ingestor. A CDEvent is created to transmit the key (which is the
 // sha256 of the collected "document"). This also fixes the issues where the "document" was too large
 // to be sent across the event stream.
-func Publish(ctx context.Context, d *processor.Document) error {
+func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
-	blobStore := blob.FromContext(ctx)
 
 	docByte, err := json.Marshal(d)
 	if err != nil {
@@ -144,7 +143,7 @@ func Publish(ctx context.Context, d *processor.Document) error {
 		return fmt.Errorf("failed marshal of document key: %w", err)
 	}
 
-	if err := emitter.Publish(ctx, emitter.SubjectNameDocCollected, keyByte); err != nil {
+	if err := pubsub.Publish(ctx, keyByte); err != nil {
 		if err != nil {
 			return fmt.Errorf("failed to publish event with error: %w", err)
 		}

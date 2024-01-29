@@ -28,7 +28,7 @@ import (
 	_ "gocloud.dev/blob/s3blob"
 )
 
-type blobStore struct {
+type BlobStore struct {
 	bucket *blob.Bucket
 }
 
@@ -37,18 +37,18 @@ type blobStore struct {
 // such as S3, google cloud bucket, azure blob store can be used.
 // Authentication is setup via environment variables. Please refer to for
 // full documentation https://gocloud.dev/howto/blob/
-func NewBlobStore(ctx context.Context, url string) (*blobStore, error) {
+func NewBlobStore(ctx context.Context, url string) (*BlobStore, error) {
 	bucket, err := blob.OpenBucket(ctx, url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open bucket with error: %w", err)
 	}
-	return &blobStore{
+	return &BlobStore{
 		bucket: bucket,
 	}, nil
 }
 
 // Write uses the key and value to write the data to the initialized blob store (via the authentication provided)
-func (b *blobStore) Write(ctx context.Context, key string, value []byte) error {
+func (b *BlobStore) Write(ctx context.Context, key string, value []byte) error {
 	w, err := b.bucket.NewWriter(ctx, key, nil)
 	if err != nil {
 		return fmt.Errorf("failed to write to bucket with error: %w", err)
@@ -67,7 +67,7 @@ func (b *blobStore) Write(ctx context.Context, key string, value []byte) error {
 }
 
 // Read uses the key read the data from the initialized blob store (via the authentication provided)
-func (b *blobStore) Read(ctx context.Context, key string) ([]byte, error) {
+func (b *BlobStore) Read(ctx context.Context, key string) ([]byte, error) {
 	r, err := b.bucket.NewReader(ctx, key, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read to bucket with error: %w", err)
@@ -79,17 +79,4 @@ func (b *blobStore) Read(ctx context.Context, key string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to read bytes with error: %w", err)
 	}
 	return buf.Bytes(), nil
-}
-
-// WithBlobStore stores the initialized blobStore in the context such that it can be retrieved later when needed
-func WithBlobStore(ctx context.Context, bs *blobStore) context.Context {
-	return context.WithValue(ctx, blobStore{}, bs)
-}
-
-// FromContext allows for the blobStore to be pulled from the context
-func FromContext(ctx context.Context) *blobStore {
-	if bs, ok := ctx.Value(blobStore{}).(*blobStore); ok {
-		return bs
-	}
-	return nil
 }

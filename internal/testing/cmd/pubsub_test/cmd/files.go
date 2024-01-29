@@ -19,20 +19,19 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/handler/processor/process"
-	"github.com/guacsec/guac/pkg/ingestor/parser"
-	"github.com/guacsec/guac/pkg/ingestor/parser/common"
-	parser_common "github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -48,7 +47,9 @@ type options struct {
 	// path to folder with documents to collect
 	path string
 	// nats
-	natsAddr string
+	pubsubAddr string
+	// address for blob store
+	blobAddr string
 
 	// osv/scorecard certifier
 	poll     bool
@@ -65,7 +66,8 @@ var filesCmd = &cobra.Command{
 			viper.GetString("gdbpass"),
 			viper.GetString("gdbaddr"),
 			viper.GetString("realm"),
-			viper.GetString("natsaddr"),
+			viper.GetString("pubsubAddr"),
+			viper.GetString("blob-addr"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -77,132 +79,24 @@ var filesCmd = &cobra.Command{
 		logger := logging.FromContext(ctx)
 
 		// Register collector
-		fileCollector := file.NewFileCollector(ctx, opts.path, false, time.Second)
+		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, 30*time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
 		if err != nil {
 			logger.Errorf("unable to register file collector: %v", err)
 		}
 
-		// initialize jetstream
-		// TODO: pass in credentials file for NATS secure login
-		jetStream := emitter.NewJetStream(opts.natsAddr, "", "")
-		ctx, err = jetStream.JetStreamInit(ctx)
-		if err != nil {
-			logger.Errorf("jetStream initialization failed with error: %v", err)
-			os.Exit(1)
-		}
-		// recreate stream to remove any old lingering documents
-		// NOT TO BE USED IN PRODUCTION
-		err = jetStream.RecreateStream(ctx)
-		if err != nil {
-			logger.Errorf("unexpected error recreating jetstream: %v", err)
-		}
-		defer jetStream.Close()
-
-		// Get pipeline of components
-		collectorPubFunc, err := getCollectorPublish(ctx)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		assemblerFunc, err := getAssembler(opts)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		// for pubsub_test we ignore identifier strings as we don't connect to a collectsub service
-		ingestorTransportFunc := func(d []assembler.IngestPredicates, i []*common.IdentifierStrings) error {
-			err := assemblerFunc(d)
-			if err != nil {
-				return err
-			}
-			return nil
-		}
-
-		ingestorFunc, err := getIngestor(ctx, ingestorTransportFunc)
-		if err != nil {
-			logger.Errorf("error: %v", err)
-			os.Exit(1)
-		}
-
-		// Set emit function to go through the entire pipeline
-		emit := func(d *processor.Document) error {
-			err = collectorPubFunc(d)
-			if err != nil {
-				logger.Errorf("collector ended with error: %v", err)
-				os.Exit(1)
-			}
-			return nil
-		}
-
-		// Collect
-		errHandler := func(err error) bool {
-			if err == nil {
-				logger.Info("collector ended gracefully")
-				return true
-			}
-			logger.Errorf("collector ended with error: %v", err)
-			return false
-		}
-
-		ingest := func(d *processor.Document) error {
-			docTree, err := process.Process(ctx, d)
-			if err != nil {
-				logger.Error("[processor] failed process document: %v", err)
-				return nil
-			}
-
-			docTreeBytes, err := json.Marshal(d)
-			if err != nil {
-				return fmt.Errorf("failed marshal of document: %w", err)
-			}
-			err = emitter.Publish(ctx, emitter.SubjectNameDocProcessed, docTreeBytes)
-			if err != nil {
-				logger.Error("[processor] failed transportFunc: %v", err)
-				return nil
-			}
-
-			logger.Infof("[processor] docTree Processed: %+v", docTree.Document.SourceInformation)
-			return nil
-		}
-
-		// Assuming that publisher and consumer are different processes.
-		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			err := process.Subscribe(ctx, ingest)
-			if err != nil {
-				logger.Errorf("processor ended with error: %v", err)
-			}
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			err := ingestorFunc()
-			if err != nil {
-				logger.Errorf("parser ended with error: %v", err)
-			}
-		}()
-
-		if err := collector.Collect(ctx, emit, errHandler); err != nil {
-			logger.Fatal(err)
-		}
-
-		wg.Wait()
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
 	},
 }
 
-func validateFlags(user string, pass string, dbAddr string, realm string, natsAddr string, args []string) (options, error) {
+func validateFlags(user string, pass string, dbAddr string, realm string, pubsubAddr string, blobAddr string, args []string) (options, error) {
 	var opts options
 	opts.user = user
 	opts.pass = pass
+	opts.blobAddr = blobAddr
 	opts.dbAddr = dbAddr
 	opts.realm = realm
-	opts.natsAddr = natsAddr
+	opts.pubsubAddr = pubsubAddr
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")
@@ -213,25 +107,82 @@ func validateFlags(user string, pass string, dbAddr string, realm string, natsAd
 	return opts, nil
 }
 
-func getCollectorPublish(ctx context.Context) (func(*processor.Document) error, error) {
+func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return collector.Publish(ctx, d)
+		return collector.Publish(ctx, d, blobStore, pubsub)
 	}, nil
 }
 
-func getIngestor(ctx context.Context, transportFunc func([]assembler.IngestPredicates, []*parser_common.IdentifierStrings) error) (func() error, error) {
-	return func() error {
-		err := parser.Subscribe(ctx, transportFunc)
+func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string) {
+	logger := logging.FromContext(ctx)
+
+	if strings.HasPrefix(pubsubAddr, "nats://") {
+		// initialize jetstream
+		// TODO: pass in credentials file for NATS secure login
+		jetStream := emitter.NewJetStream(pubsubAddr, "", "")
+		if err := jetStream.JetStreamInit(ctx); err != nil {
+			logger.Errorf("jetStream initialization failed with error: %v", err)
+			os.Exit(1)
+		}
+		defer jetStream.Close()
+	}
+
+	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
+	if err != nil {
+		logger.Errorf("unable to connect to blog store: %v", err)
+	}
+
+	pubsub := emitter.NewEmitterPubSub(ctx, pubsubAddr)
+
+	// Get pipeline of components
+	collectorPubFunc, err := getCollectorPublish(ctx, blobStore, pubsub)
+	if err != nil {
+		logger.Errorf("error: %v", err)
+		os.Exit(1)
+	}
+
+	// Set emit function to go through the entire pipeline
+	emit := func(d *processor.Document) error {
+		err = collectorPubFunc(d)
 		if err != nil {
-			return err
+			logger.Errorf("error publishing document from collector: %v", err)
+			os.Exit(1)
 		}
 		return nil
-	}, nil
-}
+	}
 
-func getAssembler(opts options) (func([]assembler.IngestPredicates) error, error) {
-	// TODO(bulldozer): return assembler func to talk to graphQL ingestion
-	return func(_ []assembler.IngestPredicates) error { return nil }, nil
+	// Collect
+	errHandler := func(err error) bool {
+		if err == nil {
+			logger.Info("collector ended gracefully")
+			return true
+		}
+		logger.Errorf("collector ended with error: %v", err)
+		// Continue to emit any documents still in the docChan
+		return true
+	}
+
+	ctx, cf := context.WithCancel(ctx)
+	var wg sync.WaitGroup
+	done := make(chan bool, 1)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := collector.Collect(ctx, emit, errHandler); err != nil {
+			logger.Errorf("Unhandled error in the collector: %s", err)
+		}
+		done <- true
+	}()
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case s := <-sigs:
+		logger.Infof("Signal received: %s, shutting down gracefully\n", s.String())
+	case <-done:
+		logger.Infof("All Collectors completed")
+	}
+	cf()
+	wg.Wait()
 }
 
 func init() {

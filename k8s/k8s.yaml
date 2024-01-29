@@ -113,7 +113,7 @@ spec:
           command: ["/opt/guac/guacingest"]
           workingDir: /tmp
           env:
-            - name: GUAC_NATS_ADDR
+            - name: GUAC_PUBSUB_ADDR
               value: nats://nats:4222
 ---
 apiVersion: apps/v1
@@ -136,7 +136,7 @@ spec:
           command: ["/opt/guac/guaccollect", "image"]
           workingDir: /tmp
           env:
-            - name: GUAC_NATS_ADDR
+            - name: GUAC_PUBSUB_ADDR
               value: nats://nats:4222
             - name: GUAC_CSUB_ADDR
               value: guac-collectsub:2782
@@ -161,7 +161,7 @@ spec:
           command: ["/opt/guac/guaccollect", "deps_dev"]
           workingDir: /tmp
           env:
-            - name: GUAC_NATS_ADDR
+            - name: GUAC_PUBSUB_ADDR
               value: nats://nats:4222
             - name: GUAC_CSUB_ADDR
               value: guac-collectsub:2782

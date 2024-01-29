@@ -98,7 +98,7 @@ not required.
   therefore don't use camelCase anywhere.
 
 - Descriptive on its own - The flag names are also used in the guac.yaml config
-  file. Therefore a name should be self descriptive. Good: `nats-addr`, Bad:
+  file. Therefore a name should be self descriptive. Good: `pubsub-addr`, Bad:
   `type`. If it is something that has the same meaning everywhere, it is ok to
   be short: ex: interval.
 
