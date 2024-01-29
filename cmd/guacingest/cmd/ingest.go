@@ -67,7 +67,7 @@ func ingest(cmd *cobra.Command, args []string) {
 		// TODO: pass in credentials file for NATS secure login
 		jetStream := emitter.NewJetStream(opts.pubsubAddr, "", "")
 		if err := jetStream.JetStreamInit(ctx); err != nil {
-			logger.Errorf("jetStream initialization failed with error: %v", err)
+			logger.Fatalf("jetStream initialization failed with error: %v", err)
 			os.Exit(1)
 		}
 		defer jetStream.Close()
@@ -76,7 +76,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	// initialize blob store
 	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)
 	if err != nil {
-		logger.Errorf("unable to connect to blog store: %v", err)
+		logger.Fatalf("unable to connect to blog store: %v", err)
 	}
 
 	// initialize pubsub

@@ -67,10 +67,10 @@ var depsDevCmd = &cobra.Command{
 		// Register collector
 		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second)
 		if err != nil {
-			logger.Errorf("unable to register depsdev collector: %v", err)
+			logger.Fatalf("unable to register depsdev collector: %v", err)
 		}
 		if err := collector.RegisterDocumentCollector(depsDevCollector, deps_dev.DepsCollector); err != nil {
-			logger.Errorf("unable to register depsdev collector: %v", err)
+			logger.Fatalf("unable to register depsdev collector: %v", err)
 		}
 
 		totalNum := 0

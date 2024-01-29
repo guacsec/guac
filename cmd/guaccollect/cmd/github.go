@@ -108,7 +108,7 @@ you have access to read and write to the respective blob store.`,
 		// GITHUB_TOKEN is the default token name
 		ghc, err := githubclient.NewGithubClient(ctx, os.Getenv("GITHUB_TOKEN"))
 		if err != nil {
-			logger.Errorf("unable to create github client: %v", err)
+			logger.Fatalf("unable to create github client: %v", err)
 		}
 
 		// Register collector
@@ -129,11 +129,11 @@ you have access to read and write to the respective blob store.`,
 
 		if opts.ownerRepoName != "" {
 			if !strings.Contains(opts.ownerRepoName, "/") {
-				logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
+				logger.Fatalf("owner-repo flag must be in the format <owner>/<repo>")
 			} else {
 				ownerRepoName := strings.Split(opts.ownerRepoName, "/")
 				if len(ownerRepoName) != 2 {
-					logger.Errorf("owner-repo flag must be in the format <owner>/<repo>")
+					logger.Fatalf("owner-repo flag must be in the format <owner>/<repo>")
 				}
 				collectorOpts = append(collectorOpts, github.WithOwner(ownerRepoName[0]))
 				collectorOpts = append(collectorOpts, github.WithRepo(ownerRepoName[1]))
@@ -142,11 +142,11 @@ you have access to read and write to the respective blob store.`,
 
 		githubCollector, err := github.NewGithubCollector(collectorOpts...)
 		if err != nil {
-			logger.Errorf("unable to create Github collector: %v", err)
+			logger.Fatalf("unable to create Github collector: %v", err)
 		}
 		err = collector.RegisterDocumentCollector(githubCollector, github.GithubCollector)
 		if err != nil {
-			logger.Errorf("unable to register Github collector: %v", err)
+			logger.Fatalf("unable to register Github collector: %v", err)
 		}
 
 		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)

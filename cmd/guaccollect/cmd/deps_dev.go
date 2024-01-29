@@ -94,11 +94,11 @@ you have access to read and write to the respective blob store.`,
 		// Register collector
 		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second)
 		if err != nil {
-			logger.Errorf("unable to register oci collector: %v", err)
+			logger.Fatalf("unable to register oci collector: %v", err)
 		}
 		err = collector.RegisterDocumentCollector(depsDevCollector, deps_dev.DepsCollector)
 		if err != nil {
-			logger.Errorf("unable to register oci collector: %v", err)
+			logger.Fatalf("unable to register oci collector: %v", err)
 		}
 		if opts.enablePrometheus {
 			go func() {

@@ -81,7 +81,7 @@ var filesCmd = &cobra.Command{
 		inmemory := inmemory.NewInmemoryProvider()
 		err = key.RegisterKeyProvider(inmemory, inmemory.Type())
 		if err != nil {
-			logger.Errorf("unable to register key provider: %v", err)
+			logger.Fatalf("unable to register key provider: %v", err)
 		}
 
 		if opts.keyPath != "" && opts.keyID != "" {
@@ -101,14 +101,14 @@ var filesCmd = &cobra.Command{
 		sigstoreAndKeyVerifier := sigstore_verifier.NewSigstoreAndKeyVerifier()
 		err = verifier.RegisterVerifier(sigstoreAndKeyVerifier, sigstoreAndKeyVerifier.Type())
 		if err != nil {
-			logger.Errorf("unable to register key provider: %v", err)
+			logger.Fatalf("unable to register key provider: %v", err)
 		}
 
 		// Register collector
 		fileCollector := file.NewFileCollector(ctx, opts.path, false, time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
 		if err != nil {
-			logger.Errorf("unable to register file collector: %v", err)
+			logger.Fatalf("unable to register file collector: %v", err)
 		}
 
 		// initialize collectsub client
