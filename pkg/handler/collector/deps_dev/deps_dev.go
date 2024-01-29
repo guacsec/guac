@@ -23,10 +23,10 @@ import (
 	"sync"
 	"time"
 
+	pb "deps.dev/api/v3alpha"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
-	pb "github.com/guacsec/guac/pkg/handler/collector/deps_dev/internal"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
