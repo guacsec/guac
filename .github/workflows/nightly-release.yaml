@@ -43,7 +43,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
 
       - name: Get GitHub App token
-        uses: actions/create-github-app-token@c4fa18d55c5d49e6a2793e351ea4938322c61072 # v1.6.4
+        uses: actions/create-github-app-token@86576b355dd19da0519e0bdb63d8edb5bcf76a25 # v1.7.0
         id: app-token
         with:
           app_id: ${{ secrets.GH_APP_ID }}
