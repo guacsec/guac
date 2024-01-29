@@ -55,4 +55,6 @@ type MetricCollector interface {
 	UnregisterHistogram(ctx context.Context, name string, labels ...string) error
 	// UnregisterGauge unregisters the gauge metric with the given name and labels.
 	UnregisterGauge(ctx context.Context, name string, labels ...string) error
+	// MeasureGraphQLResponseDuration returns a http.Handler that measures the response duration of the given handler.
+	MeasureGraphQLResponseDuration(next http.Handler) http.Handler
 }

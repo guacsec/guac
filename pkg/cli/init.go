@@ -72,15 +72,15 @@ func InitConfig() {
 }
 
 // SetupPrometheus sets up the prometheus server
-func SetupPrometheus(ctx context.Context, logger *zap.SugaredLogger, name string) error {
+func SetupPrometheus(ctx context.Context, logger *zap.SugaredLogger, name string) (metrics.MetricCollector, error) {
 	if name == "" {
-		return errors.New("name cannot be empty")
+		return nil, errors.New("name cannot be empty")
 	}
 	m := metrics.FromContext(ctx, name)
 	enablePrometheus := viper.GetBool("enable-prometheus")
 	prometheusPort := viper.GetInt("prometheus-addr")
 	if !enablePrometheus {
-		return nil
+		return nil, nil
 	}
 
 	go func() {
@@ -105,5 +105,5 @@ func SetupPrometheus(ctx context.Context, logger *zap.SugaredLogger, name string
 			logger.Errorf("Error shutting down server: %v", err)
 		}
 	}()
-	return nil
+	return m, nil
 }
