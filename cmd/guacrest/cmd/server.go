@@ -63,7 +63,7 @@ func startServer() {
 		} else {
 			err = server.ListenAndServe()
 		}
-		if err != nil {
+		if err != nil && err != http.ErrServerClosed {
 			logger.Warnf("Server finished with error: %s", err)
 		}
 	}()
