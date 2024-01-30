@@ -62,26 +62,15 @@ func (d *DSSEProcessor) Unpack(i *processor.Document) ([]*processor.Document, er
 		return nil, err
 	}
 
-	var doc *processor.Document
 	decodedPayload, err := base64.StdEncoding.DecodeString(envelope.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode payload: %w", err)
 	}
-	switch pt := envelope.PayloadType; pt {
-	case string(dsseITE6):
-		doc = &processor.Document{
-			Blob:              decodedPayload,
-			Type:              processor.DocumentITE6Generic,
-			Format:            processor.FormatJSON,
-			SourceInformation: i.SourceInformation,
-		}
-	default:
-		doc = &processor.Document{
-			Blob:              decodedPayload,
-			Type:              processor.DocumentUnknown,
-			Format:            processor.FormatUnknown,
-			SourceInformation: i.SourceInformation,
-		}
+	doc := &processor.Document{
+		Blob:              decodedPayload,
+		Type:              processor.DocumentUnknown,
+		Format:            processor.FormatUnknown,
+		SourceInformation: i.SourceInformation,
 	}
 
 	return []*processor.Document{doc}, nil
