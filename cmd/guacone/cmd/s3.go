@@ -112,8 +112,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 		})
 
 		if err := collector.RegisterDocumentCollector(s3Collector, s3.S3CollectorType); err != nil {
-			logger.Errorf("unable to register s3 collector: %v\n", err)
-			os.Exit(1)
+			logger.Fatalf("unable to register s3 collector: %v\n", err)
 		}
 
 		csubClient, err := csub_client.NewClient(s3Opts.csubClientOptions)

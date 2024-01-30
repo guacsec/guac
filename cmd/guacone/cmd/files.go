@@ -87,13 +87,11 @@ var filesCmd = &cobra.Command{
 		if opts.keyPath != "" && opts.keyID != "" {
 			keyRaw, err := os.ReadFile(opts.keyPath)
 			if err != nil {
-				logger.Errorf("error: %v", err)
-				os.Exit(1)
+				logger.Fatalf("error: %v", err)
 			}
 			err = key.Store(ctx, opts.keyID, keyRaw, inmemory.Type())
 			if err != nil {
-				logger.Errorf("error: %v", err)
-				os.Exit(1)
+				logger.Fatalf("error: %v", err)
 			}
 		}
 

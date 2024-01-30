@@ -104,15 +104,14 @@ func initializeNATsandCertifier(ctx context.Context, opts options) {
 		// TODO: pass in credentials file for NATS secure login
 		jetStream := emitter.NewJetStream(opts.pubsubAddr, "", "")
 		if err := jetStream.JetStreamInit(ctx); err != nil {
-			logger.Errorf("jetStream initialization failed with error: %v", err)
-			os.Exit(1)
+			logger.Fatalf("jetStream initialization failed with error: %v", err)
 		}
 		defer jetStream.Close()
 	}
 
 	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)
 	if err != nil {
-		logger.Errorf("unable to connect to blog store: %v", err)
+		logger.Fatalf("unable to connect to blog store: %v", err)
 	}
 
 	pubsub := emitter.NewEmitterPubSub(ctx, opts.pubsubAddr)
@@ -136,8 +135,7 @@ func initializeNATsandCertifier(ctx context.Context, opts options) {
 	emit := func(d *processor.Document) error {
 		err = certifierPubFunc(d)
 		if err != nil {
-			logger.Errorf("error publishing document from collector: %v", err)
-			os.Exit(1)
+			logger.Fatalf("error publishing document from collector: %v", err)
 		}
 		return nil
 	}

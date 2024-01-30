@@ -68,7 +68,6 @@ func ingest(cmd *cobra.Command, args []string) {
 		jetStream := emitter.NewJetStream(opts.pubsubAddr, "", "")
 		if err := jetStream.JetStreamInit(ctx); err != nil {
 			logger.Fatalf("jetStream initialization failed with error: %v", err)
-			os.Exit(1)
 		}
 		defer jetStream.Close()
 	}

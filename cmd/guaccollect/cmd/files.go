@@ -146,8 +146,7 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 	emit := func(d *processor.Document) error {
 		err = collectorPubFunc(d)
 		if err != nil {
-			logger.Errorf("error publishing document from collector: %v", err)
-			os.Exit(1)
+			logger.Fatalf("error publishing document from collector: %v", err)
 		}
 		return nil
 	}
