@@ -65,7 +65,7 @@ var ociCmd = &cobra.Command{
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, false, 10*time.Minute)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
-			logger.Errorf("unable to register oci collector: %v", err)
+			logger.Fatalf("unable to register oci collector: %v", err)
 		}
 
 		// initialize collectsub client

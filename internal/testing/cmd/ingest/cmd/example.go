@@ -61,8 +61,7 @@ func ingestExample(cmd *cobra.Command, args []string) {
 		// This is a test example, so we will ignore calling out to a collectsub service
 		input, _, err := parser.ParseDocumentTree(ctx, doc)
 		if err != nil {
-			logger.Errorf("unable to parse document: %v", err)
-			os.Exit(1)
+			logger.Fatalf("unable to parse document: %v", err)
 		}
 
 		// TODO(bulldozer): collate inputs

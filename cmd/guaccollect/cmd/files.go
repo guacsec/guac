@@ -84,7 +84,7 @@ you have access to read and write to the respective blob store.`,
 		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, 30*time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
 		if err != nil {
-			logger.Errorf("unable to register file collector: %v", err)
+			logger.Fatalf("unable to register file collector: %v", err)
 		}
 
 		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
@@ -121,8 +121,7 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 		// TODO: pass in credentials file for NATS secure login
 		jetStream := emitter.NewJetStream(pubsubAddr, "", "")
 		if err := jetStream.JetStreamInit(ctx); err != nil {
-			logger.Errorf("jetStream initialization failed with error: %v", err)
-			os.Exit(1)
+			logger.Fatalf("jetStream initialization failed with error: %v", err)
 		}
 		defer jetStream.Close()
 	}
@@ -130,7 +129,7 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 	// initialize blob store
 	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
 	if err != nil {
-		logger.Errorf("unable to connect to blog store: %v", err)
+		logger.Fatalf("unable to connect to blog store: %v", err)
 	}
 
 	// initialize pubsub
@@ -147,8 +146,7 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 	emit := func(d *processor.Document) error {
 		err = collectorPubFunc(d)
 		if err != nil {
-			logger.Errorf("error publishing document from collector: %v", err)
-			os.Exit(1)
+			logger.Fatalf("error publishing document from collector: %v", err)
 		}
 		return nil
 	}

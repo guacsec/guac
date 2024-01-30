@@ -88,7 +88,7 @@ you have access to read and write to the respective blob store.`,
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, 30*time.Second)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
-			logger.Errorf("unable to register oci collector: %v", err)
+			logger.Fatalf("unable to register oci collector: %v", err)
 		}
 
 		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
