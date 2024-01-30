@@ -118,7 +118,6 @@ func NewPrometheus(name string) MetricCollector {
 		Help:      "Histogram of response time for handler in seconds",
 		Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
 	}, []string{"route", "method", "status_code"})
-	p.histograms["http_server_request_duration_seconds"] = responseTimeHistogram
 
 	p.histograms["http_server_request_duration_seconds"] = responseTimeHistogram
 	registerOnce.Do(func() {
@@ -293,8 +292,7 @@ func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler)
 		var graphqlRequest struct {
 			OperationName string `json:"operationName"`
 		}
-		err = json.Unmarshal(bodyCopy, &graphqlRequest)
-		if err != nil {
+		if err := json.Unmarshal(bodyCopy, &graphqlRequest); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
