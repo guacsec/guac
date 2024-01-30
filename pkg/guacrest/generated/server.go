@@ -275,7 +275,7 @@ type BadRequestJSONResponse Error
 
 type InternalServerErrorJSONResponse Error
 
-type PurlListJSONResponse []string
+type PurlListJSONResponse []Purl
 
 type AnalysisDependenciesRequestObject struct {
 	Params AnalysisDependenciesParams

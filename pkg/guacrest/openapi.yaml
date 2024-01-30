@@ -78,6 +78,8 @@ paths:
 
 components:
   schemas:
+    Purl:
+      type: string
     Error:
       type: object
       required:
@@ -94,7 +96,7 @@ components:
           schema:
             type: array
             items:
-              type: string
+              $ref: "#/components/schemas/Purl"
     # intended for code 400, client side error
     BadRequest:
       description: Bad request, such as from invalid or missing parameters

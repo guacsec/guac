@@ -37,7 +37,7 @@ func (s *DefaultServer) HealthCheck(ctx context.Context, request gen.HealthCheck
 
 func (s *DefaultServer) AnalysisDependencies(ctx context.Context, request gen.AnalysisDependenciesRequestObject) (gen.AnalysisDependenciesResponseObject, error) {
 	//return gen.AnalysisDependencies200JSONResponse{
-	//  PurlListJSONResponse: []string{},
+	//  PurlListJSONResponse: []gen.Purl{},
 	//}, nil
 	return nil, fmt.Errorf("Unimplemented")
 }

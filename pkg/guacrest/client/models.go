@@ -14,6 +14,9 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// Purl defines model for Purl.
+type Purl = string
+
 // BadGateway defines model for BadGateway.
 type BadGateway = Error
 
@@ -24,7 +27,7 @@ type BadRequest = Error
 type InternalServerError = Error
 
 // PurlList defines model for PurlList.
-type PurlList = []string
+type PurlList = []Purl
 
 // AnalysisDependenciesParams defines parameters for AnalysisDependencies.
 type AnalysisDependenciesParams struct {

@@ -54,7 +54,7 @@ func startServer() {
 		proto = "https"
 	}
 
-	logger.Infof("Connect to the server at %s://localhost:%d/", proto, flags.restAPIServerPort)
+	logger.Infof("Connect to the server at %s://0.0.0.0:%d/", proto, flags.restAPIServerPort)
 	logger.Info("Starting Server")
 	go func() {
 		var err error
