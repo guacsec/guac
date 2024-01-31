@@ -64,7 +64,7 @@ func startServer() {
 			err = server.ListenAndServe()
 		}
 		if err != nil && err != http.ErrServerClosed {
-			logger.Warnf("Server finished with error: %s", err)
+			logger.Errorf("Server finished with error: %s", err)
 		}
 	}()
 
@@ -82,7 +82,7 @@ func startServer() {
 	select {
 	case <-done:
 	case <-time.After(5 * time.Second):
-		logger.Warnf("forcibly shutting down REST API Server")
+		logger.Error("forcibly shutting down REST API Server")
 		cf()
 		server.Close()
 	}
@@ -98,20 +98,17 @@ func getGraphqlServerClientOrExit(ctx context.Context) graphql.Client {
 	// expected here
 	gqlBaseAddr, ok := strings.CutSuffix(flags.gqlServerAddress, "query")
 	if !ok {
-		logger.Warnf("Unexpected GraphQL server address. URL does not end in %q", "query")
-		os.Exit(1)
+		logger.Fatalf("Unexpected GraphQL server address. URL does not end in %q", "query")
 	}
 
 	gqlHealthzEndpoint := fmt.Sprintf("%s/healthz", gqlBaseAddr)
 	healthResponse, err := httpClient.Get(gqlHealthzEndpoint)
 	if err != nil {
-		logger.Warnf("GraphQL server health check failed: %s", err)
-		os.Exit(1)
+		logger.Fatalf("GraphQL server health check failed: %s", err)
 	}
 	if code := healthResponse.StatusCode; code != 200 {
-		logger.Warnf("GraphQL server health check endpoint %s returned non-200 code: %d",
+		logger.Fatalf("GraphQL server health check endpoint %s returned non-200 code: %d",
 			gqlHealthzEndpoint, code)
-		os.Exit(1)
 	}
 
 	logger.Info("Successfully connected to Graphql Server")
