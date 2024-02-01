@@ -17,7 +17,7 @@
 
 # Defines the GraphQL operations to ingest a HasMetadata into GUAC
 
-mutation HasMetadataPkg(
+mutation IngestHasMetadataPkg(
   $pkg: PkgInputSpec!
   $pkgMatchType: MatchFlags!
   $hasMetadata: HasMetadataInputSpec!
@@ -29,7 +29,7 @@ mutation HasMetadataPkg(
   )
 }
 
-mutation HasMetadataSrc(
+mutation IngestHasMetadataSrc(
   $source: SourceInputSpec!
   $hasMetadata: HasMetadataInputSpec!
 ) {
@@ -40,7 +40,7 @@ mutation HasMetadataSrc(
   )
 }
 
-mutation HasMetadataArtifact(
+mutation IngestHasMetadataArtifact(
   $artifact: ArtifactInputSpec!
   $hasMetadata: HasMetadataInputSpec!
 ) {
@@ -53,7 +53,7 @@ mutation HasMetadataArtifact(
 
 # Defines the GraphQL operations to bulk ingest a HasMetadata into GUAC
 
-mutation HasMetadataPkgs(
+mutation IngestHasMetadataPkgs(
   $pkgs: [PkgInputSpec!]!
   $pkgMatchType: MatchFlags!
   $hasMetadataList: [HasMetadataInputSpec!]!
@@ -65,7 +65,7 @@ mutation HasMetadataPkgs(
   )
 }
 
-mutation HasMetadataSrcs(
+mutation IngestHasMetadataSrcs(
   $sources: [SourceInputSpec!]!
   $hasMetadataList: [HasMetadataInputSpec!]!
 ) {
@@ -76,7 +76,7 @@ mutation HasMetadataSrcs(
   )
 }
 
-mutation HasMetadataArtifacts(
+mutation IngestHasMetadataArtifacts(
   $artifacts: [ArtifactInputSpec!]!
   $hasMetadataList: [HasMetadataInputSpec!]!
 ) {

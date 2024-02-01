@@ -17,7 +17,7 @@
 
 # Defines the GraphQL operations to ingest occurrence information into GUAC
 
-mutation IsOccurrencePkg(
+mutation IngestIsOccurrencePkg(
   $pkg: PkgInputSpec!
   $artifact: ArtifactInputSpec!
   $occurrence: IsOccurrenceInputSpec!
@@ -29,7 +29,7 @@ mutation IsOccurrencePkg(
   )
 }
 
-mutation IsOccurrenceSrc(
+mutation IngestIsOccurrenceSrc(
   $source: SourceInputSpec!
   $artifact: ArtifactInputSpec!
   $occurrence: IsOccurrenceInputSpec!
@@ -43,7 +43,7 @@ mutation IsOccurrenceSrc(
 
 # Defines the GraphQL operations to bulk ingest occurrences information into GUAC
 
-mutation IsOccurrencesPkg(
+mutation IngestIsOccurrencesPkg(
   $pkgs: [PkgInputSpec!]!
   $artifacts: [ArtifactInputSpec!]!
   $occurrences: [IsOccurrenceInputSpec!]!
@@ -55,7 +55,7 @@ mutation IsOccurrencesPkg(
   )
 }
 
-mutation IsOccurrencesSrc(
+mutation IngestIsOccurrencesSrc(
   $sources: [SourceInputSpec!]!
   $artifacts: [ArtifactInputSpec!]!
   $occurrences: [IsOccurrenceInputSpec!]!

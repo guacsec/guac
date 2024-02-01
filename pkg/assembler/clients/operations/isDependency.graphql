@@ -17,7 +17,7 @@
 
 # Defines the GraphQL operations to ingest dependency information into GUAC
 
-mutation IsDependency(
+mutation IngestIsDependency(
   $pkg: PkgInputSpec!
   $depPkg: PkgInputSpec!
   $depPkgMatchType: MatchFlags!
@@ -33,7 +33,7 @@ mutation IsDependency(
 
 # Defines the GraphQL operations to bulk ingest dependencies information into GUAC
 
-mutation IsDependencies(
+mutation IngestIsDependencies(
   $pkgs: [PkgInputSpec!]!
   $depPkgs: [PkgInputSpec!]!
   $depPkgMatchType: MatchFlags!
