@@ -397,6 +397,210 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 	}
 }
 
+func TestAllPkgTreeToPurl(t *testing.T) {
+
+	allPkgTree := func(typ, namespace, name, version, subpath string, qualifiers map[string]string) *model.AllPkgTree {
+		var tQualifiers []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier
+		for k, v := range qualifiers {
+			tQualifiers = append(tQualifiers, model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier{
+				Key:   k,
+				Value: v,
+			})
+		}
+
+		tVersions := []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion{{
+			Version:    version,
+			Subpath:    subpath,
+			Qualifiers: tQualifiers,
+		}}
+
+		tNames := []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName{{
+			Name:     name,
+			Versions: tVersions,
+		}}
+
+		tNamespaces := []model.AllPkgTreeNamespacesPackageNamespace{{
+			Namespace: namespace,
+			Names:     tNames,
+		}}
+
+		return &model.AllPkgTree{
+			Type:       typ,
+			Namespaces: tNamespaces,
+		}
+	}
+
+	testCases := []struct {
+		expectedPurlUri string
+		input           *model.AllPkgTree
+	}{
+		{
+			// alpine
+			expectedPurlUri: "pkg:alpm/arch/pacman@6.0.1-1?arch=x86_64",
+			input: allPkgTree("alpm", "arch", "pacman", "6.0.1-1", "", map[string]string{
+				"arch": "x86_64",
+			}),
+		}, {
+			expectedPurlUri: "pkg:apk/alpine/curl@7.83.0-r0?arch=x86",
+			input: allPkgTree("apk", "alpine", "curl", "7.83.0-r0", "", map[string]string{
+				"arch": "x86",
+			}),
+		}, {
+			expectedPurlUri: "pkg:bitbucket/birkenfeld/pygments-main@244fd47e07d1014f0aed9c",
+			input:           allPkgTree("bitbucket", "birkenfeld", "pygments-main", "244fd47e07d1014f0aed9c", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:cocoapods/ShareKit@2.0#Twitter",
+			input:           allPkgTree("cocoapods", "", "ShareKit", "2.0", "Twitter", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:cargo/rand@0.7.2",
+			input:           allPkgTree("cargo", "", "rand", "0.7.2", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:composer/laravel/laravel@5.5.0",
+			input:           allPkgTree("composer", "laravel", "laravel", "5.5.0", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:conan/openssl.org/openssl@3.0.3?channel=stable&user=bincrafters",
+			input: allPkgTree("conan", "openssl.org", "openssl", "3.0.3", "", map[string]string{
+				"user":    "bincrafters",
+				"channel": "stable",
+			}),
+		}, {
+			expectedPurlUri: "pkg:conda/absl-py@0.4.1?build=py36h06a4308_0&channel=main&subdir=linux-64&type=tar.bz2",
+			input: allPkgTree("conda", "", "absl-py", "0.4.1", "", map[string]string{
+				"build":   "py36h06a4308_0",
+				"channel": "main",
+				"subdir":  "linux-64",
+				"type":    "tar.bz2",
+			}),
+		}, {
+			expectedPurlUri: "pkg:cran/A3@1.0.0",
+			input:           allPkgTree("cran", "", "A3", "1.0.0", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:deb/debian/dpkg@1.19.0.4?arch=amd64&distro=stretch",
+			input: allPkgTree("deb", "debian", "dpkg", "1.19.0.4", "", map[string]string{
+				"arch":   "amd64",
+				"distro": "stretch",
+			}),
+		}, {
+			// The following are for docker PURLs
+			expectedPurlUri: "pkg:docker/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fcustomer",
+			input:           allPkgTree("docker", "gcr.io/customer", "dockerimage", "sha256:244fd47e07d10", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:docker/debian@dc437cc87d10?repository_url=smartentry",
+			input:           allPkgTree("docker", "smartentry", "debian", "dc437cc87d10", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:docker/cassandra@latest",
+			input:           allPkgTree("docker", "", "cassandra", "latest", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:gem/ruby-advisory-db-check@0.12.4",
+			input:           allPkgTree("gem", "", "ruby-advisory-db-check", "0.12.4", "", map[string]string{}),
+		}, {
+			// TODO (Issue #635): url path escapes here? Will this be an issue when searching via purl in osv or deps.dev?
+			expectedPurlUri: "pkg:generic/openssl@1.1.10g?checksum=sha256%3Ade4d501267da&download_url=https%3A%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz",
+			input: allPkgTree("generic", "", "openssl", "1.1.10g", "", map[string]string{
+				"download_url": "https://openssl.org/source/openssl-1.1.0g.tar.gz",
+				"checksum":     "sha256:de4d501267da",
+			}),
+		}, {
+			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git%2Bhttps%3A%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl%40cc55108da32",
+			input: allPkgTree("generic", "", "bitwarderl", "", "", map[string]string{
+				"vcs_url": "git+https://git.fsfe.org/dxtr/bitwarderl@cc55108da32",
+			}),
+		}, {
+			expectedPurlUri: "pkg:github/package-url/purl-spec@244fd47e07d1004#everybody/loves/dogs",
+			input:           allPkgTree("github", "package-url", "purl-spec", "244fd47e07d1004", "everybody/loves/dogs", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:golang/github.com/gorilla/context@234fd47e07d1004f0aed9c#api",
+			input:           allPkgTree("golang", "github.com/gorilla", "context", "234fd47e07d1004f0aed9c", "api", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:hackage/3d-graphics-examples@0.0.0.2",
+			input:           allPkgTree("hackage", "", "3d-graphics-examples", "0.0.0.2", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https%3A%2F%2Fmyrepo.example.com",
+			input: allPkgTree("hex", "", "bar", "1.2.3", "", map[string]string{
+				"repository_url": "https://myrepo.example.com",
+			}),
+		}, {
+			expectedPurlUri: "pkg:hex/jason@1.1.2",
+			input:           allPkgTree("hex", "", "jason", "1.1.2", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:huggingface/distilbert-base-uncased@043235d6088ecd3dd5fb5ca3592b6913fd516027",
+			input:           allPkgTree("huggingface", "", "distilbert-base-uncased", "043235d6088ecd3dd5fb5ca3592b6913fd516027", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?classifier=dist&type=zip",
+			input: allPkgTree("maven", "org.apache.xmlgraphics", "batik-anim", "1.9.1", "", map[string]string{
+				"type":       "zip",
+				"classifier": "dist",
+			}),
+		}, {
+			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https%3A%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
+			input: allPkgTree("mlflow", "", "trafficsigns", "10", "", map[string]string{
+				"model_uuid":     "36233173b22f4c89b451f1228d700d49",
+				"run_id":         "410a3121-2709-4f88-98dd-dba0ef056b0a",
+				"repository_url": "https://adb-5245952564735461.0.azuredatabricks.net/api/2.0/mlflow",
+			}),
+		}, {
+			expectedPurlUri: "pkg:npm/foobar@12.3.1",
+			input:           allPkgTree("npm", "", "foobar", "12.3.1", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:npm/%40angular/animation@12.3.1",
+			input:           allPkgTree("npm", "@angular", "animation", "12.3.1", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:nuget/EnterpriseLibrary.Common@6.0.1304",
+			input:           allPkgTree("nuget", "", "EnterpriseLibrary.Common", "6.0.1304", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:qpkg/blackberry/com.qnx.sdp@7.0.0.SGA201702151847",
+			input:           allPkgTree("qpkg", "blackberry", "com.qnx.sdp", "7.0.0.SGA201702151847", "", map[string]string{}),
+		}, {
+			// Special OCI case
+			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?arch=amd64&repository_url=docker.io%2Flibrary&tag=latest",
+			input: allPkgTree("oci", "docker.io/library", "debian", "sha256:244fd47e07d10", "", map[string]string{
+				"arch": "amd64",
+				"tag":  "latest",
+			}),
+		}, {
+			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
+			input: allPkgTree("oci", "ghcr.io", "debian", "sha256:244fd47e07d10", "", map[string]string{
+				"tag": "bullseye",
+			}),
+		}, {
+			expectedPurlUri: "pkg:oci/hello-wasm@sha256%3A244fd47e07d10?tag=v1",
+			input: allPkgTree("oci", "", "hello-wasm", "sha256:244fd47e07d10", "", map[string]string{
+				"tag": "v1",
+			}),
+		}, {
+			expectedPurlUri: "pkg:pub/characters@1.2.0",
+			input:           allPkgTree("pub", "", "characters", "1.2.0", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:pypi/django-allauth@12.23",
+			input:           allPkgTree("pypi", "", "django-allauth", "12.23", "", map[string]string{}),
+		}, {
+			expectedPurlUri: "pkg:rpm/fedora/curl@7.50.3-1.fc25?arch=i386&distro=fedora-25",
+			input: allPkgTree("rpm", "fedora", "curl", "7.50.3-1.fc25", "", map[string]string{
+				"arch":   "i386",
+				"distro": "fedora-25",
+			}),
+		}, {
+			expectedPurlUri: "pkg:swid/Acme/example.com/Enterprise%2BServer@1.0.0?tag_id=75b8c285-fa7b-485b-b199-4745e3004d0d",
+			input: allPkgTree("swid", "Acme/example.com", "Enterprise+Server", "1.0.0", "", map[string]string{
+				"tag_id": "75b8c285-fa7b-485b-b199-4745e3004d0d",
+			}),
+		}, {
+			expectedPurlUri: "pkg:swift/github.com/RxSwiftCommunity/RxFlow@2.12.4",
+			input:           allPkgTree("swift", "github.com/RxSwiftCommunity", "RxFlow", "2.12.4", "", map[string]string{}),
+		},
+	}
+	for _, tt := range testCases {
+		t.Run(fmt.Sprintf("processing %v", tt.expectedPurlUri), func(t *testing.T) {
+			got := AllPkgTreeToPurl(tt.input)
+			if got != tt.expectedPurlUri {
+				t.Errorf("purl mismatch wanted: %s, got: %s", tt.expectedPurlUri, got)
+				return
+			}
+		})
+	}
+
+}
+
 func TestPkgToPurl(t *testing.T) {
 	testCases := []struct {
 		expectedPurlUri string
