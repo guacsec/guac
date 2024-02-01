@@ -37,7 +37,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/sync/errgroup"
 )
 
 type fileOptions struct {
@@ -115,19 +114,15 @@ var filesCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		files, filesCtx := errgroup.WithContext(ctx)
-
 		totalNum := 0
 		totalSuccess := 0
 		var filesWithErrors []string
 
 		gotErr := false
 
-		files.SetLimit(1)
-
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(filesCtx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
 
 			if err != nil {
 				gotErr = true
@@ -148,11 +143,6 @@ var filesCmd = &cobra.Command{
 		}
 
 		if err := collector.Collect(ctx, emit, errHandler); err != nil {
-			logger.Fatal(err)
-		}
-
-		err = files.Wait()
-		if err != nil {
 			logger.Fatal(err)
 		}
 
