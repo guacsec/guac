@@ -264,12 +264,12 @@ func ingestLicense(ctx context.Context, client graphql.Client, l *model.LicenseI
 }
 
 func ingestCertifyScorecard(ctx context.Context, client graphql.Client, v assembler.CertifyScorecardIngest) error {
-	_, err := model.CertifyScorecard(ctx, client, *v.Source, *v.Scorecard)
+	_, err := model.IngestCertifyScorecard(ctx, client, *v.Source, *v.Scorecard)
 	return err
 }
 
 func ingestIsDependency(ctx context.Context, client graphql.Client, v assembler.IsDependencyIngest) (*string, error) {
-	if response, err := model.IsDependency(ctx, client, *v.Pkg, *v.DepPkg, v.DepPkgMatchFlag, *v.IsDependency); err != nil {
+	if response, err := model.IngestIsDependency(ctx, client, *v.Pkg, *v.DepPkg, v.DepPkgMatchFlag, *v.IsDependency); err != nil {
 		return nil, err
 	} else {
 		return &response.IngestDependency, nil
@@ -285,13 +285,13 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, v assembler.
 	}
 
 	if v.Src != nil {
-		if result, err := model.IsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurrence); err != nil {
+		if result, err := model.IngestIsOccurrenceSrc(ctx, client, *v.Src, *v.Artifact, *v.IsOccurrence); err != nil {
 			return nil, err
 		} else {
 			return &result.IngestOccurrence, nil
 		}
 	}
-	if result, err := model.IsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurrence); err != nil {
+	if result, err := model.IngestIsOccurrencePkg(ctx, client, *v.Pkg, *v.Artifact, *v.IsOccurrence); err != nil {
 		return nil, err
 	} else {
 		return &result.IngestOccurrence, err
@@ -299,12 +299,12 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, v assembler.
 }
 
 func ingestHasSlsa(ctx context.Context, client graphql.Client, v assembler.HasSlsaIngest) error {
-	_, err := model.SLSAForArtifact(ctx, client, *v.Artifact, v.Materials, *v.Builder, *v.HasSlsa)
+	_, err := model.IngestSLSAForArtifact(ctx, client, *v.Artifact, v.Materials, *v.Builder, *v.HasSlsa)
 	return err
 }
 
 func ingestCertifyVuln(ctx context.Context, client graphql.Client, cv assembler.CertifyVulnIngest) error {
-	_, err := model.CertifyVulnPkg(ctx, client, *cv.Pkg, *cv.Vulnerability, *cv.VulnData)
+	_, err := model.IngestCertifyVulnPkg(ctx, client, *cv.Pkg, *cv.Vulnerability, *cv.VulnData)
 	return err
 }
 
@@ -331,14 +331,14 @@ func ingestCertifyBad(ctx context.Context, client graphql.Client, bad assembler.
 	}
 
 	if bad.Pkg != nil {
-		_, err := model.CertifyBadPkg(ctx, client, *bad.Pkg, bad.PkgMatchFlag, *bad.CertifyBad)
+		_, err := model.IngestCertifyBadPkg(ctx, client, *bad.Pkg, bad.PkgMatchFlag, *bad.CertifyBad)
 		return err
 	}
 	if bad.Src != nil {
-		_, err := model.CertifyBadSrc(ctx, client, *bad.Src, *bad.CertifyBad)
+		_, err := model.IngestCertifyBadSrc(ctx, client, *bad.Src, *bad.CertifyBad)
 		return err
 	}
-	_, err := model.CertifyBadArtifact(ctx, client, *bad.Artifact, *bad.CertifyBad)
+	_, err := model.IngestCertifyBadArtifact(ctx, client, *bad.Artifact, *bad.CertifyBad)
 	return err
 }
 
@@ -348,14 +348,14 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, good assemble
 	}
 
 	if good.Pkg != nil {
-		_, err := model.CertifyGoodPkg(ctx, client, *good.Pkg, good.PkgMatchFlag, *good.CertifyGood)
+		_, err := model.IngestCertifyGoodPkg(ctx, client, *good.Pkg, good.PkgMatchFlag, *good.CertifyGood)
 		return err
 	}
 	if good.Src != nil {
-		_, err := model.CertifyGoodSrc(ctx, client, *good.Src, *good.CertifyGood)
+		_, err := model.IngestCertifyGoodSrc(ctx, client, *good.Src, *good.CertifyGood)
 		return err
 	}
-	_, err := model.CertifyGoodArtifact(ctx, client, *good.Artifact, *good.CertifyGood)
+	_, err := model.IngestCertifyGoodArtifact(ctx, client, *good.Artifact, *good.CertifyGood)
 	return err
 }
 
@@ -365,14 +365,14 @@ func ingestPointOfContact(ctx context.Context, client graphql.Client, poc assemb
 	}
 
 	if poc.Pkg != nil {
-		_, err := model.PointOfContactPkg(ctx, client, *poc.Pkg, poc.PkgMatchFlag, *poc.PointOfContact)
+		_, err := model.IngestPointOfContactPkg(ctx, client, *poc.Pkg, poc.PkgMatchFlag, *poc.PointOfContact)
 		return err
 	}
 	if poc.Src != nil {
-		_, err := model.PointOfContactSrc(ctx, client, *poc.Src, *poc.PointOfContact)
+		_, err := model.IngestPointOfContactSrc(ctx, client, *poc.Src, *poc.PointOfContact)
 		return err
 	}
-	_, err := model.PointOfContactArtifact(ctx, client, *poc.Artifact, *poc.PointOfContact)
+	_, err := model.IngestPointOfContactArtifact(ctx, client, *poc.Artifact, *poc.PointOfContact)
 	return err
 }
 
@@ -382,14 +382,14 @@ func ingestHasMetadata(ctx context.Context, client graphql.Client, hm assembler.
 	}
 
 	if hm.Pkg != nil {
-		_, err := model.HasMetadataPkg(ctx, client, *hm.Pkg, hm.PkgMatchFlag, *hm.HasMetadata)
+		_, err := model.IngestHasMetadataPkg(ctx, client, *hm.Pkg, hm.PkgMatchFlag, *hm.HasMetadata)
 		return err
 	}
 	if hm.Src != nil {
-		_, err := model.HasMetadataSrc(ctx, client, *hm.Src, *hm.HasMetadata)
+		_, err := model.IngestHasMetadataSrc(ctx, client, *hm.Src, *hm.HasMetadata)
 		return err
 	}
-	_, err := model.HasMetadataArtifact(ctx, client, *hm.Artifact, *hm.HasMetadata)
+	_, err := model.IngestHasMetadataArtifact(ctx, client, *hm.Artifact, *hm.HasMetadata)
 	return err
 }
 
@@ -402,15 +402,15 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasS
 	}
 
 	if hb.Pkg != nil {
-		_, err := model.HasSBOMPkg(ctx, client, *hb.Pkg, *hb.HasSBOM, *hb.Includes)
+		_, err := model.IngestHasSBOMPkg(ctx, client, *hb.Pkg, *hb.HasSBOM, *hb.Includes)
 		return err
 	}
-	_, err := model.HasSBOMArtifact(ctx, client, *hb.Artifact, *hb.HasSBOM, *hb.Includes)
+	_, err := model.IngestHasSBOMArtifact(ctx, client, *hb.Artifact, *hb.HasSBOM, *hb.Includes)
 	return err
 }
 
 func ingestVulnMetadata(ctx context.Context, client graphql.Client, vi assembler.VulnMetadataIngest) error {
-	_, err := model.VulnHasMetadata(ctx, client, *vi.Vulnerability, *vi.VulnMetadata)
+	_, err := model.IngestVulnHasMetadata(ctx, client, *vi.Vulnerability, *vi.VulnMetadata)
 	if err != nil {
 		return err
 	}
@@ -427,14 +427,14 @@ func ingestVex(ctx context.Context, client graphql.Client, vi assembler.VexInges
 	}
 
 	if vi.Pkg != nil {
-		_, err := model.CertifyVexPkg(ctx, client, *vi.Pkg, *vi.Vulnerability, *vi.VexData)
+		_, err := model.IngestCertifyVexPkg(ctx, client, *vi.Pkg, *vi.Vulnerability, *vi.VexData)
 		if err != nil {
 			return err
 		}
 	}
 
 	if vi.Artifact != nil {
-		_, err := model.CertifyVexArtifact(ctx, client, *vi.Artifact, *vi.Vulnerability, *vi.VexData)
+		_, err := model.IngestCertifyVexArtifact(ctx, client, *vi.Artifact, *vi.Vulnerability, *vi.VexData)
 		if err != nil {
 			return err
 		}
@@ -473,10 +473,10 @@ func ingestCertifyLegal(ctx context.Context, client graphql.Client, v assembler.
 	}
 
 	if v.Src != nil {
-		_, err := model.CertifyLegalSrc(ctx, client, *v.Src, v.Declared, v.Discovered, *v.CertifyLegal)
+		_, err := model.IngestCertifyLegalSrc(ctx, client, *v.Src, v.Declared, v.Discovered, *v.CertifyLegal)
 		return err
 	}
-	_, err := model.CertifyLegalPkg(ctx, client, *v.Pkg, v.Declared, v.Discovered, *v.CertifyLegal)
+	_, err := model.IngestCertifyLegalPkg(ctx, client, *v.Pkg, v.Declared, v.Discovered, *v.CertifyLegal)
 	return err
 }
 

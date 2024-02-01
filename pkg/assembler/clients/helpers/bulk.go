@@ -270,7 +270,7 @@ func ingestCertifyVulns(ctx context.Context, client graphql.Client, cv []assembl
 		scanMetadataList = append(scanMetadataList, *ingest.VulnData)
 	}
 	if len(cv) > 0 {
-		_, err := model.CertifyVulnPkgs(ctx, client, pkgs, vulnerabilities, scanMetadataList)
+		_, err := model.IngestCertifyVulnPkgs(ctx, client, pkgs, vulnerabilities, scanMetadataList)
 		if err != nil {
 			return fmt.Errorf("CertifyVulnPkgs failed with error: %w", err)
 		}
@@ -305,13 +305,13 @@ func ingestVEXs(ctx context.Context, client graphql.Client, vi []assembler.VexIn
 		}
 	}
 	if len(artifacts) > 0 {
-		_, err := model.CertifyVexArtifacts(ctx, client, artifacts, artVulns, artVEXs)
+		_, err := model.IngestCertifyVexArtifacts(ctx, client, artifacts, artVulns, artVEXs)
 		if err != nil {
 			return fmt.Errorf("CertifyVexArtifacts failed with error: %w", err)
 		}
 	}
 	if len(pkgs) > 0 {
-		_, err := model.CertifyVexPkgs(ctx, client, pkgs, pkgVulns, pkgVEXs)
+		_, err := model.IngestCertifyVexPkgs(ctx, client, pkgs, pkgVulns, pkgVEXs)
 		if err != nil {
 			return fmt.Errorf("CertifyVexPkgs failed with error: %w", err)
 		}
@@ -327,7 +327,7 @@ func ingestVulnMetadatas(ctx context.Context, client graphql.Client, vm []assemb
 		vulnMetadataList = append(vulnMetadataList, *ingest.VulnMetadata)
 	}
 	if len(vm) > 0 {
-		_, err := model.BulkVulnHasMetadata(ctx, client, vulnerabilities, vulnMetadataList)
+		_, err := model.IngestBulkVulnHasMetadata(ctx, client, vulnerabilities, vulnMetadataList)
 		if err != nil {
 			return fmt.Errorf("VulnHasMetadatas failed with error: %w", err)
 		}
@@ -372,13 +372,13 @@ func ingestHasSourceAts(ctx context.Context, client graphql.Client, hs []assembl
 		}
 	}
 	if len(pkgVersions) > 0 {
-		_, err := model.IngestHasSourceAts(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionSources, pkgVersionHasSourceAt)
+		_, err := model.IngestHasSourcesAt(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionSources, pkgVersionHasSourceAt)
 		if err != nil {
 			return fmt.Errorf("IngestHasSourceAts - specific version failed with error: %w", err)
 		}
 	}
 	if len(pkgNames) > 0 {
-		_, err := model.IngestHasSourceAts(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameSources, pkgNameHasSourceAt)
+		_, err := model.IngestHasSourcesAt(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameSources, pkgNameHasSourceAt)
 		if err != nil {
 			return fmt.Errorf("IngestHasSourceAts - all versions failed with error: %w", err)
 		}
@@ -398,7 +398,7 @@ func ingestHasSLSAs(ctx context.Context, client graphql.Client, v []assembler.Ha
 		materialList = append(materialList, ingest.Materials)
 	}
 	if len(v) > 0 {
-		_, err := model.SLSAForArtifacts(ctx, client, subjects, materialList, builders, slsaAttestations)
+		_, err := model.IngestSLSAForArtifacts(ctx, client, subjects, materialList, builders, slsaAttestations)
 		if err != nil {
 			return fmt.Errorf("SLSAForArtifacts failed with error: %w", err)
 		}
@@ -414,7 +414,7 @@ func ingestCertifyScorecards(ctx context.Context, client graphql.Client, v []ass
 		scorecards = append(scorecards, *ingest.Scorecard)
 	}
 	if len(v) > 0 {
-		_, err := model.CertifyScorecards(ctx, client, srcs, scorecards)
+		_, err := model.IngestCertifyScorecards(ctx, client, srcs, scorecards)
 		if err != nil {
 			return fmt.Errorf("certifyScorecards failed with error: %w", err)
 		}
@@ -448,14 +448,14 @@ func ingestIsDependencies(ctx context.Context, client graphql.Client, v []assemb
 
 	var isDependenciesIDs []string
 	if len(depToVersion.pkgs) > 0 {
-		isDependencies, err := model.IsDependencies(ctx, client, depToVersion.pkgs, depToVersion.depPkgs, depToVersion.depPkgMatchFlag, depToVersion.dependencies)
+		isDependencies, err := model.IngestIsDependencies(ctx, client, depToVersion.pkgs, depToVersion.depPkgs, depToVersion.depPkgMatchFlag, depToVersion.dependencies)
 		if err != nil {
 			return nil, fmt.Errorf("isDependencies failed with error: %w", err)
 		}
 		isDependenciesIDs = append(isDependenciesIDs, isDependencies.IngestDependencies...)
 	}
 	if len(depToName.pkgs) > 0 {
-		isDependencies, err := model.IsDependencies(ctx, client, depToName.pkgs, depToName.depPkgs, depToName.depPkgMatchFlag, depToName.dependencies)
+		isDependencies, err := model.IngestIsDependencies(ctx, client, depToName.pkgs, depToName.depPkgs, depToName.depPkgMatchFlag, depToName.dependencies)
 		if err != nil {
 			return nil, fmt.Errorf("isDependencies failed with error: %w", err)
 		}
@@ -527,13 +527,13 @@ func ingestHasSBOMs(ctx context.Context, client graphql.Client, v []assembler.Ha
 		}
 	}
 	if len(artifacts) > 0 {
-		_, err := model.HasSBOMArtifacts(ctx, client, artifacts, artSBOMs, artIncludes)
+		_, err := model.IngestHasSBOMArtifacts(ctx, client, artifacts, artSBOMs, artIncludes)
 		if err != nil {
 			return fmt.Errorf("hasSBOMArtifacts failed with error: %w", err)
 		}
 	}
 	if len(pkgs) > 0 {
-		_, err := model.HasSBOMPkgs(ctx, client, pkgs, pkgSBOMs, pkgIncludes)
+		_, err := model.IngestHasSBOMPkgs(ctx, client, pkgs, pkgSBOMs, pkgIncludes)
 		if err != nil {
 			return fmt.Errorf("hasSBOMPkgs failed with error: %w", err)
 		}
@@ -571,25 +571,25 @@ func ingestPointOfContacts(ctx context.Context, client graphql.Client, poc []ass
 		}
 	}
 	if len(pkgVersions) > 0 {
-		_, err := model.PointOfContactPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionPOC)
+		_, err := model.IngestPointOfContactPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionPOC)
 		if err != nil {
 			return fmt.Errorf("HasMetadataPkgs - specific version failed with error: %w", err)
 		}
 	}
 	if len(pkgNames) > 0 {
-		_, err := model.PointOfContactPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNamePOC)
+		_, err := model.IngestPointOfContactPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNamePOC)
 		if err != nil {
 			return fmt.Errorf("HasMetadataPkgs - all versions failed with error: %w", err)
 		}
 	}
 	if len(sources) > 0 {
-		_, err := model.PointOfContactSrcs(ctx, client, sources, srcPOC)
+		_, err := model.IngestPointOfContactSrcs(ctx, client, sources, srcPOC)
 		if err != nil {
 			return fmt.Errorf("HasMetadataSrcs failed with error: %w", err)
 		}
 	}
 	if len(artifacts) > 0 {
-		_, err := model.PointOfContactArtifacts(ctx, client, artifacts, artPOC)
+		_, err := model.IngestPointOfContactArtifacts(ctx, client, artifacts, artPOC)
 		if err != nil {
 			return fmt.Errorf("HasMetadataArtifacts failed with error: %w", err)
 		}
@@ -627,25 +627,25 @@ func ingestBulkHasMetadata(ctx context.Context, client graphql.Client, v []assem
 		}
 	}
 	if len(pkgVersions) > 0 {
-		_, err := model.HasMetadataPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionHasMetadata)
+		_, err := model.IngestHasMetadataPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionHasMetadata)
 		if err != nil {
 			return fmt.Errorf("HasMetadataPkgs - specific version failed with error: %w", err)
 		}
 	}
 	if len(pkgNames) > 0 {
-		_, err := model.HasMetadataPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameHasMetadata)
+		_, err := model.IngestHasMetadataPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameHasMetadata)
 		if err != nil {
 			return fmt.Errorf("HasMetadataPkgs - all versions failed with error: %w", err)
 		}
 	}
 	if len(sources) > 0 {
-		_, err := model.HasMetadataSrcs(ctx, client, sources, srcHasMetadata)
+		_, err := model.IngestHasMetadataSrcs(ctx, client, sources, srcHasMetadata)
 		if err != nil {
 			return fmt.Errorf("HasMetadataSrcs failed with error: %w", err)
 		}
 	}
 	if len(artifacts) > 0 {
-		_, err := model.HasMetadataArtifacts(ctx, client, artifacts, artHasMetadata)
+		_, err := model.IngestHasMetadataArtifacts(ctx, client, artifacts, artHasMetadata)
 		if err != nil {
 			return fmt.Errorf("HasMetadataArtifacts failed with error: %w", err)
 		}
@@ -683,25 +683,25 @@ func ingestCertifyGoods(ctx context.Context, client graphql.Client, v []assemble
 		}
 	}
 	if len(pkgVersions) > 0 {
-		_, err := model.CertifyGoodPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionCertifyGoods)
+		_, err := model.IngestCertifyGoodPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionCertifyGoods)
 		if err != nil {
 			return fmt.Errorf("CertifyGoodPkgs - specific version failed with error: %w", err)
 		}
 	}
 	if len(pkgNames) > 0 {
-		_, err := model.CertifyGoodPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameCertifyGoods)
+		_, err := model.IngestCertifyGoodPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameCertifyGoods)
 		if err != nil {
 			return fmt.Errorf("CertifyGoodPkgs - all versions failed with error: %w", err)
 		}
 	}
 	if len(sources) > 0 {
-		_, err := model.CertifyGoodSrcs(ctx, client, sources, srcCertifyGoods)
+		_, err := model.IngestCertifyGoodSrcs(ctx, client, sources, srcCertifyGoods)
 		if err != nil {
 			return fmt.Errorf("CertifyGoodSrcs failed with error: %w", err)
 		}
 	}
 	if len(artifacts) > 0 {
-		_, err := model.CertifyGoodArtifacts(ctx, client, artifacts, artCertifyGoods)
+		_, err := model.IngestCertifyGoodArtifacts(ctx, client, artifacts, artCertifyGoods)
 		if err != nil {
 			return fmt.Errorf("CertifyGoodArtifacts failed with error: %w", err)
 		}
@@ -739,25 +739,25 @@ func ingestCertifyBads(ctx context.Context, client graphql.Client, v []assembler
 		}
 	}
 	if len(pkgVersions) > 0 {
-		_, err := model.CertifyBadPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionCertifyBads)
+		_, err := model.IngestCertifyBadPkgs(ctx, client, pkgVersions, model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion}, pkgVersionCertifyBads)
 		if err != nil {
 			return fmt.Errorf("certifyBadPkgs - specific version failed with error: %w", err)
 		}
 	}
 	if len(pkgNames) > 0 {
-		_, err := model.CertifyBadPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameCertifyBads)
+		_, err := model.IngestCertifyBadPkgs(ctx, client, pkgNames, model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions}, pkgNameCertifyBads)
 		if err != nil {
 			return fmt.Errorf("certifyBadPkgs - all versions failed with error: %w", err)
 		}
 	}
 	if len(sources) > 0 {
-		_, err := model.CertifyBadSrcs(ctx, client, sources, srcCertifyBads)
+		_, err := model.IngestCertifyBadSrcs(ctx, client, sources, srcCertifyBads)
 		if err != nil {
 			return fmt.Errorf("CertifyBadSrcs failed with error: %w", err)
 		}
 	}
 	if len(artifacts) > 0 {
-		_, err := model.CertifyBadArtifacts(ctx, client, artifacts, artCertifyBads)
+		_, err := model.IngestCertifyBadArtifacts(ctx, client, artifacts, artCertifyBads)
 		if err != nil {
 			return fmt.Errorf("CertifyBadArtifacts failed with error: %w", err)
 		}
@@ -793,14 +793,14 @@ func ingestIsOccurrences(ctx context.Context, client graphql.Client, v []assembl
 	}
 	var isOccurrencesIDs []string
 	if len(sources) > 0 {
-		isOccurrences, err := model.IsOccurrencesSrc(ctx, client, sources, srcArtifacts, srcOccurrences)
+		isOccurrences, err := model.IngestIsOccurrencesSrc(ctx, client, sources, srcArtifacts, srcOccurrences)
 		if err != nil {
 			return nil, fmt.Errorf("isOccurrencesSrc failed with error: %w", err)
 		}
 		isOccurrencesIDs = append(isOccurrencesIDs, isOccurrences.IngestOccurrences...)
 	}
 	if len(pkgs) > 0 {
-		isOccurrences, err := model.IsOccurrencesPkg(ctx, client, pkgs, pkgArtifacts, pkgOccurrences)
+		isOccurrences, err := model.IngestIsOccurrencesPkg(ctx, client, pkgs, pkgArtifacts, pkgOccurrences)
 		if err != nil {
 			return nil, fmt.Errorf("isOccurrencesPkg failed with error: %w", err)
 		}
@@ -840,13 +840,13 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 		}
 	}
 	if len(sources) > 0 {
-		_, err := model.CertifyLegalSrcs(ctx, client, sources, srcDec, srcDis, srcCL)
+		_, err := model.IngestCertifyLegalSrcs(ctx, client, sources, srcDec, srcDis, srcCL)
 		if err != nil {
 			return fmt.Errorf("certifyLegalSrc failed with error: %w", err)
 		}
 	}
 	if len(pkgs) > 0 {
-		_, err := model.CertifyLegalPkgs(ctx, client, pkgs, pkgDec, pkgDis, pkgCL)
+		_, err := model.IngestCertifyLegalPkgs(ctx, client, pkgs, pkgDec, pkgDis, pkgCL)
 		if err != nil {
 			return fmt.Errorf("certifyLegalPkg failed with error: %w", err)
 		}

@@ -957,7 +957,7 @@ func ingestIsDependency(ctx context.Context, client graphql.Client, graph assemb
 		if err != nil {
 			return fmt.Errorf("error in ingesting dependent package: %s\n", err)
 		}
-		_, err = model.IsDependency(ctx, client, *ingest.Pkg, *ingest.DepPkg, ingest.DepPkgMatchFlag, *ingest.IsDependency)
+		_, err = model.IngestIsDependency(ctx, client, *ingest.Pkg, *ingest.DepPkg, ingest.DepPkgMatchFlag, *ingest.IsDependency)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting isDependency: %s\n", err)
@@ -973,7 +973,7 @@ func ingestHasSLSA(ctx context.Context, client graphql.Client, graph assembler.I
 		if err != nil {
 			return fmt.Errorf("error in ingesting Builder for HasSlsa: %v\n", err)
 		}
-		_, err = model.SLSAForArtifact(ctx, client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
+		_, err = model.IngestSLSAForArtifact(ctx, client, *ingest.Artifact, ingest.Materials, *ingest.Builder, *ingest.HasSlsa)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting HasSlsa: %v\n", err)
@@ -1027,9 +1027,9 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, graph assemb
 		}
 
 		if ingest.Src != nil {
-			_, err = model.IsOccurrenceSrc(ctx, client, *ingest.Src, *ingest.Artifact, *ingest.IsOccurrence)
+			_, err = model.IngestIsOccurrenceSrc(ctx, client, *ingest.Src, *ingest.Artifact, *ingest.IsOccurrence)
 		} else {
-			_, err = model.IsOccurrencePkg(ctx, client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
+			_, err = model.IngestIsOccurrencePkg(ctx, client, *ingest.Pkg, *ingest.Artifact, *ingest.IsOccurrence)
 		}
 
 		if err != nil {
@@ -1047,7 +1047,7 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, graph assembl
 			return fmt.Errorf("error in ingesting Package for CertifyGood: %v\n", err)
 		}
 
-		_, err = model.CertifyGoodPkg(ctx, client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.CertifyGood)
+		_, err = model.IngestCertifyGoodPkg(ctx, client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.CertifyGood)
 
 		if err != nil {
 			return fmt.Errorf("error in ingesting CertifyGood: %v\n", err)
@@ -1120,11 +1120,11 @@ func ingestPointOfContact(ctx context.Context, client graphql.Client, graph asse
 		}
 
 		if ingest.Src != nil {
-			_, err = model.PointOfContactSrc(ctx, client, *ingest.Src, *ingest.PointOfContact)
+			_, err = model.IngestPointOfContactSrc(ctx, client, *ingest.Src, *ingest.PointOfContact)
 		} else if ingest.Pkg != nil {
-			_, err = model.PointOfContactPkg(ctx, client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.PointOfContact)
+			_, err = model.IngestPointOfContactPkg(ctx, client, *ingest.Pkg, ingest.PkgMatchFlag, *ingest.PointOfContact)
 		} else {
-			_, err = model.PointOfContactArtifact(ctx, client, *ingest.Artifact, *ingest.PointOfContact)
+			_, err = model.IngestPointOfContactArtifact(ctx, client, *ingest.Artifact, *ingest.PointOfContact)
 		}
 
 		if err != nil {
