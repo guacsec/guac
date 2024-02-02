@@ -42,6 +42,32 @@ func PurlToPkg(purlUri string) (*model.PkgInputSpec, error) {
 	return purlConvert(p)
 }
 
+// AllPkgTreeToPurl takes one package trie evaluation and converts it into a PURL
+// it will only do this for one PURL, and will ignore other pkg tries in the fragment
+func AllPkgTreeToPurl(v *model.AllPkgTree) string {
+	ns := v.Namespaces[0]
+	nsStr := ns.Namespace
+
+	name := ns.Names[0]
+	nameStr := name.Name
+
+	versionStr := ""
+	subpathStr := ""
+	qualifierStrs := []string{}
+	if len(name.Versions) > 0 {
+		version := v.Namespaces[0].Names[0].Versions[0]
+		versionStr = version.Version
+		subpathStr = version.Subpath
+		for _, v := range version.Qualifiers {
+			qualifierStrs = append(qualifierStrs, v.GetKey())
+			qualifierStrs = append(qualifierStrs, v.GetValue())
+		}
+	}
+
+	purl := PkgToPurl(v.Type, nsStr, nameStr, versionStr, subpathStr, qualifierStrs)
+	return purl
+}
+
 func PkgInputSpecToPurl(currentPkg *model.PkgInputSpec) string {
 	qualifiersMap := map[string]string{}
 	keys := []string{}
