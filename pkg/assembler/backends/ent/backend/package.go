@@ -151,6 +151,7 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 		}
 	}
 
+	// Add in new fields for guacKeys and make them indexable
 	nsID, err := client.PackageNamespace.Create().
 		SetPackageID(pkgID).
 		SetNamespace(valueOrDefault(pkg.Namespace, "")).
