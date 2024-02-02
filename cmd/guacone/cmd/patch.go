@@ -223,6 +223,9 @@ func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string, isPack
 	if isPackageVersion {
 		pkgQualifierFilter := []model.PackageQualifierSpec{}
 		for _, qualifier := range pkgInput.Qualifiers {
+			// to prevent https://github.com/golang/go/discussions/56010
+			qualifier := qualifier
+
 			pkgQualifierFilter = append(pkgQualifierFilter, model.PackageQualifierSpec{
 				Key:   qualifier.Key,
 				Value: &qualifier.Value,
