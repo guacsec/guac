@@ -118,6 +118,8 @@ var queryKnownCmd = &cobra.Command{
 
 			pkgQualifierFilter := []model.PackageQualifierSpec{}
 			for _, qualifier := range pkgInput.Qualifiers {
+				// to prevent https://github.com/golang/go/discussions/56010
+				qualifier := qualifier
 				pkgQualifierFilter = append(pkgQualifierFilter, model.PackageQualifierSpec{
 					Key:   qualifier.Key,
 					Value: &qualifier.Value,
