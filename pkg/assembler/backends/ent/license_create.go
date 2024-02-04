@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 )
@@ -56,15 +58,29 @@ func (lc *LicenseCreate) SetNillableListVersion(s *string) *LicenseCreate {
 	return lc
 }
 
+// SetID sets the "id" field.
+func (lc *LicenseCreate) SetID(u uuid.UUID) *LicenseCreate {
+	lc.mutation.SetID(u)
+	return lc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (lc *LicenseCreate) SetNillableID(u *uuid.UUID) *LicenseCreate {
+	if u != nil {
+		lc.SetID(*u)
+	}
+	return lc
+}
+
 // AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (lc *LicenseCreate) AddDeclaredInCertifyLegalIDs(ids ...int) *LicenseCreate {
+func (lc *LicenseCreate) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseCreate {
 	lc.mutation.AddDeclaredInCertifyLegalIDs(ids...)
 	return lc
 }
 
 // AddDeclaredInCertifyLegals adds the "declared_in_certify_legals" edges to the CertifyLegal entity.
 func (lc *LicenseCreate) AddDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseCreate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -72,14 +88,14 @@ func (lc *LicenseCreate) AddDeclaredInCertifyLegals(c ...*CertifyLegal) *License
 }
 
 // AddDiscoveredInCertifyLegalIDs adds the "discovered_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (lc *LicenseCreate) AddDiscoveredInCertifyLegalIDs(ids ...int) *LicenseCreate {
+func (lc *LicenseCreate) AddDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseCreate {
 	lc.mutation.AddDiscoveredInCertifyLegalIDs(ids...)
 	return lc
 }
 
 // AddDiscoveredInCertifyLegals adds the "discovered_in_certify_legals" edges to the CertifyLegal entity.
 func (lc *LicenseCreate) AddDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseCreate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -93,6 +109,7 @@ func (lc *LicenseCreate) Mutation() *LicenseMutation {
 
 // Save creates the License in the database.
 func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
+	lc.defaults()
 	return withHooks(ctx, lc.sqlSave, lc.mutation, lc.hooks)
 }
 
@@ -115,6 +132,14 @@ func (lc *LicenseCreate) Exec(ctx context.Context) error {
 func (lc *LicenseCreate) ExecX(ctx context.Context) {
 	if err := lc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (lc *LicenseCreate) defaults() {
+	if _, ok := lc.mutation.ID(); !ok {
+		v := license.DefaultID()
+		lc.mutation.SetID(v)
 	}
 }
 
@@ -142,8 +167,13 @@ func (lc *LicenseCreate) sqlSave(ctx context.Context) (*License, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	lc.mutation.id = &_node.ID
 	lc.mutation.done = true
 	return _node, nil
@@ -152,9 +182,13 @@ func (lc *LicenseCreate) sqlSave(ctx context.Context) (*License, error) {
 func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 	var (
 		_node = &License{config: lc.config}
-		_spec = sqlgraph.NewCreateSpec(license.Table, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(license.Table, sqlgraph.NewFieldSpec(license.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = lc.conflict
+	if id, ok := lc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := lc.mutation.Name(); ok {
 		_spec.SetField(license.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -175,7 +209,7 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 			Columns: license.DeclaredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -191,7 +225,7 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 			Columns: license.DiscoveredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -299,16 +333,24 @@ func (u *LicenseUpsert) ClearListVersion() *LicenseUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.License.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(license.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *LicenseUpsertOne) UpdateNewValues() *LicenseUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(license.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -411,7 +453,12 @@ func (u *LicenseUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *LicenseUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *LicenseUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: LicenseUpsertOne.ID is not supported by MySQL driver. Use LicenseUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -420,7 +467,7 @@ func (u *LicenseUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *LicenseUpsertOne) IDX(ctx context.Context) int {
+func (u *LicenseUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -447,6 +494,7 @@ func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 	for i := range lcb.builders {
 		func(i int, root context.Context) {
 			builder := lcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LicenseMutation)
 				if !ok {
@@ -474,10 +522,6 @@ func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -564,10 +608,20 @@ type LicenseUpsertBulk struct {
 //	client.License.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(license.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *LicenseUpsertBulk) UpdateNewValues() *LicenseUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(license.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

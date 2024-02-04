@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -40,9 +41,13 @@ func (SLSAAttestation) Annotations() []schema.Annotation {
 // Fields of the SLSA.
 func (SLSAAttestation) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.String("build_type").Comment("Type of the builder"),
-		field.Int("built_by_id").Comment("ID of the builder"),
-		field.Int("subject_id").Comment("ID of the subject artifact"),
+		field.UUID("built_by_id", uuid.New()).Comment("ID of the builder"),
+		field.UUID("subject_id", uuid.New()).Comment("ID of the subject artifact"),
 		field.JSON("slsa_predicate", []*model.SLSAPredicate{}).Optional().Comment("Individual predicates found in the attestation"),
 		field.String("slsa_version").Comment("Version of the SLSA predicate"),
 		field.Time("started_on").Optional().Nillable().Comment("Timestamp of build start time"),

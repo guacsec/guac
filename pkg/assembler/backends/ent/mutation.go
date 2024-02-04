@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
@@ -91,24 +92,24 @@ type ArtifactMutation struct {
 	config
 	op                       Op
 	typ                      string
-	id                       *int
+	id                       *uuid.UUID
 	algorithm                *string
 	digest                   *string
 	clearedFields            map[string]struct{}
-	occurrences              map[int]struct{}
-	removedoccurrences       map[int]struct{}
+	occurrences              map[uuid.UUID]struct{}
+	removedoccurrences       map[uuid.UUID]struct{}
 	clearedoccurrences       bool
-	sbom                     map[int]struct{}
-	removedsbom              map[int]struct{}
+	sbom                     map[uuid.UUID]struct{}
+	removedsbom              map[uuid.UUID]struct{}
 	clearedsbom              bool
-	attestations             map[int]struct{}
-	removedattestations      map[int]struct{}
+	attestations             map[uuid.UUID]struct{}
+	removedattestations      map[uuid.UUID]struct{}
 	clearedattestations      bool
-	same                     map[int]struct{}
-	removedsame              map[int]struct{}
+	same                     map[uuid.UUID]struct{}
+	removedsame              map[uuid.UUID]struct{}
 	clearedsame              bool
-	included_in_sboms        map[int]struct{}
-	removedincluded_in_sboms map[int]struct{}
+	included_in_sboms        map[uuid.UUID]struct{}
+	removedincluded_in_sboms map[uuid.UUID]struct{}
 	clearedincluded_in_sboms bool
 	done                     bool
 	oldValue                 func(context.Context) (*Artifact, error)
@@ -135,7 +136,7 @@ func newArtifactMutation(c config, op Op, opts ...artifactOption) *ArtifactMutat
 }
 
 // withArtifactID sets the ID field of the mutation.
-func withArtifactID(id int) artifactOption {
+func withArtifactID(id uuid.UUID) artifactOption {
 	return func(m *ArtifactMutation) {
 		var (
 			err   error
@@ -185,9 +186,15 @@ func (m ArtifactMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Artifact entities.
+func (m *ArtifactMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *ArtifactMutation) ID() (id int, exists bool) {
+func (m *ArtifactMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -198,12 +205,12 @@ func (m *ArtifactMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *ArtifactMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *ArtifactMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -286,9 +293,9 @@ func (m *ArtifactMutation) ResetDigest() {
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by ids.
-func (m *ArtifactMutation) AddOccurrenceIDs(ids ...int) {
+func (m *ArtifactMutation) AddOccurrenceIDs(ids ...uuid.UUID) {
 	if m.occurrences == nil {
-		m.occurrences = make(map[int]struct{})
+		m.occurrences = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.occurrences[ids[i]] = struct{}{}
@@ -306,9 +313,9 @@ func (m *ArtifactMutation) OccurrencesCleared() bool {
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to the Occurrence entity by IDs.
-func (m *ArtifactMutation) RemoveOccurrenceIDs(ids ...int) {
+func (m *ArtifactMutation) RemoveOccurrenceIDs(ids ...uuid.UUID) {
 	if m.removedoccurrences == nil {
-		m.removedoccurrences = make(map[int]struct{})
+		m.removedoccurrences = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.occurrences, ids[i])
@@ -317,7 +324,7 @@ func (m *ArtifactMutation) RemoveOccurrenceIDs(ids ...int) {
 }
 
 // RemovedOccurrences returns the removed IDs of the "occurrences" edge to the Occurrence entity.
-func (m *ArtifactMutation) RemovedOccurrencesIDs() (ids []int) {
+func (m *ArtifactMutation) RemovedOccurrencesIDs() (ids []uuid.UUID) {
 	for id := range m.removedoccurrences {
 		ids = append(ids, id)
 	}
@@ -325,7 +332,7 @@ func (m *ArtifactMutation) RemovedOccurrencesIDs() (ids []int) {
 }
 
 // OccurrencesIDs returns the "occurrences" edge IDs in the mutation.
-func (m *ArtifactMutation) OccurrencesIDs() (ids []int) {
+func (m *ArtifactMutation) OccurrencesIDs() (ids []uuid.UUID) {
 	for id := range m.occurrences {
 		ids = append(ids, id)
 	}
@@ -340,9 +347,9 @@ func (m *ArtifactMutation) ResetOccurrences() {
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by ids.
-func (m *ArtifactMutation) AddSbomIDs(ids ...int) {
+func (m *ArtifactMutation) AddSbomIDs(ids ...uuid.UUID) {
 	if m.sbom == nil {
-		m.sbom = make(map[int]struct{})
+		m.sbom = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.sbom[ids[i]] = struct{}{}
@@ -360,9 +367,9 @@ func (m *ArtifactMutation) SbomCleared() bool {
 }
 
 // RemoveSbomIDs removes the "sbom" edge to the BillOfMaterials entity by IDs.
-func (m *ArtifactMutation) RemoveSbomIDs(ids ...int) {
+func (m *ArtifactMutation) RemoveSbomIDs(ids ...uuid.UUID) {
 	if m.removedsbom == nil {
-		m.removedsbom = make(map[int]struct{})
+		m.removedsbom = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.sbom, ids[i])
@@ -371,7 +378,7 @@ func (m *ArtifactMutation) RemoveSbomIDs(ids ...int) {
 }
 
 // RemovedSbom returns the removed IDs of the "sbom" edge to the BillOfMaterials entity.
-func (m *ArtifactMutation) RemovedSbomIDs() (ids []int) {
+func (m *ArtifactMutation) RemovedSbomIDs() (ids []uuid.UUID) {
 	for id := range m.removedsbom {
 		ids = append(ids, id)
 	}
@@ -379,7 +386,7 @@ func (m *ArtifactMutation) RemovedSbomIDs() (ids []int) {
 }
 
 // SbomIDs returns the "sbom" edge IDs in the mutation.
-func (m *ArtifactMutation) SbomIDs() (ids []int) {
+func (m *ArtifactMutation) SbomIDs() (ids []uuid.UUID) {
 	for id := range m.sbom {
 		ids = append(ids, id)
 	}
@@ -394,9 +401,9 @@ func (m *ArtifactMutation) ResetSbom() {
 }
 
 // AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by ids.
-func (m *ArtifactMutation) AddAttestationIDs(ids ...int) {
+func (m *ArtifactMutation) AddAttestationIDs(ids ...uuid.UUID) {
 	if m.attestations == nil {
-		m.attestations = make(map[int]struct{})
+		m.attestations = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.attestations[ids[i]] = struct{}{}
@@ -414,9 +421,9 @@ func (m *ArtifactMutation) AttestationsCleared() bool {
 }
 
 // RemoveAttestationIDs removes the "attestations" edge to the SLSAAttestation entity by IDs.
-func (m *ArtifactMutation) RemoveAttestationIDs(ids ...int) {
+func (m *ArtifactMutation) RemoveAttestationIDs(ids ...uuid.UUID) {
 	if m.removedattestations == nil {
-		m.removedattestations = make(map[int]struct{})
+		m.removedattestations = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.attestations, ids[i])
@@ -425,7 +432,7 @@ func (m *ArtifactMutation) RemoveAttestationIDs(ids ...int) {
 }
 
 // RemovedAttestations returns the removed IDs of the "attestations" edge to the SLSAAttestation entity.
-func (m *ArtifactMutation) RemovedAttestationsIDs() (ids []int) {
+func (m *ArtifactMutation) RemovedAttestationsIDs() (ids []uuid.UUID) {
 	for id := range m.removedattestations {
 		ids = append(ids, id)
 	}
@@ -433,7 +440,7 @@ func (m *ArtifactMutation) RemovedAttestationsIDs() (ids []int) {
 }
 
 // AttestationsIDs returns the "attestations" edge IDs in the mutation.
-func (m *ArtifactMutation) AttestationsIDs() (ids []int) {
+func (m *ArtifactMutation) AttestationsIDs() (ids []uuid.UUID) {
 	for id := range m.attestations {
 		ids = append(ids, id)
 	}
@@ -448,9 +455,9 @@ func (m *ArtifactMutation) ResetAttestations() {
 }
 
 // AddSameIDs adds the "same" edge to the HashEqual entity by ids.
-func (m *ArtifactMutation) AddSameIDs(ids ...int) {
+func (m *ArtifactMutation) AddSameIDs(ids ...uuid.UUID) {
 	if m.same == nil {
-		m.same = make(map[int]struct{})
+		m.same = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.same[ids[i]] = struct{}{}
@@ -468,9 +475,9 @@ func (m *ArtifactMutation) SameCleared() bool {
 }
 
 // RemoveSameIDs removes the "same" edge to the HashEqual entity by IDs.
-func (m *ArtifactMutation) RemoveSameIDs(ids ...int) {
+func (m *ArtifactMutation) RemoveSameIDs(ids ...uuid.UUID) {
 	if m.removedsame == nil {
-		m.removedsame = make(map[int]struct{})
+		m.removedsame = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.same, ids[i])
@@ -479,7 +486,7 @@ func (m *ArtifactMutation) RemoveSameIDs(ids ...int) {
 }
 
 // RemovedSame returns the removed IDs of the "same" edge to the HashEqual entity.
-func (m *ArtifactMutation) RemovedSameIDs() (ids []int) {
+func (m *ArtifactMutation) RemovedSameIDs() (ids []uuid.UUID) {
 	for id := range m.removedsame {
 		ids = append(ids, id)
 	}
@@ -487,7 +494,7 @@ func (m *ArtifactMutation) RemovedSameIDs() (ids []int) {
 }
 
 // SameIDs returns the "same" edge IDs in the mutation.
-func (m *ArtifactMutation) SameIDs() (ids []int) {
+func (m *ArtifactMutation) SameIDs() (ids []uuid.UUID) {
 	for id := range m.same {
 		ids = append(ids, id)
 	}
@@ -502,9 +509,9 @@ func (m *ArtifactMutation) ResetSame() {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
-func (m *ArtifactMutation) AddIncludedInSbomIDs(ids ...int) {
+func (m *ArtifactMutation) AddIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.included_in_sboms == nil {
-		m.included_in_sboms = make(map[int]struct{})
+		m.included_in_sboms = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.included_in_sboms[ids[i]] = struct{}{}
@@ -522,9 +529,9 @@ func (m *ArtifactMutation) IncludedInSbomsCleared() bool {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (m *ArtifactMutation) RemoveIncludedInSbomIDs(ids ...int) {
+func (m *ArtifactMutation) RemoveIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.removedincluded_in_sboms == nil {
-		m.removedincluded_in_sboms = make(map[int]struct{})
+		m.removedincluded_in_sboms = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.included_in_sboms, ids[i])
@@ -533,7 +540,7 @@ func (m *ArtifactMutation) RemoveIncludedInSbomIDs(ids ...int) {
 }
 
 // RemovedIncludedInSboms returns the removed IDs of the "included_in_sboms" edge to the BillOfMaterials entity.
-func (m *ArtifactMutation) RemovedIncludedInSbomsIDs() (ids []int) {
+func (m *ArtifactMutation) RemovedIncludedInSbomsIDs() (ids []uuid.UUID) {
 	for id := range m.removedincluded_in_sboms {
 		ids = append(ids, id)
 	}
@@ -541,7 +548,7 @@ func (m *ArtifactMutation) RemovedIncludedInSbomsIDs() (ids []int) {
 }
 
 // IncludedInSbomsIDs returns the "included_in_sboms" edge IDs in the mutation.
-func (m *ArtifactMutation) IncludedInSbomsIDs() (ids []int) {
+func (m *ArtifactMutation) IncludedInSbomsIDs() (ids []uuid.UUID) {
 	for id := range m.included_in_sboms {
 		ids = append(ids, id)
 	}
@@ -896,7 +903,7 @@ type BillOfMaterialsMutation struct {
 	config
 	op                                 Op
 	typ                                string
-	id                                 *int
+	id                                 *uuid.UUID
 	uri                                *string
 	algorithm                          *string
 	digest                             *string
@@ -905,21 +912,21 @@ type BillOfMaterialsMutation struct {
 	collector                          *string
 	known_since                        *time.Time
 	clearedFields                      map[string]struct{}
-	_package                           *int
+	_package                           *uuid.UUID
 	cleared_package                    bool
-	artifact                           *int
+	artifact                           *uuid.UUID
 	clearedartifact                    bool
-	included_software_packages         map[int]struct{}
-	removedincluded_software_packages  map[int]struct{}
+	included_software_packages         map[uuid.UUID]struct{}
+	removedincluded_software_packages  map[uuid.UUID]struct{}
 	clearedincluded_software_packages  bool
-	included_software_artifacts        map[int]struct{}
-	removedincluded_software_artifacts map[int]struct{}
+	included_software_artifacts        map[uuid.UUID]struct{}
+	removedincluded_software_artifacts map[uuid.UUID]struct{}
 	clearedincluded_software_artifacts bool
-	included_dependencies              map[int]struct{}
-	removedincluded_dependencies       map[int]struct{}
+	included_dependencies              map[uuid.UUID]struct{}
+	removedincluded_dependencies       map[uuid.UUID]struct{}
 	clearedincluded_dependencies       bool
-	included_occurrences               map[int]struct{}
-	removedincluded_occurrences        map[int]struct{}
+	included_occurrences               map[uuid.UUID]struct{}
+	removedincluded_occurrences        map[uuid.UUID]struct{}
 	clearedincluded_occurrences        bool
 	done                               bool
 	oldValue                           func(context.Context) (*BillOfMaterials, error)
@@ -946,7 +953,7 @@ func newBillOfMaterialsMutation(c config, op Op, opts ...billofmaterialsOption) 
 }
 
 // withBillOfMaterialsID sets the ID field of the mutation.
-func withBillOfMaterialsID(id int) billofmaterialsOption {
+func withBillOfMaterialsID(id uuid.UUID) billofmaterialsOption {
 	return func(m *BillOfMaterialsMutation) {
 		var (
 			err   error
@@ -996,9 +1003,15 @@ func (m BillOfMaterialsMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of BillOfMaterials entities.
+func (m *BillOfMaterialsMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *BillOfMaterialsMutation) ID() (id int, exists bool) {
+func (m *BillOfMaterialsMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1009,12 +1022,12 @@ func (m *BillOfMaterialsMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *BillOfMaterialsMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *BillOfMaterialsMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -1025,12 +1038,12 @@ func (m *BillOfMaterialsMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetPackageID sets the "package_id" field.
-func (m *BillOfMaterialsMutation) SetPackageID(i int) {
-	m._package = &i
+func (m *BillOfMaterialsMutation) SetPackageID(u uuid.UUID) {
+	m._package = &u
 }
 
 // PackageID returns the value of the "package_id" field in the mutation.
-func (m *BillOfMaterialsMutation) PackageID() (r int, exists bool) {
+func (m *BillOfMaterialsMutation) PackageID() (r uuid.UUID, exists bool) {
 	v := m._package
 	if v == nil {
 		return
@@ -1041,7 +1054,7 @@ func (m *BillOfMaterialsMutation) PackageID() (r int, exists bool) {
 // OldPackageID returns the old "package_id" field's value of the BillOfMaterials entity.
 // If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BillOfMaterialsMutation) OldPackageID(ctx context.Context) (v *int, err error) {
+func (m *BillOfMaterialsMutation) OldPackageID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
 	}
@@ -1074,12 +1087,12 @@ func (m *BillOfMaterialsMutation) ResetPackageID() {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (m *BillOfMaterialsMutation) SetArtifactID(i int) {
-	m.artifact = &i
+func (m *BillOfMaterialsMutation) SetArtifactID(u uuid.UUID) {
+	m.artifact = &u
 }
 
 // ArtifactID returns the value of the "artifact_id" field in the mutation.
-func (m *BillOfMaterialsMutation) ArtifactID() (r int, exists bool) {
+func (m *BillOfMaterialsMutation) ArtifactID() (r uuid.UUID, exists bool) {
 	v := m.artifact
 	if v == nil {
 		return
@@ -1090,7 +1103,7 @@ func (m *BillOfMaterialsMutation) ArtifactID() (r int, exists bool) {
 // OldArtifactID returns the old "artifact_id" field's value of the BillOfMaterials entity.
 // If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BillOfMaterialsMutation) OldArtifactID(ctx context.Context) (v *int, err error) {
+func (m *BillOfMaterialsMutation) OldArtifactID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
 	}
@@ -1388,7 +1401,7 @@ func (m *BillOfMaterialsMutation) PackageCleared() bool {
 // PackageIDs returns the "package" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageID instead. It exists only for internal usage by the builders.
-func (m *BillOfMaterialsMutation) PackageIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) PackageIDs() (ids []uuid.UUID) {
 	if id := m._package; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1415,7 +1428,7 @@ func (m *BillOfMaterialsMutation) ArtifactCleared() bool {
 // ArtifactIDs returns the "artifact" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ArtifactID instead. It exists only for internal usage by the builders.
-func (m *BillOfMaterialsMutation) ArtifactIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) ArtifactIDs() (ids []uuid.UUID) {
 	if id := m.artifact; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1429,9 +1442,9 @@ func (m *BillOfMaterialsMutation) ResetArtifact() {
 }
 
 // AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by ids.
-func (m *BillOfMaterialsMutation) AddIncludedSoftwarePackageIDs(ids ...int) {
+func (m *BillOfMaterialsMutation) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) {
 	if m.included_software_packages == nil {
-		m.included_software_packages = make(map[int]struct{})
+		m.included_software_packages = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.included_software_packages[ids[i]] = struct{}{}
@@ -1449,9 +1462,9 @@ func (m *BillOfMaterialsMutation) IncludedSoftwarePackagesCleared() bool {
 }
 
 // RemoveIncludedSoftwarePackageIDs removes the "included_software_packages" edge to the PackageVersion entity by IDs.
-func (m *BillOfMaterialsMutation) RemoveIncludedSoftwarePackageIDs(ids ...int) {
+func (m *BillOfMaterialsMutation) RemoveIncludedSoftwarePackageIDs(ids ...uuid.UUID) {
 	if m.removedincluded_software_packages == nil {
-		m.removedincluded_software_packages = make(map[int]struct{})
+		m.removedincluded_software_packages = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.included_software_packages, ids[i])
@@ -1460,7 +1473,7 @@ func (m *BillOfMaterialsMutation) RemoveIncludedSoftwarePackageIDs(ids ...int) {
 }
 
 // RemovedIncludedSoftwarePackages returns the removed IDs of the "included_software_packages" edge to the PackageVersion entity.
-func (m *BillOfMaterialsMutation) RemovedIncludedSoftwarePackagesIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) RemovedIncludedSoftwarePackagesIDs() (ids []uuid.UUID) {
 	for id := range m.removedincluded_software_packages {
 		ids = append(ids, id)
 	}
@@ -1468,7 +1481,7 @@ func (m *BillOfMaterialsMutation) RemovedIncludedSoftwarePackagesIDs() (ids []in
 }
 
 // IncludedSoftwarePackagesIDs returns the "included_software_packages" edge IDs in the mutation.
-func (m *BillOfMaterialsMutation) IncludedSoftwarePackagesIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) IncludedSoftwarePackagesIDs() (ids []uuid.UUID) {
 	for id := range m.included_software_packages {
 		ids = append(ids, id)
 	}
@@ -1483,9 +1496,9 @@ func (m *BillOfMaterialsMutation) ResetIncludedSoftwarePackages() {
 }
 
 // AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by ids.
-func (m *BillOfMaterialsMutation) AddIncludedSoftwareArtifactIDs(ids ...int) {
+func (m *BillOfMaterialsMutation) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) {
 	if m.included_software_artifacts == nil {
-		m.included_software_artifacts = make(map[int]struct{})
+		m.included_software_artifacts = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.included_software_artifacts[ids[i]] = struct{}{}
@@ -1503,9 +1516,9 @@ func (m *BillOfMaterialsMutation) IncludedSoftwareArtifactsCleared() bool {
 }
 
 // RemoveIncludedSoftwareArtifactIDs removes the "included_software_artifacts" edge to the Artifact entity by IDs.
-func (m *BillOfMaterialsMutation) RemoveIncludedSoftwareArtifactIDs(ids ...int) {
+func (m *BillOfMaterialsMutation) RemoveIncludedSoftwareArtifactIDs(ids ...uuid.UUID) {
 	if m.removedincluded_software_artifacts == nil {
-		m.removedincluded_software_artifacts = make(map[int]struct{})
+		m.removedincluded_software_artifacts = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.included_software_artifacts, ids[i])
@@ -1514,7 +1527,7 @@ func (m *BillOfMaterialsMutation) RemoveIncludedSoftwareArtifactIDs(ids ...int) 
 }
 
 // RemovedIncludedSoftwareArtifacts returns the removed IDs of the "included_software_artifacts" edge to the Artifact entity.
-func (m *BillOfMaterialsMutation) RemovedIncludedSoftwareArtifactsIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) RemovedIncludedSoftwareArtifactsIDs() (ids []uuid.UUID) {
 	for id := range m.removedincluded_software_artifacts {
 		ids = append(ids, id)
 	}
@@ -1522,7 +1535,7 @@ func (m *BillOfMaterialsMutation) RemovedIncludedSoftwareArtifactsIDs() (ids []i
 }
 
 // IncludedSoftwareArtifactsIDs returns the "included_software_artifacts" edge IDs in the mutation.
-func (m *BillOfMaterialsMutation) IncludedSoftwareArtifactsIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) IncludedSoftwareArtifactsIDs() (ids []uuid.UUID) {
 	for id := range m.included_software_artifacts {
 		ids = append(ids, id)
 	}
@@ -1537,9 +1550,9 @@ func (m *BillOfMaterialsMutation) ResetIncludedSoftwareArtifacts() {
 }
 
 // AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by ids.
-func (m *BillOfMaterialsMutation) AddIncludedDependencyIDs(ids ...int) {
+func (m *BillOfMaterialsMutation) AddIncludedDependencyIDs(ids ...uuid.UUID) {
 	if m.included_dependencies == nil {
-		m.included_dependencies = make(map[int]struct{})
+		m.included_dependencies = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.included_dependencies[ids[i]] = struct{}{}
@@ -1557,9 +1570,9 @@ func (m *BillOfMaterialsMutation) IncludedDependenciesCleared() bool {
 }
 
 // RemoveIncludedDependencyIDs removes the "included_dependencies" edge to the Dependency entity by IDs.
-func (m *BillOfMaterialsMutation) RemoveIncludedDependencyIDs(ids ...int) {
+func (m *BillOfMaterialsMutation) RemoveIncludedDependencyIDs(ids ...uuid.UUID) {
 	if m.removedincluded_dependencies == nil {
-		m.removedincluded_dependencies = make(map[int]struct{})
+		m.removedincluded_dependencies = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.included_dependencies, ids[i])
@@ -1568,7 +1581,7 @@ func (m *BillOfMaterialsMutation) RemoveIncludedDependencyIDs(ids ...int) {
 }
 
 // RemovedIncludedDependencies returns the removed IDs of the "included_dependencies" edge to the Dependency entity.
-func (m *BillOfMaterialsMutation) RemovedIncludedDependenciesIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) RemovedIncludedDependenciesIDs() (ids []uuid.UUID) {
 	for id := range m.removedincluded_dependencies {
 		ids = append(ids, id)
 	}
@@ -1576,7 +1589,7 @@ func (m *BillOfMaterialsMutation) RemovedIncludedDependenciesIDs() (ids []int) {
 }
 
 // IncludedDependenciesIDs returns the "included_dependencies" edge IDs in the mutation.
-func (m *BillOfMaterialsMutation) IncludedDependenciesIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) IncludedDependenciesIDs() (ids []uuid.UUID) {
 	for id := range m.included_dependencies {
 		ids = append(ids, id)
 	}
@@ -1591,9 +1604,9 @@ func (m *BillOfMaterialsMutation) ResetIncludedDependencies() {
 }
 
 // AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by ids.
-func (m *BillOfMaterialsMutation) AddIncludedOccurrenceIDs(ids ...int) {
+func (m *BillOfMaterialsMutation) AddIncludedOccurrenceIDs(ids ...uuid.UUID) {
 	if m.included_occurrences == nil {
-		m.included_occurrences = make(map[int]struct{})
+		m.included_occurrences = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.included_occurrences[ids[i]] = struct{}{}
@@ -1611,9 +1624,9 @@ func (m *BillOfMaterialsMutation) IncludedOccurrencesCleared() bool {
 }
 
 // RemoveIncludedOccurrenceIDs removes the "included_occurrences" edge to the Occurrence entity by IDs.
-func (m *BillOfMaterialsMutation) RemoveIncludedOccurrenceIDs(ids ...int) {
+func (m *BillOfMaterialsMutation) RemoveIncludedOccurrenceIDs(ids ...uuid.UUID) {
 	if m.removedincluded_occurrences == nil {
-		m.removedincluded_occurrences = make(map[int]struct{})
+		m.removedincluded_occurrences = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.included_occurrences, ids[i])
@@ -1622,7 +1635,7 @@ func (m *BillOfMaterialsMutation) RemoveIncludedOccurrenceIDs(ids ...int) {
 }
 
 // RemovedIncludedOccurrences returns the removed IDs of the "included_occurrences" edge to the Occurrence entity.
-func (m *BillOfMaterialsMutation) RemovedIncludedOccurrencesIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) RemovedIncludedOccurrencesIDs() (ids []uuid.UUID) {
 	for id := range m.removedincluded_occurrences {
 		ids = append(ids, id)
 	}
@@ -1630,7 +1643,7 @@ func (m *BillOfMaterialsMutation) RemovedIncludedOccurrencesIDs() (ids []int) {
 }
 
 // IncludedOccurrencesIDs returns the "included_occurrences" edge IDs in the mutation.
-func (m *BillOfMaterialsMutation) IncludedOccurrencesIDs() (ids []int) {
+func (m *BillOfMaterialsMutation) IncludedOccurrencesIDs() (ids []uuid.UUID) {
 	for id := range m.included_occurrences {
 		ids = append(ids, id)
 	}
@@ -1769,14 +1782,14 @@ func (m *BillOfMaterialsMutation) OldField(ctx context.Context, name string) (en
 func (m *BillOfMaterialsMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case billofmaterials.FieldPackageID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageID(v)
 		return nil
 	case billofmaterials.FieldArtifactID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1838,16 +1851,13 @@ func (m *BillOfMaterialsMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *BillOfMaterialsMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *BillOfMaterialsMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -2132,11 +2142,11 @@ type BuilderMutation struct {
 	config
 	op                       Op
 	typ                      string
-	id                       *int
+	id                       *uuid.UUID
 	uri                      *string
 	clearedFields            map[string]struct{}
-	slsa_attestations        map[int]struct{}
-	removedslsa_attestations map[int]struct{}
+	slsa_attestations        map[uuid.UUID]struct{}
+	removedslsa_attestations map[uuid.UUID]struct{}
 	clearedslsa_attestations bool
 	done                     bool
 	oldValue                 func(context.Context) (*Builder, error)
@@ -2163,7 +2173,7 @@ func newBuilderMutation(c config, op Op, opts ...builderOption) *BuilderMutation
 }
 
 // withBuilderID sets the ID field of the mutation.
-func withBuilderID(id int) builderOption {
+func withBuilderID(id uuid.UUID) builderOption {
 	return func(m *BuilderMutation) {
 		var (
 			err   error
@@ -2213,9 +2223,15 @@ func (m BuilderMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Builder entities.
+func (m *BuilderMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *BuilderMutation) ID() (id int, exists bool) {
+func (m *BuilderMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -2226,12 +2242,12 @@ func (m *BuilderMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *BuilderMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *BuilderMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -2278,9 +2294,9 @@ func (m *BuilderMutation) ResetURI() {
 }
 
 // AddSlsaAttestationIDs adds the "slsa_attestations" edge to the SLSAAttestation entity by ids.
-func (m *BuilderMutation) AddSlsaAttestationIDs(ids ...int) {
+func (m *BuilderMutation) AddSlsaAttestationIDs(ids ...uuid.UUID) {
 	if m.slsa_attestations == nil {
-		m.slsa_attestations = make(map[int]struct{})
+		m.slsa_attestations = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.slsa_attestations[ids[i]] = struct{}{}
@@ -2298,9 +2314,9 @@ func (m *BuilderMutation) SlsaAttestationsCleared() bool {
 }
 
 // RemoveSlsaAttestationIDs removes the "slsa_attestations" edge to the SLSAAttestation entity by IDs.
-func (m *BuilderMutation) RemoveSlsaAttestationIDs(ids ...int) {
+func (m *BuilderMutation) RemoveSlsaAttestationIDs(ids ...uuid.UUID) {
 	if m.removedslsa_attestations == nil {
-		m.removedslsa_attestations = make(map[int]struct{})
+		m.removedslsa_attestations = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.slsa_attestations, ids[i])
@@ -2309,7 +2325,7 @@ func (m *BuilderMutation) RemoveSlsaAttestationIDs(ids ...int) {
 }
 
 // RemovedSlsaAttestations returns the removed IDs of the "slsa_attestations" edge to the SLSAAttestation entity.
-func (m *BuilderMutation) RemovedSlsaAttestationsIDs() (ids []int) {
+func (m *BuilderMutation) RemovedSlsaAttestationsIDs() (ids []uuid.UUID) {
 	for id := range m.removedslsa_attestations {
 		ids = append(ids, id)
 	}
@@ -2317,7 +2333,7 @@ func (m *BuilderMutation) RemovedSlsaAttestationsIDs() (ids []int) {
 }
 
 // SlsaAttestationsIDs returns the "slsa_attestations" edge IDs in the mutation.
-func (m *BuilderMutation) SlsaAttestationsIDs() (ids []int) {
+func (m *BuilderMutation) SlsaAttestationsIDs() (ids []uuid.UUID) {
 	for id := range m.slsa_attestations {
 		ids = append(ids, id)
 	}
@@ -2551,20 +2567,20 @@ type CertificationMutation struct {
 	config
 	op                     Op
 	typ                    string
-	id                     *int
+	id                     *uuid.UUID
 	_type                  *certification.Type
 	justification          *string
 	origin                 *string
 	collector              *string
 	known_since            *time.Time
 	clearedFields          map[string]struct{}
-	source                 *int
+	source                 *uuid.UUID
 	clearedsource          bool
-	package_version        *int
+	package_version        *uuid.UUID
 	clearedpackage_version bool
-	all_versions           *int
+	all_versions           *uuid.UUID
 	clearedall_versions    bool
-	artifact               *int
+	artifact               *uuid.UUID
 	clearedartifact        bool
 	done                   bool
 	oldValue               func(context.Context) (*Certification, error)
@@ -2591,7 +2607,7 @@ func newCertificationMutation(c config, op Op, opts ...certificationOption) *Cer
 }
 
 // withCertificationID sets the ID field of the mutation.
-func withCertificationID(id int) certificationOption {
+func withCertificationID(id uuid.UUID) certificationOption {
 	return func(m *CertificationMutation) {
 		var (
 			err   error
@@ -2641,9 +2657,15 @@ func (m CertificationMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Certification entities.
+func (m *CertificationMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CertificationMutation) ID() (id int, exists bool) {
+func (m *CertificationMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -2654,12 +2676,12 @@ func (m *CertificationMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CertificationMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *CertificationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -2670,12 +2692,12 @@ func (m *CertificationMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetSourceID sets the "source_id" field.
-func (m *CertificationMutation) SetSourceID(i int) {
-	m.source = &i
+func (m *CertificationMutation) SetSourceID(u uuid.UUID) {
+	m.source = &u
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
-func (m *CertificationMutation) SourceID() (r int, exists bool) {
+func (m *CertificationMutation) SourceID() (r uuid.UUID, exists bool) {
 	v := m.source
 	if v == nil {
 		return
@@ -2686,7 +2708,7 @@ func (m *CertificationMutation) SourceID() (r int, exists bool) {
 // OldSourceID returns the old "source_id" field's value of the Certification entity.
 // If the Certification object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertificationMutation) OldSourceID(ctx context.Context) (v *int, err error) {
+func (m *CertificationMutation) OldSourceID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -2719,12 +2741,12 @@ func (m *CertificationMutation) ResetSourceID() {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (m *CertificationMutation) SetPackageVersionID(i int) {
-	m.package_version = &i
+func (m *CertificationMutation) SetPackageVersionID(u uuid.UUID) {
+	m.package_version = &u
 }
 
 // PackageVersionID returns the value of the "package_version_id" field in the mutation.
-func (m *CertificationMutation) PackageVersionID() (r int, exists bool) {
+func (m *CertificationMutation) PackageVersionID() (r uuid.UUID, exists bool) {
 	v := m.package_version
 	if v == nil {
 		return
@@ -2735,7 +2757,7 @@ func (m *CertificationMutation) PackageVersionID() (r int, exists bool) {
 // OldPackageVersionID returns the old "package_version_id" field's value of the Certification entity.
 // If the Certification object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertificationMutation) OldPackageVersionID(ctx context.Context) (v *int, err error) {
+func (m *CertificationMutation) OldPackageVersionID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageVersionID is only allowed on UpdateOne operations")
 	}
@@ -2768,12 +2790,12 @@ func (m *CertificationMutation) ResetPackageVersionID() {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (m *CertificationMutation) SetPackageNameID(i int) {
-	m.all_versions = &i
+func (m *CertificationMutation) SetPackageNameID(u uuid.UUID) {
+	m.all_versions = &u
 }
 
 // PackageNameID returns the value of the "package_name_id" field in the mutation.
-func (m *CertificationMutation) PackageNameID() (r int, exists bool) {
+func (m *CertificationMutation) PackageNameID() (r uuid.UUID, exists bool) {
 	v := m.all_versions
 	if v == nil {
 		return
@@ -2784,7 +2806,7 @@ func (m *CertificationMutation) PackageNameID() (r int, exists bool) {
 // OldPackageNameID returns the old "package_name_id" field's value of the Certification entity.
 // If the Certification object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertificationMutation) OldPackageNameID(ctx context.Context) (v *int, err error) {
+func (m *CertificationMutation) OldPackageNameID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageNameID is only allowed on UpdateOne operations")
 	}
@@ -2817,12 +2839,12 @@ func (m *CertificationMutation) ResetPackageNameID() {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (m *CertificationMutation) SetArtifactID(i int) {
-	m.artifact = &i
+func (m *CertificationMutation) SetArtifactID(u uuid.UUID) {
+	m.artifact = &u
 }
 
 // ArtifactID returns the value of the "artifact_id" field in the mutation.
-func (m *CertificationMutation) ArtifactID() (r int, exists bool) {
+func (m *CertificationMutation) ArtifactID() (r uuid.UUID, exists bool) {
 	v := m.artifact
 	if v == nil {
 		return
@@ -2833,7 +2855,7 @@ func (m *CertificationMutation) ArtifactID() (r int, exists bool) {
 // OldArtifactID returns the old "artifact_id" field's value of the Certification entity.
 // If the Certification object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertificationMutation) OldArtifactID(ctx context.Context) (v *int, err error) {
+func (m *CertificationMutation) OldArtifactID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
 	}
@@ -3059,7 +3081,7 @@ func (m *CertificationMutation) SourceCleared() bool {
 // SourceIDs returns the "source" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SourceID instead. It exists only for internal usage by the builders.
-func (m *CertificationMutation) SourceIDs() (ids []int) {
+func (m *CertificationMutation) SourceIDs() (ids []uuid.UUID) {
 	if id := m.source; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3086,7 +3108,7 @@ func (m *CertificationMutation) PackageVersionCleared() bool {
 // PackageVersionIDs returns the "package_version" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageVersionID instead. It exists only for internal usage by the builders.
-func (m *CertificationMutation) PackageVersionIDs() (ids []int) {
+func (m *CertificationMutation) PackageVersionIDs() (ids []uuid.UUID) {
 	if id := m.package_version; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3100,7 +3122,7 @@ func (m *CertificationMutation) ResetPackageVersion() {
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by id.
-func (m *CertificationMutation) SetAllVersionsID(id int) {
+func (m *CertificationMutation) SetAllVersionsID(id uuid.UUID) {
 	m.all_versions = &id
 }
 
@@ -3116,7 +3138,7 @@ func (m *CertificationMutation) AllVersionsCleared() bool {
 }
 
 // AllVersionsID returns the "all_versions" edge ID in the mutation.
-func (m *CertificationMutation) AllVersionsID() (id int, exists bool) {
+func (m *CertificationMutation) AllVersionsID() (id uuid.UUID, exists bool) {
 	if m.all_versions != nil {
 		return *m.all_versions, true
 	}
@@ -3126,7 +3148,7 @@ func (m *CertificationMutation) AllVersionsID() (id int, exists bool) {
 // AllVersionsIDs returns the "all_versions" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AllVersionsID instead. It exists only for internal usage by the builders.
-func (m *CertificationMutation) AllVersionsIDs() (ids []int) {
+func (m *CertificationMutation) AllVersionsIDs() (ids []uuid.UUID) {
 	if id := m.all_versions; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3153,7 +3175,7 @@ func (m *CertificationMutation) ArtifactCleared() bool {
 // ArtifactIDs returns the "artifact" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ArtifactID instead. It exists only for internal usage by the builders.
-func (m *CertificationMutation) ArtifactIDs() (ids []int) {
+func (m *CertificationMutation) ArtifactIDs() (ids []uuid.UUID) {
 	if id := m.artifact; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3291,28 +3313,28 @@ func (m *CertificationMutation) OldField(ctx context.Context, name string) (ent.
 func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case certification.FieldSourceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceID(v)
 		return nil
 	case certification.FieldPackageVersionID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageVersionID(v)
 		return nil
 	case certification.FieldPackageNameID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageNameID(v)
 		return nil
 	case certification.FieldArtifactID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3360,16 +3382,13 @@ func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CertificationMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CertificationMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -3596,7 +3615,7 @@ type CertifyLegalMutation struct {
 	config
 	op                         Op
 	typ                        string
-	id                         *int
+	id                         *uuid.UUID
 	declared_license           *string
 	discovered_license         *string
 	attribution                *string
@@ -3607,15 +3626,15 @@ type CertifyLegalMutation struct {
 	declared_licenses_hash     *string
 	discovered_licenses_hash   *string
 	clearedFields              map[string]struct{}
-	_package                   *int
+	_package                   *uuid.UUID
 	cleared_package            bool
-	source                     *int
+	source                     *uuid.UUID
 	clearedsource              bool
-	declared_licenses          map[int]struct{}
-	removeddeclared_licenses   map[int]struct{}
+	declared_licenses          map[uuid.UUID]struct{}
+	removeddeclared_licenses   map[uuid.UUID]struct{}
 	cleareddeclared_licenses   bool
-	discovered_licenses        map[int]struct{}
-	removeddiscovered_licenses map[int]struct{}
+	discovered_licenses        map[uuid.UUID]struct{}
+	removeddiscovered_licenses map[uuid.UUID]struct{}
 	cleareddiscovered_licenses bool
 	done                       bool
 	oldValue                   func(context.Context) (*CertifyLegal, error)
@@ -3642,7 +3661,7 @@ func newCertifyLegalMutation(c config, op Op, opts ...certifylegalOption) *Certi
 }
 
 // withCertifyLegalID sets the ID field of the mutation.
-func withCertifyLegalID(id int) certifylegalOption {
+func withCertifyLegalID(id uuid.UUID) certifylegalOption {
 	return func(m *CertifyLegalMutation) {
 		var (
 			err   error
@@ -3692,9 +3711,15 @@ func (m CertifyLegalMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CertifyLegal entities.
+func (m *CertifyLegalMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CertifyLegalMutation) ID() (id int, exists bool) {
+func (m *CertifyLegalMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -3705,12 +3730,12 @@ func (m *CertifyLegalMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CertifyLegalMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *CertifyLegalMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -3721,12 +3746,12 @@ func (m *CertifyLegalMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetPackageID sets the "package_id" field.
-func (m *CertifyLegalMutation) SetPackageID(i int) {
-	m._package = &i
+func (m *CertifyLegalMutation) SetPackageID(u uuid.UUID) {
+	m._package = &u
 }
 
 // PackageID returns the value of the "package_id" field in the mutation.
-func (m *CertifyLegalMutation) PackageID() (r int, exists bool) {
+func (m *CertifyLegalMutation) PackageID() (r uuid.UUID, exists bool) {
 	v := m._package
 	if v == nil {
 		return
@@ -3737,7 +3762,7 @@ func (m *CertifyLegalMutation) PackageID() (r int, exists bool) {
 // OldPackageID returns the old "package_id" field's value of the CertifyLegal entity.
 // If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyLegalMutation) OldPackageID(ctx context.Context) (v *int, err error) {
+func (m *CertifyLegalMutation) OldPackageID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
 	}
@@ -3770,12 +3795,12 @@ func (m *CertifyLegalMutation) ResetPackageID() {
 }
 
 // SetSourceID sets the "source_id" field.
-func (m *CertifyLegalMutation) SetSourceID(i int) {
-	m.source = &i
+func (m *CertifyLegalMutation) SetSourceID(u uuid.UUID) {
+	m.source = &u
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
-func (m *CertifyLegalMutation) SourceID() (r int, exists bool) {
+func (m *CertifyLegalMutation) SourceID() (r uuid.UUID, exists bool) {
 	v := m.source
 	if v == nil {
 		return
@@ -3786,7 +3811,7 @@ func (m *CertifyLegalMutation) SourceID() (r int, exists bool) {
 // OldSourceID returns the old "source_id" field's value of the CertifyLegal entity.
 // If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyLegalMutation) OldSourceID(ctx context.Context) (v *int, err error) {
+func (m *CertifyLegalMutation) OldSourceID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -4156,7 +4181,7 @@ func (m *CertifyLegalMutation) PackageCleared() bool {
 // PackageIDs returns the "package" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageID instead. It exists only for internal usage by the builders.
-func (m *CertifyLegalMutation) PackageIDs() (ids []int) {
+func (m *CertifyLegalMutation) PackageIDs() (ids []uuid.UUID) {
 	if id := m._package; id != nil {
 		ids = append(ids, *id)
 	}
@@ -4183,7 +4208,7 @@ func (m *CertifyLegalMutation) SourceCleared() bool {
 // SourceIDs returns the "source" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SourceID instead. It exists only for internal usage by the builders.
-func (m *CertifyLegalMutation) SourceIDs() (ids []int) {
+func (m *CertifyLegalMutation) SourceIDs() (ids []uuid.UUID) {
 	if id := m.source; id != nil {
 		ids = append(ids, *id)
 	}
@@ -4197,9 +4222,9 @@ func (m *CertifyLegalMutation) ResetSource() {
 }
 
 // AddDeclaredLicenseIDs adds the "declared_licenses" edge to the License entity by ids.
-func (m *CertifyLegalMutation) AddDeclaredLicenseIDs(ids ...int) {
+func (m *CertifyLegalMutation) AddDeclaredLicenseIDs(ids ...uuid.UUID) {
 	if m.declared_licenses == nil {
-		m.declared_licenses = make(map[int]struct{})
+		m.declared_licenses = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.declared_licenses[ids[i]] = struct{}{}
@@ -4217,9 +4242,9 @@ func (m *CertifyLegalMutation) DeclaredLicensesCleared() bool {
 }
 
 // RemoveDeclaredLicenseIDs removes the "declared_licenses" edge to the License entity by IDs.
-func (m *CertifyLegalMutation) RemoveDeclaredLicenseIDs(ids ...int) {
+func (m *CertifyLegalMutation) RemoveDeclaredLicenseIDs(ids ...uuid.UUID) {
 	if m.removeddeclared_licenses == nil {
-		m.removeddeclared_licenses = make(map[int]struct{})
+		m.removeddeclared_licenses = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.declared_licenses, ids[i])
@@ -4228,7 +4253,7 @@ func (m *CertifyLegalMutation) RemoveDeclaredLicenseIDs(ids ...int) {
 }
 
 // RemovedDeclaredLicenses returns the removed IDs of the "declared_licenses" edge to the License entity.
-func (m *CertifyLegalMutation) RemovedDeclaredLicensesIDs() (ids []int) {
+func (m *CertifyLegalMutation) RemovedDeclaredLicensesIDs() (ids []uuid.UUID) {
 	for id := range m.removeddeclared_licenses {
 		ids = append(ids, id)
 	}
@@ -4236,7 +4261,7 @@ func (m *CertifyLegalMutation) RemovedDeclaredLicensesIDs() (ids []int) {
 }
 
 // DeclaredLicensesIDs returns the "declared_licenses" edge IDs in the mutation.
-func (m *CertifyLegalMutation) DeclaredLicensesIDs() (ids []int) {
+func (m *CertifyLegalMutation) DeclaredLicensesIDs() (ids []uuid.UUID) {
 	for id := range m.declared_licenses {
 		ids = append(ids, id)
 	}
@@ -4251,9 +4276,9 @@ func (m *CertifyLegalMutation) ResetDeclaredLicenses() {
 }
 
 // AddDiscoveredLicenseIDs adds the "discovered_licenses" edge to the License entity by ids.
-func (m *CertifyLegalMutation) AddDiscoveredLicenseIDs(ids ...int) {
+func (m *CertifyLegalMutation) AddDiscoveredLicenseIDs(ids ...uuid.UUID) {
 	if m.discovered_licenses == nil {
-		m.discovered_licenses = make(map[int]struct{})
+		m.discovered_licenses = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.discovered_licenses[ids[i]] = struct{}{}
@@ -4271,9 +4296,9 @@ func (m *CertifyLegalMutation) DiscoveredLicensesCleared() bool {
 }
 
 // RemoveDiscoveredLicenseIDs removes the "discovered_licenses" edge to the License entity by IDs.
-func (m *CertifyLegalMutation) RemoveDiscoveredLicenseIDs(ids ...int) {
+func (m *CertifyLegalMutation) RemoveDiscoveredLicenseIDs(ids ...uuid.UUID) {
 	if m.removeddiscovered_licenses == nil {
-		m.removeddiscovered_licenses = make(map[int]struct{})
+		m.removeddiscovered_licenses = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.discovered_licenses, ids[i])
@@ -4282,7 +4307,7 @@ func (m *CertifyLegalMutation) RemoveDiscoveredLicenseIDs(ids ...int) {
 }
 
 // RemovedDiscoveredLicenses returns the removed IDs of the "discovered_licenses" edge to the License entity.
-func (m *CertifyLegalMutation) RemovedDiscoveredLicensesIDs() (ids []int) {
+func (m *CertifyLegalMutation) RemovedDiscoveredLicensesIDs() (ids []uuid.UUID) {
 	for id := range m.removeddiscovered_licenses {
 		ids = append(ids, id)
 	}
@@ -4290,7 +4315,7 @@ func (m *CertifyLegalMutation) RemovedDiscoveredLicensesIDs() (ids []int) {
 }
 
 // DiscoveredLicensesIDs returns the "discovered_licenses" edge IDs in the mutation.
-func (m *CertifyLegalMutation) DiscoveredLicensesIDs() (ids []int) {
+func (m *CertifyLegalMutation) DiscoveredLicensesIDs() (ids []uuid.UUID) {
 	for id := range m.discovered_licenses {
 		ids = append(ids, id)
 	}
@@ -4443,14 +4468,14 @@ func (m *CertifyLegalMutation) OldField(ctx context.Context, name string) (ent.V
 func (m *CertifyLegalMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case certifylegal.FieldPackageID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageID(v)
 		return nil
 	case certifylegal.FieldSourceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -4526,16 +4551,13 @@ func (m *CertifyLegalMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CertifyLegalMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CertifyLegalMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -4774,11 +4796,11 @@ type CertifyScorecardMutation struct {
 	config
 	op               Op
 	typ              string
-	id               *int
+	id               *uuid.UUID
 	clearedFields    map[string]struct{}
-	scorecard        *int
+	scorecard        *uuid.UUID
 	clearedscorecard bool
-	source           *int
+	source           *uuid.UUID
 	clearedsource    bool
 	done             bool
 	oldValue         func(context.Context) (*CertifyScorecard, error)
@@ -4805,7 +4827,7 @@ func newCertifyScorecardMutation(c config, op Op, opts ...certifyscorecardOption
 }
 
 // withCertifyScorecardID sets the ID field of the mutation.
-func withCertifyScorecardID(id int) certifyscorecardOption {
+func withCertifyScorecardID(id uuid.UUID) certifyscorecardOption {
 	return func(m *CertifyScorecardMutation) {
 		var (
 			err   error
@@ -4855,9 +4877,15 @@ func (m CertifyScorecardMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CertifyScorecard entities.
+func (m *CertifyScorecardMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CertifyScorecardMutation) ID() (id int, exists bool) {
+func (m *CertifyScorecardMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -4868,12 +4896,12 @@ func (m *CertifyScorecardMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CertifyScorecardMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *CertifyScorecardMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -4884,12 +4912,12 @@ func (m *CertifyScorecardMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetSourceID sets the "source_id" field.
-func (m *CertifyScorecardMutation) SetSourceID(i int) {
-	m.source = &i
+func (m *CertifyScorecardMutation) SetSourceID(u uuid.UUID) {
+	m.source = &u
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
-func (m *CertifyScorecardMutation) SourceID() (r int, exists bool) {
+func (m *CertifyScorecardMutation) SourceID() (r uuid.UUID, exists bool) {
 	v := m.source
 	if v == nil {
 		return
@@ -4900,7 +4928,7 @@ func (m *CertifyScorecardMutation) SourceID() (r int, exists bool) {
 // OldSourceID returns the old "source_id" field's value of the CertifyScorecard entity.
 // If the CertifyScorecard object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyScorecardMutation) OldSourceID(ctx context.Context) (v int, err error) {
+func (m *CertifyScorecardMutation) OldSourceID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -4920,12 +4948,12 @@ func (m *CertifyScorecardMutation) ResetSourceID() {
 }
 
 // SetScorecardID sets the "scorecard_id" field.
-func (m *CertifyScorecardMutation) SetScorecardID(i int) {
-	m.scorecard = &i
+func (m *CertifyScorecardMutation) SetScorecardID(u uuid.UUID) {
+	m.scorecard = &u
 }
 
 // ScorecardID returns the value of the "scorecard_id" field in the mutation.
-func (m *CertifyScorecardMutation) ScorecardID() (r int, exists bool) {
+func (m *CertifyScorecardMutation) ScorecardID() (r uuid.UUID, exists bool) {
 	v := m.scorecard
 	if v == nil {
 		return
@@ -4936,7 +4964,7 @@ func (m *CertifyScorecardMutation) ScorecardID() (r int, exists bool) {
 // OldScorecardID returns the old "scorecard_id" field's value of the CertifyScorecard entity.
 // If the CertifyScorecard object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyScorecardMutation) OldScorecardID(ctx context.Context) (v int, err error) {
+func (m *CertifyScorecardMutation) OldScorecardID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldScorecardID is only allowed on UpdateOne operations")
 	}
@@ -4969,7 +4997,7 @@ func (m *CertifyScorecardMutation) ScorecardCleared() bool {
 // ScorecardIDs returns the "scorecard" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ScorecardID instead. It exists only for internal usage by the builders.
-func (m *CertifyScorecardMutation) ScorecardIDs() (ids []int) {
+func (m *CertifyScorecardMutation) ScorecardIDs() (ids []uuid.UUID) {
 	if id := m.scorecard; id != nil {
 		ids = append(ids, *id)
 	}
@@ -4996,7 +5024,7 @@ func (m *CertifyScorecardMutation) SourceCleared() bool {
 // SourceIDs returns the "source" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SourceID instead. It exists only for internal usage by the builders.
-func (m *CertifyScorecardMutation) SourceIDs() (ids []int) {
+func (m *CertifyScorecardMutation) SourceIDs() (ids []uuid.UUID) {
 	if id := m.source; id != nil {
 		ids = append(ids, *id)
 	}
@@ -5085,14 +5113,14 @@ func (m *CertifyScorecardMutation) OldField(ctx context.Context, name string) (e
 func (m *CertifyScorecardMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case certifyscorecard.FieldSourceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceID(v)
 		return nil
 	case certifyscorecard.FieldScorecardID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -5105,16 +5133,13 @@ func (m *CertifyScorecardMutation) SetField(name string, value ent.Value) error 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CertifyScorecardMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CertifyScorecardMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -5257,7 +5282,7 @@ type CertifyVexMutation struct {
 	config
 	op                   Op
 	typ                  string
-	id                   *int
+	id                   *uuid.UUID
 	known_since          *time.Time
 	status               *string
 	statement            *string
@@ -5266,11 +5291,11 @@ type CertifyVexMutation struct {
 	origin               *string
 	collector            *string
 	clearedFields        map[string]struct{}
-	_package             *int
+	_package             *uuid.UUID
 	cleared_package      bool
-	artifact             *int
+	artifact             *uuid.UUID
 	clearedartifact      bool
-	vulnerability        *int
+	vulnerability        *uuid.UUID
 	clearedvulnerability bool
 	done                 bool
 	oldValue             func(context.Context) (*CertifyVex, error)
@@ -5297,7 +5322,7 @@ func newCertifyVexMutation(c config, op Op, opts ...certifyvexOption) *CertifyVe
 }
 
 // withCertifyVexID sets the ID field of the mutation.
-func withCertifyVexID(id int) certifyvexOption {
+func withCertifyVexID(id uuid.UUID) certifyvexOption {
 	return func(m *CertifyVexMutation) {
 		var (
 			err   error
@@ -5347,9 +5372,15 @@ func (m CertifyVexMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CertifyVex entities.
+func (m *CertifyVexMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CertifyVexMutation) ID() (id int, exists bool) {
+func (m *CertifyVexMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -5360,12 +5391,12 @@ func (m *CertifyVexMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CertifyVexMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *CertifyVexMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -5376,12 +5407,12 @@ func (m *CertifyVexMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetPackageID sets the "package_id" field.
-func (m *CertifyVexMutation) SetPackageID(i int) {
-	m._package = &i
+func (m *CertifyVexMutation) SetPackageID(u uuid.UUID) {
+	m._package = &u
 }
 
 // PackageID returns the value of the "package_id" field in the mutation.
-func (m *CertifyVexMutation) PackageID() (r int, exists bool) {
+func (m *CertifyVexMutation) PackageID() (r uuid.UUID, exists bool) {
 	v := m._package
 	if v == nil {
 		return
@@ -5392,7 +5423,7 @@ func (m *CertifyVexMutation) PackageID() (r int, exists bool) {
 // OldPackageID returns the old "package_id" field's value of the CertifyVex entity.
 // If the CertifyVex object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyVexMutation) OldPackageID(ctx context.Context) (v *int, err error) {
+func (m *CertifyVexMutation) OldPackageID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
 	}
@@ -5425,12 +5456,12 @@ func (m *CertifyVexMutation) ResetPackageID() {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (m *CertifyVexMutation) SetArtifactID(i int) {
-	m.artifact = &i
+func (m *CertifyVexMutation) SetArtifactID(u uuid.UUID) {
+	m.artifact = &u
 }
 
 // ArtifactID returns the value of the "artifact_id" field in the mutation.
-func (m *CertifyVexMutation) ArtifactID() (r int, exists bool) {
+func (m *CertifyVexMutation) ArtifactID() (r uuid.UUID, exists bool) {
 	v := m.artifact
 	if v == nil {
 		return
@@ -5441,7 +5472,7 @@ func (m *CertifyVexMutation) ArtifactID() (r int, exists bool) {
 // OldArtifactID returns the old "artifact_id" field's value of the CertifyVex entity.
 // If the CertifyVex object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyVexMutation) OldArtifactID(ctx context.Context) (v *int, err error) {
+func (m *CertifyVexMutation) OldArtifactID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
 	}
@@ -5474,12 +5505,12 @@ func (m *CertifyVexMutation) ResetArtifactID() {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (m *CertifyVexMutation) SetVulnerabilityID(i int) {
-	m.vulnerability = &i
+func (m *CertifyVexMutation) SetVulnerabilityID(u uuid.UUID) {
+	m.vulnerability = &u
 }
 
 // VulnerabilityID returns the value of the "vulnerability_id" field in the mutation.
-func (m *CertifyVexMutation) VulnerabilityID() (r int, exists bool) {
+func (m *CertifyVexMutation) VulnerabilityID() (r uuid.UUID, exists bool) {
 	v := m.vulnerability
 	if v == nil {
 		return
@@ -5490,7 +5521,7 @@ func (m *CertifyVexMutation) VulnerabilityID() (r int, exists bool) {
 // OldVulnerabilityID returns the old "vulnerability_id" field's value of the CertifyVex entity.
 // If the CertifyVex object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyVexMutation) OldVulnerabilityID(ctx context.Context) (v int, err error) {
+func (m *CertifyVexMutation) OldVulnerabilityID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldVulnerabilityID is only allowed on UpdateOne operations")
 	}
@@ -5775,7 +5806,7 @@ func (m *CertifyVexMutation) PackageCleared() bool {
 // PackageIDs returns the "package" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageID instead. It exists only for internal usage by the builders.
-func (m *CertifyVexMutation) PackageIDs() (ids []int) {
+func (m *CertifyVexMutation) PackageIDs() (ids []uuid.UUID) {
 	if id := m._package; id != nil {
 		ids = append(ids, *id)
 	}
@@ -5802,7 +5833,7 @@ func (m *CertifyVexMutation) ArtifactCleared() bool {
 // ArtifactIDs returns the "artifact" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ArtifactID instead. It exists only for internal usage by the builders.
-func (m *CertifyVexMutation) ArtifactIDs() (ids []int) {
+func (m *CertifyVexMutation) ArtifactIDs() (ids []uuid.UUID) {
 	if id := m.artifact; id != nil {
 		ids = append(ids, *id)
 	}
@@ -5829,7 +5860,7 @@ func (m *CertifyVexMutation) VulnerabilityCleared() bool {
 // VulnerabilityIDs returns the "vulnerability" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // VulnerabilityID instead. It exists only for internal usage by the builders.
-func (m *CertifyVexMutation) VulnerabilityIDs() (ids []int) {
+func (m *CertifyVexMutation) VulnerabilityIDs() (ids []uuid.UUID) {
 	if id := m.vulnerability; id != nil {
 		ids = append(ids, *id)
 	}
@@ -5974,21 +6005,21 @@ func (m *CertifyVexMutation) OldField(ctx context.Context, name string) (ent.Val
 func (m *CertifyVexMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case certifyvex.FieldPackageID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageID(v)
 		return nil
 	case certifyvex.FieldArtifactID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetArtifactID(v)
 		return nil
 	case certifyvex.FieldVulnerabilityID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6050,16 +6081,13 @@ func (m *CertifyVexMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CertifyVexMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CertifyVexMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -6259,7 +6287,7 @@ type CertifyVulnMutation struct {
 	config
 	op                   Op
 	typ                  string
-	id                   *int
+	id                   *uuid.UUID
 	time_scanned         *time.Time
 	db_uri               *string
 	db_version           *string
@@ -6268,9 +6296,9 @@ type CertifyVulnMutation struct {
 	origin               *string
 	collector            *string
 	clearedFields        map[string]struct{}
-	vulnerability        *int
+	vulnerability        *uuid.UUID
 	clearedvulnerability bool
-	_package             *int
+	_package             *uuid.UUID
 	cleared_package      bool
 	done                 bool
 	oldValue             func(context.Context) (*CertifyVuln, error)
@@ -6297,7 +6325,7 @@ func newCertifyVulnMutation(c config, op Op, opts ...certifyvulnOption) *Certify
 }
 
 // withCertifyVulnID sets the ID field of the mutation.
-func withCertifyVulnID(id int) certifyvulnOption {
+func withCertifyVulnID(id uuid.UUID) certifyvulnOption {
 	return func(m *CertifyVulnMutation) {
 		var (
 			err   error
@@ -6347,9 +6375,15 @@ func (m CertifyVulnMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CertifyVuln entities.
+func (m *CertifyVulnMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CertifyVulnMutation) ID() (id int, exists bool) {
+func (m *CertifyVulnMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -6360,12 +6394,12 @@ func (m *CertifyVulnMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CertifyVulnMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *CertifyVulnMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -6376,12 +6410,12 @@ func (m *CertifyVulnMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (m *CertifyVulnMutation) SetVulnerabilityID(i int) {
-	m.vulnerability = &i
+func (m *CertifyVulnMutation) SetVulnerabilityID(u uuid.UUID) {
+	m.vulnerability = &u
 }
 
 // VulnerabilityID returns the value of the "vulnerability_id" field in the mutation.
-func (m *CertifyVulnMutation) VulnerabilityID() (r int, exists bool) {
+func (m *CertifyVulnMutation) VulnerabilityID() (r uuid.UUID, exists bool) {
 	v := m.vulnerability
 	if v == nil {
 		return
@@ -6392,7 +6426,7 @@ func (m *CertifyVulnMutation) VulnerabilityID() (r int, exists bool) {
 // OldVulnerabilityID returns the old "vulnerability_id" field's value of the CertifyVuln entity.
 // If the CertifyVuln object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyVulnMutation) OldVulnerabilityID(ctx context.Context) (v int, err error) {
+func (m *CertifyVulnMutation) OldVulnerabilityID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldVulnerabilityID is only allowed on UpdateOne operations")
 	}
@@ -6412,12 +6446,12 @@ func (m *CertifyVulnMutation) ResetVulnerabilityID() {
 }
 
 // SetPackageID sets the "package_id" field.
-func (m *CertifyVulnMutation) SetPackageID(i int) {
-	m._package = &i
+func (m *CertifyVulnMutation) SetPackageID(u uuid.UUID) {
+	m._package = &u
 }
 
 // PackageID returns the value of the "package_id" field in the mutation.
-func (m *CertifyVulnMutation) PackageID() (r int, exists bool) {
+func (m *CertifyVulnMutation) PackageID() (r uuid.UUID, exists bool) {
 	v := m._package
 	if v == nil {
 		return
@@ -6428,7 +6462,7 @@ func (m *CertifyVulnMutation) PackageID() (r int, exists bool) {
 // OldPackageID returns the old "package_id" field's value of the CertifyVuln entity.
 // If the CertifyVuln object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertifyVulnMutation) OldPackageID(ctx context.Context) (v int, err error) {
+func (m *CertifyVulnMutation) OldPackageID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
 	}
@@ -6713,7 +6747,7 @@ func (m *CertifyVulnMutation) VulnerabilityCleared() bool {
 // VulnerabilityIDs returns the "vulnerability" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // VulnerabilityID instead. It exists only for internal usage by the builders.
-func (m *CertifyVulnMutation) VulnerabilityIDs() (ids []int) {
+func (m *CertifyVulnMutation) VulnerabilityIDs() (ids []uuid.UUID) {
 	if id := m.vulnerability; id != nil {
 		ids = append(ids, *id)
 	}
@@ -6740,7 +6774,7 @@ func (m *CertifyVulnMutation) PackageCleared() bool {
 // PackageIDs returns the "package" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageID instead. It exists only for internal usage by the builders.
-func (m *CertifyVulnMutation) PackageIDs() (ids []int) {
+func (m *CertifyVulnMutation) PackageIDs() (ids []uuid.UUID) {
 	if id := m._package; id != nil {
 		ids = append(ids, *id)
 	}
@@ -6878,14 +6912,14 @@ func (m *CertifyVulnMutation) OldField(ctx context.Context, name string) (ent.Va
 func (m *CertifyVulnMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case certifyvuln.FieldVulnerabilityID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetVulnerabilityID(v)
 		return nil
 	case certifyvuln.FieldPackageID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6947,16 +6981,13 @@ func (m *CertifyVulnMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CertifyVulnMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CertifyVulnMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -7120,21 +7151,21 @@ type DependencyMutation struct {
 	config
 	op                               Op
 	typ                              string
-	id                               *int
+	id                               *uuid.UUID
 	version_range                    *string
 	dependency_type                  *dependency.DependencyType
 	justification                    *string
 	origin                           *string
 	collector                        *string
 	clearedFields                    map[string]struct{}
-	_package                         *int
+	_package                         *uuid.UUID
 	cleared_package                  bool
-	dependent_package_name           *int
+	dependent_package_name           *uuid.UUID
 	cleareddependent_package_name    bool
-	dependent_package_version        *int
+	dependent_package_version        *uuid.UUID
 	cleareddependent_package_version bool
-	included_in_sboms                map[int]struct{}
-	removedincluded_in_sboms         map[int]struct{}
+	included_in_sboms                map[uuid.UUID]struct{}
+	removedincluded_in_sboms         map[uuid.UUID]struct{}
 	clearedincluded_in_sboms         bool
 	done                             bool
 	oldValue                         func(context.Context) (*Dependency, error)
@@ -7161,7 +7192,7 @@ func newDependencyMutation(c config, op Op, opts ...dependencyOption) *Dependenc
 }
 
 // withDependencyID sets the ID field of the mutation.
-func withDependencyID(id int) dependencyOption {
+func withDependencyID(id uuid.UUID) dependencyOption {
 	return func(m *DependencyMutation) {
 		var (
 			err   error
@@ -7211,9 +7242,15 @@ func (m DependencyMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Dependency entities.
+func (m *DependencyMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *DependencyMutation) ID() (id int, exists bool) {
+func (m *DependencyMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -7224,12 +7261,12 @@ func (m *DependencyMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *DependencyMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *DependencyMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -7240,12 +7277,12 @@ func (m *DependencyMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetPackageID sets the "package_id" field.
-func (m *DependencyMutation) SetPackageID(i int) {
-	m._package = &i
+func (m *DependencyMutation) SetPackageID(u uuid.UUID) {
+	m._package = &u
 }
 
 // PackageID returns the value of the "package_id" field in the mutation.
-func (m *DependencyMutation) PackageID() (r int, exists bool) {
+func (m *DependencyMutation) PackageID() (r uuid.UUID, exists bool) {
 	v := m._package
 	if v == nil {
 		return
@@ -7256,7 +7293,7 @@ func (m *DependencyMutation) PackageID() (r int, exists bool) {
 // OldPackageID returns the old "package_id" field's value of the Dependency entity.
 // If the Dependency object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DependencyMutation) OldPackageID(ctx context.Context) (v int, err error) {
+func (m *DependencyMutation) OldPackageID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
 	}
@@ -7276,12 +7313,12 @@ func (m *DependencyMutation) ResetPackageID() {
 }
 
 // SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (m *DependencyMutation) SetDependentPackageNameID(i int) {
-	m.dependent_package_name = &i
+func (m *DependencyMutation) SetDependentPackageNameID(u uuid.UUID) {
+	m.dependent_package_name = &u
 }
 
 // DependentPackageNameID returns the value of the "dependent_package_name_id" field in the mutation.
-func (m *DependencyMutation) DependentPackageNameID() (r int, exists bool) {
+func (m *DependencyMutation) DependentPackageNameID() (r uuid.UUID, exists bool) {
 	v := m.dependent_package_name
 	if v == nil {
 		return
@@ -7292,7 +7329,7 @@ func (m *DependencyMutation) DependentPackageNameID() (r int, exists bool) {
 // OldDependentPackageNameID returns the old "dependent_package_name_id" field's value of the Dependency entity.
 // If the Dependency object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DependencyMutation) OldDependentPackageNameID(ctx context.Context) (v int, err error) {
+func (m *DependencyMutation) OldDependentPackageNameID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDependentPackageNameID is only allowed on UpdateOne operations")
 	}
@@ -7325,12 +7362,12 @@ func (m *DependencyMutation) ResetDependentPackageNameID() {
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (m *DependencyMutation) SetDependentPackageVersionID(i int) {
-	m.dependent_package_version = &i
+func (m *DependencyMutation) SetDependentPackageVersionID(u uuid.UUID) {
+	m.dependent_package_version = &u
 }
 
 // DependentPackageVersionID returns the value of the "dependent_package_version_id" field in the mutation.
-func (m *DependencyMutation) DependentPackageVersionID() (r int, exists bool) {
+func (m *DependencyMutation) DependentPackageVersionID() (r uuid.UUID, exists bool) {
 	v := m.dependent_package_version
 	if v == nil {
 		return
@@ -7341,7 +7378,7 @@ func (m *DependencyMutation) DependentPackageVersionID() (r int, exists bool) {
 // OldDependentPackageVersionID returns the old "dependent_package_version_id" field's value of the Dependency entity.
 // If the Dependency object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DependencyMutation) OldDependentPackageVersionID(ctx context.Context) (v int, err error) {
+func (m *DependencyMutation) OldDependentPackageVersionID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDependentPackageVersionID is only allowed on UpdateOne operations")
 	}
@@ -7567,7 +7604,7 @@ func (m *DependencyMutation) PackageCleared() bool {
 // PackageIDs returns the "package" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageID instead. It exists only for internal usage by the builders.
-func (m *DependencyMutation) PackageIDs() (ids []int) {
+func (m *DependencyMutation) PackageIDs() (ids []uuid.UUID) {
 	if id := m._package; id != nil {
 		ids = append(ids, *id)
 	}
@@ -7594,7 +7631,7 @@ func (m *DependencyMutation) DependentPackageNameCleared() bool {
 // DependentPackageNameIDs returns the "dependent_package_name" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // DependentPackageNameID instead. It exists only for internal usage by the builders.
-func (m *DependencyMutation) DependentPackageNameIDs() (ids []int) {
+func (m *DependencyMutation) DependentPackageNameIDs() (ids []uuid.UUID) {
 	if id := m.dependent_package_name; id != nil {
 		ids = append(ids, *id)
 	}
@@ -7621,7 +7658,7 @@ func (m *DependencyMutation) DependentPackageVersionCleared() bool {
 // DependentPackageVersionIDs returns the "dependent_package_version" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // DependentPackageVersionID instead. It exists only for internal usage by the builders.
-func (m *DependencyMutation) DependentPackageVersionIDs() (ids []int) {
+func (m *DependencyMutation) DependentPackageVersionIDs() (ids []uuid.UUID) {
 	if id := m.dependent_package_version; id != nil {
 		ids = append(ids, *id)
 	}
@@ -7635,9 +7672,9 @@ func (m *DependencyMutation) ResetDependentPackageVersion() {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
-func (m *DependencyMutation) AddIncludedInSbomIDs(ids ...int) {
+func (m *DependencyMutation) AddIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.included_in_sboms == nil {
-		m.included_in_sboms = make(map[int]struct{})
+		m.included_in_sboms = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.included_in_sboms[ids[i]] = struct{}{}
@@ -7655,9 +7692,9 @@ func (m *DependencyMutation) IncludedInSbomsCleared() bool {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (m *DependencyMutation) RemoveIncludedInSbomIDs(ids ...int) {
+func (m *DependencyMutation) RemoveIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.removedincluded_in_sboms == nil {
-		m.removedincluded_in_sboms = make(map[int]struct{})
+		m.removedincluded_in_sboms = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.included_in_sboms, ids[i])
@@ -7666,7 +7703,7 @@ func (m *DependencyMutation) RemoveIncludedInSbomIDs(ids ...int) {
 }
 
 // RemovedIncludedInSboms returns the removed IDs of the "included_in_sboms" edge to the BillOfMaterials entity.
-func (m *DependencyMutation) RemovedIncludedInSbomsIDs() (ids []int) {
+func (m *DependencyMutation) RemovedIncludedInSbomsIDs() (ids []uuid.UUID) {
 	for id := range m.removedincluded_in_sboms {
 		ids = append(ids, id)
 	}
@@ -7674,7 +7711,7 @@ func (m *DependencyMutation) RemovedIncludedInSbomsIDs() (ids []int) {
 }
 
 // IncludedInSbomsIDs returns the "included_in_sboms" edge IDs in the mutation.
-func (m *DependencyMutation) IncludedInSbomsIDs() (ids []int) {
+func (m *DependencyMutation) IncludedInSbomsIDs() (ids []uuid.UUID) {
 	for id := range m.included_in_sboms {
 		ids = append(ids, id)
 	}
@@ -7806,21 +7843,21 @@ func (m *DependencyMutation) OldField(ctx context.Context, name string) (ent.Val
 func (m *DependencyMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case dependency.FieldPackageID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageID(v)
 		return nil
 	case dependency.FieldDependentPackageNameID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDependentPackageNameID(v)
 		return nil
 	case dependency.FieldDependentPackageVersionID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -7868,16 +7905,13 @@ func (m *DependencyMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *DependencyMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *DependencyMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -8099,7 +8133,7 @@ type HasMetadataMutation struct {
 	config
 	op                     Op
 	typ                    string
-	id                     *int
+	id                     *uuid.UUID
 	timestamp              *time.Time
 	key                    *string
 	value                  *string
@@ -8107,13 +8141,13 @@ type HasMetadataMutation struct {
 	origin                 *string
 	collector              *string
 	clearedFields          map[string]struct{}
-	source                 *int
+	source                 *uuid.UUID
 	clearedsource          bool
-	package_version        *int
+	package_version        *uuid.UUID
 	clearedpackage_version bool
-	all_versions           *int
+	all_versions           *uuid.UUID
 	clearedall_versions    bool
-	artifact               *int
+	artifact               *uuid.UUID
 	clearedartifact        bool
 	done                   bool
 	oldValue               func(context.Context) (*HasMetadata, error)
@@ -8140,7 +8174,7 @@ func newHasMetadataMutation(c config, op Op, opts ...hasmetadataOption) *HasMeta
 }
 
 // withHasMetadataID sets the ID field of the mutation.
-func withHasMetadataID(id int) hasmetadataOption {
+func withHasMetadataID(id uuid.UUID) hasmetadataOption {
 	return func(m *HasMetadataMutation) {
 		var (
 			err   error
@@ -8190,9 +8224,15 @@ func (m HasMetadataMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of HasMetadata entities.
+func (m *HasMetadataMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *HasMetadataMutation) ID() (id int, exists bool) {
+func (m *HasMetadataMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -8203,12 +8243,12 @@ func (m *HasMetadataMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *HasMetadataMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *HasMetadataMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -8219,12 +8259,12 @@ func (m *HasMetadataMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetSourceID sets the "source_id" field.
-func (m *HasMetadataMutation) SetSourceID(i int) {
-	m.source = &i
+func (m *HasMetadataMutation) SetSourceID(u uuid.UUID) {
+	m.source = &u
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
-func (m *HasMetadataMutation) SourceID() (r int, exists bool) {
+func (m *HasMetadataMutation) SourceID() (r uuid.UUID, exists bool) {
 	v := m.source
 	if v == nil {
 		return
@@ -8235,7 +8275,7 @@ func (m *HasMetadataMutation) SourceID() (r int, exists bool) {
 // OldSourceID returns the old "source_id" field's value of the HasMetadata entity.
 // If the HasMetadata object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *HasMetadataMutation) OldSourceID(ctx context.Context) (v *int, err error) {
+func (m *HasMetadataMutation) OldSourceID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -8268,12 +8308,12 @@ func (m *HasMetadataMutation) ResetSourceID() {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (m *HasMetadataMutation) SetPackageVersionID(i int) {
-	m.package_version = &i
+func (m *HasMetadataMutation) SetPackageVersionID(u uuid.UUID) {
+	m.package_version = &u
 }
 
 // PackageVersionID returns the value of the "package_version_id" field in the mutation.
-func (m *HasMetadataMutation) PackageVersionID() (r int, exists bool) {
+func (m *HasMetadataMutation) PackageVersionID() (r uuid.UUID, exists bool) {
 	v := m.package_version
 	if v == nil {
 		return
@@ -8284,7 +8324,7 @@ func (m *HasMetadataMutation) PackageVersionID() (r int, exists bool) {
 // OldPackageVersionID returns the old "package_version_id" field's value of the HasMetadata entity.
 // If the HasMetadata object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *HasMetadataMutation) OldPackageVersionID(ctx context.Context) (v *int, err error) {
+func (m *HasMetadataMutation) OldPackageVersionID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageVersionID is only allowed on UpdateOne operations")
 	}
@@ -8317,12 +8357,12 @@ func (m *HasMetadataMutation) ResetPackageVersionID() {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (m *HasMetadataMutation) SetPackageNameID(i int) {
-	m.all_versions = &i
+func (m *HasMetadataMutation) SetPackageNameID(u uuid.UUID) {
+	m.all_versions = &u
 }
 
 // PackageNameID returns the value of the "package_name_id" field in the mutation.
-func (m *HasMetadataMutation) PackageNameID() (r int, exists bool) {
+func (m *HasMetadataMutation) PackageNameID() (r uuid.UUID, exists bool) {
 	v := m.all_versions
 	if v == nil {
 		return
@@ -8333,7 +8373,7 @@ func (m *HasMetadataMutation) PackageNameID() (r int, exists bool) {
 // OldPackageNameID returns the old "package_name_id" field's value of the HasMetadata entity.
 // If the HasMetadata object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *HasMetadataMutation) OldPackageNameID(ctx context.Context) (v *int, err error) {
+func (m *HasMetadataMutation) OldPackageNameID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageNameID is only allowed on UpdateOne operations")
 	}
@@ -8366,12 +8406,12 @@ func (m *HasMetadataMutation) ResetPackageNameID() {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (m *HasMetadataMutation) SetArtifactID(i int) {
-	m.artifact = &i
+func (m *HasMetadataMutation) SetArtifactID(u uuid.UUID) {
+	m.artifact = &u
 }
 
 // ArtifactID returns the value of the "artifact_id" field in the mutation.
-func (m *HasMetadataMutation) ArtifactID() (r int, exists bool) {
+func (m *HasMetadataMutation) ArtifactID() (r uuid.UUID, exists bool) {
 	v := m.artifact
 	if v == nil {
 		return
@@ -8382,7 +8422,7 @@ func (m *HasMetadataMutation) ArtifactID() (r int, exists bool) {
 // OldArtifactID returns the old "artifact_id" field's value of the HasMetadata entity.
 // If the HasMetadata object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *HasMetadataMutation) OldArtifactID(ctx context.Context) (v *int, err error) {
+func (m *HasMetadataMutation) OldArtifactID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
 	}
@@ -8644,7 +8684,7 @@ func (m *HasMetadataMutation) SourceCleared() bool {
 // SourceIDs returns the "source" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SourceID instead. It exists only for internal usage by the builders.
-func (m *HasMetadataMutation) SourceIDs() (ids []int) {
+func (m *HasMetadataMutation) SourceIDs() (ids []uuid.UUID) {
 	if id := m.source; id != nil {
 		ids = append(ids, *id)
 	}
@@ -8671,7 +8711,7 @@ func (m *HasMetadataMutation) PackageVersionCleared() bool {
 // PackageVersionIDs returns the "package_version" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageVersionID instead. It exists only for internal usage by the builders.
-func (m *HasMetadataMutation) PackageVersionIDs() (ids []int) {
+func (m *HasMetadataMutation) PackageVersionIDs() (ids []uuid.UUID) {
 	if id := m.package_version; id != nil {
 		ids = append(ids, *id)
 	}
@@ -8685,7 +8725,7 @@ func (m *HasMetadataMutation) ResetPackageVersion() {
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by id.
-func (m *HasMetadataMutation) SetAllVersionsID(id int) {
+func (m *HasMetadataMutation) SetAllVersionsID(id uuid.UUID) {
 	m.all_versions = &id
 }
 
@@ -8701,7 +8741,7 @@ func (m *HasMetadataMutation) AllVersionsCleared() bool {
 }
 
 // AllVersionsID returns the "all_versions" edge ID in the mutation.
-func (m *HasMetadataMutation) AllVersionsID() (id int, exists bool) {
+func (m *HasMetadataMutation) AllVersionsID() (id uuid.UUID, exists bool) {
 	if m.all_versions != nil {
 		return *m.all_versions, true
 	}
@@ -8711,7 +8751,7 @@ func (m *HasMetadataMutation) AllVersionsID() (id int, exists bool) {
 // AllVersionsIDs returns the "all_versions" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AllVersionsID instead. It exists only for internal usage by the builders.
-func (m *HasMetadataMutation) AllVersionsIDs() (ids []int) {
+func (m *HasMetadataMutation) AllVersionsIDs() (ids []uuid.UUID) {
 	if id := m.all_versions; id != nil {
 		ids = append(ids, *id)
 	}
@@ -8738,7 +8778,7 @@ func (m *HasMetadataMutation) ArtifactCleared() bool {
 // ArtifactIDs returns the "artifact" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ArtifactID instead. It exists only for internal usage by the builders.
-func (m *HasMetadataMutation) ArtifactIDs() (ids []int) {
+func (m *HasMetadataMutation) ArtifactIDs() (ids []uuid.UUID) {
 	if id := m.artifact; id != nil {
 		ids = append(ids, *id)
 	}
@@ -8883,28 +8923,28 @@ func (m *HasMetadataMutation) OldField(ctx context.Context, name string) (ent.Va
 func (m *HasMetadataMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case hasmetadata.FieldSourceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceID(v)
 		return nil
 	case hasmetadata.FieldPackageVersionID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageVersionID(v)
 		return nil
 	case hasmetadata.FieldPackageNameID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageNameID(v)
 		return nil
 	case hasmetadata.FieldArtifactID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -8959,16 +8999,13 @@ func (m *HasMetadataMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *HasMetadataMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *HasMetadataMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -9198,17 +9235,17 @@ type HasSourceAtMutation struct {
 	config
 	op                     Op
 	typ                    string
-	id                     *int
+	id                     *uuid.UUID
 	known_since            *time.Time
 	justification          *string
 	origin                 *string
 	collector              *string
 	clearedFields          map[string]struct{}
-	package_version        *int
+	package_version        *uuid.UUID
 	clearedpackage_version bool
-	all_versions           *int
+	all_versions           *uuid.UUID
 	clearedall_versions    bool
-	source                 *int
+	source                 *uuid.UUID
 	clearedsource          bool
 	done                   bool
 	oldValue               func(context.Context) (*HasSourceAt, error)
@@ -9235,7 +9272,7 @@ func newHasSourceAtMutation(c config, op Op, opts ...hassourceatOption) *HasSour
 }
 
 // withHasSourceAtID sets the ID field of the mutation.
-func withHasSourceAtID(id int) hassourceatOption {
+func withHasSourceAtID(id uuid.UUID) hassourceatOption {
 	return func(m *HasSourceAtMutation) {
 		var (
 			err   error
@@ -9285,9 +9322,15 @@ func (m HasSourceAtMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of HasSourceAt entities.
+func (m *HasSourceAtMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *HasSourceAtMutation) ID() (id int, exists bool) {
+func (m *HasSourceAtMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -9298,12 +9341,12 @@ func (m *HasSourceAtMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *HasSourceAtMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *HasSourceAtMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -9314,12 +9357,12 @@ func (m *HasSourceAtMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (m *HasSourceAtMutation) SetPackageVersionID(i int) {
-	m.package_version = &i
+func (m *HasSourceAtMutation) SetPackageVersionID(u uuid.UUID) {
+	m.package_version = &u
 }
 
 // PackageVersionID returns the value of the "package_version_id" field in the mutation.
-func (m *HasSourceAtMutation) PackageVersionID() (r int, exists bool) {
+func (m *HasSourceAtMutation) PackageVersionID() (r uuid.UUID, exists bool) {
 	v := m.package_version
 	if v == nil {
 		return
@@ -9330,7 +9373,7 @@ func (m *HasSourceAtMutation) PackageVersionID() (r int, exists bool) {
 // OldPackageVersionID returns the old "package_version_id" field's value of the HasSourceAt entity.
 // If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *HasSourceAtMutation) OldPackageVersionID(ctx context.Context) (v *int, err error) {
+func (m *HasSourceAtMutation) OldPackageVersionID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageVersionID is only allowed on UpdateOne operations")
 	}
@@ -9363,12 +9406,12 @@ func (m *HasSourceAtMutation) ResetPackageVersionID() {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (m *HasSourceAtMutation) SetPackageNameID(i int) {
-	m.all_versions = &i
+func (m *HasSourceAtMutation) SetPackageNameID(u uuid.UUID) {
+	m.all_versions = &u
 }
 
 // PackageNameID returns the value of the "package_name_id" field in the mutation.
-func (m *HasSourceAtMutation) PackageNameID() (r int, exists bool) {
+func (m *HasSourceAtMutation) PackageNameID() (r uuid.UUID, exists bool) {
 	v := m.all_versions
 	if v == nil {
 		return
@@ -9379,7 +9422,7 @@ func (m *HasSourceAtMutation) PackageNameID() (r int, exists bool) {
 // OldPackageNameID returns the old "package_name_id" field's value of the HasSourceAt entity.
 // If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *HasSourceAtMutation) OldPackageNameID(ctx context.Context) (v *int, err error) {
+func (m *HasSourceAtMutation) OldPackageNameID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageNameID is only allowed on UpdateOne operations")
 	}
@@ -9412,12 +9455,12 @@ func (m *HasSourceAtMutation) ResetPackageNameID() {
 }
 
 // SetSourceID sets the "source_id" field.
-func (m *HasSourceAtMutation) SetSourceID(i int) {
-	m.source = &i
+func (m *HasSourceAtMutation) SetSourceID(u uuid.UUID) {
+	m.source = &u
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
-func (m *HasSourceAtMutation) SourceID() (r int, exists bool) {
+func (m *HasSourceAtMutation) SourceID() (r uuid.UUID, exists bool) {
 	v := m.source
 	if v == nil {
 		return
@@ -9428,7 +9471,7 @@ func (m *HasSourceAtMutation) SourceID() (r int, exists bool) {
 // OldSourceID returns the old "source_id" field's value of the HasSourceAt entity.
 // If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *HasSourceAtMutation) OldSourceID(ctx context.Context) (v int, err error) {
+func (m *HasSourceAtMutation) OldSourceID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -9605,7 +9648,7 @@ func (m *HasSourceAtMutation) PackageVersionCleared() bool {
 // PackageVersionIDs returns the "package_version" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageVersionID instead. It exists only for internal usage by the builders.
-func (m *HasSourceAtMutation) PackageVersionIDs() (ids []int) {
+func (m *HasSourceAtMutation) PackageVersionIDs() (ids []uuid.UUID) {
 	if id := m.package_version; id != nil {
 		ids = append(ids, *id)
 	}
@@ -9619,7 +9662,7 @@ func (m *HasSourceAtMutation) ResetPackageVersion() {
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by id.
-func (m *HasSourceAtMutation) SetAllVersionsID(id int) {
+func (m *HasSourceAtMutation) SetAllVersionsID(id uuid.UUID) {
 	m.all_versions = &id
 }
 
@@ -9635,7 +9678,7 @@ func (m *HasSourceAtMutation) AllVersionsCleared() bool {
 }
 
 // AllVersionsID returns the "all_versions" edge ID in the mutation.
-func (m *HasSourceAtMutation) AllVersionsID() (id int, exists bool) {
+func (m *HasSourceAtMutation) AllVersionsID() (id uuid.UUID, exists bool) {
 	if m.all_versions != nil {
 		return *m.all_versions, true
 	}
@@ -9645,7 +9688,7 @@ func (m *HasSourceAtMutation) AllVersionsID() (id int, exists bool) {
 // AllVersionsIDs returns the "all_versions" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AllVersionsID instead. It exists only for internal usage by the builders.
-func (m *HasSourceAtMutation) AllVersionsIDs() (ids []int) {
+func (m *HasSourceAtMutation) AllVersionsIDs() (ids []uuid.UUID) {
 	if id := m.all_versions; id != nil {
 		ids = append(ids, *id)
 	}
@@ -9672,7 +9715,7 @@ func (m *HasSourceAtMutation) SourceCleared() bool {
 // SourceIDs returns the "source" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SourceID instead. It exists only for internal usage by the builders.
-func (m *HasSourceAtMutation) SourceIDs() (ids []int) {
+func (m *HasSourceAtMutation) SourceIDs() (ids []uuid.UUID) {
 	if id := m.source; id != nil {
 		ids = append(ids, *id)
 	}
@@ -9796,21 +9839,21 @@ func (m *HasSourceAtMutation) OldField(ctx context.Context, name string) (ent.Va
 func (m *HasSourceAtMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case hassourceat.FieldPackageVersionID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageVersionID(v)
 		return nil
 	case hassourceat.FieldPackageNameID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageNameID(v)
 		return nil
 	case hassourceat.FieldSourceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -9851,16 +9894,13 @@ func (m *HasSourceAtMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *HasSourceAtMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *HasSourceAtMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -10051,13 +10091,13 @@ type HashEqualMutation struct {
 	config
 	op               Op
 	typ              string
-	id               *int
+	id               *uuid.UUID
 	origin           *string
 	collector        *string
 	justification    *string
 	clearedFields    map[string]struct{}
-	artifacts        map[int]struct{}
-	removedartifacts map[int]struct{}
+	artifacts        map[uuid.UUID]struct{}
+	removedartifacts map[uuid.UUID]struct{}
 	clearedartifacts bool
 	done             bool
 	oldValue         func(context.Context) (*HashEqual, error)
@@ -10084,7 +10124,7 @@ func newHashEqualMutation(c config, op Op, opts ...hashequalOption) *HashEqualMu
 }
 
 // withHashEqualID sets the ID field of the mutation.
-func withHashEqualID(id int) hashequalOption {
+func withHashEqualID(id uuid.UUID) hashequalOption {
 	return func(m *HashEqualMutation) {
 		var (
 			err   error
@@ -10134,9 +10174,15 @@ func (m HashEqualMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of HashEqual entities.
+func (m *HashEqualMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *HashEqualMutation) ID() (id int, exists bool) {
+func (m *HashEqualMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -10147,12 +10193,12 @@ func (m *HashEqualMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *HashEqualMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *HashEqualMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -10271,9 +10317,9 @@ func (m *HashEqualMutation) ResetJustification() {
 }
 
 // AddArtifactIDs adds the "artifacts" edge to the Artifact entity by ids.
-func (m *HashEqualMutation) AddArtifactIDs(ids ...int) {
+func (m *HashEqualMutation) AddArtifactIDs(ids ...uuid.UUID) {
 	if m.artifacts == nil {
-		m.artifacts = make(map[int]struct{})
+		m.artifacts = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.artifacts[ids[i]] = struct{}{}
@@ -10291,9 +10337,9 @@ func (m *HashEqualMutation) ArtifactsCleared() bool {
 }
 
 // RemoveArtifactIDs removes the "artifacts" edge to the Artifact entity by IDs.
-func (m *HashEqualMutation) RemoveArtifactIDs(ids ...int) {
+func (m *HashEqualMutation) RemoveArtifactIDs(ids ...uuid.UUID) {
 	if m.removedartifacts == nil {
-		m.removedartifacts = make(map[int]struct{})
+		m.removedartifacts = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.artifacts, ids[i])
@@ -10302,7 +10348,7 @@ func (m *HashEqualMutation) RemoveArtifactIDs(ids ...int) {
 }
 
 // RemovedArtifacts returns the removed IDs of the "artifacts" edge to the Artifact entity.
-func (m *HashEqualMutation) RemovedArtifactsIDs() (ids []int) {
+func (m *HashEqualMutation) RemovedArtifactsIDs() (ids []uuid.UUID) {
 	for id := range m.removedartifacts {
 		ids = append(ids, id)
 	}
@@ -10310,7 +10356,7 @@ func (m *HashEqualMutation) RemovedArtifactsIDs() (ids []int) {
 }
 
 // ArtifactsIDs returns the "artifacts" edge IDs in the mutation.
-func (m *HashEqualMutation) ArtifactsIDs() (ids []int) {
+func (m *HashEqualMutation) ArtifactsIDs() (ids []uuid.UUID) {
 	for id := range m.artifacts {
 		ids = append(ids, id)
 	}
@@ -10578,14 +10624,14 @@ type IsVulnerabilityMutation struct {
 	config
 	op                   Op
 	typ                  string
-	id                   *int
+	id                   *uuid.UUID
 	justification        *string
 	origin               *string
 	collector            *string
 	clearedFields        map[string]struct{}
-	osv                  *int
+	osv                  *uuid.UUID
 	clearedosv           bool
-	vulnerability        *int
+	vulnerability        *uuid.UUID
 	clearedvulnerability bool
 	done                 bool
 	oldValue             func(context.Context) (*IsVulnerability, error)
@@ -10612,7 +10658,7 @@ func newIsVulnerabilityMutation(c config, op Op, opts ...isvulnerabilityOption) 
 }
 
 // withIsVulnerabilityID sets the ID field of the mutation.
-func withIsVulnerabilityID(id int) isvulnerabilityOption {
+func withIsVulnerabilityID(id uuid.UUID) isvulnerabilityOption {
 	return func(m *IsVulnerabilityMutation) {
 		var (
 			err   error
@@ -10662,9 +10708,15 @@ func (m IsVulnerabilityMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of IsVulnerability entities.
+func (m *IsVulnerabilityMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *IsVulnerabilityMutation) ID() (id int, exists bool) {
+func (m *IsVulnerabilityMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -10675,12 +10727,12 @@ func (m *IsVulnerabilityMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *IsVulnerabilityMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *IsVulnerabilityMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -10691,12 +10743,12 @@ func (m *IsVulnerabilityMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetOsvID sets the "osv_id" field.
-func (m *IsVulnerabilityMutation) SetOsvID(i int) {
-	m.osv = &i
+func (m *IsVulnerabilityMutation) SetOsvID(u uuid.UUID) {
+	m.osv = &u
 }
 
 // OsvID returns the value of the "osv_id" field in the mutation.
-func (m *IsVulnerabilityMutation) OsvID() (r int, exists bool) {
+func (m *IsVulnerabilityMutation) OsvID() (r uuid.UUID, exists bool) {
 	v := m.osv
 	if v == nil {
 		return
@@ -10707,7 +10759,7 @@ func (m *IsVulnerabilityMutation) OsvID() (r int, exists bool) {
 // OldOsvID returns the old "osv_id" field's value of the IsVulnerability entity.
 // If the IsVulnerability object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsVulnerabilityMutation) OldOsvID(ctx context.Context) (v int, err error) {
+func (m *IsVulnerabilityMutation) OldOsvID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOsvID is only allowed on UpdateOne operations")
 	}
@@ -10727,12 +10779,12 @@ func (m *IsVulnerabilityMutation) ResetOsvID() {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (m *IsVulnerabilityMutation) SetVulnerabilityID(i int) {
-	m.vulnerability = &i
+func (m *IsVulnerabilityMutation) SetVulnerabilityID(u uuid.UUID) {
+	m.vulnerability = &u
 }
 
 // VulnerabilityID returns the value of the "vulnerability_id" field in the mutation.
-func (m *IsVulnerabilityMutation) VulnerabilityID() (r int, exists bool) {
+func (m *IsVulnerabilityMutation) VulnerabilityID() (r uuid.UUID, exists bool) {
 	v := m.vulnerability
 	if v == nil {
 		return
@@ -10743,7 +10795,7 @@ func (m *IsVulnerabilityMutation) VulnerabilityID() (r int, exists bool) {
 // OldVulnerabilityID returns the old "vulnerability_id" field's value of the IsVulnerability entity.
 // If the IsVulnerability object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IsVulnerabilityMutation) OldVulnerabilityID(ctx context.Context) (v int, err error) {
+func (m *IsVulnerabilityMutation) OldVulnerabilityID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldVulnerabilityID is only allowed on UpdateOne operations")
 	}
@@ -10884,7 +10936,7 @@ func (m *IsVulnerabilityMutation) OsvCleared() bool {
 // OsvIDs returns the "osv" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // OsvID instead. It exists only for internal usage by the builders.
-func (m *IsVulnerabilityMutation) OsvIDs() (ids []int) {
+func (m *IsVulnerabilityMutation) OsvIDs() (ids []uuid.UUID) {
 	if id := m.osv; id != nil {
 		ids = append(ids, *id)
 	}
@@ -10911,7 +10963,7 @@ func (m *IsVulnerabilityMutation) VulnerabilityCleared() bool {
 // VulnerabilityIDs returns the "vulnerability" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // VulnerabilityID instead. It exists only for internal usage by the builders.
-func (m *IsVulnerabilityMutation) VulnerabilityIDs() (ids []int) {
+func (m *IsVulnerabilityMutation) VulnerabilityIDs() (ids []uuid.UUID) {
 	if id := m.vulnerability; id != nil {
 		ids = append(ids, *id)
 	}
@@ -11021,14 +11073,14 @@ func (m *IsVulnerabilityMutation) OldField(ctx context.Context, name string) (en
 func (m *IsVulnerabilityMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case isvulnerability.FieldOsvID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOsvID(v)
 		return nil
 	case isvulnerability.FieldVulnerabilityID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -11062,16 +11114,13 @@ func (m *IsVulnerabilityMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *IsVulnerabilityMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *IsVulnerabilityMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -11223,16 +11272,16 @@ type LicenseMutation struct {
 	config
 	op                                  Op
 	typ                                 string
-	id                                  *int
+	id                                  *uuid.UUID
 	name                                *string
 	inline                              *string
 	list_version                        *string
 	clearedFields                       map[string]struct{}
-	declared_in_certify_legals          map[int]struct{}
-	removeddeclared_in_certify_legals   map[int]struct{}
+	declared_in_certify_legals          map[uuid.UUID]struct{}
+	removeddeclared_in_certify_legals   map[uuid.UUID]struct{}
 	cleareddeclared_in_certify_legals   bool
-	discovered_in_certify_legals        map[int]struct{}
-	removeddiscovered_in_certify_legals map[int]struct{}
+	discovered_in_certify_legals        map[uuid.UUID]struct{}
+	removeddiscovered_in_certify_legals map[uuid.UUID]struct{}
 	cleareddiscovered_in_certify_legals bool
 	done                                bool
 	oldValue                            func(context.Context) (*License, error)
@@ -11259,7 +11308,7 @@ func newLicenseMutation(c config, op Op, opts ...licenseOption) *LicenseMutation
 }
 
 // withLicenseID sets the ID field of the mutation.
-func withLicenseID(id int) licenseOption {
+func withLicenseID(id uuid.UUID) licenseOption {
 	return func(m *LicenseMutation) {
 		var (
 			err   error
@@ -11309,9 +11358,15 @@ func (m LicenseMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of License entities.
+func (m *LicenseMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *LicenseMutation) ID() (id int, exists bool) {
+func (m *LicenseMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -11322,12 +11377,12 @@ func (m *LicenseMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *LicenseMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *LicenseMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -11472,9 +11527,9 @@ func (m *LicenseMutation) ResetListVersion() {
 }
 
 // AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by ids.
-func (m *LicenseMutation) AddDeclaredInCertifyLegalIDs(ids ...int) {
+func (m *LicenseMutation) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) {
 	if m.declared_in_certify_legals == nil {
-		m.declared_in_certify_legals = make(map[int]struct{})
+		m.declared_in_certify_legals = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.declared_in_certify_legals[ids[i]] = struct{}{}
@@ -11492,9 +11547,9 @@ func (m *LicenseMutation) DeclaredInCertifyLegalsCleared() bool {
 }
 
 // RemoveDeclaredInCertifyLegalIDs removes the "declared_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (m *LicenseMutation) RemoveDeclaredInCertifyLegalIDs(ids ...int) {
+func (m *LicenseMutation) RemoveDeclaredInCertifyLegalIDs(ids ...uuid.UUID) {
 	if m.removeddeclared_in_certify_legals == nil {
-		m.removeddeclared_in_certify_legals = make(map[int]struct{})
+		m.removeddeclared_in_certify_legals = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.declared_in_certify_legals, ids[i])
@@ -11503,7 +11558,7 @@ func (m *LicenseMutation) RemoveDeclaredInCertifyLegalIDs(ids ...int) {
 }
 
 // RemovedDeclaredInCertifyLegals returns the removed IDs of the "declared_in_certify_legals" edge to the CertifyLegal entity.
-func (m *LicenseMutation) RemovedDeclaredInCertifyLegalsIDs() (ids []int) {
+func (m *LicenseMutation) RemovedDeclaredInCertifyLegalsIDs() (ids []uuid.UUID) {
 	for id := range m.removeddeclared_in_certify_legals {
 		ids = append(ids, id)
 	}
@@ -11511,7 +11566,7 @@ func (m *LicenseMutation) RemovedDeclaredInCertifyLegalsIDs() (ids []int) {
 }
 
 // DeclaredInCertifyLegalsIDs returns the "declared_in_certify_legals" edge IDs in the mutation.
-func (m *LicenseMutation) DeclaredInCertifyLegalsIDs() (ids []int) {
+func (m *LicenseMutation) DeclaredInCertifyLegalsIDs() (ids []uuid.UUID) {
 	for id := range m.declared_in_certify_legals {
 		ids = append(ids, id)
 	}
@@ -11526,9 +11581,9 @@ func (m *LicenseMutation) ResetDeclaredInCertifyLegals() {
 }
 
 // AddDiscoveredInCertifyLegalIDs adds the "discovered_in_certify_legals" edge to the CertifyLegal entity by ids.
-func (m *LicenseMutation) AddDiscoveredInCertifyLegalIDs(ids ...int) {
+func (m *LicenseMutation) AddDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) {
 	if m.discovered_in_certify_legals == nil {
-		m.discovered_in_certify_legals = make(map[int]struct{})
+		m.discovered_in_certify_legals = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.discovered_in_certify_legals[ids[i]] = struct{}{}
@@ -11546,9 +11601,9 @@ func (m *LicenseMutation) DiscoveredInCertifyLegalsCleared() bool {
 }
 
 // RemoveDiscoveredInCertifyLegalIDs removes the "discovered_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (m *LicenseMutation) RemoveDiscoveredInCertifyLegalIDs(ids ...int) {
+func (m *LicenseMutation) RemoveDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) {
 	if m.removeddiscovered_in_certify_legals == nil {
-		m.removeddiscovered_in_certify_legals = make(map[int]struct{})
+		m.removeddiscovered_in_certify_legals = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.discovered_in_certify_legals, ids[i])
@@ -11557,7 +11612,7 @@ func (m *LicenseMutation) RemoveDiscoveredInCertifyLegalIDs(ids ...int) {
 }
 
 // RemovedDiscoveredInCertifyLegals returns the removed IDs of the "discovered_in_certify_legals" edge to the CertifyLegal entity.
-func (m *LicenseMutation) RemovedDiscoveredInCertifyLegalsIDs() (ids []int) {
+func (m *LicenseMutation) RemovedDiscoveredInCertifyLegalsIDs() (ids []uuid.UUID) {
 	for id := range m.removeddiscovered_in_certify_legals {
 		ids = append(ids, id)
 	}
@@ -11565,7 +11620,7 @@ func (m *LicenseMutation) RemovedDiscoveredInCertifyLegalsIDs() (ids []int) {
 }
 
 // DiscoveredInCertifyLegalsIDs returns the "discovered_in_certify_legals" edge IDs in the mutation.
-func (m *LicenseMutation) DiscoveredInCertifyLegalsIDs() (ids []int) {
+func (m *LicenseMutation) DiscoveredInCertifyLegalsIDs() (ids []uuid.UUID) {
 	for id := range m.discovered_in_certify_legals {
 		ids = append(ids, id)
 	}
@@ -11874,19 +11929,19 @@ type OccurrenceMutation struct {
 	config
 	op                       Op
 	typ                      string
-	id                       *int
+	id                       *uuid.UUID
 	justification            *string
 	origin                   *string
 	collector                *string
 	clearedFields            map[string]struct{}
-	artifact                 *int
+	artifact                 *uuid.UUID
 	clearedartifact          bool
-	_package                 *int
+	_package                 *uuid.UUID
 	cleared_package          bool
-	source                   *int
+	source                   *uuid.UUID
 	clearedsource            bool
-	included_in_sboms        map[int]struct{}
-	removedincluded_in_sboms map[int]struct{}
+	included_in_sboms        map[uuid.UUID]struct{}
+	removedincluded_in_sboms map[uuid.UUID]struct{}
 	clearedincluded_in_sboms bool
 	done                     bool
 	oldValue                 func(context.Context) (*Occurrence, error)
@@ -11913,7 +11968,7 @@ func newOccurrenceMutation(c config, op Op, opts ...occurrenceOption) *Occurrenc
 }
 
 // withOccurrenceID sets the ID field of the mutation.
-func withOccurrenceID(id int) occurrenceOption {
+func withOccurrenceID(id uuid.UUID) occurrenceOption {
 	return func(m *OccurrenceMutation) {
 		var (
 			err   error
@@ -11963,9 +12018,15 @@ func (m OccurrenceMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Occurrence entities.
+func (m *OccurrenceMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *OccurrenceMutation) ID() (id int, exists bool) {
+func (m *OccurrenceMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -11976,12 +12037,12 @@ func (m *OccurrenceMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *OccurrenceMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *OccurrenceMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -11992,12 +12053,12 @@ func (m *OccurrenceMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (m *OccurrenceMutation) SetArtifactID(i int) {
-	m.artifact = &i
+func (m *OccurrenceMutation) SetArtifactID(u uuid.UUID) {
+	m.artifact = &u
 }
 
 // ArtifactID returns the value of the "artifact_id" field in the mutation.
-func (m *OccurrenceMutation) ArtifactID() (r int, exists bool) {
+func (m *OccurrenceMutation) ArtifactID() (r uuid.UUID, exists bool) {
 	v := m.artifact
 	if v == nil {
 		return
@@ -12008,7 +12069,7 @@ func (m *OccurrenceMutation) ArtifactID() (r int, exists bool) {
 // OldArtifactID returns the old "artifact_id" field's value of the Occurrence entity.
 // If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OccurrenceMutation) OldArtifactID(ctx context.Context) (v int, err error) {
+func (m *OccurrenceMutation) OldArtifactID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
 	}
@@ -12136,12 +12197,12 @@ func (m *OccurrenceMutation) ResetCollector() {
 }
 
 // SetSourceID sets the "source_id" field.
-func (m *OccurrenceMutation) SetSourceID(i int) {
-	m.source = &i
+func (m *OccurrenceMutation) SetSourceID(u uuid.UUID) {
+	m.source = &u
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
-func (m *OccurrenceMutation) SourceID() (r int, exists bool) {
+func (m *OccurrenceMutation) SourceID() (r uuid.UUID, exists bool) {
 	v := m.source
 	if v == nil {
 		return
@@ -12152,7 +12213,7 @@ func (m *OccurrenceMutation) SourceID() (r int, exists bool) {
 // OldSourceID returns the old "source_id" field's value of the Occurrence entity.
 // If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OccurrenceMutation) OldSourceID(ctx context.Context) (v *int, err error) {
+func (m *OccurrenceMutation) OldSourceID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -12185,12 +12246,12 @@ func (m *OccurrenceMutation) ResetSourceID() {
 }
 
 // SetPackageID sets the "package_id" field.
-func (m *OccurrenceMutation) SetPackageID(i int) {
-	m._package = &i
+func (m *OccurrenceMutation) SetPackageID(u uuid.UUID) {
+	m._package = &u
 }
 
 // PackageID returns the value of the "package_id" field in the mutation.
-func (m *OccurrenceMutation) PackageID() (r int, exists bool) {
+func (m *OccurrenceMutation) PackageID() (r uuid.UUID, exists bool) {
 	v := m._package
 	if v == nil {
 		return
@@ -12201,7 +12262,7 @@ func (m *OccurrenceMutation) PackageID() (r int, exists bool) {
 // OldPackageID returns the old "package_id" field's value of the Occurrence entity.
 // If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OccurrenceMutation) OldPackageID(ctx context.Context) (v *int, err error) {
+func (m *OccurrenceMutation) OldPackageID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
 	}
@@ -12247,7 +12308,7 @@ func (m *OccurrenceMutation) ArtifactCleared() bool {
 // ArtifactIDs returns the "artifact" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ArtifactID instead. It exists only for internal usage by the builders.
-func (m *OccurrenceMutation) ArtifactIDs() (ids []int) {
+func (m *OccurrenceMutation) ArtifactIDs() (ids []uuid.UUID) {
 	if id := m.artifact; id != nil {
 		ids = append(ids, *id)
 	}
@@ -12274,7 +12335,7 @@ func (m *OccurrenceMutation) PackageCleared() bool {
 // PackageIDs returns the "package" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageID instead. It exists only for internal usage by the builders.
-func (m *OccurrenceMutation) PackageIDs() (ids []int) {
+func (m *OccurrenceMutation) PackageIDs() (ids []uuid.UUID) {
 	if id := m._package; id != nil {
 		ids = append(ids, *id)
 	}
@@ -12301,7 +12362,7 @@ func (m *OccurrenceMutation) SourceCleared() bool {
 // SourceIDs returns the "source" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SourceID instead. It exists only for internal usage by the builders.
-func (m *OccurrenceMutation) SourceIDs() (ids []int) {
+func (m *OccurrenceMutation) SourceIDs() (ids []uuid.UUID) {
 	if id := m.source; id != nil {
 		ids = append(ids, *id)
 	}
@@ -12315,9 +12376,9 @@ func (m *OccurrenceMutation) ResetSource() {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
-func (m *OccurrenceMutation) AddIncludedInSbomIDs(ids ...int) {
+func (m *OccurrenceMutation) AddIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.included_in_sboms == nil {
-		m.included_in_sboms = make(map[int]struct{})
+		m.included_in_sboms = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.included_in_sboms[ids[i]] = struct{}{}
@@ -12335,9 +12396,9 @@ func (m *OccurrenceMutation) IncludedInSbomsCleared() bool {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (m *OccurrenceMutation) RemoveIncludedInSbomIDs(ids ...int) {
+func (m *OccurrenceMutation) RemoveIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.removedincluded_in_sboms == nil {
-		m.removedincluded_in_sboms = make(map[int]struct{})
+		m.removedincluded_in_sboms = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.included_in_sboms, ids[i])
@@ -12346,7 +12407,7 @@ func (m *OccurrenceMutation) RemoveIncludedInSbomIDs(ids ...int) {
 }
 
 // RemovedIncludedInSboms returns the removed IDs of the "included_in_sboms" edge to the BillOfMaterials entity.
-func (m *OccurrenceMutation) RemovedIncludedInSbomsIDs() (ids []int) {
+func (m *OccurrenceMutation) RemovedIncludedInSbomsIDs() (ids []uuid.UUID) {
 	for id := range m.removedincluded_in_sboms {
 		ids = append(ids, id)
 	}
@@ -12354,7 +12415,7 @@ func (m *OccurrenceMutation) RemovedIncludedInSbomsIDs() (ids []int) {
 }
 
 // IncludedInSbomsIDs returns the "included_in_sboms" edge IDs in the mutation.
-func (m *OccurrenceMutation) IncludedInSbomsIDs() (ids []int) {
+func (m *OccurrenceMutation) IncludedInSbomsIDs() (ids []uuid.UUID) {
 	for id := range m.included_in_sboms {
 		ids = append(ids, id)
 	}
@@ -12472,7 +12533,7 @@ func (m *OccurrenceMutation) OldField(ctx context.Context, name string) (ent.Val
 func (m *OccurrenceMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case occurrence.FieldArtifactID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -12500,14 +12561,14 @@ func (m *OccurrenceMutation) SetField(name string, value ent.Value) error {
 		m.SetCollector(v)
 		return nil
 	case occurrence.FieldSourceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceID(v)
 		return nil
 	case occurrence.FieldPackageID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -12520,16 +12581,13 @@ func (m *OccurrenceMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *OccurrenceMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *OccurrenceMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -12745,13 +12803,13 @@ type PackageNameMutation struct {
 	config
 	op               Op
 	typ              string
-	id               *int
+	id               *uuid.UUID
 	name             *string
 	clearedFields    map[string]struct{}
-	namespace        *int
+	namespace        *uuid.UUID
 	clearednamespace bool
-	versions         map[int]struct{}
-	removedversions  map[int]struct{}
+	versions         map[uuid.UUID]struct{}
+	removedversions  map[uuid.UUID]struct{}
 	clearedversions  bool
 	done             bool
 	oldValue         func(context.Context) (*PackageName, error)
@@ -12778,7 +12836,7 @@ func newPackageNameMutation(c config, op Op, opts ...packagenameOption) *Package
 }
 
 // withPackageNameID sets the ID field of the mutation.
-func withPackageNameID(id int) packagenameOption {
+func withPackageNameID(id uuid.UUID) packagenameOption {
 	return func(m *PackageNameMutation) {
 		var (
 			err   error
@@ -12828,9 +12886,15 @@ func (m PackageNameMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PackageName entities.
+func (m *PackageNameMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *PackageNameMutation) ID() (id int, exists bool) {
+func (m *PackageNameMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -12841,12 +12905,12 @@ func (m *PackageNameMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *PackageNameMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *PackageNameMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -12857,12 +12921,12 @@ func (m *PackageNameMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetNamespaceID sets the "namespace_id" field.
-func (m *PackageNameMutation) SetNamespaceID(i int) {
-	m.namespace = &i
+func (m *PackageNameMutation) SetNamespaceID(u uuid.UUID) {
+	m.namespace = &u
 }
 
 // NamespaceID returns the value of the "namespace_id" field in the mutation.
-func (m *PackageNameMutation) NamespaceID() (r int, exists bool) {
+func (m *PackageNameMutation) NamespaceID() (r uuid.UUID, exists bool) {
 	v := m.namespace
 	if v == nil {
 		return
@@ -12873,7 +12937,7 @@ func (m *PackageNameMutation) NamespaceID() (r int, exists bool) {
 // OldNamespaceID returns the old "namespace_id" field's value of the PackageName entity.
 // If the PackageName object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PackageNameMutation) OldNamespaceID(ctx context.Context) (v int, err error) {
+func (m *PackageNameMutation) OldNamespaceID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldNamespaceID is only allowed on UpdateOne operations")
 	}
@@ -12942,7 +13006,7 @@ func (m *PackageNameMutation) NamespaceCleared() bool {
 // NamespaceIDs returns the "namespace" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // NamespaceID instead. It exists only for internal usage by the builders.
-func (m *PackageNameMutation) NamespaceIDs() (ids []int) {
+func (m *PackageNameMutation) NamespaceIDs() (ids []uuid.UUID) {
 	if id := m.namespace; id != nil {
 		ids = append(ids, *id)
 	}
@@ -12956,9 +13020,9 @@ func (m *PackageNameMutation) ResetNamespace() {
 }
 
 // AddVersionIDs adds the "versions" edge to the PackageVersion entity by ids.
-func (m *PackageNameMutation) AddVersionIDs(ids ...int) {
+func (m *PackageNameMutation) AddVersionIDs(ids ...uuid.UUID) {
 	if m.versions == nil {
-		m.versions = make(map[int]struct{})
+		m.versions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.versions[ids[i]] = struct{}{}
@@ -12976,9 +13040,9 @@ func (m *PackageNameMutation) VersionsCleared() bool {
 }
 
 // RemoveVersionIDs removes the "versions" edge to the PackageVersion entity by IDs.
-func (m *PackageNameMutation) RemoveVersionIDs(ids ...int) {
+func (m *PackageNameMutation) RemoveVersionIDs(ids ...uuid.UUID) {
 	if m.removedversions == nil {
-		m.removedversions = make(map[int]struct{})
+		m.removedversions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.versions, ids[i])
@@ -12987,7 +13051,7 @@ func (m *PackageNameMutation) RemoveVersionIDs(ids ...int) {
 }
 
 // RemovedVersions returns the removed IDs of the "versions" edge to the PackageVersion entity.
-func (m *PackageNameMutation) RemovedVersionsIDs() (ids []int) {
+func (m *PackageNameMutation) RemovedVersionsIDs() (ids []uuid.UUID) {
 	for id := range m.removedversions {
 		ids = append(ids, id)
 	}
@@ -12995,7 +13059,7 @@ func (m *PackageNameMutation) RemovedVersionsIDs() (ids []int) {
 }
 
 // VersionsIDs returns the "versions" edge IDs in the mutation.
-func (m *PackageNameMutation) VersionsIDs() (ids []int) {
+func (m *PackageNameMutation) VersionsIDs() (ids []uuid.UUID) {
 	for id := range m.versions {
 		ids = append(ids, id)
 	}
@@ -13085,7 +13149,7 @@ func (m *PackageNameMutation) OldField(ctx context.Context, name string) (ent.Va
 func (m *PackageNameMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case packagename.FieldNamespaceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -13105,16 +13169,13 @@ func (m *PackageNameMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *PackageNameMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *PackageNameMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -13267,13 +13328,13 @@ type PackageNamespaceMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *int
+	id              *uuid.UUID
 	namespace       *string
 	clearedFields   map[string]struct{}
-	_package        *int
+	_package        *uuid.UUID
 	cleared_package bool
-	names           map[int]struct{}
-	removednames    map[int]struct{}
+	names           map[uuid.UUID]struct{}
+	removednames    map[uuid.UUID]struct{}
 	clearednames    bool
 	done            bool
 	oldValue        func(context.Context) (*PackageNamespace, error)
@@ -13300,7 +13361,7 @@ func newPackageNamespaceMutation(c config, op Op, opts ...packagenamespaceOption
 }
 
 // withPackageNamespaceID sets the ID field of the mutation.
-func withPackageNamespaceID(id int) packagenamespaceOption {
+func withPackageNamespaceID(id uuid.UUID) packagenamespaceOption {
 	return func(m *PackageNamespaceMutation) {
 		var (
 			err   error
@@ -13350,9 +13411,15 @@ func (m PackageNamespaceMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PackageNamespace entities.
+func (m *PackageNamespaceMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *PackageNamespaceMutation) ID() (id int, exists bool) {
+func (m *PackageNamespaceMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -13363,12 +13430,12 @@ func (m *PackageNamespaceMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *PackageNamespaceMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *PackageNamespaceMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -13379,12 +13446,12 @@ func (m *PackageNamespaceMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetPackageID sets the "package_id" field.
-func (m *PackageNamespaceMutation) SetPackageID(i int) {
-	m._package = &i
+func (m *PackageNamespaceMutation) SetPackageID(u uuid.UUID) {
+	m._package = &u
 }
 
 // PackageID returns the value of the "package_id" field in the mutation.
-func (m *PackageNamespaceMutation) PackageID() (r int, exists bool) {
+func (m *PackageNamespaceMutation) PackageID() (r uuid.UUID, exists bool) {
 	v := m._package
 	if v == nil {
 		return
@@ -13395,7 +13462,7 @@ func (m *PackageNamespaceMutation) PackageID() (r int, exists bool) {
 // OldPackageID returns the old "package_id" field's value of the PackageNamespace entity.
 // If the PackageNamespace object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PackageNamespaceMutation) OldPackageID(ctx context.Context) (v int, err error) {
+func (m *PackageNamespaceMutation) OldPackageID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageID is only allowed on UpdateOne operations")
 	}
@@ -13464,7 +13531,7 @@ func (m *PackageNamespaceMutation) PackageCleared() bool {
 // PackageIDs returns the "package" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageID instead. It exists only for internal usage by the builders.
-func (m *PackageNamespaceMutation) PackageIDs() (ids []int) {
+func (m *PackageNamespaceMutation) PackageIDs() (ids []uuid.UUID) {
 	if id := m._package; id != nil {
 		ids = append(ids, *id)
 	}
@@ -13478,9 +13545,9 @@ func (m *PackageNamespaceMutation) ResetPackage() {
 }
 
 // AddNameIDs adds the "names" edge to the PackageName entity by ids.
-func (m *PackageNamespaceMutation) AddNameIDs(ids ...int) {
+func (m *PackageNamespaceMutation) AddNameIDs(ids ...uuid.UUID) {
 	if m.names == nil {
-		m.names = make(map[int]struct{})
+		m.names = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.names[ids[i]] = struct{}{}
@@ -13498,9 +13565,9 @@ func (m *PackageNamespaceMutation) NamesCleared() bool {
 }
 
 // RemoveNameIDs removes the "names" edge to the PackageName entity by IDs.
-func (m *PackageNamespaceMutation) RemoveNameIDs(ids ...int) {
+func (m *PackageNamespaceMutation) RemoveNameIDs(ids ...uuid.UUID) {
 	if m.removednames == nil {
-		m.removednames = make(map[int]struct{})
+		m.removednames = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.names, ids[i])
@@ -13509,7 +13576,7 @@ func (m *PackageNamespaceMutation) RemoveNameIDs(ids ...int) {
 }
 
 // RemovedNames returns the removed IDs of the "names" edge to the PackageName entity.
-func (m *PackageNamespaceMutation) RemovedNamesIDs() (ids []int) {
+func (m *PackageNamespaceMutation) RemovedNamesIDs() (ids []uuid.UUID) {
 	for id := range m.removednames {
 		ids = append(ids, id)
 	}
@@ -13517,7 +13584,7 @@ func (m *PackageNamespaceMutation) RemovedNamesIDs() (ids []int) {
 }
 
 // NamesIDs returns the "names" edge IDs in the mutation.
-func (m *PackageNamespaceMutation) NamesIDs() (ids []int) {
+func (m *PackageNamespaceMutation) NamesIDs() (ids []uuid.UUID) {
 	for id := range m.names {
 		ids = append(ids, id)
 	}
@@ -13607,7 +13674,7 @@ func (m *PackageNamespaceMutation) OldField(ctx context.Context, name string) (e
 func (m *PackageNamespaceMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case packagenamespace.FieldPackageID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -13627,16 +13694,13 @@ func (m *PackageNamespaceMutation) SetField(name string, value ent.Value) error 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *PackageNamespaceMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *PackageNamespaceMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -13789,11 +13853,11 @@ type PackageTypeMutation struct {
 	config
 	op                Op
 	typ               string
-	id                *int
+	id                *uuid.UUID
 	_type             *string
 	clearedFields     map[string]struct{}
-	namespaces        map[int]struct{}
-	removednamespaces map[int]struct{}
+	namespaces        map[uuid.UUID]struct{}
+	removednamespaces map[uuid.UUID]struct{}
 	clearednamespaces bool
 	done              bool
 	oldValue          func(context.Context) (*PackageType, error)
@@ -13820,7 +13884,7 @@ func newPackageTypeMutation(c config, op Op, opts ...packagetypeOption) *Package
 }
 
 // withPackageTypeID sets the ID field of the mutation.
-func withPackageTypeID(id int) packagetypeOption {
+func withPackageTypeID(id uuid.UUID) packagetypeOption {
 	return func(m *PackageTypeMutation) {
 		var (
 			err   error
@@ -13870,9 +13934,15 @@ func (m PackageTypeMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PackageType entities.
+func (m *PackageTypeMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *PackageTypeMutation) ID() (id int, exists bool) {
+func (m *PackageTypeMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -13883,12 +13953,12 @@ func (m *PackageTypeMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *PackageTypeMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *PackageTypeMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -13935,9 +14005,9 @@ func (m *PackageTypeMutation) ResetType() {
 }
 
 // AddNamespaceIDs adds the "namespaces" edge to the PackageNamespace entity by ids.
-func (m *PackageTypeMutation) AddNamespaceIDs(ids ...int) {
+func (m *PackageTypeMutation) AddNamespaceIDs(ids ...uuid.UUID) {
 	if m.namespaces == nil {
-		m.namespaces = make(map[int]struct{})
+		m.namespaces = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.namespaces[ids[i]] = struct{}{}
@@ -13955,9 +14025,9 @@ func (m *PackageTypeMutation) NamespacesCleared() bool {
 }
 
 // RemoveNamespaceIDs removes the "namespaces" edge to the PackageNamespace entity by IDs.
-func (m *PackageTypeMutation) RemoveNamespaceIDs(ids ...int) {
+func (m *PackageTypeMutation) RemoveNamespaceIDs(ids ...uuid.UUID) {
 	if m.removednamespaces == nil {
-		m.removednamespaces = make(map[int]struct{})
+		m.removednamespaces = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.namespaces, ids[i])
@@ -13966,7 +14036,7 @@ func (m *PackageTypeMutation) RemoveNamespaceIDs(ids ...int) {
 }
 
 // RemovedNamespaces returns the removed IDs of the "namespaces" edge to the PackageNamespace entity.
-func (m *PackageTypeMutation) RemovedNamespacesIDs() (ids []int) {
+func (m *PackageTypeMutation) RemovedNamespacesIDs() (ids []uuid.UUID) {
 	for id := range m.removednamespaces {
 		ids = append(ids, id)
 	}
@@ -13974,7 +14044,7 @@ func (m *PackageTypeMutation) RemovedNamespacesIDs() (ids []int) {
 }
 
 // NamespacesIDs returns the "namespaces" edge IDs in the mutation.
-func (m *PackageTypeMutation) NamespacesIDs() (ids []int) {
+func (m *PackageTypeMutation) NamespacesIDs() (ids []uuid.UUID) {
 	for id := range m.namespaces {
 		ids = append(ids, id)
 	}
@@ -14208,26 +14278,26 @@ type PackageVersionMutation struct {
 	config
 	op                       Op
 	typ                      string
-	id                       *int
+	id                       *uuid.UUID
 	version                  *string
 	subpath                  *string
 	qualifiers               *[]model.PackageQualifier
 	appendqualifiers         []model.PackageQualifier
 	hash                     *string
 	clearedFields            map[string]struct{}
-	name                     *int
+	name                     *uuid.UUID
 	clearedname              bool
-	occurrences              map[int]struct{}
-	removedoccurrences       map[int]struct{}
+	occurrences              map[uuid.UUID]struct{}
+	removedoccurrences       map[uuid.UUID]struct{}
 	clearedoccurrences       bool
-	sbom                     map[int]struct{}
-	removedsbom              map[int]struct{}
+	sbom                     map[uuid.UUID]struct{}
+	removedsbom              map[uuid.UUID]struct{}
 	clearedsbom              bool
-	equal_packages           map[int]struct{}
-	removedequal_packages    map[int]struct{}
+	equal_packages           map[uuid.UUID]struct{}
+	removedequal_packages    map[uuid.UUID]struct{}
 	clearedequal_packages    bool
-	included_in_sboms        map[int]struct{}
-	removedincluded_in_sboms map[int]struct{}
+	included_in_sboms        map[uuid.UUID]struct{}
+	removedincluded_in_sboms map[uuid.UUID]struct{}
 	clearedincluded_in_sboms bool
 	done                     bool
 	oldValue                 func(context.Context) (*PackageVersion, error)
@@ -14254,7 +14324,7 @@ func newPackageVersionMutation(c config, op Op, opts ...packageversionOption) *P
 }
 
 // withPackageVersionID sets the ID field of the mutation.
-func withPackageVersionID(id int) packageversionOption {
+func withPackageVersionID(id uuid.UUID) packageversionOption {
 	return func(m *PackageVersionMutation) {
 		var (
 			err   error
@@ -14304,9 +14374,15 @@ func (m PackageVersionMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PackageVersion entities.
+func (m *PackageVersionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *PackageVersionMutation) ID() (id int, exists bool) {
+func (m *PackageVersionMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -14317,12 +14393,12 @@ func (m *PackageVersionMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *PackageVersionMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *PackageVersionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -14333,12 +14409,12 @@ func (m *PackageVersionMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetNameID sets the "name_id" field.
-func (m *PackageVersionMutation) SetNameID(i int) {
-	m.name = &i
+func (m *PackageVersionMutation) SetNameID(u uuid.UUID) {
+	m.name = &u
 }
 
 // NameID returns the value of the "name_id" field in the mutation.
-func (m *PackageVersionMutation) NameID() (r int, exists bool) {
+func (m *PackageVersionMutation) NameID() (r uuid.UUID, exists bool) {
 	v := m.name
 	if v == nil {
 		return
@@ -14349,7 +14425,7 @@ func (m *PackageVersionMutation) NameID() (r int, exists bool) {
 // OldNameID returns the old "name_id" field's value of the PackageVersion entity.
 // If the PackageVersion object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PackageVersionMutation) OldNameID(ctx context.Context) (v int, err error) {
+func (m *PackageVersionMutation) OldNameID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldNameID is only allowed on UpdateOne operations")
 	}
@@ -14555,7 +14631,7 @@ func (m *PackageVersionMutation) NameCleared() bool {
 // NameIDs returns the "name" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // NameID instead. It exists only for internal usage by the builders.
-func (m *PackageVersionMutation) NameIDs() (ids []int) {
+func (m *PackageVersionMutation) NameIDs() (ids []uuid.UUID) {
 	if id := m.name; id != nil {
 		ids = append(ids, *id)
 	}
@@ -14569,9 +14645,9 @@ func (m *PackageVersionMutation) ResetName() {
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by ids.
-func (m *PackageVersionMutation) AddOccurrenceIDs(ids ...int) {
+func (m *PackageVersionMutation) AddOccurrenceIDs(ids ...uuid.UUID) {
 	if m.occurrences == nil {
-		m.occurrences = make(map[int]struct{})
+		m.occurrences = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.occurrences[ids[i]] = struct{}{}
@@ -14589,9 +14665,9 @@ func (m *PackageVersionMutation) OccurrencesCleared() bool {
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to the Occurrence entity by IDs.
-func (m *PackageVersionMutation) RemoveOccurrenceIDs(ids ...int) {
+func (m *PackageVersionMutation) RemoveOccurrenceIDs(ids ...uuid.UUID) {
 	if m.removedoccurrences == nil {
-		m.removedoccurrences = make(map[int]struct{})
+		m.removedoccurrences = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.occurrences, ids[i])
@@ -14600,7 +14676,7 @@ func (m *PackageVersionMutation) RemoveOccurrenceIDs(ids ...int) {
 }
 
 // RemovedOccurrences returns the removed IDs of the "occurrences" edge to the Occurrence entity.
-func (m *PackageVersionMutation) RemovedOccurrencesIDs() (ids []int) {
+func (m *PackageVersionMutation) RemovedOccurrencesIDs() (ids []uuid.UUID) {
 	for id := range m.removedoccurrences {
 		ids = append(ids, id)
 	}
@@ -14608,7 +14684,7 @@ func (m *PackageVersionMutation) RemovedOccurrencesIDs() (ids []int) {
 }
 
 // OccurrencesIDs returns the "occurrences" edge IDs in the mutation.
-func (m *PackageVersionMutation) OccurrencesIDs() (ids []int) {
+func (m *PackageVersionMutation) OccurrencesIDs() (ids []uuid.UUID) {
 	for id := range m.occurrences {
 		ids = append(ids, id)
 	}
@@ -14623,9 +14699,9 @@ func (m *PackageVersionMutation) ResetOccurrences() {
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by ids.
-func (m *PackageVersionMutation) AddSbomIDs(ids ...int) {
+func (m *PackageVersionMutation) AddSbomIDs(ids ...uuid.UUID) {
 	if m.sbom == nil {
-		m.sbom = make(map[int]struct{})
+		m.sbom = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.sbom[ids[i]] = struct{}{}
@@ -14643,9 +14719,9 @@ func (m *PackageVersionMutation) SbomCleared() bool {
 }
 
 // RemoveSbomIDs removes the "sbom" edge to the BillOfMaterials entity by IDs.
-func (m *PackageVersionMutation) RemoveSbomIDs(ids ...int) {
+func (m *PackageVersionMutation) RemoveSbomIDs(ids ...uuid.UUID) {
 	if m.removedsbom == nil {
-		m.removedsbom = make(map[int]struct{})
+		m.removedsbom = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.sbom, ids[i])
@@ -14654,7 +14730,7 @@ func (m *PackageVersionMutation) RemoveSbomIDs(ids ...int) {
 }
 
 // RemovedSbom returns the removed IDs of the "sbom" edge to the BillOfMaterials entity.
-func (m *PackageVersionMutation) RemovedSbomIDs() (ids []int) {
+func (m *PackageVersionMutation) RemovedSbomIDs() (ids []uuid.UUID) {
 	for id := range m.removedsbom {
 		ids = append(ids, id)
 	}
@@ -14662,7 +14738,7 @@ func (m *PackageVersionMutation) RemovedSbomIDs() (ids []int) {
 }
 
 // SbomIDs returns the "sbom" edge IDs in the mutation.
-func (m *PackageVersionMutation) SbomIDs() (ids []int) {
+func (m *PackageVersionMutation) SbomIDs() (ids []uuid.UUID) {
 	for id := range m.sbom {
 		ids = append(ids, id)
 	}
@@ -14677,9 +14753,9 @@ func (m *PackageVersionMutation) ResetSbom() {
 }
 
 // AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by ids.
-func (m *PackageVersionMutation) AddEqualPackageIDs(ids ...int) {
+func (m *PackageVersionMutation) AddEqualPackageIDs(ids ...uuid.UUID) {
 	if m.equal_packages == nil {
-		m.equal_packages = make(map[int]struct{})
+		m.equal_packages = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.equal_packages[ids[i]] = struct{}{}
@@ -14697,9 +14773,9 @@ func (m *PackageVersionMutation) EqualPackagesCleared() bool {
 }
 
 // RemoveEqualPackageIDs removes the "equal_packages" edge to the PkgEqual entity by IDs.
-func (m *PackageVersionMutation) RemoveEqualPackageIDs(ids ...int) {
+func (m *PackageVersionMutation) RemoveEqualPackageIDs(ids ...uuid.UUID) {
 	if m.removedequal_packages == nil {
-		m.removedequal_packages = make(map[int]struct{})
+		m.removedequal_packages = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.equal_packages, ids[i])
@@ -14708,7 +14784,7 @@ func (m *PackageVersionMutation) RemoveEqualPackageIDs(ids ...int) {
 }
 
 // RemovedEqualPackages returns the removed IDs of the "equal_packages" edge to the PkgEqual entity.
-func (m *PackageVersionMutation) RemovedEqualPackagesIDs() (ids []int) {
+func (m *PackageVersionMutation) RemovedEqualPackagesIDs() (ids []uuid.UUID) {
 	for id := range m.removedequal_packages {
 		ids = append(ids, id)
 	}
@@ -14716,7 +14792,7 @@ func (m *PackageVersionMutation) RemovedEqualPackagesIDs() (ids []int) {
 }
 
 // EqualPackagesIDs returns the "equal_packages" edge IDs in the mutation.
-func (m *PackageVersionMutation) EqualPackagesIDs() (ids []int) {
+func (m *PackageVersionMutation) EqualPackagesIDs() (ids []uuid.UUID) {
 	for id := range m.equal_packages {
 		ids = append(ids, id)
 	}
@@ -14731,9 +14807,9 @@ func (m *PackageVersionMutation) ResetEqualPackages() {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
-func (m *PackageVersionMutation) AddIncludedInSbomIDs(ids ...int) {
+func (m *PackageVersionMutation) AddIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.included_in_sboms == nil {
-		m.included_in_sboms = make(map[int]struct{})
+		m.included_in_sboms = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.included_in_sboms[ids[i]] = struct{}{}
@@ -14751,9 +14827,9 @@ func (m *PackageVersionMutation) IncludedInSbomsCleared() bool {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (m *PackageVersionMutation) RemoveIncludedInSbomIDs(ids ...int) {
+func (m *PackageVersionMutation) RemoveIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.removedincluded_in_sboms == nil {
-		m.removedincluded_in_sboms = make(map[int]struct{})
+		m.removedincluded_in_sboms = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.included_in_sboms, ids[i])
@@ -14762,7 +14838,7 @@ func (m *PackageVersionMutation) RemoveIncludedInSbomIDs(ids ...int) {
 }
 
 // RemovedIncludedInSboms returns the removed IDs of the "included_in_sboms" edge to the BillOfMaterials entity.
-func (m *PackageVersionMutation) RemovedIncludedInSbomsIDs() (ids []int) {
+func (m *PackageVersionMutation) RemovedIncludedInSbomsIDs() (ids []uuid.UUID) {
 	for id := range m.removedincluded_in_sboms {
 		ids = append(ids, id)
 	}
@@ -14770,7 +14846,7 @@ func (m *PackageVersionMutation) RemovedIncludedInSbomsIDs() (ids []int) {
 }
 
 // IncludedInSbomsIDs returns the "included_in_sboms" edge IDs in the mutation.
-func (m *PackageVersionMutation) IncludedInSbomsIDs() (ids []int) {
+func (m *PackageVersionMutation) IncludedInSbomsIDs() (ids []uuid.UUID) {
 	for id := range m.included_in_sboms {
 		ids = append(ids, id)
 	}
@@ -14881,7 +14957,7 @@ func (m *PackageVersionMutation) OldField(ctx context.Context, name string) (ent
 func (m *PackageVersionMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case packageversion.FieldNameID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -14922,16 +14998,13 @@ func (m *PackageVersionMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *PackageVersionMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *PackageVersionMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -15180,14 +15253,14 @@ type PkgEqualMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *int
+	id              *uuid.UUID
 	origin          *string
 	collector       *string
 	justification   *string
 	packages_hash   *string
 	clearedFields   map[string]struct{}
-	packages        map[int]struct{}
-	removedpackages map[int]struct{}
+	packages        map[uuid.UUID]struct{}
+	removedpackages map[uuid.UUID]struct{}
 	clearedpackages bool
 	done            bool
 	oldValue        func(context.Context) (*PkgEqual, error)
@@ -15214,7 +15287,7 @@ func newPkgEqualMutation(c config, op Op, opts ...pkgequalOption) *PkgEqualMutat
 }
 
 // withPkgEqualID sets the ID field of the mutation.
-func withPkgEqualID(id int) pkgequalOption {
+func withPkgEqualID(id uuid.UUID) pkgequalOption {
 	return func(m *PkgEqualMutation) {
 		var (
 			err   error
@@ -15264,9 +15337,15 @@ func (m PkgEqualMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PkgEqual entities.
+func (m *PkgEqualMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *PkgEqualMutation) ID() (id int, exists bool) {
+func (m *PkgEqualMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -15277,12 +15356,12 @@ func (m *PkgEqualMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *PkgEqualMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *PkgEqualMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -15437,9 +15516,9 @@ func (m *PkgEqualMutation) ResetPackagesHash() {
 }
 
 // AddPackageIDs adds the "packages" edge to the PackageVersion entity by ids.
-func (m *PkgEqualMutation) AddPackageIDs(ids ...int) {
+func (m *PkgEqualMutation) AddPackageIDs(ids ...uuid.UUID) {
 	if m.packages == nil {
-		m.packages = make(map[int]struct{})
+		m.packages = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.packages[ids[i]] = struct{}{}
@@ -15457,9 +15536,9 @@ func (m *PkgEqualMutation) PackagesCleared() bool {
 }
 
 // RemovePackageIDs removes the "packages" edge to the PackageVersion entity by IDs.
-func (m *PkgEqualMutation) RemovePackageIDs(ids ...int) {
+func (m *PkgEqualMutation) RemovePackageIDs(ids ...uuid.UUID) {
 	if m.removedpackages == nil {
-		m.removedpackages = make(map[int]struct{})
+		m.removedpackages = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.packages, ids[i])
@@ -15468,7 +15547,7 @@ func (m *PkgEqualMutation) RemovePackageIDs(ids ...int) {
 }
 
 // RemovedPackages returns the removed IDs of the "packages" edge to the PackageVersion entity.
-func (m *PkgEqualMutation) RemovedPackagesIDs() (ids []int) {
+func (m *PkgEqualMutation) RemovedPackagesIDs() (ids []uuid.UUID) {
 	for id := range m.removedpackages {
 		ids = append(ids, id)
 	}
@@ -15476,7 +15555,7 @@ func (m *PkgEqualMutation) RemovedPackagesIDs() (ids []int) {
 }
 
 // PackagesIDs returns the "packages" edge IDs in the mutation.
-func (m *PkgEqualMutation) PackagesIDs() (ids []int) {
+func (m *PkgEqualMutation) PackagesIDs() (ids []uuid.UUID) {
 	for id := range m.packages {
 		ids = append(ids, id)
 	}
@@ -15761,7 +15840,7 @@ type PointOfContactMutation struct {
 	config
 	op                     Op
 	typ                    string
-	id                     *int
+	id                     *uuid.UUID
 	email                  *string
 	info                   *string
 	since                  *time.Time
@@ -15769,13 +15848,13 @@ type PointOfContactMutation struct {
 	origin                 *string
 	collector              *string
 	clearedFields          map[string]struct{}
-	source                 *int
+	source                 *uuid.UUID
 	clearedsource          bool
-	package_version        *int
+	package_version        *uuid.UUID
 	clearedpackage_version bool
-	all_versions           *int
+	all_versions           *uuid.UUID
 	clearedall_versions    bool
-	artifact               *int
+	artifact               *uuid.UUID
 	clearedartifact        bool
 	done                   bool
 	oldValue               func(context.Context) (*PointOfContact, error)
@@ -15802,7 +15881,7 @@ func newPointOfContactMutation(c config, op Op, opts ...pointofcontactOption) *P
 }
 
 // withPointOfContactID sets the ID field of the mutation.
-func withPointOfContactID(id int) pointofcontactOption {
+func withPointOfContactID(id uuid.UUID) pointofcontactOption {
 	return func(m *PointOfContactMutation) {
 		var (
 			err   error
@@ -15852,9 +15931,15 @@ func (m PointOfContactMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PointOfContact entities.
+func (m *PointOfContactMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *PointOfContactMutation) ID() (id int, exists bool) {
+func (m *PointOfContactMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -15865,12 +15950,12 @@ func (m *PointOfContactMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *PointOfContactMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *PointOfContactMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -15881,12 +15966,12 @@ func (m *PointOfContactMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetSourceID sets the "source_id" field.
-func (m *PointOfContactMutation) SetSourceID(i int) {
-	m.source = &i
+func (m *PointOfContactMutation) SetSourceID(u uuid.UUID) {
+	m.source = &u
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
-func (m *PointOfContactMutation) SourceID() (r int, exists bool) {
+func (m *PointOfContactMutation) SourceID() (r uuid.UUID, exists bool) {
 	v := m.source
 	if v == nil {
 		return
@@ -15897,7 +15982,7 @@ func (m *PointOfContactMutation) SourceID() (r int, exists bool) {
 // OldSourceID returns the old "source_id" field's value of the PointOfContact entity.
 // If the PointOfContact object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PointOfContactMutation) OldSourceID(ctx context.Context) (v *int, err error) {
+func (m *PointOfContactMutation) OldSourceID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -15930,12 +16015,12 @@ func (m *PointOfContactMutation) ResetSourceID() {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (m *PointOfContactMutation) SetPackageVersionID(i int) {
-	m.package_version = &i
+func (m *PointOfContactMutation) SetPackageVersionID(u uuid.UUID) {
+	m.package_version = &u
 }
 
 // PackageVersionID returns the value of the "package_version_id" field in the mutation.
-func (m *PointOfContactMutation) PackageVersionID() (r int, exists bool) {
+func (m *PointOfContactMutation) PackageVersionID() (r uuid.UUID, exists bool) {
 	v := m.package_version
 	if v == nil {
 		return
@@ -15946,7 +16031,7 @@ func (m *PointOfContactMutation) PackageVersionID() (r int, exists bool) {
 // OldPackageVersionID returns the old "package_version_id" field's value of the PointOfContact entity.
 // If the PointOfContact object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PointOfContactMutation) OldPackageVersionID(ctx context.Context) (v *int, err error) {
+func (m *PointOfContactMutation) OldPackageVersionID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageVersionID is only allowed on UpdateOne operations")
 	}
@@ -15979,12 +16064,12 @@ func (m *PointOfContactMutation) ResetPackageVersionID() {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (m *PointOfContactMutation) SetPackageNameID(i int) {
-	m.all_versions = &i
+func (m *PointOfContactMutation) SetPackageNameID(u uuid.UUID) {
+	m.all_versions = &u
 }
 
 // PackageNameID returns the value of the "package_name_id" field in the mutation.
-func (m *PointOfContactMutation) PackageNameID() (r int, exists bool) {
+func (m *PointOfContactMutation) PackageNameID() (r uuid.UUID, exists bool) {
 	v := m.all_versions
 	if v == nil {
 		return
@@ -15995,7 +16080,7 @@ func (m *PointOfContactMutation) PackageNameID() (r int, exists bool) {
 // OldPackageNameID returns the old "package_name_id" field's value of the PointOfContact entity.
 // If the PointOfContact object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PointOfContactMutation) OldPackageNameID(ctx context.Context) (v *int, err error) {
+func (m *PointOfContactMutation) OldPackageNameID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPackageNameID is only allowed on UpdateOne operations")
 	}
@@ -16028,12 +16113,12 @@ func (m *PointOfContactMutation) ResetPackageNameID() {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (m *PointOfContactMutation) SetArtifactID(i int) {
-	m.artifact = &i
+func (m *PointOfContactMutation) SetArtifactID(u uuid.UUID) {
+	m.artifact = &u
 }
 
 // ArtifactID returns the value of the "artifact_id" field in the mutation.
-func (m *PointOfContactMutation) ArtifactID() (r int, exists bool) {
+func (m *PointOfContactMutation) ArtifactID() (r uuid.UUID, exists bool) {
 	v := m.artifact
 	if v == nil {
 		return
@@ -16044,7 +16129,7 @@ func (m *PointOfContactMutation) ArtifactID() (r int, exists bool) {
 // OldArtifactID returns the old "artifact_id" field's value of the PointOfContact entity.
 // If the PointOfContact object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PointOfContactMutation) OldArtifactID(ctx context.Context) (v *int, err error) {
+func (m *PointOfContactMutation) OldArtifactID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldArtifactID is only allowed on UpdateOne operations")
 	}
@@ -16306,7 +16391,7 @@ func (m *PointOfContactMutation) SourceCleared() bool {
 // SourceIDs returns the "source" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SourceID instead. It exists only for internal usage by the builders.
-func (m *PointOfContactMutation) SourceIDs() (ids []int) {
+func (m *PointOfContactMutation) SourceIDs() (ids []uuid.UUID) {
 	if id := m.source; id != nil {
 		ids = append(ids, *id)
 	}
@@ -16333,7 +16418,7 @@ func (m *PointOfContactMutation) PackageVersionCleared() bool {
 // PackageVersionIDs returns the "package_version" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // PackageVersionID instead. It exists only for internal usage by the builders.
-func (m *PointOfContactMutation) PackageVersionIDs() (ids []int) {
+func (m *PointOfContactMutation) PackageVersionIDs() (ids []uuid.UUID) {
 	if id := m.package_version; id != nil {
 		ids = append(ids, *id)
 	}
@@ -16347,7 +16432,7 @@ func (m *PointOfContactMutation) ResetPackageVersion() {
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by id.
-func (m *PointOfContactMutation) SetAllVersionsID(id int) {
+func (m *PointOfContactMutation) SetAllVersionsID(id uuid.UUID) {
 	m.all_versions = &id
 }
 
@@ -16363,7 +16448,7 @@ func (m *PointOfContactMutation) AllVersionsCleared() bool {
 }
 
 // AllVersionsID returns the "all_versions" edge ID in the mutation.
-func (m *PointOfContactMutation) AllVersionsID() (id int, exists bool) {
+func (m *PointOfContactMutation) AllVersionsID() (id uuid.UUID, exists bool) {
 	if m.all_versions != nil {
 		return *m.all_versions, true
 	}
@@ -16373,7 +16458,7 @@ func (m *PointOfContactMutation) AllVersionsID() (id int, exists bool) {
 // AllVersionsIDs returns the "all_versions" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AllVersionsID instead. It exists only for internal usage by the builders.
-func (m *PointOfContactMutation) AllVersionsIDs() (ids []int) {
+func (m *PointOfContactMutation) AllVersionsIDs() (ids []uuid.UUID) {
 	if id := m.all_versions; id != nil {
 		ids = append(ids, *id)
 	}
@@ -16400,7 +16485,7 @@ func (m *PointOfContactMutation) ArtifactCleared() bool {
 // ArtifactIDs returns the "artifact" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ArtifactID instead. It exists only for internal usage by the builders.
-func (m *PointOfContactMutation) ArtifactIDs() (ids []int) {
+func (m *PointOfContactMutation) ArtifactIDs() (ids []uuid.UUID) {
 	if id := m.artifact; id != nil {
 		ids = append(ids, *id)
 	}
@@ -16545,28 +16630,28 @@ func (m *PointOfContactMutation) OldField(ctx context.Context, name string) (ent
 func (m *PointOfContactMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case pointofcontact.FieldSourceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceID(v)
 		return nil
 	case pointofcontact.FieldPackageVersionID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageVersionID(v)
 		return nil
 	case pointofcontact.FieldPackageNameID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPackageNameID(v)
 		return nil
 	case pointofcontact.FieldArtifactID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -16621,16 +16706,13 @@ func (m *PointOfContactMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *PointOfContactMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *PointOfContactMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -16860,7 +16942,7 @@ type SLSAAttestationMutation struct {
 	config
 	op                   Op
 	typ                  string
-	id                   *int
+	id                   *uuid.UUID
 	build_type           *string
 	slsa_predicate       *[]*model.SLSAPredicate
 	appendslsa_predicate []*model.SLSAPredicate
@@ -16871,12 +16953,12 @@ type SLSAAttestationMutation struct {
 	collector            *string
 	built_from_hash      *string
 	clearedFields        map[string]struct{}
-	built_from           map[int]struct{}
-	removedbuilt_from    map[int]struct{}
+	built_from           map[uuid.UUID]struct{}
+	removedbuilt_from    map[uuid.UUID]struct{}
 	clearedbuilt_from    bool
-	built_by             *int
+	built_by             *uuid.UUID
 	clearedbuilt_by      bool
-	subject              *int
+	subject              *uuid.UUID
 	clearedsubject       bool
 	done                 bool
 	oldValue             func(context.Context) (*SLSAAttestation, error)
@@ -16903,7 +16985,7 @@ func newSLSAAttestationMutation(c config, op Op, opts ...slsaattestationOption) 
 }
 
 // withSLSAAttestationID sets the ID field of the mutation.
-func withSLSAAttestationID(id int) slsaattestationOption {
+func withSLSAAttestationID(id uuid.UUID) slsaattestationOption {
 	return func(m *SLSAAttestationMutation) {
 		var (
 			err   error
@@ -16953,9 +17035,15 @@ func (m SLSAAttestationMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SLSAAttestation entities.
+func (m *SLSAAttestationMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *SLSAAttestationMutation) ID() (id int, exists bool) {
+func (m *SLSAAttestationMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -16966,12 +17054,12 @@ func (m *SLSAAttestationMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *SLSAAttestationMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *SLSAAttestationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -17018,12 +17106,12 @@ func (m *SLSAAttestationMutation) ResetBuildType() {
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (m *SLSAAttestationMutation) SetBuiltByID(i int) {
-	m.built_by = &i
+func (m *SLSAAttestationMutation) SetBuiltByID(u uuid.UUID) {
+	m.built_by = &u
 }
 
 // BuiltByID returns the value of the "built_by_id" field in the mutation.
-func (m *SLSAAttestationMutation) BuiltByID() (r int, exists bool) {
+func (m *SLSAAttestationMutation) BuiltByID() (r uuid.UUID, exists bool) {
 	v := m.built_by
 	if v == nil {
 		return
@@ -17034,7 +17122,7 @@ func (m *SLSAAttestationMutation) BuiltByID() (r int, exists bool) {
 // OldBuiltByID returns the old "built_by_id" field's value of the SLSAAttestation entity.
 // If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SLSAAttestationMutation) OldBuiltByID(ctx context.Context) (v int, err error) {
+func (m *SLSAAttestationMutation) OldBuiltByID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldBuiltByID is only allowed on UpdateOne operations")
 	}
@@ -17054,12 +17142,12 @@ func (m *SLSAAttestationMutation) ResetBuiltByID() {
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (m *SLSAAttestationMutation) SetSubjectID(i int) {
-	m.subject = &i
+func (m *SLSAAttestationMutation) SetSubjectID(u uuid.UUID) {
+	m.subject = &u
 }
 
 // SubjectID returns the value of the "subject_id" field in the mutation.
-func (m *SLSAAttestationMutation) SubjectID() (r int, exists bool) {
+func (m *SLSAAttestationMutation) SubjectID() (r uuid.UUID, exists bool) {
 	v := m.subject
 	if v == nil {
 		return
@@ -17070,7 +17158,7 @@ func (m *SLSAAttestationMutation) SubjectID() (r int, exists bool) {
 // OldSubjectID returns the old "subject_id" field's value of the SLSAAttestation entity.
 // If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SLSAAttestationMutation) OldSubjectID(ctx context.Context) (v int, err error) {
+func (m *SLSAAttestationMutation) OldSubjectID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSubjectID is only allowed on UpdateOne operations")
 	}
@@ -17397,9 +17485,9 @@ func (m *SLSAAttestationMutation) ResetBuiltFromHash() {
 }
 
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by ids.
-func (m *SLSAAttestationMutation) AddBuiltFromIDs(ids ...int) {
+func (m *SLSAAttestationMutation) AddBuiltFromIDs(ids ...uuid.UUID) {
 	if m.built_from == nil {
-		m.built_from = make(map[int]struct{})
+		m.built_from = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.built_from[ids[i]] = struct{}{}
@@ -17417,9 +17505,9 @@ func (m *SLSAAttestationMutation) BuiltFromCleared() bool {
 }
 
 // RemoveBuiltFromIDs removes the "built_from" edge to the Artifact entity by IDs.
-func (m *SLSAAttestationMutation) RemoveBuiltFromIDs(ids ...int) {
+func (m *SLSAAttestationMutation) RemoveBuiltFromIDs(ids ...uuid.UUID) {
 	if m.removedbuilt_from == nil {
-		m.removedbuilt_from = make(map[int]struct{})
+		m.removedbuilt_from = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.built_from, ids[i])
@@ -17428,7 +17516,7 @@ func (m *SLSAAttestationMutation) RemoveBuiltFromIDs(ids ...int) {
 }
 
 // RemovedBuiltFrom returns the removed IDs of the "built_from" edge to the Artifact entity.
-func (m *SLSAAttestationMutation) RemovedBuiltFromIDs() (ids []int) {
+func (m *SLSAAttestationMutation) RemovedBuiltFromIDs() (ids []uuid.UUID) {
 	for id := range m.removedbuilt_from {
 		ids = append(ids, id)
 	}
@@ -17436,7 +17524,7 @@ func (m *SLSAAttestationMutation) RemovedBuiltFromIDs() (ids []int) {
 }
 
 // BuiltFromIDs returns the "built_from" edge IDs in the mutation.
-func (m *SLSAAttestationMutation) BuiltFromIDs() (ids []int) {
+func (m *SLSAAttestationMutation) BuiltFromIDs() (ids []uuid.UUID) {
 	for id := range m.built_from {
 		ids = append(ids, id)
 	}
@@ -17464,7 +17552,7 @@ func (m *SLSAAttestationMutation) BuiltByCleared() bool {
 // BuiltByIDs returns the "built_by" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // BuiltByID instead. It exists only for internal usage by the builders.
-func (m *SLSAAttestationMutation) BuiltByIDs() (ids []int) {
+func (m *SLSAAttestationMutation) BuiltByIDs() (ids []uuid.UUID) {
 	if id := m.built_by; id != nil {
 		ids = append(ids, *id)
 	}
@@ -17491,7 +17579,7 @@ func (m *SLSAAttestationMutation) SubjectCleared() bool {
 // SubjectIDs returns the "subject" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SubjectID instead. It exists only for internal usage by the builders.
-func (m *SLSAAttestationMutation) SubjectIDs() (ids []int) {
+func (m *SLSAAttestationMutation) SubjectIDs() (ids []uuid.UUID) {
 	if id := m.subject; id != nil {
 		ids = append(ids, *id)
 	}
@@ -17643,14 +17731,14 @@ func (m *SLSAAttestationMutation) SetField(name string, value ent.Value) error {
 		m.SetBuildType(v)
 		return nil
 	case slsaattestation.FieldBuiltByID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBuiltByID(v)
 		return nil
 	case slsaattestation.FieldSubjectID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -17712,16 +17800,13 @@ func (m *SLSAAttestationMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SLSAAttestationMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SLSAAttestationMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -17937,7 +18022,7 @@ type ScorecardMutation struct {
 	config
 	op                    Op
 	typ                   string
-	id                    *int
+	id                    *uuid.UUID
 	checks                *[]*model.ScorecardCheck
 	appendchecks          []*model.ScorecardCheck
 	aggregate_score       *float64
@@ -17948,8 +18033,8 @@ type ScorecardMutation struct {
 	origin                *string
 	collector             *string
 	clearedFields         map[string]struct{}
-	certifications        map[int]struct{}
-	removedcertifications map[int]struct{}
+	certifications        map[uuid.UUID]struct{}
+	removedcertifications map[uuid.UUID]struct{}
 	clearedcertifications bool
 	done                  bool
 	oldValue              func(context.Context) (*Scorecard, error)
@@ -17976,7 +18061,7 @@ func newScorecardMutation(c config, op Op, opts ...scorecardOption) *ScorecardMu
 }
 
 // withScorecardID sets the ID field of the mutation.
-func withScorecardID(id int) scorecardOption {
+func withScorecardID(id uuid.UUID) scorecardOption {
 	return func(m *ScorecardMutation) {
 		var (
 			err   error
@@ -18026,9 +18111,15 @@ func (m ScorecardMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Scorecard entities.
+func (m *ScorecardMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *ScorecardMutation) ID() (id int, exists bool) {
+func (m *ScorecardMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -18039,12 +18130,12 @@ func (m *ScorecardMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *ScorecardMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *ScorecardMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -18342,9 +18433,9 @@ func (m *ScorecardMutation) ResetCollector() {
 }
 
 // AddCertificationIDs adds the "certifications" edge to the CertifyScorecard entity by ids.
-func (m *ScorecardMutation) AddCertificationIDs(ids ...int) {
+func (m *ScorecardMutation) AddCertificationIDs(ids ...uuid.UUID) {
 	if m.certifications == nil {
-		m.certifications = make(map[int]struct{})
+		m.certifications = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.certifications[ids[i]] = struct{}{}
@@ -18362,9 +18453,9 @@ func (m *ScorecardMutation) CertificationsCleared() bool {
 }
 
 // RemoveCertificationIDs removes the "certifications" edge to the CertifyScorecard entity by IDs.
-func (m *ScorecardMutation) RemoveCertificationIDs(ids ...int) {
+func (m *ScorecardMutation) RemoveCertificationIDs(ids ...uuid.UUID) {
 	if m.removedcertifications == nil {
-		m.removedcertifications = make(map[int]struct{})
+		m.removedcertifications = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.certifications, ids[i])
@@ -18373,7 +18464,7 @@ func (m *ScorecardMutation) RemoveCertificationIDs(ids ...int) {
 }
 
 // RemovedCertifications returns the removed IDs of the "certifications" edge to the CertifyScorecard entity.
-func (m *ScorecardMutation) RemovedCertificationsIDs() (ids []int) {
+func (m *ScorecardMutation) RemovedCertificationsIDs() (ids []uuid.UUID) {
 	for id := range m.removedcertifications {
 		ids = append(ids, id)
 	}
@@ -18381,7 +18472,7 @@ func (m *ScorecardMutation) RemovedCertificationsIDs() (ids []int) {
 }
 
 // CertificationsIDs returns the "certifications" edge IDs in the mutation.
-func (m *ScorecardMutation) CertificationsIDs() (ids []int) {
+func (m *ScorecardMutation) CertificationsIDs() (ids []uuid.UUID) {
 	for id := range m.certifications {
 		ids = append(ids, id)
 	}
@@ -18732,15 +18823,15 @@ type SourceNameMutation struct {
 	config
 	op                 Op
 	typ                string
-	id                 *int
+	id                 *uuid.UUID
 	name               *string
 	commit             *string
 	tag                *string
 	clearedFields      map[string]struct{}
-	namespace          *int
+	namespace          *uuid.UUID
 	clearednamespace   bool
-	occurrences        map[int]struct{}
-	removedoccurrences map[int]struct{}
+	occurrences        map[uuid.UUID]struct{}
+	removedoccurrences map[uuid.UUID]struct{}
 	clearedoccurrences bool
 	done               bool
 	oldValue           func(context.Context) (*SourceName, error)
@@ -18767,7 +18858,7 @@ func newSourceNameMutation(c config, op Op, opts ...sourcenameOption) *SourceNam
 }
 
 // withSourceNameID sets the ID field of the mutation.
-func withSourceNameID(id int) sourcenameOption {
+func withSourceNameID(id uuid.UUID) sourcenameOption {
 	return func(m *SourceNameMutation) {
 		var (
 			err   error
@@ -18817,9 +18908,15 @@ func (m SourceNameMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SourceName entities.
+func (m *SourceNameMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *SourceNameMutation) ID() (id int, exists bool) {
+func (m *SourceNameMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -18830,12 +18927,12 @@ func (m *SourceNameMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *SourceNameMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *SourceNameMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -18980,12 +19077,12 @@ func (m *SourceNameMutation) ResetTag() {
 }
 
 // SetNamespaceID sets the "namespace_id" field.
-func (m *SourceNameMutation) SetNamespaceID(i int) {
-	m.namespace = &i
+func (m *SourceNameMutation) SetNamespaceID(u uuid.UUID) {
+	m.namespace = &u
 }
 
 // NamespaceID returns the value of the "namespace_id" field in the mutation.
-func (m *SourceNameMutation) NamespaceID() (r int, exists bool) {
+func (m *SourceNameMutation) NamespaceID() (r uuid.UUID, exists bool) {
 	v := m.namespace
 	if v == nil {
 		return
@@ -18996,7 +19093,7 @@ func (m *SourceNameMutation) NamespaceID() (r int, exists bool) {
 // OldNamespaceID returns the old "namespace_id" field's value of the SourceName entity.
 // If the SourceName object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SourceNameMutation) OldNamespaceID(ctx context.Context) (v int, err error) {
+func (m *SourceNameMutation) OldNamespaceID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldNamespaceID is only allowed on UpdateOne operations")
 	}
@@ -19029,7 +19126,7 @@ func (m *SourceNameMutation) NamespaceCleared() bool {
 // NamespaceIDs returns the "namespace" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // NamespaceID instead. It exists only for internal usage by the builders.
-func (m *SourceNameMutation) NamespaceIDs() (ids []int) {
+func (m *SourceNameMutation) NamespaceIDs() (ids []uuid.UUID) {
 	if id := m.namespace; id != nil {
 		ids = append(ids, *id)
 	}
@@ -19043,9 +19140,9 @@ func (m *SourceNameMutation) ResetNamespace() {
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by ids.
-func (m *SourceNameMutation) AddOccurrenceIDs(ids ...int) {
+func (m *SourceNameMutation) AddOccurrenceIDs(ids ...uuid.UUID) {
 	if m.occurrences == nil {
-		m.occurrences = make(map[int]struct{})
+		m.occurrences = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.occurrences[ids[i]] = struct{}{}
@@ -19063,9 +19160,9 @@ func (m *SourceNameMutation) OccurrencesCleared() bool {
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to the Occurrence entity by IDs.
-func (m *SourceNameMutation) RemoveOccurrenceIDs(ids ...int) {
+func (m *SourceNameMutation) RemoveOccurrenceIDs(ids ...uuid.UUID) {
 	if m.removedoccurrences == nil {
-		m.removedoccurrences = make(map[int]struct{})
+		m.removedoccurrences = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.occurrences, ids[i])
@@ -19074,7 +19171,7 @@ func (m *SourceNameMutation) RemoveOccurrenceIDs(ids ...int) {
 }
 
 // RemovedOccurrences returns the removed IDs of the "occurrences" edge to the Occurrence entity.
-func (m *SourceNameMutation) RemovedOccurrencesIDs() (ids []int) {
+func (m *SourceNameMutation) RemovedOccurrencesIDs() (ids []uuid.UUID) {
 	for id := range m.removedoccurrences {
 		ids = append(ids, id)
 	}
@@ -19082,7 +19179,7 @@ func (m *SourceNameMutation) RemovedOccurrencesIDs() (ids []int) {
 }
 
 // OccurrencesIDs returns the "occurrences" edge IDs in the mutation.
-func (m *SourceNameMutation) OccurrencesIDs() (ids []int) {
+func (m *SourceNameMutation) OccurrencesIDs() (ids []uuid.UUID) {
 	for id := range m.occurrences {
 		ids = append(ids, id)
 	}
@@ -19207,7 +19304,7 @@ func (m *SourceNameMutation) SetField(name string, value ent.Value) error {
 		m.SetTag(v)
 		return nil
 	case sourcename.FieldNamespaceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -19220,16 +19317,13 @@ func (m *SourceNameMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SourceNameMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SourceNameMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -19403,13 +19497,13 @@ type SourceNamespaceMutation struct {
 	config
 	op                 Op
 	typ                string
-	id                 *int
+	id                 *uuid.UUID
 	namespace          *string
 	clearedFields      map[string]struct{}
-	source_type        *int
+	source_type        *uuid.UUID
 	clearedsource_type bool
-	names              map[int]struct{}
-	removednames       map[int]struct{}
+	names              map[uuid.UUID]struct{}
+	removednames       map[uuid.UUID]struct{}
 	clearednames       bool
 	done               bool
 	oldValue           func(context.Context) (*SourceNamespace, error)
@@ -19436,7 +19530,7 @@ func newSourceNamespaceMutation(c config, op Op, opts ...sourcenamespaceOption) 
 }
 
 // withSourceNamespaceID sets the ID field of the mutation.
-func withSourceNamespaceID(id int) sourcenamespaceOption {
+func withSourceNamespaceID(id uuid.UUID) sourcenamespaceOption {
 	return func(m *SourceNamespaceMutation) {
 		var (
 			err   error
@@ -19486,9 +19580,15 @@ func (m SourceNamespaceMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SourceNamespace entities.
+func (m *SourceNamespaceMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *SourceNamespaceMutation) ID() (id int, exists bool) {
+func (m *SourceNamespaceMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -19499,12 +19599,12 @@ func (m *SourceNamespaceMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *SourceNamespaceMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *SourceNamespaceMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -19551,12 +19651,12 @@ func (m *SourceNamespaceMutation) ResetNamespace() {
 }
 
 // SetSourceID sets the "source_id" field.
-func (m *SourceNamespaceMutation) SetSourceID(i int) {
-	m.source_type = &i
+func (m *SourceNamespaceMutation) SetSourceID(u uuid.UUID) {
+	m.source_type = &u
 }
 
 // SourceID returns the value of the "source_id" field in the mutation.
-func (m *SourceNamespaceMutation) SourceID() (r int, exists bool) {
+func (m *SourceNamespaceMutation) SourceID() (r uuid.UUID, exists bool) {
 	v := m.source_type
 	if v == nil {
 		return
@@ -19567,7 +19667,7 @@ func (m *SourceNamespaceMutation) SourceID() (r int, exists bool) {
 // OldSourceID returns the old "source_id" field's value of the SourceNamespace entity.
 // If the SourceNamespace object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SourceNamespaceMutation) OldSourceID(ctx context.Context) (v int, err error) {
+func (m *SourceNamespaceMutation) OldSourceID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSourceID is only allowed on UpdateOne operations")
 	}
@@ -19587,7 +19687,7 @@ func (m *SourceNamespaceMutation) ResetSourceID() {
 }
 
 // SetSourceTypeID sets the "source_type" edge to the SourceType entity by id.
-func (m *SourceNamespaceMutation) SetSourceTypeID(id int) {
+func (m *SourceNamespaceMutation) SetSourceTypeID(id uuid.UUID) {
 	m.source_type = &id
 }
 
@@ -19603,7 +19703,7 @@ func (m *SourceNamespaceMutation) SourceTypeCleared() bool {
 }
 
 // SourceTypeID returns the "source_type" edge ID in the mutation.
-func (m *SourceNamespaceMutation) SourceTypeID() (id int, exists bool) {
+func (m *SourceNamespaceMutation) SourceTypeID() (id uuid.UUID, exists bool) {
 	if m.source_type != nil {
 		return *m.source_type, true
 	}
@@ -19613,7 +19713,7 @@ func (m *SourceNamespaceMutation) SourceTypeID() (id int, exists bool) {
 // SourceTypeIDs returns the "source_type" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // SourceTypeID instead. It exists only for internal usage by the builders.
-func (m *SourceNamespaceMutation) SourceTypeIDs() (ids []int) {
+func (m *SourceNamespaceMutation) SourceTypeIDs() (ids []uuid.UUID) {
 	if id := m.source_type; id != nil {
 		ids = append(ids, *id)
 	}
@@ -19627,9 +19727,9 @@ func (m *SourceNamespaceMutation) ResetSourceType() {
 }
 
 // AddNameIDs adds the "names" edge to the SourceName entity by ids.
-func (m *SourceNamespaceMutation) AddNameIDs(ids ...int) {
+func (m *SourceNamespaceMutation) AddNameIDs(ids ...uuid.UUID) {
 	if m.names == nil {
-		m.names = make(map[int]struct{})
+		m.names = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.names[ids[i]] = struct{}{}
@@ -19647,9 +19747,9 @@ func (m *SourceNamespaceMutation) NamesCleared() bool {
 }
 
 // RemoveNameIDs removes the "names" edge to the SourceName entity by IDs.
-func (m *SourceNamespaceMutation) RemoveNameIDs(ids ...int) {
+func (m *SourceNamespaceMutation) RemoveNameIDs(ids ...uuid.UUID) {
 	if m.removednames == nil {
-		m.removednames = make(map[int]struct{})
+		m.removednames = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.names, ids[i])
@@ -19658,7 +19758,7 @@ func (m *SourceNamespaceMutation) RemoveNameIDs(ids ...int) {
 }
 
 // RemovedNames returns the removed IDs of the "names" edge to the SourceName entity.
-func (m *SourceNamespaceMutation) RemovedNamesIDs() (ids []int) {
+func (m *SourceNamespaceMutation) RemovedNamesIDs() (ids []uuid.UUID) {
 	for id := range m.removednames {
 		ids = append(ids, id)
 	}
@@ -19666,7 +19766,7 @@ func (m *SourceNamespaceMutation) RemovedNamesIDs() (ids []int) {
 }
 
 // NamesIDs returns the "names" edge IDs in the mutation.
-func (m *SourceNamespaceMutation) NamesIDs() (ids []int) {
+func (m *SourceNamespaceMutation) NamesIDs() (ids []uuid.UUID) {
 	for id := range m.names {
 		ids = append(ids, id)
 	}
@@ -19763,7 +19863,7 @@ func (m *SourceNamespaceMutation) SetField(name string, value ent.Value) error {
 		m.SetNamespace(v)
 		return nil
 	case sourcenamespace.FieldSourceID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -19776,16 +19876,13 @@ func (m *SourceNamespaceMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SourceNamespaceMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SourceNamespaceMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -19938,11 +20035,11 @@ type SourceTypeMutation struct {
 	config
 	op                Op
 	typ               string
-	id                *int
+	id                *uuid.UUID
 	_type             *string
 	clearedFields     map[string]struct{}
-	namespaces        map[int]struct{}
-	removednamespaces map[int]struct{}
+	namespaces        map[uuid.UUID]struct{}
+	removednamespaces map[uuid.UUID]struct{}
 	clearednamespaces bool
 	done              bool
 	oldValue          func(context.Context) (*SourceType, error)
@@ -19969,7 +20066,7 @@ func newSourceTypeMutation(c config, op Op, opts ...sourcetypeOption) *SourceTyp
 }
 
 // withSourceTypeID sets the ID field of the mutation.
-func withSourceTypeID(id int) sourcetypeOption {
+func withSourceTypeID(id uuid.UUID) sourcetypeOption {
 	return func(m *SourceTypeMutation) {
 		var (
 			err   error
@@ -20019,9 +20116,15 @@ func (m SourceTypeMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SourceType entities.
+func (m *SourceTypeMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *SourceTypeMutation) ID() (id int, exists bool) {
+func (m *SourceTypeMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -20032,12 +20135,12 @@ func (m *SourceTypeMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *SourceTypeMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *SourceTypeMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -20084,9 +20187,9 @@ func (m *SourceTypeMutation) ResetType() {
 }
 
 // AddNamespaceIDs adds the "namespaces" edge to the SourceNamespace entity by ids.
-func (m *SourceTypeMutation) AddNamespaceIDs(ids ...int) {
+func (m *SourceTypeMutation) AddNamespaceIDs(ids ...uuid.UUID) {
 	if m.namespaces == nil {
-		m.namespaces = make(map[int]struct{})
+		m.namespaces = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.namespaces[ids[i]] = struct{}{}
@@ -20104,9 +20207,9 @@ func (m *SourceTypeMutation) NamespacesCleared() bool {
 }
 
 // RemoveNamespaceIDs removes the "namespaces" edge to the SourceNamespace entity by IDs.
-func (m *SourceTypeMutation) RemoveNamespaceIDs(ids ...int) {
+func (m *SourceTypeMutation) RemoveNamespaceIDs(ids ...uuid.UUID) {
 	if m.removednamespaces == nil {
-		m.removednamespaces = make(map[int]struct{})
+		m.removednamespaces = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.namespaces, ids[i])
@@ -20115,7 +20218,7 @@ func (m *SourceTypeMutation) RemoveNamespaceIDs(ids ...int) {
 }
 
 // RemovedNamespaces returns the removed IDs of the "namespaces" edge to the SourceNamespace entity.
-func (m *SourceTypeMutation) RemovedNamespacesIDs() (ids []int) {
+func (m *SourceTypeMutation) RemovedNamespacesIDs() (ids []uuid.UUID) {
 	for id := range m.removednamespaces {
 		ids = append(ids, id)
 	}
@@ -20123,7 +20226,7 @@ func (m *SourceTypeMutation) RemovedNamespacesIDs() (ids []int) {
 }
 
 // NamespacesIDs returns the "namespaces" edge IDs in the mutation.
-func (m *SourceTypeMutation) NamespacesIDs() (ids []int) {
+func (m *SourceTypeMutation) NamespacesIDs() (ids []uuid.UUID) {
 	for id := range m.namespaces {
 		ids = append(ids, id)
 	}
@@ -20357,13 +20460,13 @@ type VulnEqualMutation struct {
 	config
 	op                       Op
 	typ                      string
-	id                       *int
+	id                       *uuid.UUID
 	justification            *string
 	origin                   *string
 	collector                *string
 	clearedFields            map[string]struct{}
-	vulnerability_ids        map[int]struct{}
-	removedvulnerability_ids map[int]struct{}
+	vulnerability_ids        map[uuid.UUID]struct{}
+	removedvulnerability_ids map[uuid.UUID]struct{}
 	clearedvulnerability_ids bool
 	done                     bool
 	oldValue                 func(context.Context) (*VulnEqual, error)
@@ -20390,7 +20493,7 @@ func newVulnEqualMutation(c config, op Op, opts ...vulnequalOption) *VulnEqualMu
 }
 
 // withVulnEqualID sets the ID field of the mutation.
-func withVulnEqualID(id int) vulnequalOption {
+func withVulnEqualID(id uuid.UUID) vulnequalOption {
 	return func(m *VulnEqualMutation) {
 		var (
 			err   error
@@ -20440,9 +20543,15 @@ func (m VulnEqualMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of VulnEqual entities.
+func (m *VulnEqualMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *VulnEqualMutation) ID() (id int, exists bool) {
+func (m *VulnEqualMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -20453,12 +20562,12 @@ func (m *VulnEqualMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *VulnEqualMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *VulnEqualMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -20577,9 +20686,9 @@ func (m *VulnEqualMutation) ResetCollector() {
 }
 
 // AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by ids.
-func (m *VulnEqualMutation) AddVulnerabilityIDIDs(ids ...int) {
+func (m *VulnEqualMutation) AddVulnerabilityIDIDs(ids ...uuid.UUID) {
 	if m.vulnerability_ids == nil {
-		m.vulnerability_ids = make(map[int]struct{})
+		m.vulnerability_ids = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.vulnerability_ids[ids[i]] = struct{}{}
@@ -20597,9 +20706,9 @@ func (m *VulnEqualMutation) VulnerabilityIdsCleared() bool {
 }
 
 // RemoveVulnerabilityIDIDs removes the "vulnerability_ids" edge to the VulnerabilityID entity by IDs.
-func (m *VulnEqualMutation) RemoveVulnerabilityIDIDs(ids ...int) {
+func (m *VulnEqualMutation) RemoveVulnerabilityIDIDs(ids ...uuid.UUID) {
 	if m.removedvulnerability_ids == nil {
-		m.removedvulnerability_ids = make(map[int]struct{})
+		m.removedvulnerability_ids = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.vulnerability_ids, ids[i])
@@ -20608,7 +20717,7 @@ func (m *VulnEqualMutation) RemoveVulnerabilityIDIDs(ids ...int) {
 }
 
 // RemovedVulnerabilityIds returns the removed IDs of the "vulnerability_ids" edge to the VulnerabilityID entity.
-func (m *VulnEqualMutation) RemovedVulnerabilityIdsIDs() (ids []int) {
+func (m *VulnEqualMutation) RemovedVulnerabilityIdsIDs() (ids []uuid.UUID) {
 	for id := range m.removedvulnerability_ids {
 		ids = append(ids, id)
 	}
@@ -20616,7 +20725,7 @@ func (m *VulnEqualMutation) RemovedVulnerabilityIdsIDs() (ids []int) {
 }
 
 // VulnerabilityIdsIDs returns the "vulnerability_ids" edge IDs in the mutation.
-func (m *VulnEqualMutation) VulnerabilityIdsIDs() (ids []int) {
+func (m *VulnEqualMutation) VulnerabilityIdsIDs() (ids []uuid.UUID) {
 	for id := range m.vulnerability_ids {
 		ids = append(ids, id)
 	}
@@ -20884,16 +20993,16 @@ type VulnerabilityIDMutation struct {
 	config
 	op                            Op
 	typ                           string
-	id                            *int
+	id                            *uuid.UUID
 	vulnerability_id              *string
 	clearedFields                 map[string]struct{}
-	_type                         *int
+	_type                         *uuid.UUID
 	cleared_type                  bool
-	vuln_equals                   map[int]struct{}
-	removedvuln_equals            map[int]struct{}
+	vuln_equals                   map[uuid.UUID]struct{}
+	removedvuln_equals            map[uuid.UUID]struct{}
 	clearedvuln_equals            bool
-	vulnerability_metadata        map[int]struct{}
-	removedvulnerability_metadata map[int]struct{}
+	vulnerability_metadata        map[uuid.UUID]struct{}
+	removedvulnerability_metadata map[uuid.UUID]struct{}
 	clearedvulnerability_metadata bool
 	done                          bool
 	oldValue                      func(context.Context) (*VulnerabilityID, error)
@@ -20920,7 +21029,7 @@ func newVulnerabilityIDMutation(c config, op Op, opts ...vulnerabilityidOption) 
 }
 
 // withVulnerabilityIDID sets the ID field of the mutation.
-func withVulnerabilityIDID(id int) vulnerabilityidOption {
+func withVulnerabilityIDID(id uuid.UUID) vulnerabilityidOption {
 	return func(m *VulnerabilityIDMutation) {
 		var (
 			err   error
@@ -20970,9 +21079,15 @@ func (m VulnerabilityIDMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of VulnerabilityID entities.
+func (m *VulnerabilityIDMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *VulnerabilityIDMutation) ID() (id int, exists bool) {
+func (m *VulnerabilityIDMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -20983,12 +21098,12 @@ func (m *VulnerabilityIDMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *VulnerabilityIDMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *VulnerabilityIDMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -21035,12 +21150,12 @@ func (m *VulnerabilityIDMutation) ResetVulnerabilityID() {
 }
 
 // SetTypeID sets the "type_id" field.
-func (m *VulnerabilityIDMutation) SetTypeID(i int) {
-	m._type = &i
+func (m *VulnerabilityIDMutation) SetTypeID(u uuid.UUID) {
+	m._type = &u
 }
 
 // TypeID returns the value of the "type_id" field in the mutation.
-func (m *VulnerabilityIDMutation) TypeID() (r int, exists bool) {
+func (m *VulnerabilityIDMutation) TypeID() (r uuid.UUID, exists bool) {
 	v := m._type
 	if v == nil {
 		return
@@ -21051,7 +21166,7 @@ func (m *VulnerabilityIDMutation) TypeID() (r int, exists bool) {
 // OldTypeID returns the old "type_id" field's value of the VulnerabilityID entity.
 // If the VulnerabilityID object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *VulnerabilityIDMutation) OldTypeID(ctx context.Context) (v int, err error) {
+func (m *VulnerabilityIDMutation) OldTypeID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTypeID is only allowed on UpdateOne operations")
 	}
@@ -21084,7 +21199,7 @@ func (m *VulnerabilityIDMutation) TypeCleared() bool {
 // TypeIDs returns the "type" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // TypeID instead. It exists only for internal usage by the builders.
-func (m *VulnerabilityIDMutation) TypeIDs() (ids []int) {
+func (m *VulnerabilityIDMutation) TypeIDs() (ids []uuid.UUID) {
 	if id := m._type; id != nil {
 		ids = append(ids, *id)
 	}
@@ -21098,9 +21213,9 @@ func (m *VulnerabilityIDMutation) ResetType() {
 }
 
 // AddVulnEqualIDs adds the "vuln_equals" edge to the VulnEqual entity by ids.
-func (m *VulnerabilityIDMutation) AddVulnEqualIDs(ids ...int) {
+func (m *VulnerabilityIDMutation) AddVulnEqualIDs(ids ...uuid.UUID) {
 	if m.vuln_equals == nil {
-		m.vuln_equals = make(map[int]struct{})
+		m.vuln_equals = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.vuln_equals[ids[i]] = struct{}{}
@@ -21118,9 +21233,9 @@ func (m *VulnerabilityIDMutation) VulnEqualsCleared() bool {
 }
 
 // RemoveVulnEqualIDs removes the "vuln_equals" edge to the VulnEqual entity by IDs.
-func (m *VulnerabilityIDMutation) RemoveVulnEqualIDs(ids ...int) {
+func (m *VulnerabilityIDMutation) RemoveVulnEqualIDs(ids ...uuid.UUID) {
 	if m.removedvuln_equals == nil {
-		m.removedvuln_equals = make(map[int]struct{})
+		m.removedvuln_equals = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.vuln_equals, ids[i])
@@ -21129,7 +21244,7 @@ func (m *VulnerabilityIDMutation) RemoveVulnEqualIDs(ids ...int) {
 }
 
 // RemovedVulnEquals returns the removed IDs of the "vuln_equals" edge to the VulnEqual entity.
-func (m *VulnerabilityIDMutation) RemovedVulnEqualsIDs() (ids []int) {
+func (m *VulnerabilityIDMutation) RemovedVulnEqualsIDs() (ids []uuid.UUID) {
 	for id := range m.removedvuln_equals {
 		ids = append(ids, id)
 	}
@@ -21137,7 +21252,7 @@ func (m *VulnerabilityIDMutation) RemovedVulnEqualsIDs() (ids []int) {
 }
 
 // VulnEqualsIDs returns the "vuln_equals" edge IDs in the mutation.
-func (m *VulnerabilityIDMutation) VulnEqualsIDs() (ids []int) {
+func (m *VulnerabilityIDMutation) VulnEqualsIDs() (ids []uuid.UUID) {
 	for id := range m.vuln_equals {
 		ids = append(ids, id)
 	}
@@ -21152,9 +21267,9 @@ func (m *VulnerabilityIDMutation) ResetVulnEquals() {
 }
 
 // AddVulnerabilityMetadatumIDs adds the "vulnerability_metadata" edge to the VulnerabilityMetadata entity by ids.
-func (m *VulnerabilityIDMutation) AddVulnerabilityMetadatumIDs(ids ...int) {
+func (m *VulnerabilityIDMutation) AddVulnerabilityMetadatumIDs(ids ...uuid.UUID) {
 	if m.vulnerability_metadata == nil {
-		m.vulnerability_metadata = make(map[int]struct{})
+		m.vulnerability_metadata = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.vulnerability_metadata[ids[i]] = struct{}{}
@@ -21172,9 +21287,9 @@ func (m *VulnerabilityIDMutation) VulnerabilityMetadataCleared() bool {
 }
 
 // RemoveVulnerabilityMetadatumIDs removes the "vulnerability_metadata" edge to the VulnerabilityMetadata entity by IDs.
-func (m *VulnerabilityIDMutation) RemoveVulnerabilityMetadatumIDs(ids ...int) {
+func (m *VulnerabilityIDMutation) RemoveVulnerabilityMetadatumIDs(ids ...uuid.UUID) {
 	if m.removedvulnerability_metadata == nil {
-		m.removedvulnerability_metadata = make(map[int]struct{})
+		m.removedvulnerability_metadata = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.vulnerability_metadata, ids[i])
@@ -21183,7 +21298,7 @@ func (m *VulnerabilityIDMutation) RemoveVulnerabilityMetadatumIDs(ids ...int) {
 }
 
 // RemovedVulnerabilityMetadata returns the removed IDs of the "vulnerability_metadata" edge to the VulnerabilityMetadata entity.
-func (m *VulnerabilityIDMutation) RemovedVulnerabilityMetadataIDs() (ids []int) {
+func (m *VulnerabilityIDMutation) RemovedVulnerabilityMetadataIDs() (ids []uuid.UUID) {
 	for id := range m.removedvulnerability_metadata {
 		ids = append(ids, id)
 	}
@@ -21191,7 +21306,7 @@ func (m *VulnerabilityIDMutation) RemovedVulnerabilityMetadataIDs() (ids []int) 
 }
 
 // VulnerabilityMetadataIDs returns the "vulnerability_metadata" edge IDs in the mutation.
-func (m *VulnerabilityIDMutation) VulnerabilityMetadataIDs() (ids []int) {
+func (m *VulnerabilityIDMutation) VulnerabilityMetadataIDs() (ids []uuid.UUID) {
 	for id := range m.vulnerability_metadata {
 		ids = append(ids, id)
 	}
@@ -21288,7 +21403,7 @@ func (m *VulnerabilityIDMutation) SetField(name string, value ent.Value) error {
 		m.SetVulnerabilityID(v)
 		return nil
 	case vulnerabilityid.FieldTypeID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -21301,16 +21416,13 @@ func (m *VulnerabilityIDMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *VulnerabilityIDMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *VulnerabilityIDMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -21489,7 +21601,7 @@ type VulnerabilityMetadataMutation struct {
 	config
 	op                      Op
 	typ                     string
-	id                      *int
+	id                      *uuid.UUID
 	score_type              *vulnerabilitymetadata.ScoreType
 	score_value             *float64
 	addscore_value          *float64
@@ -21497,7 +21609,7 @@ type VulnerabilityMetadataMutation struct {
 	origin                  *string
 	collector               *string
 	clearedFields           map[string]struct{}
-	vulnerability_id        *int
+	vulnerability_id        *uuid.UUID
 	clearedvulnerability_id bool
 	done                    bool
 	oldValue                func(context.Context) (*VulnerabilityMetadata, error)
@@ -21524,7 +21636,7 @@ func newVulnerabilityMetadataMutation(c config, op Op, opts ...vulnerabilitymeta
 }
 
 // withVulnerabilityMetadataID sets the ID field of the mutation.
-func withVulnerabilityMetadataID(id int) vulnerabilitymetadataOption {
+func withVulnerabilityMetadataID(id uuid.UUID) vulnerabilitymetadataOption {
 	return func(m *VulnerabilityMetadataMutation) {
 		var (
 			err   error
@@ -21574,9 +21686,15 @@ func (m VulnerabilityMetadataMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of VulnerabilityMetadata entities.
+func (m *VulnerabilityMetadataMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *VulnerabilityMetadataMutation) ID() (id int, exists bool) {
+func (m *VulnerabilityMetadataMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -21587,12 +21705,12 @@ func (m *VulnerabilityMetadataMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *VulnerabilityMetadataMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *VulnerabilityMetadataMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -21603,12 +21721,12 @@ func (m *VulnerabilityMetadataMutation) IDs(ctx context.Context) ([]int, error) 
 }
 
 // SetVulnerabilityIDID sets the "vulnerability_id_id" field.
-func (m *VulnerabilityMetadataMutation) SetVulnerabilityIDID(i int) {
-	m.vulnerability_id = &i
+func (m *VulnerabilityMetadataMutation) SetVulnerabilityIDID(u uuid.UUID) {
+	m.vulnerability_id = &u
 }
 
 // VulnerabilityIDID returns the value of the "vulnerability_id_id" field in the mutation.
-func (m *VulnerabilityMetadataMutation) VulnerabilityIDID() (r int, exists bool) {
+func (m *VulnerabilityMetadataMutation) VulnerabilityIDID() (r uuid.UUID, exists bool) {
 	v := m.vulnerability_id
 	if v == nil {
 		return
@@ -21619,7 +21737,7 @@ func (m *VulnerabilityMetadataMutation) VulnerabilityIDID() (r int, exists bool)
 // OldVulnerabilityIDID returns the old "vulnerability_id_id" field's value of the VulnerabilityMetadata entity.
 // If the VulnerabilityMetadata object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *VulnerabilityMetadataMutation) OldVulnerabilityIDID(ctx context.Context) (v int, err error) {
+func (m *VulnerabilityMetadataMutation) OldVulnerabilityIDID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldVulnerabilityIDID is only allowed on UpdateOne operations")
 	}
@@ -21852,7 +21970,7 @@ func (m *VulnerabilityMetadataMutation) VulnerabilityIDCleared() bool {
 // VulnerabilityIDIDs returns the "vulnerability_id" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // VulnerabilityIDID instead. It exists only for internal usage by the builders.
-func (m *VulnerabilityMetadataMutation) VulnerabilityIDIDs() (ids []int) {
+func (m *VulnerabilityMetadataMutation) VulnerabilityIDIDs() (ids []uuid.UUID) {
 	if id := m.vulnerability_id; id != nil {
 		ids = append(ids, *id)
 	}
@@ -21969,7 +22087,7 @@ func (m *VulnerabilityMetadataMutation) OldField(ctx context.Context, name strin
 func (m *VulnerabilityMetadataMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case vulnerabilitymetadata.FieldVulnerabilityIDID:
-		v, ok := value.(int)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -22175,11 +22293,11 @@ type VulnerabilityTypeMutation struct {
 	config
 	op                       Op
 	typ                      string
-	id                       *int
+	id                       *uuid.UUID
 	_type                    *string
 	clearedFields            map[string]struct{}
-	vulnerability_ids        map[int]struct{}
-	removedvulnerability_ids map[int]struct{}
+	vulnerability_ids        map[uuid.UUID]struct{}
+	removedvulnerability_ids map[uuid.UUID]struct{}
 	clearedvulnerability_ids bool
 	done                     bool
 	oldValue                 func(context.Context) (*VulnerabilityType, error)
@@ -22206,7 +22324,7 @@ func newVulnerabilityTypeMutation(c config, op Op, opts ...vulnerabilitytypeOpti
 }
 
 // withVulnerabilityTypeID sets the ID field of the mutation.
-func withVulnerabilityTypeID(id int) vulnerabilitytypeOption {
+func withVulnerabilityTypeID(id uuid.UUID) vulnerabilitytypeOption {
 	return func(m *VulnerabilityTypeMutation) {
 		var (
 			err   error
@@ -22256,9 +22374,15 @@ func (m VulnerabilityTypeMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of VulnerabilityType entities.
+func (m *VulnerabilityTypeMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *VulnerabilityTypeMutation) ID() (id int, exists bool) {
+func (m *VulnerabilityTypeMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -22269,12 +22393,12 @@ func (m *VulnerabilityTypeMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *VulnerabilityTypeMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *VulnerabilityTypeMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -22321,9 +22445,9 @@ func (m *VulnerabilityTypeMutation) ResetType() {
 }
 
 // AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by ids.
-func (m *VulnerabilityTypeMutation) AddVulnerabilityIDIDs(ids ...int) {
+func (m *VulnerabilityTypeMutation) AddVulnerabilityIDIDs(ids ...uuid.UUID) {
 	if m.vulnerability_ids == nil {
-		m.vulnerability_ids = make(map[int]struct{})
+		m.vulnerability_ids = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.vulnerability_ids[ids[i]] = struct{}{}
@@ -22341,9 +22465,9 @@ func (m *VulnerabilityTypeMutation) VulnerabilityIdsCleared() bool {
 }
 
 // RemoveVulnerabilityIDIDs removes the "vulnerability_ids" edge to the VulnerabilityID entity by IDs.
-func (m *VulnerabilityTypeMutation) RemoveVulnerabilityIDIDs(ids ...int) {
+func (m *VulnerabilityTypeMutation) RemoveVulnerabilityIDIDs(ids ...uuid.UUID) {
 	if m.removedvulnerability_ids == nil {
-		m.removedvulnerability_ids = make(map[int]struct{})
+		m.removedvulnerability_ids = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.vulnerability_ids, ids[i])
@@ -22352,7 +22476,7 @@ func (m *VulnerabilityTypeMutation) RemoveVulnerabilityIDIDs(ids ...int) {
 }
 
 // RemovedVulnerabilityIds returns the removed IDs of the "vulnerability_ids" edge to the VulnerabilityID entity.
-func (m *VulnerabilityTypeMutation) RemovedVulnerabilityIdsIDs() (ids []int) {
+func (m *VulnerabilityTypeMutation) RemovedVulnerabilityIdsIDs() (ids []uuid.UUID) {
 	for id := range m.removedvulnerability_ids {
 		ids = append(ids, id)
 	}
@@ -22360,7 +22484,7 @@ func (m *VulnerabilityTypeMutation) RemovedVulnerabilityIdsIDs() (ids []int) {
 }
 
 // VulnerabilityIdsIDs returns the "vulnerability_ids" edge IDs in the mutation.
-func (m *VulnerabilityTypeMutation) VulnerabilityIdsIDs() (ids []int) {
+func (m *VulnerabilityTypeMutation) VulnerabilityIdsIDs() (ids []uuid.UUID) {
 	for id := range m.vulnerability_ids {
 		ids = append(ids, id)
 	}

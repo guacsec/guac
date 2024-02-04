@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -19,13 +20,13 @@ import (
 type HasSourceAt struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// PackageVersionID holds the value of the "package_version_id" field.
-	PackageVersionID *int `json:"package_version_id,omitempty"`
+	PackageVersionID *uuid.UUID `json:"package_version_id,omitempty"`
 	// PackageNameID holds the value of the "package_name_id" field.
-	PackageNameID *int `json:"package_name_id,omitempty"`
+	PackageNameID *uuid.UUID `json:"package_name_id,omitempty"`
 	// SourceID holds the value of the "source_id" field.
-	SourceID int `json:"source_id,omitempty"`
+	SourceID uuid.UUID `json:"source_id,omitempty"`
 	// KnownSince holds the value of the "known_since" field.
 	KnownSince time.Time `json:"known_since,omitempty"`
 	// Justification holds the value of the "justification" field.
@@ -99,12 +100,14 @@ func (*HasSourceAt) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case hassourceat.FieldID, hassourceat.FieldPackageVersionID, hassourceat.FieldPackageNameID, hassourceat.FieldSourceID:
-			values[i] = new(sql.NullInt64)
+		case hassourceat.FieldPackageVersionID, hassourceat.FieldPackageNameID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case hassourceat.FieldJustification, hassourceat.FieldOrigin, hassourceat.FieldCollector:
 			values[i] = new(sql.NullString)
 		case hassourceat.FieldKnownSince:
 			values[i] = new(sql.NullTime)
+		case hassourceat.FieldID, hassourceat.FieldSourceID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -121,30 +124,30 @@ func (hsa *HasSourceAt) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case hassourceat.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				hsa.ID = *value
 			}
-			hsa.ID = int(value.Int64)
 		case hassourceat.FieldPackageVersionID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_version_id", values[i])
 			} else if value.Valid {
-				hsa.PackageVersionID = new(int)
-				*hsa.PackageVersionID = int(value.Int64)
+				hsa.PackageVersionID = new(uuid.UUID)
+				*hsa.PackageVersionID = *value.S.(*uuid.UUID)
 			}
 		case hassourceat.FieldPackageNameID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_name_id", values[i])
 			} else if value.Valid {
-				hsa.PackageNameID = new(int)
-				*hsa.PackageNameID = int(value.Int64)
+				hsa.PackageNameID = new(uuid.UUID)
+				*hsa.PackageNameID = *value.S.(*uuid.UUID)
 			}
 		case hassourceat.FieldSourceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
-			} else if value.Valid {
-				hsa.SourceID = int(value.Int64)
+			} else if value != nil {
+				hsa.SourceID = *value
 			}
 		case hassourceat.FieldKnownSince:
 			if value, ok := values[i].(*sql.NullTime); !ok {

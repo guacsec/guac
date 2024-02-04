@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
@@ -133,8 +134,8 @@ func (snq *SourceNamespaceQuery) FirstX(ctx context.Context) *SourceNamespace {
 
 // FirstID returns the first SourceNamespace ID from the query.
 // Returns a *NotFoundError when no SourceNamespace ID was found.
-func (snq *SourceNamespaceQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (snq *SourceNamespaceQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = snq.Limit(1).IDs(setContextOp(ctx, snq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -146,7 +147,7 @@ func (snq *SourceNamespaceQuery) FirstID(ctx context.Context) (id int, err error
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (snq *SourceNamespaceQuery) FirstIDX(ctx context.Context) int {
+func (snq *SourceNamespaceQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := snq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -184,8 +185,8 @@ func (snq *SourceNamespaceQuery) OnlyX(ctx context.Context) *SourceNamespace {
 // OnlyID is like Only, but returns the only SourceNamespace ID in the query.
 // Returns a *NotSingularError when more than one SourceNamespace ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (snq *SourceNamespaceQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (snq *SourceNamespaceQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = snq.Limit(2).IDs(setContextOp(ctx, snq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -201,7 +202,7 @@ func (snq *SourceNamespaceQuery) OnlyID(ctx context.Context) (id int, err error)
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (snq *SourceNamespaceQuery) OnlyIDX(ctx context.Context) int {
+func (snq *SourceNamespaceQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := snq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -229,7 +230,7 @@ func (snq *SourceNamespaceQuery) AllX(ctx context.Context) []*SourceNamespace {
 }
 
 // IDs executes the query and returns a list of SourceNamespace IDs.
-func (snq *SourceNamespaceQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (snq *SourceNamespaceQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if snq.ctx.Unique == nil && snq.path != nil {
 		snq.Unique(true)
 	}
@@ -241,7 +242,7 @@ func (snq *SourceNamespaceQuery) IDs(ctx context.Context) (ids []int, err error)
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (snq *SourceNamespaceQuery) IDsX(ctx context.Context) []int {
+func (snq *SourceNamespaceQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := snq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -464,8 +465,8 @@ func (snq *SourceNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 }
 
 func (snq *SourceNamespaceQuery) loadSourceType(ctx context.Context, query *SourceTypeQuery, nodes []*SourceNamespace, init func(*SourceNamespace), assign func(*SourceNamespace, *SourceType)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*SourceNamespace)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*SourceNamespace)
 	for i := range nodes {
 		fk := nodes[i].SourceID
 		if _, ok := nodeids[fk]; !ok {
@@ -494,7 +495,7 @@ func (snq *SourceNamespaceQuery) loadSourceType(ctx context.Context, query *Sour
 }
 func (snq *SourceNamespaceQuery) loadNames(ctx context.Context, query *SourceNameQuery, nodes []*SourceNamespace, init func(*SourceNamespace), assign func(*SourceNamespace, *SourceName)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*SourceNamespace)
+	nodeids := make(map[uuid.UUID]*SourceNamespace)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -536,7 +537,7 @@ func (snq *SourceNamespaceQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (snq *SourceNamespaceQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(sourcenamespace.Table, sourcenamespace.Columns, sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(sourcenamespace.Table, sourcenamespace.Columns, sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeUUID))
 	_spec.From = snq.sql
 	if unique := snq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

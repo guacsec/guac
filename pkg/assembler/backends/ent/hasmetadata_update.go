@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -33,15 +34,15 @@ func (hmu *HasMetadataUpdate) Where(ps ...predicate.HasMetadata) *HasMetadataUpd
 }
 
 // SetSourceID sets the "source_id" field.
-func (hmu *HasMetadataUpdate) SetSourceID(i int) *HasMetadataUpdate {
-	hmu.mutation.SetSourceID(i)
+func (hmu *HasMetadataUpdate) SetSourceID(u uuid.UUID) *HasMetadataUpdate {
+	hmu.mutation.SetSourceID(u)
 	return hmu
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableSourceID(i *int) *HasMetadataUpdate {
-	if i != nil {
-		hmu.SetSourceID(*i)
+func (hmu *HasMetadataUpdate) SetNillableSourceID(u *uuid.UUID) *HasMetadataUpdate {
+	if u != nil {
+		hmu.SetSourceID(*u)
 	}
 	return hmu
 }
@@ -53,15 +54,15 @@ func (hmu *HasMetadataUpdate) ClearSourceID() *HasMetadataUpdate {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hmu *HasMetadataUpdate) SetPackageVersionID(i int) *HasMetadataUpdate {
-	hmu.mutation.SetPackageVersionID(i)
+func (hmu *HasMetadataUpdate) SetPackageVersionID(u uuid.UUID) *HasMetadataUpdate {
+	hmu.mutation.SetPackageVersionID(u)
 	return hmu
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillablePackageVersionID(i *int) *HasMetadataUpdate {
-	if i != nil {
-		hmu.SetPackageVersionID(*i)
+func (hmu *HasMetadataUpdate) SetNillablePackageVersionID(u *uuid.UUID) *HasMetadataUpdate {
+	if u != nil {
+		hmu.SetPackageVersionID(*u)
 	}
 	return hmu
 }
@@ -73,15 +74,15 @@ func (hmu *HasMetadataUpdate) ClearPackageVersionID() *HasMetadataUpdate {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hmu *HasMetadataUpdate) SetPackageNameID(i int) *HasMetadataUpdate {
-	hmu.mutation.SetPackageNameID(i)
+func (hmu *HasMetadataUpdate) SetPackageNameID(u uuid.UUID) *HasMetadataUpdate {
+	hmu.mutation.SetPackageNameID(u)
 	return hmu
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillablePackageNameID(i *int) *HasMetadataUpdate {
-	if i != nil {
-		hmu.SetPackageNameID(*i)
+func (hmu *HasMetadataUpdate) SetNillablePackageNameID(u *uuid.UUID) *HasMetadataUpdate {
+	if u != nil {
+		hmu.SetPackageNameID(*u)
 	}
 	return hmu
 }
@@ -93,15 +94,15 @@ func (hmu *HasMetadataUpdate) ClearPackageNameID() *HasMetadataUpdate {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (hmu *HasMetadataUpdate) SetArtifactID(i int) *HasMetadataUpdate {
-	hmu.mutation.SetArtifactID(i)
+func (hmu *HasMetadataUpdate) SetArtifactID(u uuid.UUID) *HasMetadataUpdate {
+	hmu.mutation.SetArtifactID(u)
 	return hmu
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableArtifactID(i *int) *HasMetadataUpdate {
-	if i != nil {
-		hmu.SetArtifactID(*i)
+func (hmu *HasMetadataUpdate) SetNillableArtifactID(u *uuid.UUID) *HasMetadataUpdate {
+	if u != nil {
+		hmu.SetArtifactID(*u)
 	}
 	return hmu
 }
@@ -207,13 +208,13 @@ func (hmu *HasMetadataUpdate) SetPackageVersion(p *PackageVersion) *HasMetadataU
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hmu *HasMetadataUpdate) SetAllVersionsID(id int) *HasMetadataUpdate {
+func (hmu *HasMetadataUpdate) SetAllVersionsID(id uuid.UUID) *HasMetadataUpdate {
 	hmu.mutation.SetAllVersionsID(id)
 	return hmu
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hmu *HasMetadataUpdate) SetNillableAllVersionsID(id *int) *HasMetadataUpdate {
+func (hmu *HasMetadataUpdate) SetNillableAllVersionsID(id *uuid.UUID) *HasMetadataUpdate {
 	if id != nil {
 		hmu = hmu.SetAllVersionsID(*id)
 	}
@@ -287,7 +288,7 @@ func (hmu *HasMetadataUpdate) ExecX(ctx context.Context) {
 }
 
 func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(hasmetadata.Table, hasmetadata.Columns, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(hasmetadata.Table, hasmetadata.Columns, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
 	if ps := hmu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -321,7 +322,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hasmetadata.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -334,7 +335,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hasmetadata.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -350,7 +351,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hasmetadata.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -363,7 +364,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hasmetadata.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -379,7 +380,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hasmetadata.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -392,7 +393,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hasmetadata.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -408,7 +409,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hasmetadata.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -421,7 +422,7 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hasmetadata.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -450,15 +451,15 @@ type HasMetadataUpdateOne struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (hmuo *HasMetadataUpdateOne) SetSourceID(i int) *HasMetadataUpdateOne {
-	hmuo.mutation.SetSourceID(i)
+func (hmuo *HasMetadataUpdateOne) SetSourceID(u uuid.UUID) *HasMetadataUpdateOne {
+	hmuo.mutation.SetSourceID(u)
 	return hmuo
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableSourceID(i *int) *HasMetadataUpdateOne {
-	if i != nil {
-		hmuo.SetSourceID(*i)
+func (hmuo *HasMetadataUpdateOne) SetNillableSourceID(u *uuid.UUID) *HasMetadataUpdateOne {
+	if u != nil {
+		hmuo.SetSourceID(*u)
 	}
 	return hmuo
 }
@@ -470,15 +471,15 @@ func (hmuo *HasMetadataUpdateOne) ClearSourceID() *HasMetadataUpdateOne {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hmuo *HasMetadataUpdateOne) SetPackageVersionID(i int) *HasMetadataUpdateOne {
-	hmuo.mutation.SetPackageVersionID(i)
+func (hmuo *HasMetadataUpdateOne) SetPackageVersionID(u uuid.UUID) *HasMetadataUpdateOne {
+	hmuo.mutation.SetPackageVersionID(u)
 	return hmuo
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillablePackageVersionID(i *int) *HasMetadataUpdateOne {
-	if i != nil {
-		hmuo.SetPackageVersionID(*i)
+func (hmuo *HasMetadataUpdateOne) SetNillablePackageVersionID(u *uuid.UUID) *HasMetadataUpdateOne {
+	if u != nil {
+		hmuo.SetPackageVersionID(*u)
 	}
 	return hmuo
 }
@@ -490,15 +491,15 @@ func (hmuo *HasMetadataUpdateOne) ClearPackageVersionID() *HasMetadataUpdateOne 
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hmuo *HasMetadataUpdateOne) SetPackageNameID(i int) *HasMetadataUpdateOne {
-	hmuo.mutation.SetPackageNameID(i)
+func (hmuo *HasMetadataUpdateOne) SetPackageNameID(u uuid.UUID) *HasMetadataUpdateOne {
+	hmuo.mutation.SetPackageNameID(u)
 	return hmuo
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillablePackageNameID(i *int) *HasMetadataUpdateOne {
-	if i != nil {
-		hmuo.SetPackageNameID(*i)
+func (hmuo *HasMetadataUpdateOne) SetNillablePackageNameID(u *uuid.UUID) *HasMetadataUpdateOne {
+	if u != nil {
+		hmuo.SetPackageNameID(*u)
 	}
 	return hmuo
 }
@@ -510,15 +511,15 @@ func (hmuo *HasMetadataUpdateOne) ClearPackageNameID() *HasMetadataUpdateOne {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (hmuo *HasMetadataUpdateOne) SetArtifactID(i int) *HasMetadataUpdateOne {
-	hmuo.mutation.SetArtifactID(i)
+func (hmuo *HasMetadataUpdateOne) SetArtifactID(u uuid.UUID) *HasMetadataUpdateOne {
+	hmuo.mutation.SetArtifactID(u)
 	return hmuo
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableArtifactID(i *int) *HasMetadataUpdateOne {
-	if i != nil {
-		hmuo.SetArtifactID(*i)
+func (hmuo *HasMetadataUpdateOne) SetNillableArtifactID(u *uuid.UUID) *HasMetadataUpdateOne {
+	if u != nil {
+		hmuo.SetArtifactID(*u)
 	}
 	return hmuo
 }
@@ -624,13 +625,13 @@ func (hmuo *HasMetadataUpdateOne) SetPackageVersion(p *PackageVersion) *HasMetad
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hmuo *HasMetadataUpdateOne) SetAllVersionsID(id int) *HasMetadataUpdateOne {
+func (hmuo *HasMetadataUpdateOne) SetAllVersionsID(id uuid.UUID) *HasMetadataUpdateOne {
 	hmuo.mutation.SetAllVersionsID(id)
 	return hmuo
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hmuo *HasMetadataUpdateOne) SetNillableAllVersionsID(id *int) *HasMetadataUpdateOne {
+func (hmuo *HasMetadataUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *HasMetadataUpdateOne {
 	if id != nil {
 		hmuo = hmuo.SetAllVersionsID(*id)
 	}
@@ -717,7 +718,7 @@ func (hmuo *HasMetadataUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetadata, err error) {
-	_spec := sqlgraph.NewUpdateSpec(hasmetadata.Table, hasmetadata.Columns, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(hasmetadata.Table, hasmetadata.Columns, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
 	id, ok := hmuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "HasMetadata.id" for update`)}
@@ -768,7 +769,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 			Columns: []string{hasmetadata.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -781,7 +782,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 			Columns: []string{hasmetadata.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -797,7 +798,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 			Columns: []string{hasmetadata.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -810,7 +811,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 			Columns: []string{hasmetadata.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -826,7 +827,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 			Columns: []string{hasmetadata.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -839,7 +840,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 			Columns: []string{hasmetadata.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -855,7 +856,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 			Columns: []string{hasmetadata.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -868,7 +869,7 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 			Columns: []string{hasmetadata.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

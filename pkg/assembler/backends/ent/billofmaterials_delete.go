@@ -40,7 +40,7 @@ func (bomd *BillOfMaterialsDelete) ExecX(ctx context.Context) int {
 }
 
 func (bomd *BillOfMaterialsDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(billofmaterials.Table, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(billofmaterials.Table, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID))
 	if ps := bomd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

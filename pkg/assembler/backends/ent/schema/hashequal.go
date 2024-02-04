@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // HashEqual holds the schema definition for the HashEqual entity.
@@ -29,6 +30,10 @@ type HashEqual struct {
 // Fields of the HashEqual.
 func (HashEqual) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.String("origin"),
 		field.String("collector"),
 		field.String("justification"),

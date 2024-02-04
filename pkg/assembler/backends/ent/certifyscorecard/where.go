@@ -5,101 +5,102 @@ package certifyscorecard
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.CertifyScorecard {
+func ID(id uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.CertifyScorecard {
+func IDEQ(id uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.CertifyScorecard {
+func IDNEQ(id uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.CertifyScorecard {
+func IDIn(ids ...uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.CertifyScorecard {
+func IDNotIn(ids ...uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.CertifyScorecard {
+func IDGT(id uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.CertifyScorecard {
+func IDGTE(id uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.CertifyScorecard {
+func IDLT(id uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.CertifyScorecard {
+func IDLTE(id uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldLTE(FieldID, id))
 }
 
 // SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
-func SourceID(v int) predicate.CertifyScorecard {
+func SourceID(v uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldSourceID, v))
 }
 
 // ScorecardID applies equality check predicate on the "scorecard_id" field. It's identical to ScorecardIDEQ.
-func ScorecardID(v int) predicate.CertifyScorecard {
+func ScorecardID(v uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldScorecardID, v))
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
-func SourceIDEQ(v int) predicate.CertifyScorecard {
+func SourceIDEQ(v uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldSourceID, v))
 }
 
 // SourceIDNEQ applies the NEQ predicate on the "source_id" field.
-func SourceIDNEQ(v int) predicate.CertifyScorecard {
+func SourceIDNEQ(v uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldNEQ(FieldSourceID, v))
 }
 
 // SourceIDIn applies the In predicate on the "source_id" field.
-func SourceIDIn(vs ...int) predicate.CertifyScorecard {
+func SourceIDIn(vs ...uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldIn(FieldSourceID, vs...))
 }
 
 // SourceIDNotIn applies the NotIn predicate on the "source_id" field.
-func SourceIDNotIn(vs ...int) predicate.CertifyScorecard {
+func SourceIDNotIn(vs ...uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldNotIn(FieldSourceID, vs...))
 }
 
 // ScorecardIDEQ applies the EQ predicate on the "scorecard_id" field.
-func ScorecardIDEQ(v int) predicate.CertifyScorecard {
+func ScorecardIDEQ(v uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldScorecardID, v))
 }
 
 // ScorecardIDNEQ applies the NEQ predicate on the "scorecard_id" field.
-func ScorecardIDNEQ(v int) predicate.CertifyScorecard {
+func ScorecardIDNEQ(v uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldNEQ(FieldScorecardID, v))
 }
 
 // ScorecardIDIn applies the In predicate on the "scorecard_id" field.
-func ScorecardIDIn(vs ...int) predicate.CertifyScorecard {
+func ScorecardIDIn(vs ...uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldIn(FieldScorecardID, vs...))
 }
 
 // ScorecardIDNotIn applies the NotIn predicate on the "scorecard_id" field.
-func ScorecardIDNotIn(vs ...int) predicate.CertifyScorecard {
+func ScorecardIDNotIn(vs ...uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldNotIn(FieldScorecardID, vs...))
 }
 

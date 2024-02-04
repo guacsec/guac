@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 )
@@ -40,15 +42,29 @@ func (hec *HashEqualCreate) SetJustification(s string) *HashEqualCreate {
 	return hec
 }
 
+// SetID sets the "id" field.
+func (hec *HashEqualCreate) SetID(u uuid.UUID) *HashEqualCreate {
+	hec.mutation.SetID(u)
+	return hec
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (hec *HashEqualCreate) SetNillableID(u *uuid.UUID) *HashEqualCreate {
+	if u != nil {
+		hec.SetID(*u)
+	}
+	return hec
+}
+
 // AddArtifactIDs adds the "artifacts" edge to the Artifact entity by IDs.
-func (hec *HashEqualCreate) AddArtifactIDs(ids ...int) *HashEqualCreate {
+func (hec *HashEqualCreate) AddArtifactIDs(ids ...uuid.UUID) *HashEqualCreate {
 	hec.mutation.AddArtifactIDs(ids...)
 	return hec
 }
 
 // AddArtifacts adds the "artifacts" edges to the Artifact entity.
 func (hec *HashEqualCreate) AddArtifacts(a ...*Artifact) *HashEqualCreate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -62,6 +78,7 @@ func (hec *HashEqualCreate) Mutation() *HashEqualMutation {
 
 // Save creates the HashEqual in the database.
 func (hec *HashEqualCreate) Save(ctx context.Context) (*HashEqual, error) {
+	hec.defaults()
 	return withHooks(ctx, hec.sqlSave, hec.mutation, hec.hooks)
 }
 
@@ -84,6 +101,14 @@ func (hec *HashEqualCreate) Exec(ctx context.Context) error {
 func (hec *HashEqualCreate) ExecX(ctx context.Context) {
 	if err := hec.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (hec *HashEqualCreate) defaults() {
+	if _, ok := hec.mutation.ID(); !ok {
+		v := hashequal.DefaultID()
+		hec.mutation.SetID(v)
 	}
 }
 
@@ -115,8 +140,13 @@ func (hec *HashEqualCreate) sqlSave(ctx context.Context) (*HashEqual, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	hec.mutation.id = &_node.ID
 	hec.mutation.done = true
 	return _node, nil
@@ -125,9 +155,13 @@ func (hec *HashEqualCreate) sqlSave(ctx context.Context) (*HashEqual, error) {
 func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 	var (
 		_node = &HashEqual{config: hec.config}
-		_spec = sqlgraph.NewCreateSpec(hashequal.Table, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(hashequal.Table, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = hec.conflict
+	if id, ok := hec.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := hec.mutation.Origin(); ok {
 		_spec.SetField(hashequal.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
@@ -148,7 +182,7 @@ func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 			Columns: hashequal.ArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -244,16 +278,24 @@ func (u *HashEqualUpsert) UpdateJustification() *HashEqualUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.HashEqual.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(hashequal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *HashEqualUpsertOne) UpdateNewValues() *HashEqualUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(hashequal.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -342,7 +384,12 @@ func (u *HashEqualUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *HashEqualUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *HashEqualUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: HashEqualUpsertOne.ID is not supported by MySQL driver. Use HashEqualUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -351,7 +398,7 @@ func (u *HashEqualUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *HashEqualUpsertOne) IDX(ctx context.Context) int {
+func (u *HashEqualUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -378,6 +425,7 @@ func (hecb *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error)
 	for i := range hecb.builders {
 		func(i int, root context.Context) {
 			builder := hecb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*HashEqualMutation)
 				if !ok {
@@ -405,10 +453,6 @@ func (hecb *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error)
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -495,10 +539,20 @@ type HashEqualUpsertBulk struct {
 //	client.HashEqual.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(hashequal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *HashEqualUpsertBulk) UpdateNewValues() *HashEqualUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(hashequal.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // PkgEqual holds the schema definition for the PkgEqual entity.
@@ -36,6 +37,10 @@ type PkgEqual struct {
 // Fields of the PkgEqual.
 func (PkgEqual) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		// field.Int("package_version_id"),
 		// field.Int("equal_package_id"),
 		field.String("origin"),

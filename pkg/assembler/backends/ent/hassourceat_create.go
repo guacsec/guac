@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -26,36 +28,36 @@ type HasSourceAtCreate struct {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hsac *HasSourceAtCreate) SetPackageVersionID(i int) *HasSourceAtCreate {
-	hsac.mutation.SetPackageVersionID(i)
+func (hsac *HasSourceAtCreate) SetPackageVersionID(u uuid.UUID) *HasSourceAtCreate {
+	hsac.mutation.SetPackageVersionID(u)
 	return hsac
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hsac *HasSourceAtCreate) SetNillablePackageVersionID(i *int) *HasSourceAtCreate {
-	if i != nil {
-		hsac.SetPackageVersionID(*i)
+func (hsac *HasSourceAtCreate) SetNillablePackageVersionID(u *uuid.UUID) *HasSourceAtCreate {
+	if u != nil {
+		hsac.SetPackageVersionID(*u)
 	}
 	return hsac
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hsac *HasSourceAtCreate) SetPackageNameID(i int) *HasSourceAtCreate {
-	hsac.mutation.SetPackageNameID(i)
+func (hsac *HasSourceAtCreate) SetPackageNameID(u uuid.UUID) *HasSourceAtCreate {
+	hsac.mutation.SetPackageNameID(u)
 	return hsac
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hsac *HasSourceAtCreate) SetNillablePackageNameID(i *int) *HasSourceAtCreate {
-	if i != nil {
-		hsac.SetPackageNameID(*i)
+func (hsac *HasSourceAtCreate) SetNillablePackageNameID(u *uuid.UUID) *HasSourceAtCreate {
+	if u != nil {
+		hsac.SetPackageNameID(*u)
 	}
 	return hsac
 }
 
 // SetSourceID sets the "source_id" field.
-func (hsac *HasSourceAtCreate) SetSourceID(i int) *HasSourceAtCreate {
-	hsac.mutation.SetSourceID(i)
+func (hsac *HasSourceAtCreate) SetSourceID(u uuid.UUID) *HasSourceAtCreate {
+	hsac.mutation.SetSourceID(u)
 	return hsac
 }
 
@@ -83,19 +85,33 @@ func (hsac *HasSourceAtCreate) SetCollector(s string) *HasSourceAtCreate {
 	return hsac
 }
 
+// SetID sets the "id" field.
+func (hsac *HasSourceAtCreate) SetID(u uuid.UUID) *HasSourceAtCreate {
+	hsac.mutation.SetID(u)
+	return hsac
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (hsac *HasSourceAtCreate) SetNillableID(u *uuid.UUID) *HasSourceAtCreate {
+	if u != nil {
+		hsac.SetID(*u)
+	}
+	return hsac
+}
+
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
 func (hsac *HasSourceAtCreate) SetPackageVersion(p *PackageVersion) *HasSourceAtCreate {
 	return hsac.SetPackageVersionID(p.ID)
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hsac *HasSourceAtCreate) SetAllVersionsID(id int) *HasSourceAtCreate {
+func (hsac *HasSourceAtCreate) SetAllVersionsID(id uuid.UUID) *HasSourceAtCreate {
 	hsac.mutation.SetAllVersionsID(id)
 	return hsac
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hsac *HasSourceAtCreate) SetNillableAllVersionsID(id *int) *HasSourceAtCreate {
+func (hsac *HasSourceAtCreate) SetNillableAllVersionsID(id *uuid.UUID) *HasSourceAtCreate {
 	if id != nil {
 		hsac = hsac.SetAllVersionsID(*id)
 	}
@@ -119,6 +135,7 @@ func (hsac *HasSourceAtCreate) Mutation() *HasSourceAtMutation {
 
 // Save creates the HasSourceAt in the database.
 func (hsac *HasSourceAtCreate) Save(ctx context.Context) (*HasSourceAt, error) {
+	hsac.defaults()
 	return withHooks(ctx, hsac.sqlSave, hsac.mutation, hsac.hooks)
 }
 
@@ -141,6 +158,14 @@ func (hsac *HasSourceAtCreate) Exec(ctx context.Context) error {
 func (hsac *HasSourceAtCreate) ExecX(ctx context.Context) {
 	if err := hsac.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (hsac *HasSourceAtCreate) defaults() {
+	if _, ok := hsac.mutation.ID(); !ok {
+		v := hassourceat.DefaultID()
+		hsac.mutation.SetID(v)
 	}
 }
 
@@ -178,8 +203,13 @@ func (hsac *HasSourceAtCreate) sqlSave(ctx context.Context) (*HasSourceAt, error
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	hsac.mutation.id = &_node.ID
 	hsac.mutation.done = true
 	return _node, nil
@@ -188,9 +218,13 @@ func (hsac *HasSourceAtCreate) sqlSave(ctx context.Context) (*HasSourceAt, error
 func (hsac *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec) {
 	var (
 		_node = &HasSourceAt{config: hsac.config}
-		_spec = sqlgraph.NewCreateSpec(hassourceat.Table, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(hassourceat.Table, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = hsac.conflict
+	if id, ok := hsac.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := hsac.mutation.KnownSince(); ok {
 		_spec.SetField(hassourceat.FieldKnownSince, field.TypeTime, value)
 		_node.KnownSince = value
@@ -215,7 +249,7 @@ func (hsac *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec)
 			Columns: []string{hassourceat.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -232,7 +266,7 @@ func (hsac *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec)
 			Columns: []string{hassourceat.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -249,7 +283,7 @@ func (hsac *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec)
 			Columns: []string{hassourceat.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -311,7 +345,7 @@ type (
 )
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *HasSourceAtUpsert) SetPackageVersionID(v int) *HasSourceAtUpsert {
+func (u *HasSourceAtUpsert) SetPackageVersionID(v uuid.UUID) *HasSourceAtUpsert {
 	u.Set(hassourceat.FieldPackageVersionID, v)
 	return u
 }
@@ -329,7 +363,7 @@ func (u *HasSourceAtUpsert) ClearPackageVersionID() *HasSourceAtUpsert {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *HasSourceAtUpsert) SetPackageNameID(v int) *HasSourceAtUpsert {
+func (u *HasSourceAtUpsert) SetPackageNameID(v uuid.UUID) *HasSourceAtUpsert {
 	u.Set(hassourceat.FieldPackageNameID, v)
 	return u
 }
@@ -347,7 +381,7 @@ func (u *HasSourceAtUpsert) ClearPackageNameID() *HasSourceAtUpsert {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *HasSourceAtUpsert) SetSourceID(v int) *HasSourceAtUpsert {
+func (u *HasSourceAtUpsert) SetSourceID(v uuid.UUID) *HasSourceAtUpsert {
 	u.Set(hassourceat.FieldSourceID, v)
 	return u
 }
@@ -406,16 +440,24 @@ func (u *HasSourceAtUpsert) UpdateCollector() *HasSourceAtUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.HasSourceAt.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(hassourceat.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *HasSourceAtUpsertOne) UpdateNewValues() *HasSourceAtUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(hassourceat.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -447,7 +489,7 @@ func (u *HasSourceAtUpsertOne) Update(set func(*HasSourceAtUpsert)) *HasSourceAt
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *HasSourceAtUpsertOne) SetPackageVersionID(v int) *HasSourceAtUpsertOne {
+func (u *HasSourceAtUpsertOne) SetPackageVersionID(v uuid.UUID) *HasSourceAtUpsertOne {
 	return u.Update(func(s *HasSourceAtUpsert) {
 		s.SetPackageVersionID(v)
 	})
@@ -468,7 +510,7 @@ func (u *HasSourceAtUpsertOne) ClearPackageVersionID() *HasSourceAtUpsertOne {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *HasSourceAtUpsertOne) SetPackageNameID(v int) *HasSourceAtUpsertOne {
+func (u *HasSourceAtUpsertOne) SetPackageNameID(v uuid.UUID) *HasSourceAtUpsertOne {
 	return u.Update(func(s *HasSourceAtUpsert) {
 		s.SetPackageNameID(v)
 	})
@@ -489,7 +531,7 @@ func (u *HasSourceAtUpsertOne) ClearPackageNameID() *HasSourceAtUpsertOne {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *HasSourceAtUpsertOne) SetSourceID(v int) *HasSourceAtUpsertOne {
+func (u *HasSourceAtUpsertOne) SetSourceID(v uuid.UUID) *HasSourceAtUpsertOne {
 	return u.Update(func(s *HasSourceAtUpsert) {
 		s.SetSourceID(v)
 	})
@@ -574,7 +616,12 @@ func (u *HasSourceAtUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *HasSourceAtUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *HasSourceAtUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: HasSourceAtUpsertOne.ID is not supported by MySQL driver. Use HasSourceAtUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -583,7 +630,7 @@ func (u *HasSourceAtUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *HasSourceAtUpsertOne) IDX(ctx context.Context) int {
+func (u *HasSourceAtUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -610,6 +657,7 @@ func (hsacb *HasSourceAtCreateBulk) Save(ctx context.Context) ([]*HasSourceAt, e
 	for i := range hsacb.builders {
 		func(i int, root context.Context) {
 			builder := hsacb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*HasSourceAtMutation)
 				if !ok {
@@ -637,10 +685,6 @@ func (hsacb *HasSourceAtCreateBulk) Save(ctx context.Context) ([]*HasSourceAt, e
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -727,10 +771,20 @@ type HasSourceAtUpsertBulk struct {
 //	client.HasSourceAt.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(hassourceat.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *HasSourceAtUpsertBulk) UpdateNewValues() *HasSourceAtUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(hassourceat.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -762,7 +816,7 @@ func (u *HasSourceAtUpsertBulk) Update(set func(*HasSourceAtUpsert)) *HasSourceA
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *HasSourceAtUpsertBulk) SetPackageVersionID(v int) *HasSourceAtUpsertBulk {
+func (u *HasSourceAtUpsertBulk) SetPackageVersionID(v uuid.UUID) *HasSourceAtUpsertBulk {
 	return u.Update(func(s *HasSourceAtUpsert) {
 		s.SetPackageVersionID(v)
 	})
@@ -783,7 +837,7 @@ func (u *HasSourceAtUpsertBulk) ClearPackageVersionID() *HasSourceAtUpsertBulk {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *HasSourceAtUpsertBulk) SetPackageNameID(v int) *HasSourceAtUpsertBulk {
+func (u *HasSourceAtUpsertBulk) SetPackageNameID(v uuid.UUID) *HasSourceAtUpsertBulk {
 	return u.Update(func(s *HasSourceAtUpsert) {
 		s.SetPackageNameID(v)
 	})
@@ -804,7 +858,7 @@ func (u *HasSourceAtUpsertBulk) ClearPackageNameID() *HasSourceAtUpsertBulk {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *HasSourceAtUpsertBulk) SetSourceID(v int) *HasSourceAtUpsertBulk {
+func (u *HasSourceAtUpsertBulk) SetSourceID(v uuid.UUID) *HasSourceAtUpsertBulk {
 	return u.Update(func(s *HasSourceAtUpsert) {
 		s.SetSourceID(v)
 	})

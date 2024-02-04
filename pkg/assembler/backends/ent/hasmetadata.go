@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -20,15 +21,15 @@ import (
 type HasMetadata struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// SourceID holds the value of the "source_id" field.
-	SourceID *int `json:"source_id,omitempty"`
+	SourceID *uuid.UUID `json:"source_id,omitempty"`
 	// PackageVersionID holds the value of the "package_version_id" field.
-	PackageVersionID *int `json:"package_version_id,omitempty"`
+	PackageVersionID *uuid.UUID `json:"package_version_id,omitempty"`
 	// PackageNameID holds the value of the "package_name_id" field.
-	PackageNameID *int `json:"package_name_id,omitempty"`
+	PackageNameID *uuid.UUID `json:"package_name_id,omitempty"`
 	// ArtifactID holds the value of the "artifact_id" field.
-	ArtifactID *int `json:"artifact_id,omitempty"`
+	ArtifactID *uuid.UUID `json:"artifact_id,omitempty"`
 	// Timestamp holds the value of the "timestamp" field.
 	Timestamp time.Time `json:"timestamp,omitempty"`
 	// Key holds the value of the "key" field.
@@ -121,12 +122,14 @@ func (*HasMetadata) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case hasmetadata.FieldID, hasmetadata.FieldSourceID, hasmetadata.FieldPackageVersionID, hasmetadata.FieldPackageNameID, hasmetadata.FieldArtifactID:
-			values[i] = new(sql.NullInt64)
+		case hasmetadata.FieldSourceID, hasmetadata.FieldPackageVersionID, hasmetadata.FieldPackageNameID, hasmetadata.FieldArtifactID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case hasmetadata.FieldKey, hasmetadata.FieldValue, hasmetadata.FieldJustification, hasmetadata.FieldOrigin, hasmetadata.FieldCollector:
 			values[i] = new(sql.NullString)
 		case hasmetadata.FieldTimestamp:
 			values[i] = new(sql.NullTime)
+		case hasmetadata.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -143,38 +146,38 @@ func (hm *HasMetadata) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case hasmetadata.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				hm.ID = *value
 			}
-			hm.ID = int(value.Int64)
 		case hasmetadata.FieldSourceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				hm.SourceID = new(int)
-				*hm.SourceID = int(value.Int64)
+				hm.SourceID = new(uuid.UUID)
+				*hm.SourceID = *value.S.(*uuid.UUID)
 			}
 		case hasmetadata.FieldPackageVersionID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_version_id", values[i])
 			} else if value.Valid {
-				hm.PackageVersionID = new(int)
-				*hm.PackageVersionID = int(value.Int64)
+				hm.PackageVersionID = new(uuid.UUID)
+				*hm.PackageVersionID = *value.S.(*uuid.UUID)
 			}
 		case hasmetadata.FieldPackageNameID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_name_id", values[i])
 			} else if value.Valid {
-				hm.PackageNameID = new(int)
-				*hm.PackageNameID = int(value.Int64)
+				hm.PackageNameID = new(uuid.UUID)
+				*hm.PackageNameID = *value.S.(*uuid.UUID)
 			}
 		case hasmetadata.FieldArtifactID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				hm.ArtifactID = new(int)
-				*hm.ArtifactID = int(value.Int64)
+				hm.ArtifactID = new(uuid.UUID)
+				*hm.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case hasmetadata.FieldTimestamp:
 			if value, ok := values[i].(*sql.NullTime); !ok {

@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // HasMetadata holds the schema definition for the HasMetadata entity.
@@ -31,10 +32,14 @@ type HasMetadata struct {
 // Fields of the HasMetadata.
 func (HasMetadata) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("source_id").Optional().Nillable(),
-		field.Int("package_version_id").Optional().Nillable(),
-		field.Int("package_name_id").Optional().Nillable(),
-		field.Int("artifact_id").Optional().Nillable(),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("source_id", uuid.New()).Optional().Nillable(),
+		field.UUID("package_version_id", uuid.New()).Optional().Nillable(),
+		field.UUID("package_name_id", uuid.New()).Optional().Nillable(),
+		field.UUID("artifact_id", uuid.New()).Optional().Nillable(),
 		field.Time("timestamp"),
 		field.String("key"),
 		field.String("value"),

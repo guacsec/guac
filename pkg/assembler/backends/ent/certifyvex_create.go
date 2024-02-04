@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -26,36 +28,36 @@ type CertifyVexCreate struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvc *CertifyVexCreate) SetPackageID(i int) *CertifyVexCreate {
-	cvc.mutation.SetPackageID(i)
+func (cvc *CertifyVexCreate) SetPackageID(u uuid.UUID) *CertifyVexCreate {
+	cvc.mutation.SetPackageID(u)
 	return cvc
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (cvc *CertifyVexCreate) SetNillablePackageID(i *int) *CertifyVexCreate {
-	if i != nil {
-		cvc.SetPackageID(*i)
+func (cvc *CertifyVexCreate) SetNillablePackageID(u *uuid.UUID) *CertifyVexCreate {
+	if u != nil {
+		cvc.SetPackageID(*u)
 	}
 	return cvc
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cvc *CertifyVexCreate) SetArtifactID(i int) *CertifyVexCreate {
-	cvc.mutation.SetArtifactID(i)
+func (cvc *CertifyVexCreate) SetArtifactID(u uuid.UUID) *CertifyVexCreate {
+	cvc.mutation.SetArtifactID(u)
 	return cvc
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cvc *CertifyVexCreate) SetNillableArtifactID(i *int) *CertifyVexCreate {
-	if i != nil {
-		cvc.SetArtifactID(*i)
+func (cvc *CertifyVexCreate) SetNillableArtifactID(u *uuid.UUID) *CertifyVexCreate {
+	if u != nil {
+		cvc.SetArtifactID(*u)
 	}
 	return cvc
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvc *CertifyVexCreate) SetVulnerabilityID(i int) *CertifyVexCreate {
-	cvc.mutation.SetVulnerabilityID(i)
+func (cvc *CertifyVexCreate) SetVulnerabilityID(u uuid.UUID) *CertifyVexCreate {
+	cvc.mutation.SetVulnerabilityID(u)
 	return cvc
 }
 
@@ -101,6 +103,20 @@ func (cvc *CertifyVexCreate) SetCollector(s string) *CertifyVexCreate {
 	return cvc
 }
 
+// SetID sets the "id" field.
+func (cvc *CertifyVexCreate) SetID(u uuid.UUID) *CertifyVexCreate {
+	cvc.mutation.SetID(u)
+	return cvc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (cvc *CertifyVexCreate) SetNillableID(u *uuid.UUID) *CertifyVexCreate {
+	if u != nil {
+		cvc.SetID(*u)
+	}
+	return cvc
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (cvc *CertifyVexCreate) SetPackage(p *PackageVersion) *CertifyVexCreate {
 	return cvc.SetPackageID(p.ID)
@@ -123,6 +139,7 @@ func (cvc *CertifyVexCreate) Mutation() *CertifyVexMutation {
 
 // Save creates the CertifyVex in the database.
 func (cvc *CertifyVexCreate) Save(ctx context.Context) (*CertifyVex, error) {
+	cvc.defaults()
 	return withHooks(ctx, cvc.sqlSave, cvc.mutation, cvc.hooks)
 }
 
@@ -145,6 +162,14 @@ func (cvc *CertifyVexCreate) Exec(ctx context.Context) error {
 func (cvc *CertifyVexCreate) ExecX(ctx context.Context) {
 	if err := cvc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cvc *CertifyVexCreate) defaults() {
+	if _, ok := cvc.mutation.ID(); !ok {
+		v := certifyvex.DefaultID()
+		cvc.mutation.SetID(v)
 	}
 }
 
@@ -191,8 +216,13 @@ func (cvc *CertifyVexCreate) sqlSave(ctx context.Context) (*CertifyVex, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	cvc.mutation.id = &_node.ID
 	cvc.mutation.done = true
 	return _node, nil
@@ -201,9 +231,13 @@ func (cvc *CertifyVexCreate) sqlSave(ctx context.Context) (*CertifyVex, error) {
 func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 	var (
 		_node = &CertifyVex{config: cvc.config}
-		_spec = sqlgraph.NewCreateSpec(certifyvex.Table, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(certifyvex.Table, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = cvc.conflict
+	if id, ok := cvc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := cvc.mutation.KnownSince(); ok {
 		_spec.SetField(certifyvex.FieldKnownSince, field.TypeTime, value)
 		_node.KnownSince = value
@@ -240,7 +274,7 @@ func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 			Columns: []string{certifyvex.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -257,7 +291,7 @@ func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 			Columns: []string{certifyvex.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -274,7 +308,7 @@ func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -336,7 +370,7 @@ type (
 )
 
 // SetPackageID sets the "package_id" field.
-func (u *CertifyVexUpsert) SetPackageID(v int) *CertifyVexUpsert {
+func (u *CertifyVexUpsert) SetPackageID(v uuid.UUID) *CertifyVexUpsert {
 	u.Set(certifyvex.FieldPackageID, v)
 	return u
 }
@@ -354,7 +388,7 @@ func (u *CertifyVexUpsert) ClearPackageID() *CertifyVexUpsert {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *CertifyVexUpsert) SetArtifactID(v int) *CertifyVexUpsert {
+func (u *CertifyVexUpsert) SetArtifactID(v uuid.UUID) *CertifyVexUpsert {
 	u.Set(certifyvex.FieldArtifactID, v)
 	return u
 }
@@ -372,7 +406,7 @@ func (u *CertifyVexUpsert) ClearArtifactID() *CertifyVexUpsert {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (u *CertifyVexUpsert) SetVulnerabilityID(v int) *CertifyVexUpsert {
+func (u *CertifyVexUpsert) SetVulnerabilityID(v uuid.UUID) *CertifyVexUpsert {
 	u.Set(certifyvex.FieldVulnerabilityID, v)
 	return u
 }
@@ -467,16 +501,24 @@ func (u *CertifyVexUpsert) UpdateCollector() *CertifyVexUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.CertifyVex.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifyvex.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyVexUpsertOne) UpdateNewValues() *CertifyVexUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(certifyvex.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -508,7 +550,7 @@ func (u *CertifyVexUpsertOne) Update(set func(*CertifyVexUpsert)) *CertifyVexUps
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *CertifyVexUpsertOne) SetPackageID(v int) *CertifyVexUpsertOne {
+func (u *CertifyVexUpsertOne) SetPackageID(v uuid.UUID) *CertifyVexUpsertOne {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetPackageID(v)
 	})
@@ -529,7 +571,7 @@ func (u *CertifyVexUpsertOne) ClearPackageID() *CertifyVexUpsertOne {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *CertifyVexUpsertOne) SetArtifactID(v int) *CertifyVexUpsertOne {
+func (u *CertifyVexUpsertOne) SetArtifactID(v uuid.UUID) *CertifyVexUpsertOne {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetArtifactID(v)
 	})
@@ -550,7 +592,7 @@ func (u *CertifyVexUpsertOne) ClearArtifactID() *CertifyVexUpsertOne {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (u *CertifyVexUpsertOne) SetVulnerabilityID(v int) *CertifyVexUpsertOne {
+func (u *CertifyVexUpsertOne) SetVulnerabilityID(v uuid.UUID) *CertifyVexUpsertOne {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetVulnerabilityID(v)
 	})
@@ -677,7 +719,12 @@ func (u *CertifyVexUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CertifyVexUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *CertifyVexUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: CertifyVexUpsertOne.ID is not supported by MySQL driver. Use CertifyVexUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -686,7 +733,7 @@ func (u *CertifyVexUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *CertifyVexUpsertOne) IDX(ctx context.Context) int {
+func (u *CertifyVexUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -713,6 +760,7 @@ func (cvcb *CertifyVexCreateBulk) Save(ctx context.Context) ([]*CertifyVex, erro
 	for i := range cvcb.builders {
 		func(i int, root context.Context) {
 			builder := cvcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertifyVexMutation)
 				if !ok {
@@ -740,10 +788,6 @@ func (cvcb *CertifyVexCreateBulk) Save(ctx context.Context) ([]*CertifyVex, erro
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -830,10 +874,20 @@ type CertifyVexUpsertBulk struct {
 //	client.CertifyVex.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifyvex.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyVexUpsertBulk) UpdateNewValues() *CertifyVexUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(certifyvex.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -865,7 +919,7 @@ func (u *CertifyVexUpsertBulk) Update(set func(*CertifyVexUpsert)) *CertifyVexUp
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *CertifyVexUpsertBulk) SetPackageID(v int) *CertifyVexUpsertBulk {
+func (u *CertifyVexUpsertBulk) SetPackageID(v uuid.UUID) *CertifyVexUpsertBulk {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetPackageID(v)
 	})
@@ -886,7 +940,7 @@ func (u *CertifyVexUpsertBulk) ClearPackageID() *CertifyVexUpsertBulk {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *CertifyVexUpsertBulk) SetArtifactID(v int) *CertifyVexUpsertBulk {
+func (u *CertifyVexUpsertBulk) SetArtifactID(v uuid.UUID) *CertifyVexUpsertBulk {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetArtifactID(v)
 	})
@@ -907,7 +961,7 @@ func (u *CertifyVexUpsertBulk) ClearArtifactID() *CertifyVexUpsertBulk {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (u *CertifyVexUpsertBulk) SetVulnerabilityID(v int) *CertifyVexUpsertBulk {
+func (u *CertifyVexUpsertBulk) SetVulnerabilityID(v uuid.UUID) *CertifyVexUpsertBulk {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.SetVulnerabilityID(v)
 	})

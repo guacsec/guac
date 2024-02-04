@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // PackageType holds the schema definition for the PackageType entity.
@@ -32,6 +33,10 @@ type PackageType struct {
 // Fields of the PackageType.
 func (PackageType) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.String("type").NotEmpty().Unique().Comment("This node matches a pkg:<type> partial pURL"),
 	}
 }

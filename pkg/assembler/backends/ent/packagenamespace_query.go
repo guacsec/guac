@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
@@ -133,8 +134,8 @@ func (pnq *PackageNamespaceQuery) FirstX(ctx context.Context) *PackageNamespace 
 
 // FirstID returns the first PackageNamespace ID from the query.
 // Returns a *NotFoundError when no PackageNamespace ID was found.
-func (pnq *PackageNamespaceQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pnq *PackageNamespaceQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pnq.Limit(1).IDs(setContextOp(ctx, pnq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -146,7 +147,7 @@ func (pnq *PackageNamespaceQuery) FirstID(ctx context.Context) (id int, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pnq *PackageNamespaceQuery) FirstIDX(ctx context.Context) int {
+func (pnq *PackageNamespaceQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := pnq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -184,8 +185,8 @@ func (pnq *PackageNamespaceQuery) OnlyX(ctx context.Context) *PackageNamespace {
 // OnlyID is like Only, but returns the only PackageNamespace ID in the query.
 // Returns a *NotSingularError when more than one PackageNamespace ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pnq *PackageNamespaceQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pnq *PackageNamespaceQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pnq.Limit(2).IDs(setContextOp(ctx, pnq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -201,7 +202,7 @@ func (pnq *PackageNamespaceQuery) OnlyID(ctx context.Context) (id int, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pnq *PackageNamespaceQuery) OnlyIDX(ctx context.Context) int {
+func (pnq *PackageNamespaceQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := pnq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -229,7 +230,7 @@ func (pnq *PackageNamespaceQuery) AllX(ctx context.Context) []*PackageNamespace 
 }
 
 // IDs executes the query and returns a list of PackageNamespace IDs.
-func (pnq *PackageNamespaceQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (pnq *PackageNamespaceQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if pnq.ctx.Unique == nil && pnq.path != nil {
 		pnq.Unique(true)
 	}
@@ -241,7 +242,7 @@ func (pnq *PackageNamespaceQuery) IDs(ctx context.Context) (ids []int, err error
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pnq *PackageNamespaceQuery) IDsX(ctx context.Context) []int {
+func (pnq *PackageNamespaceQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := pnq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -337,7 +338,7 @@ func (pnq *PackageNamespaceQuery) WithNames(opts ...func(*PackageNameQuery)) *Pa
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -360,7 +361,7 @@ func (pnq *PackageNamespaceQuery) GroupBy(field string, fields ...string) *Packa
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //	}
 //
 //	client.PackageNamespace.Query().
@@ -464,8 +465,8 @@ func (pnq *PackageNamespaceQuery) sqlAll(ctx context.Context, hooks ...queryHook
 }
 
 func (pnq *PackageNamespaceQuery) loadPackage(ctx context.Context, query *PackageTypeQuery, nodes []*PackageNamespace, init func(*PackageNamespace), assign func(*PackageNamespace, *PackageType)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*PackageNamespace)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PackageNamespace)
 	for i := range nodes {
 		fk := nodes[i].PackageID
 		if _, ok := nodeids[fk]; !ok {
@@ -494,7 +495,7 @@ func (pnq *PackageNamespaceQuery) loadPackage(ctx context.Context, query *Packag
 }
 func (pnq *PackageNamespaceQuery) loadNames(ctx context.Context, query *PackageNameQuery, nodes []*PackageNamespace, init func(*PackageNamespace), assign func(*PackageNamespace, *PackageName)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*PackageNamespace)
+	nodeids := make(map[uuid.UUID]*PackageNamespace)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -536,7 +537,7 @@ func (pnq *PackageNamespaceQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pnq *PackageNamespaceQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(packagenamespace.Table, packagenamespace.Columns, sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(packagenamespace.Table, packagenamespace.Columns, sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID))
 	_spec.From = pnq.sql
 	if unique := pnq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

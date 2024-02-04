@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -18,9 +19,9 @@ import (
 type Occurrence struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// The artifact in the relationship
-	ArtifactID int `json:"artifact_id,omitempty"`
+	ArtifactID uuid.UUID `json:"artifact_id,omitempty"`
 	// Justification for the attested relationship
 	Justification string `json:"justification,omitempty"`
 	// Document from which this attestation is generated from
@@ -28,9 +29,9 @@ type Occurrence struct {
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
 	// SourceID holds the value of the "source_id" field.
-	SourceID *int `json:"source_id,omitempty"`
+	SourceID *uuid.UUID `json:"source_id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
-	PackageID *int `json:"package_id,omitempty"`
+	PackageID *uuid.UUID `json:"package_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OccurrenceQuery when eager-loading is set.
 	Edges        OccurrenceEdges `json:"edges"`
@@ -109,10 +110,12 @@ func (*Occurrence) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case occurrence.FieldID, occurrence.FieldArtifactID, occurrence.FieldSourceID, occurrence.FieldPackageID:
-			values[i] = new(sql.NullInt64)
+		case occurrence.FieldSourceID, occurrence.FieldPackageID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case occurrence.FieldJustification, occurrence.FieldOrigin, occurrence.FieldCollector:
 			values[i] = new(sql.NullString)
+		case occurrence.FieldID, occurrence.FieldArtifactID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -129,16 +132,16 @@ func (o *Occurrence) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case occurrence.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				o.ID = *value
 			}
-			o.ID = int(value.Int64)
 		case occurrence.FieldArtifactID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
-			} else if value.Valid {
-				o.ArtifactID = int(value.Int64)
+			} else if value != nil {
+				o.ArtifactID = *value
 			}
 		case occurrence.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -159,18 +162,18 @@ func (o *Occurrence) assignValues(columns []string, values []any) error {
 				o.Collector = value.String
 			}
 		case occurrence.FieldSourceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				o.SourceID = new(int)
-				*o.SourceID = int(value.Int64)
+				o.SourceID = new(uuid.UUID)
+				*o.SourceID = *value.S.(*uuid.UUID)
 			}
 		case occurrence.FieldPackageID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				o.PackageID = new(int)
-				*o.PackageID = int(value.Int64)
+				o.PackageID = new(uuid.UUID)
+				*o.PackageID = *value.S.(*uuid.UUID)
 			}
 		default:
 			o.selectValues.Set(columns[i], values[i])

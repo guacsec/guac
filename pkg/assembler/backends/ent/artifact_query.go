@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -208,8 +209,8 @@ func (aq *ArtifactQuery) FirstX(ctx context.Context) *Artifact {
 
 // FirstID returns the first Artifact ID from the query.
 // Returns a *NotFoundError when no Artifact ID was found.
-func (aq *ArtifactQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *ArtifactQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -221,7 +222,7 @@ func (aq *ArtifactQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *ArtifactQuery) FirstIDX(ctx context.Context) int {
+func (aq *ArtifactQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -259,8 +260,8 @@ func (aq *ArtifactQuery) OnlyX(ctx context.Context) *Artifact {
 // OnlyID is like Only, but returns the only Artifact ID in the query.
 // Returns a *NotSingularError when more than one Artifact ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -276,7 +277,7 @@ func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *ArtifactQuery) OnlyIDX(ctx context.Context) int {
+func (aq *ArtifactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -304,7 +305,7 @@ func (aq *ArtifactQuery) AllX(ctx context.Context) []*Artifact {
 }
 
 // IDs executes the query and returns a list of Artifact IDs.
-func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if aq.ctx.Unique == nil && aq.path != nil {
 		aq.Unique(true)
 	}
@@ -316,7 +317,7 @@ func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *ArtifactQuery) IDsX(ctx context.Context) []int {
+func (aq *ArtifactQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := aq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -629,7 +630,7 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 
 func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *Occurrence)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Artifact)
+	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -659,7 +660,7 @@ func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQ
 }
 func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Artifact)
+	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -692,8 +693,8 @@ func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQue
 }
 func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttestationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SLSAAttestation)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Artifact)
-	nids := make(map[int]map[*Artifact]struct{})
+	byID := make(map[uuid.UUID]*Artifact)
+	nids := make(map[uuid.UUID]map[*Artifact]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -722,11 +723,11 @@ func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttest
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Artifact]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -753,8 +754,8 @@ func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttest
 }
 func (aq *ArtifactQuery) loadSame(ctx context.Context, query *HashEqualQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HashEqual)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Artifact)
-	nids := make(map[int]map[*Artifact]struct{})
+	byID := make(map[uuid.UUID]*Artifact)
+	nids := make(map[uuid.UUID]map[*Artifact]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -783,11 +784,11 @@ func (aq *ArtifactQuery) loadSame(ctx context.Context, query *HashEqualQuery, no
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Artifact]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -814,8 +815,8 @@ func (aq *ArtifactQuery) loadSame(ctx context.Context, query *HashEqualQuery, no
 }
 func (aq *ArtifactQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Artifact)
-	nids := make(map[int]map[*Artifact]struct{})
+	byID := make(map[uuid.UUID]*Artifact)
+	nids := make(map[uuid.UUID]map[*Artifact]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -844,11 +845,11 @@ func (aq *ArtifactQuery) loadIncludedInSboms(ctx context.Context, query *BillOfM
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Artifact]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -887,7 +888,7 @@ func (aq *ArtifactQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (aq *ArtifactQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
 	_spec.From = aq.sql
 	if unique := aq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

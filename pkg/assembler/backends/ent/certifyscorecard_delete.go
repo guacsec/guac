@@ -40,7 +40,7 @@ func (csd *CertifyScorecardDelete) ExecX(ctx context.Context) int {
 }
 
 func (csd *CertifyScorecardDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(certifyscorecard.Table, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(certifyscorecard.Table, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID))
 	if ps := csd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

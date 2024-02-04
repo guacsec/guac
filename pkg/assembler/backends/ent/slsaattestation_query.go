@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -156,8 +157,8 @@ func (saq *SLSAAttestationQuery) FirstX(ctx context.Context) *SLSAAttestation {
 
 // FirstID returns the first SLSAAttestation ID from the query.
 // Returns a *NotFoundError when no SLSAAttestation ID was found.
-func (saq *SLSAAttestationQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (saq *SLSAAttestationQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = saq.Limit(1).IDs(setContextOp(ctx, saq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -169,7 +170,7 @@ func (saq *SLSAAttestationQuery) FirstID(ctx context.Context) (id int, err error
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) FirstIDX(ctx context.Context) int {
+func (saq *SLSAAttestationQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := saq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -207,8 +208,8 @@ func (saq *SLSAAttestationQuery) OnlyX(ctx context.Context) *SLSAAttestation {
 // OnlyID is like Only, but returns the only SLSAAttestation ID in the query.
 // Returns a *NotSingularError when more than one SLSAAttestation ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (saq *SLSAAttestationQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (saq *SLSAAttestationQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = saq.Limit(2).IDs(setContextOp(ctx, saq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -224,7 +225,7 @@ func (saq *SLSAAttestationQuery) OnlyID(ctx context.Context) (id int, err error)
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) OnlyIDX(ctx context.Context) int {
+func (saq *SLSAAttestationQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := saq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -252,7 +253,7 @@ func (saq *SLSAAttestationQuery) AllX(ctx context.Context) []*SLSAAttestation {
 }
 
 // IDs executes the query and returns a list of SLSAAttestation IDs.
-func (saq *SLSAAttestationQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (saq *SLSAAttestationQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if saq.ctx.Unique == nil && saq.path != nil {
 		saq.Unique(true)
 	}
@@ -264,7 +265,7 @@ func (saq *SLSAAttestationQuery) IDs(ctx context.Context) (ids []int, err error)
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (saq *SLSAAttestationQuery) IDsX(ctx context.Context) []int {
+func (saq *SLSAAttestationQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := saq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -507,8 +508,8 @@ func (saq *SLSAAttestationQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 
 func (saq *SLSAAttestationQuery) loadBuiltFrom(ctx context.Context, query *ArtifactQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Artifact)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*SLSAAttestation)
-	nids := make(map[int]map[*SLSAAttestation]struct{})
+	byID := make(map[uuid.UUID]*SLSAAttestation)
+	nids := make(map[uuid.UUID]map[*SLSAAttestation]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -537,11 +538,11 @@ func (saq *SLSAAttestationQuery) loadBuiltFrom(ctx context.Context, query *Artif
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*SLSAAttestation]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -567,8 +568,8 @@ func (saq *SLSAAttestationQuery) loadBuiltFrom(ctx context.Context, query *Artif
 	return nil
 }
 func (saq *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *BuilderQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Builder)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*SLSAAttestation)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*SLSAAttestation)
 	for i := range nodes {
 		fk := nodes[i].BuiltByID
 		if _, ok := nodeids[fk]; !ok {
@@ -596,8 +597,8 @@ func (saq *SLSAAttestationQuery) loadBuiltBy(ctx context.Context, query *Builder
 	return nil
 }
 func (saq *SLSAAttestationQuery) loadSubject(ctx context.Context, query *ArtifactQuery, nodes []*SLSAAttestation, init func(*SLSAAttestation), assign func(*SLSAAttestation, *Artifact)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*SLSAAttestation)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*SLSAAttestation)
 	for i := range nodes {
 		fk := nodes[i].SubjectID
 		if _, ok := nodeids[fk]; !ok {
@@ -638,7 +639,7 @@ func (saq *SLSAAttestationQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (saq *SLSAAttestationQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(slsaattestation.Table, slsaattestation.Columns, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(slsaattestation.Table, slsaattestation.Columns, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID))
 	_spec.From = saq.sql
 	if unique := saq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

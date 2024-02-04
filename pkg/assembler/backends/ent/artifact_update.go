@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -60,14 +61,14 @@ func (au *ArtifactUpdate) SetNillableDigest(s *string) *ArtifactUpdate {
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (au *ArtifactUpdate) AddOccurrenceIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) AddOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.AddOccurrenceIDs(ids...)
 	return au
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
 func (au *ArtifactUpdate) AddOccurrences(o ...*Occurrence) *ArtifactUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -75,14 +76,14 @@ func (au *ArtifactUpdate) AddOccurrences(o ...*Occurrence) *ArtifactUpdate {
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (au *ArtifactUpdate) AddSbomIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) AddSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.AddSbomIDs(ids...)
 	return au
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
 func (au *ArtifactUpdate) AddSbom(b ...*BillOfMaterials) *ArtifactUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -90,14 +91,14 @@ func (au *ArtifactUpdate) AddSbom(b ...*BillOfMaterials) *ArtifactUpdate {
 }
 
 // AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by IDs.
-func (au *ArtifactUpdate) AddAttestationIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) AddAttestationIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.AddAttestationIDs(ids...)
 	return au
 }
 
 // AddAttestations adds the "attestations" edges to the SLSAAttestation entity.
 func (au *ArtifactUpdate) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -105,14 +106,14 @@ func (au *ArtifactUpdate) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdate
 }
 
 // AddSameIDs adds the "same" edge to the HashEqual entity by IDs.
-func (au *ArtifactUpdate) AddSameIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) AddSameIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.AddSameIDs(ids...)
 	return au
 }
 
 // AddSame adds the "same" edges to the HashEqual entity.
 func (au *ArtifactUpdate) AddSame(h ...*HashEqual) *ArtifactUpdate {
-	ids := make([]int, len(h))
+	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
@@ -120,14 +121,14 @@ func (au *ArtifactUpdate) AddSame(h ...*HashEqual) *ArtifactUpdate {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (au *ArtifactUpdate) AddIncludedInSbomIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.AddIncludedInSbomIDs(ids...)
 	return au
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (au *ArtifactUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -146,14 +147,14 @@ func (au *ArtifactUpdate) ClearOccurrences() *ArtifactUpdate {
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (au *ArtifactUpdate) RemoveOccurrenceIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) RemoveOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.RemoveOccurrenceIDs(ids...)
 	return au
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
 func (au *ArtifactUpdate) RemoveOccurrences(o ...*Occurrence) *ArtifactUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -167,14 +168,14 @@ func (au *ArtifactUpdate) ClearSbom() *ArtifactUpdate {
 }
 
 // RemoveSbomIDs removes the "sbom" edge to BillOfMaterials entities by IDs.
-func (au *ArtifactUpdate) RemoveSbomIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) RemoveSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.RemoveSbomIDs(ids...)
 	return au
 }
 
 // RemoveSbom removes "sbom" edges to BillOfMaterials entities.
 func (au *ArtifactUpdate) RemoveSbom(b ...*BillOfMaterials) *ArtifactUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -188,14 +189,14 @@ func (au *ArtifactUpdate) ClearAttestations() *ArtifactUpdate {
 }
 
 // RemoveAttestationIDs removes the "attestations" edge to SLSAAttestation entities by IDs.
-func (au *ArtifactUpdate) RemoveAttestationIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) RemoveAttestationIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.RemoveAttestationIDs(ids...)
 	return au
 }
 
 // RemoveAttestations removes "attestations" edges to SLSAAttestation entities.
 func (au *ArtifactUpdate) RemoveAttestations(s ...*SLSAAttestation) *ArtifactUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -209,14 +210,14 @@ func (au *ArtifactUpdate) ClearSame() *ArtifactUpdate {
 }
 
 // RemoveSameIDs removes the "same" edge to HashEqual entities by IDs.
-func (au *ArtifactUpdate) RemoveSameIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) RemoveSameIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.RemoveSameIDs(ids...)
 	return au
 }
 
 // RemoveSame removes "same" edges to HashEqual entities.
 func (au *ArtifactUpdate) RemoveSame(h ...*HashEqual) *ArtifactUpdate {
-	ids := make([]int, len(h))
+	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
@@ -230,14 +231,14 @@ func (au *ArtifactUpdate) ClearIncludedInSboms() *ArtifactUpdate {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (au *ArtifactUpdate) RemoveIncludedInSbomIDs(ids ...int) *ArtifactUpdate {
+func (au *ArtifactUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.RemoveIncludedInSbomIDs(ids...)
 	return au
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
 func (au *ArtifactUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -272,7 +273,7 @@ func (au *ArtifactUpdate) ExecX(ctx context.Context) {
 }
 
 func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -294,7 +295,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{artifact.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -307,7 +308,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{artifact.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -323,7 +324,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{artifact.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -339,7 +340,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -352,7 +353,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -368,7 +369,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -384,7 +385,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: artifact.AttestationsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -397,7 +398,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: artifact.AttestationsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -413,7 +414,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: artifact.AttestationsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -429,7 +430,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: artifact.SamePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -442,7 +443,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: artifact.SamePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -458,7 +459,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: artifact.SamePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -474,7 +475,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: artifact.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -487,7 +488,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: artifact.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -503,7 +504,7 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: artifact.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -560,14 +561,14 @@ func (auo *ArtifactUpdateOne) SetNillableDigest(s *string) *ArtifactUpdateOne {
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (auo *ArtifactUpdateOne) AddOccurrenceIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) AddOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.AddOccurrenceIDs(ids...)
 	return auo
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
 func (auo *ArtifactUpdateOne) AddOccurrences(o ...*Occurrence) *ArtifactUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -575,14 +576,14 @@ func (auo *ArtifactUpdateOne) AddOccurrences(o ...*Occurrence) *ArtifactUpdateOn
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (auo *ArtifactUpdateOne) AddSbomIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) AddSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.AddSbomIDs(ids...)
 	return auo
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
 func (auo *ArtifactUpdateOne) AddSbom(b ...*BillOfMaterials) *ArtifactUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -590,14 +591,14 @@ func (auo *ArtifactUpdateOne) AddSbom(b ...*BillOfMaterials) *ArtifactUpdateOne 
 }
 
 // AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by IDs.
-func (auo *ArtifactUpdateOne) AddAttestationIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) AddAttestationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.AddAttestationIDs(ids...)
 	return auo
 }
 
 // AddAttestations adds the "attestations" edges to the SLSAAttestation entity.
 func (auo *ArtifactUpdateOne) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -605,14 +606,14 @@ func (auo *ArtifactUpdateOne) AddAttestations(s ...*SLSAAttestation) *ArtifactUp
 }
 
 // AddSameIDs adds the "same" edge to the HashEqual entity by IDs.
-func (auo *ArtifactUpdateOne) AddSameIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) AddSameIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.AddSameIDs(ids...)
 	return auo
 }
 
 // AddSame adds the "same" edges to the HashEqual entity.
 func (auo *ArtifactUpdateOne) AddSame(h ...*HashEqual) *ArtifactUpdateOne {
-	ids := make([]int, len(h))
+	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
@@ -620,14 +621,14 @@ func (auo *ArtifactUpdateOne) AddSame(h ...*HashEqual) *ArtifactUpdateOne {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (auo *ArtifactUpdateOne) AddIncludedInSbomIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.AddIncludedInSbomIDs(ids...)
 	return auo
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (auo *ArtifactUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -646,14 +647,14 @@ func (auo *ArtifactUpdateOne) ClearOccurrences() *ArtifactUpdateOne {
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveOccurrenceIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) RemoveOccurrenceIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.RemoveOccurrenceIDs(ids...)
 	return auo
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
 func (auo *ArtifactUpdateOne) RemoveOccurrences(o ...*Occurrence) *ArtifactUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -667,14 +668,14 @@ func (auo *ArtifactUpdateOne) ClearSbom() *ArtifactUpdateOne {
 }
 
 // RemoveSbomIDs removes the "sbom" edge to BillOfMaterials entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveSbomIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) RemoveSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.RemoveSbomIDs(ids...)
 	return auo
 }
 
 // RemoveSbom removes "sbom" edges to BillOfMaterials entities.
 func (auo *ArtifactUpdateOne) RemoveSbom(b ...*BillOfMaterials) *ArtifactUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -688,14 +689,14 @@ func (auo *ArtifactUpdateOne) ClearAttestations() *ArtifactUpdateOne {
 }
 
 // RemoveAttestationIDs removes the "attestations" edge to SLSAAttestation entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveAttestationIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) RemoveAttestationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.RemoveAttestationIDs(ids...)
 	return auo
 }
 
 // RemoveAttestations removes "attestations" edges to SLSAAttestation entities.
 func (auo *ArtifactUpdateOne) RemoveAttestations(s ...*SLSAAttestation) *ArtifactUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -709,14 +710,14 @@ func (auo *ArtifactUpdateOne) ClearSame() *ArtifactUpdateOne {
 }
 
 // RemoveSameIDs removes the "same" edge to HashEqual entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveSameIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) RemoveSameIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.RemoveSameIDs(ids...)
 	return auo
 }
 
 // RemoveSame removes "same" edges to HashEqual entities.
 func (auo *ArtifactUpdateOne) RemoveSame(h ...*HashEqual) *ArtifactUpdateOne {
-	ids := make([]int, len(h))
+	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
@@ -730,14 +731,14 @@ func (auo *ArtifactUpdateOne) ClearIncludedInSboms() *ArtifactUpdateOne {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveIncludedInSbomIDs(ids ...int) *ArtifactUpdateOne {
+func (auo *ArtifactUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.RemoveIncludedInSbomIDs(ids...)
 	return auo
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
 func (auo *ArtifactUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *ArtifactUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -785,7 +786,7 @@ func (auo *ArtifactUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err error) {
-	_spec := sqlgraph.NewUpdateSpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Artifact.id" for update`)}
@@ -824,7 +825,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: []string{artifact.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -837,7 +838,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: []string{artifact.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -853,7 +854,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: []string{artifact.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -869,7 +870,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -882,7 +883,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -898,7 +899,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -914,7 +915,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: artifact.AttestationsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -927,7 +928,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: artifact.AttestationsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -943,7 +944,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: artifact.AttestationsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -959,7 +960,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: artifact.SamePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -972,7 +973,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: artifact.SamePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -988,7 +989,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: artifact.SamePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1004,7 +1005,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: artifact.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1017,7 +1018,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: artifact.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1033,7 +1034,7 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Columns: artifact.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

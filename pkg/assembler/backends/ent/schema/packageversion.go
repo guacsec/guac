@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -33,7 +34,11 @@ type PackageVersion struct {
 // Fields of the PackageVersion.
 func (PackageVersion) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("name_id"),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("name_id", uuid.New()),
 		field.String("version").Default(""),
 		field.String("subpath").Default(""),
 		field.JSON("qualifiers", []model.PackageQualifier{}).Optional(),

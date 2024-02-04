@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -133,8 +134,8 @@ func (pnq *PackageNameQuery) FirstX(ctx context.Context) *PackageName {
 
 // FirstID returns the first PackageName ID from the query.
 // Returns a *NotFoundError when no PackageName ID was found.
-func (pnq *PackageNameQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pnq *PackageNameQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pnq.Limit(1).IDs(setContextOp(ctx, pnq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -146,7 +147,7 @@ func (pnq *PackageNameQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pnq *PackageNameQuery) FirstIDX(ctx context.Context) int {
+func (pnq *PackageNameQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := pnq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -184,8 +185,8 @@ func (pnq *PackageNameQuery) OnlyX(ctx context.Context) *PackageName {
 // OnlyID is like Only, but returns the only PackageName ID in the query.
 // Returns a *NotSingularError when more than one PackageName ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pnq *PackageNameQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pnq *PackageNameQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pnq.Limit(2).IDs(setContextOp(ctx, pnq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -201,7 +202,7 @@ func (pnq *PackageNameQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pnq *PackageNameQuery) OnlyIDX(ctx context.Context) int {
+func (pnq *PackageNameQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := pnq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -229,7 +230,7 @@ func (pnq *PackageNameQuery) AllX(ctx context.Context) []*PackageName {
 }
 
 // IDs executes the query and returns a list of PackageName IDs.
-func (pnq *PackageNameQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (pnq *PackageNameQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if pnq.ctx.Unique == nil && pnq.path != nil {
 		pnq.Unique(true)
 	}
@@ -241,7 +242,7 @@ func (pnq *PackageNameQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pnq *PackageNameQuery) IDsX(ctx context.Context) []int {
+func (pnq *PackageNameQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := pnq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -337,7 +338,7 @@ func (pnq *PackageNameQuery) WithVersions(opts ...func(*PackageVersionQuery)) *P
 // Example:
 //
 //	var v []struct {
-//		NamespaceID int `json:"namespace_id,omitempty"`
+//		NamespaceID uuid.UUID `json:"namespace_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -360,7 +361,7 @@ func (pnq *PackageNameQuery) GroupBy(field string, fields ...string) *PackageNam
 // Example:
 //
 //	var v []struct {
-//		NamespaceID int `json:"namespace_id,omitempty"`
+//		NamespaceID uuid.UUID `json:"namespace_id,omitempty"`
 //	}
 //
 //	client.PackageName.Query().
@@ -464,8 +465,8 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 }
 
 func (pnq *PackageNameQuery) loadNamespace(ctx context.Context, query *PackageNamespaceQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *PackageNamespace)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*PackageName)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PackageName)
 	for i := range nodes {
 		fk := nodes[i].NamespaceID
 		if _, ok := nodeids[fk]; !ok {
@@ -494,7 +495,7 @@ func (pnq *PackageNameQuery) loadNamespace(ctx context.Context, query *PackageNa
 }
 func (pnq *PackageNameQuery) loadVersions(ctx context.Context, query *PackageVersionQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *PackageVersion)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*PackageName)
+	nodeids := make(map[uuid.UUID]*PackageName)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -536,7 +537,7 @@ func (pnq *PackageNameQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pnq *PackageNameQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(packagename.Table, packagename.Columns, sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(packagename.Table, packagename.Columns, sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID))
 	_spec.From = pnq.sql
 	if unique := pnq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

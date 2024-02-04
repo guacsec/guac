@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -17,13 +18,13 @@ import (
 type Dependency struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
-	PackageID int `json:"package_id,omitempty"`
+	PackageID uuid.UUID `json:"package_id,omitempty"`
 	// DependentPackageNameID holds the value of the "dependent_package_name_id" field.
-	DependentPackageNameID int `json:"dependent_package_name_id,omitempty"`
+	DependentPackageNameID uuid.UUID `json:"dependent_package_name_id,omitempty"`
 	// DependentPackageVersionID holds the value of the "dependent_package_version_id" field.
-	DependentPackageVersionID int `json:"dependent_package_version_id,omitempty"`
+	DependentPackageVersionID uuid.UUID `json:"dependent_package_version_id,omitempty"`
 	// VersionRange holds the value of the "version_range" field.
 	VersionRange string `json:"version_range,omitempty"`
 	// DependencyType holds the value of the "dependency_type" field.
@@ -112,10 +113,10 @@ func (*Dependency) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case dependency.FieldID, dependency.FieldPackageID, dependency.FieldDependentPackageNameID, dependency.FieldDependentPackageVersionID:
-			values[i] = new(sql.NullInt64)
 		case dependency.FieldVersionRange, dependency.FieldDependencyType, dependency.FieldJustification, dependency.FieldOrigin, dependency.FieldCollector:
 			values[i] = new(sql.NullString)
+		case dependency.FieldID, dependency.FieldPackageID, dependency.FieldDependentPackageNameID, dependency.FieldDependentPackageVersionID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -132,28 +133,28 @@ func (d *Dependency) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case dependency.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				d.ID = *value
 			}
-			d.ID = int(value.Int64)
 		case dependency.FieldPackageID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
-			} else if value.Valid {
-				d.PackageID = int(value.Int64)
+			} else if value != nil {
+				d.PackageID = *value
 			}
 		case dependency.FieldDependentPackageNameID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field dependent_package_name_id", values[i])
-			} else if value.Valid {
-				d.DependentPackageNameID = int(value.Int64)
+			} else if value != nil {
+				d.DependentPackageNameID = *value
 			}
 		case dependency.FieldDependentPackageVersionID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field dependent_package_version_id", values[i])
-			} else if value.Valid {
-				d.DependentPackageVersionID = int(value.Int64)
+			} else if value != nil {
+				d.DependentPackageVersionID = *value
 			}
 		case dependency.FieldVersionRange:
 			if value, ok := values[i].(*sql.NullString); !ok {

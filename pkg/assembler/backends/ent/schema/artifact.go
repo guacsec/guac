@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // Artifact holds the schema definition for the Artifact entity.
@@ -31,6 +32,10 @@ type Artifact struct {
 // Fields of the Artifact.
 func (Artifact) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.String("algorithm"),
 		field.String("digest"),
 	}

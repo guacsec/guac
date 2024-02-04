@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // CertifyVex holds the schema definition for the CertifyVex entity.
@@ -31,9 +32,13 @@ type CertifyVex struct {
 // Fields of the VEX.
 func (CertifyVex) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("package_id").Optional().Nillable(),
-		field.Int("artifact_id").Optional().Nillable(),
-		field.Int("vulnerability_id"),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("package_id", uuid.New()).Optional().Nillable(),
+		field.UUID("artifact_id", uuid.New()).Optional().Nillable(),
+		field.UUID("vulnerability_id", uuid.New()),
 		field.Time("known_since"),
 		field.String("status"),
 		field.String("statement"),

@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
@@ -26,8 +28,8 @@ type OccurrenceCreate struct {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (oc *OccurrenceCreate) SetArtifactID(i int) *OccurrenceCreate {
-	oc.mutation.SetArtifactID(i)
+func (oc *OccurrenceCreate) SetArtifactID(u uuid.UUID) *OccurrenceCreate {
+	oc.mutation.SetArtifactID(u)
 	return oc
 }
 
@@ -50,29 +52,43 @@ func (oc *OccurrenceCreate) SetCollector(s string) *OccurrenceCreate {
 }
 
 // SetSourceID sets the "source_id" field.
-func (oc *OccurrenceCreate) SetSourceID(i int) *OccurrenceCreate {
-	oc.mutation.SetSourceID(i)
+func (oc *OccurrenceCreate) SetSourceID(u uuid.UUID) *OccurrenceCreate {
+	oc.mutation.SetSourceID(u)
 	return oc
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (oc *OccurrenceCreate) SetNillableSourceID(i *int) *OccurrenceCreate {
-	if i != nil {
-		oc.SetSourceID(*i)
+func (oc *OccurrenceCreate) SetNillableSourceID(u *uuid.UUID) *OccurrenceCreate {
+	if u != nil {
+		oc.SetSourceID(*u)
 	}
 	return oc
 }
 
 // SetPackageID sets the "package_id" field.
-func (oc *OccurrenceCreate) SetPackageID(i int) *OccurrenceCreate {
-	oc.mutation.SetPackageID(i)
+func (oc *OccurrenceCreate) SetPackageID(u uuid.UUID) *OccurrenceCreate {
+	oc.mutation.SetPackageID(u)
 	return oc
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (oc *OccurrenceCreate) SetNillablePackageID(i *int) *OccurrenceCreate {
-	if i != nil {
-		oc.SetPackageID(*i)
+func (oc *OccurrenceCreate) SetNillablePackageID(u *uuid.UUID) *OccurrenceCreate {
+	if u != nil {
+		oc.SetPackageID(*u)
+	}
+	return oc
+}
+
+// SetID sets the "id" field.
+func (oc *OccurrenceCreate) SetID(u uuid.UUID) *OccurrenceCreate {
+	oc.mutation.SetID(u)
+	return oc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (oc *OccurrenceCreate) SetNillableID(u *uuid.UUID) *OccurrenceCreate {
+	if u != nil {
+		oc.SetID(*u)
 	}
 	return oc
 }
@@ -93,14 +109,14 @@ func (oc *OccurrenceCreate) SetSource(s *SourceName) *OccurrenceCreate {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (oc *OccurrenceCreate) AddIncludedInSbomIDs(ids ...int) *OccurrenceCreate {
+func (oc *OccurrenceCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceCreate {
 	oc.mutation.AddIncludedInSbomIDs(ids...)
 	return oc
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (oc *OccurrenceCreate) AddIncludedInSboms(b ...*BillOfMaterials) *OccurrenceCreate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -114,6 +130,7 @@ func (oc *OccurrenceCreate) Mutation() *OccurrenceMutation {
 
 // Save creates the Occurrence in the database.
 func (oc *OccurrenceCreate) Save(ctx context.Context) (*Occurrence, error) {
+	oc.defaults()
 	return withHooks(ctx, oc.sqlSave, oc.mutation, oc.hooks)
 }
 
@@ -136,6 +153,14 @@ func (oc *OccurrenceCreate) Exec(ctx context.Context) error {
 func (oc *OccurrenceCreate) ExecX(ctx context.Context) {
 	if err := oc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (oc *OccurrenceCreate) defaults() {
+	if _, ok := oc.mutation.ID(); !ok {
+		v := occurrence.DefaultID()
+		oc.mutation.SetID(v)
 	}
 }
 
@@ -170,8 +195,13 @@ func (oc *OccurrenceCreate) sqlSave(ctx context.Context) (*Occurrence, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	oc.mutation.id = &_node.ID
 	oc.mutation.done = true
 	return _node, nil
@@ -180,9 +210,13 @@ func (oc *OccurrenceCreate) sqlSave(ctx context.Context) (*Occurrence, error) {
 func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Occurrence{config: oc.config}
-		_spec = sqlgraph.NewCreateSpec(occurrence.Table, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(occurrence.Table, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = oc.conflict
+	if id, ok := oc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := oc.mutation.Justification(); ok {
 		_spec.SetField(occurrence.FieldJustification, field.TypeString, value)
 		_node.Justification = value
@@ -203,7 +237,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 			Columns: []string{occurrence.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -220,7 +254,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 			Columns: []string{occurrence.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -237,7 +271,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 			Columns: []string{occurrence.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -254,7 +288,7 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 			Columns: occurrence.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -315,7 +349,7 @@ type (
 )
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *OccurrenceUpsert) SetArtifactID(v int) *OccurrenceUpsert {
+func (u *OccurrenceUpsert) SetArtifactID(v uuid.UUID) *OccurrenceUpsert {
 	u.Set(occurrence.FieldArtifactID, v)
 	return u
 }
@@ -363,7 +397,7 @@ func (u *OccurrenceUpsert) UpdateCollector() *OccurrenceUpsert {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *OccurrenceUpsert) SetSourceID(v int) *OccurrenceUpsert {
+func (u *OccurrenceUpsert) SetSourceID(v uuid.UUID) *OccurrenceUpsert {
 	u.Set(occurrence.FieldSourceID, v)
 	return u
 }
@@ -381,7 +415,7 @@ func (u *OccurrenceUpsert) ClearSourceID() *OccurrenceUpsert {
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *OccurrenceUpsert) SetPackageID(v int) *OccurrenceUpsert {
+func (u *OccurrenceUpsert) SetPackageID(v uuid.UUID) *OccurrenceUpsert {
 	u.Set(occurrence.FieldPackageID, v)
 	return u
 }
@@ -398,16 +432,24 @@ func (u *OccurrenceUpsert) ClearPackageID() *OccurrenceUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Occurrence.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(occurrence.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *OccurrenceUpsertOne) UpdateNewValues() *OccurrenceUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(occurrence.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -439,7 +481,7 @@ func (u *OccurrenceUpsertOne) Update(set func(*OccurrenceUpsert)) *OccurrenceUps
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *OccurrenceUpsertOne) SetArtifactID(v int) *OccurrenceUpsertOne {
+func (u *OccurrenceUpsertOne) SetArtifactID(v uuid.UUID) *OccurrenceUpsertOne {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.SetArtifactID(v)
 	})
@@ -495,7 +537,7 @@ func (u *OccurrenceUpsertOne) UpdateCollector() *OccurrenceUpsertOne {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *OccurrenceUpsertOne) SetSourceID(v int) *OccurrenceUpsertOne {
+func (u *OccurrenceUpsertOne) SetSourceID(v uuid.UUID) *OccurrenceUpsertOne {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.SetSourceID(v)
 	})
@@ -516,7 +558,7 @@ func (u *OccurrenceUpsertOne) ClearSourceID() *OccurrenceUpsertOne {
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *OccurrenceUpsertOne) SetPackageID(v int) *OccurrenceUpsertOne {
+func (u *OccurrenceUpsertOne) SetPackageID(v uuid.UUID) *OccurrenceUpsertOne {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.SetPackageID(v)
 	})
@@ -552,7 +594,12 @@ func (u *OccurrenceUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *OccurrenceUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *OccurrenceUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: OccurrenceUpsertOne.ID is not supported by MySQL driver. Use OccurrenceUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -561,7 +608,7 @@ func (u *OccurrenceUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *OccurrenceUpsertOne) IDX(ctx context.Context) int {
+func (u *OccurrenceUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -588,6 +635,7 @@ func (ocb *OccurrenceCreateBulk) Save(ctx context.Context) ([]*Occurrence, error
 	for i := range ocb.builders {
 		func(i int, root context.Context) {
 			builder := ocb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*OccurrenceMutation)
 				if !ok {
@@ -615,10 +663,6 @@ func (ocb *OccurrenceCreateBulk) Save(ctx context.Context) ([]*Occurrence, error
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -705,10 +749,20 @@ type OccurrenceUpsertBulk struct {
 //	client.Occurrence.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(occurrence.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *OccurrenceUpsertBulk) UpdateNewValues() *OccurrenceUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(occurrence.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -740,7 +794,7 @@ func (u *OccurrenceUpsertBulk) Update(set func(*OccurrenceUpsert)) *OccurrenceUp
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *OccurrenceUpsertBulk) SetArtifactID(v int) *OccurrenceUpsertBulk {
+func (u *OccurrenceUpsertBulk) SetArtifactID(v uuid.UUID) *OccurrenceUpsertBulk {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.SetArtifactID(v)
 	})
@@ -796,7 +850,7 @@ func (u *OccurrenceUpsertBulk) UpdateCollector() *OccurrenceUpsertBulk {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *OccurrenceUpsertBulk) SetSourceID(v int) *OccurrenceUpsertBulk {
+func (u *OccurrenceUpsertBulk) SetSourceID(v uuid.UUID) *OccurrenceUpsertBulk {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.SetSourceID(v)
 	})
@@ -817,7 +871,7 @@ func (u *OccurrenceUpsertBulk) ClearSourceID() *OccurrenceUpsertBulk {
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *OccurrenceUpsertBulk) SetPackageID(v int) *OccurrenceUpsertBulk {
+func (u *OccurrenceUpsertBulk) SetPackageID(v uuid.UUID) *OccurrenceUpsertBulk {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.SetPackageID(v)
 	})

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
@@ -29,14 +30,14 @@ func (bu *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
 }
 
 // AddSlsaAttestationIDs adds the "slsa_attestations" edge to the SLSAAttestation entity by IDs.
-func (bu *BuilderUpdate) AddSlsaAttestationIDs(ids ...int) *BuilderUpdate {
+func (bu *BuilderUpdate) AddSlsaAttestationIDs(ids ...uuid.UUID) *BuilderUpdate {
 	bu.mutation.AddSlsaAttestationIDs(ids...)
 	return bu
 }
 
 // AddSlsaAttestations adds the "slsa_attestations" edges to the SLSAAttestation entity.
 func (bu *BuilderUpdate) AddSlsaAttestations(s ...*SLSAAttestation) *BuilderUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -55,14 +56,14 @@ func (bu *BuilderUpdate) ClearSlsaAttestations() *BuilderUpdate {
 }
 
 // RemoveSlsaAttestationIDs removes the "slsa_attestations" edge to SLSAAttestation entities by IDs.
-func (bu *BuilderUpdate) RemoveSlsaAttestationIDs(ids ...int) *BuilderUpdate {
+func (bu *BuilderUpdate) RemoveSlsaAttestationIDs(ids ...uuid.UUID) *BuilderUpdate {
 	bu.mutation.RemoveSlsaAttestationIDs(ids...)
 	return bu
 }
 
 // RemoveSlsaAttestations removes "slsa_attestations" edges to SLSAAttestation entities.
 func (bu *BuilderUpdate) RemoveSlsaAttestations(s ...*SLSAAttestation) *BuilderUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -97,7 +98,7 @@ func (bu *BuilderUpdate) ExecX(ctx context.Context) {
 }
 
 func (bu *BuilderUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(builder.Table, builder.Columns, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(builder.Table, builder.Columns, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID))
 	if ps := bu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -113,7 +114,7 @@ func (bu *BuilderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -126,7 +127,7 @@ func (bu *BuilderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -142,7 +143,7 @@ func (bu *BuilderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -171,14 +172,14 @@ type BuilderUpdateOne struct {
 }
 
 // AddSlsaAttestationIDs adds the "slsa_attestations" edge to the SLSAAttestation entity by IDs.
-func (buo *BuilderUpdateOne) AddSlsaAttestationIDs(ids ...int) *BuilderUpdateOne {
+func (buo *BuilderUpdateOne) AddSlsaAttestationIDs(ids ...uuid.UUID) *BuilderUpdateOne {
 	buo.mutation.AddSlsaAttestationIDs(ids...)
 	return buo
 }
 
 // AddSlsaAttestations adds the "slsa_attestations" edges to the SLSAAttestation entity.
 func (buo *BuilderUpdateOne) AddSlsaAttestations(s ...*SLSAAttestation) *BuilderUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -197,14 +198,14 @@ func (buo *BuilderUpdateOne) ClearSlsaAttestations() *BuilderUpdateOne {
 }
 
 // RemoveSlsaAttestationIDs removes the "slsa_attestations" edge to SLSAAttestation entities by IDs.
-func (buo *BuilderUpdateOne) RemoveSlsaAttestationIDs(ids ...int) *BuilderUpdateOne {
+func (buo *BuilderUpdateOne) RemoveSlsaAttestationIDs(ids ...uuid.UUID) *BuilderUpdateOne {
 	buo.mutation.RemoveSlsaAttestationIDs(ids...)
 	return buo
 }
 
 // RemoveSlsaAttestations removes "slsa_attestations" edges to SLSAAttestation entities.
 func (buo *BuilderUpdateOne) RemoveSlsaAttestations(s ...*SLSAAttestation) *BuilderUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -252,7 +253,7 @@ func (buo *BuilderUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (buo *BuilderUpdateOne) sqlSave(ctx context.Context) (_node *Builder, err error) {
-	_spec := sqlgraph.NewUpdateSpec(builder.Table, builder.Columns, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(builder.Table, builder.Columns, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID))
 	id, ok := buo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Builder.id" for update`)}
@@ -285,7 +286,7 @@ func (buo *BuilderUpdateOne) sqlSave(ctx context.Context) (_node *Builder, err e
 			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -298,7 +299,7 @@ func (buo *BuilderUpdateOne) sqlSave(ctx context.Context) (_node *Builder, err e
 			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -314,7 +315,7 @@ func (buo *BuilderUpdateOne) sqlSave(ctx context.Context) (_node *Builder, err e
 			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

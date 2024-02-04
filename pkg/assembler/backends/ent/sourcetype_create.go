@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 )
@@ -28,15 +30,29 @@ func (stc *SourceTypeCreate) SetType(s string) *SourceTypeCreate {
 	return stc
 }
 
+// SetID sets the "id" field.
+func (stc *SourceTypeCreate) SetID(u uuid.UUID) *SourceTypeCreate {
+	stc.mutation.SetID(u)
+	return stc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (stc *SourceTypeCreate) SetNillableID(u *uuid.UUID) *SourceTypeCreate {
+	if u != nil {
+		stc.SetID(*u)
+	}
+	return stc
+}
+
 // AddNamespaceIDs adds the "namespaces" edge to the SourceNamespace entity by IDs.
-func (stc *SourceTypeCreate) AddNamespaceIDs(ids ...int) *SourceTypeCreate {
+func (stc *SourceTypeCreate) AddNamespaceIDs(ids ...uuid.UUID) *SourceTypeCreate {
 	stc.mutation.AddNamespaceIDs(ids...)
 	return stc
 }
 
 // AddNamespaces adds the "namespaces" edges to the SourceNamespace entity.
 func (stc *SourceTypeCreate) AddNamespaces(s ...*SourceNamespace) *SourceTypeCreate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -50,6 +66,7 @@ func (stc *SourceTypeCreate) Mutation() *SourceTypeMutation {
 
 // Save creates the SourceType in the database.
 func (stc *SourceTypeCreate) Save(ctx context.Context) (*SourceType, error) {
+	stc.defaults()
 	return withHooks(ctx, stc.sqlSave, stc.mutation, stc.hooks)
 }
 
@@ -75,6 +92,14 @@ func (stc *SourceTypeCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (stc *SourceTypeCreate) defaults() {
+	if _, ok := stc.mutation.ID(); !ok {
+		v := sourcetype.DefaultID()
+		stc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (stc *SourceTypeCreate) check() error {
 	if _, ok := stc.mutation.GetType(); !ok {
@@ -94,8 +119,13 @@ func (stc *SourceTypeCreate) sqlSave(ctx context.Context) (*SourceType, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	stc.mutation.id = &_node.ID
 	stc.mutation.done = true
 	return _node, nil
@@ -104,9 +134,13 @@ func (stc *SourceTypeCreate) sqlSave(ctx context.Context) (*SourceType, error) {
 func (stc *SourceTypeCreate) createSpec() (*SourceType, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SourceType{config: stc.config}
-		_spec = sqlgraph.NewCreateSpec(sourcetype.Table, sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(sourcetype.Table, sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = stc.conflict
+	if id, ok := stc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := stc.mutation.GetType(); ok {
 		_spec.SetField(sourcetype.FieldType, field.TypeString, value)
 		_node.Type = value
@@ -119,7 +153,7 @@ func (stc *SourceTypeCreate) createSpec() (*SourceType, *sqlgraph.CreateSpec) {
 			Columns: []string{sourcetype.NamespacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -191,16 +225,24 @@ func (u *SourceTypeUpsert) UpdateType() *SourceTypeUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.SourceType.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(sourcetype.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *SourceTypeUpsertOne) UpdateNewValues() *SourceTypeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(sourcetype.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -261,7 +303,12 @@ func (u *SourceTypeUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *SourceTypeUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *SourceTypeUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: SourceTypeUpsertOne.ID is not supported by MySQL driver. Use SourceTypeUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -270,7 +317,7 @@ func (u *SourceTypeUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *SourceTypeUpsertOne) IDX(ctx context.Context) int {
+func (u *SourceTypeUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -297,6 +344,7 @@ func (stcb *SourceTypeCreateBulk) Save(ctx context.Context) ([]*SourceType, erro
 	for i := range stcb.builders {
 		func(i int, root context.Context) {
 			builder := stcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SourceTypeMutation)
 				if !ok {
@@ -324,10 +372,6 @@ func (stcb *SourceTypeCreateBulk) Save(ctx context.Context) ([]*SourceType, erro
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -414,10 +458,20 @@ type SourceTypeUpsertBulk struct {
 //	client.SourceType.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(sourcetype.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *SourceTypeUpsertBulk) UpdateNewValues() *SourceTypeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(sourcetype.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

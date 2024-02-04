@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -27,57 +29,57 @@ type HasMetadataCreate struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (hmc *HasMetadataCreate) SetSourceID(i int) *HasMetadataCreate {
-	hmc.mutation.SetSourceID(i)
+func (hmc *HasMetadataCreate) SetSourceID(u uuid.UUID) *HasMetadataCreate {
+	hmc.mutation.SetSourceID(u)
 	return hmc
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillableSourceID(i *int) *HasMetadataCreate {
-	if i != nil {
-		hmc.SetSourceID(*i)
+func (hmc *HasMetadataCreate) SetNillableSourceID(u *uuid.UUID) *HasMetadataCreate {
+	if u != nil {
+		hmc.SetSourceID(*u)
 	}
 	return hmc
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hmc *HasMetadataCreate) SetPackageVersionID(i int) *HasMetadataCreate {
-	hmc.mutation.SetPackageVersionID(i)
+func (hmc *HasMetadataCreate) SetPackageVersionID(u uuid.UUID) *HasMetadataCreate {
+	hmc.mutation.SetPackageVersionID(u)
 	return hmc
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillablePackageVersionID(i *int) *HasMetadataCreate {
-	if i != nil {
-		hmc.SetPackageVersionID(*i)
+func (hmc *HasMetadataCreate) SetNillablePackageVersionID(u *uuid.UUID) *HasMetadataCreate {
+	if u != nil {
+		hmc.SetPackageVersionID(*u)
 	}
 	return hmc
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hmc *HasMetadataCreate) SetPackageNameID(i int) *HasMetadataCreate {
-	hmc.mutation.SetPackageNameID(i)
+func (hmc *HasMetadataCreate) SetPackageNameID(u uuid.UUID) *HasMetadataCreate {
+	hmc.mutation.SetPackageNameID(u)
 	return hmc
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillablePackageNameID(i *int) *HasMetadataCreate {
-	if i != nil {
-		hmc.SetPackageNameID(*i)
+func (hmc *HasMetadataCreate) SetNillablePackageNameID(u *uuid.UUID) *HasMetadataCreate {
+	if u != nil {
+		hmc.SetPackageNameID(*u)
 	}
 	return hmc
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (hmc *HasMetadataCreate) SetArtifactID(i int) *HasMetadataCreate {
-	hmc.mutation.SetArtifactID(i)
+func (hmc *HasMetadataCreate) SetArtifactID(u uuid.UUID) *HasMetadataCreate {
+	hmc.mutation.SetArtifactID(u)
 	return hmc
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillableArtifactID(i *int) *HasMetadataCreate {
-	if i != nil {
-		hmc.SetArtifactID(*i)
+func (hmc *HasMetadataCreate) SetNillableArtifactID(u *uuid.UUID) *HasMetadataCreate {
+	if u != nil {
+		hmc.SetArtifactID(*u)
 	}
 	return hmc
 }
@@ -118,6 +120,20 @@ func (hmc *HasMetadataCreate) SetCollector(s string) *HasMetadataCreate {
 	return hmc
 }
 
+// SetID sets the "id" field.
+func (hmc *HasMetadataCreate) SetID(u uuid.UUID) *HasMetadataCreate {
+	hmc.mutation.SetID(u)
+	return hmc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (hmc *HasMetadataCreate) SetNillableID(u *uuid.UUID) *HasMetadataCreate {
+	if u != nil {
+		hmc.SetID(*u)
+	}
+	return hmc
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (hmc *HasMetadataCreate) SetSource(s *SourceName) *HasMetadataCreate {
 	return hmc.SetSourceID(s.ID)
@@ -129,13 +145,13 @@ func (hmc *HasMetadataCreate) SetPackageVersion(p *PackageVersion) *HasMetadataC
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hmc *HasMetadataCreate) SetAllVersionsID(id int) *HasMetadataCreate {
+func (hmc *HasMetadataCreate) SetAllVersionsID(id uuid.UUID) *HasMetadataCreate {
 	hmc.mutation.SetAllVersionsID(id)
 	return hmc
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hmc *HasMetadataCreate) SetNillableAllVersionsID(id *int) *HasMetadataCreate {
+func (hmc *HasMetadataCreate) SetNillableAllVersionsID(id *uuid.UUID) *HasMetadataCreate {
 	if id != nil {
 		hmc = hmc.SetAllVersionsID(*id)
 	}
@@ -159,6 +175,7 @@ func (hmc *HasMetadataCreate) Mutation() *HasMetadataMutation {
 
 // Save creates the HasMetadata in the database.
 func (hmc *HasMetadataCreate) Save(ctx context.Context) (*HasMetadata, error) {
+	hmc.defaults()
 	return withHooks(ctx, hmc.sqlSave, hmc.mutation, hmc.hooks)
 }
 
@@ -181,6 +198,14 @@ func (hmc *HasMetadataCreate) Exec(ctx context.Context) error {
 func (hmc *HasMetadataCreate) ExecX(ctx context.Context) {
 	if err := hmc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (hmc *HasMetadataCreate) defaults() {
+	if _, ok := hmc.mutation.ID(); !ok {
+		v := hasmetadata.DefaultID()
+		hmc.mutation.SetID(v)
 	}
 }
 
@@ -218,8 +243,13 @@ func (hmc *HasMetadataCreate) sqlSave(ctx context.Context) (*HasMetadata, error)
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	hmc.mutation.id = &_node.ID
 	hmc.mutation.done = true
 	return _node, nil
@@ -228,9 +258,13 @@ func (hmc *HasMetadataCreate) sqlSave(ctx context.Context) (*HasMetadata, error)
 func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) {
 	var (
 		_node = &HasMetadata{config: hmc.config}
-		_spec = sqlgraph.NewCreateSpec(hasmetadata.Table, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(hasmetadata.Table, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = hmc.conflict
+	if id, ok := hmc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := hmc.mutation.Timestamp(); ok {
 		_spec.SetField(hasmetadata.FieldTimestamp, field.TypeTime, value)
 		_node.Timestamp = value
@@ -263,7 +297,7 @@ func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) 
 			Columns: []string{hasmetadata.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -280,7 +314,7 @@ func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) 
 			Columns: []string{hasmetadata.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -297,7 +331,7 @@ func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) 
 			Columns: []string{hasmetadata.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -314,7 +348,7 @@ func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) 
 			Columns: []string{hasmetadata.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -376,7 +410,7 @@ type (
 )
 
 // SetSourceID sets the "source_id" field.
-func (u *HasMetadataUpsert) SetSourceID(v int) *HasMetadataUpsert {
+func (u *HasMetadataUpsert) SetSourceID(v uuid.UUID) *HasMetadataUpsert {
 	u.Set(hasmetadata.FieldSourceID, v)
 	return u
 }
@@ -394,7 +428,7 @@ func (u *HasMetadataUpsert) ClearSourceID() *HasMetadataUpsert {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *HasMetadataUpsert) SetPackageVersionID(v int) *HasMetadataUpsert {
+func (u *HasMetadataUpsert) SetPackageVersionID(v uuid.UUID) *HasMetadataUpsert {
 	u.Set(hasmetadata.FieldPackageVersionID, v)
 	return u
 }
@@ -412,7 +446,7 @@ func (u *HasMetadataUpsert) ClearPackageVersionID() *HasMetadataUpsert {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *HasMetadataUpsert) SetPackageNameID(v int) *HasMetadataUpsert {
+func (u *HasMetadataUpsert) SetPackageNameID(v uuid.UUID) *HasMetadataUpsert {
 	u.Set(hasmetadata.FieldPackageNameID, v)
 	return u
 }
@@ -430,7 +464,7 @@ func (u *HasMetadataUpsert) ClearPackageNameID() *HasMetadataUpsert {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *HasMetadataUpsert) SetArtifactID(v int) *HasMetadataUpsert {
+func (u *HasMetadataUpsert) SetArtifactID(v uuid.UUID) *HasMetadataUpsert {
 	u.Set(hasmetadata.FieldArtifactID, v)
 	return u
 }
@@ -519,16 +553,24 @@ func (u *HasMetadataUpsert) UpdateCollector() *HasMetadataUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.HasMetadata.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(hasmetadata.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *HasMetadataUpsertOne) UpdateNewValues() *HasMetadataUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(hasmetadata.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -560,7 +602,7 @@ func (u *HasMetadataUpsertOne) Update(set func(*HasMetadataUpsert)) *HasMetadata
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *HasMetadataUpsertOne) SetSourceID(v int) *HasMetadataUpsertOne {
+func (u *HasMetadataUpsertOne) SetSourceID(v uuid.UUID) *HasMetadataUpsertOne {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.SetSourceID(v)
 	})
@@ -581,7 +623,7 @@ func (u *HasMetadataUpsertOne) ClearSourceID() *HasMetadataUpsertOne {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *HasMetadataUpsertOne) SetPackageVersionID(v int) *HasMetadataUpsertOne {
+func (u *HasMetadataUpsertOne) SetPackageVersionID(v uuid.UUID) *HasMetadataUpsertOne {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.SetPackageVersionID(v)
 	})
@@ -602,7 +644,7 @@ func (u *HasMetadataUpsertOne) ClearPackageVersionID() *HasMetadataUpsertOne {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *HasMetadataUpsertOne) SetPackageNameID(v int) *HasMetadataUpsertOne {
+func (u *HasMetadataUpsertOne) SetPackageNameID(v uuid.UUID) *HasMetadataUpsertOne {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.SetPackageNameID(v)
 	})
@@ -623,7 +665,7 @@ func (u *HasMetadataUpsertOne) ClearPackageNameID() *HasMetadataUpsertOne {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *HasMetadataUpsertOne) SetArtifactID(v int) *HasMetadataUpsertOne {
+func (u *HasMetadataUpsertOne) SetArtifactID(v uuid.UUID) *HasMetadataUpsertOne {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.SetArtifactID(v)
 	})
@@ -743,7 +785,12 @@ func (u *HasMetadataUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *HasMetadataUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *HasMetadataUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: HasMetadataUpsertOne.ID is not supported by MySQL driver. Use HasMetadataUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -752,7 +799,7 @@ func (u *HasMetadataUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *HasMetadataUpsertOne) IDX(ctx context.Context) int {
+func (u *HasMetadataUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -779,6 +826,7 @@ func (hmcb *HasMetadataCreateBulk) Save(ctx context.Context) ([]*HasMetadata, er
 	for i := range hmcb.builders {
 		func(i int, root context.Context) {
 			builder := hmcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*HasMetadataMutation)
 				if !ok {
@@ -806,10 +854,6 @@ func (hmcb *HasMetadataCreateBulk) Save(ctx context.Context) ([]*HasMetadata, er
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -896,10 +940,20 @@ type HasMetadataUpsertBulk struct {
 //	client.HasMetadata.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(hasmetadata.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *HasMetadataUpsertBulk) UpdateNewValues() *HasMetadataUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(hasmetadata.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -931,7 +985,7 @@ func (u *HasMetadataUpsertBulk) Update(set func(*HasMetadataUpsert)) *HasMetadat
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *HasMetadataUpsertBulk) SetSourceID(v int) *HasMetadataUpsertBulk {
+func (u *HasMetadataUpsertBulk) SetSourceID(v uuid.UUID) *HasMetadataUpsertBulk {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.SetSourceID(v)
 	})
@@ -952,7 +1006,7 @@ func (u *HasMetadataUpsertBulk) ClearSourceID() *HasMetadataUpsertBulk {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *HasMetadataUpsertBulk) SetPackageVersionID(v int) *HasMetadataUpsertBulk {
+func (u *HasMetadataUpsertBulk) SetPackageVersionID(v uuid.UUID) *HasMetadataUpsertBulk {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.SetPackageVersionID(v)
 	})
@@ -973,7 +1027,7 @@ func (u *HasMetadataUpsertBulk) ClearPackageVersionID() *HasMetadataUpsertBulk {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *HasMetadataUpsertBulk) SetPackageNameID(v int) *HasMetadataUpsertBulk {
+func (u *HasMetadataUpsertBulk) SetPackageNameID(v uuid.UUID) *HasMetadataUpsertBulk {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.SetPackageNameID(v)
 	})
@@ -994,7 +1048,7 @@ func (u *HasMetadataUpsertBulk) ClearPackageNameID() *HasMetadataUpsertBulk {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *HasMetadataUpsertBulk) SetArtifactID(v int) *HasMetadataUpsertBulk {
+func (u *HasMetadataUpsertBulk) SetArtifactID(v uuid.UUID) *HasMetadataUpsertBulk {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.SetArtifactID(v)
 	})

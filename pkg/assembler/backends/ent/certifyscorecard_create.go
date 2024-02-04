@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -24,14 +26,28 @@ type CertifyScorecardCreate struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (csc *CertifyScorecardCreate) SetSourceID(i int) *CertifyScorecardCreate {
-	csc.mutation.SetSourceID(i)
+func (csc *CertifyScorecardCreate) SetSourceID(u uuid.UUID) *CertifyScorecardCreate {
+	csc.mutation.SetSourceID(u)
 	return csc
 }
 
 // SetScorecardID sets the "scorecard_id" field.
-func (csc *CertifyScorecardCreate) SetScorecardID(i int) *CertifyScorecardCreate {
-	csc.mutation.SetScorecardID(i)
+func (csc *CertifyScorecardCreate) SetScorecardID(u uuid.UUID) *CertifyScorecardCreate {
+	csc.mutation.SetScorecardID(u)
+	return csc
+}
+
+// SetID sets the "id" field.
+func (csc *CertifyScorecardCreate) SetID(u uuid.UUID) *CertifyScorecardCreate {
+	csc.mutation.SetID(u)
+	return csc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (csc *CertifyScorecardCreate) SetNillableID(u *uuid.UUID) *CertifyScorecardCreate {
+	if u != nil {
+		csc.SetID(*u)
+	}
 	return csc
 }
 
@@ -52,6 +68,7 @@ func (csc *CertifyScorecardCreate) Mutation() *CertifyScorecardMutation {
 
 // Save creates the CertifyScorecard in the database.
 func (csc *CertifyScorecardCreate) Save(ctx context.Context) (*CertifyScorecard, error) {
+	csc.defaults()
 	return withHooks(ctx, csc.sqlSave, csc.mutation, csc.hooks)
 }
 
@@ -74,6 +91,14 @@ func (csc *CertifyScorecardCreate) Exec(ctx context.Context) error {
 func (csc *CertifyScorecardCreate) ExecX(ctx context.Context) {
 	if err := csc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (csc *CertifyScorecardCreate) defaults() {
+	if _, ok := csc.mutation.ID(); !ok {
+		v := certifyscorecard.DefaultID()
+		csc.mutation.SetID(v)
 	}
 }
 
@@ -105,8 +130,13 @@ func (csc *CertifyScorecardCreate) sqlSave(ctx context.Context) (*CertifyScoreca
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	csc.mutation.id = &_node.ID
 	csc.mutation.done = true
 	return _node, nil
@@ -115,9 +145,13 @@ func (csc *CertifyScorecardCreate) sqlSave(ctx context.Context) (*CertifyScoreca
 func (csc *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.CreateSpec) {
 	var (
 		_node = &CertifyScorecard{config: csc.config}
-		_spec = sqlgraph.NewCreateSpec(certifyscorecard.Table, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(certifyscorecard.Table, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = csc.conflict
+	if id, ok := csc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if nodes := csc.mutation.ScorecardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -126,7 +160,7 @@ func (csc *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.Cr
 			Columns: []string{certifyscorecard.ScorecardColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(scorecard.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(scorecard.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -143,7 +177,7 @@ func (csc *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.Cr
 			Columns: []string{certifyscorecard.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -205,7 +239,7 @@ type (
 )
 
 // SetSourceID sets the "source_id" field.
-func (u *CertifyScorecardUpsert) SetSourceID(v int) *CertifyScorecardUpsert {
+func (u *CertifyScorecardUpsert) SetSourceID(v uuid.UUID) *CertifyScorecardUpsert {
 	u.Set(certifyscorecard.FieldSourceID, v)
 	return u
 }
@@ -217,7 +251,7 @@ func (u *CertifyScorecardUpsert) UpdateSourceID() *CertifyScorecardUpsert {
 }
 
 // SetScorecardID sets the "scorecard_id" field.
-func (u *CertifyScorecardUpsert) SetScorecardID(v int) *CertifyScorecardUpsert {
+func (u *CertifyScorecardUpsert) SetScorecardID(v uuid.UUID) *CertifyScorecardUpsert {
 	u.Set(certifyscorecard.FieldScorecardID, v)
 	return u
 }
@@ -228,16 +262,24 @@ func (u *CertifyScorecardUpsert) UpdateScorecardID() *CertifyScorecardUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.CertifyScorecard.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifyscorecard.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyScorecardUpsertOne) UpdateNewValues() *CertifyScorecardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(certifyscorecard.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -269,7 +311,7 @@ func (u *CertifyScorecardUpsertOne) Update(set func(*CertifyScorecardUpsert)) *C
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *CertifyScorecardUpsertOne) SetSourceID(v int) *CertifyScorecardUpsertOne {
+func (u *CertifyScorecardUpsertOne) SetSourceID(v uuid.UUID) *CertifyScorecardUpsertOne {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.SetSourceID(v)
 	})
@@ -283,7 +325,7 @@ func (u *CertifyScorecardUpsertOne) UpdateSourceID() *CertifyScorecardUpsertOne 
 }
 
 // SetScorecardID sets the "scorecard_id" field.
-func (u *CertifyScorecardUpsertOne) SetScorecardID(v int) *CertifyScorecardUpsertOne {
+func (u *CertifyScorecardUpsertOne) SetScorecardID(v uuid.UUID) *CertifyScorecardUpsertOne {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.SetScorecardID(v)
 	})
@@ -312,7 +354,12 @@ func (u *CertifyScorecardUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CertifyScorecardUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *CertifyScorecardUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: CertifyScorecardUpsertOne.ID is not supported by MySQL driver. Use CertifyScorecardUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -321,7 +368,7 @@ func (u *CertifyScorecardUpsertOne) ID(ctx context.Context) (id int, err error) 
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *CertifyScorecardUpsertOne) IDX(ctx context.Context) int {
+func (u *CertifyScorecardUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -348,6 +395,7 @@ func (cscb *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifySco
 	for i := range cscb.builders {
 		func(i int, root context.Context) {
 			builder := cscb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertifyScorecardMutation)
 				if !ok {
@@ -375,10 +423,6 @@ func (cscb *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifySco
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -465,10 +509,20 @@ type CertifyScorecardUpsertBulk struct {
 //	client.CertifyScorecard.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifyscorecard.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyScorecardUpsertBulk) UpdateNewValues() *CertifyScorecardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(certifyscorecard.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -500,7 +554,7 @@ func (u *CertifyScorecardUpsertBulk) Update(set func(*CertifyScorecardUpsert)) *
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *CertifyScorecardUpsertBulk) SetSourceID(v int) *CertifyScorecardUpsertBulk {
+func (u *CertifyScorecardUpsertBulk) SetSourceID(v uuid.UUID) *CertifyScorecardUpsertBulk {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.SetSourceID(v)
 	})
@@ -514,7 +568,7 @@ func (u *CertifyScorecardUpsertBulk) UpdateSourceID() *CertifyScorecardUpsertBul
 }
 
 // SetScorecardID sets the "scorecard_id" field.
-func (u *CertifyScorecardUpsertBulk) SetScorecardID(v int) *CertifyScorecardUpsertBulk {
+func (u *CertifyScorecardUpsertBulk) SetScorecardID(v uuid.UUID) *CertifyScorecardUpsertBulk {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.SetScorecardID(v)
 	})

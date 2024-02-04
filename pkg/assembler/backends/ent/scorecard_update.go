@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
@@ -135,14 +136,14 @@ func (su *ScorecardUpdate) SetNillableCollector(s *string) *ScorecardUpdate {
 }
 
 // AddCertificationIDs adds the "certifications" edge to the CertifyScorecard entity by IDs.
-func (su *ScorecardUpdate) AddCertificationIDs(ids ...int) *ScorecardUpdate {
+func (su *ScorecardUpdate) AddCertificationIDs(ids ...uuid.UUID) *ScorecardUpdate {
 	su.mutation.AddCertificationIDs(ids...)
 	return su
 }
 
 // AddCertifications adds the "certifications" edges to the CertifyScorecard entity.
 func (su *ScorecardUpdate) AddCertifications(c ...*CertifyScorecard) *ScorecardUpdate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -161,14 +162,14 @@ func (su *ScorecardUpdate) ClearCertifications() *ScorecardUpdate {
 }
 
 // RemoveCertificationIDs removes the "certifications" edge to CertifyScorecard entities by IDs.
-func (su *ScorecardUpdate) RemoveCertificationIDs(ids ...int) *ScorecardUpdate {
+func (su *ScorecardUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *ScorecardUpdate {
 	su.mutation.RemoveCertificationIDs(ids...)
 	return su
 }
 
 // RemoveCertifications removes "certifications" edges to CertifyScorecard entities.
 func (su *ScorecardUpdate) RemoveCertifications(c ...*CertifyScorecard) *ScorecardUpdate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -203,7 +204,7 @@ func (su *ScorecardUpdate) ExecX(ctx context.Context) {
 }
 
 func (su *ScorecardUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(scorecard.Table, scorecard.Columns, sqlgraph.NewFieldSpec(scorecard.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(scorecard.Table, scorecard.Columns, sqlgraph.NewFieldSpec(scorecard.FieldID, field.TypeUUID))
 	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -248,7 +249,7 @@ func (su *ScorecardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{scorecard.CertificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -261,7 +262,7 @@ func (su *ScorecardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{scorecard.CertificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -277,7 +278,7 @@ func (su *ScorecardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{scorecard.CertificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -409,14 +410,14 @@ func (suo *ScorecardUpdateOne) SetNillableCollector(s *string) *ScorecardUpdateO
 }
 
 // AddCertificationIDs adds the "certifications" edge to the CertifyScorecard entity by IDs.
-func (suo *ScorecardUpdateOne) AddCertificationIDs(ids ...int) *ScorecardUpdateOne {
+func (suo *ScorecardUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *ScorecardUpdateOne {
 	suo.mutation.AddCertificationIDs(ids...)
 	return suo
 }
 
 // AddCertifications adds the "certifications" edges to the CertifyScorecard entity.
 func (suo *ScorecardUpdateOne) AddCertifications(c ...*CertifyScorecard) *ScorecardUpdateOne {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -435,14 +436,14 @@ func (suo *ScorecardUpdateOne) ClearCertifications() *ScorecardUpdateOne {
 }
 
 // RemoveCertificationIDs removes the "certifications" edge to CertifyScorecard entities by IDs.
-func (suo *ScorecardUpdateOne) RemoveCertificationIDs(ids ...int) *ScorecardUpdateOne {
+func (suo *ScorecardUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *ScorecardUpdateOne {
 	suo.mutation.RemoveCertificationIDs(ids...)
 	return suo
 }
 
 // RemoveCertifications removes "certifications" edges to CertifyScorecard entities.
 func (suo *ScorecardUpdateOne) RemoveCertifications(c ...*CertifyScorecard) *ScorecardUpdateOne {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -490,7 +491,7 @@ func (suo *ScorecardUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (suo *ScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Scorecard, err error) {
-	_spec := sqlgraph.NewUpdateSpec(scorecard.Table, scorecard.Columns, sqlgraph.NewFieldSpec(scorecard.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(scorecard.Table, scorecard.Columns, sqlgraph.NewFieldSpec(scorecard.FieldID, field.TypeUUID))
 	id, ok := suo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Scorecard.id" for update`)}
@@ -552,7 +553,7 @@ func (suo *ScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Scorecard, e
 			Columns: []string{scorecard.CertificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -565,7 +566,7 @@ func (suo *ScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Scorecard, e
 			Columns: []string{scorecard.CertificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -581,7 +582,7 @@ func (suo *ScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Scorecard, e
 			Columns: []string{scorecard.CertificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

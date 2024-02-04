@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // License holds the schema definition for the License entity.
@@ -31,6 +32,10 @@ type License struct {
 // Fields of the License.
 func (License) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.String("name").NotEmpty(),
 		field.String("inline").Optional().Nillable(),
 		field.String("list_version").Optional().Nillable(),

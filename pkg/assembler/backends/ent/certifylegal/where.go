@@ -7,61 +7,62 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.CertifyLegal {
+func ID(id uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.CertifyLegal {
+func IDEQ(id uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.CertifyLegal {
+func IDNEQ(id uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.CertifyLegal {
+func IDIn(ids ...uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.CertifyLegal {
+func IDNotIn(ids ...uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.CertifyLegal {
+func IDGT(id uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.CertifyLegal {
+func IDGTE(id uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.CertifyLegal {
+func IDLT(id uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.CertifyLegal {
+func IDLTE(id uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldLTE(FieldID, id))
 }
 
 // PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
-func PackageID(v int) predicate.CertifyLegal {
+func PackageID(v uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldEQ(FieldPackageID, v))
 }
 
 // SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
-func SourceID(v int) predicate.CertifyLegal {
+func SourceID(v uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldEQ(FieldSourceID, v))
 }
 
@@ -111,22 +112,22 @@ func DiscoveredLicensesHash(v string) predicate.CertifyLegal {
 }
 
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
-func PackageIDEQ(v int) predicate.CertifyLegal {
+func PackageIDEQ(v uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldEQ(FieldPackageID, v))
 }
 
 // PackageIDNEQ applies the NEQ predicate on the "package_id" field.
-func PackageIDNEQ(v int) predicate.CertifyLegal {
+func PackageIDNEQ(v uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldNEQ(FieldPackageID, v))
 }
 
 // PackageIDIn applies the In predicate on the "package_id" field.
-func PackageIDIn(vs ...int) predicate.CertifyLegal {
+func PackageIDIn(vs ...uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldIn(FieldPackageID, vs...))
 }
 
 // PackageIDNotIn applies the NotIn predicate on the "package_id" field.
-func PackageIDNotIn(vs ...int) predicate.CertifyLegal {
+func PackageIDNotIn(vs ...uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldNotIn(FieldPackageID, vs...))
 }
 
@@ -141,22 +142,22 @@ func PackageIDNotNil() predicate.CertifyLegal {
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
-func SourceIDEQ(v int) predicate.CertifyLegal {
+func SourceIDEQ(v uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldEQ(FieldSourceID, v))
 }
 
 // SourceIDNEQ applies the NEQ predicate on the "source_id" field.
-func SourceIDNEQ(v int) predicate.CertifyLegal {
+func SourceIDNEQ(v uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldNEQ(FieldSourceID, v))
 }
 
 // SourceIDIn applies the In predicate on the "source_id" field.
-func SourceIDIn(vs ...int) predicate.CertifyLegal {
+func SourceIDIn(vs ...uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldIn(FieldSourceID, vs...))
 }
 
 // SourceIDNotIn applies the NotIn predicate on the "source_id" field.
-func SourceIDNotIn(vs ...int) predicate.CertifyLegal {
+func SourceIDNotIn(vs ...uuid.UUID) predicate.CertifyLegal {
 	return predicate.CertifyLegal(sql.FieldNotIn(FieldSourceID, vs...))
 }
 

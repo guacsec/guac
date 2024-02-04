@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -109,8 +110,8 @@ func (heq *HashEqualQuery) FirstX(ctx context.Context) *HashEqual {
 
 // FirstID returns the first HashEqual ID from the query.
 // Returns a *NotFoundError when no HashEqual ID was found.
-func (heq *HashEqualQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (heq *HashEqualQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = heq.Limit(1).IDs(setContextOp(ctx, heq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -122,7 +123,7 @@ func (heq *HashEqualQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (heq *HashEqualQuery) FirstIDX(ctx context.Context) int {
+func (heq *HashEqualQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := heq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +161,8 @@ func (heq *HashEqualQuery) OnlyX(ctx context.Context) *HashEqual {
 // OnlyID is like Only, but returns the only HashEqual ID in the query.
 // Returns a *NotSingularError when more than one HashEqual ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (heq *HashEqualQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (heq *HashEqualQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = heq.Limit(2).IDs(setContextOp(ctx, heq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -177,7 +178,7 @@ func (heq *HashEqualQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (heq *HashEqualQuery) OnlyIDX(ctx context.Context) int {
+func (heq *HashEqualQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := heq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -205,7 +206,7 @@ func (heq *HashEqualQuery) AllX(ctx context.Context) []*HashEqual {
 }
 
 // IDs executes the query and returns a list of HashEqual IDs.
-func (heq *HashEqualQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (heq *HashEqualQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if heq.ctx.Unique == nil && heq.path != nil {
 		heq.Unique(true)
 	}
@@ -217,7 +218,7 @@ func (heq *HashEqualQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (heq *HashEqualQuery) IDsX(ctx context.Context) []int {
+func (heq *HashEqualQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := heq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -422,8 +423,8 @@ func (heq *HashEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*H
 
 func (heq *HashEqualQuery) loadArtifacts(ctx context.Context, query *ArtifactQuery, nodes []*HashEqual, init func(*HashEqual), assign func(*HashEqual, *Artifact)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*HashEqual)
-	nids := make(map[int]map[*HashEqual]struct{})
+	byID := make(map[uuid.UUID]*HashEqual)
+	nids := make(map[uuid.UUID]map[*HashEqual]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -452,11 +453,11 @@ func (heq *HashEqualQuery) loadArtifacts(ctx context.Context, query *ArtifactQue
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*HashEqual]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -495,7 +496,7 @@ func (heq *HashEqualQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (heq *HashEqualQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
 	_spec.From = heq.sql
 	if unique := heq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

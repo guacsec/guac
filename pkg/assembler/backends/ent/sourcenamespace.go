@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 )
@@ -16,11 +17,11 @@ import (
 type SourceNamespace struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Namespace holds the value of the "namespace" field.
 	Namespace string `json:"namespace,omitempty"`
 	// SourceID holds the value of the "source_id" field.
-	SourceID int `json:"source_id,omitempty"`
+	SourceID uuid.UUID `json:"source_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SourceNamespaceQuery when eager-loading is set.
 	Edges        SourceNamespaceEdges `json:"edges"`
@@ -69,10 +70,10 @@ func (*SourceNamespace) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case sourcenamespace.FieldID, sourcenamespace.FieldSourceID:
-			values[i] = new(sql.NullInt64)
 		case sourcenamespace.FieldNamespace:
 			values[i] = new(sql.NullString)
+		case sourcenamespace.FieldID, sourcenamespace.FieldSourceID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -89,11 +90,11 @@ func (sn *SourceNamespace) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case sourcenamespace.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				sn.ID = *value
 			}
-			sn.ID = int(value.Int64)
 		case sourcenamespace.FieldNamespace:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field namespace", values[i])
@@ -101,10 +102,10 @@ func (sn *SourceNamespace) assignValues(columns []string, values []any) error {
 				sn.Namespace = value.String
 			}
 		case sourcenamespace.FieldSourceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
-			} else if value.Valid {
-				sn.SourceID = int(value.Int64)
+			} else if value != nil {
+				sn.SourceID = *value
 			}
 		default:
 			sn.selectValues.Set(columns[i], values[i])

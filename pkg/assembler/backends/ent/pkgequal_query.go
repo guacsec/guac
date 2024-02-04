@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -109,8 +110,8 @@ func (peq *PkgEqualQuery) FirstX(ctx context.Context) *PkgEqual {
 
 // FirstID returns the first PkgEqual ID from the query.
 // Returns a *NotFoundError when no PkgEqual ID was found.
-func (peq *PkgEqualQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (peq *PkgEqualQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = peq.Limit(1).IDs(setContextOp(ctx, peq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -122,7 +123,7 @@ func (peq *PkgEqualQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (peq *PkgEqualQuery) FirstIDX(ctx context.Context) int {
+func (peq *PkgEqualQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := peq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +161,8 @@ func (peq *PkgEqualQuery) OnlyX(ctx context.Context) *PkgEqual {
 // OnlyID is like Only, but returns the only PkgEqual ID in the query.
 // Returns a *NotSingularError when more than one PkgEqual ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (peq *PkgEqualQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (peq *PkgEqualQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = peq.Limit(2).IDs(setContextOp(ctx, peq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -177,7 +178,7 @@ func (peq *PkgEqualQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (peq *PkgEqualQuery) OnlyIDX(ctx context.Context) int {
+func (peq *PkgEqualQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := peq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -205,7 +206,7 @@ func (peq *PkgEqualQuery) AllX(ctx context.Context) []*PkgEqual {
 }
 
 // IDs executes the query and returns a list of PkgEqual IDs.
-func (peq *PkgEqualQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (peq *PkgEqualQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if peq.ctx.Unique == nil && peq.path != nil {
 		peq.Unique(true)
 	}
@@ -217,7 +218,7 @@ func (peq *PkgEqualQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (peq *PkgEqualQuery) IDsX(ctx context.Context) []int {
+func (peq *PkgEqualQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := peq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -422,8 +423,8 @@ func (peq *PkgEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pk
 
 func (peq *PkgEqualQuery) loadPackages(ctx context.Context, query *PackageVersionQuery, nodes []*PkgEqual, init func(*PkgEqual), assign func(*PkgEqual, *PackageVersion)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*PkgEqual)
-	nids := make(map[int]map[*PkgEqual]struct{})
+	byID := make(map[uuid.UUID]*PkgEqual)
+	nids := make(map[uuid.UUID]map[*PkgEqual]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -452,11 +453,11 @@ func (peq *PkgEqualQuery) loadPackages(ctx context.Context, query *PackageVersio
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*PkgEqual]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -495,7 +496,7 @@ func (peq *PkgEqualQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (peq *PkgEqualQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(pkgequal.Table, pkgequal.Columns, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(pkgequal.Table, pkgequal.Columns, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID))
 	_spec.From = peq.sql
 	if unique := peq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -17,11 +18,11 @@ import (
 type CertifyScorecard struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// SourceID holds the value of the "source_id" field.
-	SourceID int `json:"source_id,omitempty"`
+	SourceID uuid.UUID `json:"source_id,omitempty"`
 	// ScorecardID holds the value of the "scorecard_id" field.
-	ScorecardID int `json:"scorecard_id,omitempty"`
+	ScorecardID uuid.UUID `json:"scorecard_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CertifyScorecardQuery when eager-loading is set.
 	Edges        CertifyScorecardEdges `json:"edges"`
@@ -73,7 +74,7 @@ func (*CertifyScorecard) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case certifyscorecard.FieldID, certifyscorecard.FieldSourceID, certifyscorecard.FieldScorecardID:
-			values[i] = new(sql.NullInt64)
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -90,22 +91,22 @@ func (cs *CertifyScorecard) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case certifyscorecard.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				cs.ID = *value
 			}
-			cs.ID = int(value.Int64)
 		case certifyscorecard.FieldSourceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
-			} else if value.Valid {
-				cs.SourceID = int(value.Int64)
+			} else if value != nil {
+				cs.SourceID = *value
 			}
 		case certifyscorecard.FieldScorecardID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field scorecard_id", values[i])
-			} else if value.Valid {
-				cs.ScorecardID = int(value.Int64)
+			} else if value != nil {
+				cs.ScorecardID = *value
 			}
 		default:
 			cs.selectValues.Set(columns[i], values[i])

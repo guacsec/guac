@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -84,15 +85,15 @@ func (snu *SourceNameUpdate) ClearTag() *SourceNameUpdate {
 }
 
 // SetNamespaceID sets the "namespace_id" field.
-func (snu *SourceNameUpdate) SetNamespaceID(i int) *SourceNameUpdate {
-	snu.mutation.SetNamespaceID(i)
+func (snu *SourceNameUpdate) SetNamespaceID(u uuid.UUID) *SourceNameUpdate {
+	snu.mutation.SetNamespaceID(u)
 	return snu
 }
 
 // SetNillableNamespaceID sets the "namespace_id" field if the given value is not nil.
-func (snu *SourceNameUpdate) SetNillableNamespaceID(i *int) *SourceNameUpdate {
-	if i != nil {
-		snu.SetNamespaceID(*i)
+func (snu *SourceNameUpdate) SetNillableNamespaceID(u *uuid.UUID) *SourceNameUpdate {
+	if u != nil {
+		snu.SetNamespaceID(*u)
 	}
 	return snu
 }
@@ -103,14 +104,14 @@ func (snu *SourceNameUpdate) SetNamespace(s *SourceNamespace) *SourceNameUpdate 
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (snu *SourceNameUpdate) AddOccurrenceIDs(ids ...int) *SourceNameUpdate {
+func (snu *SourceNameUpdate) AddOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdate {
 	snu.mutation.AddOccurrenceIDs(ids...)
 	return snu
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
 func (snu *SourceNameUpdate) AddOccurrences(o ...*Occurrence) *SourceNameUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -135,14 +136,14 @@ func (snu *SourceNameUpdate) ClearOccurrences() *SourceNameUpdate {
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (snu *SourceNameUpdate) RemoveOccurrenceIDs(ids ...int) *SourceNameUpdate {
+func (snu *SourceNameUpdate) RemoveOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdate {
 	snu.mutation.RemoveOccurrenceIDs(ids...)
 	return snu
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
 func (snu *SourceNameUpdate) RemoveOccurrences(o ...*Occurrence) *SourceNameUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -188,7 +189,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := snu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(sourcename.Table, sourcename.Columns, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(sourcename.Table, sourcename.Columns, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID))
 	if ps := snu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -219,7 +220,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{sourcename.NamespaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -232,7 +233,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{sourcename.NamespaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -248,7 +249,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -261,7 +262,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -277,7 +278,7 @@ func (snu *SourceNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -360,15 +361,15 @@ func (snuo *SourceNameUpdateOne) ClearTag() *SourceNameUpdateOne {
 }
 
 // SetNamespaceID sets the "namespace_id" field.
-func (snuo *SourceNameUpdateOne) SetNamespaceID(i int) *SourceNameUpdateOne {
-	snuo.mutation.SetNamespaceID(i)
+func (snuo *SourceNameUpdateOne) SetNamespaceID(u uuid.UUID) *SourceNameUpdateOne {
+	snuo.mutation.SetNamespaceID(u)
 	return snuo
 }
 
 // SetNillableNamespaceID sets the "namespace_id" field if the given value is not nil.
-func (snuo *SourceNameUpdateOne) SetNillableNamespaceID(i *int) *SourceNameUpdateOne {
-	if i != nil {
-		snuo.SetNamespaceID(*i)
+func (snuo *SourceNameUpdateOne) SetNillableNamespaceID(u *uuid.UUID) *SourceNameUpdateOne {
+	if u != nil {
+		snuo.SetNamespaceID(*u)
 	}
 	return snuo
 }
@@ -379,14 +380,14 @@ func (snuo *SourceNameUpdateOne) SetNamespace(s *SourceNamespace) *SourceNameUpd
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (snuo *SourceNameUpdateOne) AddOccurrenceIDs(ids ...int) *SourceNameUpdateOne {
+func (snuo *SourceNameUpdateOne) AddOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
 	snuo.mutation.AddOccurrenceIDs(ids...)
 	return snuo
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
 func (snuo *SourceNameUpdateOne) AddOccurrences(o ...*Occurrence) *SourceNameUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -411,14 +412,14 @@ func (snuo *SourceNameUpdateOne) ClearOccurrences() *SourceNameUpdateOne {
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (snuo *SourceNameUpdateOne) RemoveOccurrenceIDs(ids ...int) *SourceNameUpdateOne {
+func (snuo *SourceNameUpdateOne) RemoveOccurrenceIDs(ids ...uuid.UUID) *SourceNameUpdateOne {
 	snuo.mutation.RemoveOccurrenceIDs(ids...)
 	return snuo
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
 func (snuo *SourceNameUpdateOne) RemoveOccurrences(o ...*Occurrence) *SourceNameUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -477,7 +478,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 	if err := snuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(sourcename.Table, sourcename.Columns, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(sourcename.Table, sourcename.Columns, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID))
 	id, ok := snuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SourceName.id" for update`)}
@@ -525,7 +526,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 			Columns: []string{sourcename.NamespaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -538,7 +539,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 			Columns: []string{sourcename.NamespaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -554,7 +555,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -567,7 +568,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -583,7 +584,7 @@ func (snuo *SourceNameUpdateOne) sqlSave(ctx context.Context) (_node *SourceName
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

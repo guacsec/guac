@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // BillOfMaterials holds the schema definition for the BillOfMaterials (SBOM) entity.
@@ -31,8 +32,12 @@ type BillOfMaterials struct {
 // Fields of the SBOM.
 func (BillOfMaterials) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("package_id").Optional().Nillable(),
-		field.Int("artifact_id").Optional().Nillable(),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("package_id", uuid.New()).Optional().Nillable(),
+		field.UUID("artifact_id", uuid.New()).Optional().Nillable(),
 		field.String("uri").Comment("SBOM's URI"),
 		field.String("algorithm").Comment("Digest algorithm"),
 		field.String("digest"),

@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // VulnEqual holds the schema definition for the VulnEqual entity.
@@ -29,6 +30,10 @@ type VulnEqual struct {
 // Fields of the VulnEqual.
 func (VulnEqual) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),

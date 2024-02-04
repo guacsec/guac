@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -25,35 +27,35 @@ type DependencyCreate struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (dc *DependencyCreate) SetPackageID(i int) *DependencyCreate {
-	dc.mutation.SetPackageID(i)
+func (dc *DependencyCreate) SetPackageID(u uuid.UUID) *DependencyCreate {
+	dc.mutation.SetPackageID(u)
 	return dc
 }
 
 // SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (dc *DependencyCreate) SetDependentPackageNameID(i int) *DependencyCreate {
-	dc.mutation.SetDependentPackageNameID(i)
+func (dc *DependencyCreate) SetDependentPackageNameID(u uuid.UUID) *DependencyCreate {
+	dc.mutation.SetDependentPackageNameID(u)
 	return dc
 }
 
 // SetNillableDependentPackageNameID sets the "dependent_package_name_id" field if the given value is not nil.
-func (dc *DependencyCreate) SetNillableDependentPackageNameID(i *int) *DependencyCreate {
-	if i != nil {
-		dc.SetDependentPackageNameID(*i)
+func (dc *DependencyCreate) SetNillableDependentPackageNameID(u *uuid.UUID) *DependencyCreate {
+	if u != nil {
+		dc.SetDependentPackageNameID(*u)
 	}
 	return dc
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (dc *DependencyCreate) SetDependentPackageVersionID(i int) *DependencyCreate {
-	dc.mutation.SetDependentPackageVersionID(i)
+func (dc *DependencyCreate) SetDependentPackageVersionID(u uuid.UUID) *DependencyCreate {
+	dc.mutation.SetDependentPackageVersionID(u)
 	return dc
 }
 
 // SetNillableDependentPackageVersionID sets the "dependent_package_version_id" field if the given value is not nil.
-func (dc *DependencyCreate) SetNillableDependentPackageVersionID(i *int) *DependencyCreate {
-	if i != nil {
-		dc.SetDependentPackageVersionID(*i)
+func (dc *DependencyCreate) SetNillableDependentPackageVersionID(u *uuid.UUID) *DependencyCreate {
+	if u != nil {
+		dc.SetDependentPackageVersionID(*u)
 	}
 	return dc
 }
@@ -88,6 +90,20 @@ func (dc *DependencyCreate) SetCollector(s string) *DependencyCreate {
 	return dc
 }
 
+// SetID sets the "id" field.
+func (dc *DependencyCreate) SetID(u uuid.UUID) *DependencyCreate {
+	dc.mutation.SetID(u)
+	return dc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (dc *DependencyCreate) SetNillableID(u *uuid.UUID) *DependencyCreate {
+	if u != nil {
+		dc.SetID(*u)
+	}
+	return dc
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (dc *DependencyCreate) SetPackage(p *PackageVersion) *DependencyCreate {
 	return dc.SetPackageID(p.ID)
@@ -104,14 +120,14 @@ func (dc *DependencyCreate) SetDependentPackageVersion(p *PackageVersion) *Depen
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (dc *DependencyCreate) AddIncludedInSbomIDs(ids ...int) *DependencyCreate {
+func (dc *DependencyCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *DependencyCreate {
 	dc.mutation.AddIncludedInSbomIDs(ids...)
 	return dc
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (dc *DependencyCreate) AddIncludedInSboms(b ...*BillOfMaterials) *DependencyCreate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -125,6 +141,7 @@ func (dc *DependencyCreate) Mutation() *DependencyMutation {
 
 // Save creates the Dependency in the database.
 func (dc *DependencyCreate) Save(ctx context.Context) (*Dependency, error) {
+	dc.defaults()
 	return withHooks(ctx, dc.sqlSave, dc.mutation, dc.hooks)
 }
 
@@ -147,6 +164,14 @@ func (dc *DependencyCreate) Exec(ctx context.Context) error {
 func (dc *DependencyCreate) ExecX(ctx context.Context) {
 	if err := dc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (dc *DependencyCreate) defaults() {
+	if _, ok := dc.mutation.ID(); !ok {
+		v := dependency.DefaultID()
+		dc.mutation.SetID(v)
 	}
 }
 
@@ -192,8 +217,13 @@ func (dc *DependencyCreate) sqlSave(ctx context.Context) (*Dependency, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	dc.mutation.id = &_node.ID
 	dc.mutation.done = true
 	return _node, nil
@@ -202,9 +232,13 @@ func (dc *DependencyCreate) sqlSave(ctx context.Context) (*Dependency, error) {
 func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Dependency{config: dc.config}
-		_spec = sqlgraph.NewCreateSpec(dependency.Table, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(dependency.Table, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = dc.conflict
+	if id, ok := dc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := dc.mutation.VersionRange(); ok {
 		_spec.SetField(dependency.FieldVersionRange, field.TypeString, value)
 		_node.VersionRange = value
@@ -233,7 +267,7 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 			Columns: []string{dependency.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -250,7 +284,7 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 			Columns: []string{dependency.DependentPackageNameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -267,7 +301,7 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 			Columns: []string{dependency.DependentPackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -284,7 +318,7 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 			Columns: dependency.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -345,7 +379,7 @@ type (
 )
 
 // SetPackageID sets the "package_id" field.
-func (u *DependencyUpsert) SetPackageID(v int) *DependencyUpsert {
+func (u *DependencyUpsert) SetPackageID(v uuid.UUID) *DependencyUpsert {
 	u.Set(dependency.FieldPackageID, v)
 	return u
 }
@@ -357,7 +391,7 @@ func (u *DependencyUpsert) UpdatePackageID() *DependencyUpsert {
 }
 
 // SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (u *DependencyUpsert) SetDependentPackageNameID(v int) *DependencyUpsert {
+func (u *DependencyUpsert) SetDependentPackageNameID(v uuid.UUID) *DependencyUpsert {
 	u.Set(dependency.FieldDependentPackageNameID, v)
 	return u
 }
@@ -375,7 +409,7 @@ func (u *DependencyUpsert) ClearDependentPackageNameID() *DependencyUpsert {
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (u *DependencyUpsert) SetDependentPackageVersionID(v int) *DependencyUpsert {
+func (u *DependencyUpsert) SetDependentPackageVersionID(v uuid.UUID) *DependencyUpsert {
 	u.Set(dependency.FieldDependentPackageVersionID, v)
 	return u
 }
@@ -452,16 +486,24 @@ func (u *DependencyUpsert) UpdateCollector() *DependencyUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Dependency.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(dependency.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *DependencyUpsertOne) UpdateNewValues() *DependencyUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(dependency.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -493,7 +535,7 @@ func (u *DependencyUpsertOne) Update(set func(*DependencyUpsert)) *DependencyUps
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *DependencyUpsertOne) SetPackageID(v int) *DependencyUpsertOne {
+func (u *DependencyUpsertOne) SetPackageID(v uuid.UUID) *DependencyUpsertOne {
 	return u.Update(func(s *DependencyUpsert) {
 		s.SetPackageID(v)
 	})
@@ -507,7 +549,7 @@ func (u *DependencyUpsertOne) UpdatePackageID() *DependencyUpsertOne {
 }
 
 // SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (u *DependencyUpsertOne) SetDependentPackageNameID(v int) *DependencyUpsertOne {
+func (u *DependencyUpsertOne) SetDependentPackageNameID(v uuid.UUID) *DependencyUpsertOne {
 	return u.Update(func(s *DependencyUpsert) {
 		s.SetDependentPackageNameID(v)
 	})
@@ -528,7 +570,7 @@ func (u *DependencyUpsertOne) ClearDependentPackageNameID() *DependencyUpsertOne
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (u *DependencyUpsertOne) SetDependentPackageVersionID(v int) *DependencyUpsertOne {
+func (u *DependencyUpsertOne) SetDependentPackageVersionID(v uuid.UUID) *DependencyUpsertOne {
 	return u.Update(func(s *DependencyUpsert) {
 		s.SetDependentPackageVersionID(v)
 	})
@@ -634,7 +676,12 @@ func (u *DependencyUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *DependencyUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *DependencyUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: DependencyUpsertOne.ID is not supported by MySQL driver. Use DependencyUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -643,7 +690,7 @@ func (u *DependencyUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *DependencyUpsertOne) IDX(ctx context.Context) int {
+func (u *DependencyUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -670,6 +717,7 @@ func (dcb *DependencyCreateBulk) Save(ctx context.Context) ([]*Dependency, error
 	for i := range dcb.builders {
 		func(i int, root context.Context) {
 			builder := dcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DependencyMutation)
 				if !ok {
@@ -697,10 +745,6 @@ func (dcb *DependencyCreateBulk) Save(ctx context.Context) ([]*Dependency, error
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -787,10 +831,20 @@ type DependencyUpsertBulk struct {
 //	client.Dependency.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(dependency.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *DependencyUpsertBulk) UpdateNewValues() *DependencyUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(dependency.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -822,7 +876,7 @@ func (u *DependencyUpsertBulk) Update(set func(*DependencyUpsert)) *DependencyUp
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *DependencyUpsertBulk) SetPackageID(v int) *DependencyUpsertBulk {
+func (u *DependencyUpsertBulk) SetPackageID(v uuid.UUID) *DependencyUpsertBulk {
 	return u.Update(func(s *DependencyUpsert) {
 		s.SetPackageID(v)
 	})
@@ -836,7 +890,7 @@ func (u *DependencyUpsertBulk) UpdatePackageID() *DependencyUpsertBulk {
 }
 
 // SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (u *DependencyUpsertBulk) SetDependentPackageNameID(v int) *DependencyUpsertBulk {
+func (u *DependencyUpsertBulk) SetDependentPackageNameID(v uuid.UUID) *DependencyUpsertBulk {
 	return u.Update(func(s *DependencyUpsert) {
 		s.SetDependentPackageNameID(v)
 	})
@@ -857,7 +911,7 @@ func (u *DependencyUpsertBulk) ClearDependentPackageNameID() *DependencyUpsertBu
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (u *DependencyUpsertBulk) SetDependentPackageVersionID(v int) *DependencyUpsertBulk {
+func (u *DependencyUpsertBulk) SetDependentPackageVersionID(v uuid.UUID) *DependencyUpsertBulk {
 	return u.Update(func(s *DependencyUpsert) {
 		s.SetDependentPackageVersionID(v)
 	})

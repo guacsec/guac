@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 )
@@ -40,15 +42,29 @@ func (vec *VulnEqualCreate) SetCollector(s string) *VulnEqualCreate {
 	return vec
 }
 
+// SetID sets the "id" field.
+func (vec *VulnEqualCreate) SetID(u uuid.UUID) *VulnEqualCreate {
+	vec.mutation.SetID(u)
+	return vec
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (vec *VulnEqualCreate) SetNillableID(u *uuid.UUID) *VulnEqualCreate {
+	if u != nil {
+		vec.SetID(*u)
+	}
+	return vec
+}
+
 // AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by IDs.
-func (vec *VulnEqualCreate) AddVulnerabilityIDIDs(ids ...int) *VulnEqualCreate {
+func (vec *VulnEqualCreate) AddVulnerabilityIDIDs(ids ...uuid.UUID) *VulnEqualCreate {
 	vec.mutation.AddVulnerabilityIDIDs(ids...)
 	return vec
 }
 
 // AddVulnerabilityIds adds the "vulnerability_ids" edges to the VulnerabilityID entity.
 func (vec *VulnEqualCreate) AddVulnerabilityIds(v ...*VulnerabilityID) *VulnEqualCreate {
-	ids := make([]int, len(v))
+	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -62,6 +78,7 @@ func (vec *VulnEqualCreate) Mutation() *VulnEqualMutation {
 
 // Save creates the VulnEqual in the database.
 func (vec *VulnEqualCreate) Save(ctx context.Context) (*VulnEqual, error) {
+	vec.defaults()
 	return withHooks(ctx, vec.sqlSave, vec.mutation, vec.hooks)
 }
 
@@ -84,6 +101,14 @@ func (vec *VulnEqualCreate) Exec(ctx context.Context) error {
 func (vec *VulnEqualCreate) ExecX(ctx context.Context) {
 	if err := vec.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (vec *VulnEqualCreate) defaults() {
+	if _, ok := vec.mutation.ID(); !ok {
+		v := vulnequal.DefaultID()
+		vec.mutation.SetID(v)
 	}
 }
 
@@ -115,8 +140,13 @@ func (vec *VulnEqualCreate) sqlSave(ctx context.Context) (*VulnEqual, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	vec.mutation.id = &_node.ID
 	vec.mutation.done = true
 	return _node, nil
@@ -125,9 +155,13 @@ func (vec *VulnEqualCreate) sqlSave(ctx context.Context) (*VulnEqual, error) {
 func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 	var (
 		_node = &VulnEqual{config: vec.config}
-		_spec = sqlgraph.NewCreateSpec(vulnequal.Table, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(vulnequal.Table, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = vec.conflict
+	if id, ok := vec.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := vec.mutation.Justification(); ok {
 		_spec.SetField(vulnequal.FieldJustification, field.TypeString, value)
 		_node.Justification = value
@@ -148,7 +182,7 @@ func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 			Columns: vulnequal.VulnerabilityIdsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -244,16 +278,24 @@ func (u *VulnEqualUpsert) UpdateCollector() *VulnEqualUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.VulnEqual.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(vulnequal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *VulnEqualUpsertOne) UpdateNewValues() *VulnEqualUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(vulnequal.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -342,7 +384,12 @@ func (u *VulnEqualUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *VulnEqualUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *VulnEqualUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: VulnEqualUpsertOne.ID is not supported by MySQL driver. Use VulnEqualUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -351,7 +398,7 @@ func (u *VulnEqualUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *VulnEqualUpsertOne) IDX(ctx context.Context) int {
+func (u *VulnEqualUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -378,6 +425,7 @@ func (vecb *VulnEqualCreateBulk) Save(ctx context.Context) ([]*VulnEqual, error)
 	for i := range vecb.builders {
 		func(i int, root context.Context) {
 			builder := vecb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*VulnEqualMutation)
 				if !ok {
@@ -405,10 +453,6 @@ func (vecb *VulnEqualCreateBulk) Save(ctx context.Context) ([]*VulnEqual, error)
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -495,10 +539,20 @@ type VulnEqualUpsertBulk struct {
 //	client.VulnEqual.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(vulnequal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *VulnEqualUpsertBulk) UpdateNewValues() *VulnEqualUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(vulnequal.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

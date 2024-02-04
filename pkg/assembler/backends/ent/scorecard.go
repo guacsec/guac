@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -18,7 +19,7 @@ import (
 type Scorecard struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Checks holds the value of the "checks" field.
 	Checks []*model.ScorecardCheck `json:"checks,omitempty"`
 	// Overall Scorecard score for the source
@@ -70,12 +71,12 @@ func (*Scorecard) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case scorecard.FieldAggregateScore:
 			values[i] = new(sql.NullFloat64)
-		case scorecard.FieldID:
-			values[i] = new(sql.NullInt64)
 		case scorecard.FieldScorecardVersion, scorecard.FieldScorecardCommit, scorecard.FieldOrigin, scorecard.FieldCollector:
 			values[i] = new(sql.NullString)
 		case scorecard.FieldTimeScanned:
 			values[i] = new(sql.NullTime)
+		case scorecard.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -92,11 +93,11 @@ func (s *Scorecard) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case scorecard.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				s.ID = *value
 			}
-			s.ID = int(value.Int64)
 		case scorecard.FieldChecks:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field checks", values[i])

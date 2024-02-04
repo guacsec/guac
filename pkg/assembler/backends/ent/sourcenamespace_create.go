@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
@@ -30,13 +32,27 @@ func (snc *SourceNamespaceCreate) SetNamespace(s string) *SourceNamespaceCreate 
 }
 
 // SetSourceID sets the "source_id" field.
-func (snc *SourceNamespaceCreate) SetSourceID(i int) *SourceNamespaceCreate {
-	snc.mutation.SetSourceID(i)
+func (snc *SourceNamespaceCreate) SetSourceID(u uuid.UUID) *SourceNamespaceCreate {
+	snc.mutation.SetSourceID(u)
+	return snc
+}
+
+// SetID sets the "id" field.
+func (snc *SourceNamespaceCreate) SetID(u uuid.UUID) *SourceNamespaceCreate {
+	snc.mutation.SetID(u)
+	return snc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (snc *SourceNamespaceCreate) SetNillableID(u *uuid.UUID) *SourceNamespaceCreate {
+	if u != nil {
+		snc.SetID(*u)
+	}
 	return snc
 }
 
 // SetSourceTypeID sets the "source_type" edge to the SourceType entity by ID.
-func (snc *SourceNamespaceCreate) SetSourceTypeID(id int) *SourceNamespaceCreate {
+func (snc *SourceNamespaceCreate) SetSourceTypeID(id uuid.UUID) *SourceNamespaceCreate {
 	snc.mutation.SetSourceTypeID(id)
 	return snc
 }
@@ -47,14 +63,14 @@ func (snc *SourceNamespaceCreate) SetSourceType(s *SourceType) *SourceNamespaceC
 }
 
 // AddNameIDs adds the "names" edge to the SourceName entity by IDs.
-func (snc *SourceNamespaceCreate) AddNameIDs(ids ...int) *SourceNamespaceCreate {
+func (snc *SourceNamespaceCreate) AddNameIDs(ids ...uuid.UUID) *SourceNamespaceCreate {
 	snc.mutation.AddNameIDs(ids...)
 	return snc
 }
 
 // AddNames adds the "names" edges to the SourceName entity.
 func (snc *SourceNamespaceCreate) AddNames(s ...*SourceName) *SourceNamespaceCreate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -68,6 +84,7 @@ func (snc *SourceNamespaceCreate) Mutation() *SourceNamespaceMutation {
 
 // Save creates the SourceNamespace in the database.
 func (snc *SourceNamespaceCreate) Save(ctx context.Context) (*SourceNamespace, error) {
+	snc.defaults()
 	return withHooks(ctx, snc.sqlSave, snc.mutation, snc.hooks)
 }
 
@@ -90,6 +107,14 @@ func (snc *SourceNamespaceCreate) Exec(ctx context.Context) error {
 func (snc *SourceNamespaceCreate) ExecX(ctx context.Context) {
 	if err := snc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (snc *SourceNamespaceCreate) defaults() {
+	if _, ok := snc.mutation.ID(); !ok {
+		v := sourcenamespace.DefaultID()
+		snc.mutation.SetID(v)
 	}
 }
 
@@ -118,8 +143,13 @@ func (snc *SourceNamespaceCreate) sqlSave(ctx context.Context) (*SourceNamespace
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	snc.mutation.id = &_node.ID
 	snc.mutation.done = true
 	return _node, nil
@@ -128,9 +158,13 @@ func (snc *SourceNamespaceCreate) sqlSave(ctx context.Context) (*SourceNamespace
 func (snc *SourceNamespaceCreate) createSpec() (*SourceNamespace, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SourceNamespace{config: snc.config}
-		_spec = sqlgraph.NewCreateSpec(sourcenamespace.Table, sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(sourcenamespace.Table, sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = snc.conflict
+	if id, ok := snc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := snc.mutation.Namespace(); ok {
 		_spec.SetField(sourcenamespace.FieldNamespace, field.TypeString, value)
 		_node.Namespace = value
@@ -143,7 +177,7 @@ func (snc *SourceNamespaceCreate) createSpec() (*SourceNamespace, *sqlgraph.Crea
 			Columns: []string{sourcenamespace.SourceTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -160,7 +194,7 @@ func (snc *SourceNamespaceCreate) createSpec() (*SourceNamespace, *sqlgraph.Crea
 			Columns: []string{sourcenamespace.NamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -233,7 +267,7 @@ func (u *SourceNamespaceUpsert) UpdateNamespace() *SourceNamespaceUpsert {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *SourceNamespaceUpsert) SetSourceID(v int) *SourceNamespaceUpsert {
+func (u *SourceNamespaceUpsert) SetSourceID(v uuid.UUID) *SourceNamespaceUpsert {
 	u.Set(sourcenamespace.FieldSourceID, v)
 	return u
 }
@@ -244,16 +278,24 @@ func (u *SourceNamespaceUpsert) UpdateSourceID() *SourceNamespaceUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.SourceNamespace.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(sourcenamespace.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *SourceNamespaceUpsertOne) UpdateNewValues() *SourceNamespaceUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(sourcenamespace.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -299,7 +341,7 @@ func (u *SourceNamespaceUpsertOne) UpdateNamespace() *SourceNamespaceUpsertOne {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *SourceNamespaceUpsertOne) SetSourceID(v int) *SourceNamespaceUpsertOne {
+func (u *SourceNamespaceUpsertOne) SetSourceID(v uuid.UUID) *SourceNamespaceUpsertOne {
 	return u.Update(func(s *SourceNamespaceUpsert) {
 		s.SetSourceID(v)
 	})
@@ -328,7 +370,12 @@ func (u *SourceNamespaceUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *SourceNamespaceUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *SourceNamespaceUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: SourceNamespaceUpsertOne.ID is not supported by MySQL driver. Use SourceNamespaceUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -337,7 +384,7 @@ func (u *SourceNamespaceUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *SourceNamespaceUpsertOne) IDX(ctx context.Context) int {
+func (u *SourceNamespaceUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -364,6 +411,7 @@ func (sncb *SourceNamespaceCreateBulk) Save(ctx context.Context) ([]*SourceNames
 	for i := range sncb.builders {
 		func(i int, root context.Context) {
 			builder := sncb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SourceNamespaceMutation)
 				if !ok {
@@ -391,10 +439,6 @@ func (sncb *SourceNamespaceCreateBulk) Save(ctx context.Context) ([]*SourceNames
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -481,10 +525,20 @@ type SourceNamespaceUpsertBulk struct {
 //	client.SourceNamespace.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(sourcenamespace.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *SourceNamespaceUpsertBulk) UpdateNewValues() *SourceNamespaceUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(sourcenamespace.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -530,7 +584,7 @@ func (u *SourceNamespaceUpsertBulk) UpdateNamespace() *SourceNamespaceUpsertBulk
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *SourceNamespaceUpsertBulk) SetSourceID(v int) *SourceNamespaceUpsertBulk {
+func (u *SourceNamespaceUpsertBulk) SetSourceID(v uuid.UUID) *SourceNamespaceUpsertBulk {
 	return u.Update(func(s *SourceNamespaceUpsert) {
 		s.SetSourceID(v)
 	})

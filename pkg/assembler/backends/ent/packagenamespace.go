@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 )
@@ -16,9 +17,9 @@ import (
 type PackageNamespace struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
-	PackageID int `json:"package_id,omitempty"`
+	PackageID uuid.UUID `json:"package_id,omitempty"`
 	// In the pURL representation, each PackageNamespace matches the pkg:<type>/<namespace>/ partial pURL
 	Namespace string `json:"namespace,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -69,10 +70,10 @@ func (*PackageNamespace) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case packagenamespace.FieldID, packagenamespace.FieldPackageID:
-			values[i] = new(sql.NullInt64)
 		case packagenamespace.FieldNamespace:
 			values[i] = new(sql.NullString)
+		case packagenamespace.FieldID, packagenamespace.FieldPackageID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -89,16 +90,16 @@ func (pn *PackageNamespace) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case packagenamespace.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pn.ID = *value
 			}
-			pn.ID = int(value.Int64)
 		case packagenamespace.FieldPackageID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
-			} else if value.Valid {
-				pn.PackageID = int(value.Int64)
+			} else if value != nil {
+				pn.PackageID = *value
 			}
 		case packagenamespace.FieldNamespace:
 			if value, ok := values[i].(*sql.NullString); !ok {

@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
@@ -32,14 +34,14 @@ func (sac *SLSAAttestationCreate) SetBuildType(s string) *SLSAAttestationCreate 
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (sac *SLSAAttestationCreate) SetBuiltByID(i int) *SLSAAttestationCreate {
-	sac.mutation.SetBuiltByID(i)
+func (sac *SLSAAttestationCreate) SetBuiltByID(u uuid.UUID) *SLSAAttestationCreate {
+	sac.mutation.SetBuiltByID(u)
 	return sac
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (sac *SLSAAttestationCreate) SetSubjectID(i int) *SLSAAttestationCreate {
-	sac.mutation.SetSubjectID(i)
+func (sac *SLSAAttestationCreate) SetSubjectID(u uuid.UUID) *SLSAAttestationCreate {
+	sac.mutation.SetSubjectID(u)
 	return sac
 }
 
@@ -101,15 +103,29 @@ func (sac *SLSAAttestationCreate) SetBuiltFromHash(s string) *SLSAAttestationCre
 	return sac
 }
 
+// SetID sets the "id" field.
+func (sac *SLSAAttestationCreate) SetID(u uuid.UUID) *SLSAAttestationCreate {
+	sac.mutation.SetID(u)
+	return sac
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (sac *SLSAAttestationCreate) SetNillableID(u *uuid.UUID) *SLSAAttestationCreate {
+	if u != nil {
+		sac.SetID(*u)
+	}
+	return sac
+}
+
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by IDs.
-func (sac *SLSAAttestationCreate) AddBuiltFromIDs(ids ...int) *SLSAAttestationCreate {
+func (sac *SLSAAttestationCreate) AddBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationCreate {
 	sac.mutation.AddBuiltFromIDs(ids...)
 	return sac
 }
 
 // AddBuiltFrom adds the "built_from" edges to the Artifact entity.
 func (sac *SLSAAttestationCreate) AddBuiltFrom(a ...*Artifact) *SLSAAttestationCreate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -133,6 +149,7 @@ func (sac *SLSAAttestationCreate) Mutation() *SLSAAttestationMutation {
 
 // Save creates the SLSAAttestation in the database.
 func (sac *SLSAAttestationCreate) Save(ctx context.Context) (*SLSAAttestation, error) {
+	sac.defaults()
 	return withHooks(ctx, sac.sqlSave, sac.mutation, sac.hooks)
 }
 
@@ -155,6 +172,14 @@ func (sac *SLSAAttestationCreate) Exec(ctx context.Context) error {
 func (sac *SLSAAttestationCreate) ExecX(ctx context.Context) {
 	if err := sac.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (sac *SLSAAttestationCreate) defaults() {
+	if _, ok := sac.mutation.ID(); !ok {
+		v := slsaattestation.DefaultID()
+		sac.mutation.SetID(v)
 	}
 }
 
@@ -201,8 +226,13 @@ func (sac *SLSAAttestationCreate) sqlSave(ctx context.Context) (*SLSAAttestation
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	sac.mutation.id = &_node.ID
 	sac.mutation.done = true
 	return _node, nil
@@ -211,9 +241,13 @@ func (sac *SLSAAttestationCreate) sqlSave(ctx context.Context) (*SLSAAttestation
 func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SLSAAttestation{config: sac.config}
-		_spec = sqlgraph.NewCreateSpec(slsaattestation.Table, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(slsaattestation.Table, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = sac.conflict
+	if id, ok := sac.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := sac.mutation.BuildType(); ok {
 		_spec.SetField(slsaattestation.FieldBuildType, field.TypeString, value)
 		_node.BuildType = value
@@ -254,7 +288,7 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -270,7 +304,7 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -287,7 +321,7 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 			Columns: []string{slsaattestation.SubjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -361,7 +395,7 @@ func (u *SLSAAttestationUpsert) UpdateBuildType() *SLSAAttestationUpsert {
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (u *SLSAAttestationUpsert) SetBuiltByID(v int) *SLSAAttestationUpsert {
+func (u *SLSAAttestationUpsert) SetBuiltByID(v uuid.UUID) *SLSAAttestationUpsert {
 	u.Set(slsaattestation.FieldBuiltByID, v)
 	return u
 }
@@ -373,7 +407,7 @@ func (u *SLSAAttestationUpsert) UpdateBuiltByID() *SLSAAttestationUpsert {
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (u *SLSAAttestationUpsert) SetSubjectID(v int) *SLSAAttestationUpsert {
+func (u *SLSAAttestationUpsert) SetSubjectID(v uuid.UUID) *SLSAAttestationUpsert {
 	u.Set(slsaattestation.FieldSubjectID, v)
 	return u
 }
@@ -486,16 +520,24 @@ func (u *SLSAAttestationUpsert) UpdateBuiltFromHash() *SLSAAttestationUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.SLSAAttestation.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(slsaattestation.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *SLSAAttestationUpsertOne) UpdateNewValues() *SLSAAttestationUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(slsaattestation.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -541,7 +583,7 @@ func (u *SLSAAttestationUpsertOne) UpdateBuildType() *SLSAAttestationUpsertOne {
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (u *SLSAAttestationUpsertOne) SetBuiltByID(v int) *SLSAAttestationUpsertOne {
+func (u *SLSAAttestationUpsertOne) SetBuiltByID(v uuid.UUID) *SLSAAttestationUpsertOne {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.SetBuiltByID(v)
 	})
@@ -555,7 +597,7 @@ func (u *SLSAAttestationUpsertOne) UpdateBuiltByID() *SLSAAttestationUpsertOne {
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (u *SLSAAttestationUpsertOne) SetSubjectID(v int) *SLSAAttestationUpsertOne {
+func (u *SLSAAttestationUpsertOne) SetSubjectID(v uuid.UUID) *SLSAAttestationUpsertOne {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.SetSubjectID(v)
 	})
@@ -703,7 +745,12 @@ func (u *SLSAAttestationUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *SLSAAttestationUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *SLSAAttestationUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: SLSAAttestationUpsertOne.ID is not supported by MySQL driver. Use SLSAAttestationUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -712,7 +759,7 @@ func (u *SLSAAttestationUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *SLSAAttestationUpsertOne) IDX(ctx context.Context) int {
+func (u *SLSAAttestationUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -739,6 +786,7 @@ func (sacb *SLSAAttestationCreateBulk) Save(ctx context.Context) ([]*SLSAAttesta
 	for i := range sacb.builders {
 		func(i int, root context.Context) {
 			builder := sacb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SLSAAttestationMutation)
 				if !ok {
@@ -766,10 +814,6 @@ func (sacb *SLSAAttestationCreateBulk) Save(ctx context.Context) ([]*SLSAAttesta
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -856,10 +900,20 @@ type SLSAAttestationUpsertBulk struct {
 //	client.SLSAAttestation.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(slsaattestation.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *SLSAAttestationUpsertBulk) UpdateNewValues() *SLSAAttestationUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(slsaattestation.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -905,7 +959,7 @@ func (u *SLSAAttestationUpsertBulk) UpdateBuildType() *SLSAAttestationUpsertBulk
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (u *SLSAAttestationUpsertBulk) SetBuiltByID(v int) *SLSAAttestationUpsertBulk {
+func (u *SLSAAttestationUpsertBulk) SetBuiltByID(v uuid.UUID) *SLSAAttestationUpsertBulk {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.SetBuiltByID(v)
 	})
@@ -919,7 +973,7 @@ func (u *SLSAAttestationUpsertBulk) UpdateBuiltByID() *SLSAAttestationUpsertBulk
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (u *SLSAAttestationUpsertBulk) SetSubjectID(v int) *SLSAAttestationUpsertBulk {
+func (u *SLSAAttestationUpsertBulk) SetSubjectID(v uuid.UUID) *SLSAAttestationUpsertBulk {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.SetSubjectID(v)
 	})

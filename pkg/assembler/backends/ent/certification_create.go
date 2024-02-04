@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -27,57 +29,57 @@ type CertificationCreate struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (cc *CertificationCreate) SetSourceID(i int) *CertificationCreate {
-	cc.mutation.SetSourceID(i)
+func (cc *CertificationCreate) SetSourceID(u uuid.UUID) *CertificationCreate {
+	cc.mutation.SetSourceID(u)
 	return cc
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillableSourceID(i *int) *CertificationCreate {
-	if i != nil {
-		cc.SetSourceID(*i)
+func (cc *CertificationCreate) SetNillableSourceID(u *uuid.UUID) *CertificationCreate {
+	if u != nil {
+		cc.SetSourceID(*u)
 	}
 	return cc
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (cc *CertificationCreate) SetPackageVersionID(i int) *CertificationCreate {
-	cc.mutation.SetPackageVersionID(i)
+func (cc *CertificationCreate) SetPackageVersionID(u uuid.UUID) *CertificationCreate {
+	cc.mutation.SetPackageVersionID(u)
 	return cc
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillablePackageVersionID(i *int) *CertificationCreate {
-	if i != nil {
-		cc.SetPackageVersionID(*i)
+func (cc *CertificationCreate) SetNillablePackageVersionID(u *uuid.UUID) *CertificationCreate {
+	if u != nil {
+		cc.SetPackageVersionID(*u)
 	}
 	return cc
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (cc *CertificationCreate) SetPackageNameID(i int) *CertificationCreate {
-	cc.mutation.SetPackageNameID(i)
+func (cc *CertificationCreate) SetPackageNameID(u uuid.UUID) *CertificationCreate {
+	cc.mutation.SetPackageNameID(u)
 	return cc
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillablePackageNameID(i *int) *CertificationCreate {
-	if i != nil {
-		cc.SetPackageNameID(*i)
+func (cc *CertificationCreate) SetNillablePackageNameID(u *uuid.UUID) *CertificationCreate {
+	if u != nil {
+		cc.SetPackageNameID(*u)
 	}
 	return cc
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cc *CertificationCreate) SetArtifactID(i int) *CertificationCreate {
-	cc.mutation.SetArtifactID(i)
+func (cc *CertificationCreate) SetArtifactID(u uuid.UUID) *CertificationCreate {
+	cc.mutation.SetArtifactID(u)
 	return cc
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillableArtifactID(i *int) *CertificationCreate {
-	if i != nil {
-		cc.SetArtifactID(*i)
+func (cc *CertificationCreate) SetNillableArtifactID(u *uuid.UUID) *CertificationCreate {
+	if u != nil {
+		cc.SetArtifactID(*u)
 	}
 	return cc
 }
@@ -120,6 +122,20 @@ func (cc *CertificationCreate) SetKnownSince(t time.Time) *CertificationCreate {
 	return cc
 }
 
+// SetID sets the "id" field.
+func (cc *CertificationCreate) SetID(u uuid.UUID) *CertificationCreate {
+	cc.mutation.SetID(u)
+	return cc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (cc *CertificationCreate) SetNillableID(u *uuid.UUID) *CertificationCreate {
+	if u != nil {
+		cc.SetID(*u)
+	}
+	return cc
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (cc *CertificationCreate) SetSource(s *SourceName) *CertificationCreate {
 	return cc.SetSourceID(s.ID)
@@ -131,13 +147,13 @@ func (cc *CertificationCreate) SetPackageVersion(p *PackageVersion) *Certificati
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (cc *CertificationCreate) SetAllVersionsID(id int) *CertificationCreate {
+func (cc *CertificationCreate) SetAllVersionsID(id uuid.UUID) *CertificationCreate {
 	cc.mutation.SetAllVersionsID(id)
 	return cc
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (cc *CertificationCreate) SetNillableAllVersionsID(id *int) *CertificationCreate {
+func (cc *CertificationCreate) SetNillableAllVersionsID(id *uuid.UUID) *CertificationCreate {
 	if id != nil {
 		cc = cc.SetAllVersionsID(*id)
 	}
@@ -193,6 +209,10 @@ func (cc *CertificationCreate) defaults() {
 		v := certification.DefaultType
 		cc.mutation.SetType(v)
 	}
+	if _, ok := cc.mutation.ID(); !ok {
+		v := certification.DefaultID()
+		cc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -231,8 +251,13 @@ func (cc *CertificationCreate) sqlSave(ctx context.Context) (*Certification, err
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	cc.mutation.id = &_node.ID
 	cc.mutation.done = true
 	return _node, nil
@@ -241,9 +266,13 @@ func (cc *CertificationCreate) sqlSave(ctx context.Context) (*Certification, err
 func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Certification{config: cc.config}
-		_spec = sqlgraph.NewCreateSpec(certification.Table, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(certification.Table, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = cc.conflict
+	if id, ok := cc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := cc.mutation.GetType(); ok {
 		_spec.SetField(certification.FieldType, field.TypeEnum, value)
 		_node.Type = value
@@ -272,7 +301,7 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 			Columns: []string{certification.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -289,7 +318,7 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 			Columns: []string{certification.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -306,7 +335,7 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 			Columns: []string{certification.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -323,7 +352,7 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 			Columns: []string{certification.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -385,7 +414,7 @@ type (
 )
 
 // SetSourceID sets the "source_id" field.
-func (u *CertificationUpsert) SetSourceID(v int) *CertificationUpsert {
+func (u *CertificationUpsert) SetSourceID(v uuid.UUID) *CertificationUpsert {
 	u.Set(certification.FieldSourceID, v)
 	return u
 }
@@ -403,7 +432,7 @@ func (u *CertificationUpsert) ClearSourceID() *CertificationUpsert {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *CertificationUpsert) SetPackageVersionID(v int) *CertificationUpsert {
+func (u *CertificationUpsert) SetPackageVersionID(v uuid.UUID) *CertificationUpsert {
 	u.Set(certification.FieldPackageVersionID, v)
 	return u
 }
@@ -421,7 +450,7 @@ func (u *CertificationUpsert) ClearPackageVersionID() *CertificationUpsert {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *CertificationUpsert) SetPackageNameID(v int) *CertificationUpsert {
+func (u *CertificationUpsert) SetPackageNameID(v uuid.UUID) *CertificationUpsert {
 	u.Set(certification.FieldPackageNameID, v)
 	return u
 }
@@ -439,7 +468,7 @@ func (u *CertificationUpsert) ClearPackageNameID() *CertificationUpsert {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *CertificationUpsert) SetArtifactID(v int) *CertificationUpsert {
+func (u *CertificationUpsert) SetArtifactID(v uuid.UUID) *CertificationUpsert {
 	u.Set(certification.FieldArtifactID, v)
 	return u
 }
@@ -516,16 +545,24 @@ func (u *CertificationUpsert) UpdateKnownSince() *CertificationUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Certification.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certification.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertificationUpsertOne) UpdateNewValues() *CertificationUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(certification.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -557,7 +594,7 @@ func (u *CertificationUpsertOne) Update(set func(*CertificationUpsert)) *Certifi
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *CertificationUpsertOne) SetSourceID(v int) *CertificationUpsertOne {
+func (u *CertificationUpsertOne) SetSourceID(v uuid.UUID) *CertificationUpsertOne {
 	return u.Update(func(s *CertificationUpsert) {
 		s.SetSourceID(v)
 	})
@@ -578,7 +615,7 @@ func (u *CertificationUpsertOne) ClearSourceID() *CertificationUpsertOne {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *CertificationUpsertOne) SetPackageVersionID(v int) *CertificationUpsertOne {
+func (u *CertificationUpsertOne) SetPackageVersionID(v uuid.UUID) *CertificationUpsertOne {
 	return u.Update(func(s *CertificationUpsert) {
 		s.SetPackageVersionID(v)
 	})
@@ -599,7 +636,7 @@ func (u *CertificationUpsertOne) ClearPackageVersionID() *CertificationUpsertOne
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *CertificationUpsertOne) SetPackageNameID(v int) *CertificationUpsertOne {
+func (u *CertificationUpsertOne) SetPackageNameID(v uuid.UUID) *CertificationUpsertOne {
 	return u.Update(func(s *CertificationUpsert) {
 		s.SetPackageNameID(v)
 	})
@@ -620,7 +657,7 @@ func (u *CertificationUpsertOne) ClearPackageNameID() *CertificationUpsertOne {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *CertificationUpsertOne) SetArtifactID(v int) *CertificationUpsertOne {
+func (u *CertificationUpsertOne) SetArtifactID(v uuid.UUID) *CertificationUpsertOne {
 	return u.Update(func(s *CertificationUpsert) {
 		s.SetArtifactID(v)
 	})
@@ -726,7 +763,12 @@ func (u *CertificationUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CertificationUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *CertificationUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: CertificationUpsertOne.ID is not supported by MySQL driver. Use CertificationUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -735,7 +777,7 @@ func (u *CertificationUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *CertificationUpsertOne) IDX(ctx context.Context) int {
+func (u *CertificationUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -790,10 +832,6 @@ func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification,
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -880,10 +918,20 @@ type CertificationUpsertBulk struct {
 //	client.Certification.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certification.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertificationUpsertBulk) UpdateNewValues() *CertificationUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(certification.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -915,7 +963,7 @@ func (u *CertificationUpsertBulk) Update(set func(*CertificationUpsert)) *Certif
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *CertificationUpsertBulk) SetSourceID(v int) *CertificationUpsertBulk {
+func (u *CertificationUpsertBulk) SetSourceID(v uuid.UUID) *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
 		s.SetSourceID(v)
 	})
@@ -936,7 +984,7 @@ func (u *CertificationUpsertBulk) ClearSourceID() *CertificationUpsertBulk {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *CertificationUpsertBulk) SetPackageVersionID(v int) *CertificationUpsertBulk {
+func (u *CertificationUpsertBulk) SetPackageVersionID(v uuid.UUID) *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
 		s.SetPackageVersionID(v)
 	})
@@ -957,7 +1005,7 @@ func (u *CertificationUpsertBulk) ClearPackageVersionID() *CertificationUpsertBu
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *CertificationUpsertBulk) SetPackageNameID(v int) *CertificationUpsertBulk {
+func (u *CertificationUpsertBulk) SetPackageNameID(v uuid.UUID) *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
 		s.SetPackageNameID(v)
 	})
@@ -978,7 +1026,7 @@ func (u *CertificationUpsertBulk) ClearPackageNameID() *CertificationUpsertBulk 
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *CertificationUpsertBulk) SetArtifactID(v int) *CertificationUpsertBulk {
+func (u *CertificationUpsertBulk) SetArtifactID(v uuid.UUID) *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
 		s.SetArtifactID(v)
 	})

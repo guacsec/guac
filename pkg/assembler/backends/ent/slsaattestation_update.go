@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -47,29 +48,29 @@ func (sau *SLSAAttestationUpdate) SetNillableBuildType(s *string) *SLSAAttestati
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (sau *SLSAAttestationUpdate) SetBuiltByID(i int) *SLSAAttestationUpdate {
-	sau.mutation.SetBuiltByID(i)
+func (sau *SLSAAttestationUpdate) SetBuiltByID(u uuid.UUID) *SLSAAttestationUpdate {
+	sau.mutation.SetBuiltByID(u)
 	return sau
 }
 
 // SetNillableBuiltByID sets the "built_by_id" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableBuiltByID(i *int) *SLSAAttestationUpdate {
-	if i != nil {
-		sau.SetBuiltByID(*i)
+func (sau *SLSAAttestationUpdate) SetNillableBuiltByID(u *uuid.UUID) *SLSAAttestationUpdate {
+	if u != nil {
+		sau.SetBuiltByID(*u)
 	}
 	return sau
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (sau *SLSAAttestationUpdate) SetSubjectID(i int) *SLSAAttestationUpdate {
-	sau.mutation.SetSubjectID(i)
+func (sau *SLSAAttestationUpdate) SetSubjectID(u uuid.UUID) *SLSAAttestationUpdate {
+	sau.mutation.SetSubjectID(u)
 	return sau
 }
 
 // SetNillableSubjectID sets the "subject_id" field if the given value is not nil.
-func (sau *SLSAAttestationUpdate) SetNillableSubjectID(i *int) *SLSAAttestationUpdate {
-	if i != nil {
-		sau.SetSubjectID(*i)
+func (sau *SLSAAttestationUpdate) SetNillableSubjectID(u *uuid.UUID) *SLSAAttestationUpdate {
+	if u != nil {
+		sau.SetSubjectID(*u)
 	}
 	return sau
 }
@@ -189,14 +190,14 @@ func (sau *SLSAAttestationUpdate) SetNillableBuiltFromHash(s *string) *SLSAAttes
 }
 
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by IDs.
-func (sau *SLSAAttestationUpdate) AddBuiltFromIDs(ids ...int) *SLSAAttestationUpdate {
+func (sau *SLSAAttestationUpdate) AddBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdate {
 	sau.mutation.AddBuiltFromIDs(ids...)
 	return sau
 }
 
 // AddBuiltFrom adds the "built_from" edges to the Artifact entity.
 func (sau *SLSAAttestationUpdate) AddBuiltFrom(a ...*Artifact) *SLSAAttestationUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -225,14 +226,14 @@ func (sau *SLSAAttestationUpdate) ClearBuiltFrom() *SLSAAttestationUpdate {
 }
 
 // RemoveBuiltFromIDs removes the "built_from" edge to Artifact entities by IDs.
-func (sau *SLSAAttestationUpdate) RemoveBuiltFromIDs(ids ...int) *SLSAAttestationUpdate {
+func (sau *SLSAAttestationUpdate) RemoveBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdate {
 	sau.mutation.RemoveBuiltFromIDs(ids...)
 	return sau
 }
 
 // RemoveBuiltFrom removes "built_from" edges to Artifact entities.
 func (sau *SLSAAttestationUpdate) RemoveBuiltFrom(a ...*Artifact) *SLSAAttestationUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -293,7 +294,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 	if err := sau.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(slsaattestation.Table, slsaattestation.Columns, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(slsaattestation.Table, slsaattestation.Columns, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID))
 	if ps := sau.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -347,7 +348,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -360,7 +361,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -376,7 +377,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -392,7 +393,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -405,7 +406,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -421,7 +422,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{slsaattestation.SubjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -434,7 +435,7 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{slsaattestation.SubjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -477,29 +478,29 @@ func (sauo *SLSAAttestationUpdateOne) SetNillableBuildType(s *string) *SLSAAttes
 }
 
 // SetBuiltByID sets the "built_by_id" field.
-func (sauo *SLSAAttestationUpdateOne) SetBuiltByID(i int) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetBuiltByID(i)
+func (sauo *SLSAAttestationUpdateOne) SetBuiltByID(u uuid.UUID) *SLSAAttestationUpdateOne {
+	sauo.mutation.SetBuiltByID(u)
 	return sauo
 }
 
 // SetNillableBuiltByID sets the "built_by_id" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableBuiltByID(i *int) *SLSAAttestationUpdateOne {
-	if i != nil {
-		sauo.SetBuiltByID(*i)
+func (sauo *SLSAAttestationUpdateOne) SetNillableBuiltByID(u *uuid.UUID) *SLSAAttestationUpdateOne {
+	if u != nil {
+		sauo.SetBuiltByID(*u)
 	}
 	return sauo
 }
 
 // SetSubjectID sets the "subject_id" field.
-func (sauo *SLSAAttestationUpdateOne) SetSubjectID(i int) *SLSAAttestationUpdateOne {
-	sauo.mutation.SetSubjectID(i)
+func (sauo *SLSAAttestationUpdateOne) SetSubjectID(u uuid.UUID) *SLSAAttestationUpdateOne {
+	sauo.mutation.SetSubjectID(u)
 	return sauo
 }
 
 // SetNillableSubjectID sets the "subject_id" field if the given value is not nil.
-func (sauo *SLSAAttestationUpdateOne) SetNillableSubjectID(i *int) *SLSAAttestationUpdateOne {
-	if i != nil {
-		sauo.SetSubjectID(*i)
+func (sauo *SLSAAttestationUpdateOne) SetNillableSubjectID(u *uuid.UUID) *SLSAAttestationUpdateOne {
+	if u != nil {
+		sauo.SetSubjectID(*u)
 	}
 	return sauo
 }
@@ -619,14 +620,14 @@ func (sauo *SLSAAttestationUpdateOne) SetNillableBuiltFromHash(s *string) *SLSAA
 }
 
 // AddBuiltFromIDs adds the "built_from" edge to the Artifact entity by IDs.
-func (sauo *SLSAAttestationUpdateOne) AddBuiltFromIDs(ids ...int) *SLSAAttestationUpdateOne {
+func (sauo *SLSAAttestationUpdateOne) AddBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdateOne {
 	sauo.mutation.AddBuiltFromIDs(ids...)
 	return sauo
 }
 
 // AddBuiltFrom adds the "built_from" edges to the Artifact entity.
 func (sauo *SLSAAttestationUpdateOne) AddBuiltFrom(a ...*Artifact) *SLSAAttestationUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -655,14 +656,14 @@ func (sauo *SLSAAttestationUpdateOne) ClearBuiltFrom() *SLSAAttestationUpdateOne
 }
 
 // RemoveBuiltFromIDs removes the "built_from" edge to Artifact entities by IDs.
-func (sauo *SLSAAttestationUpdateOne) RemoveBuiltFromIDs(ids ...int) *SLSAAttestationUpdateOne {
+func (sauo *SLSAAttestationUpdateOne) RemoveBuiltFromIDs(ids ...uuid.UUID) *SLSAAttestationUpdateOne {
 	sauo.mutation.RemoveBuiltFromIDs(ids...)
 	return sauo
 }
 
 // RemoveBuiltFrom removes "built_from" edges to Artifact entities.
 func (sauo *SLSAAttestationUpdateOne) RemoveBuiltFrom(a ...*Artifact) *SLSAAttestationUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -736,7 +737,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 	if err := sauo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(slsaattestation.Table, slsaattestation.Columns, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(slsaattestation.Table, slsaattestation.Columns, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID))
 	id, ok := sauo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SLSAAttestation.id" for update`)}
@@ -807,7 +808,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -820,7 +821,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -836,7 +837,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: slsaattestation.BuiltFromPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -852,7 +853,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -865,7 +866,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: []string{slsaattestation.BuiltByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -881,7 +882,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: []string{slsaattestation.SubjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -894,7 +895,7 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 			Columns: []string{slsaattestation.SubjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

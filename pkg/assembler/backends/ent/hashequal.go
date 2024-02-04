@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 )
 
@@ -15,7 +16,7 @@ import (
 type HashEqual struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Origin holds the value of the "origin" field.
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
@@ -55,10 +56,10 @@ func (*HashEqual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case hashequal.FieldID:
-			values[i] = new(sql.NullInt64)
 		case hashequal.FieldOrigin, hashequal.FieldCollector, hashequal.FieldJustification:
 			values[i] = new(sql.NullString)
+		case hashequal.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -75,11 +76,11 @@ func (he *HashEqual) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case hashequal.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				he.ID = *value
 			}
-			he.ID = int(value.Int64)
 		case hashequal.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])

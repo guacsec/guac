@@ -40,7 +40,7 @@ func (ad *ArtifactDelete) ExecX(ctx context.Context) int {
 }
 
 func (ad *ArtifactDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(artifact.Table, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(artifact.Table, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
 	if ps := ad.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

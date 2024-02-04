@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
@@ -181,8 +182,8 @@ func (oq *OccurrenceQuery) FirstX(ctx context.Context) *Occurrence {
 
 // FirstID returns the first Occurrence ID from the query.
 // Returns a *NotFoundError when no Occurrence ID was found.
-func (oq *OccurrenceQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (oq *OccurrenceQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = oq.Limit(1).IDs(setContextOp(ctx, oq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -194,7 +195,7 @@ func (oq *OccurrenceQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (oq *OccurrenceQuery) FirstIDX(ctx context.Context) int {
+func (oq *OccurrenceQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := oq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -232,8 +233,8 @@ func (oq *OccurrenceQuery) OnlyX(ctx context.Context) *Occurrence {
 // OnlyID is like Only, but returns the only Occurrence ID in the query.
 // Returns a *NotSingularError when more than one Occurrence ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (oq *OccurrenceQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (oq *OccurrenceQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = oq.Limit(2).IDs(setContextOp(ctx, oq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -249,7 +250,7 @@ func (oq *OccurrenceQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (oq *OccurrenceQuery) OnlyIDX(ctx context.Context) int {
+func (oq *OccurrenceQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := oq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -277,7 +278,7 @@ func (oq *OccurrenceQuery) AllX(ctx context.Context) []*Occurrence {
 }
 
 // IDs executes the query and returns a list of Occurrence IDs.
-func (oq *OccurrenceQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (oq *OccurrenceQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if oq.ctx.Unique == nil && oq.path != nil {
 		oq.Unique(true)
 	}
@@ -289,7 +290,7 @@ func (oq *OccurrenceQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (oq *OccurrenceQuery) IDsX(ctx context.Context) []int {
+func (oq *OccurrenceQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := oq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -409,7 +410,7 @@ func (oq *OccurrenceQuery) WithIncludedInSboms(opts ...func(*BillOfMaterialsQuer
 // Example:
 //
 //	var v []struct {
-//		ArtifactID int `json:"artifact_id,omitempty"`
+//		ArtifactID uuid.UUID `json:"artifact_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -432,7 +433,7 @@ func (oq *OccurrenceQuery) GroupBy(field string, fields ...string) *OccurrenceGr
 // Example:
 //
 //	var v []struct {
-//		ArtifactID int `json:"artifact_id,omitempty"`
+//		ArtifactID uuid.UUID `json:"artifact_id,omitempty"`
 //	}
 //
 //	client.Occurrence.Query().
@@ -550,8 +551,8 @@ func (oq *OccurrenceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 }
 
 func (oq *OccurrenceQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *Artifact)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Occurrence)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Occurrence)
 	for i := range nodes {
 		fk := nodes[i].ArtifactID
 		if _, ok := nodeids[fk]; !ok {
@@ -579,8 +580,8 @@ func (oq *OccurrenceQuery) loadArtifact(ctx context.Context, query *ArtifactQuer
 	return nil
 }
 func (oq *OccurrenceQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Occurrence)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Occurrence)
 	for i := range nodes {
 		if nodes[i].PackageID == nil {
 			continue
@@ -611,8 +612,8 @@ func (oq *OccurrenceQuery) loadPackage(ctx context.Context, query *PackageVersio
 	return nil
 }
 func (oq *OccurrenceQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *SourceName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Occurrence)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Occurrence)
 	for i := range nodes {
 		if nodes[i].SourceID == nil {
 			continue
@@ -644,8 +645,8 @@ func (oq *OccurrenceQuery) loadSource(ctx context.Context, query *SourceNameQuer
 }
 func (oq *OccurrenceQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Occurrence, init func(*Occurrence), assign func(*Occurrence, *BillOfMaterials)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Occurrence)
-	nids := make(map[int]map[*Occurrence]struct{})
+	byID := make(map[uuid.UUID]*Occurrence)
+	nids := make(map[uuid.UUID]map[*Occurrence]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -674,11 +675,11 @@ func (oq *OccurrenceQuery) loadIncludedInSboms(ctx context.Context, query *BillO
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Occurrence]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -717,7 +718,7 @@ func (oq *OccurrenceQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (oq *OccurrenceQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(occurrence.Table, occurrence.Columns, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(occurrence.Table, occurrence.Columns, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID))
 	_spec.From = oq.sql
 	if unique := oq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

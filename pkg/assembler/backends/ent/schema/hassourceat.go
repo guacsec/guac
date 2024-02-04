@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // HasSourceAt holds the schema definition for the HasSourceAt entity.
@@ -31,9 +32,13 @@ type HasSourceAt struct {
 // Fields of the HasSourceAt.
 func (HasSourceAt) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("package_version_id").Optional().Nillable(),
-		field.Int("package_name_id").Optional().Nillable(),
-		field.Int("source_id"),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("package_version_id", uuid.New()).Optional().Nillable(),
+		field.UUID("package_name_id", uuid.New()).Optional().Nillable(),
+		field.UUID("source_id", uuid.New()),
 		field.Time("known_since"),
 		field.String("justification"),
 		field.String("origin"),

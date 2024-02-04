@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 )
 
@@ -15,7 +16,7 @@ import (
 type PkgEqual struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Origin holds the value of the "origin" field.
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
@@ -57,10 +58,10 @@ func (*PkgEqual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case pkgequal.FieldID:
-			values[i] = new(sql.NullInt64)
 		case pkgequal.FieldOrigin, pkgequal.FieldCollector, pkgequal.FieldJustification, pkgequal.FieldPackagesHash:
 			values[i] = new(sql.NullString)
+		case pkgequal.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -77,11 +78,11 @@ func (pe *PkgEqual) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case pkgequal.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pe.ID = *value
 			}
-			pe.ID = int(value.Int64)
 		case pkgequal.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])

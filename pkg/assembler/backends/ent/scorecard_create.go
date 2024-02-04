@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -82,15 +84,29 @@ func (sc *ScorecardCreate) SetCollector(s string) *ScorecardCreate {
 	return sc
 }
 
+// SetID sets the "id" field.
+func (sc *ScorecardCreate) SetID(u uuid.UUID) *ScorecardCreate {
+	sc.mutation.SetID(u)
+	return sc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (sc *ScorecardCreate) SetNillableID(u *uuid.UUID) *ScorecardCreate {
+	if u != nil {
+		sc.SetID(*u)
+	}
+	return sc
+}
+
 // AddCertificationIDs adds the "certifications" edge to the CertifyScorecard entity by IDs.
-func (sc *ScorecardCreate) AddCertificationIDs(ids ...int) *ScorecardCreate {
+func (sc *ScorecardCreate) AddCertificationIDs(ids ...uuid.UUID) *ScorecardCreate {
 	sc.mutation.AddCertificationIDs(ids...)
 	return sc
 }
 
 // AddCertifications adds the "certifications" edges to the CertifyScorecard entity.
 func (sc *ScorecardCreate) AddCertifications(c ...*CertifyScorecard) *ScorecardCreate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -140,6 +156,10 @@ func (sc *ScorecardCreate) defaults() {
 		v := scorecard.DefaultTimeScanned()
 		sc.mutation.SetTimeScanned(v)
 	}
+	if _, ok := sc.mutation.ID(); !ok {
+		v := scorecard.DefaultID()
+		sc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -179,8 +199,13 @@ func (sc *ScorecardCreate) sqlSave(ctx context.Context) (*Scorecard, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	sc.mutation.id = &_node.ID
 	sc.mutation.done = true
 	return _node, nil
@@ -189,9 +214,13 @@ func (sc *ScorecardCreate) sqlSave(ctx context.Context) (*Scorecard, error) {
 func (sc *ScorecardCreate) createSpec() (*Scorecard, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Scorecard{config: sc.config}
-		_spec = sqlgraph.NewCreateSpec(scorecard.Table, sqlgraph.NewFieldSpec(scorecard.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(scorecard.Table, sqlgraph.NewFieldSpec(scorecard.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = sc.conflict
+	if id, ok := sc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := sc.mutation.Checks(); ok {
 		_spec.SetField(scorecard.FieldChecks, field.TypeJSON, value)
 		_node.Checks = value
@@ -228,7 +257,7 @@ func (sc *ScorecardCreate) createSpec() (*Scorecard, *sqlgraph.CreateSpec) {
 			Columns: []string{scorecard.CertificationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -378,16 +407,24 @@ func (u *ScorecardUpsert) UpdateCollector() *ScorecardUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Scorecard.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(scorecard.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *ScorecardUpsertOne) UpdateNewValues() *ScorecardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(scorecard.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -539,7 +576,12 @@ func (u *ScorecardUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *ScorecardUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *ScorecardUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: ScorecardUpsertOne.ID is not supported by MySQL driver. Use ScorecardUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -548,7 +590,7 @@ func (u *ScorecardUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *ScorecardUpsertOne) IDX(ctx context.Context) int {
+func (u *ScorecardUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -603,10 +645,6 @@ func (scb *ScorecardCreateBulk) Save(ctx context.Context) ([]*Scorecard, error) 
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -693,10 +731,20 @@ type ScorecardUpsertBulk struct {
 //	client.Scorecard.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(scorecard.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *ScorecardUpsertBulk) UpdateNewValues() *ScorecardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(scorecard.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

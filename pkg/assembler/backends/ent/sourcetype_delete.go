@@ -40,7 +40,7 @@ func (std *SourceTypeDelete) ExecX(ctx context.Context) int {
 }
 
 func (std *SourceTypeDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(sourcetype.Table, sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(sourcetype.Table, sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeUUID))
 	if ps := std.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

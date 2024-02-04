@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
@@ -109,8 +110,8 @@ func (stq *SourceTypeQuery) FirstX(ctx context.Context) *SourceType {
 
 // FirstID returns the first SourceType ID from the query.
 // Returns a *NotFoundError when no SourceType ID was found.
-func (stq *SourceTypeQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (stq *SourceTypeQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = stq.Limit(1).IDs(setContextOp(ctx, stq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -122,7 +123,7 @@ func (stq *SourceTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (stq *SourceTypeQuery) FirstIDX(ctx context.Context) int {
+func (stq *SourceTypeQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := stq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +161,8 @@ func (stq *SourceTypeQuery) OnlyX(ctx context.Context) *SourceType {
 // OnlyID is like Only, but returns the only SourceType ID in the query.
 // Returns a *NotSingularError when more than one SourceType ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (stq *SourceTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (stq *SourceTypeQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = stq.Limit(2).IDs(setContextOp(ctx, stq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -177,7 +178,7 @@ func (stq *SourceTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (stq *SourceTypeQuery) OnlyIDX(ctx context.Context) int {
+func (stq *SourceTypeQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := stq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -205,7 +206,7 @@ func (stq *SourceTypeQuery) AllX(ctx context.Context) []*SourceType {
 }
 
 // IDs executes the query and returns a list of SourceType IDs.
-func (stq *SourceTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (stq *SourceTypeQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if stq.ctx.Unique == nil && stq.path != nil {
 		stq.Unique(true)
 	}
@@ -217,7 +218,7 @@ func (stq *SourceTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (stq *SourceTypeQuery) IDsX(ctx context.Context) []int {
+func (stq *SourceTypeQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := stq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -422,7 +423,7 @@ func (stq *SourceTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 
 func (stq *SourceTypeQuery) loadNamespaces(ctx context.Context, query *SourceNamespaceQuery, nodes []*SourceType, init func(*SourceType), assign func(*SourceType, *SourceNamespace)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*SourceType)
+	nodeids := make(map[uuid.UUID]*SourceType)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -464,7 +465,7 @@ func (stq *SourceTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (stq *SourceTypeQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(sourcetype.Table, sourcetype.Columns, sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(sourcetype.Table, sourcetype.Columns, sqlgraph.NewFieldSpec(sourcetype.FieldID, field.TypeUUID))
 	_spec.From = stq.sql
 	if unique := stq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

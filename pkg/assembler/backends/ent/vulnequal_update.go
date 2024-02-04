@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
@@ -71,14 +72,14 @@ func (veu *VulnEqualUpdate) SetNillableCollector(s *string) *VulnEqualUpdate {
 }
 
 // AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by IDs.
-func (veu *VulnEqualUpdate) AddVulnerabilityIDIDs(ids ...int) *VulnEqualUpdate {
+func (veu *VulnEqualUpdate) AddVulnerabilityIDIDs(ids ...uuid.UUID) *VulnEqualUpdate {
 	veu.mutation.AddVulnerabilityIDIDs(ids...)
 	return veu
 }
 
 // AddVulnerabilityIds adds the "vulnerability_ids" edges to the VulnerabilityID entity.
 func (veu *VulnEqualUpdate) AddVulnerabilityIds(v ...*VulnerabilityID) *VulnEqualUpdate {
-	ids := make([]int, len(v))
+	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -97,14 +98,14 @@ func (veu *VulnEqualUpdate) ClearVulnerabilityIds() *VulnEqualUpdate {
 }
 
 // RemoveVulnerabilityIDIDs removes the "vulnerability_ids" edge to VulnerabilityID entities by IDs.
-func (veu *VulnEqualUpdate) RemoveVulnerabilityIDIDs(ids ...int) *VulnEqualUpdate {
+func (veu *VulnEqualUpdate) RemoveVulnerabilityIDIDs(ids ...uuid.UUID) *VulnEqualUpdate {
 	veu.mutation.RemoveVulnerabilityIDIDs(ids...)
 	return veu
 }
 
 // RemoveVulnerabilityIds removes "vulnerability_ids" edges to VulnerabilityID entities.
 func (veu *VulnEqualUpdate) RemoveVulnerabilityIds(v ...*VulnerabilityID) *VulnEqualUpdate {
-	ids := make([]int, len(v))
+	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -139,7 +140,7 @@ func (veu *VulnEqualUpdate) ExecX(ctx context.Context) {
 }
 
 func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(vulnequal.Table, vulnequal.Columns, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(vulnequal.Table, vulnequal.Columns, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeUUID))
 	if ps := veu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -164,7 +165,7 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: vulnequal.VulnerabilityIdsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -177,7 +178,7 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: vulnequal.VulnerabilityIdsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -193,7 +194,7 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: vulnequal.VulnerabilityIdsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -264,14 +265,14 @@ func (veuo *VulnEqualUpdateOne) SetNillableCollector(s *string) *VulnEqualUpdate
 }
 
 // AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by IDs.
-func (veuo *VulnEqualUpdateOne) AddVulnerabilityIDIDs(ids ...int) *VulnEqualUpdateOne {
+func (veuo *VulnEqualUpdateOne) AddVulnerabilityIDIDs(ids ...uuid.UUID) *VulnEqualUpdateOne {
 	veuo.mutation.AddVulnerabilityIDIDs(ids...)
 	return veuo
 }
 
 // AddVulnerabilityIds adds the "vulnerability_ids" edges to the VulnerabilityID entity.
 func (veuo *VulnEqualUpdateOne) AddVulnerabilityIds(v ...*VulnerabilityID) *VulnEqualUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -290,14 +291,14 @@ func (veuo *VulnEqualUpdateOne) ClearVulnerabilityIds() *VulnEqualUpdateOne {
 }
 
 // RemoveVulnerabilityIDIDs removes the "vulnerability_ids" edge to VulnerabilityID entities by IDs.
-func (veuo *VulnEqualUpdateOne) RemoveVulnerabilityIDIDs(ids ...int) *VulnEqualUpdateOne {
+func (veuo *VulnEqualUpdateOne) RemoveVulnerabilityIDIDs(ids ...uuid.UUID) *VulnEqualUpdateOne {
 	veuo.mutation.RemoveVulnerabilityIDIDs(ids...)
 	return veuo
 }
 
 // RemoveVulnerabilityIds removes "vulnerability_ids" edges to VulnerabilityID entities.
 func (veuo *VulnEqualUpdateOne) RemoveVulnerabilityIds(v ...*VulnerabilityID) *VulnEqualUpdateOne {
-	ids := make([]int, len(v))
+	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -345,7 +346,7 @@ func (veuo *VulnEqualUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, err error) {
-	_spec := sqlgraph.NewUpdateSpec(vulnequal.Table, vulnequal.Columns, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(vulnequal.Table, vulnequal.Columns, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeUUID))
 	id, ok := veuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "VulnEqual.id" for update`)}
@@ -387,7 +388,7 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 			Columns: vulnequal.VulnerabilityIdsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -400,7 +401,7 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 			Columns: vulnequal.VulnerabilityIdsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -416,7 +417,7 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 			Columns: vulnequal.VulnerabilityIdsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

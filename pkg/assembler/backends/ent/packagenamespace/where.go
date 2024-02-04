@@ -5,56 +5,57 @@ package packagenamespace
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.PackageNamespace {
+func ID(id uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.PackageNamespace {
+func IDEQ(id uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.PackageNamespace {
+func IDNEQ(id uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.PackageNamespace {
+func IDIn(ids ...uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.PackageNamespace {
+func IDNotIn(ids ...uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.PackageNamespace {
+func IDGT(id uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.PackageNamespace {
+func IDGTE(id uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.PackageNamespace {
+func IDLT(id uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.PackageNamespace {
+func IDLTE(id uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldLTE(FieldID, id))
 }
 
 // PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
-func PackageID(v int) predicate.PackageNamespace {
+func PackageID(v uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldEQ(FieldPackageID, v))
 }
 
@@ -64,22 +65,22 @@ func Namespace(v string) predicate.PackageNamespace {
 }
 
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
-func PackageIDEQ(v int) predicate.PackageNamespace {
+func PackageIDEQ(v uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldEQ(FieldPackageID, v))
 }
 
 // PackageIDNEQ applies the NEQ predicate on the "package_id" field.
-func PackageIDNEQ(v int) predicate.PackageNamespace {
+func PackageIDNEQ(v uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldNEQ(FieldPackageID, v))
 }
 
 // PackageIDIn applies the In predicate on the "package_id" field.
-func PackageIDIn(vs ...int) predicate.PackageNamespace {
+func PackageIDIn(vs ...uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldIn(FieldPackageID, vs...))
 }
 
 // PackageIDNotIn applies the NotIn predicate on the "package_id" field.
-func PackageIDNotIn(vs ...int) predicate.PackageNamespace {
+func PackageIDNotIn(vs ...uuid.UUID) predicate.PackageNamespace {
 	return predicate.PackageNamespace(sql.FieldNotIn(FieldPackageID, vs...))
 }
 

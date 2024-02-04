@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -207,8 +208,8 @@ func (pvq *PackageVersionQuery) FirstX(ctx context.Context) *PackageVersion {
 
 // FirstID returns the first PackageVersion ID from the query.
 // Returns a *NotFoundError when no PackageVersion ID was found.
-func (pvq *PackageVersionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pvq *PackageVersionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pvq.Limit(1).IDs(setContextOp(ctx, pvq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -220,7 +221,7 @@ func (pvq *PackageVersionQuery) FirstID(ctx context.Context) (id int, err error)
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pvq *PackageVersionQuery) FirstIDX(ctx context.Context) int {
+func (pvq *PackageVersionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := pvq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -258,8 +259,8 @@ func (pvq *PackageVersionQuery) OnlyX(ctx context.Context) *PackageVersion {
 // OnlyID is like Only, but returns the only PackageVersion ID in the query.
 // Returns a *NotSingularError when more than one PackageVersion ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pvq *PackageVersionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pvq *PackageVersionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pvq.Limit(2).IDs(setContextOp(ctx, pvq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -275,7 +276,7 @@ func (pvq *PackageVersionQuery) OnlyID(ctx context.Context) (id int, err error) 
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pvq *PackageVersionQuery) OnlyIDX(ctx context.Context) int {
+func (pvq *PackageVersionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := pvq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -303,7 +304,7 @@ func (pvq *PackageVersionQuery) AllX(ctx context.Context) []*PackageVersion {
 }
 
 // IDs executes the query and returns a list of PackageVersion IDs.
-func (pvq *PackageVersionQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (pvq *PackageVersionQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if pvq.ctx.Unique == nil && pvq.path != nil {
 		pvq.Unique(true)
 	}
@@ -315,7 +316,7 @@ func (pvq *PackageVersionQuery) IDs(ctx context.Context) (ids []int, err error) 
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pvq *PackageVersionQuery) IDsX(ctx context.Context) []int {
+func (pvq *PackageVersionQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := pvq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -447,7 +448,7 @@ func (pvq *PackageVersionQuery) WithIncludedInSboms(opts ...func(*BillOfMaterial
 // Example:
 //
 //	var v []struct {
-//		NameID int `json:"name_id,omitempty"`
+//		NameID uuid.UUID `json:"name_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -470,7 +471,7 @@ func (pvq *PackageVersionQuery) GroupBy(field string, fields ...string) *Package
 // Example:
 //
 //	var v []struct {
-//		NameID int `json:"name_id,omitempty"`
+//		NameID uuid.UUID `json:"name_id,omitempty"`
 //	}
 //
 //	client.PackageVersion.Query().
@@ -621,8 +622,8 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 }
 
 func (pvq *PackageVersionQuery) loadName(ctx context.Context, query *PackageNameQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *PackageName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*PackageVersion)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PackageVersion)
 	for i := range nodes {
 		fk := nodes[i].NameID
 		if _, ok := nodeids[fk]; !ok {
@@ -651,7 +652,7 @@ func (pvq *PackageVersionQuery) loadName(ctx context.Context, query *PackageName
 }
 func (pvq *PackageVersionQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *Occurrence)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*PackageVersion)
+	nodeids := make(map[uuid.UUID]*PackageVersion)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -684,7 +685,7 @@ func (pvq *PackageVersionQuery) loadOccurrences(ctx context.Context, query *Occu
 }
 func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *BillOfMaterials)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*PackageVersion)
+	nodeids := make(map[uuid.UUID]*PackageVersion)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -717,8 +718,8 @@ func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *BillOfMater
 }
 func (pvq *PackageVersionQuery) loadEqualPackages(ctx context.Context, query *PkgEqualQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *PkgEqual)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*PackageVersion)
-	nids := make(map[int]map[*PackageVersion]struct{})
+	byID := make(map[uuid.UUID]*PackageVersion)
+	nids := make(map[uuid.UUID]map[*PackageVersion]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -747,11 +748,11 @@ func (pvq *PackageVersionQuery) loadEqualPackages(ctx context.Context, query *Pk
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*PackageVersion]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -778,8 +779,8 @@ func (pvq *PackageVersionQuery) loadEqualPackages(ctx context.Context, query *Pk
 }
 func (pvq *PackageVersionQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *BillOfMaterials)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*PackageVersion)
-	nids := make(map[int]map[*PackageVersion]struct{})
+	byID := make(map[uuid.UUID]*PackageVersion)
+	nids := make(map[uuid.UUID]map[*PackageVersion]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -808,11 +809,11 @@ func (pvq *PackageVersionQuery) loadIncludedInSboms(ctx context.Context, query *
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*PackageVersion]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -851,7 +852,7 @@ func (pvq *PackageVersionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pvq *PackageVersionQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(packageversion.Table, packageversion.Columns, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(packageversion.Table, packageversion.Columns, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID))
 	_spec.From = pvq.sql
 	if unique := pvq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

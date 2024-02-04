@@ -7,61 +7,62 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.BillOfMaterials {
+func ID(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.BillOfMaterials {
+func IDEQ(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.BillOfMaterials {
+func IDNEQ(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.BillOfMaterials {
+func IDIn(ids ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.BillOfMaterials {
+func IDNotIn(ids ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.BillOfMaterials {
+func IDGT(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.BillOfMaterials {
+func IDGTE(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.BillOfMaterials {
+func IDLT(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.BillOfMaterials {
+func IDLTE(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldLTE(FieldID, id))
 }
 
 // PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
-func PackageID(v int) predicate.BillOfMaterials {
+func PackageID(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldPackageID, v))
 }
 
 // ArtifactID applies equality check predicate on the "artifact_id" field. It's identical to ArtifactIDEQ.
-func ArtifactID(v int) predicate.BillOfMaterials {
+func ArtifactID(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldArtifactID, v))
 }
 
@@ -101,22 +102,22 @@ func KnownSince(v time.Time) predicate.BillOfMaterials {
 }
 
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
-func PackageIDEQ(v int) predicate.BillOfMaterials {
+func PackageIDEQ(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldPackageID, v))
 }
 
 // PackageIDNEQ applies the NEQ predicate on the "package_id" field.
-func PackageIDNEQ(v int) predicate.BillOfMaterials {
+func PackageIDNEQ(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNEQ(FieldPackageID, v))
 }
 
 // PackageIDIn applies the In predicate on the "package_id" field.
-func PackageIDIn(vs ...int) predicate.BillOfMaterials {
+func PackageIDIn(vs ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldIn(FieldPackageID, vs...))
 }
 
 // PackageIDNotIn applies the NotIn predicate on the "package_id" field.
-func PackageIDNotIn(vs ...int) predicate.BillOfMaterials {
+func PackageIDNotIn(vs ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNotIn(FieldPackageID, vs...))
 }
 
@@ -131,22 +132,22 @@ func PackageIDNotNil() predicate.BillOfMaterials {
 }
 
 // ArtifactIDEQ applies the EQ predicate on the "artifact_id" field.
-func ArtifactIDEQ(v int) predicate.BillOfMaterials {
+func ArtifactIDEQ(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDNEQ applies the NEQ predicate on the "artifact_id" field.
-func ArtifactIDNEQ(v int) predicate.BillOfMaterials {
+func ArtifactIDNEQ(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDIn applies the In predicate on the "artifact_id" field.
-func ArtifactIDIn(vs ...int) predicate.BillOfMaterials {
+func ArtifactIDIn(vs ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldIn(FieldArtifactID, vs...))
 }
 
 // ArtifactIDNotIn applies the NotIn predicate on the "artifact_id" field.
-func ArtifactIDNotIn(vs ...int) predicate.BillOfMaterials {
+func ArtifactIDNotIn(vs ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNotIn(FieldArtifactID, vs...))
 }
 

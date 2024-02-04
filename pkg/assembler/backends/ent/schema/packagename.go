@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // PackageName holds the schema definition for the PackageName entity.
@@ -31,7 +32,11 @@ type PackageName struct {
 // Fields of the PackageName.
 func (PackageName) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("namespace_id"),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("namespace_id", uuid.New()),
 		field.String("name").NotEmpty(),
 	}
 }

@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
@@ -20,13 +21,13 @@ import (
 type SLSAAttestation struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Type of the builder
 	BuildType string `json:"build_type,omitempty"`
 	// ID of the builder
-	BuiltByID int `json:"built_by_id,omitempty"`
+	BuiltByID uuid.UUID `json:"built_by_id,omitempty"`
 	// ID of the subject artifact
-	SubjectID int `json:"subject_id,omitempty"`
+	SubjectID uuid.UUID `json:"subject_id,omitempty"`
 	// Individual predicates found in the attestation
 	SlsaPredicate []*model.SLSAPredicate `json:"slsa_predicate,omitempty"`
 	// Version of the SLSA predicate
@@ -106,12 +107,12 @@ func (*SLSAAttestation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case slsaattestation.FieldSlsaPredicate:
 			values[i] = new([]byte)
-		case slsaattestation.FieldID, slsaattestation.FieldBuiltByID, slsaattestation.FieldSubjectID:
-			values[i] = new(sql.NullInt64)
 		case slsaattestation.FieldBuildType, slsaattestation.FieldSlsaVersion, slsaattestation.FieldOrigin, slsaattestation.FieldCollector, slsaattestation.FieldBuiltFromHash:
 			values[i] = new(sql.NullString)
 		case slsaattestation.FieldStartedOn, slsaattestation.FieldFinishedOn:
 			values[i] = new(sql.NullTime)
+		case slsaattestation.FieldID, slsaattestation.FieldBuiltByID, slsaattestation.FieldSubjectID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -128,11 +129,11 @@ func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case slsaattestation.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				sa.ID = *value
 			}
-			sa.ID = int(value.Int64)
 		case slsaattestation.FieldBuildType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field build_type", values[i])
@@ -140,16 +141,16 @@ func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
 				sa.BuildType = value.String
 			}
 		case slsaattestation.FieldBuiltByID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field built_by_id", values[i])
-			} else if value.Valid {
-				sa.BuiltByID = int(value.Int64)
+			} else if value != nil {
+				sa.BuiltByID = *value
 			}
 		case slsaattestation.FieldSubjectID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field subject_id", values[i])
-			} else if value.Valid {
-				sa.SubjectID = int(value.Int64)
+			} else if value != nil {
+				sa.SubjectID = *value
 			}
 		case slsaattestation.FieldSlsaPredicate:
 			if value, ok := values[i].(*[]byte); !ok {

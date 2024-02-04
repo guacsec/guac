@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // PackageNamespace holds the schema definition for the PackageNamespace entity.
@@ -31,7 +32,11 @@ type PackageNamespace struct {
 // Fields of the PackageNamespace.
 func (PackageNamespace) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("package_id"),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("package_id", uuid.New()),
 		field.String("namespace").Comment("In the pURL representation, each PackageNamespace matches the pkg:<type>/<namespace>/ partial pURL"),
 	}
 }

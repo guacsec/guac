@@ -5,51 +5,52 @@ package artifact
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Artifact {
+func ID(id uuid.UUID) predicate.Artifact {
 	return predicate.Artifact(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Artifact {
+func IDEQ(id uuid.UUID) predicate.Artifact {
 	return predicate.Artifact(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Artifact {
+func IDNEQ(id uuid.UUID) predicate.Artifact {
 	return predicate.Artifact(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Artifact {
+func IDIn(ids ...uuid.UUID) predicate.Artifact {
 	return predicate.Artifact(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Artifact {
+func IDNotIn(ids ...uuid.UUID) predicate.Artifact {
 	return predicate.Artifact(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Artifact {
+func IDGT(id uuid.UUID) predicate.Artifact {
 	return predicate.Artifact(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Artifact {
+func IDGTE(id uuid.UUID) predicate.Artifact {
 	return predicate.Artifact(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Artifact {
+func IDLT(id uuid.UUID) predicate.Artifact {
 	return predicate.Artifact(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Artifact {
+func IDLTE(id uuid.UUID) predicate.Artifact {
 	return predicate.Artifact(sql.FieldLTE(FieldID, id))
 }
 

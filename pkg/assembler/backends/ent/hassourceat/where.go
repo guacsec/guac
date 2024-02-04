@@ -7,66 +7,67 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.HasSourceAt {
+func ID(id uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.HasSourceAt {
+func IDEQ(id uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.HasSourceAt {
+func IDNEQ(id uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.HasSourceAt {
+func IDIn(ids ...uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.HasSourceAt {
+func IDNotIn(ids ...uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.HasSourceAt {
+func IDGT(id uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.HasSourceAt {
+func IDGTE(id uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.HasSourceAt {
+func IDLT(id uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.HasSourceAt {
+func IDLTE(id uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldLTE(FieldID, id))
 }
 
 // PackageVersionID applies equality check predicate on the "package_version_id" field. It's identical to PackageVersionIDEQ.
-func PackageVersionID(v int) predicate.HasSourceAt {
+func PackageVersionID(v uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldEQ(FieldPackageVersionID, v))
 }
 
 // PackageNameID applies equality check predicate on the "package_name_id" field. It's identical to PackageNameIDEQ.
-func PackageNameID(v int) predicate.HasSourceAt {
+func PackageNameID(v uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldEQ(FieldPackageNameID, v))
 }
 
 // SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
-func SourceID(v int) predicate.HasSourceAt {
+func SourceID(v uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldEQ(FieldSourceID, v))
 }
 
@@ -91,22 +92,22 @@ func Collector(v string) predicate.HasSourceAt {
 }
 
 // PackageVersionIDEQ applies the EQ predicate on the "package_version_id" field.
-func PackageVersionIDEQ(v int) predicate.HasSourceAt {
+func PackageVersionIDEQ(v uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldEQ(FieldPackageVersionID, v))
 }
 
 // PackageVersionIDNEQ applies the NEQ predicate on the "package_version_id" field.
-func PackageVersionIDNEQ(v int) predicate.HasSourceAt {
+func PackageVersionIDNEQ(v uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldNEQ(FieldPackageVersionID, v))
 }
 
 // PackageVersionIDIn applies the In predicate on the "package_version_id" field.
-func PackageVersionIDIn(vs ...int) predicate.HasSourceAt {
+func PackageVersionIDIn(vs ...uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldIn(FieldPackageVersionID, vs...))
 }
 
 // PackageVersionIDNotIn applies the NotIn predicate on the "package_version_id" field.
-func PackageVersionIDNotIn(vs ...int) predicate.HasSourceAt {
+func PackageVersionIDNotIn(vs ...uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldNotIn(FieldPackageVersionID, vs...))
 }
 
@@ -121,22 +122,22 @@ func PackageVersionIDNotNil() predicate.HasSourceAt {
 }
 
 // PackageNameIDEQ applies the EQ predicate on the "package_name_id" field.
-func PackageNameIDEQ(v int) predicate.HasSourceAt {
+func PackageNameIDEQ(v uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldEQ(FieldPackageNameID, v))
 }
 
 // PackageNameIDNEQ applies the NEQ predicate on the "package_name_id" field.
-func PackageNameIDNEQ(v int) predicate.HasSourceAt {
+func PackageNameIDNEQ(v uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldNEQ(FieldPackageNameID, v))
 }
 
 // PackageNameIDIn applies the In predicate on the "package_name_id" field.
-func PackageNameIDIn(vs ...int) predicate.HasSourceAt {
+func PackageNameIDIn(vs ...uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldIn(FieldPackageNameID, vs...))
 }
 
 // PackageNameIDNotIn applies the NotIn predicate on the "package_name_id" field.
-func PackageNameIDNotIn(vs ...int) predicate.HasSourceAt {
+func PackageNameIDNotIn(vs ...uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldNotIn(FieldPackageNameID, vs...))
 }
 
@@ -151,22 +152,22 @@ func PackageNameIDNotNil() predicate.HasSourceAt {
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
-func SourceIDEQ(v int) predicate.HasSourceAt {
+func SourceIDEQ(v uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldEQ(FieldSourceID, v))
 }
 
 // SourceIDNEQ applies the NEQ predicate on the "source_id" field.
-func SourceIDNEQ(v int) predicate.HasSourceAt {
+func SourceIDNEQ(v uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldNEQ(FieldSourceID, v))
 }
 
 // SourceIDIn applies the In predicate on the "source_id" field.
-func SourceIDIn(vs ...int) predicate.HasSourceAt {
+func SourceIDIn(vs ...uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldIn(FieldSourceID, vs...))
 }
 
 // SourceIDNotIn applies the NotIn predicate on the "source_id" field.
-func SourceIDNotIn(vs ...int) predicate.HasSourceAt {
+func SourceIDNotIn(vs ...uuid.UUID) predicate.HasSourceAt {
 	return predicate.HasSourceAt(sql.FieldNotIn(FieldSourceID, vs...))
 }
 

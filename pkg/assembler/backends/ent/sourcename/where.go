@@ -5,51 +5,52 @@ package sourcename
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.SourceName {
+func ID(id uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.SourceName {
+func IDEQ(id uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.SourceName {
+func IDNEQ(id uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.SourceName {
+func IDIn(ids ...uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.SourceName {
+func IDNotIn(ids ...uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.SourceName {
+func IDGT(id uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.SourceName {
+func IDGTE(id uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.SourceName {
+func IDLT(id uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.SourceName {
+func IDLTE(id uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldLTE(FieldID, id))
 }
 
@@ -69,7 +70,7 @@ func Tag(v string) predicate.SourceName {
 }
 
 // NamespaceID applies equality check predicate on the "namespace_id" field. It's identical to NamespaceIDEQ.
-func NamespaceID(v int) predicate.SourceName {
+func NamespaceID(v uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldEQ(FieldNamespaceID, v))
 }
 
@@ -289,22 +290,22 @@ func TagContainsFold(v string) predicate.SourceName {
 }
 
 // NamespaceIDEQ applies the EQ predicate on the "namespace_id" field.
-func NamespaceIDEQ(v int) predicate.SourceName {
+func NamespaceIDEQ(v uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldEQ(FieldNamespaceID, v))
 }
 
 // NamespaceIDNEQ applies the NEQ predicate on the "namespace_id" field.
-func NamespaceIDNEQ(v int) predicate.SourceName {
+func NamespaceIDNEQ(v uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldNEQ(FieldNamespaceID, v))
 }
 
 // NamespaceIDIn applies the In predicate on the "namespace_id" field.
-func NamespaceIDIn(vs ...int) predicate.SourceName {
+func NamespaceIDIn(vs ...uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldIn(FieldNamespaceID, vs...))
 }
 
 // NamespaceIDNotIn applies the NotIn predicate on the "namespace_id" field.
-func NamespaceIDNotIn(vs ...int) predicate.SourceName {
+func NamespaceIDNotIn(vs ...uuid.UUID) predicate.SourceName {
 	return predicate.SourceName(sql.FieldNotIn(FieldNamespaceID, vs...))
 }
 

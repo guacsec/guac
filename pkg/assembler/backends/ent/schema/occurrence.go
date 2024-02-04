@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // Occurrence holds the schema definition for the Occurrence entity.
@@ -37,12 +38,16 @@ type Occurrence struct {
 // Fields of the Occurrence.
 func (Occurrence) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("artifact_id").Comment("The artifact in the relationship"),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("artifact_id", uuid.New()).Comment("The artifact in the relationship"),
 		field.String("justification").Comment("Justification for the attested relationship"),
 		field.String("origin").Comment("Document from which this attestation is generated from"),
 		field.String("collector").Comment("GUAC collector for the document"),
-		field.Int("source_id").Optional().Nillable(),
-		field.Int("package_id").Optional().Nillable(),
+		field.UUID("source_id", uuid.New()).Optional().Nillable(),
+		field.UUID("package_id", uuid.New()).Optional().Nillable(),
 	}
 }
 

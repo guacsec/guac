@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // CertifyLegal holds the schema definition for the CertifyLegal entity.
@@ -31,8 +32,12 @@ type CertifyLegal struct {
 // Fields of the CertifyLegal.
 func (CertifyLegal) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("package_id").Optional().Nillable(),
-		field.Int("source_id").Optional().Nillable(),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("package_id", uuid.New()).Optional().Nillable(),
+		field.UUID("source_id", uuid.New()).Optional().Nillable(),
 		field.String("declared_license"),
 		field.String("discovered_license"),
 		field.String("attribution"),

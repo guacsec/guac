@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -37,15 +39,29 @@ func (ac *ArtifactCreate) SetDigest(s string) *ArtifactCreate {
 	return ac
 }
 
+// SetID sets the "id" field.
+func (ac *ArtifactCreate) SetID(u uuid.UUID) *ArtifactCreate {
+	ac.mutation.SetID(u)
+	return ac
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ac *ArtifactCreate) SetNillableID(u *uuid.UUID) *ArtifactCreate {
+	if u != nil {
+		ac.SetID(*u)
+	}
+	return ac
+}
+
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (ac *ArtifactCreate) AddOccurrenceIDs(ids ...int) *ArtifactCreate {
+func (ac *ArtifactCreate) AddOccurrenceIDs(ids ...uuid.UUID) *ArtifactCreate {
 	ac.mutation.AddOccurrenceIDs(ids...)
 	return ac
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
 func (ac *ArtifactCreate) AddOccurrences(o ...*Occurrence) *ArtifactCreate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -53,14 +69,14 @@ func (ac *ArtifactCreate) AddOccurrences(o ...*Occurrence) *ArtifactCreate {
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (ac *ArtifactCreate) AddSbomIDs(ids ...int) *ArtifactCreate {
+func (ac *ArtifactCreate) AddSbomIDs(ids ...uuid.UUID) *ArtifactCreate {
 	ac.mutation.AddSbomIDs(ids...)
 	return ac
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
 func (ac *ArtifactCreate) AddSbom(b ...*BillOfMaterials) *ArtifactCreate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -68,14 +84,14 @@ func (ac *ArtifactCreate) AddSbom(b ...*BillOfMaterials) *ArtifactCreate {
 }
 
 // AddAttestationIDs adds the "attestations" edge to the SLSAAttestation entity by IDs.
-func (ac *ArtifactCreate) AddAttestationIDs(ids ...int) *ArtifactCreate {
+func (ac *ArtifactCreate) AddAttestationIDs(ids ...uuid.UUID) *ArtifactCreate {
 	ac.mutation.AddAttestationIDs(ids...)
 	return ac
 }
 
 // AddAttestations adds the "attestations" edges to the SLSAAttestation entity.
 func (ac *ArtifactCreate) AddAttestations(s ...*SLSAAttestation) *ArtifactCreate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -83,14 +99,14 @@ func (ac *ArtifactCreate) AddAttestations(s ...*SLSAAttestation) *ArtifactCreate
 }
 
 // AddSameIDs adds the "same" edge to the HashEqual entity by IDs.
-func (ac *ArtifactCreate) AddSameIDs(ids ...int) *ArtifactCreate {
+func (ac *ArtifactCreate) AddSameIDs(ids ...uuid.UUID) *ArtifactCreate {
 	ac.mutation.AddSameIDs(ids...)
 	return ac
 }
 
 // AddSame adds the "same" edges to the HashEqual entity.
 func (ac *ArtifactCreate) AddSame(h ...*HashEqual) *ArtifactCreate {
-	ids := make([]int, len(h))
+	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
@@ -98,14 +114,14 @@ func (ac *ArtifactCreate) AddSame(h ...*HashEqual) *ArtifactCreate {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (ac *ArtifactCreate) AddIncludedInSbomIDs(ids ...int) *ArtifactCreate {
+func (ac *ArtifactCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactCreate {
 	ac.mutation.AddIncludedInSbomIDs(ids...)
 	return ac
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (ac *ArtifactCreate) AddIncludedInSboms(b ...*BillOfMaterials) *ArtifactCreate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -119,6 +135,7 @@ func (ac *ArtifactCreate) Mutation() *ArtifactMutation {
 
 // Save creates the Artifact in the database.
 func (ac *ArtifactCreate) Save(ctx context.Context) (*Artifact, error) {
+	ac.defaults()
 	return withHooks(ctx, ac.sqlSave, ac.mutation, ac.hooks)
 }
 
@@ -144,6 +161,14 @@ func (ac *ArtifactCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ac *ArtifactCreate) defaults() {
+	if _, ok := ac.mutation.ID(); !ok {
+		v := artifact.DefaultID()
+		ac.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ac *ArtifactCreate) check() error {
 	if _, ok := ac.mutation.Algorithm(); !ok {
@@ -166,8 +191,13 @@ func (ac *ArtifactCreate) sqlSave(ctx context.Context) (*Artifact, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	ac.mutation.id = &_node.ID
 	ac.mutation.done = true
 	return _node, nil
@@ -176,9 +206,13 @@ func (ac *ArtifactCreate) sqlSave(ctx context.Context) (*Artifact, error) {
 func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Artifact{config: ac.config}
-		_spec = sqlgraph.NewCreateSpec(artifact.Table, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(artifact.Table, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = ac.conflict
+	if id, ok := ac.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := ac.mutation.Algorithm(); ok {
 		_spec.SetField(artifact.FieldAlgorithm, field.TypeString, value)
 		_node.Algorithm = value
@@ -195,7 +229,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Columns: []string{artifact.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -211,7 +245,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Columns: []string{artifact.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -227,7 +261,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Columns: artifact.AttestationsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -243,7 +277,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Columns: artifact.SamePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -259,7 +293,7 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Columns: artifact.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -343,16 +377,24 @@ func (u *ArtifactUpsert) UpdateDigest() *ArtifactUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Artifact.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(artifact.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *ArtifactUpsertOne) UpdateNewValues() *ArtifactUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(artifact.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -427,7 +469,12 @@ func (u *ArtifactUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *ArtifactUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *ArtifactUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: ArtifactUpsertOne.ID is not supported by MySQL driver. Use ArtifactUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -436,7 +483,7 @@ func (u *ArtifactUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *ArtifactUpsertOne) IDX(ctx context.Context) int {
+func (u *ArtifactUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -463,6 +510,7 @@ func (acb *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
 	for i := range acb.builders {
 		func(i int, root context.Context) {
 			builder := acb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ArtifactMutation)
 				if !ok {
@@ -490,10 +538,6 @@ func (acb *ArtifactCreateBulk) Save(ctx context.Context) ([]*Artifact, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -580,10 +624,20 @@ type ArtifactUpsertBulk struct {
 //	client.Artifact.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(artifact.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *ArtifactUpsertBulk) UpdateNewValues() *ArtifactUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(artifact.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

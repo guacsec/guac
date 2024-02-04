@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 const (
@@ -68,6 +69,8 @@ var (
 	DefaultAggregateScore float64
 	// DefaultTimeScanned holds the default value on creation for the "time_scanned" field.
 	DefaultTimeScanned func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )
 
 // OrderOption defines the ordering options for the Scorecard queries.

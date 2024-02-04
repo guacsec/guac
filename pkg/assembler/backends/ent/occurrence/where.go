@@ -5,56 +5,57 @@ package occurrence
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Occurrence {
+func ID(id uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Occurrence {
+func IDEQ(id uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Occurrence {
+func IDNEQ(id uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Occurrence {
+func IDIn(ids ...uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Occurrence {
+func IDNotIn(ids ...uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Occurrence {
+func IDGT(id uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Occurrence {
+func IDGTE(id uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Occurrence {
+func IDLT(id uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Occurrence {
+func IDLTE(id uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldLTE(FieldID, id))
 }
 
 // ArtifactID applies equality check predicate on the "artifact_id" field. It's identical to ArtifactIDEQ.
-func ArtifactID(v int) predicate.Occurrence {
+func ArtifactID(v uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldArtifactID, v))
 }
 
@@ -74,32 +75,32 @@ func Collector(v string) predicate.Occurrence {
 }
 
 // SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
-func SourceID(v int) predicate.Occurrence {
+func SourceID(v uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldSourceID, v))
 }
 
 // PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
-func PackageID(v int) predicate.Occurrence {
+func PackageID(v uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldPackageID, v))
 }
 
 // ArtifactIDEQ applies the EQ predicate on the "artifact_id" field.
-func ArtifactIDEQ(v int) predicate.Occurrence {
+func ArtifactIDEQ(v uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDNEQ applies the NEQ predicate on the "artifact_id" field.
-func ArtifactIDNEQ(v int) predicate.Occurrence {
+func ArtifactIDNEQ(v uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldNEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDIn applies the In predicate on the "artifact_id" field.
-func ArtifactIDIn(vs ...int) predicate.Occurrence {
+func ArtifactIDIn(vs ...uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldIn(FieldArtifactID, vs...))
 }
 
 // ArtifactIDNotIn applies the NotIn predicate on the "artifact_id" field.
-func ArtifactIDNotIn(vs ...int) predicate.Occurrence {
+func ArtifactIDNotIn(vs ...uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldNotIn(FieldArtifactID, vs...))
 }
 
@@ -299,22 +300,22 @@ func CollectorContainsFold(v string) predicate.Occurrence {
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
-func SourceIDEQ(v int) predicate.Occurrence {
+func SourceIDEQ(v uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldSourceID, v))
 }
 
 // SourceIDNEQ applies the NEQ predicate on the "source_id" field.
-func SourceIDNEQ(v int) predicate.Occurrence {
+func SourceIDNEQ(v uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldNEQ(FieldSourceID, v))
 }
 
 // SourceIDIn applies the In predicate on the "source_id" field.
-func SourceIDIn(vs ...int) predicate.Occurrence {
+func SourceIDIn(vs ...uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldIn(FieldSourceID, vs...))
 }
 
 // SourceIDNotIn applies the NotIn predicate on the "source_id" field.
-func SourceIDNotIn(vs ...int) predicate.Occurrence {
+func SourceIDNotIn(vs ...uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldNotIn(FieldSourceID, vs...))
 }
 
@@ -329,22 +330,22 @@ func SourceIDNotNil() predicate.Occurrence {
 }
 
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
-func PackageIDEQ(v int) predicate.Occurrence {
+func PackageIDEQ(v uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldEQ(FieldPackageID, v))
 }
 
 // PackageIDNEQ applies the NEQ predicate on the "package_id" field.
-func PackageIDNEQ(v int) predicate.Occurrence {
+func PackageIDNEQ(v uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldNEQ(FieldPackageID, v))
 }
 
 // PackageIDIn applies the In predicate on the "package_id" field.
-func PackageIDIn(vs ...int) predicate.Occurrence {
+func PackageIDIn(vs ...uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldIn(FieldPackageID, vs...))
 }
 
 // PackageIDNotIn applies the NotIn predicate on the "package_id" field.
-func PackageIDNotIn(vs ...int) predicate.Occurrence {
+func PackageIDNotIn(vs ...uuid.UUID) predicate.Occurrence {
 	return predicate.Occurrence(sql.FieldNotIn(FieldPackageID, vs...))
 }
 

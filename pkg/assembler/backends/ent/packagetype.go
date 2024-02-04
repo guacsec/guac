@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 )
 
@@ -15,7 +16,7 @@ import (
 type PackageType struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// This node matches a pkg:<type> partial pURL
 	Type string `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -51,10 +52,10 @@ func (*PackageType) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case packagetype.FieldID:
-			values[i] = new(sql.NullInt64)
 		case packagetype.FieldType:
 			values[i] = new(sql.NullString)
+		case packagetype.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -71,11 +72,11 @@ func (pt *PackageType) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case packagetype.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pt.ID = *value
 			}
-			pt.ID = int(value.Int64)
 		case packagetype.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])

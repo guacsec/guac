@@ -40,7 +40,7 @@ func (ved *VulnEqualDelete) ExecX(ctx context.Context) int {
 }
 
 func (ved *VulnEqualDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(vulnequal.Table, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(vulnequal.Table, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeUUID))
 	if ps := ved.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

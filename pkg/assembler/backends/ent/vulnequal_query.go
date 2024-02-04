@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
@@ -109,8 +110,8 @@ func (veq *VulnEqualQuery) FirstX(ctx context.Context) *VulnEqual {
 
 // FirstID returns the first VulnEqual ID from the query.
 // Returns a *NotFoundError when no VulnEqual ID was found.
-func (veq *VulnEqualQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (veq *VulnEqualQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = veq.Limit(1).IDs(setContextOp(ctx, veq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -122,7 +123,7 @@ func (veq *VulnEqualQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (veq *VulnEqualQuery) FirstIDX(ctx context.Context) int {
+func (veq *VulnEqualQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := veq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +161,8 @@ func (veq *VulnEqualQuery) OnlyX(ctx context.Context) *VulnEqual {
 // OnlyID is like Only, but returns the only VulnEqual ID in the query.
 // Returns a *NotSingularError when more than one VulnEqual ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (veq *VulnEqualQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (veq *VulnEqualQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = veq.Limit(2).IDs(setContextOp(ctx, veq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -177,7 +178,7 @@ func (veq *VulnEqualQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (veq *VulnEqualQuery) OnlyIDX(ctx context.Context) int {
+func (veq *VulnEqualQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := veq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -205,7 +206,7 @@ func (veq *VulnEqualQuery) AllX(ctx context.Context) []*VulnEqual {
 }
 
 // IDs executes the query and returns a list of VulnEqual IDs.
-func (veq *VulnEqualQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (veq *VulnEqualQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if veq.ctx.Unique == nil && veq.path != nil {
 		veq.Unique(true)
 	}
@@ -217,7 +218,7 @@ func (veq *VulnEqualQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (veq *VulnEqualQuery) IDsX(ctx context.Context) []int {
+func (veq *VulnEqualQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := veq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -422,8 +423,8 @@ func (veq *VulnEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*V
 
 func (veq *VulnEqualQuery) loadVulnerabilityIds(ctx context.Context, query *VulnerabilityIDQuery, nodes []*VulnEqual, init func(*VulnEqual), assign func(*VulnEqual, *VulnerabilityID)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*VulnEqual)
-	nids := make(map[int]map[*VulnEqual]struct{})
+	byID := make(map[uuid.UUID]*VulnEqual)
+	nids := make(map[uuid.UUID]map[*VulnEqual]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -452,11 +453,11 @@ func (veq *VulnEqualQuery) loadVulnerabilityIds(ctx context.Context, query *Vuln
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*VulnEqual]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -495,7 +496,7 @@ func (veq *VulnEqualQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (veq *VulnEqualQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(vulnequal.Table, vulnequal.Columns, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(vulnequal.Table, vulnequal.Columns, sqlgraph.NewFieldSpec(vulnequal.FieldID, field.TypeUUID))
 	_spec.From = veq.sql
 	if unique := veq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

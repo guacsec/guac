@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -155,8 +156,8 @@ func (cvq *CertifyVexQuery) FirstX(ctx context.Context) *CertifyVex {
 
 // FirstID returns the first CertifyVex ID from the query.
 // Returns a *NotFoundError when no CertifyVex ID was found.
-func (cvq *CertifyVexQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (cvq *CertifyVexQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = cvq.Limit(1).IDs(setContextOp(ctx, cvq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -168,7 +169,7 @@ func (cvq *CertifyVexQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cvq *CertifyVexQuery) FirstIDX(ctx context.Context) int {
+func (cvq *CertifyVexQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := cvq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -206,8 +207,8 @@ func (cvq *CertifyVexQuery) OnlyX(ctx context.Context) *CertifyVex {
 // OnlyID is like Only, but returns the only CertifyVex ID in the query.
 // Returns a *NotSingularError when more than one CertifyVex ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cvq *CertifyVexQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (cvq *CertifyVexQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = cvq.Limit(2).IDs(setContextOp(ctx, cvq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -223,7 +224,7 @@ func (cvq *CertifyVexQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cvq *CertifyVexQuery) OnlyIDX(ctx context.Context) int {
+func (cvq *CertifyVexQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := cvq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -251,7 +252,7 @@ func (cvq *CertifyVexQuery) AllX(ctx context.Context) []*CertifyVex {
 }
 
 // IDs executes the query and returns a list of CertifyVex IDs.
-func (cvq *CertifyVexQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (cvq *CertifyVexQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if cvq.ctx.Unique == nil && cvq.path != nil {
 		cvq.Unique(true)
 	}
@@ -263,7 +264,7 @@ func (cvq *CertifyVexQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cvq *CertifyVexQuery) IDsX(ctx context.Context) []int {
+func (cvq *CertifyVexQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := cvq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -371,7 +372,7 @@ func (cvq *CertifyVexQuery) WithVulnerability(opts ...func(*VulnerabilityIDQuery
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -394,7 +395,7 @@ func (cvq *CertifyVexQuery) GroupBy(field string, fields ...string) *CertifyVexG
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //	}
 //
 //	client.CertifyVex.Query().
@@ -497,8 +498,8 @@ func (cvq *CertifyVexQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 }
 
 func (cvq *CertifyVexQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*CertifyVex, init func(*CertifyVex), assign func(*CertifyVex, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*CertifyVex)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*CertifyVex)
 	for i := range nodes {
 		if nodes[i].PackageID == nil {
 			continue
@@ -529,8 +530,8 @@ func (cvq *CertifyVexQuery) loadPackage(ctx context.Context, query *PackageVersi
 	return nil
 }
 func (cvq *CertifyVexQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*CertifyVex, init func(*CertifyVex), assign func(*CertifyVex, *Artifact)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*CertifyVex)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*CertifyVex)
 	for i := range nodes {
 		if nodes[i].ArtifactID == nil {
 			continue
@@ -561,8 +562,8 @@ func (cvq *CertifyVexQuery) loadArtifact(ctx context.Context, query *ArtifactQue
 	return nil
 }
 func (cvq *CertifyVexQuery) loadVulnerability(ctx context.Context, query *VulnerabilityIDQuery, nodes []*CertifyVex, init func(*CertifyVex), assign func(*CertifyVex, *VulnerabilityID)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*CertifyVex)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*CertifyVex)
 	for i := range nodes {
 		fk := nodes[i].VulnerabilityID
 		if _, ok := nodeids[fk]; !ok {
@@ -603,7 +604,7 @@ func (cvq *CertifyVexQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cvq *CertifyVexQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(certifyvex.Table, certifyvex.Columns, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(certifyvex.Table, certifyvex.Columns, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
 	_spec.From = cvq.sql
 	if unique := cvq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

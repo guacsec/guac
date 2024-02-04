@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
@@ -18,11 +19,11 @@ import (
 type CertifyVuln struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// VulnerabilityID holds the value of the "vulnerability_id" field.
-	VulnerabilityID int `json:"vulnerability_id,omitempty"`
+	VulnerabilityID uuid.UUID `json:"vulnerability_id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
-	PackageID int `json:"package_id,omitempty"`
+	PackageID uuid.UUID `json:"package_id,omitempty"`
 	// TimeScanned holds the value of the "time_scanned" field.
 	TimeScanned time.Time `json:"time_scanned,omitempty"`
 	// DbURI holds the value of the "db_uri" field.
@@ -87,12 +88,12 @@ func (*CertifyVuln) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case certifyvuln.FieldID, certifyvuln.FieldVulnerabilityID, certifyvuln.FieldPackageID:
-			values[i] = new(sql.NullInt64)
 		case certifyvuln.FieldDbURI, certifyvuln.FieldDbVersion, certifyvuln.FieldScannerURI, certifyvuln.FieldScannerVersion, certifyvuln.FieldOrigin, certifyvuln.FieldCollector:
 			values[i] = new(sql.NullString)
 		case certifyvuln.FieldTimeScanned:
 			values[i] = new(sql.NullTime)
+		case certifyvuln.FieldID, certifyvuln.FieldVulnerabilityID, certifyvuln.FieldPackageID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -109,22 +110,22 @@ func (cv *CertifyVuln) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case certifyvuln.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				cv.ID = *value
 			}
-			cv.ID = int(value.Int64)
 		case certifyvuln.FieldVulnerabilityID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field vulnerability_id", values[i])
-			} else if value.Valid {
-				cv.VulnerabilityID = int(value.Int64)
+			} else if value != nil {
+				cv.VulnerabilityID = *value
 			}
 		case certifyvuln.FieldPackageID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
-			} else if value.Valid {
-				cv.PackageID = int(value.Int64)
+			} else if value != nil {
+				cv.PackageID = *value
 			}
 		case certifyvuln.FieldTimeScanned:
 			if value, ok := values[i].(*sql.NullTime); !ok {

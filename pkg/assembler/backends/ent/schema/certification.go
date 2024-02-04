@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // Certification holds the schema definition for the Certification entity.
@@ -31,11 +32,15 @@ type Certification struct {
 // Fields of the Certification.
 func (Certification) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		// TODO: (ivanvanderbyl) We can reduce the index size by 3/4 if we use a single type field for the source, package_version, package_name, and artifact.
-		field.Int("source_id").Optional().Nillable(),
-		field.Int("package_version_id").Optional().Nillable(),
-		field.Int("package_name_id").Optional().Nillable(),
-		field.Int("artifact_id").Optional().Nillable(),
+		field.UUID("source_id", uuid.New()).Optional().Nillable(),
+		field.UUID("package_version_id", uuid.New()).Optional().Nillable(),
+		field.UUID("package_name_id", uuid.New()).Optional().Nillable(),
+		field.UUID("artifact_id", uuid.New()).Optional().Nillable(),
 		field.Enum("type").Values("GOOD", "BAD").Default("GOOD"),
 		field.String("justification"),
 		field.String("origin"),

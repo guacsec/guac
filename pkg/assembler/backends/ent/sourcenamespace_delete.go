@@ -40,7 +40,7 @@ func (snd *SourceNamespaceDelete) ExecX(ctx context.Context) int {
 }
 
 func (snd *SourceNamespaceDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(sourcenamespace.Table, sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(sourcenamespace.Table, sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeUUID))
 	if ps := snd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

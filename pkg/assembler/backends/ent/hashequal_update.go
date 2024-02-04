@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -71,14 +72,14 @@ func (heu *HashEqualUpdate) SetNillableJustification(s *string) *HashEqualUpdate
 }
 
 // AddArtifactIDs adds the "artifacts" edge to the Artifact entity by IDs.
-func (heu *HashEqualUpdate) AddArtifactIDs(ids ...int) *HashEqualUpdate {
+func (heu *HashEqualUpdate) AddArtifactIDs(ids ...uuid.UUID) *HashEqualUpdate {
 	heu.mutation.AddArtifactIDs(ids...)
 	return heu
 }
 
 // AddArtifacts adds the "artifacts" edges to the Artifact entity.
 func (heu *HashEqualUpdate) AddArtifacts(a ...*Artifact) *HashEqualUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -97,14 +98,14 @@ func (heu *HashEqualUpdate) ClearArtifacts() *HashEqualUpdate {
 }
 
 // RemoveArtifactIDs removes the "artifacts" edge to Artifact entities by IDs.
-func (heu *HashEqualUpdate) RemoveArtifactIDs(ids ...int) *HashEqualUpdate {
+func (heu *HashEqualUpdate) RemoveArtifactIDs(ids ...uuid.UUID) *HashEqualUpdate {
 	heu.mutation.RemoveArtifactIDs(ids...)
 	return heu
 }
 
 // RemoveArtifacts removes "artifacts" edges to Artifact entities.
 func (heu *HashEqualUpdate) RemoveArtifacts(a ...*Artifact) *HashEqualUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -139,7 +140,7 @@ func (heu *HashEqualUpdate) ExecX(ctx context.Context) {
 }
 
 func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
 	if ps := heu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -164,7 +165,7 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: hashequal.ArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -177,7 +178,7 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: hashequal.ArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -193,7 +194,7 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: hashequal.ArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -264,14 +265,14 @@ func (heuo *HashEqualUpdateOne) SetNillableJustification(s *string) *HashEqualUp
 }
 
 // AddArtifactIDs adds the "artifacts" edge to the Artifact entity by IDs.
-func (heuo *HashEqualUpdateOne) AddArtifactIDs(ids ...int) *HashEqualUpdateOne {
+func (heuo *HashEqualUpdateOne) AddArtifactIDs(ids ...uuid.UUID) *HashEqualUpdateOne {
 	heuo.mutation.AddArtifactIDs(ids...)
 	return heuo
 }
 
 // AddArtifacts adds the "artifacts" edges to the Artifact entity.
 func (heuo *HashEqualUpdateOne) AddArtifacts(a ...*Artifact) *HashEqualUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -290,14 +291,14 @@ func (heuo *HashEqualUpdateOne) ClearArtifacts() *HashEqualUpdateOne {
 }
 
 // RemoveArtifactIDs removes the "artifacts" edge to Artifact entities by IDs.
-func (heuo *HashEqualUpdateOne) RemoveArtifactIDs(ids ...int) *HashEqualUpdateOne {
+func (heuo *HashEqualUpdateOne) RemoveArtifactIDs(ids ...uuid.UUID) *HashEqualUpdateOne {
 	heuo.mutation.RemoveArtifactIDs(ids...)
 	return heuo
 }
 
 // RemoveArtifacts removes "artifacts" edges to Artifact entities.
 func (heuo *HashEqualUpdateOne) RemoveArtifacts(a ...*Artifact) *HashEqualUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -345,7 +346,7 @@ func (heuo *HashEqualUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, err error) {
-	_spec := sqlgraph.NewUpdateSpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
 	id, ok := heuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "HashEqual.id" for update`)}
@@ -387,7 +388,7 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 			Columns: hashequal.ArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -400,7 +401,7 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 			Columns: hashequal.ArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -416,7 +417,7 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 			Columns: hashequal.ArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

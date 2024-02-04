@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -32,15 +33,15 @@ func (hsau *HasSourceAtUpdate) Where(ps ...predicate.HasSourceAt) *HasSourceAtUp
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hsau *HasSourceAtUpdate) SetPackageVersionID(i int) *HasSourceAtUpdate {
-	hsau.mutation.SetPackageVersionID(i)
+func (hsau *HasSourceAtUpdate) SetPackageVersionID(u uuid.UUID) *HasSourceAtUpdate {
+	hsau.mutation.SetPackageVersionID(u)
 	return hsau
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillablePackageVersionID(i *int) *HasSourceAtUpdate {
-	if i != nil {
-		hsau.SetPackageVersionID(*i)
+func (hsau *HasSourceAtUpdate) SetNillablePackageVersionID(u *uuid.UUID) *HasSourceAtUpdate {
+	if u != nil {
+		hsau.SetPackageVersionID(*u)
 	}
 	return hsau
 }
@@ -52,15 +53,15 @@ func (hsau *HasSourceAtUpdate) ClearPackageVersionID() *HasSourceAtUpdate {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hsau *HasSourceAtUpdate) SetPackageNameID(i int) *HasSourceAtUpdate {
-	hsau.mutation.SetPackageNameID(i)
+func (hsau *HasSourceAtUpdate) SetPackageNameID(u uuid.UUID) *HasSourceAtUpdate {
+	hsau.mutation.SetPackageNameID(u)
 	return hsau
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillablePackageNameID(i *int) *HasSourceAtUpdate {
-	if i != nil {
-		hsau.SetPackageNameID(*i)
+func (hsau *HasSourceAtUpdate) SetNillablePackageNameID(u *uuid.UUID) *HasSourceAtUpdate {
+	if u != nil {
+		hsau.SetPackageNameID(*u)
 	}
 	return hsau
 }
@@ -72,15 +73,15 @@ func (hsau *HasSourceAtUpdate) ClearPackageNameID() *HasSourceAtUpdate {
 }
 
 // SetSourceID sets the "source_id" field.
-func (hsau *HasSourceAtUpdate) SetSourceID(i int) *HasSourceAtUpdate {
-	hsau.mutation.SetSourceID(i)
+func (hsau *HasSourceAtUpdate) SetSourceID(u uuid.UUID) *HasSourceAtUpdate {
+	hsau.mutation.SetSourceID(u)
 	return hsau
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillableSourceID(i *int) *HasSourceAtUpdate {
-	if i != nil {
-		hsau.SetSourceID(*i)
+func (hsau *HasSourceAtUpdate) SetNillableSourceID(u *uuid.UUID) *HasSourceAtUpdate {
+	if u != nil {
+		hsau.SetSourceID(*u)
 	}
 	return hsau
 }
@@ -147,13 +148,13 @@ func (hsau *HasSourceAtUpdate) SetPackageVersion(p *PackageVersion) *HasSourceAt
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hsau *HasSourceAtUpdate) SetAllVersionsID(id int) *HasSourceAtUpdate {
+func (hsau *HasSourceAtUpdate) SetAllVersionsID(id uuid.UUID) *HasSourceAtUpdate {
 	hsau.mutation.SetAllVersionsID(id)
 	return hsau
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hsau *HasSourceAtUpdate) SetNillableAllVersionsID(id *int) *HasSourceAtUpdate {
+func (hsau *HasSourceAtUpdate) SetNillableAllVersionsID(id *uuid.UUID) *HasSourceAtUpdate {
 	if id != nil {
 		hsau = hsau.SetAllVersionsID(*id)
 	}
@@ -232,7 +233,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := hsau.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(hassourceat.Table, hassourceat.Columns, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(hassourceat.Table, hassourceat.Columns, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID))
 	if ps := hsau.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -260,7 +261,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hassourceat.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -273,7 +274,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hassourceat.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -289,7 +290,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hassourceat.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -302,7 +303,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hassourceat.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -318,7 +319,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hassourceat.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -331,7 +332,7 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{hassourceat.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -360,15 +361,15 @@ type HasSourceAtUpdateOne struct {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (hsauo *HasSourceAtUpdateOne) SetPackageVersionID(i int) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetPackageVersionID(i)
+func (hsauo *HasSourceAtUpdateOne) SetPackageVersionID(u uuid.UUID) *HasSourceAtUpdateOne {
+	hsauo.mutation.SetPackageVersionID(u)
 	return hsauo
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillablePackageVersionID(i *int) *HasSourceAtUpdateOne {
-	if i != nil {
-		hsauo.SetPackageVersionID(*i)
+func (hsauo *HasSourceAtUpdateOne) SetNillablePackageVersionID(u *uuid.UUID) *HasSourceAtUpdateOne {
+	if u != nil {
+		hsauo.SetPackageVersionID(*u)
 	}
 	return hsauo
 }
@@ -380,15 +381,15 @@ func (hsauo *HasSourceAtUpdateOne) ClearPackageVersionID() *HasSourceAtUpdateOne
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (hsauo *HasSourceAtUpdateOne) SetPackageNameID(i int) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetPackageNameID(i)
+func (hsauo *HasSourceAtUpdateOne) SetPackageNameID(u uuid.UUID) *HasSourceAtUpdateOne {
+	hsauo.mutation.SetPackageNameID(u)
 	return hsauo
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillablePackageNameID(i *int) *HasSourceAtUpdateOne {
-	if i != nil {
-		hsauo.SetPackageNameID(*i)
+func (hsauo *HasSourceAtUpdateOne) SetNillablePackageNameID(u *uuid.UUID) *HasSourceAtUpdateOne {
+	if u != nil {
+		hsauo.SetPackageNameID(*u)
 	}
 	return hsauo
 }
@@ -400,15 +401,15 @@ func (hsauo *HasSourceAtUpdateOne) ClearPackageNameID() *HasSourceAtUpdateOne {
 }
 
 // SetSourceID sets the "source_id" field.
-func (hsauo *HasSourceAtUpdateOne) SetSourceID(i int) *HasSourceAtUpdateOne {
-	hsauo.mutation.SetSourceID(i)
+func (hsauo *HasSourceAtUpdateOne) SetSourceID(u uuid.UUID) *HasSourceAtUpdateOne {
+	hsauo.mutation.SetSourceID(u)
 	return hsauo
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillableSourceID(i *int) *HasSourceAtUpdateOne {
-	if i != nil {
-		hsauo.SetSourceID(*i)
+func (hsauo *HasSourceAtUpdateOne) SetNillableSourceID(u *uuid.UUID) *HasSourceAtUpdateOne {
+	if u != nil {
+		hsauo.SetSourceID(*u)
 	}
 	return hsauo
 }
@@ -475,13 +476,13 @@ func (hsauo *HasSourceAtUpdateOne) SetPackageVersion(p *PackageVersion) *HasSour
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (hsauo *HasSourceAtUpdateOne) SetAllVersionsID(id int) *HasSourceAtUpdateOne {
+func (hsauo *HasSourceAtUpdateOne) SetAllVersionsID(id uuid.UUID) *HasSourceAtUpdateOne {
 	hsauo.mutation.SetAllVersionsID(id)
 	return hsauo
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (hsauo *HasSourceAtUpdateOne) SetNillableAllVersionsID(id *int) *HasSourceAtUpdateOne {
+func (hsauo *HasSourceAtUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *HasSourceAtUpdateOne {
 	if id != nil {
 		hsauo = hsauo.SetAllVersionsID(*id)
 	}
@@ -573,7 +574,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 	if err := hsauo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(hassourceat.Table, hassourceat.Columns, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(hassourceat.Table, hassourceat.Columns, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID))
 	id, ok := hsauo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "HasSourceAt.id" for update`)}
@@ -618,7 +619,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 			Columns: []string{hassourceat.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -631,7 +632,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 			Columns: []string{hassourceat.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -647,7 +648,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 			Columns: []string{hassourceat.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -660,7 +661,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 			Columns: []string{hassourceat.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -676,7 +677,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 			Columns: []string{hassourceat.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -689,7 +690,7 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 			Columns: []string{hassourceat.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

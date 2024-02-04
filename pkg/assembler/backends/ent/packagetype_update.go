@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -43,14 +44,14 @@ func (ptu *PackageTypeUpdate) SetNillableType(s *string) *PackageTypeUpdate {
 }
 
 // AddNamespaceIDs adds the "namespaces" edge to the PackageNamespace entity by IDs.
-func (ptu *PackageTypeUpdate) AddNamespaceIDs(ids ...int) *PackageTypeUpdate {
+func (ptu *PackageTypeUpdate) AddNamespaceIDs(ids ...uuid.UUID) *PackageTypeUpdate {
 	ptu.mutation.AddNamespaceIDs(ids...)
 	return ptu
 }
 
 // AddNamespaces adds the "namespaces" edges to the PackageNamespace entity.
 func (ptu *PackageTypeUpdate) AddNamespaces(p ...*PackageNamespace) *PackageTypeUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -69,14 +70,14 @@ func (ptu *PackageTypeUpdate) ClearNamespaces() *PackageTypeUpdate {
 }
 
 // RemoveNamespaceIDs removes the "namespaces" edge to PackageNamespace entities by IDs.
-func (ptu *PackageTypeUpdate) RemoveNamespaceIDs(ids ...int) *PackageTypeUpdate {
+func (ptu *PackageTypeUpdate) RemoveNamespaceIDs(ids ...uuid.UUID) *PackageTypeUpdate {
 	ptu.mutation.RemoveNamespaceIDs(ids...)
 	return ptu
 }
 
 // RemoveNamespaces removes "namespaces" edges to PackageNamespace entities.
 func (ptu *PackageTypeUpdate) RemoveNamespaces(p ...*PackageNamespace) *PackageTypeUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -124,7 +125,7 @@ func (ptu *PackageTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := ptu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(packagetype.Table, packagetype.Columns, sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(packagetype.Table, packagetype.Columns, sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeUUID))
 	if ps := ptu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -143,7 +144,7 @@ func (ptu *PackageTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{packagetype.NamespacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -156,7 +157,7 @@ func (ptu *PackageTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{packagetype.NamespacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -172,7 +173,7 @@ func (ptu *PackageTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{packagetype.NamespacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -215,14 +216,14 @@ func (ptuo *PackageTypeUpdateOne) SetNillableType(s *string) *PackageTypeUpdateO
 }
 
 // AddNamespaceIDs adds the "namespaces" edge to the PackageNamespace entity by IDs.
-func (ptuo *PackageTypeUpdateOne) AddNamespaceIDs(ids ...int) *PackageTypeUpdateOne {
+func (ptuo *PackageTypeUpdateOne) AddNamespaceIDs(ids ...uuid.UUID) *PackageTypeUpdateOne {
 	ptuo.mutation.AddNamespaceIDs(ids...)
 	return ptuo
 }
 
 // AddNamespaces adds the "namespaces" edges to the PackageNamespace entity.
 func (ptuo *PackageTypeUpdateOne) AddNamespaces(p ...*PackageNamespace) *PackageTypeUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -241,14 +242,14 @@ func (ptuo *PackageTypeUpdateOne) ClearNamespaces() *PackageTypeUpdateOne {
 }
 
 // RemoveNamespaceIDs removes the "namespaces" edge to PackageNamespace entities by IDs.
-func (ptuo *PackageTypeUpdateOne) RemoveNamespaceIDs(ids ...int) *PackageTypeUpdateOne {
+func (ptuo *PackageTypeUpdateOne) RemoveNamespaceIDs(ids ...uuid.UUID) *PackageTypeUpdateOne {
 	ptuo.mutation.RemoveNamespaceIDs(ids...)
 	return ptuo
 }
 
 // RemoveNamespaces removes "namespaces" edges to PackageNamespace entities.
 func (ptuo *PackageTypeUpdateOne) RemoveNamespaces(p ...*PackageNamespace) *PackageTypeUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -309,7 +310,7 @@ func (ptuo *PackageTypeUpdateOne) sqlSave(ctx context.Context) (_node *PackageTy
 	if err := ptuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(packagetype.Table, packagetype.Columns, sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(packagetype.Table, packagetype.Columns, sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeUUID))
 	id, ok := ptuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "PackageType.id" for update`)}
@@ -345,7 +346,7 @@ func (ptuo *PackageTypeUpdateOne) sqlSave(ctx context.Context) (_node *PackageTy
 			Columns: []string{packagetype.NamespacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -358,7 +359,7 @@ func (ptuo *PackageTypeUpdateOne) sqlSave(ctx context.Context) (_node *PackageTy
 			Columns: []string{packagetype.NamespacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -374,7 +375,7 @@ func (ptuo *PackageTypeUpdateOne) sqlSave(ctx context.Context) (_node *PackageTy
 			Columns: []string{packagetype.NamespacesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

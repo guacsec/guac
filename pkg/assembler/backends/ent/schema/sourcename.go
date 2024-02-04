@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // SourceName holds the schema definition for the SourceName entity.
@@ -30,10 +31,14 @@ type SourceName struct {
 // Fields of the SourceName.
 func (SourceName) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.String("name"),
 		field.String("commit").Optional(),
 		field.String("tag").Optional(),
-		field.Int("namespace_id"),
+		field.UUID("namespace_id", uuid.New()),
 	}
 }
 

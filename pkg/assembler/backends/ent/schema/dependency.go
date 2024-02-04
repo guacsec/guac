@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -40,9 +41,13 @@ func (Dependency) Annotations() []schema.Annotation {
 // Fields of the Dependency.
 func (Dependency) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("package_id"),
-		field.Int("dependent_package_name_id").Optional(),
-		field.Int("dependent_package_version_id").Optional(),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("package_id", uuid.New()),
+		field.UUID("dependent_package_name_id", uuid.New()).Optional(),
+		field.UUID("dependent_package_version_id", uuid.New()).Optional(),
 		field.String("version_range"),
 		field.Enum("dependency_type").Values(model.DependencyTypeDirect.String(), model.DependencyTypeIndirect.String(), model.DependencyTypeUnknown.String()),
 		field.String("justification"),

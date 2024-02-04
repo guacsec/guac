@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // CertifyScorecard holds the schema definition for the CertifyScorecard entity.
@@ -30,8 +31,12 @@ type CertifyScorecard struct {
 // Fields of the CertifyScorecard.
 func (CertifyScorecard) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("source_id"),
-		field.Int("scorecard_id"),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("source_id", uuid.New()),
+		field.UUID("scorecard_id", uuid.New()),
 	}
 }
 

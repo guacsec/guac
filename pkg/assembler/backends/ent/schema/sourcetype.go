@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // SourceType holds the schema definition for the SourceType entity.
@@ -29,6 +30,10 @@ type SourceType struct {
 // Fields of the SourceType.
 func (SourceType) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.String("type").Unique(),
 	}
 }

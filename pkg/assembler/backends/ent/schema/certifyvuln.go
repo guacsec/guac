@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // CertifyVuln holds the schema definition for the CertifyVuln entity.
@@ -30,8 +31,12 @@ type CertifyVuln struct {
 // Fields of the Vulnerability.
 func (CertifyVuln) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("vulnerability_id"),
-		field.Int("package_id"),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
+		field.UUID("vulnerability_id", uuid.New()),
+		field.UUID("package_id", uuid.New()),
 		field.Time("time_scanned"),
 		field.String("db_uri"),
 		field.String("db_version"),

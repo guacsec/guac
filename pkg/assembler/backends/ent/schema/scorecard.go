@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -33,6 +34,10 @@ type Scorecard struct {
 // Fields of the Scorecard.
 func (Scorecard) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.JSON("checks", []*model.ScorecardCheck{}),
 		field.Float("aggregate_score").Default(0).Comment("Overall Scorecard score for the source"),
 		field.Time("time_scanned").Default(time.Now),

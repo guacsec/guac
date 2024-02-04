@@ -40,7 +40,7 @@ func (bd *BuilderDelete) ExecX(ctx context.Context) int {
 }
 
 func (bd *BuilderDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(builder.Table, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(builder.Table, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID))
 	if ps := bd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

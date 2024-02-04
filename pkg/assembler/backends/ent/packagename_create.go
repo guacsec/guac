@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -24,8 +26,8 @@ type PackageNameCreate struct {
 }
 
 // SetNamespaceID sets the "namespace_id" field.
-func (pnc *PackageNameCreate) SetNamespaceID(i int) *PackageNameCreate {
-	pnc.mutation.SetNamespaceID(i)
+func (pnc *PackageNameCreate) SetNamespaceID(u uuid.UUID) *PackageNameCreate {
+	pnc.mutation.SetNamespaceID(u)
 	return pnc
 }
 
@@ -35,20 +37,34 @@ func (pnc *PackageNameCreate) SetName(s string) *PackageNameCreate {
 	return pnc
 }
 
+// SetID sets the "id" field.
+func (pnc *PackageNameCreate) SetID(u uuid.UUID) *PackageNameCreate {
+	pnc.mutation.SetID(u)
+	return pnc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pnc *PackageNameCreate) SetNillableID(u *uuid.UUID) *PackageNameCreate {
+	if u != nil {
+		pnc.SetID(*u)
+	}
+	return pnc
+}
+
 // SetNamespace sets the "namespace" edge to the PackageNamespace entity.
 func (pnc *PackageNameCreate) SetNamespace(p *PackageNamespace) *PackageNameCreate {
 	return pnc.SetNamespaceID(p.ID)
 }
 
 // AddVersionIDs adds the "versions" edge to the PackageVersion entity by IDs.
-func (pnc *PackageNameCreate) AddVersionIDs(ids ...int) *PackageNameCreate {
+func (pnc *PackageNameCreate) AddVersionIDs(ids ...uuid.UUID) *PackageNameCreate {
 	pnc.mutation.AddVersionIDs(ids...)
 	return pnc
 }
 
 // AddVersions adds the "versions" edges to the PackageVersion entity.
 func (pnc *PackageNameCreate) AddVersions(p ...*PackageVersion) *PackageNameCreate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -62,6 +78,7 @@ func (pnc *PackageNameCreate) Mutation() *PackageNameMutation {
 
 // Save creates the PackageName in the database.
 func (pnc *PackageNameCreate) Save(ctx context.Context) (*PackageName, error) {
+	pnc.defaults()
 	return withHooks(ctx, pnc.sqlSave, pnc.mutation, pnc.hooks)
 }
 
@@ -84,6 +101,14 @@ func (pnc *PackageNameCreate) Exec(ctx context.Context) error {
 func (pnc *PackageNameCreate) ExecX(ctx context.Context) {
 	if err := pnc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pnc *PackageNameCreate) defaults() {
+	if _, ok := pnc.mutation.ID(); !ok {
+		v := packagename.DefaultID()
+		pnc.mutation.SetID(v)
 	}
 }
 
@@ -117,8 +142,13 @@ func (pnc *PackageNameCreate) sqlSave(ctx context.Context) (*PackageName, error)
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	pnc.mutation.id = &_node.ID
 	pnc.mutation.done = true
 	return _node, nil
@@ -127,9 +157,13 @@ func (pnc *PackageNameCreate) sqlSave(ctx context.Context) (*PackageName, error)
 func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) {
 	var (
 		_node = &PackageName{config: pnc.config}
-		_spec = sqlgraph.NewCreateSpec(packagename.Table, sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(packagename.Table, sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = pnc.conflict
+	if id, ok := pnc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := pnc.mutation.Name(); ok {
 		_spec.SetField(packagename.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -142,7 +176,7 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 			Columns: []string{packagename.NamespaceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -159,7 +193,7 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 			Columns: []string{packagename.VersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -220,7 +254,7 @@ type (
 )
 
 // SetNamespaceID sets the "namespace_id" field.
-func (u *PackageNameUpsert) SetNamespaceID(v int) *PackageNameUpsert {
+func (u *PackageNameUpsert) SetNamespaceID(v uuid.UUID) *PackageNameUpsert {
 	u.Set(packagename.FieldNamespaceID, v)
 	return u
 }
@@ -243,16 +277,24 @@ func (u *PackageNameUpsert) UpdateName() *PackageNameUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.PackageName.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(packagename.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PackageNameUpsertOne) UpdateNewValues() *PackageNameUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(packagename.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -284,7 +326,7 @@ func (u *PackageNameUpsertOne) Update(set func(*PackageNameUpsert)) *PackageName
 }
 
 // SetNamespaceID sets the "namespace_id" field.
-func (u *PackageNameUpsertOne) SetNamespaceID(v int) *PackageNameUpsertOne {
+func (u *PackageNameUpsertOne) SetNamespaceID(v uuid.UUID) *PackageNameUpsertOne {
 	return u.Update(func(s *PackageNameUpsert) {
 		s.SetNamespaceID(v)
 	})
@@ -327,7 +369,12 @@ func (u *PackageNameUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *PackageNameUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *PackageNameUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: PackageNameUpsertOne.ID is not supported by MySQL driver. Use PackageNameUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -336,7 +383,7 @@ func (u *PackageNameUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *PackageNameUpsertOne) IDX(ctx context.Context) int {
+func (u *PackageNameUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -363,6 +410,7 @@ func (pncb *PackageNameCreateBulk) Save(ctx context.Context) ([]*PackageName, er
 	for i := range pncb.builders {
 		func(i int, root context.Context) {
 			builder := pncb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PackageNameMutation)
 				if !ok {
@@ -390,10 +438,6 @@ func (pncb *PackageNameCreateBulk) Save(ctx context.Context) ([]*PackageName, er
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -480,10 +524,20 @@ type PackageNameUpsertBulk struct {
 //	client.PackageName.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(packagename.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PackageNameUpsertBulk) UpdateNewValues() *PackageNameUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(packagename.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -515,7 +569,7 @@ func (u *PackageNameUpsertBulk) Update(set func(*PackageNameUpsert)) *PackageNam
 }
 
 // SetNamespaceID sets the "namespace_id" field.
-func (u *PackageNameUpsertBulk) SetNamespaceID(v int) *PackageNameUpsertBulk {
+func (u *PackageNameUpsertBulk) SetNamespaceID(v uuid.UUID) *PackageNameUpsertBulk {
 	return u.Update(func(s *PackageNameUpsert) {
 		s.SetNamespaceID(v)
 	})

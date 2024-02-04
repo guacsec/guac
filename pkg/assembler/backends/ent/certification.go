@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -20,15 +21,15 @@ import (
 type Certification struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// SourceID holds the value of the "source_id" field.
-	SourceID *int `json:"source_id,omitempty"`
+	SourceID *uuid.UUID `json:"source_id,omitempty"`
 	// PackageVersionID holds the value of the "package_version_id" field.
-	PackageVersionID *int `json:"package_version_id,omitempty"`
+	PackageVersionID *uuid.UUID `json:"package_version_id,omitempty"`
 	// PackageNameID holds the value of the "package_name_id" field.
-	PackageNameID *int `json:"package_name_id,omitempty"`
+	PackageNameID *uuid.UUID `json:"package_name_id,omitempty"`
 	// ArtifactID holds the value of the "artifact_id" field.
-	ArtifactID *int `json:"artifact_id,omitempty"`
+	ArtifactID *uuid.UUID `json:"artifact_id,omitempty"`
 	// Type holds the value of the "type" field.
 	Type certification.Type `json:"type,omitempty"`
 	// Justification holds the value of the "justification" field.
@@ -119,12 +120,14 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case certification.FieldID, certification.FieldSourceID, certification.FieldPackageVersionID, certification.FieldPackageNameID, certification.FieldArtifactID:
-			values[i] = new(sql.NullInt64)
+		case certification.FieldSourceID, certification.FieldPackageVersionID, certification.FieldPackageNameID, certification.FieldArtifactID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case certification.FieldType, certification.FieldJustification, certification.FieldOrigin, certification.FieldCollector:
 			values[i] = new(sql.NullString)
 		case certification.FieldKnownSince:
 			values[i] = new(sql.NullTime)
+		case certification.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -141,38 +144,38 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case certification.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				c.ID = *value
 			}
-			c.ID = int(value.Int64)
 		case certification.FieldSourceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				c.SourceID = new(int)
-				*c.SourceID = int(value.Int64)
+				c.SourceID = new(uuid.UUID)
+				*c.SourceID = *value.S.(*uuid.UUID)
 			}
 		case certification.FieldPackageVersionID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_version_id", values[i])
 			} else if value.Valid {
-				c.PackageVersionID = new(int)
-				*c.PackageVersionID = int(value.Int64)
+				c.PackageVersionID = new(uuid.UUID)
+				*c.PackageVersionID = *value.S.(*uuid.UUID)
 			}
 		case certification.FieldPackageNameID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_name_id", values[i])
 			} else if value.Valid {
-				c.PackageNameID = new(int)
-				*c.PackageNameID = int(value.Int64)
+				c.PackageNameID = new(uuid.UUID)
+				*c.PackageNameID = *value.S.(*uuid.UUID)
 			}
 		case certification.FieldArtifactID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				c.ArtifactID = new(int)
-				*c.ArtifactID = int(value.Int64)
+				c.ArtifactID = new(uuid.UUID)
+				*c.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case certification.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {

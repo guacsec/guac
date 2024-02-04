@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
@@ -33,15 +34,15 @@ func (bomu *BillOfMaterialsUpdate) Where(ps ...predicate.BillOfMaterials) *BillO
 }
 
 // SetPackageID sets the "package_id" field.
-func (bomu *BillOfMaterialsUpdate) SetPackageID(i int) *BillOfMaterialsUpdate {
-	bomu.mutation.SetPackageID(i)
+func (bomu *BillOfMaterialsUpdate) SetPackageID(u uuid.UUID) *BillOfMaterialsUpdate {
+	bomu.mutation.SetPackageID(u)
 	return bomu
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillablePackageID(i *int) *BillOfMaterialsUpdate {
-	if i != nil {
-		bomu.SetPackageID(*i)
+func (bomu *BillOfMaterialsUpdate) SetNillablePackageID(u *uuid.UUID) *BillOfMaterialsUpdate {
+	if u != nil {
+		bomu.SetPackageID(*u)
 	}
 	return bomu
 }
@@ -53,15 +54,15 @@ func (bomu *BillOfMaterialsUpdate) ClearPackageID() *BillOfMaterialsUpdate {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (bomu *BillOfMaterialsUpdate) SetArtifactID(i int) *BillOfMaterialsUpdate {
-	bomu.mutation.SetArtifactID(i)
+func (bomu *BillOfMaterialsUpdate) SetArtifactID(u uuid.UUID) *BillOfMaterialsUpdate {
+	bomu.mutation.SetArtifactID(u)
 	return bomu
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (bomu *BillOfMaterialsUpdate) SetNillableArtifactID(i *int) *BillOfMaterialsUpdate {
-	if i != nil {
-		bomu.SetArtifactID(*i)
+func (bomu *BillOfMaterialsUpdate) SetNillableArtifactID(u *uuid.UUID) *BillOfMaterialsUpdate {
+	if u != nil {
+		bomu.SetArtifactID(*u)
 	}
 	return bomu
 }
@@ -181,14 +182,14 @@ func (bomu *BillOfMaterialsUpdate) SetArtifact(a *Artifact) *BillOfMaterialsUpda
 }
 
 // AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by IDs.
-func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsUpdate {
+func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
 	bomu.mutation.AddIncludedSoftwarePackageIDs(ids...)
 	return bomu
 }
 
 // AddIncludedSoftwarePackages adds the "included_software_packages" edges to the PackageVersion entity.
 func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -196,14 +197,14 @@ func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwarePackages(p ...*PackageVers
 }
 
 // AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by IDs.
-func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsUpdate {
+func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
 	bomu.mutation.AddIncludedSoftwareArtifactIDs(ids...)
 	return bomu
 }
 
 // AddIncludedSoftwareArtifacts adds the "included_software_artifacts" edges to the Artifact entity.
 func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -211,14 +212,14 @@ func (bomu *BillOfMaterialsUpdate) AddIncludedSoftwareArtifacts(a ...*Artifact) 
 }
 
 // AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by IDs.
-func (bomu *BillOfMaterialsUpdate) AddIncludedDependencyIDs(ids ...int) *BillOfMaterialsUpdate {
+func (bomu *BillOfMaterialsUpdate) AddIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
 	bomu.mutation.AddIncludedDependencyIDs(ids...)
 	return bomu
 }
 
 // AddIncludedDependencies adds the "included_dependencies" edges to the Dependency entity.
 func (bomu *BillOfMaterialsUpdate) AddIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdate {
-	ids := make([]int, len(d))
+	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -226,14 +227,14 @@ func (bomu *BillOfMaterialsUpdate) AddIncludedDependencies(d ...*Dependency) *Bi
 }
 
 // AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by IDs.
-func (bomu *BillOfMaterialsUpdate) AddIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsUpdate {
+func (bomu *BillOfMaterialsUpdate) AddIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
 	bomu.mutation.AddIncludedOccurrenceIDs(ids...)
 	return bomu
 }
 
 // AddIncludedOccurrences adds the "included_occurrences" edges to the Occurrence entity.
 func (bomu *BillOfMaterialsUpdate) AddIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -264,14 +265,14 @@ func (bomu *BillOfMaterialsUpdate) ClearIncludedSoftwarePackages() *BillOfMateri
 }
 
 // RemoveIncludedSoftwarePackageIDs removes the "included_software_packages" edge to PackageVersion entities by IDs.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsUpdate {
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
 	bomu.mutation.RemoveIncludedSoftwarePackageIDs(ids...)
 	return bomu
 }
 
 // RemoveIncludedSoftwarePackages removes "included_software_packages" edges to PackageVersion entities.
 func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -285,14 +286,14 @@ func (bomu *BillOfMaterialsUpdate) ClearIncludedSoftwareArtifacts() *BillOfMater
 }
 
 // RemoveIncludedSoftwareArtifactIDs removes the "included_software_artifacts" edge to Artifact entities by IDs.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsUpdate {
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
 	bomu.mutation.RemoveIncludedSoftwareArtifactIDs(ids...)
 	return bomu
 }
 
 // RemoveIncludedSoftwareArtifacts removes "included_software_artifacts" edges to Artifact entities.
 func (bomu *BillOfMaterialsUpdate) RemoveIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -306,14 +307,14 @@ func (bomu *BillOfMaterialsUpdate) ClearIncludedDependencies() *BillOfMaterialsU
 }
 
 // RemoveIncludedDependencyIDs removes the "included_dependencies" edge to Dependency entities by IDs.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedDependencyIDs(ids ...int) *BillOfMaterialsUpdate {
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
 	bomu.mutation.RemoveIncludedDependencyIDs(ids...)
 	return bomu
 }
 
 // RemoveIncludedDependencies removes "included_dependencies" edges to Dependency entities.
 func (bomu *BillOfMaterialsUpdate) RemoveIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdate {
-	ids := make([]int, len(d))
+	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -327,14 +328,14 @@ func (bomu *BillOfMaterialsUpdate) ClearIncludedOccurrences() *BillOfMaterialsUp
 }
 
 // RemoveIncludedOccurrenceIDs removes the "included_occurrences" edge to Occurrence entities by IDs.
-func (bomu *BillOfMaterialsUpdate) RemoveIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsUpdate {
+func (bomu *BillOfMaterialsUpdate) RemoveIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdate {
 	bomu.mutation.RemoveIncludedOccurrenceIDs(ids...)
 	return bomu
 }
 
 // RemoveIncludedOccurrences removes "included_occurrences" edges to Occurrence entities.
 func (bomu *BillOfMaterialsUpdate) RemoveIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -369,7 +370,7 @@ func (bomu *BillOfMaterialsUpdate) ExecX(ctx context.Context) {
 }
 
 func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(billofmaterials.Table, billofmaterials.Columns, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(billofmaterials.Table, billofmaterials.Columns, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID))
 	if ps := bomu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -406,7 +407,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{billofmaterials.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -419,7 +420,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{billofmaterials.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -435,7 +436,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{billofmaterials.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -448,7 +449,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{billofmaterials.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -464,7 +465,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -477,7 +478,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -493,7 +494,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -509,7 +510,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -522,7 +523,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -538,7 +539,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -554,7 +555,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -567,7 +568,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -583,7 +584,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -599,7 +600,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -612,7 +613,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -628,7 +629,7 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -657,15 +658,15 @@ type BillOfMaterialsUpdateOne struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetPackageID(i int) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetPackageID(i)
+func (bomuo *BillOfMaterialsUpdateOne) SetPackageID(u uuid.UUID) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.SetPackageID(u)
 	return bomuo
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillablePackageID(i *int) *BillOfMaterialsUpdateOne {
-	if i != nil {
-		bomuo.SetPackageID(*i)
+func (bomuo *BillOfMaterialsUpdateOne) SetNillablePackageID(u *uuid.UUID) *BillOfMaterialsUpdateOne {
+	if u != nil {
+		bomuo.SetPackageID(*u)
 	}
 	return bomuo
 }
@@ -677,15 +678,15 @@ func (bomuo *BillOfMaterialsUpdateOne) ClearPackageID() *BillOfMaterialsUpdateOn
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (bomuo *BillOfMaterialsUpdateOne) SetArtifactID(i int) *BillOfMaterialsUpdateOne {
-	bomuo.mutation.SetArtifactID(i)
+func (bomuo *BillOfMaterialsUpdateOne) SetArtifactID(u uuid.UUID) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.SetArtifactID(u)
 	return bomuo
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (bomuo *BillOfMaterialsUpdateOne) SetNillableArtifactID(i *int) *BillOfMaterialsUpdateOne {
-	if i != nil {
-		bomuo.SetArtifactID(*i)
+func (bomuo *BillOfMaterialsUpdateOne) SetNillableArtifactID(u *uuid.UUID) *BillOfMaterialsUpdateOne {
+	if u != nil {
+		bomuo.SetArtifactID(*u)
 	}
 	return bomuo
 }
@@ -805,14 +806,14 @@ func (bomuo *BillOfMaterialsUpdateOne) SetArtifact(a *Artifact) *BillOfMaterials
 }
 
 // AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsUpdateOne {
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.AddIncludedSoftwarePackageIDs(ids...)
 	return bomuo
 }
 
 // AddIncludedSoftwarePackages adds the "included_software_packages" edges to the PackageVersion entity.
 func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -820,14 +821,14 @@ func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwarePackages(p ...*Package
 }
 
 // AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsUpdateOne {
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.AddIncludedSoftwareArtifactIDs(ids...)
 	return bomuo
 }
 
 // AddIncludedSoftwareArtifacts adds the "included_software_artifacts" edges to the Artifact entity.
 func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -835,14 +836,14 @@ func (bomuo *BillOfMaterialsUpdateOne) AddIncludedSoftwareArtifacts(a ...*Artifa
 }
 
 // AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedDependencyIDs(ids ...int) *BillOfMaterialsUpdateOne {
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.AddIncludedDependencyIDs(ids...)
 	return bomuo
 }
 
 // AddIncludedDependencies adds the "included_dependencies" edges to the Dependency entity.
 func (bomuo *BillOfMaterialsUpdateOne) AddIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdateOne {
-	ids := make([]int, len(d))
+	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -850,14 +851,14 @@ func (bomuo *BillOfMaterialsUpdateOne) AddIncludedDependencies(d ...*Dependency)
 }
 
 // AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) AddIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsUpdateOne {
+func (bomuo *BillOfMaterialsUpdateOne) AddIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.AddIncludedOccurrenceIDs(ids...)
 	return bomuo
 }
 
 // AddIncludedOccurrences adds the "included_occurrences" edges to the Occurrence entity.
 func (bomuo *BillOfMaterialsUpdateOne) AddIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -888,14 +889,14 @@ func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedSoftwarePackages() *BillOfMa
 }
 
 // RemoveIncludedSoftwarePackageIDs removes the "included_software_packages" edge to PackageVersion entities by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsUpdateOne {
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.RemoveIncludedSoftwarePackageIDs(ids...)
 	return bomuo
 }
 
 // RemoveIncludedSoftwarePackages removes "included_software_packages" edges to PackageVersion entities.
 func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -909,14 +910,14 @@ func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedSoftwareArtifacts() *BillOfM
 }
 
 // RemoveIncludedSoftwareArtifactIDs removes the "included_software_artifacts" edge to Artifact entities by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsUpdateOne {
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.RemoveIncludedSoftwareArtifactIDs(ids...)
 	return bomuo
 }
 
 // RemoveIncludedSoftwareArtifacts removes "included_software_artifacts" edges to Artifact entities.
 func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -930,14 +931,14 @@ func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedDependencies() *BillOfMateri
 }
 
 // RemoveIncludedDependencyIDs removes the "included_dependencies" edge to Dependency entities by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedDependencyIDs(ids ...int) *BillOfMaterialsUpdateOne {
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.RemoveIncludedDependencyIDs(ids...)
 	return bomuo
 }
 
 // RemoveIncludedDependencies removes "included_dependencies" edges to Dependency entities.
 func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedDependencies(d ...*Dependency) *BillOfMaterialsUpdateOne {
-	ids := make([]int, len(d))
+	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -951,14 +952,14 @@ func (bomuo *BillOfMaterialsUpdateOne) ClearIncludedOccurrences() *BillOfMateria
 }
 
 // RemoveIncludedOccurrenceIDs removes the "included_occurrences" edge to Occurrence entities by IDs.
-func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsUpdateOne {
+func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.RemoveIncludedOccurrenceIDs(ids...)
 	return bomuo
 }
 
 // RemoveIncludedOccurrences removes "included_occurrences" edges to Occurrence entities.
 func (bomuo *BillOfMaterialsUpdateOne) RemoveIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -1006,7 +1007,7 @@ func (bomuo *BillOfMaterialsUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *BillOfMaterials, err error) {
-	_spec := sqlgraph.NewUpdateSpec(billofmaterials.Table, billofmaterials.Columns, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(billofmaterials.Table, billofmaterials.Columns, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID))
 	id, ok := bomuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "BillOfMaterials.id" for update`)}
@@ -1060,7 +1061,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: []string{billofmaterials.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1073,7 +1074,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: []string{billofmaterials.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1089,7 +1090,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: []string{billofmaterials.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1102,7 +1103,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: []string{billofmaterials.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1118,7 +1119,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1131,7 +1132,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1147,7 +1148,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1163,7 +1164,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1176,7 +1177,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1192,7 +1193,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1208,7 +1209,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1221,7 +1222,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1237,7 +1238,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1253,7 +1254,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1266,7 +1267,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1282,7 +1283,7 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

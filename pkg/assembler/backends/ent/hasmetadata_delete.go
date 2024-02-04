@@ -40,7 +40,7 @@ func (hmd *HasMetadataDelete) ExecX(ctx context.Context) int {
 }
 
 func (hmd *HasMetadataDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(hasmetadata.Table, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(hasmetadata.Table, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
 	if ps := hmd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // SourceNamespace holds the schema definition for the SourceNamespace entity.
@@ -30,8 +31,12 @@ type SourceNamespace struct {
 // Fields of the SourceNamespace.
 func (SourceNamespace) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			Unique().
+			Immutable(),
 		field.String("namespace"),
-		field.Int("source_id"),
+		field.UUID("source_id", uuid.New()),
 	}
 }
 

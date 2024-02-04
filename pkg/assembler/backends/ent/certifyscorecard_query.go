@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
@@ -131,8 +132,8 @@ func (csq *CertifyScorecardQuery) FirstX(ctx context.Context) *CertifyScorecard 
 
 // FirstID returns the first CertifyScorecard ID from the query.
 // Returns a *NotFoundError when no CertifyScorecard ID was found.
-func (csq *CertifyScorecardQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (csq *CertifyScorecardQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = csq.Limit(1).IDs(setContextOp(ctx, csq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -144,7 +145,7 @@ func (csq *CertifyScorecardQuery) FirstID(ctx context.Context) (id int, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) FirstIDX(ctx context.Context) int {
+func (csq *CertifyScorecardQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := csq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -182,8 +183,8 @@ func (csq *CertifyScorecardQuery) OnlyX(ctx context.Context) *CertifyScorecard {
 // OnlyID is like Only, but returns the only CertifyScorecard ID in the query.
 // Returns a *NotSingularError when more than one CertifyScorecard ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (csq *CertifyScorecardQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (csq *CertifyScorecardQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = csq.Limit(2).IDs(setContextOp(ctx, csq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -199,7 +200,7 @@ func (csq *CertifyScorecardQuery) OnlyID(ctx context.Context) (id int, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) OnlyIDX(ctx context.Context) int {
+func (csq *CertifyScorecardQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := csq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -227,7 +228,7 @@ func (csq *CertifyScorecardQuery) AllX(ctx context.Context) []*CertifyScorecard 
 }
 
 // IDs executes the query and returns a list of CertifyScorecard IDs.
-func (csq *CertifyScorecardQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (csq *CertifyScorecardQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if csq.ctx.Unique == nil && csq.path != nil {
 		csq.Unique(true)
 	}
@@ -239,7 +240,7 @@ func (csq *CertifyScorecardQuery) IDs(ctx context.Context) (ids []int, err error
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (csq *CertifyScorecardQuery) IDsX(ctx context.Context) []int {
+func (csq *CertifyScorecardQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := csq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -335,7 +336,7 @@ func (csq *CertifyScorecardQuery) WithSource(opts ...func(*SourceNameQuery)) *Ce
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		SourceID uuid.UUID `json:"source_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -358,7 +359,7 @@ func (csq *CertifyScorecardQuery) GroupBy(field string, fields ...string) *Certi
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		SourceID uuid.UUID `json:"source_id,omitempty"`
 //	}
 //
 //	client.CertifyScorecard.Query().
@@ -454,8 +455,8 @@ func (csq *CertifyScorecardQuery) sqlAll(ctx context.Context, hooks ...queryHook
 }
 
 func (csq *CertifyScorecardQuery) loadScorecard(ctx context.Context, query *ScorecardQuery, nodes []*CertifyScorecard, init func(*CertifyScorecard), assign func(*CertifyScorecard, *Scorecard)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*CertifyScorecard)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*CertifyScorecard)
 	for i := range nodes {
 		fk := nodes[i].ScorecardID
 		if _, ok := nodeids[fk]; !ok {
@@ -483,8 +484,8 @@ func (csq *CertifyScorecardQuery) loadScorecard(ctx context.Context, query *Scor
 	return nil
 }
 func (csq *CertifyScorecardQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*CertifyScorecard, init func(*CertifyScorecard), assign func(*CertifyScorecard, *SourceName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*CertifyScorecard)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*CertifyScorecard)
 	for i := range nodes {
 		fk := nodes[i].SourceID
 		if _, ok := nodeids[fk]; !ok {
@@ -525,7 +526,7 @@ func (csq *CertifyScorecardQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (csq *CertifyScorecardQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(certifyscorecard.Table, certifyscorecard.Columns, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(certifyscorecard.Table, certifyscorecard.Columns, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID))
 	_spec.From = csq.sql
 	if unique := csq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

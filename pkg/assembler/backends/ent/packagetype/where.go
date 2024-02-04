@@ -5,51 +5,52 @@ package packagetype
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.PackageType {
+func ID(id uuid.UUID) predicate.PackageType {
 	return predicate.PackageType(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.PackageType {
+func IDEQ(id uuid.UUID) predicate.PackageType {
 	return predicate.PackageType(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.PackageType {
+func IDNEQ(id uuid.UUID) predicate.PackageType {
 	return predicate.PackageType(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.PackageType {
+func IDIn(ids ...uuid.UUID) predicate.PackageType {
 	return predicate.PackageType(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.PackageType {
+func IDNotIn(ids ...uuid.UUID) predicate.PackageType {
 	return predicate.PackageType(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.PackageType {
+func IDGT(id uuid.UUID) predicate.PackageType {
 	return predicate.PackageType(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.PackageType {
+func IDGTE(id uuid.UUID) predicate.PackageType {
 	return predicate.PackageType(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.PackageType {
+func IDLT(id uuid.UUID) predicate.PackageType {
 	return predicate.PackageType(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.PackageType {
+func IDLTE(id uuid.UUID) predicate.PackageType {
 	return predicate.PackageType(sql.FieldLTE(FieldID, id))
 }
 

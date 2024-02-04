@@ -7,71 +7,72 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.HasMetadata {
+func ID(id uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.HasMetadata {
+func IDEQ(id uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.HasMetadata {
+func IDNEQ(id uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.HasMetadata {
+func IDIn(ids ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.HasMetadata {
+func IDNotIn(ids ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.HasMetadata {
+func IDGT(id uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.HasMetadata {
+func IDGTE(id uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.HasMetadata {
+func IDLT(id uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.HasMetadata {
+func IDLTE(id uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldLTE(FieldID, id))
 }
 
 // SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
-func SourceID(v int) predicate.HasMetadata {
+func SourceID(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldSourceID, v))
 }
 
 // PackageVersionID applies equality check predicate on the "package_version_id" field. It's identical to PackageVersionIDEQ.
-func PackageVersionID(v int) predicate.HasMetadata {
+func PackageVersionID(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldPackageVersionID, v))
 }
 
 // PackageNameID applies equality check predicate on the "package_name_id" field. It's identical to PackageNameIDEQ.
-func PackageNameID(v int) predicate.HasMetadata {
+func PackageNameID(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldPackageNameID, v))
 }
 
 // ArtifactID applies equality check predicate on the "artifact_id" field. It's identical to ArtifactIDEQ.
-func ArtifactID(v int) predicate.HasMetadata {
+func ArtifactID(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldArtifactID, v))
 }
 
@@ -106,22 +107,22 @@ func Collector(v string) predicate.HasMetadata {
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
-func SourceIDEQ(v int) predicate.HasMetadata {
+func SourceIDEQ(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldSourceID, v))
 }
 
 // SourceIDNEQ applies the NEQ predicate on the "source_id" field.
-func SourceIDNEQ(v int) predicate.HasMetadata {
+func SourceIDNEQ(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNEQ(FieldSourceID, v))
 }
 
 // SourceIDIn applies the In predicate on the "source_id" field.
-func SourceIDIn(vs ...int) predicate.HasMetadata {
+func SourceIDIn(vs ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldIn(FieldSourceID, vs...))
 }
 
 // SourceIDNotIn applies the NotIn predicate on the "source_id" field.
-func SourceIDNotIn(vs ...int) predicate.HasMetadata {
+func SourceIDNotIn(vs ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNotIn(FieldSourceID, vs...))
 }
 
@@ -136,22 +137,22 @@ func SourceIDNotNil() predicate.HasMetadata {
 }
 
 // PackageVersionIDEQ applies the EQ predicate on the "package_version_id" field.
-func PackageVersionIDEQ(v int) predicate.HasMetadata {
+func PackageVersionIDEQ(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldPackageVersionID, v))
 }
 
 // PackageVersionIDNEQ applies the NEQ predicate on the "package_version_id" field.
-func PackageVersionIDNEQ(v int) predicate.HasMetadata {
+func PackageVersionIDNEQ(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNEQ(FieldPackageVersionID, v))
 }
 
 // PackageVersionIDIn applies the In predicate on the "package_version_id" field.
-func PackageVersionIDIn(vs ...int) predicate.HasMetadata {
+func PackageVersionIDIn(vs ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldIn(FieldPackageVersionID, vs...))
 }
 
 // PackageVersionIDNotIn applies the NotIn predicate on the "package_version_id" field.
-func PackageVersionIDNotIn(vs ...int) predicate.HasMetadata {
+func PackageVersionIDNotIn(vs ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNotIn(FieldPackageVersionID, vs...))
 }
 
@@ -166,22 +167,22 @@ func PackageVersionIDNotNil() predicate.HasMetadata {
 }
 
 // PackageNameIDEQ applies the EQ predicate on the "package_name_id" field.
-func PackageNameIDEQ(v int) predicate.HasMetadata {
+func PackageNameIDEQ(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldPackageNameID, v))
 }
 
 // PackageNameIDNEQ applies the NEQ predicate on the "package_name_id" field.
-func PackageNameIDNEQ(v int) predicate.HasMetadata {
+func PackageNameIDNEQ(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNEQ(FieldPackageNameID, v))
 }
 
 // PackageNameIDIn applies the In predicate on the "package_name_id" field.
-func PackageNameIDIn(vs ...int) predicate.HasMetadata {
+func PackageNameIDIn(vs ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldIn(FieldPackageNameID, vs...))
 }
 
 // PackageNameIDNotIn applies the NotIn predicate on the "package_name_id" field.
-func PackageNameIDNotIn(vs ...int) predicate.HasMetadata {
+func PackageNameIDNotIn(vs ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNotIn(FieldPackageNameID, vs...))
 }
 
@@ -196,22 +197,22 @@ func PackageNameIDNotNil() predicate.HasMetadata {
 }
 
 // ArtifactIDEQ applies the EQ predicate on the "artifact_id" field.
-func ArtifactIDEQ(v int) predicate.HasMetadata {
+func ArtifactIDEQ(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDNEQ applies the NEQ predicate on the "artifact_id" field.
-func ArtifactIDNEQ(v int) predicate.HasMetadata {
+func ArtifactIDNEQ(v uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDIn applies the In predicate on the "artifact_id" field.
-func ArtifactIDIn(vs ...int) predicate.HasMetadata {
+func ArtifactIDIn(vs ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldIn(FieldArtifactID, vs...))
 }
 
 // ArtifactIDNotIn applies the NotIn predicate on the "artifact_id" field.
-func ArtifactIDNotIn(vs ...int) predicate.HasMetadata {
+func ArtifactIDNotIn(vs ...uuid.UUID) predicate.HasMetadata {
 	return predicate.HasMetadata(sql.FieldNotIn(FieldArtifactID, vs...))
 }
 

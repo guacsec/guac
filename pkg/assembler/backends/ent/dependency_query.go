@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -180,8 +181,8 @@ func (dq *DependencyQuery) FirstX(ctx context.Context) *Dependency {
 
 // FirstID returns the first Dependency ID from the query.
 // Returns a *NotFoundError when no Dependency ID was found.
-func (dq *DependencyQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (dq *DependencyQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = dq.Limit(1).IDs(setContextOp(ctx, dq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -193,7 +194,7 @@ func (dq *DependencyQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (dq *DependencyQuery) FirstIDX(ctx context.Context) int {
+func (dq *DependencyQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := dq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -231,8 +232,8 @@ func (dq *DependencyQuery) OnlyX(ctx context.Context) *Dependency {
 // OnlyID is like Only, but returns the only Dependency ID in the query.
 // Returns a *NotSingularError when more than one Dependency ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (dq *DependencyQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (dq *DependencyQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = dq.Limit(2).IDs(setContextOp(ctx, dq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -248,7 +249,7 @@ func (dq *DependencyQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (dq *DependencyQuery) OnlyIDX(ctx context.Context) int {
+func (dq *DependencyQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := dq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -276,7 +277,7 @@ func (dq *DependencyQuery) AllX(ctx context.Context) []*Dependency {
 }
 
 // IDs executes the query and returns a list of Dependency IDs.
-func (dq *DependencyQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (dq *DependencyQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if dq.ctx.Unique == nil && dq.path != nil {
 		dq.Unique(true)
 	}
@@ -288,7 +289,7 @@ func (dq *DependencyQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (dq *DependencyQuery) IDsX(ctx context.Context) []int {
+func (dq *DependencyQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := dq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -408,7 +409,7 @@ func (dq *DependencyQuery) WithIncludedInSboms(opts ...func(*BillOfMaterialsQuer
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -431,7 +432,7 @@ func (dq *DependencyQuery) GroupBy(field string, fields ...string) *DependencyGr
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //	}
 //
 //	client.Dependency.Query().
@@ -549,8 +550,8 @@ func (dq *DependencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*D
 }
 
 func (dq *DependencyQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*Dependency, init func(*Dependency), assign func(*Dependency, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Dependency)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Dependency)
 	for i := range nodes {
 		fk := nodes[i].PackageID
 		if _, ok := nodeids[fk]; !ok {
@@ -578,8 +579,8 @@ func (dq *DependencyQuery) loadPackage(ctx context.Context, query *PackageVersio
 	return nil
 }
 func (dq *DependencyQuery) loadDependentPackageName(ctx context.Context, query *PackageNameQuery, nodes []*Dependency, init func(*Dependency), assign func(*Dependency, *PackageName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Dependency)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Dependency)
 	for i := range nodes {
 		fk := nodes[i].DependentPackageNameID
 		if _, ok := nodeids[fk]; !ok {
@@ -607,8 +608,8 @@ func (dq *DependencyQuery) loadDependentPackageName(ctx context.Context, query *
 	return nil
 }
 func (dq *DependencyQuery) loadDependentPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*Dependency, init func(*Dependency), assign func(*Dependency, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Dependency)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Dependency)
 	for i := range nodes {
 		fk := nodes[i].DependentPackageVersionID
 		if _, ok := nodeids[fk]; !ok {
@@ -637,8 +638,8 @@ func (dq *DependencyQuery) loadDependentPackageVersion(ctx context.Context, quer
 }
 func (dq *DependencyQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Dependency, init func(*Dependency), assign func(*Dependency, *BillOfMaterials)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Dependency)
-	nids := make(map[int]map[*Dependency]struct{})
+	byID := make(map[uuid.UUID]*Dependency)
+	nids := make(map[uuid.UUID]map[*Dependency]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -667,11 +668,11 @@ func (dq *DependencyQuery) loadIncludedInSboms(ctx context.Context, query *BillO
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Dependency]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -710,7 +711,7 @@ func (dq *DependencyQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dq *DependencyQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(dependency.Table, dependency.Columns, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(dependency.Table, dependency.Columns, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID))
 	_spec.From = dq.sql
 	if unique := dq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

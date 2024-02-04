@@ -40,7 +40,7 @@ func (sad *SLSAAttestationDelete) ExecX(ctx context.Context) int {
 }
 
 func (sad *SLSAAttestationDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(slsaattestation.Table, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(slsaattestation.Table, sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID))
 	if ps := sad.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

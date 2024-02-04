@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -18,9 +19,9 @@ import (
 type PackageVersion struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// NameID holds the value of the "name_id" field.
-	NameID int `json:"name_id,omitempty"`
+	NameID uuid.UUID `json:"name_id,omitempty"`
 	// Version holds the value of the "version" field.
 	Version string `json:"version,omitempty"`
 	// Subpath holds the value of the "subpath" field.
@@ -115,10 +116,10 @@ func (*PackageVersion) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case packageversion.FieldQualifiers:
 			values[i] = new([]byte)
-		case packageversion.FieldID, packageversion.FieldNameID:
-			values[i] = new(sql.NullInt64)
 		case packageversion.FieldVersion, packageversion.FieldSubpath, packageversion.FieldHash:
 			values[i] = new(sql.NullString)
+		case packageversion.FieldID, packageversion.FieldNameID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -135,16 +136,16 @@ func (pv *PackageVersion) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case packageversion.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pv.ID = *value
 			}
-			pv.ID = int(value.Int64)
 		case packageversion.FieldNameID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field name_id", values[i])
-			} else if value.Valid {
-				pv.NameID = int(value.Int64)
+			} else if value != nil {
+				pv.NameID = *value
 			}
 		case packageversion.FieldVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -31,29 +32,29 @@ func (du *DependencyUpdate) Where(ps ...predicate.Dependency) *DependencyUpdate 
 }
 
 // SetPackageID sets the "package_id" field.
-func (du *DependencyUpdate) SetPackageID(i int) *DependencyUpdate {
-	du.mutation.SetPackageID(i)
+func (du *DependencyUpdate) SetPackageID(u uuid.UUID) *DependencyUpdate {
+	du.mutation.SetPackageID(u)
 	return du
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillablePackageID(i *int) *DependencyUpdate {
-	if i != nil {
-		du.SetPackageID(*i)
+func (du *DependencyUpdate) SetNillablePackageID(u *uuid.UUID) *DependencyUpdate {
+	if u != nil {
+		du.SetPackageID(*u)
 	}
 	return du
 }
 
 // SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (du *DependencyUpdate) SetDependentPackageNameID(i int) *DependencyUpdate {
-	du.mutation.SetDependentPackageNameID(i)
+func (du *DependencyUpdate) SetDependentPackageNameID(u uuid.UUID) *DependencyUpdate {
+	du.mutation.SetDependentPackageNameID(u)
 	return du
 }
 
 // SetNillableDependentPackageNameID sets the "dependent_package_name_id" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillableDependentPackageNameID(i *int) *DependencyUpdate {
-	if i != nil {
-		du.SetDependentPackageNameID(*i)
+func (du *DependencyUpdate) SetNillableDependentPackageNameID(u *uuid.UUID) *DependencyUpdate {
+	if u != nil {
+		du.SetDependentPackageNameID(*u)
 	}
 	return du
 }
@@ -65,15 +66,15 @@ func (du *DependencyUpdate) ClearDependentPackageNameID() *DependencyUpdate {
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (du *DependencyUpdate) SetDependentPackageVersionID(i int) *DependencyUpdate {
-	du.mutation.SetDependentPackageVersionID(i)
+func (du *DependencyUpdate) SetDependentPackageVersionID(u uuid.UUID) *DependencyUpdate {
+	du.mutation.SetDependentPackageVersionID(u)
 	return du
 }
 
 // SetNillableDependentPackageVersionID sets the "dependent_package_version_id" field if the given value is not nil.
-func (du *DependencyUpdate) SetNillableDependentPackageVersionID(i *int) *DependencyUpdate {
-	if i != nil {
-		du.SetDependentPackageVersionID(*i)
+func (du *DependencyUpdate) SetNillableDependentPackageVersionID(u *uuid.UUID) *DependencyUpdate {
+	if u != nil {
+		du.SetDependentPackageVersionID(*u)
 	}
 	return du
 }
@@ -170,14 +171,14 @@ func (du *DependencyUpdate) SetDependentPackageVersion(p *PackageVersion) *Depen
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (du *DependencyUpdate) AddIncludedInSbomIDs(ids ...int) *DependencyUpdate {
+func (du *DependencyUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdate {
 	du.mutation.AddIncludedInSbomIDs(ids...)
 	return du
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (du *DependencyUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -214,14 +215,14 @@ func (du *DependencyUpdate) ClearIncludedInSboms() *DependencyUpdate {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (du *DependencyUpdate) RemoveIncludedInSbomIDs(ids ...int) *DependencyUpdate {
+func (du *DependencyUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdate {
 	du.mutation.RemoveIncludedInSbomIDs(ids...)
 	return du
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
 func (du *DependencyUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -272,7 +273,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := du.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(dependency.Table, dependency.Columns, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(dependency.Table, dependency.Columns, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID))
 	if ps := du.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -303,7 +304,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{dependency.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -316,7 +317,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{dependency.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -332,7 +333,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{dependency.DependentPackageNameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -345,7 +346,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{dependency.DependentPackageNameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -361,7 +362,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{dependency.DependentPackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -374,7 +375,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{dependency.DependentPackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -390,7 +391,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: dependency.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -403,7 +404,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: dependency.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -419,7 +420,7 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: dependency.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -448,29 +449,29 @@ type DependencyUpdateOne struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (duo *DependencyUpdateOne) SetPackageID(i int) *DependencyUpdateOne {
-	duo.mutation.SetPackageID(i)
+func (duo *DependencyUpdateOne) SetPackageID(u uuid.UUID) *DependencyUpdateOne {
+	duo.mutation.SetPackageID(u)
 	return duo
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillablePackageID(i *int) *DependencyUpdateOne {
-	if i != nil {
-		duo.SetPackageID(*i)
+func (duo *DependencyUpdateOne) SetNillablePackageID(u *uuid.UUID) *DependencyUpdateOne {
+	if u != nil {
+		duo.SetPackageID(*u)
 	}
 	return duo
 }
 
 // SetDependentPackageNameID sets the "dependent_package_name_id" field.
-func (duo *DependencyUpdateOne) SetDependentPackageNameID(i int) *DependencyUpdateOne {
-	duo.mutation.SetDependentPackageNameID(i)
+func (duo *DependencyUpdateOne) SetDependentPackageNameID(u uuid.UUID) *DependencyUpdateOne {
+	duo.mutation.SetDependentPackageNameID(u)
 	return duo
 }
 
 // SetNillableDependentPackageNameID sets the "dependent_package_name_id" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillableDependentPackageNameID(i *int) *DependencyUpdateOne {
-	if i != nil {
-		duo.SetDependentPackageNameID(*i)
+func (duo *DependencyUpdateOne) SetNillableDependentPackageNameID(u *uuid.UUID) *DependencyUpdateOne {
+	if u != nil {
+		duo.SetDependentPackageNameID(*u)
 	}
 	return duo
 }
@@ -482,15 +483,15 @@ func (duo *DependencyUpdateOne) ClearDependentPackageNameID() *DependencyUpdateO
 }
 
 // SetDependentPackageVersionID sets the "dependent_package_version_id" field.
-func (duo *DependencyUpdateOne) SetDependentPackageVersionID(i int) *DependencyUpdateOne {
-	duo.mutation.SetDependentPackageVersionID(i)
+func (duo *DependencyUpdateOne) SetDependentPackageVersionID(u uuid.UUID) *DependencyUpdateOne {
+	duo.mutation.SetDependentPackageVersionID(u)
 	return duo
 }
 
 // SetNillableDependentPackageVersionID sets the "dependent_package_version_id" field if the given value is not nil.
-func (duo *DependencyUpdateOne) SetNillableDependentPackageVersionID(i *int) *DependencyUpdateOne {
-	if i != nil {
-		duo.SetDependentPackageVersionID(*i)
+func (duo *DependencyUpdateOne) SetNillableDependentPackageVersionID(u *uuid.UUID) *DependencyUpdateOne {
+	if u != nil {
+		duo.SetDependentPackageVersionID(*u)
 	}
 	return duo
 }
@@ -587,14 +588,14 @@ func (duo *DependencyUpdateOne) SetDependentPackageVersion(p *PackageVersion) *D
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (duo *DependencyUpdateOne) AddIncludedInSbomIDs(ids ...int) *DependencyUpdateOne {
+func (duo *DependencyUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdateOne {
 	duo.mutation.AddIncludedInSbomIDs(ids...)
 	return duo
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (duo *DependencyUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -631,14 +632,14 @@ func (duo *DependencyUpdateOne) ClearIncludedInSboms() *DependencyUpdateOne {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (duo *DependencyUpdateOne) RemoveIncludedInSbomIDs(ids ...int) *DependencyUpdateOne {
+func (duo *DependencyUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *DependencyUpdateOne {
 	duo.mutation.RemoveIncludedInSbomIDs(ids...)
 	return duo
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
 func (duo *DependencyUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *DependencyUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -702,7 +703,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 	if err := duo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(dependency.Table, dependency.Columns, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(dependency.Table, dependency.Columns, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID))
 	id, ok := duo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Dependency.id" for update`)}
@@ -750,7 +751,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Columns: []string{dependency.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -763,7 +764,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Columns: []string{dependency.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -779,7 +780,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Columns: []string{dependency.DependentPackageNameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -792,7 +793,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Columns: []string{dependency.DependentPackageNameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -808,7 +809,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Columns: []string{dependency.DependentPackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -821,7 +822,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Columns: []string{dependency.DependentPackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -837,7 +838,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Columns: dependency.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -850,7 +851,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Columns: dependency.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -866,7 +867,7 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 			Columns: dependency.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

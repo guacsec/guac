@@ -11,7 +11,7 @@ import (
 var (
 	// ArtifactsColumns holds the columns for the "artifacts" table.
 	ArtifactsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "algorithm", Type: field.TypeString},
 		{Name: "digest", Type: field.TypeString},
 	}
@@ -35,7 +35,7 @@ var (
 	}
 	// BillOfMaterialsColumns holds the columns for the "bill_of_materials" table.
 	BillOfMaterialsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "uri", Type: field.TypeString},
 		{Name: "algorithm", Type: field.TypeString},
 		{Name: "digest", Type: field.TypeString},
@@ -43,8 +43,8 @@ var (
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "known_since", Type: field.TypeTime},
-		{Name: "package_id", Type: field.TypeInt, Nullable: true},
-		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
+		{Name: "package_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// BillOfMaterialsTable holds the schema information for the "bill_of_materials" table.
 	BillOfMaterialsTable = &schema.Table{
@@ -86,7 +86,7 @@ var (
 	}
 	// BuildersColumns holds the columns for the "builders" table.
 	BuildersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "uri", Type: field.TypeString, Unique: true},
 	}
 	// BuildersTable holds the schema information for the "builders" table.
@@ -104,16 +104,16 @@ var (
 	}
 	// CertificationsColumns holds the columns for the "certifications" table.
 	CertificationsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"GOOD", "BAD"}, Default: "GOOD"},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "known_since", Type: field.TypeTime},
-		{Name: "source_id", Type: field.TypeInt, Nullable: true},
-		{Name: "package_version_id", Type: field.TypeInt, Nullable: true},
-		{Name: "package_name_id", Type: field.TypeInt, Nullable: true},
-		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
+		{Name: "source_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "package_version_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "package_name_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// CertificationsTable holds the schema information for the "certifications" table.
 	CertificationsTable = &schema.Table{
@@ -183,7 +183,7 @@ var (
 	}
 	// CertifyLegalsColumns holds the columns for the "certify_legals" table.
 	CertifyLegalsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "declared_license", Type: field.TypeString},
 		{Name: "discovered_license", Type: field.TypeString},
 		{Name: "attribution", Type: field.TypeString},
@@ -193,8 +193,8 @@ var (
 		{Name: "collector", Type: field.TypeString},
 		{Name: "declared_licenses_hash", Type: field.TypeString},
 		{Name: "discovered_licenses_hash", Type: field.TypeString},
-		{Name: "package_id", Type: field.TypeInt, Nullable: true},
-		{Name: "source_id", Type: field.TypeInt, Nullable: true},
+		{Name: "package_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "source_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// CertifyLegalsTable holds the schema information for the "certify_legals" table.
 	CertifyLegalsTable = &schema.Table{
@@ -236,9 +236,9 @@ var (
 	}
 	// CertifyScorecardsColumns holds the columns for the "certify_scorecards" table.
 	CertifyScorecardsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "source_id", Type: field.TypeInt},
-		{Name: "scorecard_id", Type: field.TypeInt},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "source_id", Type: field.TypeUUID},
+		{Name: "scorecard_id", Type: field.TypeUUID},
 	}
 	// CertifyScorecardsTable holds the schema information for the "certify_scorecards" table.
 	CertifyScorecardsTable = &schema.Table{
@@ -269,7 +269,7 @@ var (
 	}
 	// CertifyVexesColumns holds the columns for the "certify_vexes" table.
 	CertifyVexesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "known_since", Type: field.TypeTime},
 		{Name: "status", Type: field.TypeString},
 		{Name: "statement", Type: field.TypeString},
@@ -277,9 +277,9 @@ var (
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "package_id", Type: field.TypeInt, Nullable: true},
-		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
-		{Name: "vulnerability_id", Type: field.TypeInt},
+		{Name: "package_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "vulnerability_id", Type: field.TypeUUID},
 	}
 	// CertifyVexesTable holds the schema information for the "certify_vexes" table.
 	CertifyVexesTable = &schema.Table{
@@ -327,7 +327,7 @@ var (
 	}
 	// CertifyVulnsColumns holds the columns for the "certify_vulns" table.
 	CertifyVulnsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "time_scanned", Type: field.TypeTime},
 		{Name: "db_uri", Type: field.TypeString},
 		{Name: "db_version", Type: field.TypeString},
@@ -335,8 +335,8 @@ var (
 		{Name: "scanner_version", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "vulnerability_id", Type: field.TypeInt},
-		{Name: "package_id", Type: field.TypeInt},
+		{Name: "vulnerability_id", Type: field.TypeUUID},
+		{Name: "package_id", Type: field.TypeUUID},
 	}
 	// CertifyVulnsTable holds the schema information for the "certify_vulns" table.
 	CertifyVulnsTable = &schema.Table{
@@ -367,15 +367,15 @@ var (
 	}
 	// DependenciesColumns holds the columns for the "dependencies" table.
 	DependenciesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "version_range", Type: field.TypeString},
 		{Name: "dependency_type", Type: field.TypeEnum, Enums: []string{"DIRECT", "INDIRECT", "UNKNOWN"}},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "package_id", Type: field.TypeInt},
-		{Name: "dependent_package_name_id", Type: field.TypeInt, Nullable: true},
-		{Name: "dependent_package_version_id", Type: field.TypeInt, Nullable: true},
+		{Name: "package_id", Type: field.TypeUUID},
+		{Name: "dependent_package_name_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "dependent_package_version_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// DependenciesTable holds the schema information for the "dependencies" table.
 	DependenciesTable = &schema.Table{
@@ -423,17 +423,17 @@ var (
 	}
 	// HasMetadataColumns holds the columns for the "has_metadata" table.
 	HasMetadataColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "timestamp", Type: field.TypeTime},
 		{Name: "key", Type: field.TypeString},
 		{Name: "value", Type: field.TypeString},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "source_id", Type: field.TypeInt, Nullable: true},
-		{Name: "package_version_id", Type: field.TypeInt, Nullable: true},
-		{Name: "package_name_id", Type: field.TypeInt, Nullable: true},
-		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
+		{Name: "source_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "package_version_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "package_name_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// HasMetadataTable holds the schema information for the "has_metadata" table.
 	HasMetadataTable = &schema.Table{
@@ -503,14 +503,14 @@ var (
 	}
 	// HasSourceAtsColumns holds the columns for the "has_source_ats" table.
 	HasSourceAtsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "known_since", Type: field.TypeTime},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "package_version_id", Type: field.TypeInt, Nullable: true},
-		{Name: "package_name_id", Type: field.TypeInt, Nullable: true},
-		{Name: "source_id", Type: field.TypeInt},
+		{Name: "package_version_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "package_name_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "source_id", Type: field.TypeUUID},
 	}
 	// HasSourceAtsTable holds the schema information for the "has_source_ats" table.
 	HasSourceAtsTable = &schema.Table{
@@ -563,7 +563,7 @@ var (
 	}
 	// HashEqualsColumns holds the columns for the "hash_equals" table.
 	HashEqualsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "justification", Type: field.TypeString},
@@ -576,12 +576,12 @@ var (
 	}
 	// IsVulnerabilitiesColumns holds the columns for the "is_vulnerabilities" table.
 	IsVulnerabilitiesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "osv_id", Type: field.TypeInt},
-		{Name: "vulnerability_id", Type: field.TypeInt},
+		{Name: "osv_id", Type: field.TypeUUID},
+		{Name: "vulnerability_id", Type: field.TypeUUID},
 	}
 	// IsVulnerabilitiesTable holds the schema information for the "is_vulnerabilities" table.
 	IsVulnerabilitiesTable = &schema.Table{
@@ -612,7 +612,7 @@ var (
 	}
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "inline", Type: field.TypeString, Nullable: true},
 		{Name: "list_version", Type: field.TypeString, Nullable: true},
@@ -651,13 +651,13 @@ var (
 	}
 	// OccurrencesColumns holds the columns for the "occurrences" table.
 	OccurrencesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "artifact_id", Type: field.TypeInt},
-		{Name: "package_id", Type: field.TypeInt, Nullable: true},
-		{Name: "source_id", Type: field.TypeInt, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeUUID},
+		{Name: "package_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "source_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// OccurrencesTable holds the schema information for the "occurrences" table.
 	OccurrencesTable = &schema.Table{
@@ -705,9 +705,9 @@ var (
 	}
 	// PackageNamesColumns holds the columns for the "package_names" table.
 	PackageNamesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "namespace_id", Type: field.TypeInt},
+		{Name: "namespace_id", Type: field.TypeUUID},
 	}
 	// PackageNamesTable holds the schema information for the "package_names" table.
 	PackageNamesTable = &schema.Table{
@@ -732,9 +732,9 @@ var (
 	}
 	// PackageNamespacesColumns holds the columns for the "package_namespaces" table.
 	PackageNamespacesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "namespace", Type: field.TypeString},
-		{Name: "package_id", Type: field.TypeInt},
+		{Name: "package_id", Type: field.TypeUUID},
 	}
 	// PackageNamespacesTable holds the schema information for the "package_namespaces" table.
 	PackageNamespacesTable = &schema.Table{
@@ -759,7 +759,7 @@ var (
 	}
 	// PackageTypesColumns holds the columns for the "package_types" table.
 	PackageTypesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "type", Type: field.TypeString, Unique: true},
 	}
 	// PackageTypesTable holds the schema information for the "package_types" table.
@@ -770,12 +770,12 @@ var (
 	}
 	// PackageVersionsColumns holds the columns for the "package_versions" table.
 	PackageVersionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "version", Type: field.TypeString, Default: ""},
 		{Name: "subpath", Type: field.TypeString, Default: ""},
 		{Name: "qualifiers", Type: field.TypeJSON, Nullable: true},
 		{Name: "hash", Type: field.TypeString},
-		{Name: "name_id", Type: field.TypeInt},
+		{Name: "name_id", Type: field.TypeUUID},
 	}
 	// PackageVersionsTable holds the schema information for the "package_versions" table.
 	PackageVersionsTable = &schema.Table{
@@ -815,7 +815,7 @@ var (
 	}
 	// PkgEqualsColumns holds the columns for the "pkg_equals" table.
 	PkgEqualsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "justification", Type: field.TypeString},
@@ -836,17 +836,17 @@ var (
 	}
 	// PointOfContactsColumns holds the columns for the "point_of_contacts" table.
 	PointOfContactsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "email", Type: field.TypeString},
 		{Name: "info", Type: field.TypeString},
 		{Name: "since", Type: field.TypeTime},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "source_id", Type: field.TypeInt, Nullable: true},
-		{Name: "package_version_id", Type: field.TypeInt, Nullable: true},
-		{Name: "package_name_id", Type: field.TypeInt, Nullable: true},
-		{Name: "artifact_id", Type: field.TypeInt, Nullable: true},
+		{Name: "source_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "package_version_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "package_name_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "artifact_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// PointOfContactsTable holds the schema information for the "point_of_contacts" table.
 	PointOfContactsTable = &schema.Table{
@@ -916,7 +916,7 @@ var (
 	}
 	// SlsaAttestationsColumns holds the columns for the "slsa_attestations" table.
 	SlsaAttestationsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "build_type", Type: field.TypeString},
 		{Name: "slsa_predicate", Type: field.TypeJSON, Nullable: true},
 		{Name: "slsa_version", Type: field.TypeString},
@@ -925,8 +925,8 @@ var (
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "built_from_hash", Type: field.TypeString},
-		{Name: "built_by_id", Type: field.TypeInt},
-		{Name: "subject_id", Type: field.TypeInt},
+		{Name: "built_by_id", Type: field.TypeUUID},
+		{Name: "subject_id", Type: field.TypeUUID},
 	}
 	// SlsaAttestationsTable holds the schema information for the "slsa_attestations" table.
 	SlsaAttestationsTable = &schema.Table{
@@ -967,7 +967,7 @@ var (
 	}
 	// ScorecardsColumns holds the columns for the "scorecards" table.
 	ScorecardsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "checks", Type: field.TypeJSON},
 		{Name: "aggregate_score", Type: field.TypeFloat64, Default: 0},
 		{Name: "time_scanned", Type: field.TypeTime},
@@ -991,11 +991,11 @@ var (
 	}
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "commit", Type: field.TypeString, Nullable: true},
 		{Name: "tag", Type: field.TypeString, Nullable: true},
-		{Name: "namespace_id", Type: field.TypeInt},
+		{Name: "namespace_id", Type: field.TypeUUID},
 	}
 	// SourceNamesTable holds the schema information for the "source_names" table.
 	SourceNamesTable = &schema.Table{
@@ -1020,9 +1020,9 @@ var (
 	}
 	// SourceNamespacesColumns holds the columns for the "source_namespaces" table.
 	SourceNamespacesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "namespace", Type: field.TypeString},
-		{Name: "source_id", Type: field.TypeInt},
+		{Name: "source_id", Type: field.TypeUUID},
 	}
 	// SourceNamespacesTable holds the schema information for the "source_namespaces" table.
 	SourceNamespacesTable = &schema.Table{
@@ -1047,7 +1047,7 @@ var (
 	}
 	// SourceTypesColumns holds the columns for the "source_types" table.
 	SourceTypesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "type", Type: field.TypeString, Unique: true},
 	}
 	// SourceTypesTable holds the schema information for the "source_types" table.
@@ -1058,7 +1058,7 @@ var (
 	}
 	// VulnEqualsColumns holds the columns for the "vuln_equals" table.
 	VulnEqualsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
@@ -1071,9 +1071,9 @@ var (
 	}
 	// VulnerabilityIdsColumns holds the columns for the "vulnerability_ids" table.
 	VulnerabilityIdsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "vulnerability_id", Type: field.TypeString},
-		{Name: "type_id", Type: field.TypeInt},
+		{Name: "type_id", Type: field.TypeUUID},
 	}
 	// VulnerabilityIdsTable holds the schema information for the "vulnerability_ids" table.
 	VulnerabilityIdsTable = &schema.Table{
@@ -1098,13 +1098,13 @@ var (
 	}
 	// VulnerabilityMetadataColumns holds the columns for the "vulnerability_metadata" table.
 	VulnerabilityMetadataColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "score_type", Type: field.TypeEnum, Enums: []string{"CVSSv2", "CVSSv3", "EPSSv1", "EPSSv2", "CVSSv31", "CVSSv4", "OWASP", "SSVC"}},
 		{Name: "score_value", Type: field.TypeFloat64},
 		{Name: "timestamp", Type: field.TypeTime},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "vulnerability_id_id", Type: field.TypeInt},
+		{Name: "vulnerability_id_id", Type: field.TypeUUID},
 	}
 	// VulnerabilityMetadataTable holds the schema information for the "vulnerability_metadata" table.
 	VulnerabilityMetadataTable = &schema.Table{
@@ -1129,7 +1129,7 @@ var (
 	}
 	// VulnerabilityTypesColumns holds the columns for the "vulnerability_types" table.
 	VulnerabilityTypesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "type", Type: field.TypeString},
 	}
 	// VulnerabilityTypesTable holds the schema information for the "vulnerability_types" table.
@@ -1147,8 +1147,8 @@ var (
 	}
 	// BillOfMaterialsIncludedSoftwarePackagesColumns holds the columns for the "bill_of_materials_included_software_packages" table.
 	BillOfMaterialsIncludedSoftwarePackagesColumns = []*schema.Column{
-		{Name: "bill_of_materials_id", Type: field.TypeInt},
-		{Name: "package_version_id", Type: field.TypeInt},
+		{Name: "bill_of_materials_id", Type: field.TypeUUID},
+		{Name: "package_version_id", Type: field.TypeUUID},
 	}
 	// BillOfMaterialsIncludedSoftwarePackagesTable holds the schema information for the "bill_of_materials_included_software_packages" table.
 	BillOfMaterialsIncludedSoftwarePackagesTable = &schema.Table{
@@ -1172,8 +1172,8 @@ var (
 	}
 	// BillOfMaterialsIncludedSoftwareArtifactsColumns holds the columns for the "bill_of_materials_included_software_artifacts" table.
 	BillOfMaterialsIncludedSoftwareArtifactsColumns = []*schema.Column{
-		{Name: "bill_of_materials_id", Type: field.TypeInt},
-		{Name: "artifact_id", Type: field.TypeInt},
+		{Name: "bill_of_materials_id", Type: field.TypeUUID},
+		{Name: "artifact_id", Type: field.TypeUUID},
 	}
 	// BillOfMaterialsIncludedSoftwareArtifactsTable holds the schema information for the "bill_of_materials_included_software_artifacts" table.
 	BillOfMaterialsIncludedSoftwareArtifactsTable = &schema.Table{
@@ -1197,8 +1197,8 @@ var (
 	}
 	// BillOfMaterialsIncludedDependenciesColumns holds the columns for the "bill_of_materials_included_dependencies" table.
 	BillOfMaterialsIncludedDependenciesColumns = []*schema.Column{
-		{Name: "bill_of_materials_id", Type: field.TypeInt},
-		{Name: "dependency_id", Type: field.TypeInt},
+		{Name: "bill_of_materials_id", Type: field.TypeUUID},
+		{Name: "dependency_id", Type: field.TypeUUID},
 	}
 	// BillOfMaterialsIncludedDependenciesTable holds the schema information for the "bill_of_materials_included_dependencies" table.
 	BillOfMaterialsIncludedDependenciesTable = &schema.Table{
@@ -1222,8 +1222,8 @@ var (
 	}
 	// BillOfMaterialsIncludedOccurrencesColumns holds the columns for the "bill_of_materials_included_occurrences" table.
 	BillOfMaterialsIncludedOccurrencesColumns = []*schema.Column{
-		{Name: "bill_of_materials_id", Type: field.TypeInt},
-		{Name: "occurrence_id", Type: field.TypeInt},
+		{Name: "bill_of_materials_id", Type: field.TypeUUID},
+		{Name: "occurrence_id", Type: field.TypeUUID},
 	}
 	// BillOfMaterialsIncludedOccurrencesTable holds the schema information for the "bill_of_materials_included_occurrences" table.
 	BillOfMaterialsIncludedOccurrencesTable = &schema.Table{
@@ -1247,8 +1247,8 @@ var (
 	}
 	// CertifyLegalDeclaredLicensesColumns holds the columns for the "certify_legal_declared_licenses" table.
 	CertifyLegalDeclaredLicensesColumns = []*schema.Column{
-		{Name: "certify_legal_id", Type: field.TypeInt},
-		{Name: "license_id", Type: field.TypeInt},
+		{Name: "certify_legal_id", Type: field.TypeUUID},
+		{Name: "license_id", Type: field.TypeUUID},
 	}
 	// CertifyLegalDeclaredLicensesTable holds the schema information for the "certify_legal_declared_licenses" table.
 	CertifyLegalDeclaredLicensesTable = &schema.Table{
@@ -1272,8 +1272,8 @@ var (
 	}
 	// CertifyLegalDiscoveredLicensesColumns holds the columns for the "certify_legal_discovered_licenses" table.
 	CertifyLegalDiscoveredLicensesColumns = []*schema.Column{
-		{Name: "certify_legal_id", Type: field.TypeInt},
-		{Name: "license_id", Type: field.TypeInt},
+		{Name: "certify_legal_id", Type: field.TypeUUID},
+		{Name: "license_id", Type: field.TypeUUID},
 	}
 	// CertifyLegalDiscoveredLicensesTable holds the schema information for the "certify_legal_discovered_licenses" table.
 	CertifyLegalDiscoveredLicensesTable = &schema.Table{
@@ -1297,8 +1297,8 @@ var (
 	}
 	// HashEqualArtifactsColumns holds the columns for the "hash_equal_artifacts" table.
 	HashEqualArtifactsColumns = []*schema.Column{
-		{Name: "hash_equal_id", Type: field.TypeInt},
-		{Name: "artifact_id", Type: field.TypeInt},
+		{Name: "hash_equal_id", Type: field.TypeUUID},
+		{Name: "artifact_id", Type: field.TypeUUID},
 	}
 	// HashEqualArtifactsTable holds the schema information for the "hash_equal_artifacts" table.
 	HashEqualArtifactsTable = &schema.Table{
@@ -1322,8 +1322,8 @@ var (
 	}
 	// PkgEqualPackagesColumns holds the columns for the "pkg_equal_packages" table.
 	PkgEqualPackagesColumns = []*schema.Column{
-		{Name: "pkg_equal_id", Type: field.TypeInt},
-		{Name: "package_version_id", Type: field.TypeInt},
+		{Name: "pkg_equal_id", Type: field.TypeUUID},
+		{Name: "package_version_id", Type: field.TypeUUID},
 	}
 	// PkgEqualPackagesTable holds the schema information for the "pkg_equal_packages" table.
 	PkgEqualPackagesTable = &schema.Table{
@@ -1347,8 +1347,8 @@ var (
 	}
 	// SlsaAttestationBuiltFromColumns holds the columns for the "slsa_attestation_built_from" table.
 	SlsaAttestationBuiltFromColumns = []*schema.Column{
-		{Name: "slsa_attestation_id", Type: field.TypeInt},
-		{Name: "artifact_id", Type: field.TypeInt},
+		{Name: "slsa_attestation_id", Type: field.TypeUUID},
+		{Name: "artifact_id", Type: field.TypeUUID},
 	}
 	// SlsaAttestationBuiltFromTable holds the schema information for the "slsa_attestation_built_from" table.
 	SlsaAttestationBuiltFromTable = &schema.Table{
@@ -1372,8 +1372,8 @@ var (
 	}
 	// VulnEqualVulnerabilityIdsColumns holds the columns for the "vuln_equal_vulnerability_ids" table.
 	VulnEqualVulnerabilityIdsColumns = []*schema.Column{
-		{Name: "vuln_equal_id", Type: field.TypeInt},
-		{Name: "vulnerability_id_id", Type: field.TypeInt},
+		{Name: "vuln_equal_id", Type: field.TypeUUID},
+		{Name: "vulnerability_id_id", Type: field.TypeUUID},
 	}
 	// VulnEqualVulnerabilityIdsTable holds the schema information for the "vuln_equal_vulnerability_ids" table.
 	VulnEqualVulnerabilityIdsTable = &schema.Table{

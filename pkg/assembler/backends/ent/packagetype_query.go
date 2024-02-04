@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -109,8 +110,8 @@ func (ptq *PackageTypeQuery) FirstX(ctx context.Context) *PackageType {
 
 // FirstID returns the first PackageType ID from the query.
 // Returns a *NotFoundError when no PackageType ID was found.
-func (ptq *PackageTypeQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (ptq *PackageTypeQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = ptq.Limit(1).IDs(setContextOp(ctx, ptq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -122,7 +123,7 @@ func (ptq *PackageTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (ptq *PackageTypeQuery) FirstIDX(ctx context.Context) int {
+func (ptq *PackageTypeQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := ptq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +161,8 @@ func (ptq *PackageTypeQuery) OnlyX(ctx context.Context) *PackageType {
 // OnlyID is like Only, but returns the only PackageType ID in the query.
 // Returns a *NotSingularError when more than one PackageType ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (ptq *PackageTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (ptq *PackageTypeQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = ptq.Limit(2).IDs(setContextOp(ctx, ptq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -177,7 +178,7 @@ func (ptq *PackageTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (ptq *PackageTypeQuery) OnlyIDX(ctx context.Context) int {
+func (ptq *PackageTypeQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := ptq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -205,7 +206,7 @@ func (ptq *PackageTypeQuery) AllX(ctx context.Context) []*PackageType {
 }
 
 // IDs executes the query and returns a list of PackageType IDs.
-func (ptq *PackageTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (ptq *PackageTypeQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if ptq.ctx.Unique == nil && ptq.path != nil {
 		ptq.Unique(true)
 	}
@@ -217,7 +218,7 @@ func (ptq *PackageTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (ptq *PackageTypeQuery) IDsX(ctx context.Context) []int {
+func (ptq *PackageTypeQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := ptq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -422,7 +423,7 @@ func (ptq *PackageTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 
 func (ptq *PackageTypeQuery) loadNamespaces(ctx context.Context, query *PackageNamespaceQuery, nodes []*PackageType, init func(*PackageType), assign func(*PackageType, *PackageNamespace)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*PackageType)
+	nodeids := make(map[uuid.UUID]*PackageType)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -464,7 +465,7 @@ func (ptq *PackageTypeQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (ptq *PackageTypeQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(packagetype.Table, packagetype.Columns, sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(packagetype.Table, packagetype.Columns, sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeUUID))
 	_spec.From = ptq.sql
 	if unique := ptq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

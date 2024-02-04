@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -179,8 +180,8 @@ func (hmq *HasMetadataQuery) FirstX(ctx context.Context) *HasMetadata {
 
 // FirstID returns the first HasMetadata ID from the query.
 // Returns a *NotFoundError when no HasMetadata ID was found.
-func (hmq *HasMetadataQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (hmq *HasMetadataQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = hmq.Limit(1).IDs(setContextOp(ctx, hmq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -192,7 +193,7 @@ func (hmq *HasMetadataQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (hmq *HasMetadataQuery) FirstIDX(ctx context.Context) int {
+func (hmq *HasMetadataQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := hmq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -230,8 +231,8 @@ func (hmq *HasMetadataQuery) OnlyX(ctx context.Context) *HasMetadata {
 // OnlyID is like Only, but returns the only HasMetadata ID in the query.
 // Returns a *NotSingularError when more than one HasMetadata ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (hmq *HasMetadataQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (hmq *HasMetadataQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = hmq.Limit(2).IDs(setContextOp(ctx, hmq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -247,7 +248,7 @@ func (hmq *HasMetadataQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (hmq *HasMetadataQuery) OnlyIDX(ctx context.Context) int {
+func (hmq *HasMetadataQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := hmq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -275,7 +276,7 @@ func (hmq *HasMetadataQuery) AllX(ctx context.Context) []*HasMetadata {
 }
 
 // IDs executes the query and returns a list of HasMetadata IDs.
-func (hmq *HasMetadataQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (hmq *HasMetadataQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if hmq.ctx.Unique == nil && hmq.path != nil {
 		hmq.Unique(true)
 	}
@@ -287,7 +288,7 @@ func (hmq *HasMetadataQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (hmq *HasMetadataQuery) IDsX(ctx context.Context) []int {
+func (hmq *HasMetadataQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := hmq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -407,7 +408,7 @@ func (hmq *HasMetadataQuery) WithArtifact(opts ...func(*ArtifactQuery)) *HasMeta
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		SourceID uuid.UUID `json:"source_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -430,7 +431,7 @@ func (hmq *HasMetadataQuery) GroupBy(field string, fields ...string) *HasMetadat
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		SourceID uuid.UUID `json:"source_id,omitempty"`
 //	}
 //
 //	client.HasMetadata.Query().
@@ -540,8 +541,8 @@ func (hmq *HasMetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 }
 
 func (hmq *HasMetadataQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *SourceName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*HasMetadata)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*HasMetadata)
 	for i := range nodes {
 		if nodes[i].SourceID == nil {
 			continue
@@ -572,8 +573,8 @@ func (hmq *HasMetadataQuery) loadSource(ctx context.Context, query *SourceNameQu
 	return nil
 }
 func (hmq *HasMetadataQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*HasMetadata)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*HasMetadata)
 	for i := range nodes {
 		if nodes[i].PackageVersionID == nil {
 			continue
@@ -604,8 +605,8 @@ func (hmq *HasMetadataQuery) loadPackageVersion(ctx context.Context, query *Pack
 	return nil
 }
 func (hmq *HasMetadataQuery) loadAllVersions(ctx context.Context, query *PackageNameQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *PackageName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*HasMetadata)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*HasMetadata)
 	for i := range nodes {
 		if nodes[i].PackageNameID == nil {
 			continue
@@ -636,8 +637,8 @@ func (hmq *HasMetadataQuery) loadAllVersions(ctx context.Context, query *Package
 	return nil
 }
 func (hmq *HasMetadataQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*HasMetadata, init func(*HasMetadata), assign func(*HasMetadata, *Artifact)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*HasMetadata)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*HasMetadata)
 	for i := range nodes {
 		if nodes[i].ArtifactID == nil {
 			continue
@@ -681,7 +682,7 @@ func (hmq *HasMetadataQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (hmq *HasMetadataQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(hasmetadata.Table, hasmetadata.Columns, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(hasmetadata.Table, hasmetadata.Columns, sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID))
 	_spec.From = hmq.sql
 	if unique := hmq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

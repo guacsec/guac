@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -179,8 +180,8 @@ func (pocq *PointOfContactQuery) FirstX(ctx context.Context) *PointOfContact {
 
 // FirstID returns the first PointOfContact ID from the query.
 // Returns a *NotFoundError when no PointOfContact ID was found.
-func (pocq *PointOfContactQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pocq *PointOfContactQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pocq.Limit(1).IDs(setContextOp(ctx, pocq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -192,7 +193,7 @@ func (pocq *PointOfContactQuery) FirstID(ctx context.Context) (id int, err error
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pocq *PointOfContactQuery) FirstIDX(ctx context.Context) int {
+func (pocq *PointOfContactQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := pocq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -230,8 +231,8 @@ func (pocq *PointOfContactQuery) OnlyX(ctx context.Context) *PointOfContact {
 // OnlyID is like Only, but returns the only PointOfContact ID in the query.
 // Returns a *NotSingularError when more than one PointOfContact ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pocq *PointOfContactQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pocq *PointOfContactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pocq.Limit(2).IDs(setContextOp(ctx, pocq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -247,7 +248,7 @@ func (pocq *PointOfContactQuery) OnlyID(ctx context.Context) (id int, err error)
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pocq *PointOfContactQuery) OnlyIDX(ctx context.Context) int {
+func (pocq *PointOfContactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := pocq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -275,7 +276,7 @@ func (pocq *PointOfContactQuery) AllX(ctx context.Context) []*PointOfContact {
 }
 
 // IDs executes the query and returns a list of PointOfContact IDs.
-func (pocq *PointOfContactQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (pocq *PointOfContactQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if pocq.ctx.Unique == nil && pocq.path != nil {
 		pocq.Unique(true)
 	}
@@ -287,7 +288,7 @@ func (pocq *PointOfContactQuery) IDs(ctx context.Context) (ids []int, err error)
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pocq *PointOfContactQuery) IDsX(ctx context.Context) []int {
+func (pocq *PointOfContactQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := pocq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -407,7 +408,7 @@ func (pocq *PointOfContactQuery) WithArtifact(opts ...func(*ArtifactQuery)) *Poi
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		SourceID uuid.UUID `json:"source_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -430,7 +431,7 @@ func (pocq *PointOfContactQuery) GroupBy(field string, fields ...string) *PointO
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		SourceID uuid.UUID `json:"source_id,omitempty"`
 //	}
 //
 //	client.PointOfContact.Query().
@@ -540,8 +541,8 @@ func (pocq *PointOfContactQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 }
 
 func (pocq *PointOfContactQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *SourceName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*PointOfContact)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PointOfContact)
 	for i := range nodes {
 		if nodes[i].SourceID == nil {
 			continue
@@ -572,8 +573,8 @@ func (pocq *PointOfContactQuery) loadSource(ctx context.Context, query *SourceNa
 	return nil
 }
 func (pocq *PointOfContactQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*PointOfContact)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PointOfContact)
 	for i := range nodes {
 		if nodes[i].PackageVersionID == nil {
 			continue
@@ -604,8 +605,8 @@ func (pocq *PointOfContactQuery) loadPackageVersion(ctx context.Context, query *
 	return nil
 }
 func (pocq *PointOfContactQuery) loadAllVersions(ctx context.Context, query *PackageNameQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *PackageName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*PointOfContact)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PointOfContact)
 	for i := range nodes {
 		if nodes[i].PackageNameID == nil {
 			continue
@@ -636,8 +637,8 @@ func (pocq *PointOfContactQuery) loadAllVersions(ctx context.Context, query *Pac
 	return nil
 }
 func (pocq *PointOfContactQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*PointOfContact, init func(*PointOfContact), assign func(*PointOfContact, *Artifact)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*PointOfContact)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PointOfContact)
 	for i := range nodes {
 		if nodes[i].ArtifactID == nil {
 			continue
@@ -681,7 +682,7 @@ func (pocq *PointOfContactQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pocq *PointOfContactQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(pointofcontact.Table, pointofcontact.Columns, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(pointofcontact.Table, pointofcontact.Columns, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
 	_spec.From = pocq.sql
 	if unique := pocq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

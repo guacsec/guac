@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -34,15 +35,15 @@ func (pvu *PackageVersionUpdate) Where(ps ...predicate.PackageVersion) *PackageV
 }
 
 // SetNameID sets the "name_id" field.
-func (pvu *PackageVersionUpdate) SetNameID(i int) *PackageVersionUpdate {
-	pvu.mutation.SetNameID(i)
+func (pvu *PackageVersionUpdate) SetNameID(u uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.SetNameID(u)
 	return pvu
 }
 
 // SetNillableNameID sets the "name_id" field if the given value is not nil.
-func (pvu *PackageVersionUpdate) SetNillableNameID(i *int) *PackageVersionUpdate {
-	if i != nil {
-		pvu.SetNameID(*i)
+func (pvu *PackageVersionUpdate) SetNillableNameID(u *uuid.UUID) *PackageVersionUpdate {
+	if u != nil {
+		pvu.SetNameID(*u)
 	}
 	return pvu
 }
@@ -113,14 +114,14 @@ func (pvu *PackageVersionUpdate) SetName(p *PackageName) *PackageVersionUpdate {
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (pvu *PackageVersionUpdate) AddOccurrenceIDs(ids ...int) *PackageVersionUpdate {
+func (pvu *PackageVersionUpdate) AddOccurrenceIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.AddOccurrenceIDs(ids...)
 	return pvu
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
 func (pvu *PackageVersionUpdate) AddOccurrences(o ...*Occurrence) *PackageVersionUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -128,14 +129,14 @@ func (pvu *PackageVersionUpdate) AddOccurrences(o ...*Occurrence) *PackageVersio
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (pvu *PackageVersionUpdate) AddSbomIDs(ids ...int) *PackageVersionUpdate {
+func (pvu *PackageVersionUpdate) AddSbomIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.AddSbomIDs(ids...)
 	return pvu
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
 func (pvu *PackageVersionUpdate) AddSbom(b ...*BillOfMaterials) *PackageVersionUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -143,14 +144,14 @@ func (pvu *PackageVersionUpdate) AddSbom(b ...*BillOfMaterials) *PackageVersionU
 }
 
 // AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by IDs.
-func (pvu *PackageVersionUpdate) AddEqualPackageIDs(ids ...int) *PackageVersionUpdate {
+func (pvu *PackageVersionUpdate) AddEqualPackageIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.AddEqualPackageIDs(ids...)
 	return pvu
 }
 
 // AddEqualPackages adds the "equal_packages" edges to the PkgEqual entity.
 func (pvu *PackageVersionUpdate) AddEqualPackages(p ...*PkgEqual) *PackageVersionUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -158,14 +159,14 @@ func (pvu *PackageVersionUpdate) AddEqualPackages(p ...*PkgEqual) *PackageVersio
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (pvu *PackageVersionUpdate) AddIncludedInSbomIDs(ids ...int) *PackageVersionUpdate {
+func (pvu *PackageVersionUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.AddIncludedInSbomIDs(ids...)
 	return pvu
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (pvu *PackageVersionUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *PackageVersionUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -190,14 +191,14 @@ func (pvu *PackageVersionUpdate) ClearOccurrences() *PackageVersionUpdate {
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (pvu *PackageVersionUpdate) RemoveOccurrenceIDs(ids ...int) *PackageVersionUpdate {
+func (pvu *PackageVersionUpdate) RemoveOccurrenceIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.RemoveOccurrenceIDs(ids...)
 	return pvu
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
 func (pvu *PackageVersionUpdate) RemoveOccurrences(o ...*Occurrence) *PackageVersionUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -211,14 +212,14 @@ func (pvu *PackageVersionUpdate) ClearSbom() *PackageVersionUpdate {
 }
 
 // RemoveSbomIDs removes the "sbom" edge to BillOfMaterials entities by IDs.
-func (pvu *PackageVersionUpdate) RemoveSbomIDs(ids ...int) *PackageVersionUpdate {
+func (pvu *PackageVersionUpdate) RemoveSbomIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.RemoveSbomIDs(ids...)
 	return pvu
 }
 
 // RemoveSbom removes "sbom" edges to BillOfMaterials entities.
 func (pvu *PackageVersionUpdate) RemoveSbom(b ...*BillOfMaterials) *PackageVersionUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -232,14 +233,14 @@ func (pvu *PackageVersionUpdate) ClearEqualPackages() *PackageVersionUpdate {
 }
 
 // RemoveEqualPackageIDs removes the "equal_packages" edge to PkgEqual entities by IDs.
-func (pvu *PackageVersionUpdate) RemoveEqualPackageIDs(ids ...int) *PackageVersionUpdate {
+func (pvu *PackageVersionUpdate) RemoveEqualPackageIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.RemoveEqualPackageIDs(ids...)
 	return pvu
 }
 
 // RemoveEqualPackages removes "equal_packages" edges to PkgEqual entities.
 func (pvu *PackageVersionUpdate) RemoveEqualPackages(p ...*PkgEqual) *PackageVersionUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -253,14 +254,14 @@ func (pvu *PackageVersionUpdate) ClearIncludedInSboms() *PackageVersionUpdate {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (pvu *PackageVersionUpdate) RemoveIncludedInSbomIDs(ids ...int) *PackageVersionUpdate {
+func (pvu *PackageVersionUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.RemoveIncludedInSbomIDs(ids...)
 	return pvu
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
 func (pvu *PackageVersionUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *PackageVersionUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -306,7 +307,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 	if err := pvu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(packageversion.Table, packageversion.Columns, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(packageversion.Table, packageversion.Columns, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID))
 	if ps := pvu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -342,7 +343,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{packageversion.NameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -355,7 +356,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{packageversion.NameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -371,7 +372,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{packageversion.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -384,7 +385,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{packageversion.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -400,7 +401,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{packageversion.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -416,7 +417,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{packageversion.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -429,7 +430,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{packageversion.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -445,7 +446,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{packageversion.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -461,7 +462,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: packageversion.EqualPackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -474,7 +475,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: packageversion.EqualPackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -490,7 +491,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: packageversion.EqualPackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -506,7 +507,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: packageversion.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -519,7 +520,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: packageversion.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -535,7 +536,7 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: packageversion.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -564,15 +565,15 @@ type PackageVersionUpdateOne struct {
 }
 
 // SetNameID sets the "name_id" field.
-func (pvuo *PackageVersionUpdateOne) SetNameID(i int) *PackageVersionUpdateOne {
-	pvuo.mutation.SetNameID(i)
+func (pvuo *PackageVersionUpdateOne) SetNameID(u uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.SetNameID(u)
 	return pvuo
 }
 
 // SetNillableNameID sets the "name_id" field if the given value is not nil.
-func (pvuo *PackageVersionUpdateOne) SetNillableNameID(i *int) *PackageVersionUpdateOne {
-	if i != nil {
-		pvuo.SetNameID(*i)
+func (pvuo *PackageVersionUpdateOne) SetNillableNameID(u *uuid.UUID) *PackageVersionUpdateOne {
+	if u != nil {
+		pvuo.SetNameID(*u)
 	}
 	return pvuo
 }
@@ -643,14 +644,14 @@ func (pvuo *PackageVersionUpdateOne) SetName(p *PackageName) *PackageVersionUpda
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (pvuo *PackageVersionUpdateOne) AddOccurrenceIDs(ids ...int) *PackageVersionUpdateOne {
+func (pvuo *PackageVersionUpdateOne) AddOccurrenceIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.AddOccurrenceIDs(ids...)
 	return pvuo
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
 func (pvuo *PackageVersionUpdateOne) AddOccurrences(o ...*Occurrence) *PackageVersionUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -658,14 +659,14 @@ func (pvuo *PackageVersionUpdateOne) AddOccurrences(o ...*Occurrence) *PackageVe
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (pvuo *PackageVersionUpdateOne) AddSbomIDs(ids ...int) *PackageVersionUpdateOne {
+func (pvuo *PackageVersionUpdateOne) AddSbomIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.AddSbomIDs(ids...)
 	return pvuo
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
 func (pvuo *PackageVersionUpdateOne) AddSbom(b ...*BillOfMaterials) *PackageVersionUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -673,14 +674,14 @@ func (pvuo *PackageVersionUpdateOne) AddSbom(b ...*BillOfMaterials) *PackageVers
 }
 
 // AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by IDs.
-func (pvuo *PackageVersionUpdateOne) AddEqualPackageIDs(ids ...int) *PackageVersionUpdateOne {
+func (pvuo *PackageVersionUpdateOne) AddEqualPackageIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.AddEqualPackageIDs(ids...)
 	return pvuo
 }
 
 // AddEqualPackages adds the "equal_packages" edges to the PkgEqual entity.
 func (pvuo *PackageVersionUpdateOne) AddEqualPackages(p ...*PkgEqual) *PackageVersionUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -688,14 +689,14 @@ func (pvuo *PackageVersionUpdateOne) AddEqualPackages(p ...*PkgEqual) *PackageVe
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (pvuo *PackageVersionUpdateOne) AddIncludedInSbomIDs(ids ...int) *PackageVersionUpdateOne {
+func (pvuo *PackageVersionUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.AddIncludedInSbomIDs(ids...)
 	return pvuo
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (pvuo *PackageVersionUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *PackageVersionUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -720,14 +721,14 @@ func (pvuo *PackageVersionUpdateOne) ClearOccurrences() *PackageVersionUpdateOne
 }
 
 // RemoveOccurrenceIDs removes the "occurrences" edge to Occurrence entities by IDs.
-func (pvuo *PackageVersionUpdateOne) RemoveOccurrenceIDs(ids ...int) *PackageVersionUpdateOne {
+func (pvuo *PackageVersionUpdateOne) RemoveOccurrenceIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.RemoveOccurrenceIDs(ids...)
 	return pvuo
 }
 
 // RemoveOccurrences removes "occurrences" edges to Occurrence entities.
 func (pvuo *PackageVersionUpdateOne) RemoveOccurrences(o ...*Occurrence) *PackageVersionUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -741,14 +742,14 @@ func (pvuo *PackageVersionUpdateOne) ClearSbom() *PackageVersionUpdateOne {
 }
 
 // RemoveSbomIDs removes the "sbom" edge to BillOfMaterials entities by IDs.
-func (pvuo *PackageVersionUpdateOne) RemoveSbomIDs(ids ...int) *PackageVersionUpdateOne {
+func (pvuo *PackageVersionUpdateOne) RemoveSbomIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.RemoveSbomIDs(ids...)
 	return pvuo
 }
 
 // RemoveSbom removes "sbom" edges to BillOfMaterials entities.
 func (pvuo *PackageVersionUpdateOne) RemoveSbom(b ...*BillOfMaterials) *PackageVersionUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -762,14 +763,14 @@ func (pvuo *PackageVersionUpdateOne) ClearEqualPackages() *PackageVersionUpdateO
 }
 
 // RemoveEqualPackageIDs removes the "equal_packages" edge to PkgEqual entities by IDs.
-func (pvuo *PackageVersionUpdateOne) RemoveEqualPackageIDs(ids ...int) *PackageVersionUpdateOne {
+func (pvuo *PackageVersionUpdateOne) RemoveEqualPackageIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.RemoveEqualPackageIDs(ids...)
 	return pvuo
 }
 
 // RemoveEqualPackages removes "equal_packages" edges to PkgEqual entities.
 func (pvuo *PackageVersionUpdateOne) RemoveEqualPackages(p ...*PkgEqual) *PackageVersionUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -783,14 +784,14 @@ func (pvuo *PackageVersionUpdateOne) ClearIncludedInSboms() *PackageVersionUpdat
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (pvuo *PackageVersionUpdateOne) RemoveIncludedInSbomIDs(ids ...int) *PackageVersionUpdateOne {
+func (pvuo *PackageVersionUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.RemoveIncludedInSbomIDs(ids...)
 	return pvuo
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
 func (pvuo *PackageVersionUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *PackageVersionUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -849,7 +850,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 	if err := pvuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(packageversion.Table, packageversion.Columns, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(packageversion.Table, packageversion.Columns, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID))
 	id, ok := pvuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "PackageVersion.id" for update`)}
@@ -902,7 +903,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: []string{packageversion.NameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -915,7 +916,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: []string{packageversion.NameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -931,7 +932,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: []string{packageversion.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -944,7 +945,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: []string{packageversion.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -960,7 +961,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: []string{packageversion.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -976,7 +977,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: []string{packageversion.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -989,7 +990,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: []string{packageversion.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1005,7 +1006,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: []string{packageversion.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1021,7 +1022,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: packageversion.EqualPackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1034,7 +1035,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: packageversion.EqualPackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1050,7 +1051,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: packageversion.EqualPackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1066,7 +1067,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: packageversion.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1079,7 +1080,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: packageversion.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1095,7 +1096,7 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Columns: packageversion.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

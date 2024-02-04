@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -133,8 +134,8 @@ func (lq *LicenseQuery) FirstX(ctx context.Context) *License {
 
 // FirstID returns the first License ID from the query.
 // Returns a *NotFoundError when no License ID was found.
-func (lq *LicenseQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (lq *LicenseQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = lq.Limit(1).IDs(setContextOp(ctx, lq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -146,7 +147,7 @@ func (lq *LicenseQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (lq *LicenseQuery) FirstIDX(ctx context.Context) int {
+func (lq *LicenseQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := lq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -184,8 +185,8 @@ func (lq *LicenseQuery) OnlyX(ctx context.Context) *License {
 // OnlyID is like Only, but returns the only License ID in the query.
 // Returns a *NotSingularError when more than one License ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (lq *LicenseQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (lq *LicenseQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = lq.Limit(2).IDs(setContextOp(ctx, lq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -201,7 +202,7 @@ func (lq *LicenseQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (lq *LicenseQuery) OnlyIDX(ctx context.Context) int {
+func (lq *LicenseQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := lq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -229,7 +230,7 @@ func (lq *LicenseQuery) AllX(ctx context.Context) []*License {
 }
 
 // IDs executes the query and returns a list of License IDs.
-func (lq *LicenseQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (lq *LicenseQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if lq.ctx.Unique == nil && lq.path != nil {
 		lq.Unique(true)
 	}
@@ -241,7 +242,7 @@ func (lq *LicenseQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (lq *LicenseQuery) IDsX(ctx context.Context) []int {
+func (lq *LicenseQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := lq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -477,8 +478,8 @@ func (lq *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Lice
 
 func (lq *LicenseQuery) loadDeclaredInCertifyLegals(ctx context.Context, query *CertifyLegalQuery, nodes []*License, init func(*License), assign func(*License, *CertifyLegal)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*License)
-	nids := make(map[int]map[*License]struct{})
+	byID := make(map[uuid.UUID]*License)
+	nids := make(map[uuid.UUID]map[*License]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -507,11 +508,11 @@ func (lq *LicenseQuery) loadDeclaredInCertifyLegals(ctx context.Context, query *
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*License]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -538,8 +539,8 @@ func (lq *LicenseQuery) loadDeclaredInCertifyLegals(ctx context.Context, query *
 }
 func (lq *LicenseQuery) loadDiscoveredInCertifyLegals(ctx context.Context, query *CertifyLegalQuery, nodes []*License, init func(*License), assign func(*License, *CertifyLegal)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*License)
-	nids := make(map[int]map[*License]struct{})
+	byID := make(map[uuid.UUID]*License)
+	nids := make(map[uuid.UUID]map[*License]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -568,11 +569,11 @@ func (lq *LicenseQuery) loadDiscoveredInCertifyLegals(ctx context.Context, query
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*License]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -611,7 +612,7 @@ func (lq *LicenseQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (lq *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeUUID))
 	_spec.From = lq.sql
 	if unique := lq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

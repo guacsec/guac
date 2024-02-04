@@ -40,7 +40,7 @@ func (hed *HashEqualDelete) ExecX(ctx context.Context) int {
 }
 
 func (hed *HashEqualDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(hashequal.Table, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(hashequal.Table, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
 	if ps := hed.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

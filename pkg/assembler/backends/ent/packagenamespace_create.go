@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
@@ -24,8 +26,8 @@ type PackageNamespaceCreate struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (pnc *PackageNamespaceCreate) SetPackageID(i int) *PackageNamespaceCreate {
-	pnc.mutation.SetPackageID(i)
+func (pnc *PackageNamespaceCreate) SetPackageID(u uuid.UUID) *PackageNamespaceCreate {
+	pnc.mutation.SetPackageID(u)
 	return pnc
 }
 
@@ -35,20 +37,34 @@ func (pnc *PackageNamespaceCreate) SetNamespace(s string) *PackageNamespaceCreat
 	return pnc
 }
 
+// SetID sets the "id" field.
+func (pnc *PackageNamespaceCreate) SetID(u uuid.UUID) *PackageNamespaceCreate {
+	pnc.mutation.SetID(u)
+	return pnc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pnc *PackageNamespaceCreate) SetNillableID(u *uuid.UUID) *PackageNamespaceCreate {
+	if u != nil {
+		pnc.SetID(*u)
+	}
+	return pnc
+}
+
 // SetPackage sets the "package" edge to the PackageType entity.
 func (pnc *PackageNamespaceCreate) SetPackage(p *PackageType) *PackageNamespaceCreate {
 	return pnc.SetPackageID(p.ID)
 }
 
 // AddNameIDs adds the "names" edge to the PackageName entity by IDs.
-func (pnc *PackageNamespaceCreate) AddNameIDs(ids ...int) *PackageNamespaceCreate {
+func (pnc *PackageNamespaceCreate) AddNameIDs(ids ...uuid.UUID) *PackageNamespaceCreate {
 	pnc.mutation.AddNameIDs(ids...)
 	return pnc
 }
 
 // AddNames adds the "names" edges to the PackageName entity.
 func (pnc *PackageNamespaceCreate) AddNames(p ...*PackageName) *PackageNamespaceCreate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -62,6 +78,7 @@ func (pnc *PackageNamespaceCreate) Mutation() *PackageNamespaceMutation {
 
 // Save creates the PackageNamespace in the database.
 func (pnc *PackageNamespaceCreate) Save(ctx context.Context) (*PackageNamespace, error) {
+	pnc.defaults()
 	return withHooks(ctx, pnc.sqlSave, pnc.mutation, pnc.hooks)
 }
 
@@ -84,6 +101,14 @@ func (pnc *PackageNamespaceCreate) Exec(ctx context.Context) error {
 func (pnc *PackageNamespaceCreate) ExecX(ctx context.Context) {
 	if err := pnc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pnc *PackageNamespaceCreate) defaults() {
+	if _, ok := pnc.mutation.ID(); !ok {
+		v := packagenamespace.DefaultID()
+		pnc.mutation.SetID(v)
 	}
 }
 
@@ -112,8 +137,13 @@ func (pnc *PackageNamespaceCreate) sqlSave(ctx context.Context) (*PackageNamespa
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	pnc.mutation.id = &_node.ID
 	pnc.mutation.done = true
 	return _node, nil
@@ -122,9 +152,13 @@ func (pnc *PackageNamespaceCreate) sqlSave(ctx context.Context) (*PackageNamespa
 func (pnc *PackageNamespaceCreate) createSpec() (*PackageNamespace, *sqlgraph.CreateSpec) {
 	var (
 		_node = &PackageNamespace{config: pnc.config}
-		_spec = sqlgraph.NewCreateSpec(packagenamespace.Table, sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(packagenamespace.Table, sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = pnc.conflict
+	if id, ok := pnc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := pnc.mutation.Namespace(); ok {
 		_spec.SetField(packagenamespace.FieldNamespace, field.TypeString, value)
 		_node.Namespace = value
@@ -137,7 +171,7 @@ func (pnc *PackageNamespaceCreate) createSpec() (*PackageNamespace, *sqlgraph.Cr
 			Columns: []string{packagenamespace.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagetype.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -154,7 +188,7 @@ func (pnc *PackageNamespaceCreate) createSpec() (*PackageNamespace, *sqlgraph.Cr
 			Columns: []string{packagenamespace.NamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -215,7 +249,7 @@ type (
 )
 
 // SetPackageID sets the "package_id" field.
-func (u *PackageNamespaceUpsert) SetPackageID(v int) *PackageNamespaceUpsert {
+func (u *PackageNamespaceUpsert) SetPackageID(v uuid.UUID) *PackageNamespaceUpsert {
 	u.Set(packagenamespace.FieldPackageID, v)
 	return u
 }
@@ -238,16 +272,24 @@ func (u *PackageNamespaceUpsert) UpdateNamespace() *PackageNamespaceUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.PackageNamespace.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(packagenamespace.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PackageNamespaceUpsertOne) UpdateNewValues() *PackageNamespaceUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(packagenamespace.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -279,7 +321,7 @@ func (u *PackageNamespaceUpsertOne) Update(set func(*PackageNamespaceUpsert)) *P
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *PackageNamespaceUpsertOne) SetPackageID(v int) *PackageNamespaceUpsertOne {
+func (u *PackageNamespaceUpsertOne) SetPackageID(v uuid.UUID) *PackageNamespaceUpsertOne {
 	return u.Update(func(s *PackageNamespaceUpsert) {
 		s.SetPackageID(v)
 	})
@@ -322,7 +364,12 @@ func (u *PackageNamespaceUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *PackageNamespaceUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *PackageNamespaceUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: PackageNamespaceUpsertOne.ID is not supported by MySQL driver. Use PackageNamespaceUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -331,7 +378,7 @@ func (u *PackageNamespaceUpsertOne) ID(ctx context.Context) (id int, err error) 
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *PackageNamespaceUpsertOne) IDX(ctx context.Context) int {
+func (u *PackageNamespaceUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -358,6 +405,7 @@ func (pncb *PackageNamespaceCreateBulk) Save(ctx context.Context) ([]*PackageNam
 	for i := range pncb.builders {
 		func(i int, root context.Context) {
 			builder := pncb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PackageNamespaceMutation)
 				if !ok {
@@ -385,10 +433,6 @@ func (pncb *PackageNamespaceCreateBulk) Save(ctx context.Context) ([]*PackageNam
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -475,10 +519,20 @@ type PackageNamespaceUpsertBulk struct {
 //	client.PackageNamespace.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(packagenamespace.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PackageNamespaceUpsertBulk) UpdateNewValues() *PackageNamespaceUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(packagenamespace.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -510,7 +564,7 @@ func (u *PackageNamespaceUpsertBulk) Update(set func(*PackageNamespaceUpsert)) *
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *PackageNamespaceUpsertBulk) SetPackageID(v int) *PackageNamespaceUpsertBulk {
+func (u *PackageNamespaceUpsertBulk) SetPackageID(v uuid.UUID) *PackageNamespaceUpsertBulk {
 	return u.Update(func(s *PackageNamespaceUpsert) {
 		s.SetPackageID(v)
 	})
