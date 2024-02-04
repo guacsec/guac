@@ -66,7 +66,7 @@ func init() {
 	set.String("neptune-user", "", "neptune user credential to connect to graph db")
 	set.String("neptune-realm", "neptune", "realm to connect to graph db")
 
-	set.String("db-address", "postgres://localhost/guac_dev", "Full URL of database to connect to")
+	set.String("db-address", "postgres://guac:guac@0.0.0.0:5432/guac?sslmode=disable", "Full URL of database to connect to")
 	set.String("db-driver", "postgres", "database driver to use, one of [postgres | sqlite3 | mysql] or anything supported by sql.DB")
 	set.Bool("db-debug", false, "enable debug logging for database queries")
 	set.Bool("db-migrate", true, "automatically run database migrations on start")
