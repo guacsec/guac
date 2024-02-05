@@ -612,7 +612,7 @@ func TestIngestPredicates(t *testing.T) {
 					VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 						ScoreType:  generated.VulnerabilityScoreTypeCvssv2,
 						ScoreValue: 6.8,
-						Timestamp:  tm,
+						Timestamp:  tm.UTC(),
 						Origin:     "Demo ingestion",
 						Collector:  "Demo ingestion",
 					},
@@ -625,7 +625,7 @@ func TestIngestPredicates(t *testing.T) {
 					VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 						ScoreType:  generated.VulnerabilityScoreTypeCvssv3,
 						ScoreValue: 7.8,
-						Timestamp:  tm,
+						Timestamp:  tm.UTC(),
 						Origin:     "Demo ingestion",
 						Collector:  "Demo ingestion",
 					},

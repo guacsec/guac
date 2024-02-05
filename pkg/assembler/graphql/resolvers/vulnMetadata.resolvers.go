@@ -101,7 +101,7 @@ func (r *queryResolver) VulnerabilityMetadata(ctx context.Context, vulnerability
 			ScoreType:     vulnerabilityMetadataSpec.ScoreType,
 			ScoreValue:    vulnerabilityMetadataSpec.ScoreValue,
 			Comparator:    vulnerabilityMetadataSpec.Comparator,
-			Timestamp:     vulnerabilityMetadataSpec.Timestamp,
+			Timestamp:     vulnerabilityMetadataSpec.Timestamp.UTC(),
 			Origin:        vulnerabilityMetadataSpec.Origin,
 			Collector:     vulnerabilityMetadataSpec.Collector,
 		}
