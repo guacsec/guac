@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -38,10 +37,7 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/sync/errgroup"
 )
-
-const maxConcurrentJobsString string = "MAX_CONCURRENT_JOBS"
 
 type fileOptions struct {
 	// path to the pem file
@@ -57,7 +53,7 @@ type fileOptions struct {
 }
 
 var filesCmd = &cobra.Command{
-	Use:   "files [flags] file_path (set environment variable MAX_CONCURRENT_JOBS to increase the number of documents to ingest in parallel. Default: 1)",
+	Use:   "files [flags] file_path",
 	Short: "take a folder of files and create a GUAC graph, this command talks directly to the graphQL endpoint",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := logging.WithLogger(context.Background())
@@ -118,29 +114,15 @@ var filesCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		files, filesCtx := errgroup.WithContext(ctx)
-
 		totalNum := 0
 		totalSuccess := 0
 		var filesWithErrors []string
 
 		gotErr := false
 
-		// Backend can only process a few files at a time. Increasing this might cause timeout errors in the database
-		maxConcurrentJobs, found := os.LookupEnv(maxConcurrentJobsString)
-		if found {
-			jobs, err := strconv.Atoi(maxConcurrentJobs)
-			if err != nil {
-				logger.Fatalf("failed to convert concurrent jobs value to integer ")
-			}
-			files.SetLimit(jobs)
-		} else {
-			files.SetLimit(1)
-		}
-
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(filesCtx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
 
 			if err != nil {
 				gotErr = true
@@ -161,11 +143,6 @@ var filesCmd = &cobra.Command{
 		}
 
 		if err := collector.Collect(ctx, emit, errHandler); err != nil {
-			logger.Fatal(err)
-		}
-
-		err = files.Wait()
-		if err != nil {
 			logger.Fatal(err)
 		}
 
