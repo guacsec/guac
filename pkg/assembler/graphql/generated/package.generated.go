@@ -891,6 +891,61 @@ func (ec *executionContext) fieldContext_PackageVersion_subpath(ctx context.Cont
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputIDorPkgInputSpec(ctx context.Context, obj interface{}) (model.IDorPkgInputSpec, error) {
+	var it model.IDorPkgInputSpec
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"packageTypeID", "packageNamespaceID", "packageNameID", "packageVersionID", "pkg"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "packageTypeID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packageTypeID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PackageTypeID = data
+		case "packageNamespaceID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packageNamespaceID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PackageNamespaceID = data
+		case "packageNameID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packageNameID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PackageNameID = data
+		case "packageVersionID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packageVersionID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PackageVersionID = data
+		case "pkg":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
+			data, err := ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Pkg = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputPackageQualifierInputSpec(ctx context.Context, obj interface{}) (model.PackageQualifierInputSpec, error) {
 	var it model.PackageQualifierInputSpec
 	asMap := map[string]interface{}{}
@@ -1463,6 +1518,33 @@ func (ec *executionContext) _PackageVersion(ctx context.Context, sel ast.Selecti
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) unmarshalNIDorPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputSpec(ctx context.Context, v interface{}) (model.IDorPkgInputSpec, error) {
+	res, err := ec.unmarshalInputIDorPkgInputSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNIDorPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.IDorPkgInputSpec, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.IDorPkgInputSpec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNIDorPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputSpec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNIDorPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputSpec(ctx context.Context, v interface{}) (*model.IDorPkgInputSpec, error) {
+	res, err := ec.unmarshalInputIDorPkgInputSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
 
 func (ec *executionContext) marshalNPackage2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Package) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))

@@ -189,6 +189,14 @@ input PackageQualifierInputSpec {
   value: String!
 }
 
+input IDorPkgInputSpec {
+  packageTypeID: ID
+  packageNamespaceID: ID
+  packageNameID: ID
+  packageVersionID: ID
+  pkg: PkgInputSpec
+}
+
 extend type Query {
   "Returns all packages matching a filter."
   packages(pkgSpec: PkgSpec!): [Package!]!
@@ -196,7 +204,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string."
-  ingestPackage(pkg: PkgInputSpec!): PackageIDs!
+  ingestPackage(pkg: IDorPkgInputSpec!): PackageIDs!
   "Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings."
-  ingestPackages(pkgs: [PkgInputSpec!]!): [PackageIDs!]!
+  ingestPackages(pkgs: [IDorPkgInputSpec!]!): [PackageIDs!]!
 }

@@ -34,10 +34,12 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 
 			packages := p.GetPackages(ctx)
 			logger.Infof("assembling Package: %v", len(packages))
-			var collectedPackages []model.PkgInputSpec
-			collectedPackages = make([]model.PkgInputSpec, 0)
+			var collectedPackages []model.IDorPkgInputSpec
+			collectedPackages = make([]model.IDorPkgInputSpec, 0)
 			for _, v := range packages {
-				collectedPackages = append(collectedPackages, *v)
+				collectedPackages = append(collectedPackages, model.IDorPkgInputSpec{
+					Pkg: v,
+				})
 			}
 			if ids, err := ingestPackages(ctx, gqlclient, collectedPackages); err != nil {
 				logger.Errorf("ingestPackages failed with error: %v", err)
@@ -208,7 +210,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 	}
 }
 
-func ingestPackages(ctx context.Context, client graphql.Client, v []model.PkgInputSpec) ([]string, error) {
+func ingestPackages(ctx context.Context, client graphql.Client, v []model.IDorPkgInputSpec) ([]string, error) {
 	response, err := model.IngestPackages(ctx, client, v)
 	if err != nil {
 		return nil, fmt.Errorf("ingestPackages failed with error: %w", err)

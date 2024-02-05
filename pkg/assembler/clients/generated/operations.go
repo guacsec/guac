@@ -8059,6 +8059,29 @@ func (v *HashEqualInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns HashEqualInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 
+type IDorPkgInputSpec struct {
+	PackageTypeID      *string       `json:"packageTypeID"`
+	PackageNamespaceID *string       `json:"packageNamespaceID"`
+	PackageNameID      *string       `json:"packageNameID"`
+	PackageVersionID   *string       `json:"packageVersionID"`
+	Pkg                *PkgInputSpec `json:"pkg"`
+}
+
+// GetPackageTypeID returns IDorPkgInputSpec.PackageTypeID, and is useful for accessing the field via an interface.
+func (v *IDorPkgInputSpec) GetPackageTypeID() *string { return v.PackageTypeID }
+
+// GetPackageNamespaceID returns IDorPkgInputSpec.PackageNamespaceID, and is useful for accessing the field via an interface.
+func (v *IDorPkgInputSpec) GetPackageNamespaceID() *string { return v.PackageNamespaceID }
+
+// GetPackageNameID returns IDorPkgInputSpec.PackageNameID, and is useful for accessing the field via an interface.
+func (v *IDorPkgInputSpec) GetPackageNameID() *string { return v.PackageNameID }
+
+// GetPackageVersionID returns IDorPkgInputSpec.PackageVersionID, and is useful for accessing the field via an interface.
+func (v *IDorPkgInputSpec) GetPackageVersionID() *string { return v.PackageVersionID }
+
+// GetPkg returns IDorPkgInputSpec.Pkg, and is useful for accessing the field via an interface.
+func (v *IDorPkgInputSpec) GetPkg() *PkgInputSpec { return v.Pkg }
+
 // IngestArtifactResponse is returned by IngestArtifact on success.
 type IngestArtifactResponse struct {
 	// Ingests a new artifact and returns it. The returned ID can be empty string.
@@ -23115,19 +23138,19 @@ func (v *__IngestLicensesInput) GetLicenses() []LicenseInputSpec { return v.Lice
 
 // __IngestPackageInput is used internally by genqlient
 type __IngestPackageInput struct {
-	Pkg PkgInputSpec `json:"pkg"`
+	Pkg IDorPkgInputSpec `json:"pkg"`
 }
 
 // GetPkg returns __IngestPackageInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestPackageInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestPackageInput) GetPkg() IDorPkgInputSpec { return v.Pkg }
 
 // __IngestPackagesInput is used internally by genqlient
 type __IngestPackagesInput struct {
-	Pkgs []PkgInputSpec `json:"pkgs"`
+	Pkgs []IDorPkgInputSpec `json:"pkgs"`
 }
 
 // GetPkgs returns __IngestPackagesInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestPackagesInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestPackagesInput) GetPkgs() []IDorPkgInputSpec { return v.Pkgs }
 
 // __IngestPkgEqualInput is used internally by genqlient
 type __IngestPkgEqualInput struct {
@@ -25874,7 +25897,7 @@ func IngestLicenses(
 
 // The query or mutation executed by IngestPackage.
 const IngestPackage_Operation = `
-mutation IngestPackage ($pkg: PkgInputSpec!) {
+mutation IngestPackage ($pkg: IDorPkgInputSpec!) {
 	ingestPackage(pkg: $pkg) {
 		packageTypeID
 		packageNamespaceID
@@ -25887,7 +25910,7 @@ mutation IngestPackage ($pkg: PkgInputSpec!) {
 func IngestPackage(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
+	pkg IDorPkgInputSpec,
 ) (*IngestPackageResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestPackage",
@@ -25912,7 +25935,7 @@ func IngestPackage(
 
 // The query or mutation executed by IngestPackages.
 const IngestPackages_Operation = `
-mutation IngestPackages ($pkgs: [PkgInputSpec!]!) {
+mutation IngestPackages ($pkgs: [IDorPkgInputSpec!]!) {
 	ingestPackages(pkgs: $pkgs) {
 		packageTypeID
 		packageNamespaceID
@@ -25925,7 +25948,7 @@ mutation IngestPackages ($pkgs: [PkgInputSpec!]!) {
 func IngestPackages(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
+	pkgs []IDorPkgInputSpec,
 ) (*IngestPackagesResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestPackages",

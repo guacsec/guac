@@ -596,6 +596,14 @@ type HashEqualSpec struct {
 	Collector     *string         `json:"collector,omitempty"`
 }
 
+type IDorPkgInputSpec struct {
+	PackageTypeID      *string       `json:"packageTypeID,omitempty"`
+	PackageNamespaceID *string       `json:"packageNamespaceID,omitempty"`
+	PackageNameID      *string       `json:"packageNameID,omitempty"`
+	PackageVersionID   *string       `json:"packageVersionID,omitempty"`
+	Pkg                *PkgInputSpec `json:"pkg,omitempty"`
+}
+
 // IsDependency is an attestation to record that a package depends on another.
 type IsDependency struct {
 	ID string `json:"id"`

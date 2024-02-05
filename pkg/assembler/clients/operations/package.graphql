@@ -17,7 +17,7 @@
 
 # Ingest Package
 
-mutation IngestPackage($pkg: PkgInputSpec!) {
+mutation IngestPackage($pkg: IDorPkgInputSpec!) {
   ingestPackage(pkg: $pkg) {
     packageTypeID
     packageNamespaceID
@@ -28,7 +28,7 @@ mutation IngestPackage($pkg: PkgInputSpec!) {
 
 # Bulk Ingest Packages
 
-mutation IngestPackages($pkgs: [PkgInputSpec!]!) {
+mutation IngestPackages($pkgs: [IDorPkgInputSpec!]!) {
   ingestPackages(pkgs: $pkgs) {
     packageTypeID
     packageNamespaceID

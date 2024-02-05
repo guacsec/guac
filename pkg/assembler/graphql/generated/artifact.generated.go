@@ -53,8 +53,8 @@ type MutationResolver interface {
 	IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error)
 	IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error)
 	IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error)
-	IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error)
-	IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error)
+	IngestPackage(ctx context.Context, pkg model.IDorPkgInputSpec) (*model.PackageIDs, error)
+	IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInputSpec) ([]*model.PackageIDs, error)
 	IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error)
 	IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error)
 	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error)
@@ -932,10 +932,10 @@ func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgInputSpec
+	var arg0 model.IDorPkgInputSpec
 	if tmp, ok := rawArgs["pkg"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputSpec(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -947,10 +947,10 @@ func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_ingestPackages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.PkgInputSpec
+	var arg0 []*model.IDorPkgInputSpec
 	if tmp, ok := rawArgs["pkgs"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputSpecᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3823,7 +3823,7 @@ func (ec *executionContext) _Mutation_ingestPackage(ctx context.Context, field g
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestPackage(rctx, fc.Args["pkg"].(model.PkgInputSpec))
+		return ec.resolvers.Mutation().IngestPackage(rctx, fc.Args["pkg"].(model.IDorPkgInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3885,7 +3885,7 @@ func (ec *executionContext) _Mutation_ingestPackages(ctx context.Context, field 
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestPackages(rctx, fc.Args["pkgs"].([]*model.PkgInputSpec))
+		return ec.resolvers.Mutation().IngestPackages(rctx, fc.Args["pkgs"].([]*model.IDorPkgInputSpec))
 	})
 
 	if resTmp == nil {

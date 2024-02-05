@@ -217,8 +217,8 @@ type ComplexityRoot struct {
 		IngestLicenses                  func(childComplexity int, licenses []*model.LicenseInputSpec) int
 		IngestOccurrence                func(childComplexity int, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) int
 		IngestOccurrences               func(childComplexity int, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) int
-		IngestPackage                   func(childComplexity int, pkg model.PkgInputSpec) int
-		IngestPackages                  func(childComplexity int, pkgs []*model.PkgInputSpec) int
+		IngestPackage                   func(childComplexity int, pkg model.IDorPkgInputSpec) int
+		IngestPackages                  func(childComplexity int, pkgs []*model.IDorPkgInputSpec) int
 		IngestPkgEqual                  func(childComplexity int, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) int
 		IngestPkgEquals                 func(childComplexity int, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) int
 		IngestPointOfContact            func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) int
@@ -1467,7 +1467,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(model.PkgInputSpec)), true
+		return e.complexity.Mutation.IngestPackage(childComplexity, args["pkg"].(model.IDorPkgInputSpec)), true
 
 	case "Mutation.ingestPackages":
 		if e.complexity.Mutation.IngestPackages == nil {
@@ -1479,7 +1479,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestPackages(childComplexity, args["pkgs"].([]*model.PkgInputSpec)), true
+		return e.complexity.Mutation.IngestPackages(childComplexity, args["pkgs"].([]*model.IDorPkgInputSpec)), true
 
 	case "Mutation.ingestPkgEqual":
 		if e.complexity.Mutation.IngestPkgEqual == nil {
@@ -2696,6 +2696,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputHasSourceAtSpec,
 		ec.unmarshalInputHashEqualInputSpec,
 		ec.unmarshalInputHashEqualSpec,
+		ec.unmarshalInputIDorPkgInputSpec,
 		ec.unmarshalInputIsDependencyInputSpec,
 		ec.unmarshalInputIsDependencySpec,
 		ec.unmarshalInputIsOccurrenceInputSpec,
@@ -4808,6 +4809,14 @@ input PackageQualifierInputSpec {
   value: String!
 }
 
+input IDorPkgInputSpec {
+  packageTypeID: ID
+  packageNamespaceID: ID
+  packageNameID: ID
+  packageVersionID: ID
+  pkg: PkgInputSpec
+}
+
 extend type Query {
   "Returns all packages matching a filter."
   packages(pkgSpec: PkgSpec!): [Package!]!
@@ -4815,9 +4824,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string."
-  ingestPackage(pkg: PkgInputSpec!): PackageIDs!
+  ingestPackage(pkg: IDorPkgInputSpec!): PackageIDs!
   "Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings."
-  ingestPackages(pkgs: [PkgInputSpec!]!): [PackageIDs!]!
+  ingestPackages(pkgs: [IDorPkgInputSpec!]!): [PackageIDs!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/path.graphql", Input: `#
