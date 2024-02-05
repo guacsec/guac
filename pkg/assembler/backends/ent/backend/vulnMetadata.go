@@ -76,7 +76,7 @@ func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulner
 func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) predicate.VulnerabilityMetadata {
 	predicates := []predicate.VulnerabilityMetadata{
 		optionalPredicate(filter.ID, IDEQ),
-		optionalPredicate(filter.Timestamp.UTC(), vulnerabilitymetadata.TimestampGTE),
+		optionalPredicate(filter.Timestamp, vulnerabilitymetadata.TimestampGTE),
 		optionalPredicate(filter.Origin, vulnerabilitymetadata.OriginEQ),
 		optionalPredicate(filter.Collector, vulnerabilitymetadata.CollectorEQ),
 	}
