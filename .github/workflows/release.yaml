@@ -53,7 +53,7 @@ jobs:
       - name: Install cosign
         uses:  sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # main
       - name: Install syft
-        uses: anchore/sbom-action/download-syft@c6aed38a4323b393d05372c58a74c39ae8386d02 # v0.15.6
+        uses: anchore/sbom-action/download-syft@b6a39da80722a2cb0ef5d197531764a89b5d48c3 # v0.15.8
 
       - name: Run GoReleaser Snapshot
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
