@@ -655,8 +655,8 @@ github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 h1:N/ElC8H3+5X
 github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/redis/go-redis/v9 v9.4.0 h1:Yzoz33UZw9I/mFhx4MNrB6Fk+XHO1VukNcCa1+lwyKk=
 github.com/redis/go-redis/v9 v9.4.0/go.mod h1:hdY0cQFCN4fnSYT6TkisLufl/4W5UIXyv0b/CLO2V2M=
-github.com/regclient/regclient v0.5.5 h1:fDh5afBCRbeSU71vcvbN0fI88D1fTfp2m39BPqki7EU=
-github.com/regclient/regclient v0.5.5/go.mod h1:604ymXFhwbmWjyfGFp3uF91gfCXIcjWBxJhBg94s9cM=
+github.com/regclient/regclient v0.5.6 h1:Ce5T9N6lAY9tBNzfQqFT+VARuhn4T/vsVsTynnfFaDU=
+github.com/regclient/regclient v0.5.6/go.mod h1:FK3FhoPD09FpNln5RQ4kXJ7Q0Lg3Mm+0a7xZKK9SnGs=
 github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 h1:OdAsTTz6OkFY5QxjkYwrChwuRruF69c169dPK26NUlk=
 github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0/go.mod h1:qqbHyh8v60DhA7CoWK5oRCqLrMHRGoxYCSS9EjAz6Eo=
 github.com/rhysd/actionlint v1.6.26 h1:zi7jPZf3Ks14gCXYAAL47uBziyFlX7+Xwilqhexct9g=
