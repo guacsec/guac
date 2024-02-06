@@ -12,12 +12,12 @@ import (
 )
 
 // IngestScorecard is the resolver for the ingestScorecard field.
-func (r *mutationResolver) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+func (r *mutationResolver) IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error) {
 	return r.Backend.IngestScorecard(ctx, source, scorecard)
 }
 
 // IngestScorecards is the resolver for the ingestScorecards field.
-func (r *mutationResolver) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	funcName := "IngestScorecards"
 	ingestedScorecardsIDS := []string{}
 	if len(sources) != len(scorecards) {

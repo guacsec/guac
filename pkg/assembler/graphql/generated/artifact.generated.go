@@ -19,52 +19,52 @@ import (
 // region    ************************** generated!.gotpl **************************
 
 type MutationResolver interface {
-	IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error)
-	IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error)
-	IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error)
-	IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error)
+	IngestArtifact(ctx context.Context, artifact *model.IDorArtifactInput) (string, error)
+	IngestArtifacts(ctx context.Context, artifacts []*model.IDorArtifactInput) ([]string, error)
+	IngestBuilder(ctx context.Context, builder *model.IDorBuilderInput) (string, error)
+	IngestBuilders(ctx context.Context, builders []*model.IDorBuilderInput) ([]string, error)
 	IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error)
 	IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error)
 	IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (string, error)
 	IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error)
-	IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) (string, error)
-	IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error)
-	IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error)
-	IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error)
-	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error)
-	IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error)
-	IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error)
-	IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error)
+	IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, certifyLegal model.CertifyLegalInputSpec) (string, error)
+	IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error)
+	IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error)
+	IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error)
+	IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.IDorVulnerabilityInput, vexStatement model.VexStatementInputSpec) (string, error)
+	IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) ([]string, error)
+	IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error)
+	IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error)
 	IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error)
 	IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, pointOfContacts []*model.PointOfContactInputSpec) ([]string, error)
 	IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error)
 	IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error)
-	IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error)
-	IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error)
-	IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error)
-	IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error)
-	IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error)
-	IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error)
-	IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error)
-	IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error)
-	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error)
-	IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error)
-	IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error)
-	IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error)
+	IngestSlsa(ctx context.Context, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (string, error)
+	IngestSLSAs(ctx context.Context, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) ([]string, error)
+	IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, hasSourceAt model.HasSourceAtInputSpec) (string, error)
+	IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error)
+	IngestHashEqual(ctx context.Context, artifact model.IDorArtifactInput, otherArtifact model.IDorArtifactInput, hashEqual model.HashEqualInputSpec) (string, error)
+	IngestHashEquals(ctx context.Context, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) ([]string, error)
+	IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error)
+	IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error)
+	IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error)
+	IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error)
+	IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error)
+	IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error)
 	IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error)
 	IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error)
-	IngestPackage(ctx context.Context, pkg model.IDorPkgInputSpec) (*model.PackageIDs, error)
-	IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInputSpec) ([]*model.PackageIDs, error)
-	IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error)
-	IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error)
-	IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error)
-	IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error)
-	IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error)
-	IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error)
-	IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error)
-	IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error)
-	IngestVulnerability(ctx context.Context, vuln model.VulnerabilityInputSpec) (*model.VulnerabilityIDs, error)
-	IngestVulnerabilities(ctx context.Context, vulns []*model.VulnerabilityInputSpec) ([]*model.VulnerabilityIDs, error)
+	IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error)
+	IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error)
+	IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, otherPackage model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error)
+	IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) ([]string, error)
+	IngestSource(ctx context.Context, source model.IDorSourceInput) (*model.SourceIDs, error)
+	IngestSources(ctx context.Context, sources []*model.IDorSourceInput) ([]*model.SourceIDs, error)
+	IngestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec) (string, error)
+	IngestVulnEquals(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) ([]string, error)
+	IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error)
+	IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error)
+	IngestVulnerability(ctx context.Context, vuln model.IDorVulnerabilityInput) (*model.VulnerabilityIDs, error)
+	IngestVulnerabilities(ctx context.Context, vulns []*model.IDorVulnerabilityInput) ([]*model.VulnerabilityIDs, error)
 }
 type QueryResolver interface {
 	Artifacts(ctx context.Context, artifactSpec model.ArtifactSpec) ([]*model.Artifact, error)
@@ -104,10 +104,10 @@ type QueryResolver interface {
 func (ec *executionContext) field_Mutation_ingestArtifact_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.ArtifactInputSpec
+	var arg0 *model.IDorArtifactInput
 	if tmp, ok := rawArgs["artifact"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-		arg0, err = ec.unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -119,10 +119,10 @@ func (ec *executionContext) field_Mutation_ingestArtifact_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestArtifacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.ArtifactInputSpec
+	var arg0 []*model.IDorArtifactInput
 	if tmp, ok := rawArgs["artifacts"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-		arg0, err = ec.unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -134,10 +134,10 @@ func (ec *executionContext) field_Mutation_ingestArtifacts_args(ctx context.Cont
 func (ec *executionContext) field_Mutation_ingestBuilder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.BuilderInputSpec
+	var arg0 *model.IDorBuilderInput
 	if tmp, ok := rawArgs["builder"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builder"))
-		arg0, err = ec.unmarshalOBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalOIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -149,10 +149,10 @@ func (ec *executionContext) field_Mutation_ingestBuilder_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_ingestBuilders_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.BuilderInputSpec
+	var arg0 []*model.IDorBuilderInput
 	if tmp, ok := rawArgs["builders"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builders"))
-		arg0, err = ec.unmarshalNBuilderInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -197,10 +197,10 @@ func (ec *executionContext) field_Mutation_ingestBulkHasMetadata_args(ctx contex
 func (ec *executionContext) field_Mutation_ingestBulkVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.VulnerabilityInputSpec
+	var arg0 []*model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vulnerabilities"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
-		arg0, err = ec.unmarshalNVulnerabilityInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -362,19 +362,19 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegal_args(ctx context.C
 		}
 	}
 	args["subject"] = arg0
-	var arg1 []*model.LicenseInputSpec
+	var arg1 []*model.IDorLicenseInput
 	if tmp, ok := rawArgs["declaredLicenses"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicenses"))
-		arg1, err = ec.unmarshalNLicenseInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["declaredLicenses"] = arg1
-	var arg2 []*model.LicenseInputSpec
+	var arg2 []*model.IDorLicenseInput
 	if tmp, ok := rawArgs["discoveredLicenses"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicenses"))
-		arg2, err = ec.unmarshalNLicenseInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		arg2, err = ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -404,19 +404,19 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegals_args(ctx context.
 		}
 	}
 	args["subjects"] = arg0
-	var arg1 [][]*model.LicenseInputSpec
+	var arg1 [][]*model.IDorLicenseInput
 	if tmp, ok := rawArgs["declaredLicensesList"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("declaredLicensesList"))
-		arg1, err = ec.unmarshalNLicenseInputSpec2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["declaredLicensesList"] = arg1
-	var arg2 [][]*model.LicenseInputSpec
+	var arg2 [][]*model.IDorLicenseInput
 	if tmp, ok := rawArgs["discoveredLicensesList"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("discoveredLicensesList"))
-		arg2, err = ec.unmarshalNLicenseInputSpec2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		arg2, err = ec.unmarshalNIDorLicenseInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -437,19 +437,19 @@ func (ec *executionContext) field_Mutation_ingestCertifyLegals_args(ctx context.
 func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgInputSpec
+	var arg0 model.IDorPkgInput
 	if tmp, ok := rawArgs["pkg"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["pkg"] = arg0
-	var arg1 model.VulnerabilityInputSpec
+	var arg1 model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -470,19 +470,19 @@ func (ec *executionContext) field_Mutation_ingestCertifyVuln_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestCertifyVulns_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.PkgInputSpec
+	var arg0 []*model.IDorPkgInput
 	if tmp, ok := rawArgs["pkgs"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["pkgs"] = arg0
-	var arg1 []*model.VulnerabilityInputSpec
+	var arg1 []*model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vulnerabilities"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
-		arg1, err = ec.unmarshalNVulnerabilityInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -503,19 +503,19 @@ func (ec *executionContext) field_Mutation_ingestCertifyVulns_args(ctx context.C
 func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.PkgInputSpec
+	var arg0 []*model.IDorPkgInput
 	if tmp, ok := rawArgs["pkgs"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["pkgs"] = arg0
-	var arg1 []*model.PkgInputSpec
+	var arg1 []*model.IDorPkgInput
 	if tmp, ok := rawArgs["depPkgs"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkgs"))
-		arg1, err = ec.unmarshalNPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -545,19 +545,19 @@ func (ec *executionContext) field_Mutation_ingestDependencies_args(ctx context.C
 func (ec *executionContext) field_Mutation_ingestDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgInputSpec
+	var arg0 model.IDorPkgInput
 	if tmp, ok := rawArgs["pkg"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["pkg"] = arg0
-	var arg1 model.PkgInputSpec
+	var arg1 model.IDorPkgInput
 	if tmp, ok := rawArgs["depPkg"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("depPkg"))
-		arg1, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -686,10 +686,10 @@ func (ec *executionContext) field_Mutation_ingestHasSBOMs_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestHasSourceAt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgInputSpec
+	var arg0 model.IDorPkgInput
 	if tmp, ok := rawArgs["pkg"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -704,10 +704,10 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAt_args(ctx context.Co
 		}
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 model.SourceInputSpec
+	var arg2 model.IDorSourceInput
 	if tmp, ok := rawArgs["source"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-		arg2, err = ec.unmarshalNSourceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, tmp)
+		arg2, err = ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -728,10 +728,10 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAt_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestHasSourceAts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.PkgInputSpec
+	var arg0 []*model.IDorPkgInput
 	if tmp, ok := rawArgs["pkgs"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -746,10 +746,10 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAts_args(ctx context.C
 		}
 	}
 	args["pkgMatchType"] = arg1
-	var arg2 []*model.SourceInputSpec
+	var arg2 []*model.IDorSourceInput
 	if tmp, ok := rawArgs["sources"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
-		arg2, err = ec.unmarshalNSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx, tmp)
+		arg2, err = ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -770,19 +770,19 @@ func (ec *executionContext) field_Mutation_ingestHasSourceAts_args(ctx context.C
 func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.ArtifactInputSpec
+	var arg0 model.IDorArtifactInput
 	if tmp, ok := rawArgs["artifact"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-		arg0, err = ec.unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["artifact"] = arg0
-	var arg1 model.ArtifactInputSpec
+	var arg1 model.IDorArtifactInput
 	if tmp, ok := rawArgs["otherArtifact"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherArtifact"))
-		arg1, err = ec.unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -803,19 +803,19 @@ func (ec *executionContext) field_Mutation_ingestHashEqual_args(ctx context.Cont
 func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.ArtifactInputSpec
+	var arg0 []*model.IDorArtifactInput
 	if tmp, ok := rawArgs["artifacts"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-		arg0, err = ec.unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["artifacts"] = arg0
-	var arg1 []*model.ArtifactInputSpec
+	var arg1 []*model.IDorArtifactInput
 	if tmp, ok := rawArgs["otherArtifacts"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherArtifacts"))
-		arg1, err = ec.unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -836,10 +836,10 @@ func (ec *executionContext) field_Mutation_ingestHashEquals_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestLicense_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.LicenseInputSpec
+	var arg0 *model.IDorLicenseInput
 	if tmp, ok := rawArgs["license"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("license"))
-		arg0, err = ec.unmarshalOLicenseInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalOIDorLicenseInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -851,10 +851,10 @@ func (ec *executionContext) field_Mutation_ingestLicense_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_ingestLicenses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.LicenseInputSpec
+	var arg0 []*model.IDorLicenseInput
 	if tmp, ok := rawArgs["licenses"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("licenses"))
-		arg0, err = ec.unmarshalNLicenseInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorLicenseInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorLicenseInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -875,10 +875,10 @@ func (ec *executionContext) field_Mutation_ingestOccurrence_args(ctx context.Con
 		}
 	}
 	args["subject"] = arg0
-	var arg1 model.ArtifactInputSpec
+	var arg1 model.IDorArtifactInput
 	if tmp, ok := rawArgs["artifact"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-		arg1, err = ec.unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -908,10 +908,10 @@ func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Co
 		}
 	}
 	args["subjects"] = arg0
-	var arg1 []*model.ArtifactInputSpec
+	var arg1 []*model.IDorArtifactInput
 	if tmp, ok := rawArgs["artifacts"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-		arg1, err = ec.unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -932,10 +932,10 @@ func (ec *executionContext) field_Mutation_ingestOccurrences_args(ctx context.Co
 func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.IDorPkgInputSpec
+	var arg0 model.IDorPkgInput
 	if tmp, ok := rawArgs["pkg"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNIDorPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -947,10 +947,10 @@ func (ec *executionContext) field_Mutation_ingestPackage_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_ingestPackages_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.IDorPkgInputSpec
+	var arg0 []*model.IDorPkgInput
 	if tmp, ok := rawArgs["pkgs"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNIDorPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -962,19 +962,19 @@ func (ec *executionContext) field_Mutation_ingestPackages_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.PkgInputSpec
+	var arg0 model.IDorPkgInput
 	if tmp, ok := rawArgs["pkg"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkg"))
-		arg0, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["pkg"] = arg0
-	var arg1 model.PkgInputSpec
+	var arg1 model.IDorPkgInput
 	if tmp, ok := rawArgs["otherPackage"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherPackage"))
-		arg1, err = ec.unmarshalNPkgInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorPkgInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -995,19 +995,19 @@ func (ec *executionContext) field_Mutation_ingestPkgEqual_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_ingestPkgEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.PkgInputSpec
+	var arg0 []*model.IDorPkgInput
 	if tmp, ok := rawArgs["pkgs"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgs"))
-		arg0, err = ec.unmarshalNPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["pkgs"] = arg0
-	var arg1 []*model.PkgInputSpec
+	var arg1 []*model.IDorPkgInput
 	if tmp, ok := rawArgs["otherPackages"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherPackages"))
-		arg1, err = ec.unmarshalNPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1094,28 +1094,28 @@ func (ec *executionContext) field_Mutation_ingestPointOfContacts_args(ctx contex
 func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.ArtifactInputSpec
+	var arg0 model.IDorArtifactInput
 	if tmp, ok := rawArgs["subject"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
-		arg0, err = ec.unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["subject"] = arg0
-	var arg1 []*model.ArtifactInputSpec
+	var arg1 []*model.IDorArtifactInput
 	if tmp, ok := rawArgs["builtFrom"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFrom"))
-		arg1, err = ec.unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["builtFrom"] = arg1
-	var arg2 model.BuilderInputSpec
+	var arg2 model.IDorBuilderInput
 	if tmp, ok := rawArgs["builtBy"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtBy"))
-		arg2, err = ec.unmarshalNBuilderInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx, tmp)
+		arg2, err = ec.unmarshalNIDorBuilderInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1136,28 +1136,28 @@ func (ec *executionContext) field_Mutation_ingestSLSA_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_ingestSLSAs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.ArtifactInputSpec
+	var arg0 []*model.IDorArtifactInput
 	if tmp, ok := rawArgs["subjects"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjects"))
-		arg0, err = ec.unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["subjects"] = arg0
-	var arg1 [][]*model.ArtifactInputSpec
+	var arg1 [][]*model.IDorArtifactInput
 	if tmp, ok := rawArgs["builtFromList"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtFromList"))
-		arg1, err = ec.unmarshalNArtifactInputSpec2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["builtFromList"] = arg1
-	var arg2 []*model.BuilderInputSpec
+	var arg2 []*model.IDorBuilderInput
 	if tmp, ok := rawArgs["builtByList"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builtByList"))
-		arg2, err = ec.unmarshalNBuilderInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpecᚄ(ctx, tmp)
+		arg2, err = ec.unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1178,10 +1178,10 @@ func (ec *executionContext) field_Mutation_ingestSLSAs_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_ingestScorecard_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.SourceInputSpec
+	var arg0 model.IDorSourceInput
 	if tmp, ok := rawArgs["source"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-		arg0, err = ec.unmarshalNSourceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1202,10 +1202,10 @@ func (ec *executionContext) field_Mutation_ingestScorecard_args(ctx context.Cont
 func (ec *executionContext) field_Mutation_ingestScorecards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.SourceInputSpec
+	var arg0 []*model.IDorSourceInput
 	if tmp, ok := rawArgs["sources"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
-		arg0, err = ec.unmarshalNSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1226,10 +1226,10 @@ func (ec *executionContext) field_Mutation_ingestScorecards_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.SourceInputSpec
+	var arg0 model.IDorSourceInput
 	if tmp, ok := rawArgs["source"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-		arg0, err = ec.unmarshalNSourceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1241,10 +1241,10 @@ func (ec *executionContext) field_Mutation_ingestSource_args(ctx context.Context
 func (ec *executionContext) field_Mutation_ingestSources_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.SourceInputSpec
+	var arg0 []*model.IDorSourceInput
 	if tmp, ok := rawArgs["sources"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
-		arg0, err = ec.unmarshalNSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1265,10 +1265,10 @@ func (ec *executionContext) field_Mutation_ingestVEXStatement_args(ctx context.C
 		}
 	}
 	args["subject"] = arg0
-	var arg1 model.VulnerabilityInputSpec
+	var arg1 model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg1, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1298,10 +1298,10 @@ func (ec *executionContext) field_Mutation_ingestVEXStatements_args(ctx context.
 		}
 	}
 	args["subjects"] = arg0
-	var arg1 []*model.VulnerabilityInputSpec
+	var arg1 []*model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vulnerabilities"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
-		arg1, err = ec.unmarshalNVulnerabilityInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1322,19 +1322,19 @@ func (ec *executionContext) field_Mutation_ingestVEXStatements_args(ctx context.
 func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.VulnerabilityInputSpec
+	var arg0 model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg0, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["vulnerability"] = arg0
-	var arg1 model.VulnerabilityInputSpec
+	var arg1 model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["otherVulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherVulnerability"))
-		arg1, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1355,19 +1355,19 @@ func (ec *executionContext) field_Mutation_ingestVulnEqual_args(ctx context.Cont
 func (ec *executionContext) field_Mutation_ingestVulnEquals_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.VulnerabilityInputSpec
+	var arg0 []*model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vulnerabilities"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilities"))
-		arg0, err = ec.unmarshalNVulnerabilityInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["vulnerabilities"] = arg0
-	var arg1 []*model.VulnerabilityInputSpec
+	var arg1 []*model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["otherVulnerabilities"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("otherVulnerabilities"))
-		arg1, err = ec.unmarshalNVulnerabilityInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpecᚄ(ctx, tmp)
+		arg1, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1388,10 +1388,10 @@ func (ec *executionContext) field_Mutation_ingestVulnEquals_args(ctx context.Con
 func (ec *executionContext) field_Mutation_ingestVulnerabilities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 []*model.VulnerabilityInputSpec
+	var arg0 []*model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vulns"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulns"))
-		arg0, err = ec.unmarshalNVulnerabilityInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpecᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorVulnerabilityInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInputᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1403,10 +1403,10 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilities_args(ctx contex
 func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.VulnerabilityInputSpec
+	var arg0 model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vulnerability"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerability"))
-		arg0, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1427,10 +1427,10 @@ func (ec *executionContext) field_Mutation_ingestVulnerabilityMetadata_args(ctx 
 func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.VulnerabilityInputSpec
+	var arg0 model.IDorVulnerabilityInput
 	if tmp, ok := rawArgs["vuln"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vuln"))
-		arg0, err = ec.unmarshalNVulnerabilityInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityInputSpec(ctx, tmp)
+		arg0, err = ec.unmarshalNIDorVulnerabilityInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorVulnerabilityInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2055,7 +2055,7 @@ func (ec *executionContext) _Mutation_ingestArtifact(ctx context.Context, field 
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestArtifact(rctx, fc.Args["artifact"].(*model.ArtifactInputSpec))
+		return ec.resolvers.Mutation().IngestArtifact(rctx, fc.Args["artifact"].(*model.IDorArtifactInput))
 	})
 
 	if resTmp == nil {
@@ -2107,7 +2107,7 @@ func (ec *executionContext) _Mutation_ingestArtifacts(ctx context.Context, field
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestArtifacts(rctx, fc.Args["artifacts"].([]*model.ArtifactInputSpec))
+		return ec.resolvers.Mutation().IngestArtifacts(rctx, fc.Args["artifacts"].([]*model.IDorArtifactInput))
 	})
 
 	if resTmp == nil {
@@ -2159,7 +2159,7 @@ func (ec *executionContext) _Mutation_ingestBuilder(ctx context.Context, field g
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestBuilder(rctx, fc.Args["builder"].(*model.BuilderInputSpec))
+		return ec.resolvers.Mutation().IngestBuilder(rctx, fc.Args["builder"].(*model.IDorBuilderInput))
 	})
 
 	if resTmp == nil {
@@ -2211,7 +2211,7 @@ func (ec *executionContext) _Mutation_ingestBuilders(ctx context.Context, field 
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestBuilders(rctx, fc.Args["builders"].([]*model.BuilderInputSpec))
+		return ec.resolvers.Mutation().IngestBuilders(rctx, fc.Args["builders"].([]*model.IDorBuilderInput))
 	})
 
 	if resTmp == nil {
@@ -2471,7 +2471,7 @@ func (ec *executionContext) _Mutation_ingestCertifyLegal(ctx context.Context, fi
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyLegal(rctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["declaredLicenses"].([]*model.LicenseInputSpec), fc.Args["discoveredLicenses"].([]*model.LicenseInputSpec), fc.Args["certifyLegal"].(model.CertifyLegalInputSpec))
+		return ec.resolvers.Mutation().IngestCertifyLegal(rctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["declaredLicenses"].([]*model.IDorLicenseInput), fc.Args["discoveredLicenses"].([]*model.IDorLicenseInput), fc.Args["certifyLegal"].(model.CertifyLegalInputSpec))
 	})
 
 	if resTmp == nil {
@@ -2523,7 +2523,7 @@ func (ec *executionContext) _Mutation_ingestCertifyLegals(ctx context.Context, f
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyLegals(rctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["declaredLicensesList"].([][]*model.LicenseInputSpec), fc.Args["discoveredLicensesList"].([][]*model.LicenseInputSpec), fc.Args["certifyLegals"].([]*model.CertifyLegalInputSpec))
+		return ec.resolvers.Mutation().IngestCertifyLegals(rctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["declaredLicensesList"].([][]*model.IDorLicenseInput), fc.Args["discoveredLicensesList"].([][]*model.IDorLicenseInput), fc.Args["certifyLegals"].([]*model.CertifyLegalInputSpec))
 	})
 
 	if resTmp == nil {
@@ -2575,7 +2575,7 @@ func (ec *executionContext) _Mutation_ingestScorecard(ctx context.Context, field
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestScorecard(rctx, fc.Args["source"].(model.SourceInputSpec), fc.Args["scorecard"].(model.ScorecardInputSpec))
+		return ec.resolvers.Mutation().IngestScorecard(rctx, fc.Args["source"].(model.IDorSourceInput), fc.Args["scorecard"].(model.ScorecardInputSpec))
 	})
 
 	if resTmp == nil {
@@ -2627,7 +2627,7 @@ func (ec *executionContext) _Mutation_ingestScorecards(ctx context.Context, fiel
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestScorecards(rctx, fc.Args["sources"].([]*model.SourceInputSpec), fc.Args["scorecards"].([]*model.ScorecardInputSpec))
+		return ec.resolvers.Mutation().IngestScorecards(rctx, fc.Args["sources"].([]*model.IDorSourceInput), fc.Args["scorecards"].([]*model.ScorecardInputSpec))
 	})
 
 	if resTmp == nil {
@@ -2679,7 +2679,7 @@ func (ec *executionContext) _Mutation_ingestVEXStatement(ctx context.Context, fi
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["vexStatement"].(model.VexStatementInputSpec))
+		return ec.resolvers.Mutation().IngestVEXStatement(rctx, fc.Args["subject"].(model.PackageOrArtifactInput), fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["vexStatement"].(model.VexStatementInputSpec))
 	})
 
 	if resTmp == nil {
@@ -2731,7 +2731,7 @@ func (ec *executionContext) _Mutation_ingestVEXStatements(ctx context.Context, f
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVEXStatements(rctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["vulnerabilities"].([]*model.VulnerabilityInputSpec), fc.Args["vexStatements"].([]*model.VexStatementInputSpec))
+		return ec.resolvers.Mutation().IngestVEXStatements(rctx, fc.Args["subjects"].(model.PackageOrArtifactInputs), fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vexStatements"].([]*model.VexStatementInputSpec))
 	})
 
 	if resTmp == nil {
@@ -2783,7 +2783,7 @@ func (ec *executionContext) _Mutation_ingestCertifyVuln(ctx context.Context, fie
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyVuln(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["certifyVuln"].(model.ScanMetadataInput))
+		return ec.resolvers.Mutation().IngestCertifyVuln(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["certifyVuln"].(model.ScanMetadataInput))
 	})
 
 	if resTmp == nil {
@@ -2835,7 +2835,7 @@ func (ec *executionContext) _Mutation_ingestCertifyVulns(ctx context.Context, fi
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestCertifyVulns(rctx, fc.Args["pkgs"].([]*model.PkgInputSpec), fc.Args["vulnerabilities"].([]*model.VulnerabilityInputSpec), fc.Args["certifyVulns"].([]*model.ScanMetadataInput))
+		return ec.resolvers.Mutation().IngestCertifyVulns(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["certifyVulns"].([]*model.ScanMetadataInput))
 	})
 
 	if resTmp == nil {
@@ -3095,7 +3095,7 @@ func (ec *executionContext) _Mutation_ingestSLSA(ctx context.Context, field grap
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestSlsa(rctx, fc.Args["subject"].(model.ArtifactInputSpec), fc.Args["builtFrom"].([]*model.ArtifactInputSpec), fc.Args["builtBy"].(model.BuilderInputSpec), fc.Args["slsa"].(model.SLSAInputSpec))
+		return ec.resolvers.Mutation().IngestSlsa(rctx, fc.Args["subject"].(model.IDorArtifactInput), fc.Args["builtFrom"].([]*model.IDorArtifactInput), fc.Args["builtBy"].(model.IDorBuilderInput), fc.Args["slsa"].(model.SLSAInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3147,7 +3147,7 @@ func (ec *executionContext) _Mutation_ingestSLSAs(ctx context.Context, field gra
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestSLSAs(rctx, fc.Args["subjects"].([]*model.ArtifactInputSpec), fc.Args["builtFromList"].([][]*model.ArtifactInputSpec), fc.Args["builtByList"].([]*model.BuilderInputSpec), fc.Args["slsaList"].([]*model.SLSAInputSpec))
+		return ec.resolvers.Mutation().IngestSLSAs(rctx, fc.Args["subjects"].([]*model.IDorArtifactInput), fc.Args["builtFromList"].([][]*model.IDorArtifactInput), fc.Args["builtByList"].([]*model.IDorBuilderInput), fc.Args["slsaList"].([]*model.SLSAInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3199,7 +3199,7 @@ func (ec *executionContext) _Mutation_ingestHasSourceAt(ctx context.Context, fie
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestHasSourceAt(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["source"].(model.SourceInputSpec), fc.Args["hasSourceAt"].(model.HasSourceAtInputSpec))
+		return ec.resolvers.Mutation().IngestHasSourceAt(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["source"].(model.IDorSourceInput), fc.Args["hasSourceAt"].(model.HasSourceAtInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3251,7 +3251,7 @@ func (ec *executionContext) _Mutation_ingestHasSourceAts(ctx context.Context, fi
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestHasSourceAts(rctx, fc.Args["pkgs"].([]*model.PkgInputSpec), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["sources"].([]*model.SourceInputSpec), fc.Args["hasSourceAts"].([]*model.HasSourceAtInputSpec))
+		return ec.resolvers.Mutation().IngestHasSourceAts(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["pkgMatchType"].(model.MatchFlags), fc.Args["sources"].([]*model.IDorSourceInput), fc.Args["hasSourceAts"].([]*model.HasSourceAtInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3303,7 +3303,7 @@ func (ec *executionContext) _Mutation_ingestHashEqual(ctx context.Context, field
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestHashEqual(rctx, fc.Args["artifact"].(model.ArtifactInputSpec), fc.Args["otherArtifact"].(model.ArtifactInputSpec), fc.Args["hashEqual"].(model.HashEqualInputSpec))
+		return ec.resolvers.Mutation().IngestHashEqual(rctx, fc.Args["artifact"].(model.IDorArtifactInput), fc.Args["otherArtifact"].(model.IDorArtifactInput), fc.Args["hashEqual"].(model.HashEqualInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3355,7 +3355,7 @@ func (ec *executionContext) _Mutation_ingestHashEquals(ctx context.Context, fiel
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestHashEquals(rctx, fc.Args["artifacts"].([]*model.ArtifactInputSpec), fc.Args["otherArtifacts"].([]*model.ArtifactInputSpec), fc.Args["hashEquals"].([]*model.HashEqualInputSpec))
+		return ec.resolvers.Mutation().IngestHashEquals(rctx, fc.Args["artifacts"].([]*model.IDorArtifactInput), fc.Args["otherArtifacts"].([]*model.IDorArtifactInput), fc.Args["hashEquals"].([]*model.HashEqualInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3407,7 +3407,7 @@ func (ec *executionContext) _Mutation_ingestDependency(ctx context.Context, fiel
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestDependency(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["depPkg"].(model.PkgInputSpec), fc.Args["depPkgMatchType"].(model.MatchFlags), fc.Args["dependency"].(model.IsDependencyInputSpec))
+		return ec.resolvers.Mutation().IngestDependency(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["depPkg"].(model.IDorPkgInput), fc.Args["depPkgMatchType"].(model.MatchFlags), fc.Args["dependency"].(model.IsDependencyInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3459,7 +3459,7 @@ func (ec *executionContext) _Mutation_ingestDependencies(ctx context.Context, fi
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestDependencies(rctx, fc.Args["pkgs"].([]*model.PkgInputSpec), fc.Args["depPkgs"].([]*model.PkgInputSpec), fc.Args["depPkgMatchType"].(model.MatchFlags), fc.Args["dependencies"].([]*model.IsDependencyInputSpec))
+		return ec.resolvers.Mutation().IngestDependencies(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["depPkgs"].([]*model.IDorPkgInput), fc.Args["depPkgMatchType"].(model.MatchFlags), fc.Args["dependencies"].([]*model.IsDependencyInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3511,7 +3511,7 @@ func (ec *executionContext) _Mutation_ingestOccurrence(ctx context.Context, fiel
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestOccurrence(rctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["artifact"].(model.ArtifactInputSpec), fc.Args["occurrence"].(model.IsOccurrenceInputSpec))
+		return ec.resolvers.Mutation().IngestOccurrence(rctx, fc.Args["subject"].(model.PackageOrSourceInput), fc.Args["artifact"].(model.IDorArtifactInput), fc.Args["occurrence"].(model.IsOccurrenceInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3563,7 +3563,7 @@ func (ec *executionContext) _Mutation_ingestOccurrences(ctx context.Context, fie
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestOccurrences(rctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["artifacts"].([]*model.ArtifactInputSpec), fc.Args["occurrences"].([]*model.IsOccurrenceInputSpec))
+		return ec.resolvers.Mutation().IngestOccurrences(rctx, fc.Args["subjects"].(model.PackageOrSourceInputs), fc.Args["artifacts"].([]*model.IDorArtifactInput), fc.Args["occurrences"].([]*model.IsOccurrenceInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3615,7 +3615,7 @@ func (ec *executionContext) _Mutation_ingestLicense(ctx context.Context, field g
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestLicense(rctx, fc.Args["license"].(*model.LicenseInputSpec))
+		return ec.resolvers.Mutation().IngestLicense(rctx, fc.Args["license"].(*model.IDorLicenseInput))
 	})
 
 	if resTmp == nil {
@@ -3667,7 +3667,7 @@ func (ec *executionContext) _Mutation_ingestLicenses(ctx context.Context, field 
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestLicenses(rctx, fc.Args["licenses"].([]*model.LicenseInputSpec))
+		return ec.resolvers.Mutation().IngestLicenses(rctx, fc.Args["licenses"].([]*model.IDorLicenseInput))
 	})
 
 	if resTmp == nil {
@@ -3823,7 +3823,7 @@ func (ec *executionContext) _Mutation_ingestPackage(ctx context.Context, field g
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestPackage(rctx, fc.Args["pkg"].(model.IDorPkgInputSpec))
+		return ec.resolvers.Mutation().IngestPackage(rctx, fc.Args["pkg"].(model.IDorPkgInput))
 	})
 
 	if resTmp == nil {
@@ -3885,7 +3885,7 @@ func (ec *executionContext) _Mutation_ingestPackages(ctx context.Context, field 
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestPackages(rctx, fc.Args["pkgs"].([]*model.IDorPkgInputSpec))
+		return ec.resolvers.Mutation().IngestPackages(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput))
 	})
 
 	if resTmp == nil {
@@ -3947,7 +3947,7 @@ func (ec *executionContext) _Mutation_ingestPkgEqual(ctx context.Context, field 
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestPkgEqual(rctx, fc.Args["pkg"].(model.PkgInputSpec), fc.Args["otherPackage"].(model.PkgInputSpec), fc.Args["pkgEqual"].(model.PkgEqualInputSpec))
+		return ec.resolvers.Mutation().IngestPkgEqual(rctx, fc.Args["pkg"].(model.IDorPkgInput), fc.Args["otherPackage"].(model.IDorPkgInput), fc.Args["pkgEqual"].(model.PkgEqualInputSpec))
 	})
 
 	if resTmp == nil {
@@ -3999,7 +3999,7 @@ func (ec *executionContext) _Mutation_ingestPkgEquals(ctx context.Context, field
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestPkgEquals(rctx, fc.Args["pkgs"].([]*model.PkgInputSpec), fc.Args["otherPackages"].([]*model.PkgInputSpec), fc.Args["pkgEquals"].([]*model.PkgEqualInputSpec))
+		return ec.resolvers.Mutation().IngestPkgEquals(rctx, fc.Args["pkgs"].([]*model.IDorPkgInput), fc.Args["otherPackages"].([]*model.IDorPkgInput), fc.Args["pkgEquals"].([]*model.PkgEqualInputSpec))
 	})
 
 	if resTmp == nil {
@@ -4051,7 +4051,7 @@ func (ec *executionContext) _Mutation_ingestSource(ctx context.Context, field gr
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestSource(rctx, fc.Args["source"].(model.SourceInputSpec))
+		return ec.resolvers.Mutation().IngestSource(rctx, fc.Args["source"].(model.IDorSourceInput))
 	})
 
 	if resTmp == nil {
@@ -4111,7 +4111,7 @@ func (ec *executionContext) _Mutation_ingestSources(ctx context.Context, field g
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestSources(rctx, fc.Args["sources"].([]*model.SourceInputSpec))
+		return ec.resolvers.Mutation().IngestSources(rctx, fc.Args["sources"].([]*model.IDorSourceInput))
 	})
 
 	if resTmp == nil {
@@ -4171,7 +4171,7 @@ func (ec *executionContext) _Mutation_ingestVulnEqual(ctx context.Context, field
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnEqual(rctx, fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["otherVulnerability"].(model.VulnerabilityInputSpec), fc.Args["vulnEqual"].(model.VulnEqualInputSpec))
+		return ec.resolvers.Mutation().IngestVulnEqual(rctx, fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["otherVulnerability"].(model.IDorVulnerabilityInput), fc.Args["vulnEqual"].(model.VulnEqualInputSpec))
 	})
 
 	if resTmp == nil {
@@ -4223,7 +4223,7 @@ func (ec *executionContext) _Mutation_ingestVulnEquals(ctx context.Context, fiel
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnEquals(rctx, fc.Args["vulnerabilities"].([]*model.VulnerabilityInputSpec), fc.Args["otherVulnerabilities"].([]*model.VulnerabilityInputSpec), fc.Args["vulnEquals"].([]*model.VulnEqualInputSpec))
+		return ec.resolvers.Mutation().IngestVulnEquals(rctx, fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["otherVulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vulnEquals"].([]*model.VulnEqualInputSpec))
 	})
 
 	if resTmp == nil {
@@ -4275,7 +4275,7 @@ func (ec *executionContext) _Mutation_ingestVulnerabilityMetadata(ctx context.Co
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnerabilityMetadata(rctx, fc.Args["vulnerability"].(model.VulnerabilityInputSpec), fc.Args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec))
+		return ec.resolvers.Mutation().IngestVulnerabilityMetadata(rctx, fc.Args["vulnerability"].(model.IDorVulnerabilityInput), fc.Args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec))
 	})
 
 	if resTmp == nil {
@@ -4327,7 +4327,7 @@ func (ec *executionContext) _Mutation_ingestBulkVulnerabilityMetadata(ctx contex
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestBulkVulnerabilityMetadata(rctx, fc.Args["vulnerabilities"].([]*model.VulnerabilityInputSpec), fc.Args["vulnerabilityMetadataList"].([]*model.VulnerabilityMetadataInputSpec))
+		return ec.resolvers.Mutation().IngestBulkVulnerabilityMetadata(rctx, fc.Args["vulnerabilities"].([]*model.IDorVulnerabilityInput), fc.Args["vulnerabilityMetadataList"].([]*model.VulnerabilityMetadataInputSpec))
 	})
 
 	if resTmp == nil {
@@ -4379,7 +4379,7 @@ func (ec *executionContext) _Mutation_ingestVulnerability(ctx context.Context, f
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["vuln"].(model.VulnerabilityInputSpec))
+		return ec.resolvers.Mutation().IngestVulnerability(rctx, fc.Args["vuln"].(model.IDorVulnerabilityInput))
 	})
 
 	if resTmp == nil {
@@ -4437,7 +4437,7 @@ func (ec *executionContext) _Mutation_ingestVulnerabilities(ctx context.Context,
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().IngestVulnerabilities(rctx, fc.Args["vulns"].([]*model.VulnerabilityInputSpec))
+		return ec.resolvers.Mutation().IngestVulnerabilities(rctx, fc.Args["vulns"].([]*model.IDorVulnerabilityInput))
 	})
 
 	if resTmp == nil {
@@ -6449,6 +6449,40 @@ func (ec *executionContext) unmarshalInputArtifactSpec(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputIDorArtifactInput(ctx context.Context, obj interface{}) (model.IDorArtifactInput, error) {
+	var it model.IDorArtifactInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"artifactID", "artifactInput"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "artifactID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifactID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ArtifactID = data
+		case "artifactInput":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifactInput"))
+			data, err := ec.unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ArtifactInput = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -7594,50 +7628,6 @@ func (ec *executionContext) marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋ
 	return ec._Artifact(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNArtifactInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v interface{}) (model.ArtifactInputSpec, error) {
-	res, err := ec.unmarshalInputArtifactInputSpec(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNArtifactInputSpec2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx context.Context, v interface{}) ([][]*model.ArtifactInputSpec, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([][]*model.ArtifactInputSpec, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) unmarshalNArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.ArtifactInputSpec, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]*model.ArtifactInputSpec, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) unmarshalNArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v interface{}) (*model.ArtifactInputSpec, error) {
-	res, err := ec.unmarshalInputArtifactInputSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (model.ArtifactSpec, error) {
 	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -7648,24 +7638,48 @@ func (ec *executionContext) unmarshalNArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋg
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.ArtifactInputSpec, error) {
-	if v == nil {
-		return nil, nil
-	}
+func (ec *executionContext) unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v interface{}) (model.IDorArtifactInput, error) {
+	res, err := ec.unmarshalInputIDorArtifactInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v interface{}) ([][]*model.IDorArtifactInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]*model.ArtifactInputSpec, len(vSlice))
+	res := make([][]*model.IDorArtifactInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
+}
+
+func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorArtifactInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.IDorArtifactInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v interface{}) (*model.IDorArtifactInput, error) {
+	res, err := ec.unmarshalInputIDorArtifactInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v interface{}) (*model.ArtifactInputSpec, error) {
@@ -7721,6 +7735,34 @@ func (ec *executionContext) unmarshalOArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋg
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorArtifactInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.IDorArtifactInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v interface{}) (*model.IDorArtifactInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputIDorArtifactInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

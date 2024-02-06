@@ -12,7 +12,7 @@ import (
 )
 
 // IngestSlsa is the resolver for the ingestSLSA field.
-func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
+func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (string, error) {
 	if len(builtFrom) < 1 {
 		return "", gqlerror.Errorf("IngestSLSA :: Must have at least 1 builtFrom")
 	}
@@ -21,7 +21,7 @@ func (r *mutationResolver) IngestSlsa(ctx context.Context, subject model.Artifac
 }
 
 // IngestSLSAs is the resolver for the ingestSLSAs field.
-func (r *mutationResolver) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestSLSAs(ctx context.Context, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) ([]string, error) {
 	funcName := "IngestSLSAs"
 	ingestedSLSAIDS := []string{}
 	if len(subjects) != len(slsaList) {

@@ -189,12 +189,19 @@ input PackageQualifierInputSpec {
   value: String!
 }
 
-input IDorPkgInputSpec {
+"""
+IDorPkgInput allows for specifying either the package IDs or the PkgInputSpec.
+
+Either the IDs or the PkgInputSpec must be specified. Both cannot be nil.
+
+If the IDs are specified, the PkgInputSpec is not used.
+"""
+input IDorPkgInput {
   packageTypeID: ID
   packageNamespaceID: ID
   packageNameID: ID
   packageVersionID: ID
-  pkg: PkgInputSpec
+  packageInput: PkgInputSpec
 }
 
 extend type Query {
@@ -204,7 +211,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string."
-  ingestPackage(pkg: IDorPkgInputSpec!): PackageIDs!
+  ingestPackage(pkg: IDorPkgInput!): PackageIDs!
   "Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings."
-  ingestPackages(pkgs: [IDorPkgInputSpec!]!): [PackageIDs!]!
+  ingestPackages(pkgs: [IDorPkgInput!]!): [PackageIDs!]!
 }

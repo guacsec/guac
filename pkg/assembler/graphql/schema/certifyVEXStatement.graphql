@@ -38,8 +38,8 @@ input type to be used in mutations.
 Exactly one of the value must be set to non-nil.
 """
 input PackageOrArtifactInput {
-  package: PkgInputSpec
-  artifact: ArtifactInputSpec
+  package: IDorPkgInput
+  artifact: IDorArtifactInput
 }
 
 """
@@ -47,8 +47,8 @@ PackageOrArtifactInputs allows using packages and artifacts as input for batch m
 Exactly one list must be specified.
 """
 input PackageOrArtifactInputs {
-  packages: [PkgInputSpec!]
-  artifacts: [ArtifactInputSpec!]
+  packages: [IDorPkgInput!]
+  artifacts: [IDorArtifactInput!]
 }
 
 "Records the status of a VEX statement subject."
@@ -138,13 +138,13 @@ extend type Mutation {
   "Adds a VEX certification for a package. The returned ID can be empty string."
   ingestVEXStatement(
     subject: PackageOrArtifactInput!
-    vulnerability: VulnerabilityInputSpec!
+    vulnerability: IDorVulnerabilityInput!
     vexStatement: VexStatementInputSpec!
   ): ID!
   "Bulk add VEX certifications for a package and vulnerability. The returned array of IDs can be a an array of empty string."
   ingestVEXStatements(
     subjects: PackageOrArtifactInputs!, 
-    vulnerabilities: [VulnerabilityInputSpec!]!, 
+    vulnerabilities: [IDorVulnerabilityInput!]!, 
     vexStatements: [VexStatementInputSpec!]!
   ): [ID!]!
 }

@@ -12,12 +12,12 @@ import (
 )
 
 // IngestDependency is the resolver for the ingestDependency field.
-func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+func (r *mutationResolver) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 	return r.Backend.IngestDependency(ctx, pkg, depPkg, depPkgMatchType, dependency)
 }
 
 // IngestDependencies is the resolver for the ingestDependencies field.
-func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	funcName := "IngestDependencies"
 	ingestedDependenciesIDS := []string{}
 	if len(pkgs) != len(depPkgs) {

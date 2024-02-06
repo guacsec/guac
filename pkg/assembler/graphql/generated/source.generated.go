@@ -578,6 +578,54 @@ func (ec *executionContext) fieldContext_SourceNamespace_names(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputIDorSourceInput(ctx context.Context, obj interface{}) (model.IDorSourceInput, error) {
+	var it model.IDorSourceInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"sourceTypeID", "sourceNamespaceID", "sourceNameID", "sourceInput"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "sourceTypeID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceTypeID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SourceTypeID = data
+		case "sourceNamespaceID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceNamespaceID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SourceNamespaceID = data
+		case "sourceNameID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceNameID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SourceNameID = data
+		case "sourceInput":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceInput"))
+			data, err := ec.unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SourceInput = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSourceInputSpec(ctx context.Context, obj interface{}) (model.SourceInputSpec, error) {
 	var it model.SourceInputSpec
 	asMap := map[string]interface{}{}
@@ -909,6 +957,33 @@ func (ec *executionContext) _SourceNamespace(ctx context.Context, sel ast.Select
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) unmarshalNIDorSourceInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx context.Context, v interface{}) (model.IDorSourceInput, error) {
+	res, err := ec.unmarshalInputIDorSourceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorSourceInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.IDorSourceInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx context.Context, v interface{}) (*model.IDorSourceInput, error) {
+	res, err := ec.unmarshalInputIDorSourceInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNSource2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Source) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -1019,33 +1094,6 @@ func (ec *executionContext) marshalNSourceIDs2ᚖgithubᚗcomᚋguacsecᚋguac�
 		return graphql.Null
 	}
 	return ec._SourceIDs(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNSourceInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx context.Context, v interface{}) (model.SourceInputSpec, error) {
-	res, err := ec.unmarshalInputSourceInputSpec(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.SourceInputSpec, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]*model.SourceInputSpec, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) unmarshalNSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx context.Context, v interface{}) (*model.SourceInputSpec, error) {
-	res, err := ec.unmarshalInputSourceInputSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNSourceName2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceNameᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SourceName) graphql.Marshaler {
@@ -1161,7 +1209,7 @@ func (ec *executionContext) unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguac�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.SourceInputSpec, error) {
+func (ec *executionContext) unmarshalOIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorSourceInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -1170,15 +1218,23 @@ func (ec *executionContext) unmarshalOSourceInputSpec2ᚕᚖgithubᚗcomᚋguacs
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]*model.SourceInputSpec, len(vSlice))
+	res := make([]*model.IDorSourceInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
+}
+
+func (ec *executionContext) unmarshalOIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx context.Context, v interface{}) (*model.IDorSourceInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputIDorSourceInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx context.Context, v interface{}) (*model.SourceInputSpec, error) {

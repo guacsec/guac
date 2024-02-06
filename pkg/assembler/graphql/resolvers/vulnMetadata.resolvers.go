@@ -14,7 +14,7 @@ import (
 )
 
 // IngestVulnerabilityMetadata is the resolver for the ingestVulnerabilityMetadata field.
-func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
+func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
 	funcName := "IngestVulnerabilityMetadata"
 	err := helper.ValidateNoVul(vulnerability)
 	if err != nil {
@@ -32,7 +32,7 @@ func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vuln
 }
 
 // IngestBulkVulnerabilityMetadata is the resolver for the ingestBulkVulnerabilityMetadata field.
-func (r *mutationResolver) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	funcName := "IngestVulnerabilityMetadatas"
 	if len(vulnerabilities) != len(vulnerabilityMetadataList) {
 		return []string{}, gqlerror.Errorf("%v :: uneven vulnerabilities and vulnerabilityMetadata for ingestion", funcName)

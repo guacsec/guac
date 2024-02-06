@@ -14,7 +14,7 @@ import (
 )
 
 // IngestVEXStatement is the resolver for the ingestVEXStatement field.
-func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
+func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.IDorVulnerabilityInput, vexStatement model.VexStatementInputSpec) (string, error) {
 	funcName := "IngestVEXStatement"
 	if err := helper.ValidatePackageOrArtifactInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
@@ -40,7 +40,7 @@ func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model
 }
 
 // IngestVEXStatements is the resolver for the ingestVEXStatements field.
-func (r *mutationResolver) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
 	funcName := "IngestVEXStatements"
 	valuesDefined := 0
 	if len(subjects.Packages) > 0 {

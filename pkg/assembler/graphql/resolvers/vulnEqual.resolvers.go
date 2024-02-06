@@ -14,7 +14,7 @@ import (
 )
 
 // IngestVulnEqual is the resolver for the ingestVulnEqual field.
-func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
+func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	funcName := "IngestVulnEqual"
 	err := helper.ValidateNoVul(vulnerability)
 	if err != nil {
@@ -44,7 +44,7 @@ func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability mo
 }
 
 // IngestVulnEquals is the resolver for the ingestVulnEquals field.
-func (r *mutationResolver) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
 	funcName := "IngestVulnEquals"
 
 	if len(vulnerabilities) != len(otherVulnerabilities) {

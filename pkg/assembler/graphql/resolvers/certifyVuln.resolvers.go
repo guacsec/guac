@@ -14,7 +14,7 @@ import (
 )
 
 // IngestCertifyVuln is the resolver for the ingestCertifyVuln field.
-func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
+func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
 	funcName := "IngestCertifyVuln"
 	err := helper.ValidateVulnerabilityIDInputSpec(vulnerability)
 	if err != nil {
@@ -27,7 +27,7 @@ func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.PkgI
 }
 
 // IngestCertifyVulns is the resolver for the ingestCertifyVulns field.
-func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	funcName := "IngestCertifyVulns"
 	ingestedCertifyVulnsIDS := []string{}
 	if len(pkgs) != len(vulnerabilities) {

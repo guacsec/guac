@@ -13,7 +13,7 @@ import (
 )
 
 // IngestCertifyLegal is the resolver for the ingestCertifyLegal field.
-func (r *mutationResolver) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal model.CertifyLegalInputSpec) (string, error) {
+func (r *mutationResolver) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, certifyLegal model.CertifyLegalInputSpec) (string, error) {
 	funcName := "IngestCertifyLegal"
 	if err := helper.ValidatePackageOrSourceInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
@@ -23,7 +23,7 @@ func (r *mutationResolver) IngestCertifyLegal(ctx context.Context, subject model
 }
 
 // IngestCertifyLegals is the resolver for the ingestCertifyLegals field.
-func (r *mutationResolver) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 	funcName := "IngestCertifyLegals"
 	valuesDefined := 0
 	if (len(certifyLegals) != len(discoveredLicensesList)) ||

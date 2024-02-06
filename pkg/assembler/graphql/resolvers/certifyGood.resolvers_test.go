@@ -43,8 +43,8 @@ func TestIngestCertifyGood(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source:   testdata.S1,
-						Artifact: testdata.A1,
+						Source:   &model.IDorSourceInput{SourceInput: testdata.S1},
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
@@ -58,7 +58,7 @@ func TestIngestCertifyGood(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					CG: &model.CertifyGoodInputSpec{
 						Justification: "test justification",
@@ -113,7 +113,7 @@ func TestIngestCertifyGoods(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 					},
 					Match: model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,

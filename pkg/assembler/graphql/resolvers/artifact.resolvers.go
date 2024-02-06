@@ -12,12 +12,12 @@ import (
 )
 
 // IngestArtifact is the resolver for the ingestArtifact field.
-func (r *mutationResolver) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
+func (r *mutationResolver) IngestArtifact(ctx context.Context, artifact *model.IDorArtifactInput) (string, error) {
 	return r.Backend.IngestArtifact(ctx, artifact)
 }
 
 // IngestArtifacts is the resolver for the ingestArtifacts field.
-func (r *mutationResolver) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestArtifacts(ctx context.Context, artifacts []*model.IDorArtifactInput) ([]string, error) {
 	return r.Backend.IngestArtifacts(ctx, artifacts)
 }
 

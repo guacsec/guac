@@ -61,14 +61,14 @@ extend type Query {
 extend type Mutation {
   "Ingest a mapping between vulnerabilities. The returned ID can be empty string."
   ingestVulnEqual(
-    vulnerability: VulnerabilityInputSpec!
-    otherVulnerability: VulnerabilityInputSpec!
+    vulnerability: IDorVulnerabilityInput!
+    otherVulnerability: IDorVulnerabilityInput!
     vulnEqual: VulnEqualInputSpec!
   ): ID!
   "Bulk ingest mapping between vulnerabilities. The returned array of IDs can be a an array of empty string."
   ingestVulnEquals(
-    vulnerabilities: [VulnerabilityInputSpec!]!
-    otherVulnerabilities: [VulnerabilityInputSpec!]!
+    vulnerabilities: [IDorVulnerabilityInput!]!
+    otherVulnerabilities: [IDorVulnerabilityInput!]!
     vulnEquals: [VulnEqualInputSpec!]!
   ): [ID!]!
 }

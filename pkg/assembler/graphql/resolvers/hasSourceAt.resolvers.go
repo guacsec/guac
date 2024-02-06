@@ -12,12 +12,12 @@ import (
 )
 
 // IngestHasSourceAt is the resolver for the ingestHasSourceAt field.
-func (r *mutationResolver) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
+func (r *mutationResolver) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	return r.Backend.IngestHasSourceAt(ctx, pkg, pkgMatchType, source, hasSourceAt)
 }
 
 // IngestHasSourceAts is the resolver for the ingestHasSourceAts field.
-func (r *mutationResolver) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
 	funcName := "IngestHasSourceAts"
 	if len(pkgs) != len(sources) {
 		return []string{}, gqlerror.Errorf("%v :: uneven packages and sources for ingestion", funcName)

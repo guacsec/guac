@@ -135,16 +135,16 @@ extend type Query {
 extend type Mutation {
   "Ingests a SLSA attestation. The returned ID can be empty string."
   ingestSLSA(
-    subject: ArtifactInputSpec!
-    builtFrom: [ArtifactInputSpec!]!
-    builtBy: BuilderInputSpec!
+    subject: IDorArtifactInput!
+    builtFrom: [IDorArtifactInput!]!
+    builtBy: IDorBuilderInput!
     slsa: SLSAInputSpec!
   ): ID!
   "Bulk Ingest SLSA attestations. The returned array of IDs can be a an array of empty string."
   ingestSLSAs(
-    subjects: [ArtifactInputSpec!]!
-    builtFromList: [[ArtifactInputSpec!]!]!
-    builtByList: [BuilderInputSpec!]!
+    subjects: [IDorArtifactInput!]!
+    builtFromList: [[IDorArtifactInput!]!]!
+    builtByList: [IDorBuilderInput!]!
     slsaList: [SLSAInputSpec!]!
   ): [ID!]!
 }

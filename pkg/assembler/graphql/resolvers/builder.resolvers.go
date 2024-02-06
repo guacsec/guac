@@ -11,12 +11,12 @@ import (
 )
 
 // IngestBuilder is the resolver for the ingestBuilder field.
-func (r *mutationResolver) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
+func (r *mutationResolver) IngestBuilder(ctx context.Context, builder *model.IDorBuilderInput) (string, error) {
 	return r.Backend.IngestBuilder(ctx, builder)
 }
 
 // IngestBuilders is the resolver for the ingestBuilders field.
-func (r *mutationResolver) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestBuilders(ctx context.Context, builders []*model.IDorBuilderInput) ([]string, error) {
 	return r.Backend.IngestBuilders(ctx, builders)
 }
 

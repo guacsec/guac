@@ -12,12 +12,12 @@ import (
 )
 
 // IngestHashEqual is the resolver for the ingestHashEqual field.
-func (r *mutationResolver) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
+func (r *mutationResolver) IngestHashEqual(ctx context.Context, artifact model.IDorArtifactInput, otherArtifact model.IDorArtifactInput, hashEqual model.HashEqualInputSpec) (string, error) {
 	return r.Backend.IngestHashEqual(ctx, artifact, otherArtifact, hashEqual)
 }
 
 // IngestHashEquals is the resolver for the ingestHashEquals field.
-func (r *mutationResolver) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestHashEquals(ctx context.Context, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
 	funcName := "IngestHashEquals"
 	ingestedHashEqualsIDS := []string{}
 	if len(artifacts) != len(otherArtifacts) {

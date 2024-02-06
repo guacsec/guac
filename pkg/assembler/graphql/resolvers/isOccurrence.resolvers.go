@@ -13,7 +13,7 @@ import (
 )
 
 // IngestOccurrence is the resolver for the ingestOccurrence field.
-func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error) {
 	funcName := "IngestOccurrence"
 	if err := helper.ValidatePackageOrSourceInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v :: %s", funcName, err)
@@ -22,7 +22,7 @@ func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.P
 }
 
 // IngestOccurrences is the resolver for the ingestOccurrences field.
-func (r *mutationResolver) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+func (r *mutationResolver) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	funcName := "IngestOccurrences"
 	ingestedOccurrencesIDs := []string{}
 	valuesDefined := 0
