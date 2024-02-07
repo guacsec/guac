@@ -185,32 +185,6 @@ func showWideOutput(allSBOMResponses []model.HasSBOMsHasSBOM, file string) {
 
 }
 
-// func print
-func findHasSBOMBy(id, uri, purl, algorithm, digest, downloadLocation, origin, collector string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
-	var foundHasSBOMPkg *model.HasSBOMsResponse
-	var err error
-	if purl != "" {
-		pkgResponse, err := getPkgResponseFromPurl(ctx, gqlclient, purl)
-		if err != nil {
-			fmt.Printf("getPkgResponseFromPurl - error: %v", err)
-			return nil, err
-		}
-		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Subject: &model.PackageOrArtifactSpec{Package: &model.PkgSpec{Id: &pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id}},
-			Id: &id, Digest: &digest, DownloadLocation: &downloadLocation, Origin: &origin, Collector: &collector})
-		if err != nil {
-			fmt.Printf("failed getting hasSBOM with error :%v", err)
-			return nil, err
-		}
-	} else {
-		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Uri: &uri, Id: &id, Digest: &digest, DownloadLocation: &downloadLocation, Origin: &origin, Collector: &collector})
-		if err != nil {
-			fmt.Printf("failed getting hasSBOM  with error: %v", err)
-			return nil, err
-		}
-	}
-	return foundHasSBOMPkg, nil
-}
-
 func init() {
 	rootCmd.AddCommand(lookupCmd)
 	//these flags are used to lookup SBOMs that meet the flag criteria, all mentioned flags are ANDed together
