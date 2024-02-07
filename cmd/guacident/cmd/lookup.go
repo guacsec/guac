@@ -47,6 +47,7 @@ var lookupCmd = &cobra.Command{
 		downloadLocation, _ := cmd.Flags().GetString("download-location")
 		origin, _ := cmd.Flags().GetString("origin")
 		collector, _ := cmd.Flags().GetString("collector")
+		file, _ := cmd.Flags().GetString("file")
 
 		all, _ := cmd.Flags().GetBool("all")
 		max, _ := cmd.Flags().GetInt("max")
@@ -71,17 +72,31 @@ var lookupCmd = &cobra.Command{
 		}
 
 		if wide {
-			showWideOutput(allSBOMResponses)
+			showWideOutput(allSBOMResponses, file)
 		} else {
-			printNarrowOutput(allSBOMResponses, all, max)
+			printNarrowOutput(allSBOMResponses, all, max, file)
 		}
 
 	},
 }
 
-func printNarrowOutput(allSBOMResponses []model.HasSBOMsHasSBOM, all bool, max int) {
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
+func printNarrowOutput(allSBOMResponses []model.HasSBOMsHasSBOM, all bool, max int, file string) {
+	var out *os.File
+	var err error
+	if file == "" {
+		out = os.Stdout
+	}else{
+		if !strings.HasSuffix(file, ".json") {
+			// If not, change the filename to have ".json" extension
+			file = strings.TrimSuffix(file, ".") + ".json"
+		}
+		out, err = os.Create(file)
+		if err != nil{
+			fmt.Errorf("Error creating file:", err)
+			return
+		}
+	}
+	w := tabwriter.NewWriter(out, 0, 0, 3, ' ', 0)
 
 	fmt.Fprintln(w, "ID\tURI\tAlgorithm\tDigest\tDownload Location\tOrigin\tCollector\tKnown Since")
 
@@ -109,14 +124,8 @@ func printNarrowOutput(allSBOMResponses []model.HasSBOMsHasSBOM, all bool, max i
 		fmt.Print("Run with --all to list all packages that match the specification or specify max with a preferred number\n")
 	}
 }
-func showWideOutput(allSBOMResponses []model.HasSBOMsHasSBOM) {
-
-	tmpfile, err := os.CreateTemp("", "example*.json")
-	if err != nil {
-		fmt.Errorf("Error creating temporary file:", err)
-		return
-	}
-	defer os.Remove(tmpfile.Name())
+func showWideOutput(allSBOMResponses []model.HasSBOMsHasSBOM, file string) {
+	
 
 	jsonData, err := json.MarshalIndent(allSBOMResponses, "", "  ")
 	if err != nil {
@@ -124,31 +133,56 @@ func showWideOutput(allSBOMResponses []model.HasSBOMsHasSBOM) {
 		return
 	}
 
-	if _, err := tmpfile.Write([]byte(jsonData)); err != nil {
-		fmt.Errorf("Error writing to temporary file:", err)
-		return
+	// Write the JSON to a defined file if file is specified and return else write to tmp file
+	if file!= "" {
+		if !strings.HasSuffix(file, ".json") {
+			file = strings.TrimSuffix(file, ".") + ".json"
+		}
+		fileout, err := os.Create(file)
+		if err != nil {
+			fmt.Errorf("Error creating file:", err)
+			return
+		}
+
+		if _, err := fileout.Write([]byte(jsonData)); err != nil {
+			fmt.Errorf("Error writing to file:", err)
+			return
+		}
+	}else {
+		tmpfile, err := os.CreateTemp("", "example*.json")
+		if err != nil {
+			fmt.Errorf("Error creating file:", err)
+			return
+		}
+
+		defer os.Remove(tmpfile.Name())
+		if _, err := tmpfile.Write([]byte(jsonData)); err != nil {
+			fmt.Errorf("Error writing to file:", err)
+			return
+		}
+
+		if err := tmpfile.Close(); err != nil {
+			fmt.Errorf("Error closing file:", err)
+			return
+		}
+
+		cmd := exec.Command("more", tmpfile.Name())
+
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Start(); err != nil {
+			fmt.Errorf("Error executing less: %v", err)
+			return
+		}
+
+		if err := cmd.Wait(); err != nil {
+			fmt.Errorf("Error waiting for less to finish: %v", err)
+			return
+		}
 	}
 
-	if err := tmpfile.Close(); err != nil {
-		fmt.Errorf("Error closing temporary file:", err)
-		return
-	}
-
-	cmd := exec.Command("more", tmpfile.Name())
-
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Start(); err != nil {
-		fmt.Errorf("Error executing less: %v", err)
-		return
-	}
-
-	if err := cmd.Wait(); err != nil {
-		fmt.Errorf("Error waiting for less to finish: %v", err)
-		return
-	}
 }
 
 // func print
@@ -188,6 +222,7 @@ func init() {
 	lookupCmd.PersistentFlags().String("download-location", "", "download-location SBOM to lookup")
 	lookupCmd.PersistentFlags().String("origin", "", "origin for SBOM to lookup")
 	lookupCmd.PersistentFlags().String("collector", "", "collector for SBOM to lookup")
+	lookupCmd.PersistentFlags().String("file", "", "Pipe the output to a json file instead of Stdout")
 	lookupCmd.PersistentFlags().Bool("all", false, "Print the first few SBOMs found, if any")
 	lookupCmd.PersistentFlags().Bool("wide", false, "Print with all occurrences, packages, and dependencies for found SBOMs")
 	lookupCmd.PersistentFlags().Int("max", 5, "Print only max number of SBOMs found (Min 1), if any")
