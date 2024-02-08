@@ -38,7 +38,6 @@ func (g Graph) AddEdge(source, target Node) {
 	g[source] = append(g[source], target)
 }
 
-// diffCmd represents the diff command
 var diffCmd = &cobra.Command{
 	Use:   "diff",
 	Short: "Get a unified tree diff for two given SBOMS",
@@ -112,14 +111,15 @@ var diffCmd = &cobra.Command{
 
 		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMResponseOne), G1)
 		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMResponseTwo), G2)
+		diffgraph := performDiff(G1, G2, lcs, mhd )
+		
+		printGraphWithColorDiff(G1, diffgraph, boms[0])
+		printGraphWithColorDiff(G2, diffgraph, boms[1])
 
-		if err = performDiff(G1, G2, lcs, mhd ); err != nil {
-			fmt.Errorf("failed to perform diff with error: %v", err)
-			return
-		}
 	},
 }
-
+// This function recursively traverses the fields of a struct using reflection and converts them into nodes of a graph. 
+// It handles nested structs and arrays within the main struct.
 func hasSBOMResponseToGraph(structValue reflect.Value, graph Graph) {
 	for i := 0; i < structValue.NumField(); i++ {
 		field := structValue.Field(i)
@@ -141,13 +141,59 @@ func hasSBOMResponseToGraph(structValue reflect.Value, graph Graph) {
 	}
 }  
 
-func performDiff(G1, G2 Graph, lcs bool, mhd bool) error{
+func printGraphWithColorDiff(graph Graph, diffGraph Graph, bom string) {
+	fmt.Println("Graph for: ", bom)
+    for node, neighbors := range graph {
+        fmt.Printf("Node %v -> ", node.Value)
+        for _, neighbor := range neighbors {
+            if isNodeDifferent(neighbor, diffGraph) {
+                fmt.Printf("\033[31m%v\033[0m, ", neighbor.Value) // Red color
+            } else {
+                fmt.Printf("%v, ", neighbor.Value)
+            }
+        }
+        fmt.Println()
+    }
+}
+func isNodeDifferent(node Node, diffGraph Graph) bool {
+    _, ok := diffGraph[node]
+    return ok
+}
+
+// MH Diff  and LCS Algorithms:
+// The LCS algorithm finds common nodes between two graphs by iterating over each node in both graphs and comparing them using reflect.DeepEqual.
+// The common nodes are added to the LCS graph. The MH diff algorithm finds the nodes that are present in one graph but not the other.
+// It iterates over each node in both graphs and adds nodes that are unique to one graph to the diff graph.
+// How reflect.DeepEqual works:
+// For basic types (int, string, etc.), it performs a simple value comparison.
+// For slices, maps, and arrays, it compares the elements recursively.
+// For structs, it compares the fields recursively.
+// For pointers, it compares the values they point to recursively.
+// For interface values, it compares the underlying values recursively.
+
+func performDiff(G1, G2 Graph, lcs bool, mhd bool)Graph{
+	diffGraph := make(Graph)
 	if(lcs){
-
+		for node1 := range G1 {
+			for node2 := range G2 {
+				if reflect.DeepEqual(node1, node2) {
+					diffGraph[node1] = G1[node1]
+				}
+			}
+		}
 	}else if (mhd){
-
+		for node1 := range G1 {
+			if _, ok := G2[node1]; !ok {
+				diffGraph[node1] = G1[node1]
+			}
+		}
+		for node2 := range G2 {
+			if _, ok := G1[node2]; !ok {
+				diffGraph[node2] = G2[node2]
+			}
+		}
 	}
-	return nil
+	return diffGraph
 }
 
 
@@ -156,7 +202,7 @@ func init() {
 	rootCmd.AddCommand(diffCmd)
 	rootCmd.PersistentFlags().StringSlice("boms", []string{}, "two sboms to find the diff between")
 	rootCmd.PersistentFlags().Bool("lcs", false, "use the Longest-Common-Subsequence algorithm to find the diff")
-	rootCmd.PersistentFlags().Bool("mhd", false, "use the MH-Diff algorithm to find the diff")
+	rootCmd.PersistentFlags().Bool("mhd", false, "use the Minimum Heirarchical (MH-Diff) algorithm to find the diff")
 	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
 	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
 }
