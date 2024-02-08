@@ -245,7 +245,7 @@ func GuacPkgPurl(pkgName string, pkgVersion *string) string {
 func GuacFilePurl(alg string, digest string, filename *string) string {
 	s := fmt.Sprintf(PurlFilesGuac+"%s:%s", strings.ToLower(alg), digest)
 	if filename != nil {
-		s += fmt.Sprintf("#%s", SanitizeString(*filename))
+		s += fmt.Sprintf("?filename=%s", SanitizeString(*filename))
 	}
 	return s
 }
