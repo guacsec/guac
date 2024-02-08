@@ -275,7 +275,7 @@ func Test_cyclonedxParser_addRootPackage(t *testing.T) {
 				},
 			},
 		},
-		wantPurl: "pkg:guac/cdx/sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870#/home/work/test/build/webserver",
+		wantPurl: "pkg:guac/cdx/sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?filename=/home/work/test/build/webserver",
 	}, {
 		name: "file type - purl nor provided, version not provided",
 		cdxBom: &cdx.BOM{
@@ -434,7 +434,7 @@ func Test_cyclonedxParser_getComponentPackages(t *testing.T) {
 				Version: "sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870",
 			}},
 		},
-		wantPurl: "pkg:guac/files/sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870#/home/work/test/build/webserver",
+		wantPurl: "pkg:guac/files/sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870?filename=/home/work/test/build/webserver",
 	}, {
 		name: "file type - purl nor provided, version not provided",
 		cdxBom: &cdx.BOM{
