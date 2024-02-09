@@ -30,8 +30,8 @@ import (
 func TestIngestCertifyLegal(t *testing.T) {
 	type call struct {
 		Sub model.PackageOrSourceInput
-		Dec []*model.LicenseInputSpec
-		Dis []*model.LicenseInputSpec
+		Dec []*model.IDorLicenseInput
+		Dis []*model.IDorLicenseInput
 		CL  *model.CertifyLegalInputSpec
 	}
 	tests := []struct {
@@ -43,8 +43,8 @@ func TestIngestCertifyLegal(t *testing.T) {
 			Name: "Ingest with two subjects",
 			Call: call{
 				Sub: model.PackageOrSourceInput{
-					Source:  testdata.S1,
-					Package: testdata.P1,
+					Source:  &model.IDorSourceInput{SourceInput: testdata.S1},
+					Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 				},
 				CL: &model.CertifyLegalInputSpec{
 					Justification: "test justification",
@@ -56,7 +56,7 @@ func TestIngestCertifyLegal(t *testing.T) {
 			Name: "Happy path",
 			Call: call{
 				Sub: model.PackageOrSourceInput{
-					Package: testdata.P1,
+					Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 				},
 				CL: &model.CertifyLegalInputSpec{
 					Justification: "test justification",
@@ -94,8 +94,8 @@ func TestIngestCertifyLegal(t *testing.T) {
 func TestIngestCertifyLegals(t *testing.T) {
 	type call struct {
 		Sub model.PackageOrSourceInputs
-		Dec [][]*model.LicenseInputSpec
-		Dis [][]*model.LicenseInputSpec
+		Dec [][]*model.IDorLicenseInput
+		Dis [][]*model.IDorLicenseInput
 		CL  []*model.CertifyLegalInputSpec
 	}
 	tests := []struct {
@@ -107,10 +107,10 @@ func TestIngestCertifyLegals(t *testing.T) {
 			Name: "HappyPath Pkg",
 			Call: call{
 				Sub: model.PackageOrSourceInputs{
-					Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+					Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 				},
-				Dec: [][]*model.LicenseInputSpec{nil, nil},
-				Dis: [][]*model.LicenseInputSpec{nil, nil},
+				Dec: [][]*model.IDorLicenseInput{nil, nil},
+				Dis: [][]*model.IDorLicenseInput{nil, nil},
 				CL: []*model.CertifyLegalInputSpec{
 					{
 						Justification: "test justification",
@@ -125,10 +125,10 @@ func TestIngestCertifyLegals(t *testing.T) {
 			Name: "HappyPath Src",
 			Call: call{
 				Sub: model.PackageOrSourceInputs{
-					Sources: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+					Sources: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S2}},
 				},
-				Dec: [][]*model.LicenseInputSpec{nil, nil},
-				Dis: [][]*model.LicenseInputSpec{nil, nil},
+				Dec: [][]*model.IDorLicenseInput{nil, nil},
+				Dis: [][]*model.IDorLicenseInput{nil, nil},
 				CL: []*model.CertifyLegalInputSpec{
 					{
 						Justification: "test justification",
@@ -143,10 +143,10 @@ func TestIngestCertifyLegals(t *testing.T) {
 			Name: "Ingest with two packages and one CertifyLegal",
 			Call: call{
 				Sub: model.PackageOrSourceInputs{
-					Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+					Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 				},
-				Dec: [][]*model.LicenseInputSpec{nil, nil},
-				Dis: [][]*model.LicenseInputSpec{nil, nil},
+				Dec: [][]*model.IDorLicenseInput{nil, nil},
+				Dis: [][]*model.IDorLicenseInput{nil, nil},
 				CL: []*model.CertifyLegalInputSpec{
 					{
 						Justification: "test justification",
@@ -159,10 +159,10 @@ func TestIngestCertifyLegals(t *testing.T) {
 			Name: "Ingest with two sources and one CertifyLegal",
 			Call: call{
 				Sub: model.PackageOrSourceInputs{
-					Sources: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+					Sources: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S2}},
 				},
-				Dec: [][]*model.LicenseInputSpec{nil, nil},
-				Dis: [][]*model.LicenseInputSpec{nil, nil},
+				Dec: [][]*model.IDorLicenseInput{nil, nil},
+				Dis: [][]*model.IDorLicenseInput{nil, nil},
 				CL: []*model.CertifyLegalInputSpec{
 					{
 						Justification: "test justification",
@@ -175,10 +175,10 @@ func TestIngestCertifyLegals(t *testing.T) {
 			Name: "Ingest with one Dis",
 			Call: call{
 				Sub: model.PackageOrSourceInputs{
-					Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+					Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 				},
-				Dec: [][]*model.LicenseInputSpec{nil, nil},
-				Dis: [][]*model.LicenseInputSpec{nil},
+				Dec: [][]*model.IDorLicenseInput{nil, nil},
+				Dis: [][]*model.IDorLicenseInput{nil},
 				CL: []*model.CertifyLegalInputSpec{
 					{
 						Justification: "test justification",
@@ -194,11 +194,11 @@ func TestIngestCertifyLegals(t *testing.T) {
 			Name: "Ingest with one package and one source, two everything else",
 			Call: call{
 				Sub: model.PackageOrSourceInputs{
-					Packages: []*model.PkgInputSpec{testdata.P1},
-					Sources:  []*model.SourceInputSpec{testdata.S1},
+					Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
+					Sources:  []*model.IDorSourceInput{{SourceInput: testdata.S1}},
 				},
-				Dec: [][]*model.LicenseInputSpec{nil, nil},
-				Dis: [][]*model.LicenseInputSpec{nil, nil},
+				Dec: [][]*model.IDorLicenseInput{nil, nil},
+				Dis: [][]*model.IDorLicenseInput{nil, nil},
 				CL: []*model.CertifyLegalInputSpec{
 					{
 						Justification: "test justification",

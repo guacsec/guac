@@ -15,15 +15,21 @@ import (
 
 // IngestCertifyVuln is the resolver for the ingestCertifyVuln field.
 func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
-	funcName := "IngestCertifyVuln"
-	err := helper.ValidateVulnerabilityIDInputSpec(vulnerability)
-	if err != nil {
-		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	return r.Backend.IngestCertifyVuln(ctx, pkg,
-		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
-		certifyVuln)
+	if vulnerability.VulnerabilityInput != nil {
+		funcName := "IngestCertifyVuln"
+		err := helper.ValidateVulnerabilityIDInputSpec(*vulnerability.VulnerabilityInput)
+		if err != nil {
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+		return r.Backend.IngestCertifyVuln(ctx, pkg, model.IDorVulnerabilityInput{
+			VulnerabilityTypeID: vulnerability.VulnerabilityTypeID,
+			VulnerabilityNodeID: vulnerability.VulnerabilityNodeID,
+			VulnerabilityInput:  &model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.VulnerabilityInput.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityInput.VulnerabilityID)},
+		}, certifyVuln)
+	} else {
+		return r.Backend.IngestCertifyVuln(ctx, pkg, vulnerability, certifyVuln)
+	}
 }
 
 // IngestCertifyVulns is the resolver for the ingestCertifyVulns field.
@@ -38,21 +44,29 @@ func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model
 	}
 
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
+	var lowercaseVulnList []*model.IDorVulnerabilityInput
 	for _, v := range vulnerabilities {
-
-		err := helper.ValidateVulnerabilityIDInputSpec(*v)
+		if v.VulnerabilityInput == nil {
+			lowercaseVulnList = append(lowercaseVulnList, v)
+			continue
+		}
+		err := helper.ValidateVulnerabilityIDInputSpec(*v.VulnerabilityInput)
 		if err != nil {
 			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
 		lowercaseVulnInput := model.VulnerabilityInputSpec{
-			Type:            strings.ToLower(v.Type),
-			VulnerabilityID: strings.ToLower(v.VulnerabilityID),
+			Type:            strings.ToLower(v.VulnerabilityInput.Type),
+			VulnerabilityID: strings.ToLower(v.VulnerabilityInput.VulnerabilityID),
 		}
-		lowercaseVulnInputList = append(lowercaseVulnInputList, &lowercaseVulnInput)
+
+		lowercaseVulnList = append(lowercaseVulnList, &model.IDorVulnerabilityInput{
+			VulnerabilityTypeID: v.VulnerabilityTypeID,
+			VulnerabilityNodeID: v.VulnerabilityNodeID,
+			VulnerabilityInput:  &lowercaseVulnInput,
+		})
 	}
-	return r.Backend.IngestCertifyVulns(ctx, pkgs, lowercaseVulnInputList, certifyVulns)
+	return r.Backend.IngestCertifyVulns(ctx, pkgs, lowercaseVulnList, certifyVulns)
 }
 
 // CertifyVuln is the resolver for the CertifyVuln field.

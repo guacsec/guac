@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package backend_test
 
 import (
@@ -50,7 +48,7 @@ func TestPkgEqual(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -72,7 +70,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same, different order",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -101,7 +99,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on Justification",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -130,7 +128,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on pkg ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -165,7 +163,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on secondary pkg ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -606,7 +604,7 @@ func TestIngestPkgEquals(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
@@ -633,11 +631,11 @@ func TestIngestPkgEquals(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same, different order",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
-					P1: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-					P2: []*model.PkgInputSpec{testdata.P2, testdata.P1},
+					P1: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+					P2: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",

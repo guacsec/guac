@@ -64,11 +64,11 @@ func TestCertifyBad(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -90,11 +90,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "HappyPath All Version",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
@@ -120,11 +120,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same twice",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -135,7 +135,7 @@ func TestCertifyBad(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -161,11 +161,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query on Justification",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -176,7 +176,7 @@ func TestCertifyBad(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -198,11 +198,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query on KnownSince",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -214,7 +214,7 @@ func TestCertifyBad(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -239,8 +239,8 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P4},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P4}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
@@ -266,7 +266,7 @@ func TestCertifyBad(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -296,7 +296,7 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package version ID",
-			InPkg: []*model.PkgInputSpec{testdata.P4},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P4}},
 			InSrc: []*model.SourceInputSpec{},
 			Calls: []call{
 				{
@@ -321,12 +321,12 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -337,7 +337,7 @@ func TestCertifyBad(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -368,7 +368,7 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source ID",
-			InPkg: []*model.PkgInputSpec{},
+			InPkg: []*model.IDorPkgInput{},
 			InSrc: []*model.SourceInputSpec{testdata.S2},
 			Calls: []call{
 				{
@@ -390,12 +390,12 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query on Artifact",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -411,7 +411,7 @@ func TestCertifyBad(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -435,11 +435,11 @@ func TestCertifyBad(t *testing.T) {
 		{
 			Name:  "Query on Artifact ID",
 			InSrc: []*model.SourceInputSpec{},
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -464,11 +464,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query none",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -494,11 +494,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query multiple",
-			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -533,11 +533,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query Packages",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -590,11 +590,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query ID",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -619,11 +619,11 @@ func TestCertifyBad(t *testing.T) {
 		},
 		{
 			Name:  "Query bad ID",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					CB: &model.CertifyBadInputSpec{
 						Justification: "test justification",
@@ -743,11 +743,11 @@ func TestIngestCertifyBads(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -771,11 +771,11 @@ func TestIngestCertifyBads(t *testing.T) {
 		},
 		{
 			Name:  "HappyPath All Version",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
@@ -803,7 +803,7 @@ func TestIngestCertifyBads(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same twice",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
@@ -838,12 +838,12 @@ func TestIngestCertifyBads(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -859,7 +859,7 @@ func TestIngestCertifyBads(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Sources: []*model.SourceInputSpec{testdata.S1},
+						Sources: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 					},
 					CB: []*model.CertifyBadInputSpec{
 						{
@@ -888,12 +888,12 @@ func TestIngestCertifyBads(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -934,12 +934,12 @@ func TestIngestCertifyBads(t *testing.T) {
 		},
 		{
 			Name:  "Query on Artifact",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+						Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					},
 					CB: []*model.CertifyBadInputSpec{
 						{
@@ -952,7 +952,7 @@ func TestIngestCertifyBads(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Sources: []*model.SourceInputSpec{testdata.S1},
+						Sources: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 					},
 					CB: []*model.CertifyBadInputSpec{
 						{
@@ -1048,10 +1048,10 @@ func Test_buildCertifyBadByID(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Call: call{
 				Sub: model.PackageSourceOrArtifactInput{
-					Package: testdata.P1,
+					Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 				},
 				Match: &model.MatchFlags{
 					Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1071,7 +1071,7 @@ func Test_buildCertifyBadByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P4},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P4}},
 			Call: call{
 				Sub: model.PackageSourceOrArtifactInput{
 					Package: testdata.P4,
@@ -1123,7 +1123,7 @@ func Test_buildCertifyBadByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on Artifact",
-			InArt: []*model.ArtifactInputSpec{testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			Call: call{
 				Sub: model.PackageSourceOrArtifactInput{
 					Artifact: testdata.A2,
@@ -1180,10 +1180,10 @@ func Test_buildCertifyBadByID(t *testing.T) {
 		},
 		{
 			Name:  "Query bad ID",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Call: call{
 				Sub: model.PackageSourceOrArtifactInput{
-					Source: testdata.S1,
+					Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 				},
 				CB: &model.CertifyBadInputSpec{
 					Justification: "test justification",

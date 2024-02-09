@@ -540,7 +540,7 @@ func (s *Suite) TestIngestCertifyVulnerability() {
 		},
 		{
 			Name:  "Ingest missing pkg",
-			InPkg: []*model.PkgInputSpec{},
+			InPkg: []*model.IDorPkgInput{},
 			Calls: []call{
 				{
 					Pkg:         p2,

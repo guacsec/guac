@@ -31,8 +31,8 @@ var t1, _ = time.Parse(time.RFC3339, "2023-01-01T00:00:00Z")
 
 func TestIngestCertifyVulns(t *testing.T) {
 	type call struct {
-		Pkgs         []*model.PkgInputSpec
-		Vulns        []*model.VulnerabilityInputSpec
+		Pkgs         []*model.IDorPkgInput
+		Vulns        []*model.IDorVulnerabilityInput
 		CertifyVulns []*model.ScanMetadataInput
 	}
 	tests := []struct {
@@ -44,8 +44,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			Name: "Ingest without vuln",
 			Calls: []call{
 				{
-					Pkgs:         []*model.PkgInputSpec{testdata.P2},
-					Vulns:        []*model.VulnerabilityInputSpec{},
+					Pkgs:         []*model.IDorPkgInput{{PackageInput: testdata.P2}},
+					Vulns:        []*model.IDorVulnerabilityInput{},
 					CertifyVulns: []*model.ScanMetadataInput{{}},
 				},
 			},
@@ -55,8 +55,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			Name: "Ingest missing pkg",
 			Calls: []call{
 				{
-					Pkgs:         []*model.PkgInputSpec{},
-					Vulns:        []*model.VulnerabilityInputSpec{},
+					Pkgs:         []*model.IDorPkgInput{},
+					Vulns:        []*model.IDorVulnerabilityInput{},
 					CertifyVulns: []*model.ScanMetadataInput{{}},
 				},
 			},
@@ -66,13 +66,12 @@ func TestIngestCertifyVulns(t *testing.T) {
 			Name: "Ingest vulnerability cve with novulnID",
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P2},
-					Vulns: []*model.VulnerabilityInputSpec{
-						{
+					Pkgs: []*model.IDorPkgInput{{PackageInput: testdata.P2}},
+					Vulns: []*model.IDorVulnerabilityInput{{
+						VulnerabilityInput: &model.VulnerabilityInputSpec{
 							Type:            "cve",
-							VulnerabilityID: "",
-						},
-					},
+							VulnerabilityID: ""},
+					}},
 					CertifyVulns: []*model.ScanMetadataInput{{}},
 				},
 			},
@@ -82,8 +81,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			Name: "Happy path",
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
 							Collector:      "test collector",

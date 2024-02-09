@@ -28,9 +28,9 @@ import (
 
 func TestIngestHasSourceAts(t *testing.T) {
 	type call struct {
-		Pkgs       []*model.PkgInputSpec
+		Pkgs       []*model.IDorPkgInput
 		Match      model.MatchFlags
-		Sources    []*model.SourceInputSpec
+		Sources    []*model.IDorSourceInput
 		HasSources []*model.HasSourceAtInputSpec
 	}
 	tests := []struct {
@@ -42,11 +42,11 @@ func TestIngestHasSourceAts(t *testing.T) {
 			Name: "Ingest without source",
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P2},
+					Pkgs: []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 					Match: model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					Sources:    []*model.SourceInputSpec{},
+					Sources:    []*model.IDorSourceInput{},
 					HasSources: []*model.HasSourceAtInputSpec{{}},
 				},
 			},
@@ -56,11 +56,11 @@ func TestIngestHasSourceAts(t *testing.T) {
 			Name: "Ingest missing pkg",
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{},
+					Pkgs: []*model.IDorPkgInput{},
 					Match: model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					Sources:    []*model.SourceInputSpec{testdata.S1},
+					Sources:    []*model.IDorSourceInput{{SourceInput: testdata.S1}},
 					HasSources: []*model.HasSourceAtInputSpec{{}},
 				},
 			},
@@ -70,11 +70,11 @@ func TestIngestHasSourceAts(t *testing.T) {
 			Name: "Ingest without hasSource",
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P2},
+					Pkgs: []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 					Match: model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					Sources:    []*model.SourceInputSpec{testdata.S1},
+					Sources:    []*model.IDorSourceInput{{SourceInput: testdata.S1}},
 					HasSources: []*model.HasSourceAtInputSpec{},
 				},
 			},
@@ -84,11 +84,11 @@ func TestIngestHasSourceAts(t *testing.T) {
 			Name: "Happy path",
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P2, testdata.P1},
+					Pkgs: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					Match: model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
-					Sources: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+					Sources: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S2}},
 					HasSources: []*model.HasSourceAtInputSpec{
 						{
 							Justification: "test",

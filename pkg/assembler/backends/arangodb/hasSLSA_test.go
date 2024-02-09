@@ -163,13 +163,13 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "HappyPath",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
 					},
@@ -191,21 +191,21 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Ingest twice",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
 					},
 				},
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
 					},
@@ -227,21 +227,21 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Build Type",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type one",
 					},
 				},
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type two",
 					},
@@ -263,21 +263,21 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Version",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						SlsaVersion: "test type one",
 					},
 				},
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						SlsaVersion: "test type two",
 					},
@@ -299,21 +299,21 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Time",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						StartedOn: &testTime2,
 					},
 				},
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						StartedOn: &testTime,
 					},
@@ -335,21 +335,21 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Time",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						FinishedOn: &testTime2,
 					},
 				},
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						FinishedOn: &testTime,
 					},
@@ -376,13 +376,13 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A3,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -412,13 +412,13 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A3,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -441,7 +441,7 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -475,18 +475,18 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Builder",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -513,13 +513,13 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A3,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -544,18 +544,18 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on ID",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -573,18 +573,18 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query none",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -598,18 +598,18 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query bad ID",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -708,11 +708,11 @@ func TestIngestHasSLSAs(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: []*model.ArtifactInputSpec{testdata.A1},
+					Sub: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
 					BF:  [][]*model.ArtifactInputSpec{{testdata.A2}},
 					BB:  []*model.BuilderInputSpec{testdata.B1},
 					SLSA: []*model.SLSAInputSpec{
@@ -738,7 +738,7 @@ func TestIngestHasSLSAs(t *testing.T) {
 		},
 		{
 			Name:  "Ingest twice",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -771,7 +771,7 @@ func TestIngestHasSLSAs(t *testing.T) {
 		},
 		{
 			Name:  "Query on Build Type",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -934,13 +934,13 @@ func Test_buildHasSlsaByID(t *testing.T) {
 	}{
 		{
 			Name:  "Query on Subject",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type one",
 					},
@@ -969,7 +969,7 @@ func Test_buildHasSlsaByID(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A3,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -1009,12 +1009,12 @@ func Test_buildHasSlsaByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on Builder",
-			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
 			InBld: []*model.BuilderInputSpec{testdata.B2},
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -1039,7 +1039,7 @@ func Test_buildHasSlsaByID(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A3,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -1054,12 +1054,12 @@ func Test_buildHasSlsaByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on ID",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -1074,12 +1074,12 @@ func Test_buildHasSlsaByID(t *testing.T) {
 		},
 		{
 			Name:  "Query bad ID",
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			InBld: []*model.BuilderInputSpec{testdata.B2},
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},

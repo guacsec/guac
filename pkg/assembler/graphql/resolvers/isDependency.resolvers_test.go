@@ -28,8 +28,8 @@ import (
 
 func TestIngestDependencies(t *testing.T) {
 	type call struct {
-		P1s []*model.PkgInputSpec
-		P2s []*model.PkgInputSpec
+		P1s []*model.IDorPkgInput
+		P2s []*model.IDorPkgInput
 		MF  model.MatchFlags
 		IDs []*model.IsDependencyInputSpec
 	}
@@ -42,8 +42,8 @@ func TestIngestDependencies(t *testing.T) {
 			Name: "Ingest two packages and one dependent package",
 			Calls: []call{
 				{
-					P1s: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-					P2s: []*model.PkgInputSpec{testdata.P4},
+					P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+					P2s: []*model.IDorPkgInput{{PackageInput: testdata.P4}},
 					MF:  testdata.MAll,
 					IDs: []*model.IsDependencyInputSpec{
 						{
@@ -61,8 +61,8 @@ func TestIngestDependencies(t *testing.T) {
 			Name: "Ingest one package and two dependency notes",
 			Calls: []call{
 				{
-					P1s: []*model.PkgInputSpec{testdata.P1},
-					P2s: []*model.PkgInputSpec{testdata.P4},
+					P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
+					P2s: []*model.IDorPkgInput{{PackageInput: testdata.P4}},
 					MF:  testdata.MAll,
 					IDs: []*model.IsDependencyInputSpec{
 						{
@@ -79,8 +79,8 @@ func TestIngestDependencies(t *testing.T) {
 		{
 			Name: "HappyPath",
 			Calls: []call{{
-				P1s: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-				P2s: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+				P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+				P2s: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P4}},
 				MF:  testdata.MAll,
 				IDs: []*model.IsDependencyInputSpec{
 					{

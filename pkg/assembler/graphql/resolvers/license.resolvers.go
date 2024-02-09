@@ -13,8 +13,10 @@ import (
 
 // IngestLicense is the resolver for the ingestLicense field.
 func (r *mutationResolver) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
-	if err := helper.ValidateLicenseInput(license); err != nil {
-		return "", err
+	if license.LicenseInput != nil {
+		if err := helper.ValidateLicenseInput(license.LicenseInput); err != nil {
+			return "", err
+		}
 	}
 	return r.Backend.IngestLicense(ctx, license)
 }
@@ -22,8 +24,10 @@ func (r *mutationResolver) IngestLicense(ctx context.Context, license *model.IDo
 // IngestLicenses is the resolver for the ingestLicenses field.
 func (r *mutationResolver) IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error) {
 	for _, l := range licenses {
-		if err := helper.ValidateLicenseInput(l); err != nil {
-			return nil, err
+		if l.LicenseInput != nil {
+			if err := helper.ValidateLicenseInput(l.LicenseInput); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return r.Backend.IngestLicenses(ctx, licenses)

@@ -517,7 +517,7 @@ func TestOccurrence(t *testing.T) {
 		},
 		{
 			Name:  "Ingest without package",
-			InPkg: []*model.PkgInputSpec{},
+			InPkg: []*model.IDorPkgInput{},
 			InArt: []*model.ArtifactInputSpec{a1},
 			Calls: []call{
 				{

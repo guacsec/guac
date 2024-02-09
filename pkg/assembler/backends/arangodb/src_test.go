@@ -88,7 +88,7 @@ func Test_Sources(t *testing.T) {
 		wantErr    bool
 	}{{
 		name:     "myrepo with tag",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},
@@ -97,7 +97,7 @@ func Test_Sources(t *testing.T) {
 		wantErr:    false,
 	}, {
 		name:     "myrepo with tag, ID search",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},
@@ -172,7 +172,7 @@ func Test_SourceTypes(t *testing.T) {
 		wantErr    bool
 	}{{
 		name:     "myrepo with tag",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},
@@ -184,7 +184,7 @@ func Test_SourceTypes(t *testing.T) {
 		wantErr: false,
 	}, {
 		name:     "myrepo with tag, ID search",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},
@@ -272,7 +272,7 @@ func Test_SourceNamespaces(t *testing.T) {
 		wantErr    bool
 	}{{
 		name:     "myrepo with tag",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},
@@ -288,7 +288,7 @@ func Test_SourceNamespaces(t *testing.T) {
 		wantErr: false,
 	}, {
 		name:     "myrepo with tag, ID search",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},
@@ -383,7 +383,7 @@ func Test_buildSourceResponseFromID(t *testing.T) {
 		wantErr    bool
 	}{{
 		name:     "myrepo with tag",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},
@@ -392,7 +392,7 @@ func Test_buildSourceResponseFromID(t *testing.T) {
 		wantErr:    false,
 	}, {
 		name:     "myrepo with tag, ID search",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},

@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package backend_test
 
 import (
@@ -67,12 +65,12 @@ func TestLegal(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -93,12 +91,12 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same twice",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -107,7 +105,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -128,12 +126,12 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Query on Justification",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -142,7 +140,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -163,12 +161,12 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Query on ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -177,7 +175,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -197,12 +195,12 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -236,12 +234,12 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source",
-			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -275,12 +273,12 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Query on License",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			InLic: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L3},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1, testdata.L2},
 					Legal: &model.CertifyLegalInputSpec{
@@ -289,7 +287,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L3},
 					Legal: &model.CertifyLegalInputSpec{
@@ -312,12 +310,12 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Query on License inline",
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			InLic: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L4},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1, testdata.L4},
 					Legal: &model.CertifyLegalInputSpec{
@@ -326,7 +324,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L2},
 					Legal: &model.CertifyLegalInputSpec{
@@ -349,11 +347,11 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Query on expression",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						DeclaredLicense: "GPL OR MIT",
@@ -361,7 +359,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						DeclaredLicense: "GPL AND MIT",
@@ -380,11 +378,11 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Query on attribution",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						Attribution: "Copyright Jeff",
@@ -392,7 +390,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						Attribution: "Copyright Bob",
@@ -411,11 +409,11 @@ func TestLegal(t *testing.T) {
 		},
 		{
 			Name:  "Query on time",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						TimeScanned: testdata.T3,
@@ -423,7 +421,7 @@ func TestLegal(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Legal: &model.CertifyLegalInputSpec{
 						TimeScanned: testdata.T2,
@@ -447,7 +445,7 @@ func TestLegal(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -515,11 +513,11 @@ func TestLegal(t *testing.T) {
 		// },
 		// {
 		// 	Name:  "Ingest without License",
-		// 	InPkg: []*model.PkgInputSpec{testdata.P1},
+		// 	InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 		// 	Calls: []call{
 		// 		{
 		// 			PkgSrc: model.PackageOrSourceInput{
-		// 				Package: testdata.P1,
+		// 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 		// 			},
 		// 			Dec:   []*model.LicenseInputSpec{lNone},
 		// 			Legal: &model.CertifyLegalInputSpec{},
@@ -593,12 +591,12 @@ func TestLegals(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 					},
 					Dec: [][]*model.LicenseInputSpec{{testdata.L1}, {testdata.L1}},
 					Dis: [][]*model.LicenseInputSpec{{}, {}},

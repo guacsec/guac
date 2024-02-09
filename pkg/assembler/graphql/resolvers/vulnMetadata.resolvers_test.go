@@ -108,7 +108,7 @@ func TestIngestVulnerabilityMetadata(t *testing.T) {
 					IngestVulnerabilityMetadata(ctx, gomock.Any(), *o.VulnMetadata).
 					Return("xyz", nil).
 					Times(times)
-				_, err := r.Mutation().IngestVulnerabilityMetadata(ctx, *o.Vuln, *o.VulnMetadata)
+				_, err := r.Mutation().IngestVulnerabilityMetadata(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: o.Vuln}, *o.VulnMetadata)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -122,7 +122,7 @@ func TestIngestVulnerabilityMetadata(t *testing.T) {
 
 func TestIngestVulnerabilityMetadatas(t *testing.T) {
 	type call struct {
-		Vulns         []*model.VulnerabilityInputSpec
+		Vulns         []*model.IDorVulnerabilityInput
 		VulnMetadatas []*model.VulnerabilityMetadataInputSpec
 	}
 	tests := []struct {
@@ -134,7 +134,7 @@ func TestIngestVulnerabilityMetadatas(t *testing.T) {
 			Name: "Ingest with two vulnerabilities and one vulnerabilityMetadata",
 			Calls: []call{
 				{
-					Vulns: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
 						{
 							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -152,11 +152,7 @@ func TestIngestVulnerabilityMetadatas(t *testing.T) {
 			Name: "Ingest with vulnerability type novuln",
 			Calls: []call{
 				{
-					Vulns: []*model.VulnerabilityInputSpec{
-						{
-							Type: "novuln",
-						},
-					},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: &model.VulnerabilityInputSpec{Type: "novuln"}}},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
 						{
 							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -174,11 +170,7 @@ func TestIngestVulnerabilityMetadatas(t *testing.T) {
 			Name: "Ingest with vulnerability type cve with no id",
 			Calls: []call{
 				{
-					Vulns: []*model.VulnerabilityInputSpec{
-						{
-							Type: "cve",
-						},
-					},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: &model.VulnerabilityInputSpec{Type: "cve"}}},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
 						{
 							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -196,7 +188,7 @@ func TestIngestVulnerabilityMetadatas(t *testing.T) {
 			Name: "HappyPath",
 			Calls: []call{
 				{
-					Vulns: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
 						{
 							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,

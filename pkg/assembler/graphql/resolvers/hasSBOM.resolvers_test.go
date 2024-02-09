@@ -43,8 +43,8 @@ func TestIngestHasSbom(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package:  testdata.P1,
-						Artifact: testdata.A1,
+						Package:  &model.IDorPkgInput{PackageInput: testdata.P1},
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
@@ -59,7 +59,7 @@ func TestIngestHasSbom(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI:        "test uri",
@@ -115,7 +115,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -132,7 +132,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -149,7 +149,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -166,8 +166,8 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages:  []*model.PkgInputSpec{testdata.P1},
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+						Packages:  []*model.IDorPkgInput{{PackageInput: testdata.P1}},
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -185,7 +185,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{

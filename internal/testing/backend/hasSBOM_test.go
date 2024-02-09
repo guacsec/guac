@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package backend_test
 
 import (
@@ -342,14 +340,14 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -369,14 +367,14 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same twice",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -384,7 +382,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -404,14 +402,14 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on URI",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri one",
@@ -419,7 +417,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri two",
@@ -439,11 +437,11 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on URI and KnownSince",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI:        "test uri one",
@@ -452,7 +450,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI:        "test uri two",
@@ -474,11 +472,11 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
-			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P2, testdata.P4},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
 				pkg:       testdata.P2,
@@ -512,7 +510,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -547,12 +545,12 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -568,7 +566,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -601,11 +599,11 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on Artifact",
-			InPkg: []*model.PkgInputSpec{testdata.P2},
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P2},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			},
 			Calls: []call{
 				{
@@ -618,7 +616,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -650,12 +648,12 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on Artifact ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -663,7 +661,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -693,14 +691,14 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on Algorithm",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						Algorithm: "QWERasdf",
@@ -708,7 +706,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						Algorithm: "QWERasdf two",
@@ -728,10 +726,10 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on Digest",
-			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P2, testdata.P4},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
 				pkg:       testdata.P2,
@@ -788,14 +786,14 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on DownloadLocation",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
@@ -803,7 +801,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
@@ -823,14 +821,14 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query none",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
@@ -838,7 +836,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
@@ -852,11 +850,11 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query multiple",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
@@ -864,7 +862,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
@@ -900,14 +898,14 @@ func TestHasSBOM(t *testing.T) {
 		},
 		{
 			Name:  "Query on ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
@@ -915,7 +913,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
@@ -2809,14 +2807,14 @@ func TestIngestHasSBOMs(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2838,9 +2836,9 @@ func TestIngestHasSBOMs(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same twice",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
@@ -2870,9 +2868,9 @@ func TestIngestHasSBOMs(t *testing.T) {
 		},
 		{
 			Name:  "Query on URI",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
@@ -2902,11 +2900,11 @@ func TestIngestHasSBOMs(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
-			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P2, testdata.P4},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
 				pkg:       testdata.P2,
@@ -2924,7 +2922,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2937,7 +2935,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+						Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2973,11 +2971,11 @@ func TestIngestHasSBOMs(t *testing.T) {
 		},
 		{
 			Name:  "Query on Artifact",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P1},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 			},
 			IsOccs: []testOccurrence{{
 				Subj:  &model.PackageOrSourceInput{Package: testdata.P1},
@@ -2987,7 +2985,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2997,7 +2995,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+						Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{

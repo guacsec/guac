@@ -30,7 +30,7 @@ import (
 func TestIngestOccurrence(t *testing.T) {
 	type call struct {
 		PkgSrc     model.PackageOrSourceInput
-		Artifact   *model.ArtifactInputSpec
+		Artifact   *model.IDorArtifactInput
 		Occurrence *model.IsOccurrenceInputSpec
 	}
 	tests := []struct {
@@ -43,10 +43,10 @@ func TestIngestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
-						Source:  testdata.S1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+						Source:  &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
-					Artifact: testdata.A1,
+					Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					Occurrence: &model.IsOccurrenceInputSpec{
 						Justification: "test justification",
 					},
@@ -59,9 +59,9 @@ func TestIngestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
-					Artifact: testdata.A1,
+					Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					Occurrence: &model.IsOccurrenceInputSpec{
 						Justification: "test justification",
 					},
@@ -101,7 +101,7 @@ func TestIngestOccurrence(t *testing.T) {
 func TestIngestOccurrences(t *testing.T) {
 	type call struct {
 		PkgSrcs     model.PackageOrSourceInputs
-		Artifacts   []*model.ArtifactInputSpec
+		Artifacts   []*model.IDorArtifactInput
 		Occurrences []*model.IsOccurrenceInputSpec
 	}
 	tests := []struct {
@@ -114,9 +114,9 @@ func TestIngestOccurrences(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrcs: model.PackageOrSourceInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					},
-					Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+					Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 					Occurrences: []*model.IsOccurrenceInputSpec{
 						{
 							Justification: "test justification",
@@ -134,9 +134,9 @@ func TestIngestOccurrences(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrcs: model.PackageOrSourceInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					},
-					Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+					Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 					Occurrences: []*model.IsOccurrenceInputSpec{
 						{
 							Justification: "test justification",
@@ -151,9 +151,9 @@ func TestIngestOccurrences(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrcs: model.PackageOrSourceInputs{
-						Sources: []*model.SourceInputSpec{testdata.S1},
+						Sources: []*model.IDorSourceInput{{SourceInput: testdata.S1}},
 					},
-					Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+					Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 					Occurrences: []*model.IsOccurrenceInputSpec{
 						{
 							Justification: "test justification",
@@ -171,9 +171,9 @@ func TestIngestOccurrences(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrcs: model.PackageOrSourceInputs{
-						Sources: []*model.SourceInputSpec{testdata.S1},
+						Sources: []*model.IDorSourceInput{{SourceInput: testdata.S1}},
 					},
-					Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+					Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 					Occurrences: []*model.IsOccurrenceInputSpec{
 						{
 							Justification: "test justification",
@@ -191,10 +191,10 @@ func TestIngestOccurrences(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrcs: model.PackageOrSourceInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
-						Sources:  []*model.SourceInputSpec{testdata.S1},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
+						Sources:  []*model.IDorSourceInput{{SourceInput: testdata.S1}},
 					},
-					Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+					Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 					Occurrences: []*model.IsOccurrenceInputSpec{
 						{
 							Justification: "test justification",
@@ -209,9 +209,9 @@ func TestIngestOccurrences(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrcs: model.PackageOrSourceInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					},
-					Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+					Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 					Occurrences: []*model.IsOccurrenceInputSpec{
 						{
 							Justification: "test justification",
@@ -228,9 +228,9 @@ func TestIngestOccurrences(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrcs: model.PackageOrSourceInputs{
-						Sources: []*model.SourceInputSpec{testdata.S1},
+						Sources: []*model.IDorSourceInput{{SourceInput: testdata.S1}},
 					},
-					Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+					Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 					Occurrences: []*model.IsOccurrenceInputSpec{{
 						Justification: "test justification",
 					}},

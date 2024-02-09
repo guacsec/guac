@@ -29,8 +29,8 @@ import (
 
 func TestIngestPkgEquals(t *testing.T) {
 	type call struct {
-		P1 []*model.PkgInputSpec
-		P2 []*model.PkgInputSpec
+		P1 []*model.IDorPkgInput
+		P2 []*model.IDorPkgInput
 		PE []*model.PkgEqualInputSpec
 	}
 	tests := []struct {
@@ -42,8 +42,8 @@ func TestIngestPkgEquals(t *testing.T) {
 			Name: "Ingest with different number of artifacts",
 			Calls: []call{
 				{
-					P1: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-					P2: []*model.PkgInputSpec{testdata.P2},
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -57,8 +57,8 @@ func TestIngestPkgEquals(t *testing.T) {
 			Name: "Ingest with different number of HashEqual",
 			Calls: []call{
 				{
-					P1: []*model.PkgInputSpec{testdata.P1},
-					P2: []*model.PkgInputSpec{testdata.P2},
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -75,8 +75,8 @@ func TestIngestPkgEquals(t *testing.T) {
 			Name: "HappyPath",
 			Calls: []call{
 				{
-					P1: []*model.PkgInputSpec{testdata.P1},
-					P2: []*model.PkgInputSpec{testdata.P2},
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",

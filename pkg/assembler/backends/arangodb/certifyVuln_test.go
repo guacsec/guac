@@ -74,7 +74,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "HappyPath",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -108,7 +108,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Certify NoVuln",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -143,7 +143,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Certify OSV",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -178,7 +178,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Certify GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -213,7 +213,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query on GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -248,7 +248,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query on Vulnerability ID",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -279,7 +279,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query ID",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -310,7 +310,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query DbURI",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -351,7 +351,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query DB Version",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -392,7 +392,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query TimeScanned",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -433,7 +433,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query ScannerURI",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -474,7 +474,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query ScannerVersion",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -582,7 +582,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query none",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -608,7 +608,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query No Vuln",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -643,7 +643,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query No Vuln - with novuln boolen",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.C1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -691,7 +691,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query only cve (exclude novuln) - with novuln boolen",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.C1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -1030,10 +1030,10 @@ func TestIngestCertifyVulns(t *testing.T) {
 		{
 			Name:   "HappyPath",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
-			InPkg:  []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+					Pkgs:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 					Vulns: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
@@ -1084,10 +1084,10 @@ func TestIngestCertifyVulns(t *testing.T) {
 		{
 			Name:   "Certify NoVuln",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.NoVulnInput},
-			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+					Pkgs:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 					Vulns: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.NoVulnInput},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
@@ -1138,10 +1138,10 @@ func TestIngestCertifyVulns(t *testing.T) {
 		{
 			Name:   "Certify OSV",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2},
+					Pkgs:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 					Vulns: []*model.VulnerabilityInputSpec{testdata.O1},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
@@ -1175,10 +1175,10 @@ func TestIngestCertifyVulns(t *testing.T) {
 		{
 			Name:   "Certify GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2},
+					Pkgs:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 					Vulns: []*model.VulnerabilityInputSpec{testdata.G1},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
@@ -1212,10 +1212,10 @@ func TestIngestCertifyVulns(t *testing.T) {
 		{
 			Name:   "Query on GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
-			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+					Pkgs:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 					Vulns: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
@@ -1305,10 +1305,10 @@ func TestIngestCertifyVulns(t *testing.T) {
 		{
 			Name:   "Query none",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
-			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+					Pkgs:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 					Vulns: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
@@ -1342,10 +1342,10 @@ func TestIngestCertifyVulns(t *testing.T) {
 		{
 			Name:   "Query No Vuln",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.NoVulnInput},
-			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+					Pkgs:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
 					Vulns: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.NoVulnInput},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
@@ -1459,7 +1459,7 @@ func Test_buildCertifyVulnByID(t *testing.T) {
 		{
 			Name:   "Certify NoVuln",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -1493,7 +1493,7 @@ func Test_buildCertifyVulnByID(t *testing.T) {
 		{
 			Name:   "Certify OSV",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -1526,7 +1526,7 @@ func Test_buildCertifyVulnByID(t *testing.T) {
 		{
 			Name:   "Certify GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -1559,7 +1559,7 @@ func Test_buildCertifyVulnByID(t *testing.T) {
 		{
 			Name:   "Query on GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -1592,7 +1592,7 @@ func Test_buildCertifyVulnByID(t *testing.T) {
 		{
 			Name:   "Query ID",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,

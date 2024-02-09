@@ -200,7 +200,7 @@ func TestIngestVulnEqual(t *testing.T) {
 					IngestVulnEqual(ctx, gomock.Any(), gomock.Any(), *o.VE).
 					Return("", nil).
 					Times(times)
-				_, err := r.Mutation().IngestVulnEqual(ctx, *o.V1, *o.V2, *o.VE)
+				_, err := r.Mutation().IngestVulnEqual(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: o.V1}, model.IDorVulnerabilityInput{VulnerabilityInput: o.V2}, *o.VE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -214,8 +214,8 @@ func TestIngestVulnEqual(t *testing.T) {
 
 func TestIngestVulnEquals(t *testing.T) {
 	type call struct {
-		V1 []*model.VulnerabilityInputSpec
-		V2 []*model.VulnerabilityInputSpec
+		V1 []*model.IDorVulnerabilityInput
+		V2 []*model.IDorVulnerabilityInput
 		VE []*model.VulnEqualInputSpec
 	}
 	tests := []struct {
@@ -227,8 +227,8 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name: "uneven vulnerabilities",
 			Calls: []call{
 				{
-					V1: []*model.VulnerabilityInputSpec{testdata.O1, testdata.NoVulnInput},
-					V2: []*model.VulnerabilityInputSpec{testdata.O2},
+					V1: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.NoVulnInput}},
+					V2: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O2}},
 					VE: []*model.VulnEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -242,8 +242,8 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name: "uneven vulnEqual",
 			Calls: []call{
 				{
-					V1: []*model.VulnerabilityInputSpec{testdata.O1, testdata.NoVulnInput},
-					V2: []*model.VulnerabilityInputSpec{testdata.O2, testdata.NoVulnInput},
+					V1: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.NoVulnInput}},
+					V2: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.NoVulnInput}},
 					VE: []*model.VulnEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -257,8 +257,8 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name: "novuln vulnerability",
 			Calls: []call{
 				{
-					V1: []*model.VulnerabilityInputSpec{testdata.O1, testdata.NoVulnInput},
-					V2: []*model.VulnerabilityInputSpec{testdata.O2, testdata.O2},
+					V1: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.NoVulnInput}},
+					V2: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O2}, {VulnerabilityInput: testdata.O2}},
 					VE: []*model.VulnEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -275,8 +275,8 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name: "novuln other vulnerability",
 			Calls: []call{
 				{
-					V1: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2},
-					V2: []*model.VulnerabilityInputSpec{testdata.O2, testdata.NoVulnInput},
+					V1: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O2}},
+					V2: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O2}, {VulnerabilityInput: testdata.NoVulnInput}},
 					VE: []*model.VulnEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -293,11 +293,8 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name: "Ingest with no vuln ID",
 			Calls: []call{
 				{
-					V1: []*model.VulnerabilityInputSpec{{
-						Type:            "cve",
-						VulnerabilityID: "",
-					}},
-					V2: []*model.VulnerabilityInputSpec{testdata.O1},
+					V1: []*model.IDorVulnerabilityInput{{VulnerabilityInput: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: ""}}},
+					V2: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}},
 					VE: []*model.VulnEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -311,11 +308,8 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name: "Ingest with no vuln ID other vuln",
 			Calls: []call{
 				{
-					V1: []*model.VulnerabilityInputSpec{testdata.O1},
-					V2: []*model.VulnerabilityInputSpec{{
-						Type:            "cve",
-						VulnerabilityID: "",
-					}},
+					V1: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}},
+					V2: []*model.IDorVulnerabilityInput{{VulnerabilityInput: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: ""}}},
 					VE: []*model.VulnEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -329,8 +323,8 @@ func TestIngestVulnEquals(t *testing.T) {
 			Name: "Ingest with vuln ID",
 			Calls: []call{
 				{
-					V1: []*model.VulnerabilityInputSpec{testdata.O1},
-					V2: []*model.VulnerabilityInputSpec{testdata.O2},
+					V1: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}},
+					V2: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O2}},
 					VE: []*model.VulnEqualInputSpec{
 						{
 							Justification: "test justification",

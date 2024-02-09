@@ -16,19 +16,25 @@ import (
 // IngestVulnerabilityMetadata is the resolver for the ingestVulnerabilityMetadata field.
 func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
 	funcName := "IngestVulnerabilityMetadata"
-	err := helper.ValidateNoVul(vulnerability)
-	if err != nil {
-		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
 
-	err = helper.ValidateVulnerabilityIDInputSpec(vulnerability)
-	if err != nil {
-		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
+	if vulnerability.VulnerabilityInput != nil {
+		err := helper.ValidateNoVul(*vulnerability.VulnerabilityInput)
+		if err != nil {
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
 
-	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	return r.Backend.IngestVulnerabilityMetadata(ctx,
-		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)}, vulnerabilityMetadata)
+		err = helper.ValidateVulnerabilityIDInputSpec(*vulnerability.VulnerabilityInput)
+		if err != nil {
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+		return r.Backend.IngestVulnerabilityMetadata(ctx, model.IDorVulnerabilityInput{
+			VulnerabilityTypeID: vulnerability.VulnerabilityTypeID,
+			VulnerabilityNodeID: vulnerability.VulnerabilityNodeID,
+			VulnerabilityInput:  &model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.VulnerabilityInput.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityInput.VulnerabilityID)},
+		}, vulnerabilityMetadata)
+	} else {
+		return r.Backend.IngestVulnerabilityMetadata(ctx, vulnerability, vulnerabilityMetadata)
+	}
 }
 
 // IngestBulkVulnerabilityMetadata is the resolver for the ingestBulkVulnerabilityMetadata field.
@@ -39,24 +45,31 @@ func (r *mutationResolver) IngestBulkVulnerabilityMetadata(ctx context.Context, 
 	}
 
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
+	var lowercaseVulnInputList []*model.IDorVulnerabilityInput
 	for _, v := range vulnerabilities {
-
-		err := helper.ValidateNoVul(*v)
+		if v.VulnerabilityInput == nil {
+			lowercaseVulnInputList = append(lowercaseVulnInputList, v)
+			continue
+		}
+		err := helper.ValidateNoVul(*v.VulnerabilityInput)
 		if err != nil {
 			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
-		err = helper.ValidateVulnerabilityIDInputSpec(*v)
+		err = helper.ValidateVulnerabilityIDInputSpec(*v.VulnerabilityInput)
 		if err != nil {
 			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
 		lowercaseVulnInput := model.VulnerabilityInputSpec{
-			Type:            strings.ToLower(v.Type),
-			VulnerabilityID: strings.ToLower(v.VulnerabilityID),
+			Type:            strings.ToLower(v.VulnerabilityInput.Type),
+			VulnerabilityID: strings.ToLower(v.VulnerabilityInput.VulnerabilityID),
 		}
-		lowercaseVulnInputList = append(lowercaseVulnInputList, &lowercaseVulnInput)
+		lowercaseVulnInputList = append(lowercaseVulnInputList, &model.IDorVulnerabilityInput{
+			VulnerabilityTypeID: v.VulnerabilityTypeID,
+			VulnerabilityNodeID: v.VulnerabilityNodeID,
+			VulnerabilityInput:  &lowercaseVulnInput,
+		})
 	}
 	return r.Backend.IngestBulkVulnerabilityMetadata(ctx, lowercaseVulnInputList, vulnerabilityMetadataList)
 }

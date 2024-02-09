@@ -62,12 +62,12 @@ func TestHasSourceAt(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -89,12 +89,12 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "HappyPath All Versions",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
@@ -122,11 +122,11 @@ func TestHasSourceAt(t *testing.T) {
 		{
 			Name:  "Ingest Same Twice",
 			InPkg: []*model.PkgInputSpec{testdata.P3},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P3,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -136,7 +136,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 				{
 					Pkg: testdata.P3,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -166,12 +166,12 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query On Justification",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -181,7 +181,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -204,11 +204,11 @@ func TestHasSourceAt(t *testing.T) {
 		{
 			Name:  "Query on Package",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P4},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -216,7 +216,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 				{
 					Pkg: testdata.P4,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -239,12 +239,12 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package version ID",
-			InPkg: []*model.PkgInputSpec{testdata.P4},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P4}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P4,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -261,12 +261,12 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source - tag",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S3},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.SourceInputSpec{&model.IDorSourceInput{SourceInput: testdata.S1}, testdata.S3},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -298,7 +298,7 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source - commit",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			InSrc: []*model.SourceInputSpec{testdata.S4, testdata.S3},
 			Calls: []call{
 				{
@@ -335,7 +335,7 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			InSrc: []*model.SourceInputSpec{testdata.S2},
 			Calls: []call{
 				{
@@ -357,12 +357,12 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query on KnownSince",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -372,7 +372,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -394,12 +394,12 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query Multiple",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -409,7 +409,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -419,7 +419,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 				{
 					Pkg: testdata.P2,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -446,12 +446,12 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query None",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -461,7 +461,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -477,12 +477,12 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -490,7 +490,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 				{
 					Pkg: testdata.P2,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -512,7 +512,7 @@ func TestHasSourceAt(t *testing.T) {
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -520,7 +520,7 @@ func TestHasSourceAt(t *testing.T) {
 				},
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
@@ -557,12 +557,12 @@ func TestHasSourceAt(t *testing.T) {
 		},
 		{
 			Name:  "Query bad ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -664,12 +664,12 @@ func TestIngestHasSourceAts(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1},
+					Pkgs: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					Srcs: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -693,12 +693,12 @@ func TestIngestHasSourceAts(t *testing.T) {
 		},
 		{
 			Name:  "HappyPath All Versions",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1},
+					Pkgs: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					Srcs: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
@@ -728,11 +728,11 @@ func TestIngestHasSourceAts(t *testing.T) {
 		{
 			Name:  "Ingest Same Twice",
 			InPkg: []*model.PkgInputSpec{testdata.P3},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkgs: []*model.PkgInputSpec{testdata.P3, testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1, testdata.S1},
+					Srcs: []*model.SourceInputSpec{&model.IDorSourceInput{SourceInput: testdata.S1}, testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -768,11 +768,11 @@ func TestIngestHasSourceAts(t *testing.T) {
 		{
 			Name:  "Query on Package",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P4},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkgs: []*model.PkgInputSpec{testdata.P1, testdata.P4},
-					Srcs: []*model.SourceInputSpec{testdata.S1, testdata.S1},
+					Srcs: []*model.SourceInputSpec{&model.IDorSourceInput{SourceInput: testdata.S1}, testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -803,12 +803,12 @@ func TestIngestHasSourceAts(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S3},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.SourceInputSpec{&model.IDorSourceInput{SourceInput: testdata.S1}, testdata.S3},
 			Calls: []call{
 				{
 					Pkgs: []*model.PkgInputSpec{testdata.P1, testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1, testdata.S3},
+					Srcs: []*model.SourceInputSpec{&model.IDorSourceInput{SourceInput: testdata.S1}, testdata.S3},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -840,12 +840,12 @@ func TestIngestHasSourceAts(t *testing.T) {
 		},
 		{
 			Name:  "Query on KnownSince",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkgs: []*model.PkgInputSpec{testdata.P1, testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1, testdata.S1},
+					Srcs: []*model.SourceInputSpec{&model.IDorSourceInput{SourceInput: testdata.S1}, testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -938,12 +938,12 @@ func Test_buildHasSourceAtByID(t *testing.T) {
 	}{
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.PkgInputSpec{testdata.P4},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P4}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P4,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -964,12 +964,12 @@ func Test_buildHasSourceAtByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package version ID",
-			InPkg: []*model.PkgInputSpec{testdata.P4},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P4}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P4,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -983,7 +983,7 @@ func Test_buildHasSourceAtByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source - tag",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			InSrc: []*model.SourceInputSpec{testdata.S3},
 			Calls: []call{
 				{
@@ -1010,7 +1010,7 @@ func Test_buildHasSourceAtByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			InSrc: []*model.SourceInputSpec{testdata.S2},
 			Calls: []call{
 				{
@@ -1029,12 +1029,12 @@ func Test_buildHasSourceAtByID(t *testing.T) {
 		},
 		{
 			Name:  "Query ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P2,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -1048,12 +1048,12 @@ func Test_buildHasSourceAtByID(t *testing.T) {
 		},
 		{
 			Name:  "Query bad ID",
-			InPkg: []*model.PkgInputSpec{testdata.P1},
-			InSrc: []*model.SourceInputSpec{testdata.S1},
+			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 			Calls: []call{
 				{
 					Pkg: testdata.P1,
-					Src: testdata.S1,
+					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},

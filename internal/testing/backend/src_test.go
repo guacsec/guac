@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package backend_test
 
 import (
@@ -65,7 +63,7 @@ func TestSources(t *testing.T) {
 		wantErr    bool
 	}{{
 		name:     "myrepo with tag",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},
@@ -74,7 +72,7 @@ func TestSources(t *testing.T) {
 		wantErr:    false,
 	}, {
 		name:     "myrepo with tag, ID search",
-		srcInput: testdata.S1,
+		srcInput: &model.IDorSourceInput{SourceInput: testdata.S1},
 		srcFilter: &model.SourceSpec{
 			Name: ptrfrom.String("myrepo"),
 		},

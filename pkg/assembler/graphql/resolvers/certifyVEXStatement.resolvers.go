@@ -23,20 +23,24 @@ func (r *mutationResolver) IngestVEXStatement(ctx context.Context, subject model
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	err = helper.ValidateNoVul(vulnerability)
-	if err != nil {
-		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	if vulnerability.VulnerabilityInput != nil {
+		err = helper.ValidateNoVul(*vulnerability.VulnerabilityInput)
+		if err != nil {
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+		err = helper.ValidateVulnerabilityIDInputSpec(*vulnerability.VulnerabilityInput)
+		if err != nil {
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+		// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+		return r.Backend.IngestVEXStatement(ctx, subject, model.IDorVulnerabilityInput{
+			VulnerabilityTypeID: vulnerability.VulnerabilityTypeID,
+			VulnerabilityNodeID: vulnerability.VulnerabilityNodeID,
+			VulnerabilityInput:  &model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.VulnerabilityInput.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityInput.VulnerabilityID)},
+		}, vexStatement)
+	} else {
+		return r.Backend.IngestVEXStatement(ctx, subject, vulnerability, vexStatement)
 	}
-
-	err = helper.ValidateVulnerabilityIDInputSpec(vulnerability)
-	if err != nil {
-		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-
-	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
-	return r.Backend.IngestVEXStatement(ctx, subject,
-		model.VulnerabilityInputSpec{Type: strings.ToLower(vulnerability.Type), VulnerabilityID: strings.ToLower(vulnerability.VulnerabilityID)},
-		vexStatement)
 }
 
 // IngestVEXStatements is the resolver for the ingestVEXStatements field.
@@ -62,26 +66,34 @@ func (r *mutationResolver) IngestVEXStatements(ctx context.Context, subjects mod
 		return []string{}, gqlerror.Errorf("must specify at most packages or artifacts for %v", "IngestVEXStatements")
 	}
 
-	var lowercaseVulnInputList []*model.VulnerabilityInputSpec
+	var lowercaseVulnList []*model.IDorVulnerabilityInput
 	for _, v := range vulnerabilities {
-
-		err := helper.ValidateNoVul(*v)
+		if v.VulnerabilityInput == nil {
+			lowercaseVulnList = append(lowercaseVulnList, v)
+			continue
+		}
+		err := helper.ValidateNoVul(*v.VulnerabilityInput)
 		if err != nil {
 			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
-		err = helper.ValidateVulnerabilityIDInputSpec(*v)
+		err = helper.ValidateVulnerabilityIDInputSpec(*v.VulnerabilityInput)
 		if err != nil {
 			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
 		lowercaseVulnInput := model.VulnerabilityInputSpec{
-			Type:            strings.ToLower(v.Type),
-			VulnerabilityID: strings.ToLower(v.VulnerabilityID),
+			Type:            strings.ToLower(v.VulnerabilityInput.Type),
+			VulnerabilityID: strings.ToLower(v.VulnerabilityInput.VulnerabilityID),
 		}
-		lowercaseVulnInputList = append(lowercaseVulnInputList, &lowercaseVulnInput)
+
+		lowercaseVulnList = append(lowercaseVulnList, &model.IDorVulnerabilityInput{
+			VulnerabilityTypeID: v.VulnerabilityTypeID,
+			VulnerabilityNodeID: v.VulnerabilityNodeID,
+			VulnerabilityInput:  &lowercaseVulnInput,
+		})
 	}
-	return r.Backend.IngestVEXStatements(ctx, subjects, lowercaseVulnInputList, vexStatements)
+	return r.Backend.IngestVEXStatements(ctx, subjects, lowercaseVulnList, vexStatements)
 }
 
 // CertifyVEXStatement is the resolver for the CertifyVEXStatement field.

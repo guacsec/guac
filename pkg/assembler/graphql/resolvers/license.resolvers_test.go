@@ -128,7 +128,7 @@ func TestIngestLicense(t *testing.T) {
 				IngestLicense(ctx, test.Call).
 				Return("", nil).
 				Times(times)
-			_, err := r.Mutation().IngestLicense(ctx, test.Call)
+			_, err := r.Mutation().IngestLicense(ctx, &model.IDorLicenseInput{LicenseInput: test.Call})
 			if (err != nil) != test.ExpIngestErr {
 				t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 			}
@@ -142,38 +142,48 @@ func TestIngestLicense(t *testing.T) {
 func TestIngestBulkLicense(t *testing.T) {
 	tests := []struct {
 		Name         string
-		Call         []*model.LicenseInputSpec
+		Call         []*model.IDorLicenseInput
 		ExpIngestErr bool
 	}{
 		{
 			Name: "All Good",
-			Call: []*model.LicenseInputSpec{
+			Call: []*model.IDorLicenseInput{
 				{
-					Name:        "LIC-ID",
-					ListVersion: ptrfrom.String("1.2.3"),
+					LicenseInput: &model.LicenseInputSpec{
+						Name:        "LIC-ID",
+						ListVersion: ptrfrom.String("1.2.3"),
+					},
 				},
 				{
-					Name:   "LicenseRef-123",
-					Inline: ptrfrom.String("text"),
+					LicenseInput: &model.LicenseInputSpec{
+						Name:   "LicenseRef-123",
+						Inline: ptrfrom.String("text"),
+					},
 				},
 			},
 			ExpIngestErr: false,
 		},
 		{
 			Name: "One Bad",
-			Call: []*model.LicenseInputSpec{
+			Call: []*model.IDorLicenseInput{
 				{
-					Name:        "LIC-ID",
-					ListVersion: ptrfrom.String("1.2.3"),
+					LicenseInput: &model.LicenseInputSpec{
+						Name:        "LIC-ID",
+						ListVersion: ptrfrom.String("1.2.3"),
+					},
 				},
 				{
-					Name:        "LIC-ID",
-					ListVersion: ptrfrom.String("1.2.3"),
-					Inline:      ptrfrom.String("asdf"),
+					LicenseInput: &model.LicenseInputSpec{
+						Name:        "LIC-ID",
+						ListVersion: ptrfrom.String("1.2.3"),
+						Inline:      ptrfrom.String("asdf"),
+					},
 				},
 				{
-					Name:   "LicenseRef-123",
-					Inline: ptrfrom.String("text"),
+					LicenseInput: &model.LicenseInputSpec{
+						Name:   "LicenseRef-123",
+						Inline: ptrfrom.String("text"),
+					},
 				},
 			},
 			ExpIngestErr: true,
