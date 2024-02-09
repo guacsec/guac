@@ -31,6 +31,24 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Graph map[string][]Node
+
+type Node struct {
+	Value interface{}
+	neighbours []*Node
+	flag bool
+	tag string
+}
+
+type Edge struct {
+	Source Node
+	Target Node
+}
+
+type GEDGraph struct {
+	Nodes []Node
+	Edges []Edge
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "guacident",
@@ -56,6 +74,7 @@ func init() {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
 	}
+
 	rootCmd.PersistentFlags().AddFlagSet(set)
 	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
@@ -109,7 +128,7 @@ func truncate(s string, length int) string {
 	return s
 }
 
-func findHasSBOMBy(id, uri, purl, algorithm, digest, downloadLocation, origin, collector string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
+func findHasSBOMBy(uri, purl string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
 	var foundHasSBOMPkg *model.HasSBOMsResponse
 	var err error
 	if purl != "" {
@@ -119,13 +138,13 @@ func findHasSBOMBy(id, uri, purl, algorithm, digest, downloadLocation, origin, c
 			return nil, err
 		}
 		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Subject: &model.PackageOrArtifactSpec{Package: &model.PkgSpec{Id: &pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id}},
-			Id: &id, Digest: &digest, DownloadLocation: &downloadLocation, Origin: &origin, Collector: &collector})
+			})
 		if err != nil {
 			fmt.Printf("failed getting hasSBOM with error :%v", err)
 			return nil, err
 		}
 	} else {
-		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Uri: &uri, Id: &id, Digest: &digest, DownloadLocation: &downloadLocation, Origin: &origin, Collector: &collector})
+		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Uri: &uri,})
 		if err != nil {
 			fmt.Printf("failed getting hasSBOM  with error: %v", err)
 			return nil, err
