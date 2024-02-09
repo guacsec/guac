@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
 	"github.com/Khan/genqlient/graphql"
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"

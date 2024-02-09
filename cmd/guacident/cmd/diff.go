@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"time"
 
 	"fmt"
 	"net/http"
@@ -121,8 +122,8 @@ var diffCmd = &cobra.Command{
 		nodeOne := Node{Value: hasSBOMResponseOne.HasSBOM[0]}
 		nodeTwo := Node{Value: hasSBOMResponseTwo.HasSBOM[0]}
 
-		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMResponseOne.HasSBOM[0]), nodeOne)
-		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMResponseTwo.HasSBOM[0]), nodeTwo)
+		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMResponseOne.HasSBOM[0]), &nodeOne)
+		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMResponseTwo.HasSBOM[0]), &nodeTwo)
 
 		if (!wide) {
 			//just print the diff result
@@ -135,9 +136,6 @@ var diffCmd = &cobra.Command{
 	},
 }
 
-
-
-
 func rawCompareGraphs(node1, node2 *Node) string {
 	if !reflect.DeepEqual(node1, node2) {
 		return "SBOMs differ"
@@ -147,14 +145,21 @@ func rawCompareGraphs(node1, node2 *Node) string {
 
 // This function recursively traverses the fields of a struct using reflection and converts them into nodes of a graph. 
 // It handles nested structs and arrays within the main struct.
-func hasSBOMResponseToGraph(data reflect.Value, head Node) {
+func hasSBOMResponseToGraph(data reflect.Value, head *Node) {
 	node := Node{Value: data.Interface(), tag: data.Type().Name()}
 	head.neighbours = append(head.neighbours, &node)
+	
 	//base case
-	if data.Kind() != reflect.Array || data.Kind() != reflect.Slice || data.Kind() != reflect.Struct {
+	if data.Kind() != reflect.Array && data.Kind() != reflect.Slice && data.Kind() != reflect.Struct {
 		//just add a neighbour and return
 		return
 	}
+	// edge base case for time.Time to not go into recursion, while being a "struct"
+	if data.Kind() == reflect.Struct && data.Type() == reflect.TypeOf(time.Time{}) {
+		return
+	}
+
+	//if we have a struct, we need to go over its fields
 	//update head to be the last element of the neighbours slice
 	newHead := head.neighbours[len(head.neighbours)-1]
 	//first input is the HasSBOMsHasSBOM struct, we go over its fields
@@ -171,36 +176,19 @@ func hasSBOMResponseToGraph(data reflect.Value, head Node) {
 		}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
 			field = data.Index(i)
 		}
-		hasSBOMResponseToGraph(field, *newHead)
+			hasSBOMResponseToGraph(field, newHead)
         }
-    }
-
-
-// MH Diff  and LCS Algorithms:
-// The LCS algorithm finds common nodes between two graphs by iterating over each node in both graphs and comparing them using reflect.DeepEqual.
-// The common nodes are added to the LCS graph. The MH diff algorithm finds the nodes that are present in one graph but not the other.
-// It iterates over each node in both graphs and adds nodes that are unique to one graph to the diff graph.
-// How reflect.DeepEqual works:
-// For basic types (int, string, etc.), it performs a simple value comparison.
-// For slices, maps, and arrays, it compares the elements recursively.
-// For structs, it compares the fields recursively.
-// For pointers, it compares the values they point to recursively.
-// For interface values, it compares the underlying values recursively.
-
+}
 func performDiff(nodeOne, nodeTwo *Node){
 	if reflect.DeepEqual(nodeOne,Node{}) && reflect.DeepEqual(nodeTwo,Node{}) {
 		return
 	}
 
-	// if reflect.DeepEqual(nodeOne,Node{}) ||reflect.DeepEqual(nodeTwo,Node{}) {//|| !reflect.DeepEqual(node1, node2) {
-	// 	printNode(nodeOne, "SBOM 1")
-	// 	printNode(nodeTwo, "SBOM 2")
-	// }
-
 	if len(nodeOne.neighbours) != len(nodeTwo.neighbours) {
 		fmt.Println("Neighbour node count mismatch!")
 	}
 
+	
     for i := 0; i < len(nodeOne.neighbours) || i < len(nodeTwo.neighbours); i++ {
         if i < len(nodeOne.neighbours) && i < len(nodeTwo.neighbours) {
             performDiff(nodeOne.neighbours[i], nodeOne.neighbours[i])
@@ -211,11 +199,7 @@ func performDiff(nodeOne, nodeTwo *Node){
         }
     }
 }
-
-
-
 //helpers
-
 func printNode(node *Node, name string) {
 	if node == nil {
 		return
