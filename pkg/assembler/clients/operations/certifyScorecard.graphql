@@ -18,7 +18,7 @@
 # Defines the GraphQL operations to ingest a Scorecard certification into GUAC
 
 mutation IngestCertifyScorecard(
-  $source: SourceInputSpec!
+  $source: IDorSourceInput!
   $scorecard: ScorecardInputSpec!
 ) {
   ingestScorecard(source: $source, scorecard: $scorecard)
@@ -27,7 +27,7 @@ mutation IngestCertifyScorecard(
 # Defines the GraphQL operations to bulk ingest Scorecard certifications into GUAC
 
 mutation IngestCertifyScorecards(
-  $sources: [SourceInputSpec!]!
+  $sources: [IDorSourceInput!]!
   $scorecards: [ScorecardInputSpec!]!
 ) {
   ingestScorecards(sources: $sources, scorecards: $scorecards)

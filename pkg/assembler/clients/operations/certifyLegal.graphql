@@ -17,19 +17,19 @@
 
 # Defines the GraphQL operations to ingest legal attestations into GUAC
 
-mutation IngestCertifyLegalPkg($pkg: PkgInputSpec!, $declaredLicenses: [LicenseInputSpec!]!, $discoveredLicenses: [LicenseInputSpec!]!, $legal: CertifyLegalInputSpec!) {
+mutation IngestCertifyLegalPkg($pkg: IDorPkgInput!, $declaredLicenses: [IDorLicenseInput!]!, $discoveredLicenses: [IDorLicenseInput!]!, $legal: CertifyLegalInputSpec!) {
   ingestCertifyLegal(subject: {package: $pkg}, declaredLicenses: $declaredLicenses, discoveredLicenses: $discoveredLicenses, certifyLegal: $legal)
 }
 
-mutation IngestCertifyLegalPkgs($pkgs: [PkgInputSpec!]!, $declaredLicensesList: [[LicenseInputSpec!]!]!, $discoveredLicensesList: [[LicenseInputSpec!]!]!, $legals: [CertifyLegalInputSpec!]!) {
+mutation IngestCertifyLegalPkgs($pkgs: [IDorPkgInput!]!, $declaredLicensesList: [[IDorLicenseInput!]!]!, $discoveredLicensesList: [[IDorLicenseInput!]!]!, $legals: [CertifyLegalInputSpec!]!) {
   ingestCertifyLegals(subjects: {packages: $pkgs}, declaredLicensesList: $declaredLicensesList, discoveredLicensesList: $discoveredLicensesList, certifyLegals: $legals)
 }
 
-mutation IngestCertifyLegalSrc($src: SourceInputSpec!, $declaredLicenses: [LicenseInputSpec!]!, $discoveredLicenses: [LicenseInputSpec!]!, $legal: CertifyLegalInputSpec!) {
+mutation IngestCertifyLegalSrc($src: IDorSourceInput!, $declaredLicenses: [IDorLicenseInput!]!, $discoveredLicenses: [IDorLicenseInput!]!, $legal: CertifyLegalInputSpec!) {
   ingestCertifyLegal(subject: {source: $src}, declaredLicenses: $declaredLicenses, discoveredLicenses: $discoveredLicenses, certifyLegal: $legal)
 }
 
-mutation IngestCertifyLegalSrcs($srcs: [SourceInputSpec!]!, $declaredLicensesList: [[LicenseInputSpec!]!]!, $discoveredLicensesList: [[LicenseInputSpec!]!]!, $legals: [CertifyLegalInputSpec!]!) {
+mutation IngestCertifyLegalSrcs($srcs: [IDorSourceInput!]!, $declaredLicensesList: [[IDorLicenseInput!]!]!, $discoveredLicensesList: [[IDorLicenseInput!]!]!, $legals: [CertifyLegalInputSpec!]!) {
   ingestCertifyLegals(subjects: {sources: $srcs}, declaredLicensesList: $declaredLicensesList, discoveredLicensesList: $discoveredLicensesList, certifyLegals: $legals)
 }
 

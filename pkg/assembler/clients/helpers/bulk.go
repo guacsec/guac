@@ -210,7 +210,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 	}
 }
 
-func ingestPackages(ctx context.Context, client graphql.Client, v []model.IDorPkgInputSpec) ([]string, error) {
+func ingestPackages(ctx context.Context, client graphql.Client, v []model.IDorPkgInput) ([]string, error) {
 	response, err := model.IngestPackages(ctx, client, v)
 	if err != nil {
 		return nil, fmt.Errorf("ingestPackages failed with error: %w", err)

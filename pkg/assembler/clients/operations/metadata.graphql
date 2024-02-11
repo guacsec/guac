@@ -18,7 +18,7 @@
 # Defines the GraphQL operations to ingest a HasMetadata into GUAC
 
 mutation IngestHasMetadataPkg(
-  $pkg: PkgInputSpec!
+  $pkg: IDorPkgInput!
   $pkgMatchType: MatchFlags!
   $hasMetadata: HasMetadataInputSpec!
 ) {
@@ -30,7 +30,7 @@ mutation IngestHasMetadataPkg(
 }
 
 mutation IngestHasMetadataSrc(
-  $source: SourceInputSpec!
+  $source: IDorSourceInput!
   $hasMetadata: HasMetadataInputSpec!
 ) {
   ingestHasMetadata(
@@ -41,7 +41,7 @@ mutation IngestHasMetadataSrc(
 }
 
 mutation IngestHasMetadataArtifact(
-  $artifact: ArtifactInputSpec!
+  $artifact: IDorArtifactInput!
   $hasMetadata: HasMetadataInputSpec!
 ) {
   ingestHasMetadata(
@@ -54,7 +54,7 @@ mutation IngestHasMetadataArtifact(
 # Defines the GraphQL operations to bulk ingest a HasMetadata into GUAC
 
 mutation IngestHasMetadataPkgs(
-  $pkgs: [PkgInputSpec!]!
+  $pkgs: [IDorPkgInput!]!
   $pkgMatchType: MatchFlags!
   $hasMetadataList: [HasMetadataInputSpec!]!
 ) {
@@ -66,7 +66,7 @@ mutation IngestHasMetadataPkgs(
 }
 
 mutation IngestHasMetadataSrcs(
-  $sources: [SourceInputSpec!]!
+  $sources: [IDorSourceInput!]!
   $hasMetadataList: [HasMetadataInputSpec!]!
 ) {
   ingestBulkHasMetadata(
@@ -77,7 +77,7 @@ mutation IngestHasMetadataSrcs(
 }
 
 mutation IngestHasMetadataArtifacts(
-  $artifacts: [ArtifactInputSpec!]!
+  $artifacts: [IDorArtifactInput!]!
   $hasMetadataList: [HasMetadataInputSpec!]!
 ) {
   ingestBulkHasMetadata(

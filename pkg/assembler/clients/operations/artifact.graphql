@@ -17,13 +17,13 @@
 
 # Ingest Artifact
 
-mutation IngestArtifact($artifact: ArtifactInputSpec!) {
+mutation IngestArtifact($artifact: IDorArtifactInput!) {
   ingestArtifact(artifact: $artifact)
 }
 
 # Bulk Ingest Artifacts
 
-mutation IngestArtifacts($artifacts: [ArtifactInputSpec!]!) {
+mutation IngestArtifacts($artifacts: [IDorArtifactInput!]!) {
   ingestArtifacts(artifacts: $artifacts)
 }
 

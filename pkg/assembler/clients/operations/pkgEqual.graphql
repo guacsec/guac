@@ -18,8 +18,8 @@
 # Defines the GraphQL operations to certify that two packages are identical
 
 mutation IngestPkgEqual(
-  $pkg: PkgInputSpec!
-  $otherPackage: PkgInputSpec!
+  $pkg: IDorPkgInput!
+  $otherPackage: IDorPkgInput!
   $pkgEqual: PkgEqualInputSpec!
 ) {
   ingestPkgEqual(pkg: $pkg, otherPackage: $otherPackage, pkgEqual: $pkgEqual)
@@ -29,8 +29,8 @@ mutation IngestPkgEqual(
 # Defines the GraphQL operations to bulk certify that two packages are identical
 
 mutation IngestPkgEquals(
-  $pkgs: [PkgInputSpec!]!
-  $otherPackages: [PkgInputSpec!]!
+  $pkgs: [IDorPkgInput!]!
+  $otherPackages: [IDorPkgInput!]!
   $pkgEquals: [PkgEqualInputSpec!]!
   ) {
   ingestPkgEquals(
