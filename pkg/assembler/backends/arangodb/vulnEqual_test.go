@@ -597,7 +597,7 @@ func TestVulnEqual(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			var collectedVulnIDs []*model.VulnerabilityIDs
 			for _, g := range test.InVuln {
-				if vulnIDs, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if vulnIDs, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				} else {
 					collectedVulnIDs = append(collectedVulnIDs, vulnIDs)
@@ -673,7 +673,7 @@ func TestIngestVulnEquals(t *testing.T) {
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1, testdata.O1, testdata.C2},
 			Calls: []call{
 				{
-					Vulns:      []*model.VulnerabilityInputSpec{testdata.O1, testdata.O1},
+					Vulns:      []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O1}},
 					OtherVulns: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
 					Ins: []*model.VulnEqualInputSpec{
 						{
@@ -722,7 +722,7 @@ func TestIngestVulnEquals(t *testing.T) {
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1, testdata.O1, testdata.C1},
 			Calls: []call{
 				{
-					Vulns:      []*model.VulnerabilityInputSpec{testdata.O1, testdata.O1},
+					Vulns:      []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O1}},
 					OtherVulns: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C1},
 					Ins: []*model.VulnEqualInputSpec{
 						{
@@ -955,7 +955,7 @@ func Test_buildVulnEqualByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}

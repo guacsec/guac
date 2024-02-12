@@ -2625,17 +2625,17 @@ func TestHasSBOM(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -2947,12 +2947,12 @@ func TestIngestHasSBOMs(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -3135,12 +3135,12 @@ func TestHasSBOMNeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}

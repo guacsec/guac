@@ -438,7 +438,7 @@ func TestVulnEqual(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
@@ -711,7 +711,7 @@ func TestVulnerabilityEqualNeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %s", err)
 				}
 			}

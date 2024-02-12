@@ -83,7 +83,7 @@ func TestArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedArtID, err := b.IngestArtifact(ctx, tt.artifactInput)
+			ingestedArtID, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: tt.artifactInput})
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.IngestArtifact() error = %v, wantErr %v", err, tt.wantErr)
 				return

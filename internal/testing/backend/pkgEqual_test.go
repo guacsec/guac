@@ -48,7 +48,7 @@ func TestPkgEqual(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -70,7 +70,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same, different order",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -99,7 +99,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on Justification",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -128,7 +128,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on pkg ID",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -163,7 +163,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on secondary pkg ID",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -531,14 +531,14 @@ func TestPkgEqual(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			var collectedPkgIDs []*model.PackageIDs
 			for _, a := range test.InPkg {
-				if pkgIDs, err := b.IngestPackage(ctx, *a); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: a}); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				} else {
 					collectedPkgIDs = append(collectedPkgIDs, pkgIDs)
 				}
 			}
 			for _, o := range test.Calls {
-				peID, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
+				peID, err := b.IngestPkgEqual(ctx, model.IDorPkgInput{PackageInput: o.P1}, model.IDorPkgInput{PackageInput: o.P2}, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -589,8 +589,8 @@ func TestIngestPkgEquals(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
 	type call struct {
-		P1 []*model.PkgInputSpec
-		P2 []*model.PkgInputSpec
+		P1 []*model.IDorPkgInput
+		P2 []*model.IDorPkgInput
 		PE []*model.PkgEqualInputSpec
 	}
 	tests := []struct {
@@ -604,11 +604,11 @@ func TestIngestPkgEquals(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
-					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
-					P2: []*model.PkgInputSpec{testdata.P2, testdata.P2},
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P2}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -631,11 +631,11 @@ func TestIngestPkgEquals(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same, different order",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
-					P1: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-					P2: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -661,8 +661,8 @@ func TestIngestPkgEquals(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
 			Calls: []call{
 				{
-					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
-					P2: []*model.PkgInputSpec{testdata.P2, testdata.P3},
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P3}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -692,8 +692,8 @@ func TestIngestPkgEquals(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
 			Calls: []call{
 				{
-					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
-					P2: []*model.PkgInputSpec{testdata.P2, testdata.P3},
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P3}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -725,8 +725,8 @@ func TestIngestPkgEquals(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3},
 			Calls: []call{
 				{
-					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
-					P2: []*model.PkgInputSpec{testdata.P2, testdata.P3},
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P3}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -758,9 +758,12 @@ func TestIngestPkgEquals(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
-				t.Fatalf("Could not ingest pkg: %v", err)
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				}
 			}
+
 			for _, o := range test.Calls {
 				_, err := b.IngestPkgEquals(ctx, o.P1, o.P2, o.PE)
 				if (err != nil) != test.ExpIngestErr {

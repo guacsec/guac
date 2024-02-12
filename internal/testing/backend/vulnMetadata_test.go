@@ -973,7 +973,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				ingestedVuln, err := b.IngestVulnerability(ctx, *g)
+				ingestedVuln, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g})
 				if err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
@@ -987,7 +987,7 @@ func TestIngestVulnMetadata(t *testing.T) {
 			}
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				record, err := b.IngestVulnerabilityMetadata(ctx, *o.Vuln, *o.VulnMetadata)
+				record, err := b.IngestVulnerabilityMetadata(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: o.Vuln}, *o.VulnMetadata)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -1028,7 +1028,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
 	type call struct {
-		Vulns         []*model.VulnerabilityInputSpec
+		Vulns         []*model.IDorVulnerabilityInput
 		VulnMetadatas []*model.VulnerabilityMetadataInputSpec
 	}
 
@@ -1046,7 +1046,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
 			Calls: []call{
 				{
-					Vulns: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
 						{
 							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -1100,7 +1100,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2},
 			Calls: []call{
 				{
-					Vulns: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O2}},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
 						{
 							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -1155,7 +1155,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
 			Calls: []call{
 				{
-					Vulns: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.G1}, {VulnerabilityInput: testdata.G2}},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
 						{
 							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -1210,7 +1210,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
 			Calls: []call{
 				{
-					Vulns: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.G1}, {VulnerabilityInput: testdata.G2}},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
 						{
 							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -1253,7 +1253,7 @@ func TestIngestVulnMetadatas(t *testing.T) {
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
 			Calls: []call{
 				{
-					Vulns: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.G1}, {VulnerabilityInput: testdata.G2}},
 					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
 						{
 							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
@@ -1282,8 +1282,10 @@ func TestIngestVulnMetadatas(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
-				t.Fatalf("Could not ingest vulnerabilities: %a", err)
+			for _, v := range test.InVuln {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: v}); err != nil {
+					t.Fatalf("Could not ingest vulnerability: %a", err)
+				}
 			}
 			for _, o := range test.Calls {
 				_, err := b.IngestBulkVulnerabilityMetadata(ctx, o.Vulns, o.VulnMetadatas)

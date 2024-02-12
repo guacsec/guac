@@ -59,7 +59,7 @@ func TestPkgEqual(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -81,7 +81,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same, different order",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -110,7 +110,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on Justification",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -139,7 +139,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on pkg ID",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -174,7 +174,7 @@ func TestPkgEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on secondary pkg ID",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -656,7 +656,7 @@ func TestIngestPkgEquals(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: []*model.PkgInputSpec{testdata.P1, testdata.P1},
@@ -683,11 +683,11 @@ func TestIngestPkgEquals(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same, different order",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
-					P1: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-					P2: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+					P1: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+					P2: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -1058,7 +1058,7 @@ func Test_buildPkgEqualByID(t *testing.T) {
 	}{
 		{
 			Name:  "Query on pkg ID",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,

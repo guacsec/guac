@@ -353,7 +353,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "HappyPath",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
@@ -380,7 +380,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Ingest same twice",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
@@ -415,7 +415,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query on URI",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
@@ -450,7 +450,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query on URI and KnownSince",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			Calls: []call{
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
@@ -486,10 +486,10 @@ var includedTestExpectedSource = &model.Source{
 // 		{
 // 			Name:  "Query on Package",
 // 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
-// 			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+// 			InArt: []*model.ArtifactInputSpec{testdata.A1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
-// 				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+// 				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 // 			},
 // 			IsDeps: []testDependency{{
 // 				pkg:       testdata.P2,
@@ -507,7 +507,7 @@ var includedTestExpectedSource = &model.Source{
 // 			Calls: []call{
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P2,
+// 						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 // 					},
 // 					HS: &model.HasSBOMInputSpec{
 // 						URI: "test uri",
@@ -515,7 +515,7 @@ var includedTestExpectedSource = &model.Source{
 // 				},
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P4,
+// 						Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 // 					},
 // 					HS: &model.HasSBOMInputSpec{
 // 						URI: "test uri",
@@ -557,8 +557,8 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query on Package ID",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-// 			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+// 			InArt: []*model.ArtifactInputSpec{testdata.A1},
 // 			Calls: []call{
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
@@ -570,7 +570,7 @@ var includedTestExpectedSource = &model.Source{
 // 				},
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P2,
+// 						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 // 					},
 // 					HS: &model.HasSBOMInputSpec{
 // 						URI: "test uri",
@@ -611,15 +611,15 @@ var includedTestExpectedSource = &model.Source{
 // 		{
 // 			Name:  "Query on Artifact",
 // 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
-// 			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+// 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
-// 				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+// 				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 // 			},
 // 			Calls: []call{
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P2,
+// 						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 // 					},
 // 					HS: &model.HasSBOMInputSpec{
 // 						URI: "test uri",
@@ -635,7 +635,7 @@ var includedTestExpectedSource = &model.Source{
 // 				},
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
-// 						Artifact: testdata.A2,
+// 						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 // 					},
 // 					HS: &model.HasSBOMInputSpec{
 // 						URI: "test uri",
@@ -659,8 +659,8 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query on Artifact ID",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-// 			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
+// 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 // 			Calls: []call{
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
@@ -680,7 +680,7 @@ var includedTestExpectedSource = &model.Source{
 // 				},
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
-// 						Artifact: testdata.A2,
+// 						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 // 					},
 // 					HS: &model.HasSBOMInputSpec{
 // 						URI: "test uri",
@@ -702,7 +702,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query on Algorithm",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
@@ -740,7 +740,7 @@ var includedTestExpectedSource = &model.Source{
 // 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
-// 				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+// 				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 // 			},
 // 			IsDeps: []testDependency{{
 // 				pkg:       testdata.P2,
@@ -758,7 +758,7 @@ var includedTestExpectedSource = &model.Source{
 // 			Calls: []call{
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P2,
+// 						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 // 					},
 // 					HS: &model.HasSBOMInputSpec{
 // 						Digest: "QWERasdf",
@@ -766,7 +766,7 @@ var includedTestExpectedSource = &model.Source{
 // 				},
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P2,
+// 						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 // 					},
 // 					HS: &model.HasSBOMInputSpec{
 // 						Digest: "QWERasdf two",
@@ -796,7 +796,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query on DownloadLocation",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
@@ -831,7 +831,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query none",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
@@ -860,7 +860,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query multiple",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 // 			Calls: []call{
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
@@ -880,7 +880,7 @@ var includedTestExpectedSource = &model.Source{
 // 				},
 // 				{
 // 					Sub: model.PackageOrArtifactInput{
-// 						Package: testdata.P2,
+// 						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 // 					},
 // 					HS: &model.HasSBOMInputSpec{
 // 						DownloadLocation: "location two",
@@ -908,7 +908,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query on ID",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
@@ -941,7 +941,7 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query bad ID",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
@@ -2683,7 +2683,7 @@ var includedTestExpectedSource = &model.Source{
 // 	for _, test := range tests {
 // 		t.Run(test.Name, func(t *testing.T) {
 // 			for _, p := range test.InPkg {
-// 				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
+// 				if pkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 // 					t.Fatalf("Could not ingest package: %v", err)
 // 				} else {
 // 					if test.QueryPkgID {
@@ -2698,7 +2698,7 @@ var includedTestExpectedSource = &model.Source{
 // 				}
 // 			}
 // 			for _, a := range test.InArt {
-// 				if artID, err := b.IngestArtifact(ctx, a); err != nil {
+// 				if artID, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 // 					t.Fatalf("Could not ingest artifact: %v", err)
 // 				} else {
 // 					if test.QueryArtID {
@@ -2714,7 +2714,7 @@ var includedTestExpectedSource = &model.Source{
 // 			}
 // 			includes := model.HasSBOMIncludesInputSpec{}
 // 			for _, s := range test.InSrc {
-// 				if srcIDs, err := b.IngestSource(ctx, *s); err != nil {
+// 				if srcIDs, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 // 					t.Fatalf("Could not ingest source: %v", err)
 // 				} else {
 // 					if test.QueryIncludeOccurSrcID {
@@ -2843,7 +2843,7 @@ var includedTestExpectedSource = &model.Source{
 // 	}{
 // 		{
 // 			Name:  "HappyPath",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
@@ -2872,14 +2872,14 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Ingest same twice",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
 // 			Calls: []call{
 // 				{
 // 					Sub: model.PackageOrArtifactInputs{
-// 						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+// 						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
 // 					},
 // 					HS: []*model.HasSBOMInputSpec{
 // 						{
@@ -2904,14 +2904,14 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query on URI",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 // 			},
 // 			Calls: []call{
 // 				{
 // 					Sub: model.PackageOrArtifactInputs{
-// 						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+// 						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
 // 					},
 // 					HS: []*model.HasSBOMInputSpec{
 // 						{
@@ -2937,10 +2937,10 @@ var includedTestExpectedSource = &model.Source{
 // 		{
 // 			Name:  "Query on Package",
 // 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
-// 			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+// 			InArt: []*model.ArtifactInputSpec{testdata.A1},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
-// 				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+// 				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 // 			},
 // 			IsDeps: []testDependency{{
 // 				pkg:       testdata.P2,
@@ -2971,7 +2971,7 @@ var includedTestExpectedSource = &model.Source{
 // 				},
 // 				{
 // 					Sub: model.PackageOrArtifactInputs{
-// 						Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+// 						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 // 					},
 // 					HS: []*model.HasSBOMInputSpec{
 // 						{
@@ -3007,11 +3007,11 @@ var includedTestExpectedSource = &model.Source{
 // 		},
 // 		{
 // 			Name:  "Query on Artifact",
-// 			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-// 			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+// 			InPkg: []*model.PkgInputSpec{testdata.P1},
+// 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 // 			PkgArt: &model.PackageOrArtifactInputs{
 // 				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-// 				Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+// 				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 // 			},
 // 			IsOccs: []testOccurrence{{
 // 				Subj:  &model.PackageOrSourceInput{Package: testdata.P1},
@@ -3031,7 +3031,7 @@ var includedTestExpectedSource = &model.Source{
 // 				},
 // 				{
 // 					Sub: model.PackageOrArtifactInputs{
-// 						Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+// 						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 // 					},
 // 					HS: []*model.HasSBOMInputSpec{
 // 						{
@@ -3070,12 +3070,12 @@ var includedTestExpectedSource = &model.Source{
 // 	for _, test := range tests {
 // 		t.Run(test.Name, func(t *testing.T) {
 // 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
+// 				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 // 					t.Fatalf("Could not ingest package: %v", err)
 // 				}
 // 			}
 // 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
+// 				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 // 					t.Fatalf("Could not ingest artifact: %v", err)
 // 				}
 // 			}
@@ -3168,7 +3168,7 @@ func Test_buildHasSbomByID(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -3189,13 +3189,13 @@ func Test_buildHasSbomByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on Package ID",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
 			Calls: []call{
 
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -3213,7 +3213,7 @@ func Test_buildHasSbomByID(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -3238,7 +3238,7 @@ func Test_buildHasSbomByID(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -3252,7 +3252,7 @@ func Test_buildHasSbomByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on ID",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
@@ -3270,7 +3270,7 @@ func Test_buildHasSbomByID(t *testing.T) {
 		},
 		{
 			Name:  "Query bad ID",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
@@ -3301,12 +3301,12 @@ func Test_buildHasSbomByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}

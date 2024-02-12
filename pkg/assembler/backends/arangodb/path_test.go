@@ -66,7 +66,7 @@ func Test_Path(t *testing.T) {
 		{
 			name:   "certifyVuln - edges not provided",
 			inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+			inPkg:  []*model.PkgInputSpec{testdata.P2},
 			edges:  []model.Edge{},
 			certifyVulnCall: &certifyVulnCall{
 				Pkg:  testdata.P2,
@@ -100,7 +100,7 @@ func Test_Path(t *testing.T) {
 		{
 			name:   "certifyVuln - edges not provided",
 			inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+			inPkg:  []*model.PkgInputSpec{testdata.P2},
 			edges:  []model.Edge{model.EdgePackageCertifyVuln, model.EdgeVulnerabilityCertifyVuln},
 			certifyVulnCall: &certifyVulnCall{
 				Pkg:  testdata.P2,
@@ -153,7 +153,7 @@ func Test_Path(t *testing.T) {
 		},
 		{
 			name:  "isDependency",
-			inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			edges: []model.Edge{model.EdgePackageIsDependency, model.EdgeIsDependencyPackage},
 			isDepCall: &isDepCall{
 				P1: testdata.P1,
@@ -181,7 +181,7 @@ func Test_Path(t *testing.T) {
 			if tt.certifyVulnTwoPkgsCall != nil {
 				var nonVulnPkgID string
 				for _, p := range tt.inPkg {
-					pkg, err := b.IngestPackage(ctx, *p)
+					pkg, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p})
 					if err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
@@ -199,14 +199,14 @@ func Test_Path(t *testing.T) {
 			}
 			if tt.certifyVulnCall != nil {
 				for _, p := range tt.inPkg {
-					if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
+					if pkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					} else {
 						startID = pkgIDs.PackageVersionID
 					}
 				}
 				for _, g := range tt.inVuln {
-					if vulnIDs, err := b.IngestVulnerability(ctx, *g); err != nil {
+					if vulnIDs, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 						t.Fatalf("Could not ingest vulnerability: %a", err)
 					} else {
 						stopID = vulnIDs.VulnerabilityNodeID
@@ -222,7 +222,7 @@ func Test_Path(t *testing.T) {
 			}
 			if tt.isDepCall != nil {
 				for _, p := range tt.inPkg {
-					if _, err := b.IngestPackage(ctx, *p); err != nil {
+					if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 						t.Fatalf("Could not ingest package: %v", err)
 					}
 				}
@@ -425,7 +425,7 @@ func Test_Nodes(t *testing.T) {
 		want:         []model.Node{testdata.L1out},
 	}, {
 		name:  "certifyBad",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -443,7 +443,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "certifyGood",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -461,7 +461,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "certifyLegal",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L1},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -495,7 +495,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:   "vex",
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg:  []*model.PkgInputSpec{testdata.P1},
 		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
 		vexCall: &vexCall{
 			Sub: model.PackageOrArtifactInput{
@@ -519,7 +519,7 @@ func Test_Nodes(t *testing.T) {
 	}, {
 		name:   "certifyVuln",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+		inPkg:  []*model.PkgInputSpec{testdata.P2},
 		certifyVulnCall: &certifyVulnCall{
 			Pkg:  testdata.P2,
 			Vuln: testdata.G1,
@@ -557,7 +557,7 @@ func Test_Nodes(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			HM: &model.HasMetadataInputSpec{
 				Justification: "test justification",
@@ -569,7 +569,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "hasSBOM",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		hasSBOMCall: &hasSBOMCall{
 
 			Sub: model.PackageOrArtifactInput{
@@ -585,7 +585,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "hasSLSA",
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+		InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 		hasSlsaCall: &hasSlsaCall{
 			Sub:  testdata.A1,
@@ -602,11 +602,11 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "hasSourceAt",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasSourceAtCall: &hasSourceAtCall{
 			Pkg: testdata.P2,
-			Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+			Src: testdata.S1,
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
 			},
@@ -618,7 +618,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "isDependency",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -631,8 +631,8 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "isOccurrence",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isOcurCall: &isOcurCall{
 			PkgSrc: model.PackageOrSourceInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -649,7 +649,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "pkgEqual",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		pkgEqualCall: &pkgEqualCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -667,7 +667,7 @@ func Test_Nodes(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			POC: &model.PointOfContactInputSpec{
 				Justification: "test justification",
@@ -732,17 +732,17 @@ func Test_Nodes(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var nodeID string
 			for _, p := range tt.inPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range tt.inSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range tt.inArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -757,7 +757,7 @@ func Test_Nodes(t *testing.T) {
 				}
 			}
 			for _, g := range tt.inVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
@@ -1267,7 +1267,7 @@ func Test_Neighbors(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1286,7 +1286,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
@@ -1313,7 +1313,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1339,7 +1339,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "certifyBad - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -1369,7 +1369,7 @@ func Test_Neighbors(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1385,7 +1385,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
@@ -1401,7 +1401,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1414,7 +1414,7 @@ func Test_Neighbors(t *testing.T) {
 		want:              []model.Node{testdata.P2out},
 	}, {
 		name:  "certifyBad - query certifyBadID srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -1433,7 +1433,7 @@ func Test_Neighbors(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1452,7 +1452,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
@@ -1479,7 +1479,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1505,7 +1505,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "certifyGood - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -1535,7 +1535,7 @@ func Test_Neighbors(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1551,7 +1551,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
@@ -1567,7 +1567,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -1580,7 +1580,7 @@ func Test_Neighbors(t *testing.T) {
 		want:               []model.Node{testdata.P2out},
 	}, {
 		name:  "certifyGood - query certifyGoodID srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -1596,7 +1596,7 @@ func Test_Neighbors(t *testing.T) {
 		want:               []model.Node{testdata.S1out},
 	}, {
 		name:  "certifyLegal - pkgVersion",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L1},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -1625,7 +1625,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "certifyLegal - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		inLic: []*model.LicenseInputSpec{testdata.L1},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -1652,7 +1652,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "certifyLegal - Declared License",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L2},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -1672,7 +1672,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "certifyLegal - Discovered License",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L3},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -1692,7 +1692,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "certifyLegal - query certifyLegalID pkgVersion",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L1},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -1708,7 +1708,7 @@ func Test_Neighbors(t *testing.T) {
 		want:                []model.Node{testdata.P1out},
 	}, {
 		name:  "certifyLegal - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		inLic: []*model.LicenseInputSpec{testdata.L1},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -1724,7 +1724,7 @@ func Test_Neighbors(t *testing.T) {
 		want:                []model.Node{testdata.S1out},
 	}, {
 		name:  "certifyLegal - Declared License",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L2},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -1740,7 +1740,7 @@ func Test_Neighbors(t *testing.T) {
 		want:                []model.Node{testdata.L2out},
 	}, {
 		name:  "certifyLegal - Discovered License",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L3},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -1797,7 +1797,7 @@ func Test_Neighbors(t *testing.T) {
 		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
 		vexCall: &vexCall{
 			Sub: model.PackageOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			Vuln: testdata.O2,
 			In: &model.VexStatementInputSpec{
@@ -1817,7 +1817,7 @@ func Test_Neighbors(t *testing.T) {
 		}},
 	}, {
 		name:   "vex - pkgVersion",
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg:  []*model.PkgInputSpec{testdata.P1},
 		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
 		vexCall: &vexCall{
 			Sub: model.PackageOrArtifactInput{
@@ -1851,7 +1851,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:   "vex - vulnID",
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg:  []*model.PkgInputSpec{testdata.P1},
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 		vexCall: &vexCall{
 			Sub: model.PackageOrArtifactInput{
@@ -1884,7 +1884,7 @@ func Test_Neighbors(t *testing.T) {
 		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
 		vexCall: &vexCall{
 			Sub: model.PackageOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			Vuln: testdata.O2,
 			In: &model.VexStatementInputSpec{
@@ -1897,7 +1897,7 @@ func Test_Neighbors(t *testing.T) {
 		want:              []model.Node{testdata.A2out},
 	}, {
 		name:   "vex - certifyVexID - pkgVersion",
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg:  []*model.PkgInputSpec{testdata.P1},
 		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
 		vexCall: &vexCall{
 			Sub: model.PackageOrArtifactInput{
@@ -1914,7 +1914,7 @@ func Test_Neighbors(t *testing.T) {
 		want:              []model.Node{testdata.P1out},
 	}, {
 		name:   "vex - certifyVexID - vulnID",
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg:  []*model.PkgInputSpec{testdata.P1},
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 		vexCall: &vexCall{
 			Sub: model.PackageOrArtifactInput{
@@ -1935,7 +1935,7 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:   "certifyVuln - pkgVersion",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+		inPkg:  []*model.PkgInputSpec{testdata.P2},
 		certifyVulnCall: &certifyVulnCall{
 			Pkg:  testdata.P2,
 			Vuln: testdata.G1,
@@ -1971,7 +1971,7 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:   "certifyVuln - vulnID",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+		inPkg:  []*model.PkgInputSpec{testdata.P2},
 		certifyVulnCall: &certifyVulnCall{
 			Pkg:  testdata.P2,
 			Vuln: testdata.G1,
@@ -2002,7 +2002,7 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:   "certifyVuln - certifyVulnID -  pkgVersion",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+		inPkg:  []*model.PkgInputSpec{testdata.P2},
 		certifyVulnCall: &certifyVulnCall{
 			Pkg:  testdata.P2,
 			Vuln: testdata.G1,
@@ -2022,7 +2022,7 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:   "certifyVuln - vulnID",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+		inPkg:  []*model.PkgInputSpec{testdata.P2},
 		certifyVulnCall: &certifyVulnCall{
 			Pkg:  testdata.P2,
 			Vuln: testdata.G1,
@@ -2081,7 +2081,7 @@ func Test_Neighbors(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			HM: &model.HasMetadataInputSpec{
 				Justification: "test justification",
@@ -2097,7 +2097,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
@@ -2124,7 +2124,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -2150,7 +2150,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "hasMetadata - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -2180,7 +2180,7 @@ func Test_Neighbors(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			HM: &model.HasMetadataInputSpec{
 				Justification: "test justification",
@@ -2194,7 +2194,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
@@ -2211,7 +2211,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -2225,7 +2225,7 @@ func Test_Neighbors(t *testing.T) {
 		want:               []model.Node{testdata.P2out},
 	}, {
 		name:  "hasMetadata - hasMetadataID - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -2245,7 +2245,7 @@ func Test_Neighbors(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		hasSBOMCall: &hasSBOMCall{
 			Sub: model.PackageOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			HS: &model.HasSBOMInputSpec{
 				DownloadLocation: "location two",
@@ -2261,7 +2261,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		hasSBOMCall: &hasSBOMCall{
 			Sub: model.PackageOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			HS: &model.HasSBOMInputSpec{
 				DownloadLocation: "location two",
@@ -2287,7 +2287,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		hasSBOMCall: &hasSBOMCall{
 			Sub: model.PackageOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			HS: &model.HasSBOMInputSpec{
 				DownloadLocation: "location two",
@@ -2343,7 +2343,7 @@ func Test_Neighbors(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		hasSBOMCall: &hasSBOMCall{
 			Sub: model.PackageOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			HS: &model.HasSBOMInputSpec{
 				DownloadLocation: "location two",
@@ -2357,7 +2357,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		hasSBOMCall: &hasSBOMCall{
 			Sub: model.PackageOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			HS: &model.HasSBOMInputSpec{
 				DownloadLocation: "location two",
@@ -2368,7 +2368,7 @@ func Test_Neighbors(t *testing.T) {
 		want:           []model.Node{testdata.P2out},
 	}, {
 		name:  "hasSLSA - builder",
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+		InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 		hasSlsaCall: &hasSlsaCall{
 			Sub:  testdata.A1,
@@ -2386,7 +2386,7 @@ func Test_Neighbors(t *testing.T) {
 		}},
 	}, {
 		name:  "hasSLSA - subject artifact",
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+		InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 		hasSlsaCall: &hasSlsaCall{
 			Sub:  testdata.A1,
@@ -2404,7 +2404,7 @@ func Test_Neighbors(t *testing.T) {
 		}},
 	}, {
 		name:  "hasSLSA - hasSlsaID - builder",
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+		InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 		hasSlsaCall: &hasSlsaCall{
 			Sub:  testdata.A1,
@@ -2417,7 +2417,7 @@ func Test_Neighbors(t *testing.T) {
 		want:           []model.Node{testdata.B2out},
 	}, {
 		name:  "hasSLSA - hasSlsaID - subject artifact",
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+		InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 		hasSlsaCall: &hasSlsaCall{
 			Sub:  testdata.A1,
@@ -2430,7 +2430,7 @@ func Test_Neighbors(t *testing.T) {
 		want:           []model.Node{testdata.A1out},
 	}, {
 		name:  "hasSLSA - hasSlsaID - builtFrom",
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+		InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 		hasSlsaCall: &hasSlsaCall{
 			Sub:  testdata.A1,
@@ -2444,10 +2444,10 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:  "hasSourceAt - pkgName",
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasSourceAtCall: &hasSourceAtCall{
 			Pkg: testdata.P2,
-			Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+			Src: testdata.S1,
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
 			},
@@ -2469,10 +2469,10 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:  "hasSourceAt - pkgVersion",
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasSourceAtCall: &hasSourceAtCall{
 			Pkg: testdata.P2,
-			Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+			Src: testdata.S1,
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
 			},
@@ -2495,10 +2495,10 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:  "hasSourceAt - srcName",
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasSourceAtCall: &hasSourceAtCall{
 			Pkg: testdata.P2,
-			Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+			Src: testdata.S1,
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
 			},
@@ -2524,10 +2524,10 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:  "hasSourceAt - hasSourceAtID - pkgName",
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasSourceAtCall: &hasSourceAtCall{
 			Pkg: testdata.P2,
-			Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+			Src: testdata.S1,
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
 			},
@@ -2539,10 +2539,10 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:  "hasSourceAt - hasSourceAtID - pkgVersion",
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasSourceAtCall: &hasSourceAtCall{
 			Pkg: testdata.P2,
-			Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+			Src: testdata.S1,
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
 			},
@@ -2554,10 +2554,10 @@ func Test_Neighbors(t *testing.T) {
 	}, {
 		name:  "hasSourceAt - hasSourceAtID - srcName",
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasSourceAtCall: &hasSourceAtCall{
 			Pkg: testdata.P2,
-			Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+			Src: testdata.S1,
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
 			},
@@ -2568,7 +2568,7 @@ func Test_Neighbors(t *testing.T) {
 		want:               []model.Node{testdata.S1out},
 	}, {
 		name:  "isDependency - pkgName",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -2590,7 +2590,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "isDependency - pkgVersion",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -2613,7 +2613,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "isDependency - isDependencyID - pkgName",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -2625,7 +2625,7 @@ func Test_Neighbors(t *testing.T) {
 		want:                []model.Node{testdata.P1out, testdata.P2outName},
 	}, {
 		name:  "isDependency - isDependencyID - pkgVersion",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -2637,8 +2637,8 @@ func Test_Neighbors(t *testing.T) {
 		want:                []model.Node{testdata.P1out, testdata.P2out},
 	}, {
 		name:  "isOccurrence - artifact",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isOcurCall: &isOcurCall{
 			PkgSrc: model.PackageOrSourceInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -2656,8 +2656,8 @@ func Test_Neighbors(t *testing.T) {
 		}},
 	}, {
 		name:  "isOccurrence - pkgVersion",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isOcurCall: &isOcurCall{
 			PkgSrc: model.PackageOrSourceInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -2684,8 +2684,8 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "isOccurrence - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isOcurCall: &isOcurCall{
 			PkgSrc: model.PackageOrSourceInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -2711,8 +2711,8 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "isOccurrence - isOccurrenceID - artifact",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isOcurCall: &isOcurCall{
 			PkgSrc: model.PackageOrSourceInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -2727,8 +2727,8 @@ func Test_Neighbors(t *testing.T) {
 		want:                []model.Node{testdata.A1out},
 	}, {
 		name:  "isOccurrence - isOccurrenceID - pkgVersion",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isOcurCall: &isOcurCall{
 			PkgSrc: model.PackageOrSourceInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -2743,8 +2743,8 @@ func Test_Neighbors(t *testing.T) {
 		want:                []model.Node{testdata.P1out},
 	}, {
 		name:  "isOccurrence - isOccurrenceID - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isOcurCall: &isOcurCall{
 			PkgSrc: model.PackageOrSourceInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -2759,7 +2759,7 @@ func Test_Neighbors(t *testing.T) {
 		want:                []model.Node{testdata.S1out},
 	}, {
 		name:  "pkgEqual",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		pkgEqualCall: &pkgEqualCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -2784,7 +2784,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "pkgEqual - equal package",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		pkgEqualCall: &pkgEqualCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -2809,7 +2809,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "pkgEqual - pkgEqualID",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		pkgEqualCall: &pkgEqualCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -2822,7 +2822,7 @@ func Test_Neighbors(t *testing.T) {
 		want:            []model.Node{testdata.P1out, testdata.P2out},
 	}, {
 		name:  "pointOfContact - artifact",
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
@@ -2844,7 +2844,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
@@ -2868,7 +2868,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "pointOfContact - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -2898,7 +2898,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -2924,7 +2924,7 @@ func Test_Neighbors(t *testing.T) {
 			}},
 	}, {
 		name:  "pointOfContact - pointOfContactID - artifact",
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
@@ -2944,7 +2944,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeAllVersions,
@@ -2958,7 +2958,7 @@ func Test_Neighbors(t *testing.T) {
 		want:                  []model.Node{testdata.P2outName},
 	}, {
 		name:  "pointOfContact - pointOfContactID - srcName",
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Source: &model.IDorSourceInput{SourceInput: testdata.S1},
@@ -2978,7 +2978,7 @@ func Test_Neighbors(t *testing.T) {
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
@@ -3125,17 +3125,17 @@ func Test_Neighbors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var nodeID string
 			for _, p := range tt.inPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range tt.inSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range tt.inArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -3150,7 +3150,7 @@ func Test_Neighbors(t *testing.T) {
 				}
 			}
 			for _, g := range tt.inVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
@@ -3448,7 +3448,7 @@ func Test_Neighbors(t *testing.T) {
 			if tt.hasSBOMCall != nil {
 				includes := model.HasSBOMIncludesInputSpec{}
 				for _, s := range tt.hasSBOMCall.InSrc {
-					if _, err := b.IngestSource(ctx, *s); err != nil {
+					if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 						t.Fatalf("Could not ingest source: %v", err)
 					}
 				}

@@ -163,7 +163,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "HappyPath",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -191,7 +191,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Ingest twice",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -227,7 +227,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Build Type",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -263,7 +263,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Version",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -299,7 +299,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Time",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -335,7 +335,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Time",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -475,7 +475,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on Builder",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
@@ -544,7 +544,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query on ID",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
@@ -573,7 +573,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query none",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
@@ -598,7 +598,7 @@ func TestHasSLSA(t *testing.T) {
 		},
 		{
 			Name:  "Query bad ID",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
@@ -626,7 +626,7 @@ func TestHasSLSA(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if artID, err := b.IngestArtifact(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					if test.QuerySubjectID {
@@ -708,11 +708,11 @@ func TestIngestHasSLSAs(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+					Sub: []*model.ArtifactInputSpec{testdata.A1},
 					BF:  [][]*model.ArtifactInputSpec{{testdata.A2}},
 					BB:  []*model.BuilderInputSpec{testdata.B1},
 					SLSA: []*model.SLSAInputSpec{
@@ -738,7 +738,7 @@ func TestIngestHasSLSAs(t *testing.T) {
 		},
 		{
 			Name:  "Ingest twice",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -771,7 +771,7 @@ func TestIngestHasSLSAs(t *testing.T) {
 		},
 		{
 			Name:  "Query on Build Type",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -873,7 +873,7 @@ func TestIngestHasSLSAs(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -934,7 +934,7 @@ func Test_buildHasSlsaByID(t *testing.T) {
 	}{
 		{
 			Name:  "Query on Subject",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
@@ -1009,7 +1009,7 @@ func Test_buildHasSlsaByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on Builder",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
 			InBld: []*model.BuilderInputSpec{testdata.B2},
 			Calls: []call{
 				{
@@ -1054,7 +1054,7 @@ func Test_buildHasSlsaByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on ID",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 			Calls: []call{
 				{
@@ -1074,7 +1074,7 @@ func Test_buildHasSlsaByID(t *testing.T) {
 		},
 		{
 			Name:  "Query bad ID",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InBld: []*model.BuilderInputSpec{testdata.B2},
 			Calls: []call{
 				{
@@ -1096,7 +1096,7 @@ func Test_buildHasSlsaByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}

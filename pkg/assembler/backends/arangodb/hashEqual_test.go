@@ -58,7 +58,7 @@ func TestHashEqual(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			Calls: []call{
 				{
 					A1: testdata.A1,
@@ -80,7 +80,7 @@ func TestHashEqual(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same, different order",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			Calls: []call{
 				{
 					A1: testdata.A1,
@@ -109,7 +109,7 @@ func TestHashEqual(t *testing.T) {
 		},
 		{
 			Name:  "Query on Justification",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			Calls: []call{
 				{
 					A1: testdata.A1,
@@ -550,10 +550,10 @@ func TestIngestHashEquals(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			Calls: []call{
 				{
-					A1: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+					A1: []*model.ArtifactInputSpec{testdata.A1},
 					A2: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					HE: []*model.HashEqualInputSpec{
 						{
@@ -574,10 +574,10 @@ func TestIngestHashEquals(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same, different order",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			Calls: []call{
 				{
-					A1: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					A1: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 					A2: []*model.ArtifactInputSpec{testdata.A2, testdata.A1},
 					HE: []*model.HashEqualInputSpec{
 						{
@@ -601,7 +601,7 @@ func TestIngestHashEquals(t *testing.T) {
 		},
 		{
 			Name:  "Query on Justification",
-			InArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			Calls: []call{
 				{
 					A1: []*model.ArtifactInputSpec{testdata.A1, testdata.A1},
@@ -767,7 +767,7 @@ func TestIngestHashEquals(t *testing.T) {
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2, testdata.A3},
 			Calls: []call{
 				{
-					A1: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					A1: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 					A2: []*model.ArtifactInputSpec{testdata.A2, testdata.A3},
 					HE: []*model.HashEqualInputSpec{
 						{},
@@ -799,7 +799,7 @@ func TestIngestHashEquals(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -904,7 +904,7 @@ func Test_buildHashEqualByID(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}

@@ -423,7 +423,7 @@ func (s *Suite) TestCertifyScorecard() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -604,7 +604,7 @@ func (s *Suite) TestIngestScorecards() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}

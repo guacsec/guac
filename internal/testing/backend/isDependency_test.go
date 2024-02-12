@@ -48,7 +48,7 @@ func TestIsDependency(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -72,7 +72,7 @@ func TestIsDependency(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -136,7 +136,7 @@ func TestIsDependency(t *testing.T) {
 		},
 		{
 			Name:  "Query on Justification",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -603,7 +603,7 @@ func TestIsDependency(t *testing.T) {
 		},
 		{
 			Name:  "Query on Range",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -635,7 +635,7 @@ func TestIsDependency(t *testing.T) {
 		},
 		{
 			Name:  "Query on DependencyType",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -818,7 +818,7 @@ func TestIsDependency(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InPkg {
-				if pkgIDs, err := b.IngestPackage(ctx, *a); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: a}); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				} else {
 					if test.QueryPkgID {
@@ -838,7 +838,7 @@ func TestIsDependency(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				depID, err := b.IngestDependency(ctx, *o.P1, *o.P2, o.MF, *o.ID)
+				depID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: o.P1}, model.IDorPkgInput{PackageInput: o.P2}, o.MF, *o.ID)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -869,8 +869,8 @@ func TestIsDependencies(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
 	type call struct {
-		P1s []*model.PkgInputSpec
-		P2s []*model.PkgInputSpec
+		P1s []*model.IDorPkgInput
+		P2s []*model.IDorPkgInput
 		MF  model.MatchFlags
 		IDs []*model.IsDependencyInputSpec
 	}
@@ -886,8 +886,8 @@ func TestIsDependencies(t *testing.T) {
 			Name:  "HappyPath",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3, testdata.P4},
 			Calls: []call{{
-				P1s: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-				P2s: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+				P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+				P2s: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P4}},
 				MF:  mAll,
 				IDs: []*model.IsDependencyInputSpec{
 					{
@@ -910,8 +910,8 @@ func TestIsDependencies(t *testing.T) {
 			Name:  "HappyPath",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3, testdata.P4},
 			Calls: []call{{
-				P1s: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-				P2s: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+				P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+				P2s: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P4}},
 				MF:  mSpecific,
 				IDs: []*model.IsDependencyInputSpec{
 					{
@@ -934,7 +934,7 @@ func TestIsDependencies(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *a); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: a}); err != nil {
 					t.Fatalf("Could not ingest pkg: %v", err)
 				}
 			}

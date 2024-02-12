@@ -116,7 +116,7 @@ func TestPackages(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedPkgIDs, err := b.IngestPackage(ctx, *tt.pkgInput)
+			ingestedPkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: tt.pkgInput})
 			if (err != nil) != tt.wantErr {
 				t.Errorf("IngestPackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -141,11 +141,11 @@ func TestIngestPackages(t *testing.T) {
 	b := setupTest(t)
 	tests := []struct {
 		name      string
-		pkgInputs []*model.PkgInputSpec
+		pkgInputs []*model.IDorPkgInput
 		wantErr   bool
 	}{{
 		name:      "tensorflow empty version",
-		pkgInputs: []*model.PkgInputSpec{testdata.P3, testdata.P4},
+		pkgInputs: []*model.IDorPkgInput{{PackageInput: testdata.P3}, {PackageInput: testdata.P4}},
 		wantErr:   false,
 	}}
 	for _, tt := range tests {

@@ -51,7 +51,7 @@ func TestVEX(t *testing.T) {
 	}{
 		{
 			Name:   "HappyPath",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
@@ -82,7 +82,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Ingest same twice",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
@@ -123,7 +123,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Justification",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
@@ -164,8 +164,8 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Package",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-			InArt:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InArt:  []*model.ArtifactInputSpec{testdata.A1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
@@ -180,7 +180,7 @@ func TestVEX(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					Vuln: testdata.O1,
 					In: &model.VexStatementInputSpec{
@@ -229,8 +229,8 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Package ID",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-			InArt:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InArt:  []*model.ArtifactInputSpec{testdata.A1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
@@ -245,7 +245,7 @@ func TestVEX(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					Vuln: testdata.O1,
 					In: &model.VexStatementInputSpec{
@@ -279,8 +279,8 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Artifact",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-			InArt:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
+			InArt:  []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
@@ -305,7 +305,7 @@ func TestVEX(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					Vuln: testdata.O1,
 					In: &model.VexStatementInputSpec{
@@ -335,8 +335,8 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Artifact ID",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-			InArt:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
+			InArt:  []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
@@ -361,7 +361,7 @@ func TestVEX(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					Vuln: testdata.O1,
 					In: &model.VexStatementInputSpec{
@@ -385,7 +385,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Vuln",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
 			Calls: []call{
 				{
@@ -475,7 +475,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Vulnerability ID",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
 			Calls: []call{
 				{
@@ -524,7 +524,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Status",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.O1},
 			Calls: []call{
 				{
@@ -568,7 +568,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Status Notes",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.O1},
 			Calls: []call{
 				{
@@ -612,7 +612,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on Statement",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
@@ -656,7 +656,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on KnownSince",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
@@ -697,7 +697,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query on ID",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2},
 			Calls: []call{
 				{
@@ -736,7 +736,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query None",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
 			Calls: []call{
 				{
@@ -779,7 +779,7 @@ func TestVEX(t *testing.T) {
 		},
 		{
 			Name:   "Query multiple",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
 			Calls: []call{
 				{
@@ -841,7 +841,7 @@ func TestVEX(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					if test.QueryPkgID {
@@ -856,7 +856,7 @@ func TestVEX(t *testing.T) {
 				}
 			}
 			for _, a := range test.InArt {
-				if artID, err := b.IngestArtifact(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %a", err)
 				} else {
 					if test.QueryArtID {
@@ -871,7 +871,7 @@ func TestVEX(t *testing.T) {
 				}
 			}
 			for _, v := range test.InVuln {
-				if vulnIDs, err := b.IngestVulnerability(ctx, *v); err != nil {
+				if vulnIDs, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: v}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %v", err)
 				} else {
 					if test.QueryVulnID {
@@ -884,7 +884,7 @@ func TestVEX(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				vexID, err := b.IngestVEXStatement(ctx, o.Sub, *o.Vuln, *o.In)
+				vexID, err := b.IngestVEXStatement(ctx, o.Sub, model.IDorVulnerabilityInput{VulnerabilityInput: o.Vuln}, *o.In)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -916,7 +916,7 @@ func TestVEXBulkIngest(t *testing.T) {
 	b := setupTest(t)
 	type call struct {
 		Subs  model.PackageOrArtifactInputs
-		Vulns []*model.VulnerabilityInputSpec
+		Vulns []*model.IDorVulnerabilityInput
 		Vexs  []*model.VexStatementInputSpec
 	}
 	tests := []struct {
@@ -932,14 +932,14 @@ func TestVEXBulkIngest(t *testing.T) {
 	}{
 		{
 			Name:   "HappyPath",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
 					Subs: model.PackageOrArtifactInputs{
 						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.O1},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}},
 					Vexs: []*model.VexStatementInputSpec{
 						{
 							VexJustification: "test justification",
@@ -965,14 +965,14 @@ func TestVEXBulkIngest(t *testing.T) {
 		},
 		{
 			Name:   "Ingest same twice",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
 					Subs: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
 					},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O1},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O1}},
 					Vexs: []*model.VexStatementInputSpec{
 						{
 							VexJustification: "test justification",
@@ -1002,15 +1002,15 @@ func TestVEXBulkIngest(t *testing.T) {
 		},
 		{
 			Name:   "Query on Package",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-			InArt:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InArt:  []*model.ArtifactInputSpec{testdata.A1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
 					Subs: model.PackageOrArtifactInputs{
-						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O1},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O1}},
 					Vexs: []*model.VexStatementInputSpec{
 						{
 							VexJustification: "test justification",
@@ -1024,9 +1024,9 @@ func TestVEXBulkIngest(t *testing.T) {
 				},
 				{
 					Subs: model.PackageOrArtifactInputs{
-						Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 					},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.O1},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}},
 					Vexs: []*model.VexStatementInputSpec{
 						{
 							VexJustification: "test justification",
@@ -1056,14 +1056,14 @@ func TestVEXBulkIngest(t *testing.T) {
 		},
 		{
 			Name:   "Query on Artifact",
-			InArt:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+			InArt:  []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
 			Calls: []call{
 				{
 					Subs: model.PackageOrArtifactInputs{
-						Artifacts: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 					},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O1},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O1}},
 					Vexs: []*model.VexStatementInputSpec{
 						{
 							VexJustification: "test justification",
@@ -1097,14 +1097,14 @@ func TestVEXBulkIngest(t *testing.T) {
 		},
 		{
 			Name:   "Query on Vuln",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
 			Calls: []call{
 				{
 					Subs: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P1, testdata.P1},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
 					},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O2}, {VulnerabilityInput: testdata.C1}},
 					Vexs: []*model.VexStatementInputSpec{
 						{
 							VexJustification: "test justification",
@@ -1168,14 +1168,14 @@ func TestVEXBulkIngest(t *testing.T) {
 		},
 		{
 			Name:   "Query on Status",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.O1},
 			Calls: []call{
 				{
 					Subs: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
 					},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.C1, testdata.O1},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.O1}},
 					Vexs: []*model.VexStatementInputSpec{
 						{
 							VexJustification: "test justification",
@@ -1207,14 +1207,14 @@ func TestVEXBulkIngest(t *testing.T) {
 		},
 		{
 			Name:   "Query multiple",
-			InPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
 			Calls: []call{
 				{
 					Subs: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P1, testdata.P1},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
 					},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.O1, testdata.O2, testdata.C1},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O2}, {VulnerabilityInput: testdata.C1}},
 					Vexs: []*model.VexStatementInputSpec{
 						{
 							VexJustification: "test justification",
@@ -1258,16 +1258,20 @@ func TestVEXBulkIngest(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
-				t.Fatalf("Could not ingest package: %v", err)
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
+					t.Fatalf("Could not ingest package: %v", err)
+				}
 			}
-
-			if _, err := b.IngestArtifacts(ctx, test.InArt); err != nil {
-				t.Fatalf("Could not ingest artifact: %a", err)
+			for _, a := range test.InArt {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
+					t.Fatalf("Could not ingest artifact: %a", err)
+				}
 			}
-
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
-				t.Fatalf("Could not ingest vulnerability: %v", err)
+			for _, v := range test.InVuln {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: v}); err != nil {
+					t.Fatalf("Could not ingest vulnerability: %v", err)
+				}
 			}
 			for _, o := range test.Calls {
 				_, err := b.IngestVEXStatements(ctx, o.Subs, o.Vulns, o.Vexs)

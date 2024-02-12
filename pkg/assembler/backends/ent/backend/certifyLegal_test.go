@@ -44,7 +44,7 @@ func (s *Suite) TestLegal() {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
@@ -70,7 +70,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Ingest same twice",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
@@ -105,7 +105,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Query on Justification",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
@@ -140,7 +140,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Query on Package",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
@@ -154,7 +154,7 @@ func (s *Suite) TestLegal() {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -179,7 +179,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Query on Source",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
+			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
@@ -193,7 +193,7 @@ func (s *Suite) TestLegal() {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: testdata.S2,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S2},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -218,7 +218,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Query on License",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			InLic: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L3},
 			Calls: []call{
 				{
@@ -255,7 +255,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Query on License inline",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			InLic: []*model.LicenseInputSpec{testdata.L1, testdata.L2, testdata.L4},
 			Calls: []call{
 				{
@@ -292,7 +292,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Query on expression",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
@@ -323,7 +323,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Query on attribution",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
@@ -354,7 +354,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Query on time",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
@@ -399,7 +399,7 @@ func (s *Suite) TestLegal() {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -408,7 +408,7 @@ func (s *Suite) TestLegal() {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P3,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P3},
 					},
 					Dec: []*model.LicenseInputSpec{testdata.L1},
 					Legal: &model.CertifyLegalInputSpec{
@@ -458,7 +458,7 @@ func (s *Suite) TestLegal() {
 		},
 		{
 			Name:  "Ingest without License",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
@@ -480,12 +480,12 @@ func (s *Suite) TestLegal() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
@@ -537,12 +537,12 @@ func (s *Suite) TestLegals() {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			InLic: []*model.LicenseInputSpec{testdata.L1},
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInputs{
-						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					},
 					Dec: [][]*model.LicenseInputSpec{{testdata.L1}, {testdata.L1}},
 					Dis: [][]*model.LicenseInputSpec{{}, {}},
@@ -578,12 +578,12 @@ func (s *Suite) TestLegals() {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}

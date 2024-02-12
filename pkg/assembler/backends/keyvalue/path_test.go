@@ -192,7 +192,7 @@ func Test_Nodes(t *testing.T) {
 		want:         []model.Node{testdata.L1out},
 	}, {
 		name:  "certifyBad",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		certifyBadCall: &certifyBadCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -210,7 +210,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "certifyGood",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		certifyGoodCall: &certifyGoodCall{
 			Sub: model.PackageSourceOrArtifactInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -228,7 +228,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "certifyLegal",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
 		inLic: []*model.LicenseInputSpec{testdata.L1},
 		certifyLegalCall: &certifyLegalCall{
 			PkgSrc: model.PackageOrSourceInput{
@@ -262,7 +262,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:   "vex",
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+		InPkg:  []*model.PkgInputSpec{testdata.P1},
 		inVuln: []*model.VulnerabilityInputSpec{testdata.O2},
 		vexCall: &vexCall{
 			Sub: model.PackageOrArtifactInput{
@@ -286,7 +286,7 @@ func Test_Nodes(t *testing.T) {
 	}, {
 		name:   "certifyVuln",
 		inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-		inPkg:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+		inPkg:  []*model.PkgInputSpec{testdata.P2},
 		certifyVulnCall: &certifyVulnCall{
 			Pkg:  testdata.P2,
 			Vuln: testdata.G1,
@@ -324,7 +324,7 @@ func Test_Nodes(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		hasMetadataCall: &hasMetadataCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			HM: &model.HasMetadataInputSpec{
 				Justification: "test justification",
@@ -337,7 +337,7 @@ func Test_Nodes(t *testing.T) {
 	}, {
 		name:  "hasSBOM",
 		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isDepCall: &isDepCall{
 			P1: testdata.P2,
 			P2: testdata.P4,
@@ -348,7 +348,7 @@ func Test_Nodes(t *testing.T) {
 		},
 		isOcurCall: &isOcurCall{
 			PkgSrc: model.PackageOrSourceInput{
-				Package: testdata.P4,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 			},
 			Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 			Occurrence: &model.IsOccurrenceInputSpec{
@@ -357,7 +357,7 @@ func Test_Nodes(t *testing.T) {
 		},
 		hasSBOMCall: &hasSBOMCall{
 			Sub: model.PackageOrArtifactInput{
-				Package: testdata.P2,
+				Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 			},
 			HS: &model.HasSBOMInputSpec{
 				DownloadLocation: "location two",
@@ -382,7 +382,7 @@ func Test_Nodes(t *testing.T) {
 	}, {
 
 		name:  "hasSLSA",
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}, &model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+		InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 		inBld: []*model.BuilderInputSpec{testdata.B1, testdata.B2},
 		hasSlsaCall: &hasSlsaCall{
 			Sub:  testdata.A1,
@@ -399,11 +399,11 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "hasSourceAt",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
-		inSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		InSrc: []*model.SourceInputSpec{testdata.S1},
 		hasSourceAtCall: &hasSourceAtCall{
 			Pkg: testdata.P2,
-			Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+			Src: testdata.S1,
 			Match: &model.MatchFlags{
 				Pkg: model.PkgMatchTypeSpecificVersion,
 			},
@@ -415,7 +415,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "isDependency",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		isDepCall: &isDepCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -429,8 +429,8 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "isOccurrence",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
-		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A1}},
+		InPkg: []*model.PkgInputSpec{testdata.P1},
+		inArt: []*model.ArtifactInputSpec{testdata.A1},
 		isOcurCall: &isOcurCall{
 			PkgSrc: model.PackageOrSourceInput{
 				Package: &model.IDorPkgInput{PackageInput: testdata.P1},
@@ -447,7 +447,7 @@ func Test_Nodes(t *testing.T) {
 		}},
 	}, {
 		name:  "pkgEqual",
-		inPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 		pkgEqualCall: &pkgEqualCall{
 			P1: testdata.P1,
 			P2: testdata.P2,
@@ -465,7 +465,7 @@ func Test_Nodes(t *testing.T) {
 		inArt: []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 		pointOfContactCall: &pointOfContactCall{
 			Sub: model.PackageSourceOrArtifactInput{
-				Artifact: testdata.A2,
+				Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 			},
 			POC: &model.PointOfContactInputSpec{
 				Justification: "test justification",
@@ -536,19 +536,19 @@ func Test_Nodes(t *testing.T) {
 			var nodeID string
 			includes := model.HasSBOMIncludesInputSpec{}
 			for _, p := range tt.inPkg {
-				if pkg, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkg, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					includes.Software = append(includes.Software, pkg.PackageVersionID)
 				}
 			}
 			for _, s := range tt.inSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range tt.inArt {
-				if art, err := b.IngestArtifact(ctx, a); err != nil {
+				if art, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					includes.Software = append(includes.Software, art)
@@ -565,7 +565,7 @@ func Test_Nodes(t *testing.T) {
 				}
 			}
 			for _, g := range tt.inVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}

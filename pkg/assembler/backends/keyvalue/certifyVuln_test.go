@@ -583,7 +583,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		},
 		{
 			Name:  "Ingest missing pkg",
-			InPkg: []*model.IDorPkgInput{},
+			InPkg: []*model.PkgInputSpec{},
 			Calls: []call{
 				{
 					Pkg:         p2,
@@ -607,7 +607,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}
@@ -1191,7 +1191,7 @@ func TestCertifyVulnNeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}

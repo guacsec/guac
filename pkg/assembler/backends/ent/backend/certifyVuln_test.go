@@ -540,7 +540,7 @@ func (s *Suite) TestIngestCertifyVulnerability() {
 		},
 		{
 			Name:  "Ingest missing pkg",
-			InPkg: []*model.IDorPkgInput{},
+			InPkg: []*model.PkgInputSpec{},
 			Calls: []call{
 				{
 					Pkg:         p2,
@@ -565,7 +565,7 @@ func (s *Suite) TestIngestCertifyVulnerability() {
 			}
 
 			for _, g := range test.InVuln {
-				if _, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				}
 			}

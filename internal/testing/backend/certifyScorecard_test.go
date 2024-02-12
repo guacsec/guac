@@ -46,10 +46,10 @@ func TestCertifyScorecard(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						Origin: "test origin",
 					},
@@ -70,16 +70,16 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						Origin: "test origin",
 					},
 				},
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						Origin: "test origin",
 					},
@@ -100,10 +100,10 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Query on Source ID",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
+			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						Origin: "test origin",
 					},
@@ -128,23 +128,23 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Query multiple",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						Origin: "test origin one",
 					},
 				},
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore: 4.4,
 						Origin:         "test origin two",
 					},
 				},
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore: 4.9,
 						Origin:         "test origin two",
@@ -175,10 +175,10 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Query Source",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
+			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						Origin: "test origin",
 					},
@@ -230,10 +230,10 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Query Time",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore:   1.5,
 						TimeScanned:      time.Unix(1e9, 0),
@@ -242,7 +242,7 @@ func TestCertifyScorecard(t *testing.T) {
 					},
 				},
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore:   1.5,
 						TimeScanned:      testTime,
@@ -269,10 +269,10 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Query Score",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore:   1.5,
 						TimeScanned:      time.Unix(1e9, 0),
@@ -281,7 +281,7 @@ func TestCertifyScorecard(t *testing.T) {
 					},
 				},
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore:   5.7,
 						TimeScanned:      time.Unix(1e9, 0),
@@ -308,10 +308,10 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Query Checks",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						Checks: []*model.ScorecardCheckInputSpec{
 							{
@@ -323,7 +323,7 @@ func TestCertifyScorecard(t *testing.T) {
 					},
 				},
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						Checks: []*model.ScorecardCheckInputSpec{
 							{
@@ -364,10 +364,10 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Query None",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore:   1.5,
 						TimeScanned:      time.Unix(1e9, 0),
@@ -376,7 +376,7 @@ func TestCertifyScorecard(t *testing.T) {
 					},
 				},
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore:   5.7,
 						TimeScanned:      time.Unix(1e9, 0),
@@ -392,10 +392,10 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Query commit",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore:   1.5,
 						TimeScanned:      time.Unix(1e9, 0),
@@ -404,7 +404,7 @@ func TestCertifyScorecard(t *testing.T) {
 					},
 				},
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore:   5.7,
 						TimeScanned:      time.Unix(1e9, 0),
@@ -451,10 +451,10 @@ func TestCertifyScorecard(t *testing.T) {
 		},
 		{
 			Name:  "Query ID",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: &model.IDorSourceInput{SourceInput: testdata.S1},
+					Src: testdata.S1,
 					SC: &model.ScorecardInputSpec{
 						AggregateScore:   1.5,
 						TimeScanned:      time.Unix(1e9, 0),
@@ -481,7 +481,7 @@ func TestCertifyScorecard(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, s := range test.InSrc {
-				if srcID, err := b.IngestSource(ctx, *s); err != nil {
+				if srcID, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				} else {
 					if test.QuerySourceID {
@@ -495,7 +495,7 @@ func TestCertifyScorecard(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				scoreID, err := b.IngestScorecard(ctx, *o.Src, *o.SC)
+				scoreID, err := b.IngestScorecard(ctx, model.IDorSourceInput{SourceInput: o.Src}, *o.SC)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -526,7 +526,7 @@ func TestIngestScorecards(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
 	type call struct {
-		Src []*model.SourceInputSpec
+		Src []*model.IDorSourceInput
 		SC  []*model.ScorecardInputSpec
 	}
 	tests := []struct {
@@ -540,10 +540,10 @@ func TestIngestScorecards(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+					Src: []*model.IDorSourceInput{{SourceInput: testdata.S1}},
 					SC: []*model.ScorecardInputSpec{
 						{
 							Origin: "test origin",
@@ -566,10 +566,10 @@ func TestIngestScorecards(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: []*model.SourceInputSpec{&model.IDorSourceInput{SourceInput: testdata.S1}, testdata.S1},
+					Src: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S1}},
 					SC: []*model.ScorecardInputSpec{
 						{
 							Origin: "test origin",
@@ -595,10 +595,10 @@ func TestIngestScorecards(t *testing.T) {
 		},
 		{
 			Name:  "Query multiple",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Src: []*model.SourceInputSpec{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S1}, testdata.S1},
+					Src: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S1}, {SourceInput: testdata.S1}},
 					SC: []*model.ScorecardInputSpec{
 						{
 							Origin: "test origin one",
@@ -638,10 +638,10 @@ func TestIngestScorecards(t *testing.T) {
 		},
 		{
 			Name:  "Query Source",
-			InSrc: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
+			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
 			Calls: []call{
 				{
-					Src: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
+					Src: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S2}},
 					SC: []*model.ScorecardInputSpec{
 						{
 							Origin: "test origin",
@@ -694,7 +694,7 @@ func TestIngestScorecards(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}

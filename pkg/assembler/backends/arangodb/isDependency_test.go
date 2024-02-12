@@ -64,7 +64,7 @@ func TestIsDependency(t *testing.T) {
 	}{
 		{
 			Name:  "HappyPath",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -88,7 +88,7 @@ func TestIsDependency(t *testing.T) {
 		},
 		{
 			Name:  "Ingest same",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -152,7 +152,7 @@ func TestIsDependency(t *testing.T) {
 		},
 		{
 			Name:  "Query on Justification",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -619,7 +619,7 @@ func TestIsDependency(t *testing.T) {
 		},
 		{
 			Name:  "Query on Range",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -651,7 +651,7 @@ func TestIsDependency(t *testing.T) {
 		},
 		{
 			Name:  "Query on DependencyType",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,
@@ -941,7 +941,7 @@ func TestIsDependencies(t *testing.T) {
 			Name:  "HappyPath",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3, testdata.P4},
 			Calls: []call{{
-				P1s: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+				P1s: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 				P2s: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
 				MF:  mAll,
 				IDs: []*model.IsDependencyInputSpec{
@@ -965,7 +965,7 @@ func TestIsDependencies(t *testing.T) {
 			Name:  "HappyPath",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3, testdata.P4},
 			Calls: []call{{
-				P1s: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+				P1s: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 				P2s: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
 				MF:  mSpecific,
 				IDs: []*model.IsDependencyInputSpec{
@@ -1090,7 +1090,7 @@ func Test_buildIsDependencyByID(t *testing.T) {
 		},
 		{
 			Name:  "Query on ID",
-			InPkg: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}, &model.IDorPkgInput{PackageInput: testdata.P2}},
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
 					P1: testdata.P1,

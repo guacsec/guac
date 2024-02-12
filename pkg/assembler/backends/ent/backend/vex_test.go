@@ -838,12 +838,12 @@ package backend
 // 				t.Fatalf("Could not instantiate testing backend: %v", err)
 // 			}
 // 			for _, p := range test.InPkg {
-// 				if _, err := b.IngestPackage(ctx, *p); err != nil {
+// 				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 // 					t.Fatalf("Could not ingest package: %v", err)
 // 				}
 // 			}
 // 			for _, a := range test.InArt {
-// 				if _, err := b.IngestArtifact(ctx, a); err != nil {
+// 				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 // 					t.Fatalf("Could not ingest artifact: %a", err)
 // 				}
 // 			}
@@ -986,12 +986,12 @@ package backend
 //				t.Fatalf("Could not instantiate testing backend: %v", err)
 //			}
 //			for _, p := range test.InPkg {
-//				if _, err := b.IngestPackage(ctx, *p); err != nil {
+//				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 //					t.Fatalf("Could not ingest package: %v", err)
 //				}
 //			}
 //			for _, a := range test.InArt {
-//				if _, err := b.IngestArtifact(ctx, a); err != nil {
+//				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 //					t.Fatalf("Could not ingest artifact: %a", err)
 //				}
 //			}

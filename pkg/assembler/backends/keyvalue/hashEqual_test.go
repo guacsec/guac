@@ -397,7 +397,7 @@ func TestHashEqual(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -667,7 +667,7 @@ func TestIngestHashEquals(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -768,7 +768,7 @@ func TestHashEqualNeighbors(t *testing.T) {
 				t.Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}

@@ -2566,7 +2566,7 @@ func (s *Suite) TestHasSBOM() {
 			}
 			var pkgIDs []string
 			for _, p := range test.InPkg {
-				if pkg, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkg, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				} else {
 					pkgIDs = append(pkgIDs, pkg.PackageVersionID)
@@ -2574,7 +2574,7 @@ func (s *Suite) TestHasSBOM() {
 			}
 			var artifactIDs []string
 			for _, a := range test.InArt {
-				if art, err := b.IngestArtifact(ctx, a); err != nil {
+				if art, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					s.T().Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					artifactIDs = append(artifactIDs, art)
@@ -2948,12 +2948,12 @@ func (s *Suite) TestIngestHasSBOMs() {
 				s.T().Fatalf("Could not instantiate testing backend: %v", err)
 			}
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					s.T().Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					s.T().Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
