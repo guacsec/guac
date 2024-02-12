@@ -953,7 +953,7 @@ func TestGuacFilePurl(t *testing.T) {
 			alg:      "sha256",
 			digest:   "cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec",
 			filename: strP("/test/path"),
-			expected: "pkg:guac/files/sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec#/test/path",
+			expected: "pkg:guac/files/sha256:cf194aa4315da360a262ff73ce63e2ff68a128c3a9ee7d97163c998fd1690cec?filename=/test/path",
 		},
 		{
 			alg:      "sha256",

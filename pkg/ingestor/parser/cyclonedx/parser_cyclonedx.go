@@ -468,7 +468,7 @@ func guacCDXFilePurl(fileName string, version string, topLevel bool) string {
 			splitVersion := strings.Split(version, ":")
 			if len(splitVersion) == 2 {
 				s := fmt.Sprintf("pkg:guac/cdx/"+"%s:%s", strings.ToLower(splitVersion[0]), splitVersion[1])
-				s += fmt.Sprintf("#%s", escapedName)
+				s += fmt.Sprintf("?filename=%s", escapedName)
 				return s
 			}
 		}

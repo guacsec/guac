@@ -147,8 +147,13 @@
         "namespace": "files",
         "name": "sha256:713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201",
         "version": "",
-        "qualifiers": null,
-        "subpath": "etc/apk/world"
+        "qualifiers": [
+          {
+            "key": "filename",
+            "value": "/etc/apk/world"
+          }
+        ],
+        "subpath": ""
       },
       "artifact": {
         "algorithm": "sha256",
@@ -166,8 +171,13 @@
         "namespace": "files",
         "name": "sha256:575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
         "version": "",
-        "qualifiers": null,
-        "subpath": "etc/crontabs/root"
+        "qualifiers": [
+          {
+            "key": "filename",
+            "value": "/etc/crontabs/root"
+          }
+        ],
+        "subpath": ""
       },
       "artifact": {
         "algorithm": "sha256",
