@@ -17,7 +17,7 @@
 
 # Defines the GraphQL operations to ingest a vulnerability certification into GUAC
 
-mutation CertifyVulnPkg(
+mutation IngestCertifyVulnPkg(
   $pkg: PkgInputSpec!
   $vulnerability: VulnerabilityInputSpec!
   $certifyVuln: ScanMetadataInput!
@@ -31,7 +31,7 @@ mutation CertifyVulnPkg(
 
 # Defines the GraphQL operations to bulk ingest vulnerability certifications into GUAC
 
-mutation CertifyVulnPkgs(
+mutation IngestCertifyVulnPkgs(
   $pkgs: [PkgInputSpec!]!
   $vulnerabilities: [VulnerabilityInputSpec!]!
   $certifyVulns: [ScanMetadataInput!]!

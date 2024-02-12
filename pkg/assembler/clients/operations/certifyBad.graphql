@@ -17,7 +17,7 @@
 
 # Defines the GraphQL operations to ingest a CertifyBad into GUAC
 
-mutation CertifyBadPkg(
+mutation IngestCertifyBadPkg(
   $pkg: PkgInputSpec!
   $pkgMatchType: MatchFlags!
   $certifyBad: CertifyBadInputSpec!
@@ -29,7 +29,7 @@ mutation CertifyBadPkg(
   )
 }
 
-mutation CertifyBadSrc(
+mutation IngestCertifyBadSrc(
   $source: SourceInputSpec!
   $certifyBad: CertifyBadInputSpec!
 ) {
@@ -40,7 +40,7 @@ mutation CertifyBadSrc(
   )
 }
 
-mutation CertifyBadArtifact(
+mutation IngestCertifyBadArtifact(
   $artifact: ArtifactInputSpec!
   $certifyBad: CertifyBadInputSpec!
 ) {
@@ -53,7 +53,7 @@ mutation CertifyBadArtifact(
 
 # Defines the GraphQL operations to bulk ingest a CertifyBad into GUAC
 
-mutation CertifyBadPkgs(
+mutation IngestCertifyBadPkgs(
   $pkgs: [PkgInputSpec!]!
   $pkgMatchType: MatchFlags!
   $certifyBads: [CertifyBadInputSpec!]!
@@ -65,7 +65,7 @@ mutation CertifyBadPkgs(
   )
 }
 
-mutation CertifyBadSrcs(
+mutation IngestCertifyBadSrcs(
   $sources: [SourceInputSpec!]!
   $certifyBads: [CertifyBadInputSpec!]!
 ) {
@@ -76,7 +76,7 @@ mutation CertifyBadSrcs(
   )
 }
 
-mutation CertifyBadArtifacts(
+mutation IngestCertifyBadArtifacts(
   $artifacts: [ArtifactInputSpec!]!
   $certifyBads: [CertifyBadInputSpec!]!
 ) {

@@ -17,7 +17,7 @@
 
 # Defines the GraphQL operations to ingest a PointOfContact into GUAC
 
-mutation PointOfContactPkg(
+mutation IngestPointOfContactPkg(
   $pkg: PkgInputSpec!
   $pkgMatchType: MatchFlags!
   $pointOfContact: PointOfContactInputSpec!
@@ -29,7 +29,7 @@ mutation PointOfContactPkg(
   )
 }
 
-mutation PointOfContactSrc(
+mutation IngestPointOfContactSrc(
   $source: SourceInputSpec!
   $pointOfContact: PointOfContactInputSpec!
 ) {
@@ -40,7 +40,7 @@ mutation PointOfContactSrc(
   )
 }
 
-mutation PointOfContactArtifact(
+mutation IngestPointOfContactArtifact(
   $artifact: ArtifactInputSpec!
   $pointOfContact: PointOfContactInputSpec!
 ) {
@@ -53,7 +53,7 @@ mutation PointOfContactArtifact(
 
 # Defines the GraphQL operations to bulk ingest a PointOfContact into GUAC
 
-mutation PointOfContactPkgs(
+mutation IngestPointOfContactPkgs(
   $pkgs: [PkgInputSpec!]!
   $pkgMatchType: MatchFlags!
   $pointOfContacts: [PointOfContactInputSpec!]!
@@ -65,7 +65,7 @@ mutation PointOfContactPkgs(
   )
 }
 
-mutation PointOfContactSrcs(
+mutation IngestPointOfContactSrcs(
   $sources: [SourceInputSpec!]!
   $pointOfContacts: [PointOfContactInputSpec!]!
 ) {
@@ -76,7 +76,7 @@ mutation PointOfContactSrcs(
   )
 }
 
-mutation PointOfContactArtifacts(
+mutation IngestPointOfContactArtifacts(
   $artifacts: [ArtifactInputSpec!]!
   $pointOfContacts: [PointOfContactInputSpec!]!
 ) {
