@@ -47,7 +47,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
+	ariga.io/atlas v0.19.1-0.20240203083654-5948b60a8e43 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Azure/azure-amqp-common-go/v3 v3.2.3 // indirect
@@ -275,7 +275,7 @@ require (
 require (
 	deps.dev/api/v3alpha v0.0.0-20240109042716-00b51ef52ece
 	entgo.io/contrib v0.4.5
-	entgo.io/ent v0.12.5
+	entgo.io/ent v0.13.0
 	github.com/99designs/gqlgen v0.17.41
 	github.com/CycloneDX/cyclonedx-go v0.8.0
 	github.com/Khan/genqlient v0.6.0
