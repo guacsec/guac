@@ -88,8 +88,8 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// AnalysisDependencies request
-	AnalysisDependencies(ctx context.Context, params *AnalysisDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// AnalyzeDependencies request
+	AnalyzeDependencies(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// HealthCheck request
 	HealthCheck(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -98,8 +98,8 @@ type ClientInterface interface {
 	RetrieveDependencies(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) AnalysisDependencies(ctx context.Context, params *AnalysisDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAnalysisDependenciesRequest(c.Server, params)
+func (c *Client) AnalyzeDependencies(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAnalyzeDependenciesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -134,8 +134,8 @@ func (c *Client) RetrieveDependencies(ctx context.Context, params *RetrieveDepen
 	return c.Client.Do(req)
 }
 
-// NewAnalysisDependenciesRequest generates requests for AnalysisDependencies
-func NewAnalysisDependenciesRequest(server string, params *AnalysisDependenciesParams) (*http.Request, error) {
+// NewAnalyzeDependenciesRequest generates requests for AnalyzeDependencies
+func NewAnalyzeDependenciesRequest(server string, params *AnalyzeDependenciesParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -294,8 +294,8 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// AnalysisDependenciesWithResponse request
-	AnalysisDependenciesWithResponse(ctx context.Context, params *AnalysisDependenciesParams, reqEditors ...RequestEditorFn) (*AnalysisDependenciesResponse, error)
+	// AnalyzeDependenciesWithResponse request
+	AnalyzeDependenciesWithResponse(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*AnalyzeDependenciesResponse, error)
 
 	// HealthCheckWithResponse request
 	HealthCheckWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*HealthCheckResponse, error)
@@ -304,7 +304,7 @@ type ClientWithResponsesInterface interface {
 	RetrieveDependenciesWithResponse(ctx context.Context, params *RetrieveDependenciesParams, reqEditors ...RequestEditorFn) (*RetrieveDependenciesResponse, error)
 }
 
-type AnalysisDependenciesResponse struct {
+type AnalyzeDependenciesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *PurlList
@@ -314,7 +314,7 @@ type AnalysisDependenciesResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r AnalysisDependenciesResponse) Status() string {
+func (r AnalyzeDependenciesResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -322,7 +322,7 @@ func (r AnalysisDependenciesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r AnalysisDependenciesResponse) StatusCode() int {
+func (r AnalyzeDependenciesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -376,13 +376,13 @@ func (r RetrieveDependenciesResponse) StatusCode() int {
 	return 0
 }
 
-// AnalysisDependenciesWithResponse request returning *AnalysisDependenciesResponse
-func (c *ClientWithResponses) AnalysisDependenciesWithResponse(ctx context.Context, params *AnalysisDependenciesParams, reqEditors ...RequestEditorFn) (*AnalysisDependenciesResponse, error) {
-	rsp, err := c.AnalysisDependencies(ctx, params, reqEditors...)
+// AnalyzeDependenciesWithResponse request returning *AnalyzeDependenciesResponse
+func (c *ClientWithResponses) AnalyzeDependenciesWithResponse(ctx context.Context, params *AnalyzeDependenciesParams, reqEditors ...RequestEditorFn) (*AnalyzeDependenciesResponse, error) {
+	rsp, err := c.AnalyzeDependencies(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseAnalysisDependenciesResponse(rsp)
+	return ParseAnalyzeDependenciesResponse(rsp)
 }
 
 // HealthCheckWithResponse request returning *HealthCheckResponse
@@ -403,15 +403,15 @@ func (c *ClientWithResponses) RetrieveDependenciesWithResponse(ctx context.Conte
 	return ParseRetrieveDependenciesResponse(rsp)
 }
 
-// ParseAnalysisDependenciesResponse parses an HTTP response from a AnalysisDependenciesWithResponse call
-func ParseAnalysisDependenciesResponse(rsp *http.Response) (*AnalysisDependenciesResponse, error) {
+// ParseAnalyzeDependenciesResponse parses an HTTP response from a AnalyzeDependenciesWithResponse call
+func ParseAnalyzeDependenciesResponse(rsp *http.Response) (*AnalyzeDependenciesResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &AnalysisDependenciesResponse{
+	response := &AnalyzeDependenciesResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

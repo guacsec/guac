@@ -39,7 +39,8 @@ func startServer() {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
 
-	gqlClient := getGraphqlServerClientOrExit(ctx)
+	httpClient := &http.Client{}
+	gqlClient := getGraphqlServerClientOrExit(ctx, httpClient)
 	handler := server.NewDefaultServer(gqlClient)
 	handlerWrapper := gen.NewStrictHandler(handler, nil)
 	router := chi.NewRouter()
@@ -90,9 +91,8 @@ func startServer() {
 }
 
 // get the graphql client and test the connection
-func getGraphqlServerClientOrExit(ctx context.Context) graphql.Client {
+func getGraphqlServerClientOrExit(ctx context.Context, httpClient *http.Client) graphql.Client {
 	logger := logging.FromContext(ctx)
-	httpClient := &http.Client{}
 
 	// the "query" path of the gql server is not configurable, so it can be
 	// expected here

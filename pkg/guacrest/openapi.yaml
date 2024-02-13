@@ -15,8 +15,8 @@
 
 openapi: "3.0.0"
 paths:
-  # the query/* endpoints are for simple queries of the graph
-  # the analysis/* endpoints are for more advanced questions
+  # the query endpoints are for simple queries of the graph
+  # the analysis endpoints are for more advanced questions
   "/healthz":
     get:
       summary: Health check the server
@@ -51,7 +51,7 @@ paths:
   "/analysis/dependencies":
     get:
       summary: Identify the most important dependencies
-      operationId: analysisDependencies
+      operationId: analyzeDependencies 
       parameters:
         - name: sort
           description: >

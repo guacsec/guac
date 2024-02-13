@@ -18,7 +18,7 @@ import (
 type ServerInterface interface {
 	// Identify the most important dependencies
 	// (GET /analysis/dependencies)
-	AnalysisDependencies(w http.ResponseWriter, r *http.Request, params AnalysisDependenciesParams)
+	AnalyzeDependencies(w http.ResponseWriter, r *http.Request, params AnalyzeDependenciesParams)
 	// Health check the server
 	// (GET /healthz)
 	HealthCheck(w http.ResponseWriter, r *http.Request)
@@ -33,7 +33,7 @@ type Unimplemented struct{}
 
 // Identify the most important dependencies
 // (GET /analysis/dependencies)
-func (_ Unimplemented) AnalysisDependencies(w http.ResponseWriter, r *http.Request, params AnalysisDependenciesParams) {
+func (_ Unimplemented) AnalyzeDependencies(w http.ResponseWriter, r *http.Request, params AnalyzeDependenciesParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -58,14 +58,14 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// AnalysisDependencies operation middleware
-func (siw *ServerInterfaceWrapper) AnalysisDependencies(w http.ResponseWriter, r *http.Request) {
+// AnalyzeDependencies operation middleware
+func (siw *ServerInterfaceWrapper) AnalyzeDependencies(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params AnalysisDependenciesParams
+	var params AnalyzeDependenciesParams
 
 	// ------------- Required query parameter "sort" -------------
 
@@ -83,7 +83,7 @@ func (siw *ServerInterfaceWrapper) AnalysisDependencies(w http.ResponseWriter, r
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AnalysisDependencies(w, r, params)
+		siw.Handler.AnalyzeDependencies(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -257,7 +257,7 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/analysis/dependencies", wrapper.AnalysisDependencies)
+		r.Get(options.BaseURL+"/analysis/dependencies", wrapper.AnalyzeDependencies)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/healthz", wrapper.HealthCheck)
@@ -277,46 +277,46 @@ type InternalServerErrorJSONResponse Error
 
 type PurlListJSONResponse []Purl
 
-type AnalysisDependenciesRequestObject struct {
-	Params AnalysisDependenciesParams
+type AnalyzeDependenciesRequestObject struct {
+	Params AnalyzeDependenciesParams
 }
 
-type AnalysisDependenciesResponseObject interface {
-	VisitAnalysisDependenciesResponse(w http.ResponseWriter) error
+type AnalyzeDependenciesResponseObject interface {
+	VisitAnalyzeDependenciesResponse(w http.ResponseWriter) error
 }
 
-type AnalysisDependencies200JSONResponse struct{ PurlListJSONResponse }
+type AnalyzeDependencies200JSONResponse struct{ PurlListJSONResponse }
 
-func (response AnalysisDependencies200JSONResponse) VisitAnalysisDependenciesResponse(w http.ResponseWriter) error {
+func (response AnalyzeDependencies200JSONResponse) VisitAnalyzeDependenciesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AnalysisDependencies400JSONResponse struct{ BadRequestJSONResponse }
+type AnalyzeDependencies400JSONResponse struct{ BadRequestJSONResponse }
 
-func (response AnalysisDependencies400JSONResponse) VisitAnalysisDependenciesResponse(w http.ResponseWriter) error {
+func (response AnalyzeDependencies400JSONResponse) VisitAnalyzeDependenciesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AnalysisDependencies500JSONResponse struct {
+type AnalyzeDependencies500JSONResponse struct {
 	InternalServerErrorJSONResponse
 }
 
-func (response AnalysisDependencies500JSONResponse) VisitAnalysisDependenciesResponse(w http.ResponseWriter) error {
+func (response AnalyzeDependencies500JSONResponse) VisitAnalyzeDependenciesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AnalysisDependencies502JSONResponse struct{ BadGatewayJSONResponse }
+type AnalyzeDependencies502JSONResponse struct{ BadGatewayJSONResponse }
 
-func (response AnalysisDependencies502JSONResponse) VisitAnalysisDependenciesResponse(w http.ResponseWriter) error {
+func (response AnalyzeDependencies502JSONResponse) VisitAnalyzeDependenciesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(502)
 
@@ -389,7 +389,7 @@ func (response RetrieveDependencies502JSONResponse) VisitRetrieveDependenciesRes
 type StrictServerInterface interface {
 	// Identify the most important dependencies
 	// (GET /analysis/dependencies)
-	AnalysisDependencies(ctx context.Context, request AnalysisDependenciesRequestObject) (AnalysisDependenciesResponseObject, error)
+	AnalyzeDependencies(ctx context.Context, request AnalyzeDependenciesRequestObject) (AnalyzeDependenciesResponseObject, error)
 	// Health check the server
 	// (GET /healthz)
 	HealthCheck(ctx context.Context, request HealthCheckRequestObject) (HealthCheckResponseObject, error)
@@ -427,25 +427,25 @@ type strictHandler struct {
 	options     StrictHTTPServerOptions
 }
 
-// AnalysisDependencies operation middleware
-func (sh *strictHandler) AnalysisDependencies(w http.ResponseWriter, r *http.Request, params AnalysisDependenciesParams) {
-	var request AnalysisDependenciesRequestObject
+// AnalyzeDependencies operation middleware
+func (sh *strictHandler) AnalyzeDependencies(w http.ResponseWriter, r *http.Request, params AnalyzeDependenciesParams) {
+	var request AnalyzeDependenciesRequestObject
 
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.AnalysisDependencies(ctx, request.(AnalysisDependenciesRequestObject))
+		return sh.ssi.AnalyzeDependencies(ctx, request.(AnalyzeDependenciesRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AnalysisDependencies")
+		handler = middleware(handler, "AnalyzeDependencies")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(AnalysisDependenciesResponseObject); ok {
-		if err := validResponse.VisitAnalysisDependenciesResponse(w); err != nil {
+	} else if validResponse, ok := response.(AnalyzeDependenciesResponseObject); ok {
+		if err := validResponse.VisitAnalyzeDependenciesResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
