@@ -26,7 +26,7 @@ type Purl = string
 // PaginationSpec defines model for PaginationSpec.
 type PaginationSpec struct {
 	Cursor   *string `json:"Cursor,omitempty"`
-	PageSize int     `json:"PageSize"`
+	PageSize *int    `json:"PageSize,omitempty"`
 }
 
 // BadGateway defines model for BadGateway.
@@ -47,7 +47,7 @@ type PurlList struct {
 // AnalyzeDependenciesParams defines parameters for AnalyzeDependencies.
 type AnalyzeDependenciesParams struct {
 	// PaginationSpec The pagination configuration for the query.
-	//   * 'PageSize' specified the number of results returned
+	//   * 'PageSize' specifies the number of results returned
 	//   * 'Cursor' is returned by previous calls and specifies what page to return
 	PaginationSpec *PaginationSpec `form:"PaginationSpec,omitempty" json:"PaginationSpec,omitempty"`
 
@@ -63,7 +63,7 @@ type AnalyzeDependenciesParamsSort string
 // RetrieveDependenciesParams defines parameters for RetrieveDependencies.
 type RetrieveDependenciesParams struct {
 	// PaginationSpec The pagination configuration for the query.
-	//   * 'PageSize' specified the number of results returned
+	//   * 'PageSize' specifies the number of results returned
 	//   * 'Cursor' is returned by previous calls and specifies what page to return
 	PaginationSpec *PaginationSpec `form:"PaginationSpec,omitempty" json:"PaginationSpec,omitempty"`
 

@@ -85,13 +85,11 @@ components:
       in: query
       description: >
         The pagination configuration for the query.
-          * 'PageSize' specified the number of results returned
+          * 'PageSize' specifies the number of results returned
           * 'Cursor' is returned by previous calls and specifies what page to return
       required: false
       schema:
         type: object
-        required: 
-          - PageSize
         properties:
           PageSize: 
             type: integer 
