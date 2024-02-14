@@ -17,7 +17,6 @@ package assembler
 
 import (
 	"context"
-	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
@@ -196,19 +195,19 @@ type CertifyLegalIngest struct {
 	CertifyLegal *generated.CertifyLegalInputSpec `json:"certifyLegal,omitempty"`
 }
 
-func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInputSpec {
-	packageMap := make(map[string]*generated.PkgInputSpec)
+func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated.IDorPkgInput {
+	packageMap := make(map[string]*generated.IDorPkgInput)
 	for _, dep := range i.IsDependency {
 		if dep.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(dep.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = dep.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: dep.Pkg}
 			}
 		}
 		if dep.DepPkg != nil {
 			depPkgPurl := helpers.PkgInputSpecToPurl(dep.DepPkg)
 			if _, ok := packageMap[depPkgPurl]; !ok {
-				packageMap[depPkgPurl] = dep.DepPkg
+				packageMap[depPkgPurl] = &generated.IDorPkgInput{PackageInput: dep.DepPkg}
 			}
 		}
 	}
@@ -216,7 +215,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if occur.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(occur.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = occur.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: occur.Pkg}
 			}
 		}
 	}
@@ -224,7 +223,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if vuln.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(vuln.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = vuln.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: vuln.Pkg}
 			}
 		}
 	}
@@ -232,7 +231,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if hasSource.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(hasSource.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = hasSource.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: hasSource.Pkg}
 			}
 		}
 	}
@@ -240,7 +239,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if bad.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(bad.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = bad.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: bad.Pkg}
 			}
 		}
 	}
@@ -248,7 +247,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if good.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(good.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = good.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: good.Pkg}
 			}
 		}
 	}
@@ -256,7 +255,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if sbom.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(sbom.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = sbom.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: sbom.Pkg}
 			}
 		}
 	}
@@ -264,7 +263,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if v.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(v.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = v.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: v.Pkg}
 			}
 		}
 	}
@@ -272,7 +271,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if poc.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(poc.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = poc.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: poc.Pkg}
 			}
 		}
 	}
@@ -280,7 +279,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if hm.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(hm.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = hm.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: hm.Pkg}
 			}
 		}
 	}
@@ -288,13 +287,13 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if equal.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(equal.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = equal.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: equal.Pkg}
 			}
 		}
 		if equal.EqualPkg != nil {
 			equalPkgPurl := helpers.PkgInputSpecToPurl(equal.EqualPkg)
 			if _, ok := packageMap[equalPkgPurl]; !ok {
-				packageMap[equalPkgPurl] = equal.EqualPkg
+				packageMap[equalPkgPurl] = &generated.IDorPkgInput{PackageInput: equal.EqualPkg}
 			}
 		}
 	}
@@ -302,228 +301,207 @@ func (i IngestPredicates) GetPackages(ctx context.Context) []*generated.PkgInput
 		if cl.Pkg != nil {
 			pkgPurl := helpers.PkgInputSpecToPurl(cl.Pkg)
 			if _, ok := packageMap[pkgPurl]; !ok {
-				packageMap[pkgPurl] = cl.Pkg
+				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: cl.Pkg}
 			}
 		}
 	}
-	packages := make([]*generated.PkgInputSpec, 0, len(packageMap))
 
-	for _, pkg := range packageMap {
-		packages = append(packages, pkg)
-	}
-	return packages
+	return packageMap
 }
 
-func (i IngestPredicates) GetSources(ctx context.Context) []*generated.SourceInputSpec {
-	sourceMap := make(map[string]*generated.SourceInputSpec)
+func (i IngestPredicates) GetSources(ctx context.Context) map[string]*generated.IDorSourceInput {
+	sourceMap := make(map[string]*generated.IDorSourceInput)
 	for _, score := range i.CertifyScorecard {
 		if score.Source != nil {
-			sourceString := concatenateSourceInput(score.Source)
+			sourceString := helpers.ConcatenateSourceInput(score.Source)
 			if _, ok := sourceMap[sourceString]; !ok {
-				sourceMap[sourceString] = score.Source
+				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: score.Source}
 			}
 		}
 	}
 	for _, occur := range i.IsOccurrence {
 		if occur.Src != nil {
-			sourceString := concatenateSourceInput(occur.Src)
+			sourceString := helpers.ConcatenateSourceInput(occur.Src)
 			if _, ok := sourceMap[sourceString]; !ok {
-				sourceMap[sourceString] = occur.Src
+				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: occur.Src}
 			}
 		}
 	}
 	for _, hasSource := range i.HasSourceAt {
 		if hasSource.Src != nil {
-			sourceString := concatenateSourceInput(hasSource.Src)
+			sourceString := helpers.ConcatenateSourceInput(hasSource.Src)
 			if _, ok := sourceMap[sourceString]; !ok {
-				sourceMap[sourceString] = hasSource.Src
+				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: hasSource.Src}
 			}
 		}
 	}
 	for _, bad := range i.CertifyBad {
 		if bad.Src != nil {
-			sourceString := concatenateSourceInput(bad.Src)
+			sourceString := helpers.ConcatenateSourceInput(bad.Src)
 			if _, ok := sourceMap[sourceString]; !ok {
-				sourceMap[sourceString] = bad.Src
+				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: bad.Src}
 			}
 		}
 	}
 	for _, good := range i.CertifyGood {
 		if good.Src != nil {
-			sourceString := concatenateSourceInput(good.Src)
+			sourceString := helpers.ConcatenateSourceInput(good.Src)
 			if _, ok := sourceMap[sourceString]; !ok {
-				sourceMap[sourceString] = good.Src
+				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: good.Src}
 			}
 		}
 	}
 	for _, poc := range i.PointOfContact {
 		if poc.Src != nil {
-			sourceString := concatenateSourceInput(poc.Src)
+			sourceString := helpers.ConcatenateSourceInput(poc.Src)
 			if _, ok := sourceMap[sourceString]; !ok {
-				sourceMap[sourceString] = poc.Src
+				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: poc.Src}
 			}
 		}
 	}
 	for _, hm := range i.HasMetadata {
 		if hm.Src != nil {
-			sourceString := concatenateSourceInput(hm.Src)
+			sourceString := helpers.ConcatenateSourceInput(hm.Src)
 			if _, ok := sourceMap[sourceString]; !ok {
-				sourceMap[sourceString] = hm.Src
+				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: hm.Src}
 			}
 		}
 	}
 	for _, cl := range i.CertifyLegal {
 		if cl.Src != nil {
-			sourceString := concatenateSourceInput(cl.Src)
+			sourceString := helpers.ConcatenateSourceInput(cl.Src)
 			if _, ok := sourceMap[sourceString]; !ok {
-				sourceMap[sourceString] = cl.Src
+				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: cl.Src}
 			}
 		}
 	}
-	sources := make([]*generated.SourceInputSpec, 0, len(sourceMap))
 
-	for _, source := range sourceMap {
-		sources = append(sources, source)
-	}
-	return sources
+	return sourceMap
 }
 
-func (i IngestPredicates) GetArtifacts(ctx context.Context) []*generated.ArtifactInputSpec {
-	artifactMap := make(map[string]*generated.ArtifactInputSpec)
+func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generated.IDorArtifactInput {
+	artifactMap := make(map[string]*generated.IDorArtifactInput)
 	for _, occur := range i.IsOccurrence {
 		if occur.Artifact != nil {
-			artifactString := occur.Artifact.Algorithm + ":" + occur.Artifact.Digest
+			artifactString := helpers.ArtifactKey(occur.Artifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = occur.Artifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: occur.Artifact}
 			}
 		}
 	}
 	for _, slsa := range i.HasSlsa {
 		if slsa.Artifact != nil {
-			artifactString := slsa.Artifact.Algorithm + ":" + slsa.Artifact.Digest
+			artifactString := helpers.ArtifactKey(slsa.Artifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = slsa.Artifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: slsa.Artifact}
 			}
 		}
 	}
 	for _, sbom := range i.HasSBOM {
 		if sbom.Artifact != nil {
-			artifactString := sbom.Artifact.Algorithm + ":" + sbom.Artifact.Digest
+			artifactString := helpers.ArtifactKey(sbom.Artifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = sbom.Artifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: sbom.Artifact}
 			}
 		}
 	}
 	for _, bad := range i.CertifyBad {
 		if bad.Artifact != nil {
-			artifactString := bad.Artifact.Algorithm + ":" + bad.Artifact.Digest
+			artifactString := helpers.ArtifactKey(bad.Artifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = bad.Artifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: bad.Artifact}
 			}
 		}
 	}
 	for _, good := range i.CertifyGood {
 		if good.Artifact != nil {
-			artifactString := good.Artifact.Algorithm + ":" + good.Artifact.Digest
+			artifactString := helpers.ArtifactKey(good.Artifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = good.Artifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: good.Artifact}
 			}
 		}
 	}
 	for _, v := range i.Vex {
 		if v.Artifact != nil {
-			artifactString := v.Artifact.Algorithm + ":" + v.Artifact.Digest
+			artifactString := helpers.ArtifactKey(v.Artifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = v.Artifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: v.Artifact}
 			}
 		}
 	}
 	for _, poc := range i.PointOfContact {
 		if poc.Artifact != nil {
-			artifactString := poc.Artifact.Algorithm + ":" + poc.Artifact.Digest
+			artifactString := helpers.ArtifactKey(poc.Artifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = poc.Artifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: poc.Artifact}
 			}
 		}
 	}
 	for _, hm := range i.HasMetadata {
 		if hm.Artifact != nil {
-			artifactString := hm.Artifact.Algorithm + ":" + hm.Artifact.Digest
+			artifactString := helpers.ArtifactKey(hm.Artifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = hm.Artifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: hm.Artifact}
 			}
 		}
 	}
 	for _, equal := range i.HashEqual {
 		if equal.Artifact != nil {
-			artifactString := equal.Artifact.Algorithm + ":" + equal.Artifact.Digest
+			artifactString := helpers.ArtifactKey(equal.Artifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = equal.Artifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: equal.Artifact}
 			}
 		}
 		if equal.EqualArtifact != nil {
-			artifactString := equal.EqualArtifact.Algorithm + ":" + equal.EqualArtifact.Digest
+			artifactString := helpers.ArtifactKey(equal.EqualArtifact)
 			if _, ok := artifactMap[artifactString]; !ok {
-				artifactMap[artifactString] = equal.EqualArtifact
+				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: equal.EqualArtifact}
 			}
 		}
 	}
-	artifacts := make([]*generated.ArtifactInputSpec, 0, len(artifactMap))
 
-	for _, art := range artifactMap {
-		artifacts = append(artifacts, art)
-	}
-	return artifacts
+	return artifactMap
 }
 
-func (i IngestPredicates) GetMaterials(ctx context.Context) []generated.ArtifactInputSpec {
-	materialMap := make(map[string]generated.ArtifactInputSpec)
+func (i IngestPredicates) GetMaterials(ctx context.Context) map[string]*generated.IDorArtifactInput {
+	materialMap := make(map[string]*generated.IDorArtifactInput)
 	for _, slsa := range i.HasSlsa {
 		for _, mat := range slsa.Materials {
 			artifactString := mat.Algorithm + ":" + mat.Digest
 			if _, ok := materialMap[artifactString]; !ok {
-				materialMap[artifactString] = mat
+				materialMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: &mat}
 			}
 		}
 
 	}
-	materials := make([]generated.ArtifactInputSpec, 0, len(materialMap))
 
-	for _, mat := range materialMap {
-		materials = append(materials, mat)
-	}
-	return materials
+	return materialMap
 }
 
-func (i IngestPredicates) GetBuilders(ctx context.Context) []*generated.BuilderInputSpec {
-	builderMap := make(map[string]*generated.BuilderInputSpec)
+func (i IngestPredicates) GetBuilders(ctx context.Context) map[string]*generated.IDorBuilderInput {
+	builderMap := make(map[string]*generated.IDorBuilderInput)
 	for _, slsa := range i.HasSlsa {
 		if slsa.Builder != nil {
 			if _, ok := builderMap[slsa.Builder.Uri]; !ok {
-				builderMap[slsa.Builder.Uri] = slsa.Builder
+				builderMap[slsa.Builder.Uri] = &generated.IDorBuilderInput{BuilderInput: slsa.Builder}
 			}
 		}
 	}
-	builders := make([]*generated.BuilderInputSpec, 0, len(builderMap))
-
-	for _, build := range builderMap {
-		builders = append(builders, build)
-	}
-	return builders
+	return builderMap
 }
 
-func (i IngestPredicates) GetVulnerabilities(ctx context.Context) []*generated.VulnerabilityInputSpec {
-	vulnMap := make(map[string]*generated.VulnerabilityInputSpec)
+func (i IngestPredicates) GetVulnerabilities(ctx context.Context) map[string]*generated.IDorVulnerabilityInput {
+	vulnMap := make(map[string]*generated.IDorVulnerabilityInput)
 	for _, v := range i.CertifyVuln {
 		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
 		if _, ok := vulnMap[equalVURI]; !ok {
-			vulnMap[equalVURI] = v.Vulnerability
+			vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.Vulnerability}
 		}
 	}
 	for _, v := range i.VulnMetadata {
 		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
 		if _, ok := vulnMap[equalVURI]; !ok {
-			vulnMap[equalVURI] = v.Vulnerability
+			vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.Vulnerability}
 		}
 
 	}
@@ -531,70 +509,43 @@ func (i IngestPredicates) GetVulnerabilities(ctx context.Context) []*generated.V
 		if v.Vulnerability != nil {
 			equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
 			if _, ok := vulnMap[equalVURI]; !ok {
-				vulnMap[equalVURI] = v.Vulnerability
+				vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.Vulnerability}
 			}
 		}
 		if v.EqualVulnerability != nil {
 			equalVURI := helpers.VulnInputToVURI(v.EqualVulnerability)
 			if _, ok := vulnMap[equalVURI]; !ok {
-				vulnMap[equalVURI] = v.EqualVulnerability
+				vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.EqualVulnerability}
 			}
 		}
 	}
 	for _, v := range i.Vex {
 		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
 		if _, ok := vulnMap[equalVURI]; !ok {
-			vulnMap[equalVURI] = v.Vulnerability
+			vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.Vulnerability}
 		}
 	}
-	vulns := make([]*generated.VulnerabilityInputSpec, 0, len(vulnMap))
 
-	for _, vuln := range vulnMap {
-		vulns = append(vulns, vuln)
-	}
-	return vulns
+	return vulnMap
 }
 
-func (i IngestPredicates) GetLicenses(ctx context.Context) []generated.LicenseInputSpec {
-	licenseMap := make(map[string]*generated.LicenseInputSpec)
+func (i IngestPredicates) GetLicenses(ctx context.Context) map[string]*generated.IDorLicenseInput {
+	licenseMap := make(map[string]*generated.IDorLicenseInput)
 	for _, cl := range i.CertifyLegal {
 		for i := range cl.Declared {
-			k := licenseKey(&cl.Declared[i])
+			k := helpers.LicenseKey(&cl.Declared[i])
 			if _, ok := licenseMap[k]; !ok {
-				licenseMap[k] = &cl.Declared[i]
+				licenseMap[k] = &generated.IDorLicenseInput{LicenseInput: &cl.Declared[i]}
 			}
 		}
 		for i := range cl.Discovered {
-			k := licenseKey(&cl.Discovered[i])
+			k := helpers.LicenseKey(&cl.Discovered[i])
 			if _, ok := licenseMap[k]; !ok {
-				licenseMap[k] = &cl.Discovered[i]
+				licenseMap[k] = &generated.IDorLicenseInput{LicenseInput: &cl.Discovered[i]}
 			}
 		}
 	}
-	licenses := make([]generated.LicenseInputSpec, 0, len(licenseMap))
-	for _, license := range licenseMap {
-		licenses = append(licenses, *license)
-	}
-	return licenses
-}
-
-func concatenateSourceInput(source *generated.SourceInputSpec) string {
-	var sourceElements []string
-	sourceElements = append(sourceElements, source.Type, source.Namespace, source.Name)
-	if source.Tag != nil {
-		sourceElements = append(sourceElements, *source.Tag)
-	}
-	if source.Commit != nil {
-		sourceElements = append(sourceElements, *source.Commit)
-	}
-	return strings.Join(sourceElements, "/")
-}
-
-func licenseKey(l *generated.LicenseInputSpec) string {
-	if l.ListVersion != nil && *l.ListVersion != "" {
-		return strings.Join([]string{l.Name, *l.ListVersion}, ":")
-	}
-	return l.Name
+	return licenseMap
 }
 
 // AssemblerInput represents the inputs to add to the graph

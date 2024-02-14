@@ -81,13 +81,13 @@ func TestIngestPredicates(t *testing.T) {
 	tests := []struct {
 		name          string
 		field         IngestPredicates
-		wantPkg       []*generated.PkgInputSpec
-		wantSource    []*generated.SourceInputSpec
-		wantArtifact  []*generated.ArtifactInputSpec
-		wantMaterials []generated.ArtifactInputSpec
-		wantBuilder   []*generated.BuilderInputSpec
-		wantVuln      []*generated.VulnerabilityInputSpec
-		wantLicense   []generated.LicenseInputSpec
+		wantPkg       map[string]*generated.IDorPkgInput
+		wantSource    map[string]*generated.IDorSourceInput
+		wantArtifact  map[string]*generated.IDorArtifactInput
+		wantMaterials map[string]*generated.IDorArtifactInput
+		wantBuilder   map[string]*generated.IDorBuilderInput
+		wantVuln      map[string]*generated.IDorVulnerabilityInput
+		wantLicense   map[string]*generated.IDorLicenseInput
 	}{{
 		name: "get nouns",
 		field: IngestPredicates{
@@ -686,124 +686,77 @@ func TestIngestPredicates(t *testing.T) {
 				},
 			},
 		},
-		wantPkg:    []*generated.PkgInputSpec{rootFilePack, maven, openSSL, openSSLWithQualifier, topLevelPack, baselayoutPack, baselayoutdataPack, worldFilePack},
-		wantSource: []*generated.SourceInputSpec{k8sSource},
-		wantArtifact: []*generated.ArtifactInputSpec{
-			{
-				Algorithm: "sha256",
-				Digest:    "1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
-			},
-			{
-				Algorithm: "sha256",
-				Digest:    "575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
-			},
-			{
-				Algorithm: "sha256",
-				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
-			},
-			{
-				Algorithm: "sha256",
-				Digest:    "713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201",
-			},
-			{
+		wantPkg: map[string]*generated.IDorPkgInput{
+			"pkg:alpine/alpine-baselayout-data@3.2.0-r22?arch=x86_64&distro=alpine-3.16.2&upstream=alpine-baselayout": {PackageInput: baselayoutdataPack},
+			"pkg:alpine/alpine-baselayout@3.2.0-r22?arch=x86_64&distro=alpine-3.16.2&upstream=alpine-baselayout":      {PackageInput: baselayoutPack},
+			"pkg:conan/openssl.org/openssl2@3.0.3":                                                                                       {PackageInput: openSSL},
+			"pkg:conan/openssl.org/openssl@3.0.3?channel=stable&user=bincrafters":                                                        {PackageInput: openSSLWithQualifier},
+			"pkg:guac/files/sha256%3A575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3?filename=%2Fetc%2Fcrontabs%2Froot": {PackageInput: rootFilePack},
+			"pkg:guac/files/sha256%3A713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201?filename=%2Fetc%2Fapk%2Fworld":     {PackageInput: worldFilePack},
+			"pkg:guac/spdx/gcr.io/google-containers/alpine-latest":                                                                       {PackageInput: topLevelPack},
+			"pkg:maven/org.apache.logging.log4j/log4j-core@2.8.1":                                                                        {PackageInput: maven}},
+		wantSource: map[string]*generated.IDorSourceInput{
+			"git/github.com/kubernetes/kubernetes/5835544ca568b757a8ecae5c153f317e5736700e": {SourceInput: k8sSource}},
+		wantArtifact: map[string]*generated.IDorArtifactInput{
+			"sha1:7A8F47318E4676DACB0142AFA0B83029CD7BEFD9": {ArtifactInput: &generated.ArtifactInputSpec{
 				Algorithm: "sha1",
 				Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
-			},
-			{
+			}},
+			"sha256:1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4": {ArtifactInput: &generated.ArtifactInputSpec{
+				Algorithm: "sha256",
+				Digest:    "1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+			}},
+			"sha256:575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3": {ArtifactInput: &generated.ArtifactInputSpec{
+				Algorithm: "sha256",
+				Digest:    "575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
+			}},
+			"sha256:6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf": {ArtifactInput: &generated.ArtifactInputSpec{
+				Algorithm: "sha256",
+				Digest:    "6bbb0da1891646e58eb3e6a63af3a6fc3c8eb5a0d44824cba581d2e14a0450cf",
+			}},
+			"sha256:713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201": {ArtifactInput: &generated.ArtifactInputSpec{
+				Algorithm: "sha256",
+				Digest:    "713e3907167dce202d7c16034831af3d670191382a3e9026e0ac0a4023013201",
+			}},
+
+			"sha256:fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4": {ArtifactInput: &generated.ArtifactInputSpec{
 				Algorithm: "sha256",
 				Digest:    "fe4fe40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
-			},
+			}},
 		},
-		wantMaterials: []generated.ArtifactInputSpec{
-			{
+		wantMaterials: map[string]*generated.IDorArtifactInput{
+			"gitCommit:c27d339ee6075c1f744c5d4b200f7901aad2c369": {ArtifactInput: &generated.ArtifactInputSpec{
 				Algorithm: "gitCommit",
 				Digest:    "c27d339ee6075c1f744c5d4b200f7901aad2c369",
-			},
+			}},
 		},
-		wantBuilder: []*generated.BuilderInputSpec{
-			{
+		wantBuilder: map[string]*generated.IDorBuilderInput{
+			"https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1": {BuilderInput: &generated.BuilderInputSpec{
 				Uri: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v0.0.1",
-			},
+			}},
 		},
-		wantVuln: []*generated.VulnerabilityInputSpec{
-			{
-				Type:            "osv",
-				VulnerabilityID: "cve-2018-15710",
-			},
-			{
-				Type:            "osv",
-				VulnerabilityID: "cve-2023-1944",
-			},
-			{
-				Type:            "osv",
-				VulnerabilityID: "ghsa-7rjr-3q55-vv33",
-			},
-			{
-				Type:            "osv",
-				VulnerabilityID: "ghsa-8489-44mv-ggj8",
-			},
-			{
-				Type:            "osv",
-				VulnerabilityID: "ghsa-fxph-q3j8-mv87",
-			},
-			{
-				Type:            "osv",
-				VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
-			},
-			{
-				Type:            "osv",
-				VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
-			},
-			{
-				Type:            "osv",
-				VulnerabilityID: "ghsa-vwqq-5vrc-xw9h",
-			},
-			{
-				Type:            "cve",
-				VulnerabilityID: "cve-2018-43610",
-			},
-			{
-				Type:            "cve",
-				VulnerabilityID: "cve-2023-1944",
-			},
-			{
-				Type:            "ghsa",
-				VulnerabilityID: "ghsa-7rjr-3q55-vv33",
-			},
-			{
-				Type:            "ghsa",
-				VulnerabilityID: "ghsa-8489-44mv-ggj8",
-			},
-			{
-				Type:            "ghsa",
-				VulnerabilityID: "ghsa-fxph-q3j8-mv87",
-			},
-			{
-				Type:            "ghsa",
-				VulnerabilityID: "ghsa-h45f-rjvw-2rv2",
-			},
-			{
-				Type:            "ghsa",
-				VulnerabilityID: "ghsa-jfh8-c2jp-5v3q",
-			},
-			{
-				Type:            "ghsa",
-				VulnerabilityID: "ghsa-p6xc-xr62-6r2g",
-			},
+		wantVuln: map[string]*generated.IDorVulnerabilityInput{
+			"vuln://cve/cve-2018-43610":       {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2018-43610"}},
+			"vuln://cve/cve-2023-1944":        {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2023-1944"}},
+			"vuln://ghsa/ghsa-7rjr-3q55-vv33": {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "ghsa", VulnerabilityID: "ghsa-7rjr-3q55-vv33"}},
+			"vuln://ghsa/ghsa-8489-44mv-ggj8": {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "ghsa", VulnerabilityID: "ghsa-8489-44mv-ggj8"}},
+			"vuln://ghsa/ghsa-fxph-q3j8-mv87": {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "ghsa", VulnerabilityID: "ghsa-fxph-q3j8-mv87"}},
+			"vuln://ghsa/ghsa-h45f-rjvw-2rv2": {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "ghsa", VulnerabilityID: "ghsa-h45f-rjvw-2rv2"}},
+			"vuln://ghsa/ghsa-jfh8-c2jp-5v3q": {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "ghsa", VulnerabilityID: "ghsa-jfh8-c2jp-5v3q"}},
+			"vuln://ghsa/ghsa-p6xc-xr62-6r2g": {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "ghsa", VulnerabilityID: "ghsa-p6xc-xr62-6r2g"}},
+			"vuln://osv/cve-2018-15710":       {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "osv", VulnerabilityID: "cve-2018-15710"}},
+			"vuln://osv/cve-2023-1944":        {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "osv", VulnerabilityID: "cve-2023-1944"}},
+			"vuln://osv/ghsa-7rjr-3q55-vv33":  {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "osv", VulnerabilityID: "ghsa-7rjr-3q55-vv33"}},
+			"vuln://osv/ghsa-8489-44mv-ggj8":  {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "osv", VulnerabilityID: "ghsa-8489-44mv-ggj8"}},
+			"vuln://osv/ghsa-fxph-q3j8-mv87":  {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "osv", VulnerabilityID: "ghsa-fxph-q3j8-mv87"}},
+			"vuln://osv/ghsa-jfh8-c2jp-5v3q":  {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "osv", VulnerabilityID: "ghsa-jfh8-c2jp-5v3q"}},
+			"vuln://osv/ghsa-p6xc-xr62-6r2g":  {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "osv", VulnerabilityID: "ghsa-p6xc-xr62-6r2g"}},
+			"vuln://osv/ghsa-vwqq-5vrc-xw9h":  {VulnerabilityInput: &generated.VulnerabilityInputSpec{Type: "osv", VulnerabilityID: "ghsa-vwqq-5vrc-xw9h"}},
 		},
-		wantLicense: []generated.LicenseInputSpec{
-			{
-				Name:        "qwer",
-				ListVersion: ptrfrom.String("1.2.3"),
-			},
-			{
-				Name:        "asdf",
-				ListVersion: ptrfrom.String("1.2.3"),
-			},
-			{
-				Name:   "LicenseRef-123",
-				Inline: ptrfrom.String("This is the license text."),
-			},
+		wantLicense: map[string]*generated.IDorLicenseInput{
+			"LicenseRef-123": {LicenseInput: &generated.LicenseInputSpec{Name: "LicenseRef-123", Inline: ptrfrom.String("This is the license text.")}},
+			"asdf:1.2.3":     {LicenseInput: &generated.LicenseInputSpec{Name: "asdf", ListVersion: ptrfrom.String("1.2.3")}},
+			"qwer:1.2.3":     {LicenseInput: &generated.LicenseInputSpec{Name: "qwer", ListVersion: ptrfrom.String("1.2.3")}},
 		},
 	}}
 	for _, tt := range tests {

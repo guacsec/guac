@@ -269,7 +269,7 @@ require (
 	deps.dev/api/v3alpha v0.0.0-20240109042716-00b51ef52ece
 	entgo.io/contrib v0.4.5
 	entgo.io/ent v0.13.0
-	github.com/99designs/gqlgen v0.17.41
+	github.com/99designs/gqlgen v0.17.43
 	github.com/CycloneDX/cyclonedx-go v0.8.0
 	github.com/Khan/genqlient v0.6.0
 	github.com/Masterminds/semver v1.5.0
@@ -319,7 +319,7 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.8.4
 	github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb
-	github.com/vektah/gqlparser/v2 v2.5.10
+	github.com/vektah/gqlparser/v2 v2.5.11
 	gocloud.dev v0.36.0
 	gocloud.dev/pubsub/kafkapubsub v0.36.0
 	gocloud.dev/pubsub/rabbitpubsub v0.36.0

@@ -29,8 +29,7 @@ func worker(ctx context.Context, input reflect.Value, start, end int, keyName, v
 		item := input.Index(i)
 		item, isStruct := isStructOrPointerToStruct(item)
 		found := fieldMatchesRecursive(item, keyName, value, operation)
-		
-		
+
 		if isStruct && found {
 			resultChan <- item
 		}
@@ -45,7 +44,7 @@ func fieldMatchesRecursive(item reflect.Value, keyName, value string, operation 
 	for i := 0; i < item.NumField(); i++ {
 		field := item.Field(i)
 		fieldName := item.Type().Field(i).Name
-		
+
 		if isStructPtrField(field) && strings.EqualFold(fieldName, keys[0]) {
 			found = handleStructPtrField(field, keys, value, operation)
 
@@ -57,7 +56,7 @@ func fieldMatchesRecursive(item reflect.Value, keyName, value string, operation 
 			} else {
 				found = false
 			}
-            
+
 		} else if isMatchingField(fieldName, keys) {
 			found = handleMatchingField(field, keys, value, operation)
 		}
@@ -110,7 +109,7 @@ func handleMatchingField(field reflect.Value, keys []string, value string, opera
 			if strings.HasPrefix(lowercaseFieldValue, lowercaseInputValue) {
 				return true
 			}
-		} 
+		}
 	}
 
 	return false
@@ -119,7 +118,7 @@ func handleMatchingField(field reflect.Value, keys []string, value string, opera
 func isStructOrPointerToStruct(v reflect.Value) (reflect.Value, bool) {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
-	} 
+	}
 
 	return v, v.Kind() == reflect.Struct
 }
@@ -145,7 +144,7 @@ func Filter(ctx context.Context, obj interface{}, next graphql.Resolver, keyName
 	if err != nil {
 		return nil, err
 	}
-	
+
 	v := reflect.ValueOf(result)
 	if v.Kind() == reflect.Slice && v.Len() > 0 {
 		modelType := v.Index(0).Type().Elem()

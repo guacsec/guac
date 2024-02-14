@@ -34,7 +34,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 			packages := p.GetPackages(ctx)
 			logger.Infof("assembling Package: %v", len(packages))
 			for _, v := range packages {
-				if id, err := ingestPackage(ctx, gqlclient, &model.IDorPkgInputSpec{Pkg: v}); err != nil {
+				if id, err := ingestPackage(ctx, gqlclient, &model.IDorPkgInput{Pkg: v}); err != nil {
 					return err
 				} else {
 					packageAndArtifactIDs = append(packageAndArtifactIDs, *id)
