@@ -67,6 +67,14 @@ func (siw *ServerInterfaceWrapper) AnalyzeDependencies(w http.ResponseWriter, r 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params AnalyzeDependenciesParams
 
+	// ------------- Optional query parameter "PaginationSpec" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "PaginationSpec", r.URL.Query(), &params.PaginationSpec)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "PaginationSpec", Err: err})
+		return
+	}
+
 	// ------------- Required query parameter "sort" -------------
 
 	if paramValue := r.URL.Query().Get("sort"); paramValue != "" {
@@ -116,6 +124,14 @@ func (siw *ServerInterfaceWrapper) RetrieveDependencies(w http.ResponseWriter, r
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params RetrieveDependenciesParams
+
+	// ------------- Optional query parameter "PaginationSpec" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "PaginationSpec", r.URL.Query(), &params.PaginationSpec)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "PaginationSpec", Err: err})
+		return
+	}
 
 	// ------------- Required query parameter "purl" -------------
 
@@ -275,7 +291,10 @@ type BadRequestJSONResponse Error
 
 type InternalServerErrorJSONResponse Error
 
-type PurlListJSONResponse []Purl
+type PurlListJSONResponse struct {
+	PaginationInfo PaginationInfo `json:"PaginationInfo"`
+	PurlList       []Purl         `json:"PurlList"`
+}
 
 type AnalyzeDependenciesRequestObject struct {
 	Params AnalyzeDependenciesParams

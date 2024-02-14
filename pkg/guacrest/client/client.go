@@ -156,6 +156,22 @@ func NewAnalyzeDependenciesRequest(server string, params *AnalyzeDependenciesPar
 	if params != nil {
 		queryValues := queryURL.Query()
 
+		if params.PaginationSpec != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "PaginationSpec", runtime.ParamLocationQuery, *params.PaginationSpec); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort", runtime.ParamLocationQuery, params.Sort); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
@@ -227,6 +243,22 @@ func NewRetrieveDependenciesRequest(server string, params *RetrieveDependenciesP
 
 	if params != nil {
 		queryValues := queryURL.Query()
+
+		if params.PaginationSpec != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "PaginationSpec", runtime.ParamLocationQuery, *params.PaginationSpec); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
 
 		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "purl", runtime.ParamLocationQuery, params.Purl); err != nil {
 			return nil, err

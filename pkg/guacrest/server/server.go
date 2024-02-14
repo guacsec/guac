@@ -18,6 +18,7 @@ package server
 import (
 	"context"
 	"fmt"
+
 	"github.com/Khan/genqlient/graphql"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 )
@@ -36,15 +37,9 @@ func (s *DefaultServer) HealthCheck(ctx context.Context, request gen.HealthCheck
 }
 
 func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.AnalyzeDependenciesRequestObject) (gen.AnalyzeDependenciesResponseObject, error) {
-	//return gen.AnalyzeDependencies200JSONResponse{
-	//  PurlListJSONResponse: []gen.Purl{},
-	//}, nil
 	return nil, fmt.Errorf("Unimplemented")
 }
 
 func (s *DefaultServer) RetrieveDependencies(ctx context.Context, request gen.RetrieveDependenciesRequestObject) (gen.RetrieveDependenciesResponseObject, error) {
-	//return gen.RetrieveDependencies200JSONResponse{
-	//  PurlListJSONResponse: []string{},
-	//}, nil
 	return nil, fmt.Errorf("Unimplemented")
 }
