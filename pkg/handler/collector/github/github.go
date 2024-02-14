@@ -18,7 +18,6 @@ package github
 import (
 	"context"
 	"fmt"
-	"github.com/guacsec/guac/pkg/handler/processor/guesser"
 	"net/url"
 	"strings"
 	"time"
@@ -329,15 +328,6 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 					Collector: GithubCollector,
 					Source:    artifact.Name,
 				},
-			}
-
-			// guess the document type and format because it is automatically set to unknown
-			documentType, documentFormat, err := guesser.GuessDocument(ctx, doc)
-			if err != nil {
-				logger.Warnf("unable to guess document type and format: %v", err)
-			} else {
-				doc.Type = documentType
-				doc.Format = documentFormat
 			}
 
 			docChannel <- doc
