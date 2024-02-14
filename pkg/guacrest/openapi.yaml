@@ -1,0 +1,120 @@
+#
+#  Copyright 2024 The GUAC Authors.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+openapi: "3.0.0"
+paths:
+  # the query endpoints are for simple queries of the graph
+  # the analysis endpoints are for more advanced questions
+  "/healthz":
+    get:
+      summary: Health check the server
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Indicates the server is healthy
+          content:
+            application/json:
+              schema:
+                type: string
+  "/query/dependencies":
+    get:
+      summary: Retrieve the dependencies of a package
+      operationId: retrieveDependencies
+      parameters:
+        - name: purl
+          description: the purl of the dependent package
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/PurlList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+  "/analysis/dependencies":
+    get:
+      summary: Identify the most important dependencies
+      operationId: analyzeDependencies 
+      parameters:
+        - name: sort
+          description: >
+            The sort order of the packages
+              * 'frequency' - The packages with the highest number of dependents
+              * 'scorecard' - The packages with the lowest OpenSSF scorecard score
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - frequency
+              - scorecard
+      responses:
+        "200":
+          $ref: "#/components/responses/PurlList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+
+
+components:
+  schemas:
+    Purl:
+      type: string
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+  responses:
+    # intended for code 200
+    PurlList:
+      description: A list of purls
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Purl"
+    # intended for code 400, client side error
+    BadRequest:
+      description: Bad request, such as from invalid or missing parameters
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    # intended for code 500
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    # intended for code 502
+    BadGateway:
+      description: The server encountered an error connecting to the data backend
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
