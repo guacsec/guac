@@ -99,7 +99,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			vulns := p.GetVulnerabilities(ctx)
 			logger.Infof("assembling Vulnerability: %v", len(vulns))
 
-			collectedIdorVulnInputs, err := ingestVulnerabilities(ctx, gqlclient, vulns)
+			collectedIDorVulnInputs, err := ingestVulnerabilities(ctx, gqlclient, vulns)
 			if err != nil {
 				return fmt.Errorf("ingestVulnerabilities failed with error: %v", err)
 			}
@@ -108,7 +108,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			licenses := p.GetLicenses(ctx)
 			logger.Infof("assembling Licenses: %v", len(licenses))
 
-			collectedIdorLicenseInputs, err := ingestLicenses(ctx, gqlclient, licenses)
+			collectedIDorLicenseInputs, err := ingestLicenses(ctx, gqlclient, licenses)
 			if err != nil {
 				return fmt.Errorf("ingestLicenses failed with error: %v", err)
 			}
@@ -140,17 +140,17 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 
 			logger.Infof("assembling CertifyVuln: %v", len(p.CertifyVuln))
-			if err := ingestCertifyVulns(ctx, gqlclient, p.CertifyVuln, collectedIDorPkgInputs, collectedIdorVulnInputs); err != nil {
+			if err := ingestCertifyVulns(ctx, gqlclient, p.CertifyVuln, collectedIDorPkgInputs, collectedIDorVulnInputs); err != nil {
 				logger.Errorf("ingestCertifyVulns failed with error: %v", err)
 			}
 
 			logger.Infof("assembling VulnMetadata: %v", len(p.VulnMetadata))
-			if err := ingestVulnMetadatas(ctx, gqlclient, p.VulnMetadata, collectedIdorVulnInputs); err != nil {
+			if err := ingestVulnMetadatas(ctx, gqlclient, p.VulnMetadata, collectedIDorVulnInputs); err != nil {
 				logger.Errorf("ingestVulnMetadatas failed with error: %v", err)
 			}
 
 			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
-			if err := ingestVulnEquals(ctx, gqlclient, p.VulnEqual, collectedIdorVulnInputs); err != nil {
+			if err := ingestVulnEquals(ctx, gqlclient, p.VulnEqual, collectedIDorVulnInputs); err != nil {
 				logger.Errorf("ingestVulnEquals failed with error: %v", err)
 
 			}
@@ -192,7 +192,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 
 			logger.Infof("assembling VEX : %v", len(p.Vex))
-			if err := ingestVEXs(ctx, gqlclient, p.Vex, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIdorVulnInputs); err != nil {
+			if err := ingestVEXs(ctx, gqlclient, p.Vex, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIDorVulnInputs); err != nil {
 				logger.Errorf("ingestVEXs failed with error: %v", err)
 			}
 
@@ -207,7 +207,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 
 			logger.Infof("assembling CertifyLegal : %v", len(p.CertifyLegal))
-			if err := ingestCertifyLegals(ctx, gqlclient, p.CertifyLegal, collectedIDorPkgInputs, collectedIDorSrcInputs, collectedIdorLicenseInputs); err != nil {
+			if err := ingestCertifyLegals(ctx, gqlclient, p.CertifyLegal, collectedIDorPkgInputs, collectedIDorSrcInputs, collectedIDorLicenseInputs); err != nil {
 				logger.Errorf("ingestCertifyLegals failed with error: %v", err)
 			}
 		}
@@ -227,8 +227,8 @@ func ingestPackages(ctx context.Context, client graphql.Client, packageInputMap 
 	if err != nil {
 		return nil, fmt.Errorf("IngestPackages failed with error: %w", err)
 	}
-	var results map[string]*model.IDorPkgInput
-	results = make(map[string]*model.IDorPkgInput, 0)
+
+	results := make(map[string]*model.IDorPkgInput)
 
 	for i := range response.IngestPackages {
 		pkgIDs := response.IngestPackages[i]
@@ -254,8 +254,7 @@ func ingestSources(ctx context.Context, client graphql.Client, sourceInputMap ma
 	if err != nil {
 		return nil, fmt.Errorf("IngestSources failed with error: %w", err)
 	}
-	var results map[string]*model.IDorSourceInput
-	results = make(map[string]*model.IDorSourceInput, 0)
+	results := make(map[string]*model.IDorSourceInput)
 
 	for i := range response.IngestSources {
 		srcIDs := response.IngestSources[i]
@@ -280,8 +279,7 @@ func ingestArtifacts(ctx context.Context, client graphql.Client, artInputMap map
 	if err != nil {
 		return nil, fmt.Errorf("IngestArtifacts failed with error: %w", err)
 	}
-	var results map[string]*model.IDorArtifactInput
-	results = make(map[string]*model.IDorArtifactInput, 0)
+	results := make(map[string]*model.IDorArtifactInput)
 
 	for i := range response.IngestArtifacts {
 		artID := response.IngestArtifacts[i]
@@ -304,8 +302,8 @@ func ingestBuilders(ctx context.Context, client graphql.Client, buildInputMap ma
 	if err != nil {
 		return nil, fmt.Errorf("IngestBuilders failed with error: %w", err)
 	}
-	var results map[string]*model.IDorBuilderInput
-	results = make(map[string]*model.IDorBuilderInput, 0)
+
+	results := make(map[string]*model.IDorBuilderInput)
 
 	for i := range response.IngestBuilders {
 		buildID := response.IngestBuilders[i]
@@ -328,8 +326,7 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client, vulnInput
 	if err != nil {
 		return nil, fmt.Errorf("IngestVulnerabilities failed with error: %w", err)
 	}
-	var results map[string]*model.IDorVulnerabilityInput
-	results = make(map[string]*model.IDorVulnerabilityInput, 0)
+	results := make(map[string]*model.IDorVulnerabilityInput)
 
 	for i := range response.IngestVulnerabilities {
 		vulnIDs := response.IngestVulnerabilities[i]
@@ -353,8 +350,7 @@ func ingestLicenses(ctx context.Context, client graphql.Client, licenseInputMap 
 	if err != nil {
 		return nil, fmt.Errorf("IngestLicenses failed with error: %w", err)
 	}
-	var results map[string]*model.IDorLicenseInput
-	results = make(map[string]*model.IDorLicenseInput, 0)
+	results := make(map[string]*model.IDorLicenseInput)
 
 	for i := range response.IngestLicenses {
 		licenseID := response.IngestLicenses[i]
@@ -373,12 +369,12 @@ func ingestCertifyVulns(ctx context.Context, client graphql.Client, cv []assembl
 		if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 			pkgIDs = append(pkgIDs, *pkgID)
 		} else {
-			return fmt.Errorf("failed to find ingested Package ID for certifyVuln: %w", ingest.Pkg)
+			return fmt.Errorf("failed to find ingested Package ID for certifyVuln: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 		}
 		if vulnID, found := vulnInputMap[helpers.VulnInputToVURI(ingest.Vulnerability)]; found {
 			vulnerabilityIDs = append(vulnerabilityIDs, *vulnID)
 		} else {
-			return fmt.Errorf("failed to find ingested vulnerability ID for certifyVuln: %w", ingest.Vulnerability)
+			return fmt.Errorf("failed to find ingested vulnerability ID for certifyVuln: %s", helpers.VulnInputToVURI(ingest.Vulnerability))
 		}
 		scanMetadataList = append(scanMetadataList, *ingest.VulnData)
 	}
@@ -410,24 +406,24 @@ func ingestVEXs(ctx context.Context, client graphql.Client, vi []assembler.VexIn
 			if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 				pkgIDs = append(pkgIDs, *pkgID)
 			} else {
-				return fmt.Errorf("failed to find ingested Package ID for Vex: %w", ingest.Pkg)
+				return fmt.Errorf("failed to find ingested Package ID for Vex: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 			}
 			if vulnID, found := vulnInputMap[helpers.VulnInputToVURI(ingest.Vulnerability)]; found {
 				pkgVulns = append(pkgVulns, *vulnID)
 			} else {
-				return fmt.Errorf("failed to find ingested vulnerability ID for Vex: %w", ingest.Vulnerability)
+				return fmt.Errorf("failed to find ingested vulnerability ID for Vex: %s", helpers.VulnInputToVURI(ingest.Vulnerability))
 			}
 			pkgVEXs = append(pkgVEXs, *ingest.VexData)
 		} else {
 			if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 				artifactIDs = append(artifactIDs, *artID)
 			} else {
-				return fmt.Errorf("failed to find ingested artifact ID for Vex: %w", ingest.Artifact)
+				return fmt.Errorf("failed to find ingested artifact ID for Vex: %s", helpers.ArtifactKey(ingest.Artifact))
 			}
 			if vulnID, found := vulnInputMap[helpers.VulnInputToVURI(ingest.Vulnerability)]; found {
 				artVulns = append(artVulns, *vulnID)
 			} else {
-				return fmt.Errorf("failed to find ingested vulnerability ID for Vex: %w", ingest.Vulnerability)
+				return fmt.Errorf("failed to find ingested vulnerability ID for Vex: %s", helpers.VulnInputToVURI(ingest.Vulnerability))
 			}
 			artVEXs = append(artVEXs, *ingest.VexData)
 		}
@@ -454,7 +450,7 @@ func ingestVulnMetadatas(ctx context.Context, client graphql.Client, vm []assemb
 		if vulnID, found := vulnInputMap[helpers.VulnInputToVURI(ingest.Vulnerability)]; found {
 			vulnIDs = append(vulnIDs, *vulnID)
 		} else {
-			return fmt.Errorf("failed to find ingested vulnerability ID for vulnMetadata: %w", ingest.Vulnerability)
+			return fmt.Errorf("failed to find ingested vulnerability ID for vulnMetadata: %s", helpers.VulnInputToVURI(ingest.Vulnerability))
 		}
 		vulnMetadataList = append(vulnMetadataList, *ingest.VulnMetadata)
 	}
@@ -475,12 +471,12 @@ func ingestVulnEquals(ctx context.Context, client graphql.Client, ve []assembler
 		if vulnID, found := vulnInputMap[helpers.VulnInputToVURI(ingest.Vulnerability)]; found {
 			vulnIDs = append(vulnIDs, *vulnID)
 		} else {
-			return fmt.Errorf("failed to find ingested vulnerability ID for vulnMetadata: %w", ingest.Vulnerability)
+			return fmt.Errorf("failed to find ingested vulnerability ID for vulnMetadata: %s", helpers.VulnInputToVURI(ingest.Vulnerability))
 		}
 		if equalVulnID, found := vulnInputMap[helpers.VulnInputToVURI(ingest.EqualVulnerability)]; found {
 			equalVulnIDs = append(equalVulnIDs, *equalVulnID)
 		} else {
-			return fmt.Errorf("failed to find ingested equal vulnerability ID for vulnMetadata: %w", ingest.EqualVulnerability)
+			return fmt.Errorf("failed to find ingested equal vulnerability ID for vulnMetadata: %s", helpers.VulnInputToVURI(ingest.EqualVulnerability))
 		}
 		vulnEqualList = append(vulnEqualList, *ingest.VulnEqual)
 	}
@@ -505,24 +501,24 @@ func ingestHasSourceAts(ctx context.Context, client graphql.Client, hs []assembl
 			if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 				specificVersionPkgIDs = append(specificVersionPkgIDs, *pkgID)
 			} else {
-				return fmt.Errorf("failed to find ingested Package ID for hasSourceAt: %w", ingest.Pkg)
+				return fmt.Errorf("failed to find ingested Package ID for hasSourceAt: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 			}
 			if srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(ingest.Src)]; found {
 				specificVersionSrcIDs = append(specificVersionSrcIDs, *srcID)
 			} else {
-				return fmt.Errorf("failed to find ingested Source ID for hasSourceAt: %w", ingest.Pkg)
+				return fmt.Errorf("failed to find ingested Source ID for hasSourceAt: %s", helpers.ConcatenateSourceInput(ingest.Src))
 			}
 			pkgVersionHasSourceAt = append(pkgVersionHasSourceAt, *ingest.HasSourceAt)
 		} else {
 			if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 				allVersionPkgIDs = append(allVersionPkgIDs, *pkgID)
 			} else {
-				return fmt.Errorf("failed to find ingested Package ID for hasSourceAt: %w", ingest.Pkg)
+				return fmt.Errorf("failed to find ingested Package ID for hasSourceAt: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 			}
 			if srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(ingest.Src)]; found {
 				allVersionSrcIDs = append(allVersionSrcIDs, *srcID)
 			} else {
-				return fmt.Errorf("failed to find ingested Source ID for hasSourceAt: %w", ingest.Pkg)
+				return fmt.Errorf("failed to find ingested Source ID for hasSourceAt: %s", helpers.ConcatenateSourceInput(ingest.Src))
 			}
 			pkgNameHasSourceAt = append(pkgNameHasSourceAt, *ingest.HasSourceAt)
 		}
@@ -542,7 +538,9 @@ func ingestHasSourceAts(ctx context.Context, client graphql.Client, hs []assembl
 	return nil
 }
 
-func ingestHasSLSAs(ctx context.Context, client graphql.Client, hs []assembler.HasSlsaIngest, artInputMap map[string]*model.IDorArtifactInput, matInputSpec map[string]*model.IDorArtifactInput, builderInputMap map[string]*model.IDorBuilderInput) error {
+func ingestHasSLSAs(ctx context.Context, client graphql.Client, hs []assembler.HasSlsaIngest, artInputMap map[string]*model.IDorArtifactInput,
+	matInputSpec map[string]*model.IDorArtifactInput, builderInputMap map[string]*model.IDorBuilderInput) error {
+
 	var subjectIDs []model.IDorArtifactInput
 	var slsaAttestations []model.SLSAInputSpec
 	var materialIDs [][]model.IDorArtifactInput
@@ -551,19 +549,19 @@ func ingestHasSLSAs(ctx context.Context, client graphql.Client, hs []assembler.H
 		if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 			subjectIDs = append(subjectIDs, *artID)
 		} else {
-			return fmt.Errorf("failed to find ingested artifact ID for hasSLSA: %w", ingest.Artifact)
+			return fmt.Errorf("failed to find ingested artifact ID for hasSLSA: %s", helpers.ArtifactKey(ingest.Artifact))
 		}
 		if buildID, found := builderInputMap[ingest.Builder.Uri]; found {
 			builderIDs = append(builderIDs, *buildID)
 		} else {
-			return fmt.Errorf("failed to find ingested builder ID for hasSLSA: %w", ingest.Builder)
+			return fmt.Errorf("failed to find ingested builder ID for hasSLSA: %s", ingest.Builder.Uri)
 		}
 		var matIDList []model.IDorArtifactInput
 		for _, mat := range ingest.Materials {
-			if matID, found := artInputMap[helpers.ArtifactKey(&mat)]; found {
+			if matID, found := matInputSpec[helpers.ArtifactKey(&mat)]; found {
 				matIDList = append(matIDList, *matID)
 			} else {
-				return fmt.Errorf("failed to find ingested material ID for hasSLSA: %w", mat)
+				return fmt.Errorf("failed to find ingested material ID for hasSLSA: %s", helpers.ArtifactKey(&mat))
 			}
 		}
 		materialIDs = append(materialIDs, matIDList)
@@ -585,7 +583,7 @@ func ingestCertifyScorecards(ctx context.Context, client graphql.Client, cs []as
 		if srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(ingest.Source)]; found {
 			sourceIDs = append(sourceIDs, *srcID)
 		} else {
-			return fmt.Errorf("failed to find ingested Source ID for certifyScorecard: %w", ingest.Source)
+			return fmt.Errorf("failed to find ingested Source ID for certifyScorecard: %s", helpers.ConcatenateSourceInput(ingest.Source))
 		}
 		scorecards = append(scorecards, *ingest.Scorecard)
 	}
@@ -615,24 +613,24 @@ func ingestIsDependencies(ctx context.Context, client graphql.Client, deps []ass
 			if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 				depToSpecificVersion.pkgs = append(depToSpecificVersion.pkgs, *pkgID)
 			} else {
-				return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %w", ingest.Pkg)
+				return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 			}
 			if depPkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.DepPkg)]; found {
 				depToSpecificVersion.depPkgs = append(depToSpecificVersion.depPkgs, *depPkgID)
 			} else {
-				return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %w", ingest.DepPkg)
+				return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %s", helpers.PkgInputSpecToPurl(ingest.DepPkg))
 			}
 			depToSpecificVersion.dependencies = append(depToSpecificVersion.dependencies, *ingest.IsDependency)
 		} else if ingest.DepPkgMatchFlag.Pkg == model.PkgMatchTypeAllVersions {
 			if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 				depToAllVersions.pkgs = append(depToAllVersions.pkgs, *pkgID)
 			} else {
-				return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %w", ingest.Pkg)
+				return nil, fmt.Errorf("failed to find ingested Package ID for isDependency: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 			}
 			if depPkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.DepPkg)]; found {
 				depToAllVersions.depPkgs = append(depToAllVersions.depPkgs, *depPkgID)
 			} else {
-				return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %w", ingest.DepPkg)
+				return nil, fmt.Errorf("failed to find ingested dependency Package ID for isDependency: %s", helpers.PkgInputSpecToPurl(ingest.DepPkg))
 			}
 			depToAllVersions.dependencies = append(depToAllVersions.dependencies, *ingest.IsDependency)
 		}
@@ -665,12 +663,12 @@ func ingestPkgEquals(ctx context.Context, client graphql.Client, pe []assembler.
 		if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 			pkgIDs = append(pkgIDs, *pkgID)
 		} else {
-			return fmt.Errorf("failed to find ingested Package ID for pkgEqual: %w", ingest.Pkg)
+			return fmt.Errorf("failed to find ingested Package ID for pkgEqual: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 		}
 		if equalPkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.EqualPkg)]; found {
 			equalPkgIDs = append(equalPkgIDs, *equalPkgID)
 		} else {
-			return fmt.Errorf("failed to find ingested equal Package ID for pkgEqual: %w", ingest.EqualPkg)
+			return fmt.Errorf("failed to find ingested equal Package ID for pkgEqual: %s", helpers.PkgInputSpecToPurl(ingest.EqualPkg))
 		}
 		pkgEquals = append(pkgEquals, *ingest.PkgEqual)
 	}
@@ -691,12 +689,12 @@ func ingestHashEquals(ctx context.Context, client graphql.Client, he []assembler
 		if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 			artIDs = append(artIDs, *artID)
 		} else {
-			return fmt.Errorf("failed to find ingested artifact ID for hashEqual: %w", ingest.Artifact)
+			return fmt.Errorf("failed to find ingested artifact ID for hashEqual: %s", helpers.ArtifactKey(ingest.Artifact))
 		}
 		if equalArtID, found := artInputMap[helpers.ArtifactKey(ingest.EqualArtifact)]; found {
 			equalArtIDs = append(equalArtIDs, *equalArtID)
 		} else {
-			return fmt.Errorf("failed to find ingested artifact ID for hashEqual: %w", ingest.EqualArtifact)
+			return fmt.Errorf("failed to find ingested artifact ID for hashEqual: %s", helpers.ArtifactKey(ingest.EqualArtifact))
 		}
 		hashEquals = append(hashEquals, *ingest.HashEqual)
 	}
@@ -730,7 +728,7 @@ func ingestHasSBOMs(ctx context.Context, client graphql.Client, hs []assembler.H
 			if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 				pkgIDs = append(pkgIDs, *pkgID)
 			} else {
-				return fmt.Errorf("failed to find ingested Package ID for hasSBOM: %w", ingest.Pkg)
+				return fmt.Errorf("failed to find ingested Package ID for hasSBOM: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 			}
 			pkgSBOMs = append(pkgSBOMs, *ingest.HasSBOM)
 			pkgIncludes = append(pkgIncludes, includes)
@@ -738,7 +736,7 @@ func ingestHasSBOMs(ctx context.Context, client graphql.Client, hs []assembler.H
 			if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 				artIDs = append(artIDs, *artID)
 			} else {
-				return fmt.Errorf("failed to find ingested artifact ID for hasSBOM: %w", ingest.Artifact)
+				return fmt.Errorf("failed to find ingested artifact ID for hasSBOM: %s", helpers.ArtifactKey(ingest.Artifact))
 			}
 			artSBOMs = append(artSBOMs, *ingest.HasSBOM)
 			artIncludes = append(artIncludes, includes)
@@ -779,14 +777,14 @@ func ingestPointOfContacts(ctx context.Context, client graphql.Client, poc []ass
 				if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 					pkgSpecificVersionIDs = append(pkgSpecificVersionIDs, *pkgID)
 				} else {
-					return fmt.Errorf("failed to find ingested Package ID for point of contact: %w", ingest.Pkg)
+					return fmt.Errorf("failed to find ingested Package ID for point of contact: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 				}
 				pkgVersionPOC = append(pkgVersionPOC, *ingest.PointOfContact)
 			} else {
 				if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 					pkgAllVersionsIDs = append(pkgAllVersionsIDs, *pkgID)
 				} else {
-					return fmt.Errorf("failed to find ingested Package ID for point of contact: %w", ingest.Pkg)
+					return fmt.Errorf("failed to find ingested Package ID for point of contact: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 				}
 				pkgNamePOC = append(pkgNamePOC, *ingest.PointOfContact)
 			}
@@ -794,14 +792,14 @@ func ingestPointOfContacts(ctx context.Context, client graphql.Client, poc []ass
 			if srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(ingest.Src)]; found {
 				sourceIDs = append(sourceIDs, *srcID)
 			} else {
-				return fmt.Errorf("failed to find ingested Source ID for point of contact: %w", ingest.Src)
+				return fmt.Errorf("failed to find ingested Source ID for point of contact: %s", helpers.ConcatenateSourceInput(ingest.Src))
 			}
 			srcPOC = append(srcPOC, *ingest.PointOfContact)
 		} else {
 			if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 				artIDs = append(artIDs, *artID)
 			} else {
-				return fmt.Errorf("failed to find ingested artifact ID for point of contact: %w", ingest.Artifact)
+				return fmt.Errorf("failed to find ingested artifact ID for point of contact: %s", helpers.ArtifactKey(ingest.Artifact))
 			}
 			artPOC = append(artPOC, *ingest.PointOfContact)
 		}
@@ -853,14 +851,14 @@ func ingestBulkHasMetadata(ctx context.Context, client graphql.Client, hm []asse
 				if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 					pkgSpecificVersionIDs = append(pkgSpecificVersionIDs, *pkgID)
 				} else {
-					return fmt.Errorf("failed to find ingested Package ID for hasMetadata: %w", ingest.Pkg)
+					return fmt.Errorf("failed to find ingested Package ID for hasMetadata: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 				}
 				pkgVersionHasMetadata = append(pkgVersionHasMetadata, *ingest.HasMetadata)
 			} else {
 				if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 					pkgAllVersionsIDs = append(pkgAllVersionsIDs, *pkgID)
 				} else {
-					return fmt.Errorf("failed to find ingested Package ID for hasMetadata: %w", ingest.Pkg)
+					return fmt.Errorf("failed to find ingested Package ID for hasMetadata: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 				}
 				pkgNameHasMetadata = append(pkgNameHasMetadata, *ingest.HasMetadata)
 			}
@@ -868,14 +866,14 @@ func ingestBulkHasMetadata(ctx context.Context, client graphql.Client, hm []asse
 			if srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(ingest.Src)]; found {
 				sourceIDs = append(sourceIDs, *srcID)
 			} else {
-				return fmt.Errorf("failed to find ingested Source ID for point of contact: %w", ingest.Src)
+				return fmt.Errorf("failed to find ingested Source ID for point of contact: %s", helpers.ConcatenateSourceInput(ingest.Src))
 			}
 			srcHasMetadata = append(srcHasMetadata, *ingest.HasMetadata)
 		} else {
 			if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 				artIDs = append(artIDs, *artID)
 			} else {
-				return fmt.Errorf("failed to find ingested artifact ID for point of contact: %w", ingest.Artifact)
+				return fmt.Errorf("failed to find ingested artifact ID for point of contact: %s", helpers.ArtifactKey(ingest.Artifact))
 			}
 			artHasMetadata = append(artHasMetadata, *ingest.HasMetadata)
 		}
@@ -927,14 +925,14 @@ func ingestCertifyGoods(ctx context.Context, client graphql.Client, cg []assembl
 				if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 					pkgSpecificVersionIDs = append(pkgSpecificVersionIDs, *pkgID)
 				} else {
-					return fmt.Errorf("failed to find ingested Package ID for certifyGood: %w", ingest.Pkg)
+					return fmt.Errorf("failed to find ingested Package ID for certifyGood: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 				}
 				pkgVersionCertifyGoods = append(pkgVersionCertifyGoods, *ingest.CertifyGood)
 			} else {
 				if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 					pkgAllVersionsIDs = append(pkgAllVersionsIDs, *pkgID)
 				} else {
-					return fmt.Errorf("failed to find ingested Package ID for certifyGood: %w", ingest.Pkg)
+					return fmt.Errorf("failed to find ingested Package ID for certifyGood: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 				}
 				pkgNameCertifyGoods = append(pkgNameCertifyGoods, *ingest.CertifyGood)
 			}
@@ -942,14 +940,14 @@ func ingestCertifyGoods(ctx context.Context, client graphql.Client, cg []assembl
 			if srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(ingest.Src)]; found {
 				sourceIDs = append(sourceIDs, *srcID)
 			} else {
-				return fmt.Errorf("failed to find ingested Source ID for certifyGood: %w", ingest.Src)
+				return fmt.Errorf("failed to find ingested Source ID for certifyGood: %s", helpers.ConcatenateSourceInput(ingest.Src))
 			}
 			srcCertifyGoods = append(srcCertifyGoods, *ingest.CertifyGood)
 		} else {
 			if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 				artIDs = append(artIDs, *artID)
 			} else {
-				return fmt.Errorf("failed to find ingested artifact ID for certifyGood: %w", ingest.Artifact)
+				return fmt.Errorf("failed to find ingested artifact ID for certifyGood: %s", helpers.ArtifactKey(ingest.Artifact))
 			}
 			artCertifyGoods = append(artCertifyGoods, *ingest.CertifyGood)
 		}
@@ -1001,14 +999,14 @@ func ingestCertifyBads(ctx context.Context, client graphql.Client, cb []assemble
 				if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 					pkgSpecificVersionIDs = append(pkgSpecificVersionIDs, *pkgID)
 				} else {
-					return fmt.Errorf("failed to find ingested Package ID for certifyBad: %w", ingest.Pkg)
+					return fmt.Errorf("failed to find ingested Package ID for certifyBad: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 				}
 				pkgVersionCertifyBads = append(pkgVersionCertifyBads, *ingest.CertifyBad)
 			} else {
 				if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 					pkgAllVersionsIDs = append(pkgAllVersionsIDs, *pkgID)
 				} else {
-					return fmt.Errorf("failed to find ingested Package ID for certifyBad: %w", ingest.Pkg)
+					return fmt.Errorf("failed to find ingested Package ID for certifyBad: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 				}
 				pkgNameCertifyBads = append(pkgNameCertifyBads, *ingest.CertifyBad)
 			}
@@ -1016,14 +1014,14 @@ func ingestCertifyBads(ctx context.Context, client graphql.Client, cb []assemble
 			if srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(ingest.Src)]; found {
 				sourceIDs = append(sourceIDs, *srcID)
 			} else {
-				return fmt.Errorf("failed to find ingested Source ID for certifyBad: %w", ingest.Src)
+				return fmt.Errorf("failed to find ingested Source ID for certifyBad: %s", helpers.ConcatenateSourceInput(ingest.Src))
 			}
 			srcCertifyBads = append(srcCertifyBads, *ingest.CertifyBad)
 		} else {
 			if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 				artIDs = append(artIDs, *artID)
 			} else {
-				return fmt.Errorf("failed to find ingested artifact ID for certifyBad: %w", ingest.Artifact)
+				return fmt.Errorf("failed to find ingested artifact ID for certifyBad: %s", helpers.ArtifactKey(ingest.Artifact))
 			}
 			artCertifyBads = append(artCertifyBads, *ingest.CertifyBad)
 		}
@@ -1077,24 +1075,24 @@ func ingestIsOccurrences(ctx context.Context, client graphql.Client, io []assemb
 			if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 				pkgIDs = append(pkgIDs, *pkgID)
 			} else {
-				return nil, fmt.Errorf("failed to find ingested Package ID for isOccurrence: %w", ingest.Pkg)
+				return nil, fmt.Errorf("failed to find ingested Package ID for isOccurrence: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 			}
 			if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 				pkgArtIDs = append(pkgArtIDs, *artID)
 			} else {
-				return nil, fmt.Errorf("failed to find ingested artifact ID for isOccurrence: %w", ingest.Artifact)
+				return nil, fmt.Errorf("failed to find ingested artifact ID for isOccurrence: %s", helpers.ArtifactKey(ingest.Artifact))
 			}
 			pkgOccurrences = append(pkgOccurrences, *ingest.IsOccurrence)
 		} else {
 			if srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(ingest.Src)]; found {
 				sourceIDs = append(sourceIDs, *srcID)
 			} else {
-				return nil, fmt.Errorf("failed to find ingested Source ID for isOccurrence: %w", ingest.Src)
+				return nil, fmt.Errorf("failed to find ingested Source ID for isOccurrence: %s", helpers.ConcatenateSourceInput(ingest.Src))
 			}
 			if artID, found := artInputMap[helpers.ArtifactKey(ingest.Artifact)]; found {
 				srcArtIDs = append(srcArtIDs, *artID)
 			} else {
-				return nil, fmt.Errorf("failed to find ingested artifact ID for isOccurrence: %w", ingest.Artifact)
+				return nil, fmt.Errorf("failed to find ingested artifact ID for isOccurrence: %s", helpers.ArtifactKey(ingest.Artifact))
 			}
 			srcOccurrences = append(srcOccurrences, *ingest.IsOccurrence)
 		}
@@ -1141,7 +1139,7 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 			if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 				pkgIDs = append(pkgIDs, *pkgID)
 			} else {
-				return fmt.Errorf("failed to find ingested Package ID for certifyLegal: %w", ingest.Pkg)
+				return fmt.Errorf("failed to find ingested Package ID for certifyLegal: %s", helpers.PkgInputSpecToPurl(ingest.Pkg))
 			}
 
 			// Declared Licenses
@@ -1150,7 +1148,7 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 				if licID, found := licenseInputMap[helpers.LicenseKey(&dec)]; found {
 					pkgDecList = append(pkgDecList, *licID)
 				} else {
-					return fmt.Errorf("failed to find ingested license ID for certifyLegal: %w", dec)
+					return fmt.Errorf("failed to find ingested license ID for certifyLegal: %s", helpers.LicenseKey(&dec))
 				}
 			}
 			pkgDecIDs = append(pkgDecIDs, pkgDecList)
@@ -1161,7 +1159,7 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 				if licID, found := licenseInputMap[helpers.LicenseKey(&dis)]; found {
 					pkgDisList = append(pkgDisList, *licID)
 				} else {
-					return fmt.Errorf("failed to find ingested license ID for certifyLegal: %w", dis)
+					return fmt.Errorf("failed to find ingested license ID for certifyLegal: %s", helpers.LicenseKey(&dis))
 				}
 			}
 			pkgDisIDs = append(pkgDisIDs, pkgDisList)
@@ -1170,7 +1168,7 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 			if srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(ingest.Src)]; found {
 				sourceIDs = append(sourceIDs, *srcID)
 			} else {
-				return fmt.Errorf("failed to find ingested Source ID for certifyLegal: %w", ingest.Src)
+				return fmt.Errorf("failed to find ingested Source ID for certifyLegal: %s", helpers.ConcatenateSourceInput(ingest.Src))
 			}
 
 			// Declared Licenses
@@ -1179,7 +1177,7 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 				if licID, found := licenseInputMap[helpers.LicenseKey(&dec)]; found {
 					srcDecList = append(srcDecList, *licID)
 				} else {
-					return fmt.Errorf("failed to find ingested license ID for certifyLegal: %w", dec)
+					return fmt.Errorf("failed to find ingested license ID for certifyLegal: %s", helpers.LicenseKey(&dec))
 				}
 			}
 			srcDecIDs = append(srcDecIDs, srcDecList)
@@ -1190,7 +1188,7 @@ func ingestCertifyLegals(ctx context.Context, client graphql.Client, v []assembl
 				if licID, found := licenseInputMap[helpers.LicenseKey(&dis)]; found {
 					srcDisList = append(srcDisList, *licID)
 				} else {
-					return fmt.Errorf("failed to find ingested license ID for certifyLegal: %w", dis)
+					return fmt.Errorf("failed to find ingested license ID for certifyLegal: %s", helpers.LicenseKey(&dis))
 				}
 			}
 			srcDisIDs = append(srcDisIDs, srcDisList)
