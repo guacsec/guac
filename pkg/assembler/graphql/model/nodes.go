@@ -802,6 +802,9 @@ type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }
 
+type Mutation struct {
+}
+
 // Package represents the root of the package trie/tree.
 //
 // We map package information to a trie, closely matching the pURL specification
@@ -1141,6 +1144,9 @@ type PointOfContactSpec struct {
 	Justification *string                      `json:"justification,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
+}
+
+type Query struct {
 }
 
 // SLSA contains all of the fields present in a SLSA attestation.

@@ -2912,9 +2912,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new artifact and returns it. The returned ID can be empty string."
+  "Ingests a new artifact and returns it."
   ingestArtifact(artifact: IDorArtifactInput): ID!
-  "Bulk ingests new artifacts and returns a list of them. The returned array of IDs can be a an array of empty string."
+  "Bulk ingests new artifacts and returns a list of them. The returned array of IDs must be in the same order as the input."
   ingestArtifacts(artifacts: [IDorArtifactInput!]!): [ID!]!
 }
 `, BuiltIn: false},
@@ -2976,9 +2976,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new builder and returns it. The returned ID can be empty string."
+  "Ingests a new builder and returns it."
   ingestBuilder(builder: IDorBuilderInput): ID!
-  "Bulk ingests new builders and returns a list of them. The returned array of IDs can be a an array of empty string."
+  "Bulk ingests new builders and returns a list of them. The returned array of IDs must be in the same order as the inputs."
   ingestBuilders(builders: [IDorBuilderInput!]!): [ID!]!
 }
 `, BuiltIn: false},
@@ -4334,14 +4334,14 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a dependency between two packages. The returned ID can be empty string."
+  "Adds a dependency between two packages. The returned ID cannot be empty string as its used by hasSBOM."
   ingestDependency(
     pkg: IDorPkgInput!
     depPkg: IDorPkgInput!
     depPkgMatchType: MatchFlags!
     dependency: IsDependencyInputSpec!
   ): ID!
-  "Bulk adds a dependency between two packages. The returned array of IDs can be a an array of empty string."
+  "Bulk adds a dependency between two packages. The returned array of IDs cannot be an empty string as its used by hasSBOM."
   ingestDependencies(
     pkgs: [IDorPkgInput!]!
     depPkgs: [IDorPkgInput!]!
@@ -4446,13 +4446,13 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingest that an artifact is produced from a package or source. The returned ID can be empty string."
+  "Ingest that an artifact is produced from a package or source. The returned ID cannot be empty string as its used by hasSBOM."
   ingestOccurrence(
     subject: PackageOrSourceInput!
     artifact: IDorArtifactInput!
     occurrence: IsOccurrenceInputSpec!
   ): ID!
-  "Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string."
+  "Bulk ingest that an artifact is produced from a package or source. The returned array of IDs cannot be an empty string as its used by hasSBOM"
   ingestOccurrences(
     subjects: PackageOrSourceInputs!
     artifacts: [IDorArtifactInput!]!
@@ -4553,7 +4553,7 @@ extend type Query {
 extend type Mutation {
   "Ingests a new license and returns it."
   ingestLicense(license: IDorLicenseInput): ID!
-  "Bulk ingests new licenses and returns a list of them."
+  "Bulk ingests new licenses and returns a list of them. The returned array of IDs must be in the same order as the inputs."
   ingestLicenses(licenses: [IDorLicenseInput!]!): [ID!]!
 }
 `, BuiltIn: false},
@@ -4871,9 +4871,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string."
+  "Ingests a new package and returns a corresponding package hierarchy containing only the IDs."
   ingestPackage(pkg: IDorPkgInput!): PackageIDs!
-  "Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings."
+  "Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs must be in the same order as the inputs."
   ingestPackages(pkgs: [IDorPkgInput!]!): [PackageIDs!]!
 }
 `, BuiltIn: false},
@@ -5317,9 +5317,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string."
+  "Ingests a new source and returns the corresponding source trie path."
   ingestSource(source: IDorSourceInput!): SourceIDs!
-  "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string."
+  "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs must be in the same order as the inputs."
   ingestSources(sources: [IDorSourceInput!]!): [SourceIDs!]!
 }
 `, BuiltIn: false},
@@ -5637,9 +5637,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string."
+  "Ingests a new vulnerability and returns the corresponding vulnerability trie path."
   ingestVulnerability(vuln: IDorVulnerabilityInput!): VulnerabilityIDs!
-  "Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs can be a an array of empty string."
+  "Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs must be in the same order as the inputs"
   ingestVulnerabilities(vulns: [IDorVulnerabilityInput!]!): [VulnerabilityIDs!]!
 }
 `, BuiltIn: false},

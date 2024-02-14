@@ -8183,7 +8183,7 @@ func (v *IDorVulnerabilityInput) GetVulnerabilityInput() *VulnerabilityInputSpec
 
 // IngestArtifactResponse is returned by IngestArtifact on success.
 type IngestArtifactResponse struct {
-	// Ingests a new artifact and returns it. The returned ID can be empty string.
+	// Ingests a new artifact and returns it.
 	IngestArtifact string `json:"ingestArtifact"`
 }
 
@@ -8192,7 +8192,7 @@ func (v *IngestArtifactResponse) GetIngestArtifact() string { return v.IngestArt
 
 // IngestArtifactsResponse is returned by IngestArtifacts on success.
 type IngestArtifactsResponse struct {
-	// Bulk ingests new artifacts and returns a list of them. The returned array of IDs can be a an array of empty string.
+	// Bulk ingests new artifacts and returns a list of them. The returned array of IDs must be in the same order as the input.
 	IngestArtifacts []string `json:"ingestArtifacts"`
 }
 
@@ -8201,7 +8201,7 @@ func (v *IngestArtifactsResponse) GetIngestArtifacts() []string { return v.Inges
 
 // IngestBuilderResponse is returned by IngestBuilder on success.
 type IngestBuilderResponse struct {
-	// Ingests a new builder and returns it. The returned ID can be empty string.
+	// Ingests a new builder and returns it.
 	IngestBuilder string `json:"ingestBuilder"`
 }
 
@@ -8210,7 +8210,7 @@ func (v *IngestBuilderResponse) GetIngestBuilder() string { return v.IngestBuild
 
 // IngestBuildersResponse is returned by IngestBuilders on success.
 type IngestBuildersResponse struct {
-	// Bulk ingests new builders and returns a list of them. The returned array of IDs can be a an array of empty string.
+	// Bulk ingests new builders and returns a list of them. The returned array of IDs must be in the same order as the inputs.
 	IngestBuilders []string `json:"ingestBuilders"`
 }
 
@@ -8592,7 +8592,7 @@ func (v *IngestHashEqualsResponse) GetIngestHashEquals() []string { return v.Ing
 
 // IngestIsDependenciesResponse is returned by IngestIsDependencies on success.
 type IngestIsDependenciesResponse struct {
-	// Bulk adds a dependency between two packages. The returned array of IDs can be a an array of empty string.
+	// Bulk adds a dependency between two packages. The returned array of IDs cannot be an empty string as its used by hasSBOM.
 	IngestDependencies []string `json:"ingestDependencies"`
 }
 
@@ -8601,7 +8601,7 @@ func (v *IngestIsDependenciesResponse) GetIngestDependencies() []string { return
 
 // IngestIsDependencyResponse is returned by IngestIsDependency on success.
 type IngestIsDependencyResponse struct {
-	// Adds a dependency between two packages. The returned ID can be empty string.
+	// Adds a dependency between two packages. The returned ID cannot be empty string as its used by hasSBOM.
 	IngestDependency string `json:"ingestDependency"`
 }
 
@@ -8610,7 +8610,7 @@ func (v *IngestIsDependencyResponse) GetIngestDependency() string { return v.Ing
 
 // IngestIsOccurrencePkgResponse is returned by IngestIsOccurrencePkg on success.
 type IngestIsOccurrencePkgResponse struct {
-	// Ingest that an artifact is produced from a package or source. The returned ID can be empty string.
+	// Ingest that an artifact is produced from a package or source. The returned ID cannot be empty string as its used by hasSBOM.
 	IngestOccurrence string `json:"ingestOccurrence"`
 }
 
@@ -8619,7 +8619,7 @@ func (v *IngestIsOccurrencePkgResponse) GetIngestOccurrence() string { return v.
 
 // IngestIsOccurrenceSrcResponse is returned by IngestIsOccurrenceSrc on success.
 type IngestIsOccurrenceSrcResponse struct {
-	// Ingest that an artifact is produced from a package or source. The returned ID can be empty string.
+	// Ingest that an artifact is produced from a package or source. The returned ID cannot be empty string as its used by hasSBOM.
 	IngestOccurrence string `json:"ingestOccurrence"`
 }
 
@@ -8628,7 +8628,7 @@ func (v *IngestIsOccurrenceSrcResponse) GetIngestOccurrence() string { return v.
 
 // IngestIsOccurrencesPkgResponse is returned by IngestIsOccurrencesPkg on success.
 type IngestIsOccurrencesPkgResponse struct {
-	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string.
+	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs cannot be an empty string as its used by hasSBOM
 	IngestOccurrences []string `json:"ingestOccurrences"`
 }
 
@@ -8637,7 +8637,7 @@ func (v *IngestIsOccurrencesPkgResponse) GetIngestOccurrences() []string { retur
 
 // IngestIsOccurrencesSrcResponse is returned by IngestIsOccurrencesSrc on success.
 type IngestIsOccurrencesSrcResponse struct {
-	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string.
+	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs cannot be an empty string as its used by hasSBOM
 	IngestOccurrences []string `json:"ingestOccurrences"`
 }
 
@@ -8655,7 +8655,7 @@ func (v *IngestLicenseResponse) GetIngestLicense() string { return v.IngestLicen
 
 // IngestLicensesResponse is returned by IngestLicenses on success.
 type IngestLicensesResponse struct {
-	// Bulk ingests new licenses and returns a list of them.
+	// Bulk ingests new licenses and returns a list of them. The returned array of IDs must be in the same order as the inputs.
 	IngestLicenses []string `json:"ingestLicenses"`
 }
 
@@ -8691,7 +8691,7 @@ func (v *IngestPackageIngestPackagePackageIDs) GetPackageVersionID() string {
 
 // IngestPackageResponse is returned by IngestPackage on success.
 type IngestPackageResponse struct {
-	// Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string.
+	// Ingests a new package and returns a corresponding package hierarchy containing only the IDs.
 	IngestPackage IngestPackageIngestPackagePackageIDs `json:"ingestPackage"`
 }
 
@@ -8729,7 +8729,7 @@ func (v *IngestPackagesIngestPackagesPackageIDs) GetPackageVersionID() string {
 
 // IngestPackagesResponse is returned by IngestPackages on success.
 type IngestPackagesResponse struct {
-	// Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings.
+	// Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs must be in the same order as the inputs.
 	IngestPackages []IngestPackagesIngestPackagesPackageIDs `json:"ingestPackages"`
 }
 
@@ -8861,7 +8861,7 @@ func (v *IngestSourceIngestSourceSourceIDs) GetSourceNameID() string { return v.
 
 // IngestSourceResponse is returned by IngestSource on success.
 type IngestSourceResponse struct {
-	// Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string.
+	// Ingests a new source and returns the corresponding source trie path.
 	IngestSource IngestSourceIngestSourceSourceIDs `json:"ingestSource"`
 }
 
@@ -8893,7 +8893,7 @@ func (v *IngestSourcesIngestSourcesSourceIDs) GetSourceNameID() string { return 
 
 // IngestSourcesResponse is returned by IngestSources on success.
 type IngestSourcesResponse struct {
-	// Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string.
+	// Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs must be in the same order as the inputs.
 	IngestSources []IngestSourcesIngestSourcesSourceIDs `json:"ingestSources"`
 }
 
@@ -8952,7 +8952,7 @@ func (v *IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs) GetVulnerab
 
 // IngestVulnerabilitiesResponse is returned by IngestVulnerabilities on success.
 type IngestVulnerabilitiesResponse struct {
-	// Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs can be a an array of empty string.
+	// Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs must be in the same order as the inputs
 	IngestVulnerabilities []IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs `json:"ingestVulnerabilities"`
 }
 
@@ -8982,7 +8982,7 @@ func (v *IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs) GetVulnerabilit
 
 // IngestVulnerabilityResponse is returned by IngestVulnerability on success.
 type IngestVulnerabilityResponse struct {
-	// Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string.
+	// Ingests a new vulnerability and returns the corresponding vulnerability trie path.
 	IngestVulnerability IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs `json:"ingestVulnerability"`
 }
 

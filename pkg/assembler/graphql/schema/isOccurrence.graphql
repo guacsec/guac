@@ -94,13 +94,13 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingest that an artifact is produced from a package or source. The returned ID can be empty string."
+  "Ingest that an artifact is produced from a package or source. The returned ID cannot be empty string as its used by hasSBOM."
   ingestOccurrence(
     subject: PackageOrSourceInput!
     artifact: IDorArtifactInput!
     occurrence: IsOccurrenceInputSpec!
   ): ID!
-  "Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string."
+  "Bulk ingest that an artifact is produced from a package or source. The returned array of IDs cannot be an empty string as its used by hasSBOM"
   ingestOccurrences(
     subjects: PackageOrSourceInputs!
     artifacts: [IDorArtifactInput!]!

@@ -210,8 +210,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string."
+  "Ingests a new package and returns a corresponding package hierarchy containing only the IDs."
   ingestPackage(pkg: IDorPkgInput!): PackageIDs!
-  "Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings."
+  "Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs must be in the same order as the inputs."
   ingestPackages(pkgs: [IDorPkgInput!]!): [PackageIDs!]!
 }

@@ -91,6 +91,6 @@ extend type Query {
 extend type Mutation {
   "Ingests a new license and returns it."
   ingestLicense(license: IDorLicenseInput): ID!
-  "Bulk ingests new licenses and returns a list of them."
+  "Bulk ingests new licenses and returns a list of them. The returned array of IDs must be in the same order as the inputs."
   ingestLicenses(licenses: [IDorLicenseInput!]!): [ID!]!
 }

@@ -130,8 +130,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string."
+  "Ingests a new source and returns the corresponding source trie path."
   ingestSource(source: IDorSourceInput!): SourceIDs!
-  "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string."
+  "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs must be in the same order as the inputs."
   ingestSources(sources: [IDorSourceInput!]!): [SourceIDs!]!
 }

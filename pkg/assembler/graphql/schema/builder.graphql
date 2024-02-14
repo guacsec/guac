@@ -56,8 +56,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new builder and returns it. The returned ID can be empty string."
+  "Ingests a new builder and returns it."
   ingestBuilder(builder: IDorBuilderInput): ID!
-  "Bulk ingests new builders and returns a list of them. The returned array of IDs can be a an array of empty string."
+  "Bulk ingests new builders and returns a list of them. The returned array of IDs must be in the same order as the inputs."
   ingestBuilders(builders: [IDorBuilderInput!]!): [ID!]!
 }
