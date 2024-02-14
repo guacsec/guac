@@ -62,7 +62,7 @@ func (c *demoClient) builderByInput(ctx context.Context, b *model.BuilderInputSp
 
 // Ingest Builders
 
-func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.BuilderInputSpec) ([]string, error) {
+func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.IDorBuilderInput) ([]string, error) {
 	var modelBuilders []string
 	for _, build := range builders {
 		modelBuild, err := c.IngestBuilder(ctx, build)
@@ -76,11 +76,11 @@ func (c *demoClient) IngestBuilders(ctx context.Context, builders []*model.Build
 
 // Ingest Builder
 
-func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.BuilderInputSpec) (string, error) {
+func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.IDorBuilderInput) (string, error) {
 	return c.ingestBuilder(ctx, builder, true)
 }
 
-func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.BuilderInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.IDorBuilderInput, readOnly bool) (string, error) {
 	in := &builderStruct{
 		URI: builder.URI,
 	}

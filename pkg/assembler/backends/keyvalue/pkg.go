@@ -352,7 +352,7 @@ func (n *pkgVersion) Key() string {
 
 // Ingest Package
 
-func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
+func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error) {
 	var modelPkgs []*model.PackageIDs
 	for _, pkg := range pkgs {
 		modelPkg, err := c.IngestPackage(ctx, *pkg)
@@ -364,7 +364,7 @@ func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputS
 	return modelPkgs, nil
 }
 
-func (c *demoClient) IngestPackage(ctx context.Context, input model.PkgInputSpec) (*model.PackageIDs, error) {
+func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput) (*model.PackageIDs, error) {
 	inType := &pkgType{
 		Type: input.Type,
 	}

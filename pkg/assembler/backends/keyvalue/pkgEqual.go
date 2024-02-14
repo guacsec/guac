@@ -58,7 +58,7 @@ func (n *pkgEqualStruct) BuildModelNode(ctx context.Context, c *demoClient) (mod
 
 // Ingest PkgEqual
 
-func (c *demoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
+func (c *demoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
 	var modelPkgEqualsIDs []string
 	for i := range pkgEquals {
 		pkgEqual, err := c.IngestPkgEqual(ctx, *pkgs[i], *otherPackages[i], *pkgEquals[i])
@@ -87,11 +87,11 @@ func (c *demoClient) convPkgEqual(ctx context.Context, in *pkgEqualStruct) (*mod
 	return out, nil
 }
 
-func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
+func (c *demoClient) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	return c.ingestPkgEqual(ctx, pkg, depPkg, pkgEqual, true)
 }
 
-func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestPkgEqual"
 
 	in := &pkgEqualStruct{

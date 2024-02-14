@@ -184,7 +184,7 @@ func (n *srcNamespace) addName(ctx context.Context, name string, c *demoClient) 
 
 // Ingest Source
 
-func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
+func (c *demoClient) IngestSources(ctx context.Context, sources []*model.IDorSourceInput) ([]*model.SourceIDs, error) {
 	var modelSources []*model.SourceIDs
 	for _, src := range sources {
 		modelSrc, err := c.IngestSource(ctx, *src)
@@ -196,7 +196,7 @@ func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceI
 	return modelSources, nil
 }
 
-func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.SourceIDs, error) {
+func (c *demoClient) IngestSource(ctx context.Context, input model.IDorSourceInput) (*model.SourceIDs, error) {
 	inType := &srcType{
 		Type: input.Type,
 	}

@@ -62,7 +62,7 @@ func (n *vulnerabilityMetadataLink) BuildModelNode(ctx context.Context, c *demoC
 }
 
 // Ingest VulnerabilityMetadata
-func (c *demoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+func (c *demoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	var modelVulnMetadataIDList []string
 	for i := range vulnerabilityMetadataList {
 		vulnMetadata, err := c.IngestVulnerabilityMetadata(ctx, *vulnerabilities[i], *vulnerabilityMetadataList[i])
@@ -74,11 +74,11 @@ func (c *demoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vulner
 	return modelVulnMetadataIDList, nil
 }
 
-func (c *demoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
+func (c *demoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
 	return c.ingestVulnerabilityMetadata(ctx, vulnerability, vulnerabilityMetadata, true)
 }
 
-func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestVulnerabilityMetadata"
 
 	in := &vulnerabilityMetadataLink{

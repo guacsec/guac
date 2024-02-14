@@ -80,7 +80,7 @@ func (n *vexLink) BuildModelNode(ctx context.Context, c *demoClient) (model.Node
 
 // Ingest CertifyVex
 
-func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
 	var modelVexStatementIDs []string
 
 	for i := range vexStatements {
@@ -104,11 +104,11 @@ func (c *demoClient) IngestVEXStatements(ctx context.Context, subjects model.Pac
 	return modelVexStatementIDs, nil
 }
 
-func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
+func (c *demoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.IDorVulnerabilityInput, vexStatement model.VexStatementInputSpec) (string, error) {
 	return c.ingestVEXStatement(ctx, subject, vulnerability, vexStatement, true)
 }
 
-func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.IDorVulnerabilityInput, vexStatement model.VexStatementInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestVEXStatement"
 
 	in := &vexLink{

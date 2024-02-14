@@ -189,7 +189,7 @@ func matchSLSAPreds(haves []*model.SLSAPredicate, wants []*model.SLSAPredicateSp
 
 // Ingest HasSlsa
 
-func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) ([]string, error) {
 	var modelHasSLSAList []string
 	for i := range subjects {
 		hasSLSA, err := c.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsaList[i])
@@ -202,15 +202,15 @@ func (c *demoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifact
 }
 
 func (c *demoClient) IngestSLSA(ctx context.Context,
-	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
-	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec,
+	subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput,
+	builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec,
 ) (string, error) {
 	return c.ingestSLSA(ctx, subject, builtFrom, builtBy, slsa, true)
 }
 
 func (c *demoClient) ingestSLSA(ctx context.Context,
-	subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec,
-	builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec, readOnly bool) (
+	subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput,
+	builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec, readOnly bool) (
 	string, error,
 ) {
 	preds := convSLSAP(slsa.SlsaPredicate)

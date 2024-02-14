@@ -72,7 +72,7 @@ func (n *isOccurrenceStruct) Key() string {
 
 // Ingest IngestOccurrences
 
-func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	var modelIsOccurrences []string
 
 	for i := range occurrences {
@@ -98,11 +98,11 @@ func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.Packa
 
 // Ingest IsOccurrence
 
-func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error) {
 	return c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
 }
 
-func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestOccurrence"
 
 	in := &isOccurrenceStruct{

@@ -141,7 +141,7 @@ func (c *demoClient) artifactModelByID(ctx context.Context, id string) (*model.A
 
 // Ingest Artifacts
 
-func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.IDorArtifactInput) ([]string, error) {
 	var modelArtifacts []string
 	for _, art := range artifacts {
 		modelArt, err := c.IngestArtifact(ctx, art)
@@ -153,13 +153,13 @@ func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.Art
 	return modelArtifacts, nil
 }
 
-func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
+func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.IDorArtifactInput) (string, error) {
 	return c.ingestArtifact(ctx, artifact, true)
 }
 
-func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, readOnly bool) (string, error) {
-	algorithm := strings.ToLower(artifact.Algorithm)
-	digest := strings.ToLower(artifact.Digest)
+func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.IDorArtifactInput, readOnly bool) (string, error) {
+	algorithm := strings.ToLower(artifact.ArtifactInput.Algorithm)
+	digest := strings.ToLower(artifact.ArtifactInput.Digest)
 
 	inA := &artStruct{
 		Algorithm: algorithm,

@@ -59,7 +59,7 @@ func (n *licStruct) setCertifyLegals(ctx context.Context, id string, c *demoClie
 	return setkv(ctx, licenseCol, n, c)
 }
 
-func (c *demoClient) licenseByInput(ctx context.Context, b *model.LicenseInputSpec) (*licStruct, error) {
+func (c *demoClient) licenseByInput(ctx context.Context, b *model.IDorLicenseInput) (*licStruct, error) {
 	in := &licStruct{
 		Name:        b.Name,
 		ListVersion: nilToEmpty(b.ListVersion),
@@ -69,7 +69,7 @@ func (c *demoClient) licenseByInput(ctx context.Context, b *model.LicenseInputSp
 
 // Ingest Licenses
 
-func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
+func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error) {
 	var modelLicenses []string
 	for _, lic := range licenses {
 		modelLic, err := c.IngestLicense(ctx, lic)
@@ -81,11 +81,11 @@ func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.Licen
 	return modelLicenses, nil
 }
 
-func (c *demoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
+func (c *demoClient) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
 	return c.ingestLicense(ctx, license, true)
 }
 
-func (c *demoClient) ingestLicense(ctx context.Context, license *model.LicenseInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestLicense(ctx context.Context, license *model.IDorLicenseInput, readOnly bool) (string, error) {
 	in := &licStruct{
 		Name:        license.Name,
 		Inline:      nilToEmpty(license.Inline),

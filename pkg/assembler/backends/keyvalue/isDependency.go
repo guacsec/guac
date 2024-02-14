@@ -65,7 +65,7 @@ func (n *isDependencyLink) BuildModelNode(ctx context.Context, c *demoClient) (m
 
 // Ingest IngestDependencies
 
-func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO(LUMJJB): match flags
 
 	var modelIsDependencies []string
@@ -80,11 +80,11 @@ func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgIn
 }
 
 // Ingest IsDependency
-func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.IDorPkgInput, dependentPackageArg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 	return c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, true)
 }
 
-func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDorPkgInput, dependentPackageArg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestDependency"
 
 	inLink := &isDependencyLink{
