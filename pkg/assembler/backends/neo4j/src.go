@@ -240,33 +240,33 @@ func (c *neo4jClient) sourcesNamespace(ctx context.Context, sourceSpec *model.So
 	return result.([]*model.Source), nil
 }
 
-func (c *neo4jClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
+func (c *neo4jClient) IngestSources(ctx context.Context, sources []*model.IDorSourceInput) ([]*model.SourceIDs, error) {
 	return []*model.SourceIDs{}, fmt.Errorf("not implemented: IngestSources")
 }
 
-func (c *neo4jClient) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
+func (c *neo4jClient) IngestSource(ctx context.Context, source model.IDorSourceInput) (*model.SourceIDs, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
 	values := map[string]any{}
-	values["sourceType"] = source.Type
-	values["namespace"] = source.Namespace
-	values["name"] = source.Name
+	values["sourceType"] = source.SourceInput.Type
+	values["namespace"] = source.SourceInput.Namespace
+	values["name"] = source.SourceInput.Name
 
-	if source.Commit != nil && source.Tag != nil {
-		if *source.Commit != "" && *source.Tag != "" {
+	if source.SourceInput.Commit != nil && source.SourceInput.Tag != nil {
+		if *source.SourceInput.Commit != "" && *source.SourceInput.Tag != "" {
 			return nil, gqlerror.Errorf("Passing both commit and tag selectors is an error")
 		}
 	}
 
-	if source.Commit != nil {
-		values["commit"] = *source.Commit
+	if source.SourceInput.Commit != nil {
+		values["commit"] = *source.SourceInput.Commit
 	} else {
 		values["commit"] = ""
 	}
 
-	if source.Tag != nil {
-		values["tag"] = *source.Tag
+	if source.SourceInput.Tag != nil {
+		values["tag"] = *source.SourceInput.Tag
 	} else {
 		values["tag"] = ""
 	}

@@ -165,7 +165,7 @@ func setPkgEqualValues(sb *strings.Builder, pkgEqualSpec *model.PkgEqualSpec, fi
 
 // Ingest PkgEqual
 
-func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
+func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
@@ -173,8 +173,8 @@ func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec
 	queryValues := map[string]any{}
 
 	// TODO: use generics here between PkgInputSpec and PkgSpec?
-	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
-	depPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&depPkg)
+	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(pkg.PackageInput)
+	depPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(depPkg.PackageInput)
 
 	queryValues[justification] = pkgEqual.Justification
 	queryValues[origin] = pkgEqual.Origin
@@ -258,6 +258,6 @@ func (c *neo4jClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec
 	return result.(*model.PkgEqual).ID, nil
 }
 
-func (c *neo4jClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
+func (c *neo4jClient) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
 	return nil, fmt.Errorf("not implemented - IngestPkgEquals")
 }
