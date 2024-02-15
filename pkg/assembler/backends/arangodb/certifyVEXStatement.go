@@ -504,7 +504,7 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 		  
 		RETURN { 'certifyVex_id': certifyVex._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getVEXStatementQueryValues(subject.Package.PackageInput, nil, &vulnerability.VulnerabilityInput, &vexStatement), "IngestVEXStatement - Package")
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, getVEXStatementQueryValues(subject.Package.PackageInput, nil, vulnerability.VulnerabilityInput, &vexStatement), "IngestVEXStatement - Package")
 		if err != nil {
 			return "", fmt.Errorf("failed to create ingest VEX: %w", err)
 		}
