@@ -66,7 +66,7 @@ func toLowerPtr(s *string) *string {
 	return &lower
 }
 
-func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.IDorArtifactInput) ([]string, error) {
 	funcName := "IngestArtifacts"
 	artsID := make([]string, len(artifacts))
 	eg, ctx := errgroup.WithContext(ctx)
@@ -87,10 +87,10 @@ func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.Art
 	return artsID, nil
 }
 
-func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.ArtifactInputSpec) (string, error) {
+func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifactInput) (string, error) {
 	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
-		return upsertArtifact(ctx, client, art)
+		return upsertArtifact(ctx, client, art.ArtifactInput)
 	})
 	if err != nil {
 		return "", err

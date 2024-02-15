@@ -63,7 +63,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 	return models, nil
 }
 
-func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	models := make([]string, len(occurrences))
 	eg, ctx := errgroup.WithContext(ctx)
 	for i := range occurrences {
@@ -92,7 +92,7 @@ func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.Packa
 
 func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	subject model.PackageOrSourceInput,
-	art model.ArtifactInputSpec,
+	art model.IDorArtifactInput,
 	spec model.IsOccurrenceInputSpec,
 ) (string, error) {
 	funcName := "IngestOccurrence"
@@ -104,7 +104,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 
 		artRecord, err := client.Artifact.Query().
 			Order(ent.Asc(artifact.FieldID)). // is order important here?
-			Where(artifactQueryInputPredicates(art)).
+			Where(artifactQueryInputPredicates(*art.ArtifactInput)).
 			Only(ctx) // should already be ingested
 		if err != nil {
 			return nil, err
@@ -126,7 +126,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
-			pkgVersion, err := getPkgVersion(ctx, client, *subject.Package)
+			pkgVersion, err := getPkgVersion(ctx, client, *subject.Package.PackageInput)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get package version")
 			}
@@ -137,7 +137,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 				sql.IsNull(occurrence.FieldSourceID),
 			)
 		} else if subject.Source != nil {
-			srcNameID, err := upsertSource(ctx, tx, *subject.Source)
+			srcNameID, err := upsertSource(ctx, tx, *subject.Source.SourceInput)
 			if err != nil {
 				return nil, err
 			}

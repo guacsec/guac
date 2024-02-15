@@ -69,9 +69,9 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	return collect(records, toModelHasSourceAt), nil
 }
 
-func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
+func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.HasSourceAt, error) {
-		return upsertHasSourceAt(ctx, ent.TxFromContext(ctx), pkg, pkgMatchType, source, hasSourceAt)
+		return upsertHasSourceAt(ctx, ent.TxFromContext(ctx), *pkg.PackageInput, pkgMatchType, *source.SourceInput, hasSourceAt)
 	})
 	if err != nil {
 		return "", err
@@ -81,7 +81,7 @@ func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSp
 	return nodeID(record.ID), nil
 }
 
-func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType *model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
+func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
 	var result []string
 	for i := range hasSourceAts {
 		hsa, err := b.IngestHasSourceAt(ctx, *pkgs[i], *pkgMatchType, *sources[i], *hasSourceAts[i])
@@ -161,7 +161,7 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 	return collect(records, toModelSourceName), nil
 }
 
-func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
+func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.IDorSourceInput) ([]*model.SourceIDs, error) {
 	ids := make([]*model.SourceIDs, len(sources))
 	eg, ctx := errgroup.WithContext(ctx)
 	for i := range sources {
@@ -181,9 +181,9 @@ func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.SourceI
 	return ids, nil
 }
 
-func (b *EntBackend) IngestSource(ctx context.Context, source model.SourceInputSpec) (*model.SourceIDs, error) {
+func (b *EntBackend) IngestSource(ctx context.Context, source model.IDorSourceInput) (*model.SourceIDs, error) {
 	sourceNameID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.SourceIDs, error) {
-		return upsertSource(ctx, ent.TxFromContext(ctx), source)
+		return upsertSource(ctx, ent.TxFromContext(ctx), *source.SourceInput)
 	})
 	if err != nil {
 		return nil, err

@@ -203,7 +203,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 
 	switch {
 	case subject.Artifact != nil:
-		art, err := client.Artifact.Query().Where(artifactQueryInputPredicates(*subject.Artifact)).Only(ctx)
+		art, err := client.Artifact.Query().Where(artifactQueryInputPredicates(*subject.Artifact.ArtifactInput)).Only(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -218,7 +218,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 
 	case subject.Package != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			pv, err := getPkgVersion(ctx, client.Client(), *subject.Package)
+			pv, err := getPkgVersion(ctx, client.Client(), *subject.Package.PackageInput)
 			if err != nil {
 				return nil, err
 			}
@@ -231,7 +231,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 				sql.IsNull(certification.FieldSourceID),
 			)
 		} else {
-			pn, err := getPkgName(ctx, client.Client(), *subject.Package)
+			pn, err := getPkgName(ctx, client.Client(), *subject.Package.PackageInput)
 			if err != nil {
 				return nil, err
 			}
@@ -246,7 +246,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 		}
 
 	case subject.Source != nil:
-		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source)
+		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source.SourceInput)
 		if err != nil {
 			return nil, err
 		}

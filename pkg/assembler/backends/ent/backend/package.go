@@ -94,7 +94,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	return collect(pkgs, toModelPackage), nil
 }
 
-func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
+func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error) {
 	// FIXME: (ivanvanderbyl) This will be suboptimal because we can't batch insert relations with upserts. See Readme.
 	pkgsID := make([]*model.PackageIDs, len(pkgs))
 	eg, ctx := errgroup.WithContext(ctx)
@@ -115,9 +115,9 @@ func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.PkgInputS
 	return pkgsID, nil
 }
 
-func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
+func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
 	pkgVersionID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.PackageIDs, error) {
-		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), pkg)
+		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), *pkg.PackageInput)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to upsert package")
 		}
@@ -134,7 +134,7 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) 
 // It is used in multiple places, so we extract it to a function.
 func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
 
-	pkgID, err := client.PackageType.CreateBulk().
+	pkgID, err := client.PackageType.Create().
 		SetType(pkg.Type).
 		OnConflict(sql.ConflictColumns(packagetype.FieldType)).
 		DoNothing().

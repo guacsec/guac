@@ -48,7 +48,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 	return collect(deps, toModelIsDependencyWithBackrefs), nil
 }
 
-func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO: This looks like a good candidate for using BulkCreate()
 
 	var modelIsDependencies = make([]string, len(dependencies))
@@ -73,12 +73,12 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.PkgIn
 	return modelIsDependencies, nil
 }
 
-func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
+func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
 	funcName := "IngestDependency"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
-		p, err := getPkgVersion(ctx, client.Client(), pkg)
+		p, err := getPkgVersion(ctx, client.Client(), *pkg.PackageInput)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +102,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 		var conflictWhere *sql.Predicate
 
 		if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-			dpn, err := getPkgName(ctx, client.Client(), depPkg)
+			dpn, err := getPkgName(ctx, client.Client(), *depPkg.PackageInput)
 			if err != nil {
 				return nil, err
 			}
@@ -113,7 +113,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.PkgInputSpe
 				sql.IsNull(dependency.FieldDependentPackageVersionID),
 			)
 		} else {
-			dpv, err := getPkgVersion(ctx, client.Client(), depPkg)
+			dpv, err := getPkgVersion(ctx, client.Client(), *depPkg.PackageInput)
 			if err != nil {
 				return nil, err
 			}

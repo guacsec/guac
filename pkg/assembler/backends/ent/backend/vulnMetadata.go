@@ -50,9 +50,9 @@ func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 	return collect(records, toModelVulnerabilityMetadata), nil
 }
 
-func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
+func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		return upsertVulnerabilityMetadata(ctx, ent.TxFromContext(ctx), vulnerability, vulnerabilityMetadata)
+		return upsertVulnerabilityMetadata(ctx, ent.TxFromContext(ctx), *vulnerability.VulnerabilityInput, vulnerabilityMetadata)
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to execute IngestVulnerabilityMetadata :: %s", err)
@@ -61,7 +61,7 @@ func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerabil
 	return strconv.Itoa(*recordID), nil
 }
 
-func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	var results []string
 	for i := range vulnerabilityMetadataList {
 		hm, err := b.IngestVulnerabilityMetadata(ctx, *vulnerabilities[i], *vulnerabilityMetadataList[i])

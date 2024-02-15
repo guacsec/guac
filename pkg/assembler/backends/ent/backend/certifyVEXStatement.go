@@ -32,7 +32,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
+func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.IDorVulnerabilityInput, vexStatement model.VexStatementInputSpec) (string, error) {
 	funcName := "IngestVEXStatement"
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
@@ -52,8 +52,8 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 		// manage vulnerability
 		vulnID, err := client.VulnerabilityID.Query().
 			Where(
-				vulnerabilityid.VulnerabilityIDEqualFold(vulnerability.VulnerabilityID),
-				vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(vulnerability.Type)),
+				vulnerabilityid.VulnerabilityIDEqualFold(vulnerability.VulnerabilityInput.VulnerabilityID),
+				vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(vulnerability.VulnerabilityInput.Type)),
 			).
 			OnlyID(ctx)
 		if err != nil {
@@ -65,7 +65,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 
 		// manage package or artifact
 		if subject.Package != nil {
-			p, err := getPkgVersion(ctx, client.Client(), *subject.Package)
+			p, err := getPkgVersion(ctx, client.Client(), *subject.Package.PackageInput)
 			if err != nil {
 				return nil, Errorf("%v ::  %s", funcName, err)
 			}
@@ -77,7 +77,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 			)
 		} else if subject.Artifact != nil {
 			artID, err := client.Artifact.Query().
-				Where(artifactQueryInputPredicates(*subject.Artifact)).
+				Where(artifactQueryInputPredicates(*subject.Artifact.ArtifactInput)).
 				OnlyID(ctx)
 			if err != nil {
 				return nil, Errorf("%v ::  %s", funcName, err)
@@ -113,7 +113,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 				return nil, errors.Wrap(err, "upsert certify vex statement node")
 			}
 			id, err = client.CertifyVex.Query().
-				Where(vexStatementInputPredicate(subject, vulnerability, vexStatement)).
+				Where(vexStatementInputPredicate(subject, *vulnerability.VulnerabilityInput, vexStatement)).
 				WithPackage(func(q *ent.PackageVersionQuery) {
 					q.WithName(func(q *ent.PackageNameQuery) {
 						q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
@@ -139,7 +139,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 	return nodeID(*recordID), nil
 }
 
-func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
 	var ids = make([]string, len(vexStatements))
 	eg, ctx := errgroup.WithContext(ctx)
 	for i := range vexStatements {
@@ -258,11 +258,11 @@ func vexStatementInputPredicate(subject model.PackageOrArtifactInput, vulnerabil
 	var sub *model.PackageOrArtifactSpec
 	if subject.Package != nil {
 		sub = &model.PackageOrArtifactSpec{
-			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package),
+			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
 		}
 	} else {
 		sub = &model.PackageOrArtifactSpec{
-			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact),
+			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
 		}
 	}
 	return certifyVexPredicate(model.CertifyVEXStatementSpec{
