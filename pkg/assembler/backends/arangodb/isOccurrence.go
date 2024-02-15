@@ -233,14 +233,14 @@ func getOccurrenceQueryValues(pkg *model.PkgInputSpec, src *model.SourceInputSpe
 	return values
 }
 
-func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	var cursor driver.Cursor
 	var err error
 	if len(subjects.Packages) > 0 {
 		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
-			listOfValues = append(listOfValues, getOccurrenceQueryValues(subjects.Packages[i], nil, artifacts[i], occurrences[i]))
+			listOfValues = append(listOfValues, getOccurrenceQueryValues(subjects.Packages[i].PackageInput, nil, artifacts[i].ArtifactInput, occurrences[i]))
 		}
 
 		var documents []string
@@ -303,7 +303,7 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		var listOfValues []map[string]any
 
 		for i := range subjects.Sources {
-			listOfValues = append(listOfValues, getOccurrenceQueryValues(nil, subjects.Sources[i], artifacts[i], occurrences[i]))
+			listOfValues = append(listOfValues, getOccurrenceQueryValues(nil, subjects.Sources[i].SourceInput, artifacts[i].ArtifactInput, occurrences[i]))
 		}
 
 		var documents []string
@@ -377,7 +377,7 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 	return isOcurIDList, nil
 }
 
-func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error) {
 	var cursor driver.Cursor
 	var err error
 	if subject.Package != nil {
@@ -408,7 +408,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 	  
 	RETURN { 'isOccurrence_id': isOccurrence._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getOccurrenceQueryValues(subject.Package, nil, &artifact, &occurrence), "IngestOccurrence")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getOccurrenceQueryValues(subject.Package.PackageInput, nil, artifact.ArtifactInput, &occurrence), "IngestOccurrence")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest package occurrence: %w", err)
 		}
@@ -441,7 +441,7 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		  
 		RETURN { 'isOccurrence_id': isOccurrence._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getOccurrenceQueryValues(nil, subject.Source, &artifact, &occurrence), "IngestOccurrence")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getOccurrenceQueryValues(nil, subject.Source.SourceInput, artifact.ArtifactInput, &occurrence), "IngestOccurrence")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source occurrence: %w", err)
 		}

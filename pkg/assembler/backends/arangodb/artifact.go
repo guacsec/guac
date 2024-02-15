@@ -117,10 +117,10 @@ func (c *arangoClient) getMaterialsByID(ctx context.Context, artifactIDs []strin
 }
 
 // getMaterials return an slice of artifacts as they are already ingested to be used for hasSLSA
-func (c *arangoClient) getMaterials(ctx context.Context, artifactSpec []*model.ArtifactInputSpec) ([]*model.Artifact, error) {
+func (c *arangoClient) getMaterials(ctx context.Context, artifactSpec []*model.IDorArtifactInput) ([]*model.Artifact, error) {
 	var listOfValues []map[string]any
 	for i := range artifactSpec {
-		listOfValues = append(listOfValues, getArtifactQueryValues(artifactSpec[i]))
+		listOfValues = append(listOfValues, getArtifactQueryValues(artifactSpec[i].ArtifactInput))
 	}
 
 	var documents []string
@@ -174,10 +174,10 @@ func getArtifactQueryValues(artifact *model.ArtifactInputSpec) map[string]any {
 	return values
 }
 
-func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+func (c *arangoClient) IngestArtifacts(ctx context.Context, artifacts []*model.IDorArtifactInput) ([]string, error) {
 	var listOfValues []map[string]any
 	for i := range artifacts {
-		listOfValues = append(listOfValues, getArtifactQueryValues(artifacts[i]))
+		listOfValues = append(listOfValues, getArtifactQueryValues(artifacts[i].ArtifactInput))
 	}
 
 	var documents []string
@@ -228,14 +228,14 @@ RETURN { "id": NEW._id }`
 	return artifactIDs, nil
 }
 
-func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
+func (c *arangoClient) IngestArtifact(ctx context.Context, artifact *model.IDorArtifactInput) (string, error) {
 	query := `
 UPSERT { algorithm:@algorithm, digest:@digest } 
 INSERT { algorithm:@algorithm, digest:@digest } 
 UPDATE {} IN artifacts OPTIONS { indexHint: "byArtAndDigest" }
 RETURN { "id": NEW._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getArtifactQueryValues(artifact), "IngestArtifact")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getArtifactQueryValues(artifact.ArtifactInput), "IngestArtifact")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest artifact: %w", err)
 	}

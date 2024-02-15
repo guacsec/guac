@@ -205,11 +205,11 @@ func getVulnEqualQueryValues(vulnerability *model.VulnerabilityInputSpec, otherV
 }
 
 // Ingest IngestVulnEqual
-func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range vulnEquals {
-		listOfValues = append(listOfValues, getVulnEqualQueryValues(vulnerabilities[i], otherVulnerabilities[i], vulnEquals[i]))
+		listOfValues = append(listOfValues, getVulnEqualQueryValues(vulnerabilities[i].VulnerabilityInput, otherVulnerabilities[i].VulnerabilityInput, vulnEquals[i]))
 	}
 
 	var documents []string
@@ -289,7 +289,7 @@ func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*
 	return vulnEqualIDList, nil
 }
 
-func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
+func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	query := `
 	LET firstVuln = FIRST(
 		FOR vVulnID in vulnerabilities
@@ -324,7 +324,7 @@ func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.
 	
 	RETURN { 'vulnEqual_id': vulnEqual._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getVulnEqualQueryValues(&vulnerability, &otherVulnerability, &vulnEqual), "IngestVulnEqual")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getVulnEqualQueryValues(vulnerability.VulnerabilityInput, otherVulnerability.VulnerabilityInput, &vulnEqual), "IngestVulnEqual")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest vulnEqual: %w", err)
 	}

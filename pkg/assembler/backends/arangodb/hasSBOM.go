@@ -279,7 +279,7 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
-			listOfValues = append(listOfValues, getHasSBOMQueryValues(subjects.Packages[i], nil, hasSBOMs[i], includes[i]))
+			listOfValues = append(listOfValues, getHasSBOMQueryValues(subjects.Packages[i].PackageInput, nil, hasSBOMs[i], includes[i]))
 		}
 
 		var documents []string
@@ -358,7 +358,7 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		var listOfValues []map[string]any
 
 		for i := range subjects.Artifacts {
-			listOfValues = append(listOfValues, getHasSBOMQueryValues(nil, subjects.Artifacts[i], hasSBOMs[i], includes[i]))
+			listOfValues = append(listOfValues, getHasSBOMQueryValues(nil, subjects.Artifacts[i].ArtifactInput, hasSBOMs[i], includes[i]))
 		}
 
 		var documents []string
@@ -479,7 +479,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		  
 		  RETURN { 'hasSBOM_id': hasSBOM._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(nil, subject.Artifact, &hasSbom, &includes), "IngestHasSbom - Artifact")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(nil, subject.Artifact.ArtifactInput, &hasSbom, &includes), "IngestHasSbom - Artifact")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest hasSBOM: %w", err)
 		}
@@ -537,7 +537,7 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		  
 		  RETURN { 'hasSBOM_id': hasSBOM._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(subject.Package, nil, &hasSbom, &includes), "IngestHasSbom - Package")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSBOMQueryValues(subject.Package.PackageInput, nil, &hasSbom, &includes), "IngestHasSbom - Package")
 		if err != nil {
 			return "", fmt.Errorf("failed to create ingest hasSBOM: %w", err)
 		}

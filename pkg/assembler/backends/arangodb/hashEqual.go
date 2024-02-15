@@ -177,11 +177,11 @@ func getHashEqualQueryValues(artifact *model.ArtifactInputSpec, equalArtifact *m
 	return values
 }
 
-func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
+func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range artifacts {
-		listOfValues = append(listOfValues, getHashEqualQueryValues(artifacts[i], otherArtifacts[i], hashEquals[i]))
+		listOfValues = append(listOfValues, getHashEqualQueryValues(artifacts[i].ArtifactInput, otherArtifacts[i].ArtifactInput, hashEquals[i]))
 	}
 
 	var documents []string
@@ -245,7 +245,7 @@ func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.
 	return hasEqualIDList, nil
 }
 
-func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
+func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.IDorArtifactInput, equalArtifact model.IDorArtifactInput, hashEqual model.HashEqualInputSpec) (string, error) {
 	query := `
 LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @equal_algorithm FILTER art.digest == @equal_digest RETURN art)
@@ -264,7 +264,7 @@ INSERT { _key: CONCAT("hashEqualArtEdges", hashEqual._key, equalArtifact._key), 
 
 RETURN { 'hashEqual_id': hashEqual._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getHashEqualQueryValues(&artifact, &equalArtifact, &hashEqual), "IngestHashEqual")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getHashEqualQueryValues(artifact.ArtifactInput, equalArtifact.ArtifactInput, &hashEqual), "IngestHashEqual")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest hashEqual: %w", err)
 	}

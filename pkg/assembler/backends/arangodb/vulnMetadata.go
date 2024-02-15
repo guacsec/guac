@@ -162,7 +162,7 @@ func getVulnMetadataQueryValues(vulnerability *model.VulnerabilityInputSpec, vul
 	return values
 }
 
-func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.VulnerabilityInputSpec, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
+func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
 	query := `
 	LET firstVuln = FIRST(
 		FOR vVulnID in vulnerabilities
@@ -187,7 +187,7 @@ func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerab
 	  
 	  RETURN { 'vulnMetadata_id': vulnMetadata._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getVulnMetadataQueryValues(&vulnerability, vulnerabilityMetadata), "IngestVulnerabilityMetadata")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getVulnMetadataQueryValues(vulnerability.VulnerabilityInput, vulnerabilityMetadata), "IngestVulnerabilityMetadata")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest VulnerabilityMetadata: %w", err)
 	}
@@ -205,11 +205,11 @@ func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerab
 	}
 }
 
-func (c *arangoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
+func (c *arangoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range vulnerabilityMetadataList {
-		listOfValues = append(listOfValues, getVulnMetadataQueryValues(vulnerabilities[i], *vulnerabilityMetadataList[i]))
+		listOfValues = append(listOfValues, getVulnMetadataQueryValues(vulnerabilities[i].VulnerabilityInput, *vulnerabilityMetadataList[i]))
 	}
 
 	var documents []string

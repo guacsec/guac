@@ -337,11 +337,11 @@ func getPkgEqualQueryValues(currentPkg *model.PkgInputSpec, otherPkg *model.PkgI
 	return values
 }
 
-func (c *arangoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
+func (c *arangoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range pkgEquals {
-		listOfValues = append(listOfValues, getPkgEqualQueryValues(pkgs[i], otherPackages[i], pkgEquals[i]))
+		listOfValues = append(listOfValues, getPkgEqualQueryValues(pkgs[i].PackageInput, otherPackages[i].PackageInput, pkgEquals[i]))
 	}
 
 	var documents []string
@@ -421,7 +421,7 @@ func (c *arangoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInp
 	return pkgEqualIDList, nil
 }
 
-func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, otherPackage model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
+func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, otherPackage model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	query := `
 	LET firstPkg = FIRST(
 		FOR pVersion in pkgVersions
@@ -456,7 +456,7 @@ func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpe
 	
 	RETURN { 'pkgEqual_id': pkgEqual._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getPkgEqualQueryValues(&pkg, &otherPackage, &pkgEqual), "IngestPkgEqual")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getPkgEqualQueryValues(pkg.PackageInput, otherPackage.PackageInput, &pkgEqual), "IngestPkgEqual")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest pkgEqual: %w", err)
 	}

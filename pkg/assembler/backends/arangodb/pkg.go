@@ -162,10 +162,10 @@ func getPackageQueryValues(pkg *model.PkgInputSpec) map[string]any {
 	return values
 }
 
-func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
+func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error) {
 	var listOfValues []map[string]any
 	for i := range pkgs {
-		listOfValues = append(listOfValues, getPackageQueryValues(pkgs[i]))
+		listOfValues = append(listOfValues, getPackageQueryValues(pkgs[i].PackageInput))
 	}
 
 	var documents []string
@@ -252,7 +252,7 @@ func (c *arangoClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInpu
 	return getPackageIDs(ctx, cursor)
 }
 
-func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
+func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
 	query := `
 	  LET type = FIRST(
 		UPSERT { type: @pkgType }
@@ -305,7 +305,7 @@ func (c *arangoClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec
 		"version_id": pkgVersionObj._id
   }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getPackageQueryValues(&pkg), "IngestPackage")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getPackageQueryValues(pkg.PackageInput), "IngestPackage")
 	if err != nil {
 		return nil, fmt.Errorf("failed to ingest package: %w", err)
 	}

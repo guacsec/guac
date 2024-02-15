@@ -259,12 +259,12 @@ func getVEXStatementQueryValues(pkg *model.PkgInputSpec, artifact *model.Artifac
 	return values
 }
 
-func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.VulnerabilityInputSpec, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
+func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
 	if len(subjects.Artifacts) > 0 {
 		var listOfValues []map[string]any
 
 		for i := range subjects.Artifacts {
-			listOfValues = append(listOfValues, getVEXStatementQueryValues(nil, subjects.Artifacts[i], vulnerabilities[i], vexStatements[i]))
+			listOfValues = append(listOfValues, getVEXStatementQueryValues(nil, subjects.Artifacts[i].ArtifactInput, vulnerabilities[i].VulnerabilityInput, vexStatements[i]))
 		}
 
 		var documents []string
@@ -339,7 +339,7 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
-			listOfValues = append(listOfValues, getVEXStatementQueryValues(subjects.Packages[i], nil, vulnerabilities[i], vexStatements[i]))
+			listOfValues = append(listOfValues, getVEXStatementQueryValues(subjects.Packages[i].PackageInput, nil, vulnerabilities[i].VulnerabilityInput, vexStatements[i]))
 		}
 
 		var documents []string
@@ -424,7 +424,7 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 	}
 }
 
-func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) (string, error) {
+func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.IDorVulnerabilityInput, vexStatement model.VexStatementInputSpec) (string, error) {
 	if subject.Artifact != nil {
 		query := `
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
@@ -453,7 +453,7 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 		  
 		  RETURN { 'certifyVex_id': certifyVex._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getVEXStatementQueryValues(nil, subject.Artifact, &vulnerability, &vexStatement), "IngestVEXStatement - Artifact")
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, getVEXStatementQueryValues(nil, subject.Artifact.ArtifactInput, vulnerability.VulnerabilityInput, &vexStatement), "IngestVEXStatement - Artifact")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest VEX: %w", err)
 		}
@@ -504,7 +504,7 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 		  
 		RETURN { 'certifyVex_id': certifyVex._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getVEXStatementQueryValues(subject.Package, nil, &vulnerability, &vexStatement), "IngestVEXStatement - Package")
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, getVEXStatementQueryValues(subject.Package.PackageInput, nil, &vulnerability.VulnerabilityInput, &vexStatement), "IngestVEXStatement - Package")
 		if err != nil {
 			return "", fmt.Errorf("failed to create ingest VEX: %w", err)
 		}

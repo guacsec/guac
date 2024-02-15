@@ -364,7 +364,7 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 		  
 		  RETURN { 'pointOfContact_id': pointOfContact._id }`
 
-			cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(subject.Package, pkgMatchType, nil, nil, &pointOfContact), "IngestPointOfContact - PkgVersion")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(subject.Package.PackageInput, pkgMatchType, nil, nil, &pointOfContact), "IngestPointOfContact - PkgVersion")
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
@@ -396,7 +396,7 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 			  
 			  RETURN { 'pointOfContact_id': pointOfContact._id }`
 
-			cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(subject.Package, pkgMatchType, nil, nil, &pointOfContact), "IngestPointOfContact - PkgName")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(subject.Package.PackageInput, pkgMatchType, nil, nil, &pointOfContact), "IngestPointOfContact - PkgName")
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package pointOfContact: %w", err)
 			}
@@ -422,7 +422,7 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 		
 		RETURN { 'pointOfContact_id': pointOfContact._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(nil, nil, subject.Artifact, nil, &pointOfContact), "IngestPointOfContact - artifact")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(nil, nil, subject.Artifact.ArtifactInput, nil, &pointOfContact), "IngestPointOfContact - artifact")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest artifact pointOfContact: %w", err)
 		}
@@ -454,7 +454,7 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 		
 		RETURN { 'pointOfContact_id': pointOfContact._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(nil, nil, nil, subject.Source, &pointOfContact), "IngestPointOfContact - source")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getPointOfContactQueryValues(nil, nil, nil, subject.Source.SourceInput, &pointOfContact), "IngestPointOfContact - source")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source pointOfContact: %w", err)
 		}
@@ -481,7 +481,7 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
-			listOfValues = append(listOfValues, getPointOfContactQueryValues(subjects.Packages[i], pkgMatchType, nil, nil, pointOfContacts[i]))
+			listOfValues = append(listOfValues, getPointOfContactQueryValues(subjects.Packages[i].PackageInput, pkgMatchType, nil, nil, pointOfContacts[i]))
 		}
 
 		var documents []string
@@ -580,7 +580,7 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 		var listOfValues []map[string]any
 
 		for i := range subjects.Artifacts {
-			listOfValues = append(listOfValues, getPointOfContactQueryValues(nil, nil, subjects.Artifacts[i], nil, pointOfContacts[i]))
+			listOfValues = append(listOfValues, getPointOfContactQueryValues(nil, nil, subjects.Artifacts[i].ArtifactInput, nil, pointOfContacts[i]))
 		}
 
 		var documents []string
@@ -634,7 +634,7 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 		var listOfValues []map[string]any
 
 		for i := range subjects.Sources {
-			listOfValues = append(listOfValues, getPointOfContactQueryValues(nil, nil, nil, subjects.Sources[i], pointOfContacts[i]))
+			listOfValues = append(listOfValues, getPointOfContactQueryValues(nil, nil, nil, subjects.Sources[i].SourceInput, pointOfContacts[i]))
 		}
 
 		var documents []string

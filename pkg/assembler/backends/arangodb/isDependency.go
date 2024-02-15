@@ -345,13 +345,13 @@ func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpe
 	return values
 }
 
-func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO(LUMJJB): handle pkgmatchtype
 
 	var listOfValues []map[string]any
 
 	for i := range pkgs {
-		listOfValues = append(listOfValues, getDependencyQueryValues(pkgs[i], depPkgs[i], depPkgMatchType, dependencies[i]))
+		listOfValues = append(listOfValues, getDependencyQueryValues(pkgs[i].PackageInput, depPkgs[i].PackageInput, depPkgMatchType, dependencies[i]))
 	}
 
 	var documents []string
@@ -469,7 +469,7 @@ func (c *arangoClient) IngestDependencies(ctx context.Context, pkgs []*model.Pkg
 	return isDepIDList, nil
 }
 
-func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 
 	var query string
 	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
@@ -544,7 +544,7 @@ func (c *arangoClient) IngestDependency(ctx context.Context, pkg model.PkgInputS
 	  
 	  RETURN { 'isDependency_id': isDependency._id }`
 	}
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getDependencyQueryValues(&pkg, &depPkg, depPkgMatchType, &dependency), "IngestDependency")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getDependencyQueryValues(pkg.PackageInput, depPkg.PackageInput, depPkgMatchType, &dependency), "IngestDependency")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest isDependency: %w", err)
 	}

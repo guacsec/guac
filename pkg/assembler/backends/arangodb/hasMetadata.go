@@ -363,7 +363,7 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 		  
 		  RETURN { 'hasMetadata_id': hasMetadata._id }`
 
-			cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(subject.Package, pkgMatchType, nil, nil, &hasMetadata), "IngestHasMetadata - PkgVersion")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(subject.Package.PackageInput, pkgMatchType, nil, nil, &hasMetadata), "IngestHasMetadata - PkgVersion")
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
@@ -396,7 +396,7 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 			  
 			  RETURN { 'hasMetadata_id': hasMetadata._id }`
 
-			cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(subject.Package, pkgMatchType, nil, nil, &hasMetadata), "IngestHasMetadata - PkgName")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(subject.Package.PackageInput, pkgMatchType, nil, nil, &hasMetadata), "IngestHasMetadata - PkgName")
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package hasMetadata: %w", err)
 			}
@@ -421,7 +421,7 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 		
 		RETURN { 'hasMetadata_id': hasMetadata._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(nil, nil, subject.Artifact, nil, &hasMetadata), "IngestHasMetadata - artifact")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(nil, nil, subject.Artifact.ArtifactInput, nil, &hasMetadata), "IngestHasMetadata - artifact")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest artifact hasMetadata: %w", err)
 		}
@@ -453,7 +453,7 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 		
 		RETURN { 'hasMetadata_id': hasMetadata._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(nil, nil, nil, subject.Source, &hasMetadata), "IngestHasMetadata - source")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasMetadataQueryValues(nil, nil, nil, subject.Source.SourceInput, &hasMetadata), "IngestHasMetadata - source")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source hasMetadata: %w", err)
 		}
@@ -481,7 +481,7 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
-			listOfValues = append(listOfValues, getHasMetadataQueryValues(subjects.Packages[i], pkgMatchType, nil, nil, hasMetadataList[i]))
+			listOfValues = append(listOfValues, getHasMetadataQueryValues(subjects.Packages[i].PackageInput, pkgMatchType, nil, nil, hasMetadataList[i]))
 		}
 
 		var documents []string
@@ -580,7 +580,7 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 		var listOfValues []map[string]any
 
 		for i := range subjects.Artifacts {
-			listOfValues = append(listOfValues, getHasMetadataQueryValues(nil, nil, subjects.Artifacts[i], nil, hasMetadataList[i]))
+			listOfValues = append(listOfValues, getHasMetadataQueryValues(nil, nil, subjects.Artifacts[i].ArtifactInput, nil, hasMetadataList[i]))
 		}
 
 		var documents []string
@@ -634,7 +634,7 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 		var listOfValues []map[string]any
 
 		for i := range subjects.Sources {
-			listOfValues = append(listOfValues, getHasMetadataQueryValues(nil, nil, nil, subjects.Sources[i], hasMetadataList[i]))
+			listOfValues = append(listOfValues, getHasMetadataQueryValues(nil, nil, nil, subjects.Sources[i].SourceInput, hasMetadataList[i]))
 		}
 
 		var documents []string
