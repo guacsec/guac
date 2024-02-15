@@ -97,17 +97,18 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.IDo
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	srcName, err := c.getSourceNameFromInput(ctx, source)
+	var pkgNameOrVersionNode pkgNameOrVersion
+	var err error
+	in.PackageID, pkgNameOrVersionNode, err = c.returnFoundPkgBasedOnMatchType(ctx, &packageArg, &pkgMatchType)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
+	srcName, err := c.returnFoundSource(ctx, &source)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	in.SourceID = srcName.ThisID
-
-	pkgNameOrVersionNode, err := c.getPackageNameOrVerFromInput(ctx, packageArg, pkgMatchType)
-	if err != nil {
-		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-	in.PackageID = pkgNameOrVersionNode.ID()
 
 	out, err := byKeykv[*srcMapLink](ctx, hsaCol, in.Key(), c)
 	if err == nil {

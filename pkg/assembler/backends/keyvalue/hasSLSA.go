@@ -233,7 +233,7 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	s, err := c.artifactByInput(ctx, &subject)
+	s, err := c.returnFoundArtifact(ctx, &subject)
 	if err != nil {
 		return "", gqlerror.Errorf("IngestSLSA :: Subject artifact not found")
 	}
@@ -242,7 +242,7 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	var bfs []*artStruct
 	var bfIDs []string
 	for i, a := range builtFrom {
-		b, err := c.artifactByInput(ctx, a)
+		b, err := c.returnFoundArtifact(ctx, a)
 		if err != nil {
 			return "", gqlerror.Errorf("IngestSLSA :: BuiltFrom %d artifact not found", i)
 		}
@@ -252,7 +252,7 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 	slices.Sort(bfIDs)
 	in.BuiltFrom = bfIDs
 
-	b, err := c.builderByInput(ctx, &builtBy)
+	b, err := c.returnFoundBuilder(ctx, &builtBy)
 	if err != nil {
 		return "", gqlerror.Errorf("IngestSLSA :: Builder not found")
 	}

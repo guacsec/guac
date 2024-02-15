@@ -305,3 +305,20 @@ func (c *demoClient) buildArtifactResponse(ctx context.Context, ID string, filte
 
 	return art, nil
 }
+
+// returnFoundArtifact return the node by first searching via ID. If the ID is not specified, it defaults to searching via inputspec
+func (c *demoClient) returnFoundArtifact(ctx context.Context, artIDorInput *model.IDorArtifactInput) (*artStruct, error) {
+	if artIDorInput.ArtifactID != nil {
+		foundArtStruct, err := byIDkv[*artStruct](ctx, *artIDorInput.ArtifactID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to return artStruct node by ID with error: %w", err)
+		}
+		return foundArtStruct, nil
+	} else {
+		foundArtStruct, err := c.artifactByInput(ctx, artIDorInput.ArtifactInput)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to artifactByInput with error: %w", err)
+		}
+		return foundArtStruct, nil
+	}
+}

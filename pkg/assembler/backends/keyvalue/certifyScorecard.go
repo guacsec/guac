@@ -103,11 +103,11 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.IDorSour
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	srcName, err := c.getSourceNameFromInput(ctx, source)
+	srcName, err := c.returnFoundSource(ctx, &source)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	in.SourceID = srcName.ThisID
+	in.SourceID = srcName.ID()
 
 	out, err := byKeykv[*scorecardLink](ctx, cscCol, in.Key(), c)
 	if err == nil {

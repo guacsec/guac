@@ -233,6 +233,7 @@ func ingestPackages(ctx context.Context, client graphql.Client, packageInputMap 
 	for i := range response.IngestPackages {
 		pkgIDs := response.IngestPackages[i]
 		results[keys[i]] = &model.IDorPkgInput{
+			PackageInput:       pkgInputs[i].PackageInput,
 			PackageTypeID:      &pkgIDs.PackageTypeID,
 			PackageNamespaceID: &pkgIDs.PackageNamespaceID,
 			PackageNameID:      &pkgIDs.PackageNameID,
@@ -259,6 +260,7 @@ func ingestSources(ctx context.Context, client graphql.Client, sourceInputMap ma
 	for i := range response.IngestSources {
 		srcIDs := response.IngestSources[i]
 		results[keys[i]] = &model.IDorSourceInput{
+			SourceInput:       srcInputs[i].SourceInput,
 			SourceTypeID:      &srcIDs.SourceTypeID,
 			SourceNamespaceID: &srcIDs.SourceNamespaceID,
 			SourceNameID:      &srcIDs.SourceNameID,
@@ -284,7 +286,8 @@ func ingestArtifacts(ctx context.Context, client graphql.Client, artInputMap map
 	for i := range response.IngestArtifacts {
 		artID := response.IngestArtifacts[i]
 		results[keys[i]] = &model.IDorArtifactInput{
-			ArtifactID: &artID,
+			ArtifactInput: artInputs[i].ArtifactInput,
+			ArtifactID:    &artID,
 		}
 	}
 	return results, nil
@@ -308,7 +311,8 @@ func ingestBuilders(ctx context.Context, client graphql.Client, buildInputMap ma
 	for i := range response.IngestBuilders {
 		buildID := response.IngestBuilders[i]
 		results[keys[i]] = &model.IDorBuilderInput{
-			BuilderID: &buildID,
+			BuilderInput: buildInputs[i].BuilderInput,
+			BuilderID:    &buildID,
 		}
 	}
 	return results, nil
@@ -331,6 +335,7 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client, vulnInput
 	for i := range response.IngestVulnerabilities {
 		vulnIDs := response.IngestVulnerabilities[i]
 		results[keys[i]] = &model.IDorVulnerabilityInput{
+			VulnerabilityInput:  vulnInputs[i].VulnerabilityInput,
 			VulnerabilityTypeID: &vulnIDs.VulnerabilityTypeID,
 			VulnerabilityNodeID: &vulnIDs.VulnerabilityNodeID,
 		}
@@ -355,7 +360,8 @@ func ingestLicenses(ctx context.Context, client graphql.Client, licenseInputMap 
 	for i := range response.IngestLicenses {
 		licenseID := response.IngestLicenses[i]
 		results[keys[i]] = &model.IDorLicenseInput{
-			LicenseID: &licenseID,
+			LicenseInput: licenseInputs[i].LicenseInput,
+			LicenseID:    &licenseID,
 		}
 	}
 	return results, nil

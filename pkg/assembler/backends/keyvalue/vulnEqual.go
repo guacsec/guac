@@ -89,10 +89,10 @@ func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.ID
 
 	vIDs := make([]string, 0, 2)
 	vs := make([]*vulnIDNode, 0, 2)
-	for _, vi := range []model.VulnerabilityInputSpec{vulnerability, otherVulnerability} {
-		v, err := c.getVulnerabilityFromInput(ctx, vi)
+	for _, vi := range []model.IDorVulnerabilityInput{vulnerability, otherVulnerability} {
+		v, err := c.returnFoundVulnerability(ctx, &vi)
 		if err != nil {
-			return "", gqlerror.Errorf("%v :: %v", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		vs = append(vs, v)
 		vIDs = append(vIDs, v.ThisID)

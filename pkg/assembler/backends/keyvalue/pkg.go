@@ -366,7 +366,7 @@ func (c *demoClient) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgIn
 
 func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput) (*model.PackageIDs, error) {
 	inType := &pkgType{
-		Type: input.Type,
+		Type: input.PackageInput.Type,
 	}
 	c.m.RLock()
 	outType, err := byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
@@ -398,7 +398,7 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput
 
 	inNamespace := &pkgNamespace{
 		Parent:    outType.ThisID,
-		Namespace: nilToEmpty(input.Namespace),
+		Namespace: nilToEmpty(input.PackageInput.Namespace),
 	}
 	c.m.RLock()
 	outNamespace, err := byKeykv[*pkgNamespace](ctx, pkgNSCol, inNamespace.Key(), c)
@@ -431,7 +431,7 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput
 
 	inName := &pkgName{
 		Parent: outNamespace.ThisID,
-		Name:   input.Name,
+		Name:   input.PackageInput.Name,
 	}
 	c.m.RLock()
 	outName, err := byKeykv[*pkgName](ctx, pkgNameCol, inName.Key(), c)
@@ -464,9 +464,9 @@ func (c *demoClient) IngestPackage(ctx context.Context, input model.IDorPkgInput
 
 	inVersion := &pkgVersion{
 		Parent:     outName.ThisID,
-		Version:    nilToEmpty(input.Version),
-		Subpath:    nilToEmpty(input.Subpath),
-		Qualifiers: getQualifiersFromInput(input.Qualifiers),
+		Version:    nilToEmpty(input.PackageInput.Version),
+		Subpath:    nilToEmpty(input.PackageInput.Subpath),
+		Qualifiers: getQualifiersFromInput(input.PackageInput.Qualifiers),
 	}
 	c.m.RLock()
 	outVersion, err := byKeykv[*pkgVersion](ctx, pkgVerCol, inVersion.Key(), c)
@@ -1040,4 +1040,46 @@ func (c *demoClient) matchPackages(ctx context.Context, filter []*model.PkgSpec,
 		}
 	}
 	return true
+}
+
+// returnFoundPkgVersion return the node by first searching via ID. If the ID is not specified, it defaults to searching via inputspec
+func (c *demoClient) returnFoundPkgVersion(ctx context.Context, pkgIDorInput *model.IDorPkgInput) (*pkgVersion, error) {
+	if pkgIDorInput.PackageVersionID != nil {
+		foundPkgVersionNode, err := byIDkv[*pkgVersion](ctx, *pkgIDorInput.PackageVersionID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to return pkgVersion node by ID with error: %w", err)
+		}
+		return foundPkgVersionNode, nil
+	} else {
+		foundPkgVersionNode, err := c.getPackageVerFromInput(ctx, *pkgIDorInput.PackageInput)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to getPackageVerFromInput with error: %w", err)
+		}
+		return foundPkgVersionNode, nil
+	}
+}
+
+// returnFoundPkgBasedOnMatchType return the node by first searching via ID depending on the match type. If the ID is not specified, it defaults to searching via inputspec
+func (c *demoClient) returnFoundPkgBasedOnMatchType(ctx context.Context, pkgIDorInput *model.IDorPkgInput, pkgMatchType *model.MatchFlags) (string, pkgNameOrVersion, error) {
+	if pkgIDorInput.PackageVersionID != nil && pkgIDorInput.PackageNameID != nil {
+		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+			foundPkgVersionNode, err := byIDkv[*pkgVersion](ctx, *pkgIDorInput.PackageVersionID, c)
+			if err != nil {
+				return "", nil, gqlerror.Errorf("failed to return pkgVersion node by ID with error: %w", err)
+			}
+			return *pkgIDorInput.PackageVersionID, foundPkgVersionNode, nil
+		} else {
+			foundPkgNameNode, err := byIDkv[*pkgName](ctx, *pkgIDorInput.PackageNameID, c)
+			if err != nil {
+				return "", nil, gqlerror.Errorf("failed to return pkgName node by ID with error: %w", err)
+			}
+			return *pkgIDorInput.PackageNameID, foundPkgNameNode, nil
+		}
+	} else {
+		foundPkgNameorVersionNode, err := c.getPackageNameOrVerFromInput(ctx, *pkgIDorInput.PackageInput, *pkgMatchType)
+		if err != nil {
+			return "", nil, gqlerror.Errorf("failed to getPackageNameOrVerFromInput with error: %w", err)
+		}
+		return foundPkgNameorVersionNode.ID(), foundPkgNameorVersionNode, nil
+	}
 }

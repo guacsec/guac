@@ -106,17 +106,17 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.I
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	foundPackage, err := c.getPackageVerFromInput(ctx, packageArg)
+	foundPackage, err := c.returnFoundPkgVersion(ctx, &packageArg)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	in.PackageID = foundPackage.ThisID
+	in.PackageID = foundPackage.ID()
 
-	foundVulnNode, err := c.getVulnerabilityFromInput(ctx, vulnerability)
+	foundVulnNode, err := c.returnFoundVulnerability(ctx, &vulnerability)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	in.VulnerabilityID = foundVulnNode.ThisID
+	in.VulnerabilityID = foundVulnNode.ID()
 
 	out, err := byKeykv[*certifyVulnerabilityLink](ctx, cVulnCol, in.Key(), c)
 	if err == nil {

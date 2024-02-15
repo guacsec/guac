@@ -92,11 +92,11 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	foundVulnNode, err := c.getVulnerabilityFromInput(ctx, vulnerability)
+	foundVulnNode, err := c.returnFoundVulnerability(ctx, &vulnerability)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	in.VulnerabilityID = foundVulnNode.ThisID
+	in.VulnerabilityID = foundVulnNode.ID()
 
 	out, err := byKeykv[*vulnerabilityMetadataLink](ctx, vulnMDCol, in.Key(), c)
 	if err == nil {

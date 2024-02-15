@@ -105,10 +105,10 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.IDorPkgInput,
 
 	pIDs := make([]string, 0, 2)
 	ps := make([]*pkgVersion, 0, 2)
-	for _, pi := range []model.PkgInputSpec{pkg, depPkg} {
-		p, err := c.getPackageVerFromInput(ctx, pi)
+	for _, pi := range []model.IDorPkgInput{pkg, depPkg} {
+		p, err := c.returnFoundPkgVersion(ctx, &pi)
 		if err != nil {
-			return "", gqlerror.Errorf("%v :: %v", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		ps = append(ps, p)
 		pIDs = append(pIDs, p.ThisID)

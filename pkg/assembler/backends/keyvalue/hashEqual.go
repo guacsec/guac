@@ -86,11 +86,11 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.IDorArt
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	aInt1, err := c.artifactByInput(ctx, &artifact)
+	aInt1, err := c.returnFoundArtifact(ctx, &artifact)
 	if err != nil {
 		return "", gqlerror.Errorf("IngestHashEqual :: Artifact not found")
 	}
-	aInt2, err := c.artifactByInput(ctx, &equalArtifact)
+	aInt2, err := c.returnFoundArtifact(ctx, &equalArtifact)
 	if err != nil {
 		return "", gqlerror.Errorf("IngestHashEqual :: Artifact not found")
 	}

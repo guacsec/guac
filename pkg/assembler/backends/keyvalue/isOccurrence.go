@@ -114,7 +114,7 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	a, err := c.artifactByInput(ctx, &artifact)
+	a, err := c.returnFoundArtifact(ctx, &artifact)
 	if err != nil {
 		return "", gqlerror.Errorf("%v :: Artifact not found %s", funcName, err)
 	}
@@ -123,9 +123,9 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 	var pkgVer *pkgVersion
 	if subject.Package != nil {
 		var err error
-		pkgVer, err = c.getPackageVerFromInput(ctx, *subject.Package)
+		pkgVer, err = c.returnFoundPkgVersion(ctx, subject.Package)
 		if err != nil {
-			return "", gqlerror.Errorf("IngestOccurrence :: %v", err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.Pkg = pkgVer.ThisID
 	}
@@ -133,9 +133,9 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 	var src *srcNameNode
 	if subject.Source != nil {
 		var err error
-		src, err = c.getSourceNameFromInput(ctx, *subject.Source)
+		src, err = c.returnFoundSource(ctx, subject.Source)
 		if err != nil {
-			return "", gqlerror.Errorf("IngestOccurrence :: %v", err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.Source = src.ThisID
 	}

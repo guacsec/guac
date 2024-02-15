@@ -59,7 +59,7 @@ func (n *licStruct) setCertifyLegals(ctx context.Context, id string, c *demoClie
 	return setkv(ctx, licenseCol, n, c)
 }
 
-func (c *demoClient) licenseByInput(ctx context.Context, b *model.IDorLicenseInput) (*licStruct, error) {
+func (c *demoClient) licenseByInput(ctx context.Context, b *model.LicenseInputSpec) (*licStruct, error) {
 	in := &licStruct{
 		Name:        b.Name,
 		ListVersion: nilToEmpty(b.ListVersion),
@@ -87,9 +87,9 @@ func (c *demoClient) IngestLicense(ctx context.Context, license *model.IDorLicen
 
 func (c *demoClient) ingestLicense(ctx context.Context, license *model.IDorLicenseInput, readOnly bool) (string, error) {
 	in := &licStruct{
-		Name:        license.Name,
-		Inline:      nilToEmpty(license.Inline),
-		ListVersion: nilToEmpty(license.ListVersion),
+		Name:        license.LicenseInput.Name,
+		Inline:      nilToEmpty(license.LicenseInput.Inline),
+		ListVersion: nilToEmpty(license.LicenseInput.ListVersion),
 	}
 
 	lock(&c.m, readOnly)
@@ -205,4 +205,21 @@ func (c *demoClient) convLicense(a *licStruct) *model.License {
 		rv.ListVersion = &a.ListVersion
 	}
 	return rv
+}
+
+// returnFoundLicense return the node by first searching via ID. If the ID is not specified, it defaults to searching via inputspec
+func (c *demoClient) returnFoundLicense(ctx context.Context, licenseIDorInput *model.IDorLicenseInput) (*licStruct, error) {
+	if licenseIDorInput.LicenseID != nil {
+		licStruct, err := byIDkv[*licStruct](ctx, *licenseIDorInput.LicenseID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to return licStruct node by ID with error: %w", err)
+		}
+		return licStruct, nil
+	} else {
+		licStruct, err := c.licenseByInput(ctx, licenseIDorInput.LicenseInput)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to licenseByInput with error: %w", err)
+		}
+		return licStruct, nil
+	}
 }

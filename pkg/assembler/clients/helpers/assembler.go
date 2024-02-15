@@ -254,6 +254,7 @@ func ingestPackage(ctx context.Context, client graphql.Client, p *model.IDorPkgI
 		return nil, fmt.Errorf("IngestPackage failed with error: %w", err)
 	} else {
 		return &model.IDorPkgInput{
+			PackageInput:       p.PackageInput,
 			PackageTypeID:      &result.IngestPackage.PackageTypeID,
 			PackageNamespaceID: &result.IngestPackage.PackageNamespaceID,
 			PackageNameID:      &result.IngestPackage.PackageNameID,
@@ -267,6 +268,7 @@ func ingestSource(ctx context.Context, client graphql.Client, s *model.IDorSourc
 		return nil, fmt.Errorf("IngestSource failed with error: %w", err)
 	} else {
 		return &model.IDorSourceInput{
+			SourceInput:       s.SourceInput,
 			SourceTypeID:      &result.IngestSource.SourceTypeID,
 			SourceNamespaceID: &result.IngestSource.SourceNamespaceID,
 			SourceNameID:      &result.IngestSource.SourceNameID,
@@ -278,7 +280,7 @@ func ingestArtifact(ctx context.Context, client graphql.Client, a *model.IDorArt
 	if result, err := model.IngestArtifact(ctx, client, *a); err != nil {
 		return nil, fmt.Errorf("IngestArtifact failed with error: %w", err)
 	} else {
-		return &model.IDorArtifactInput{ArtifactID: &result.IngestArtifact}, err
+		return &model.IDorArtifactInput{ArtifactID: &result.IngestArtifact, ArtifactInput: a.ArtifactInput}, err
 	}
 }
 
@@ -286,7 +288,7 @@ func ingestBuilder(ctx context.Context, client graphql.Client, b *model.IDorBuil
 	if result, err := model.IngestBuilder(ctx, client, *b); err != nil {
 		return nil, fmt.Errorf("IngestBuilder failed with error: %w", err)
 	} else {
-		return &model.IDorBuilderInput{BuilderID: &result.IngestBuilder}, err
+		return &model.IDorBuilderInput{BuilderID: &result.IngestBuilder, BuilderInput: b.BuilderInput}, err
 	}
 }
 
@@ -295,6 +297,7 @@ func ingestVulnerability(ctx context.Context, client graphql.Client, v *model.ID
 		return nil, fmt.Errorf("IngestVulnerability failed with error: %w", err)
 	} else {
 		return &model.IDorVulnerabilityInput{
+			VulnerabilityInput:  v.VulnerabilityInput,
 			VulnerabilityTypeID: &result.IngestVulnerability.VulnerabilityTypeID,
 			VulnerabilityNodeID: &result.IngestVulnerability.VulnerabilityNodeID,
 		}, err
@@ -306,7 +309,8 @@ func ingestLicense(ctx context.Context, client graphql.Client, l *model.IDorLice
 		return nil, fmt.Errorf("IngestLicense failed with error: %w", err)
 	} else {
 		return &model.IDorLicenseInput{
-			LicenseID: &result.IngestLicense,
+			LicenseInput: l.LicenseInput,
+			LicenseID:    &result.IngestLicense,
 		}, err
 	}
 }

@@ -99,20 +99,18 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDor
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	// for IsDependency the dependent package will return the ID at the
-	// packageName node. VersionRange will be used to specify the versions are
-	// the attestation relates to
-	foundPkgVersion, err := c.getPackageVerFromInput(ctx, packageArg)
+	var depPkg pkgNameOrVersion
+	var err error
+	inLink.DepPackageID, depPkg, err = c.returnFoundPkgBasedOnMatchType(ctx, &dependentPackageArg, &depPkgMatchType)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	inLink.PackageID = foundPkgVersion.ThisID
 
-	depPkg, err := c.getPackageNameOrVerFromInput(ctx, dependentPackageArg, depPkgMatchType)
+	foundPkgVersion, err := c.returnFoundPkgVersion(ctx, &packageArg)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	inLink.DepPackageID = depPkg.ID()
+	inLink.PackageID = foundPkgVersion.ID()
 
 	outLink, err := byKeykv[*isDependencyLink](ctx, isDepCol, inLink.Key(), c)
 	if err == nil {

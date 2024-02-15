@@ -82,7 +82,7 @@ func (c *demoClient) IngestBuilder(ctx context.Context, builder *model.IDorBuild
 
 func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.IDorBuilderInput, readOnly bool) (string, error) {
 	in := &builderStruct{
-		URI: builder.URI,
+		URI: builder.BuilderInput.URI,
 	}
 
 	lock(&c.m, readOnly)
@@ -178,4 +178,21 @@ func (c *demoClient) exactBuilder(ctx context.Context, filter *model.BuilderSpec
 		}
 	}
 	return nil, nil
+}
+
+// returnFoundBuilder return the node by first searching via ID. If the ID is not specified, it defaults to searching via inputspec
+func (c *demoClient) returnFoundBuilder(ctx context.Context, buildIDorInput *model.IDorBuilderInput) (*builderStruct, error) {
+	if buildIDorInput.BuilderID != nil {
+		builderStruct, err := byIDkv[*builderStruct](ctx, *buildIDorInput.BuilderID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to return builderStruct node by ID with error: %w", err)
+		}
+		return builderStruct, nil
+	} else {
+		builderStruct, err := c.builderByInput(ctx, buildIDorInput.BuilderInput)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to builderByInput with error: %w", err)
+		}
+		return builderStruct, nil
+	}
 }
