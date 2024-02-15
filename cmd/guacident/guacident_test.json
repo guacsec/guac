@@ -1,0 +1,181 @@
+[
+    {
+      "test-description": "",
+      "hasSBOMOne": {
+        "id": "",
+        "uri": "",
+        "algorithm": "",
+        "digest": "",
+        "downloadLocation": "",
+        "origin": "",
+        "collector": "",
+        "knownSince": "2024-02-15T18:00:00Z",
+        "includedOccurrences": [
+            {
+                
+                "id": "",
+                "artifact": {
+                    "id": "",
+                    "algorithm": "",
+                    "digest": ""
+                },
+                "justification": "",
+                "origin": "",
+                "collector": ""
+            }
+        ],
+        "includedDependencies": [
+            {
+            "id": "",
+            "justification": "",
+            "package": {
+                "id": "",
+                "type": "",
+                "namespaces": [
+                    {
+                    "id": "",
+                    "namespace": "",
+                    "names": [{
+                        "id": "",
+                        "name": "",
+                        "versions": [
+                            {
+                                "id": "",
+                                "version": "",
+                                "Subpath": "",
+                                "qualifiers": [
+                                    {
+                                        "key": "",
+                                        "value": ""
+                                    }
+                                ]
+                            }
+                        ]                                                         
+                    }]
+                    }
+                ]
+            },
+            "dependencyPackage": {
+                "id": "",
+                "type": "",
+                "namespaces": [
+                    {
+                        "id": "",
+                        "namespace": "",
+                        "names": [{
+                            "id": "",
+                            "name": "",
+                            "versions": [
+                                {
+                                    "id": "",
+                                    "version": "",
+                                    "Subpath": "",
+                                    "qualifiers": [
+                                        {
+                                            "key": "",
+                                            "value": ""
+                                        }
+                                    ]
+                                }
+                            ]
+                        }]
+                    }
+                ]
+            },
+            "dependencyType": "",
+            "versionRange": "",
+            "origin": "",
+            "collector": ""
+            }
+        ]
+      },
+      "hasSBOMTwo": {
+        "id": "",
+        "uri": "",
+        "algorithm": "",
+        "digest": "",
+        "downloadLocation": "",
+        "origin": "",
+        "collector": "",
+        "knownSince": "2024-02-15T18:00:00Z",
+        "includedOccurrences": [
+            {
+                "id": "",
+                "artifact": {
+                    "id": "",
+                    "algorithm": "",
+                    "digest": ""
+                },
+                "justification": "",
+                "origin": "",
+                "collector": ""
+            }
+        ],
+        "includedDependencies": [
+            {
+            "id": "",
+            "justification": "",
+            "package": {
+                "id": "",
+                "type": "",
+                "namespaces": [
+                    {
+                    "id": "",
+                    "namespace": "",
+                    "names": [{
+                        "id": "",
+                        "name": "",
+                        "versions": [
+                            {
+                                "id": "",
+                                "version": "",
+                                "Subpath": "",
+                                "qualifiers": [
+                                    {
+                                        "key": "",
+                                        "value": ""
+                                    }
+                                ]
+                            }
+                        ]                                                         
+                    }]
+                    }
+                ]
+            },
+            "dependencyPackage": {
+                "id": "",
+                "type": "",
+                "namespaces": [
+                    {
+                        "id": "",
+                        "namespace": "",
+                        "names": [{
+                            "id": "",
+                            "name": "",
+                            "versions": [
+                                {
+                                    "id": "",
+                                    "version": "",
+                                    "Subpath": "",
+                                    "qualifiers": [
+                                        {
+                                            "key": "",
+                                            "value": ""
+                                        }
+                                    ]
+                                }
+                            ]
+                        }]
+                    }
+                ]
+            },
+            "dependencyType": "",
+            "versionRange": "",
+            "origin": "",
+            "collector": ""
+            }
+        ]
+      }
+    }
+  ]
+  
