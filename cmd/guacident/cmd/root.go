@@ -32,12 +32,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Graph map[string][]Node
+type SBOMDiffTest struct {
+	Description string `json:"test-description"`
+	HasSBOMOne model.HasSBOMsHasSBOM `json:"hasSBOMOne"`
+    HasSBOMTwo model.HasSBOMsHasSBOM `json:"hasSBOMTwo"`
+}
 
 type Node struct {
 	Value interface{}
 	neighbours []*Node
-	flag bool
+	leaf bool
 	tag string
 }
 

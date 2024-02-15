@@ -17,18 +17,25 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"fmt"
 	"net/http"
 	"os"
 	"reflect"
-
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	
+)
+
+var (
+	hasSBOMOne []model.HasSBOMsHasSBOM
+	hasSBOMTwo []model.HasSBOMsHasSBOM
 )
 
 func init() {
@@ -36,7 +43,8 @@ func init() {
 	rootCmd.PersistentFlags().StringSlice("boms", []string{}, "two sboms to find the diff between")
 	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
 	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
-	rootCmd.PersistentFlags().Bool("wide", false, "show differences in color")
+	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
+	rootCmd.PersistentFlags().String("file", "guacident_test.json", "filename to read sbom test cases from")
 }
 
 var diffCmd = &cobra.Command{
@@ -44,120 +52,172 @@ var diffCmd = &cobra.Command{
 	Short: "Get a unified tree diff for two given SBOMS",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		boms, err := cmd.Flags().GetStringSlice("boms")
-		if err!= nil {
-			fmt.Println("Must provide two sboms to find the diff between")
-			os.Exit(1)
-		}
+		test, _ := cmd.Flags().GetBool("test")
+		testfile, _ := cmd.Flags().GetString("file")
 
-		if len(boms) < 2 {
-			fmt.Println("Must provide two sboms to find the diff between")
-			fmt.Println(boms)
-			os.Exit(1)
-		}else if len(boms) > 2{
-			fmt.Println("Must provide only two sboms to find the diff between")
-			os.Exit(1)
-		}
+		if !test {
+			boms, err := cmd.Flags().GetStringSlice("boms")
+			if err!= nil {
+				fmt.Println("Must provide two sboms to find the diff between")
+				os.Exit(1)
+			}
 
-		uri, _ := cmd.Flags().GetBool("uri")
-		purl, _ := cmd.Flags().GetBool("purl")
-		wide, _ := cmd.Flags().GetBool("wide")
+			if len(boms) < 2 {
+				fmt.Println("Must provide two sboms to find the diff between")
+				fmt.Println(boms)
+				os.Exit(1)
+			}else if len(boms) > 2{
+				fmt.Println("Must provide only two sboms to find the diff between")
+				os.Exit(1)
+			}
 
-		if !uri && !purl {
-			fmt.Println("Must provide one of --uri or --purl")
-			os.Exit(1)
-		}
+			uri, _ := cmd.Flags().GetBool("uri")
+			purl, _ := cmd.Flags().GetBool("purl")
 
-
-		if uri && purl {
-			fmt.Println("Must provide only one of --uri or --purl")
-			os.Exit(1)
-		}
+			if !uri && !purl {
+				fmt.Println("Must provide one of --uri or --purl")
+				os.Exit(1)
+			}
 
 
-		ctx := logging.WithLogger(context.Background())
-		httpClient := http.Client{}
-		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
-		var hasSBOMResponseOne *model.HasSBOMsResponse
+			if uri && purl {
+				fmt.Println("Must provide only one of --uri or --purl")
+				os.Exit(1)
+			}
 
-		var hasSBOMResponseTwo *model.HasSBOMsResponse
-	
-		if uri {
-			hasSBOMResponseOne, err = findHasSBOMBy(boms[0],"",  ctx, gqlclient)
+
+			ctx := logging.WithLogger(context.Background())
+			httpClient := http.Client{}
+			gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
+			var hasSBOMResponseOne *model.HasSBOMsResponse
+			var hasSBOMResponseTwo *model.HasSBOMsResponse
+		
+			if uri {
+				hasSBOMResponseOne, err = findHasSBOMBy(boms[0],"",  ctx, gqlclient)
+				if err != nil {
+					fmt.Println("failed to lookup sbom: %s %v", boms[0], err)
+					return
+				}
+
+				hasSBOMResponseTwo, err = findHasSBOMBy( boms[1],"",  ctx, gqlclient)
+				if err != nil {
+					fmt.Println("failed to lookup sbom: %s %v", boms[1], err)
+					return
+				}
+			} else if purl {
+
+				hasSBOMResponseTwo, err = findHasSBOMBy( "", boms[0],  ctx, gqlclient)
+				if err != nil {
+					fmt.Println("failed to lookup sbom: %s %v", boms[0], err)
+					return
+				}
+				hasSBOMResponseTwo, err = findHasSBOMBy( "", boms[1], ctx, gqlclient)
+				if err != nil {
+					fmt.Println("failed to lookup sbom: %s %v", boms[1], err)
+					return
+				}
+			}
+			if hasSBOMResponseOne == nil || hasSBOMResponseTwo == nil {
+				fmt.Println("failed to lookup sboms")
+				return
+			}
+			if len(hasSBOMResponseOne.HasSBOM) == 0 || len(hasSBOMResponseTwo.HasSBOM) == 0 {
+				fmt.Println("Failed to lookup sboms, one endpoint may not have sboms")
+				return
+			}
+			if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
+				fmt.Println("Warning: Multiple sboms found for given purl or uri. Using first one")
+			}
+			hasSBOMOne = append( hasSBOMOne,hasSBOMResponseOne.HasSBOM[0])
+			hasSBOMTwo = append( hasSBOMTwo,hasSBOMResponseTwo.HasSBOM[0])
+
+		}else{
+			jsonData, err := os.ReadFile(testfile)
 			if err != nil {
-				fmt.Println("failed to lookup sbom: %s %v", boms[0], err)
+				fmt.Println("Error reading test:", err)
 				return
 			}
 
-			hasSBOMResponseTwo, err = findHasSBOMBy( boms[1],"",  ctx, gqlclient)
+			var test []SBOMDiffTest
+			err = json.Unmarshal(jsonData, &test)
 			if err != nil {
-				fmt.Println("failed to lookup sbom: %s %v", boms[1], err)
+				fmt.Println("Error:", err)
 				return
 			}
-		} else if purl {
-
-			hasSBOMResponseTwo, err = findHasSBOMBy( "", boms[0],  ctx, gqlclient)
-			if err != nil {
-				fmt.Println("failed to lookup sbom: %s %v", boms[0], err)
-				return
-			}
-			hasSBOMResponseTwo, err = findHasSBOMBy( "", boms[1], ctx, gqlclient)
-			if err != nil {
-				fmt.Println("failed to lookup sbom: %s %v", boms[1], err)
-				return
+			for _, t := range test {
+				hasSBOMOne = append( hasSBOMOne,t.HasSBOMOne)
+				hasSBOMTwo = append( hasSBOMTwo,t.HasSBOMTwo)
 			}
 		}
-		if hasSBOMResponseOne == nil || hasSBOMResponseTwo == nil {
-			fmt.Println("failed to lookup sboms")
-			return
-		}
-		if len(hasSBOMResponseOne.HasSBOM) == 0 || len(hasSBOMResponseTwo.HasSBOM) == 0 {
-			fmt.Println("Failed to lookup sboms, one endpoint may not have sboms")
-			return
-		}
-		if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
-			fmt.Println("Warning: Multiple sboms found for given purl or uri. Using first one")
-		}
+		nodeOne := Node{Value: hasSBOMOne}
+		nodeTwo := Node{Value: hasSBOMTwo}
 
-		nodeOne := Node{Value: hasSBOMResponseOne.HasSBOM[0]}
-		nodeTwo := Node{Value: hasSBOMResponseTwo.HasSBOM[0]}
+		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMOne), &nodeOne)
+		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMTwo), &nodeTwo)
 
-		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMResponseOne.HasSBOM[0]), &nodeOne)
-		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMResponseTwo.HasSBOM[0]), &nodeTwo)
+		//offset to the first node, ignoring the node for the whole struct
+		nodeOne = *nodeOne.neighbours[0]
+		nodeTwo = *nodeTwo.neighbours[0]
 
-		if (!wide) {
-			//just print the diff result
-			fmt.Println(rawCompareGraphs(&nodeOne, &nodeTwo))
-			return
-		}
+		//flatten the graph
+		// flatGraphOne := make(map[string]string)
+		// flatGraphTwo := make(map[string]string)
+		// FlattenGraph(&nodeOne, "", &flatGraphOne)
+		// FlattenGraph(&nodeTwo, "", &flatGraphTwo)
 
-		performDiff(&nodeOne, &nodeTwo)
+		//perform a diff on the flat graph
+		// findFraserDiff(flatGraphOne, flatGraphTwo )
+
+
 
 	},
 }
+// The github.com/sergi/go-diff/diffmatchpatch package is a Go implementation of Neil Fraser's Diff Match Patch library,
+// which provides robust algorithms to perform diff, match, and patch operations on plain text.
+func findFraserDiff(flatGraphOne, flatGraphTwo string){
+	dmp := diffmatchpatch.New()
 
-func rawCompareGraphs(node1, node2 *Node) string {
-	if !reflect.DeepEqual(node1, node2) {
-		return "SBOMs differ"
+	diffs := dmp.DiffMain(flatGraphOne,flatGraphTwo, false)
+
+	for _, diff := range diffs {
+		fmt.Printf("%v: %s\n", diff.Type, diff.Text)
 	}
-	return "SBOMs are identical"
+
 }
 
+func FlattenGraph(node *Node, parent string, flatGraph *map[string]string) {
+	// Store the current node and its parent in the flattened map
+	(*flatGraph)[node.tag] = parent
+
+	// Recursively flatten the neighbors
+	for _, neighbor := range node.neighbours {
+		FlattenGraph(neighbor, node.tag, flatGraph)
+	}
+}
 // This function recursively traverses the fields of a struct using reflection and converts them into nodes of a graph. 
 // It handles nested structs and arrays within the main struct.
 func hasSBOMResponseToGraph(data reflect.Value, head *Node) {
+
 	node := Node{Value: data.Interface(), tag: data.Type().Name()}
 	head.neighbours = append(head.neighbours, &node)
 	
 	//base case
-	if data.Kind() != reflect.Array && data.Kind() != reflect.Slice && data.Kind() != reflect.Struct {
+	if data.Kind() == reflect.String {
+	// if data.Kind() != reflect.Array && data.Kind() != reflect.Slice && data.Kind() != reflect.Struct {
 		//just add a neighbour and return
+		node.leaf = true
 		return
 	}
 	// edge base case for time.Time to not go into recursion, while being a "struct"
 	if data.Kind() == reflect.Struct && data.Type() == reflect.TypeOf(time.Time{}) {
+		node.tag = "Time"
+		node.leaf = true
 		return
 	}
+	node.leaf = false
+
+	//TODO: arorasoham9 this does not consider field type of interfaces or pointers or []json.rawmessage. I still need to work on that
+
 
 	//if we have a struct, we need to go over its fields
 	//update head to be the last element of the neighbours slice
@@ -176,49 +236,7 @@ func hasSBOMResponseToGraph(data reflect.Value, head *Node) {
 		}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
 			field = data.Index(i)
 		}
-			hasSBOMResponseToGraph(field, newHead)
-        }
-}
-func performDiff(nodeOne, nodeTwo *Node){
-	if reflect.DeepEqual(nodeOne,Node{}) && reflect.DeepEqual(nodeTwo,Node{}) {
-		return
-	}
-
-	if len(nodeOne.neighbours) != len(nodeTwo.neighbours) {
-		fmt.Println("Neighbour node count mismatch!")
-	}
-
-	
-    for i := 0; i < len(nodeOne.neighbours) || i < len(nodeTwo.neighbours); i++ {
-        if i < len(nodeOne.neighbours) && i < len(nodeTwo.neighbours) {
-            performDiff(nodeOne.neighbours[i], nodeOne.neighbours[i])
-        } else if i < len(nodeOne.neighbours) {
-            fmt.Printf("SBOM 1 extra %+v\n", nodeOne.neighbours[i].tag)
-        } else {
-            fmt.Printf("SBOM 2 extra %+v\n", nodeTwo.neighbours[i].tag)
-        }
-    }
-}
-//helpers
-func printNode(node *Node, name string) {
-	if node == nil {
-		return
-	}
-	fmt.Printf("%s %s\n", name, node.tag)
-}
-func printTree(node *Node, level int) {
-	if node == nil {
-		return
-	}
-
-	// Print the current node's value with indentation
-	for i := 0; i < level; i++ {
-		fmt.Print("\t")
-	}
-	fmt.Println(node.tag, " ", node.Value)
-
-	// Recursively print the child nodes
-	for _, child := range node.neighbours {
-		printTree(child, level+1)
+		hasSBOMResponseToGraph(field, newHead)
 	}
 }
+
