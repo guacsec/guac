@@ -107,7 +107,7 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSp
 		SetCollector(spec.Collector).
 		SetOrigin(spec.Origin).
 		SetJustification(spec.Justification).
-		SetKnownSince(spec.KnownSince).
+		SetKnownSince(spec.KnownSince.UTC()).
 		SetSourceID(srcID)
 
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {

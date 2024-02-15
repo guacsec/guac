@@ -733,7 +733,7 @@ func (c *arangoClient) getCertifyLegalFromCursor(ctx context.Context,
 			DiscoveredLicense: createdValue.DiscoveredLicense,
 			Attribution:       createdValue.Attribution,
 			Justification:     createdValue.Justification,
-			TimeScanned:       createdValue.TimeScanned,
+			TimeScanned:       createdValue.TimeScanned.UTC(),
 			Origin:            createdValue.Origin,
 			Collector:         createdValue.Collector,
 		}

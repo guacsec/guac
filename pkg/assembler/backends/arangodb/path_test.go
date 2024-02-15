@@ -708,7 +708,7 @@ func Test_Nodes(t *testing.T) {
 			VulnMetadata: &model.VulnerabilityMetadataInputSpec{
 				ScoreType:  model.VulnerabilityScoreTypeCVSSv2,
 				ScoreValue: 8.9,
-				Timestamp:  testdata.T1,
+				Timestamp:  testdata.T1.UTC(),
 				Collector:  "test collector",
 				Origin:     "test origin",
 			},

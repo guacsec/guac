@@ -93,7 +93,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 		}
 
 		insert.
-			SetKnownSince(vexStatement.KnownSince).
+			SetKnownSince(vexStatement.KnownSince.UTC()).
 			SetStatus(vexStatement.Status.String()).
 			SetStatement(vexStatement.Statement).
 			SetStatusNotes(vexStatement.StatusNotes).

@@ -108,7 +108,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 			SetDiscoveredLicense(spec.DiscoveredLicense).
 			SetAttribution(spec.Attribution).
 			SetJustification(spec.Justification).
-			SetTimeScanned(spec.TimeScanned).
+			SetTimeScanned(spec.TimeScanned.UTC()).
 			SetOrigin(spec.Origin).
 			SetCollector(spec.Collector)
 
