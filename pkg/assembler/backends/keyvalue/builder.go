@@ -185,13 +185,13 @@ func (c *demoClient) returnFoundBuilder(ctx context.Context, buildIDorInput *mod
 	if buildIDorInput.BuilderID != nil {
 		builderStruct, err := byIDkv[*builderStruct](ctx, *buildIDorInput.BuilderID, c)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to return builderStruct node by ID with error: %w", err)
+			return nil, gqlerror.Errorf("failed to return builderStruct node by ID with error: %v", err)
 		}
 		return builderStruct, nil
 	} else {
 		builderStruct, err := c.builderByInput(ctx, buildIDorInput.BuilderInput)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to builderByInput with error: %w", err)
+			return nil, gqlerror.Errorf("failed to builderByInput with error: %v", err)
 		}
 		return builderStruct, nil
 	}

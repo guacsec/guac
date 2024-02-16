@@ -627,13 +627,13 @@ func (c *demoClient) returnFoundSource(ctx context.Context, srcIDorInput *model.
 	if srcIDorInput.SourceNameID != nil {
 		foundSrcNameNode, err := byIDkv[*srcNameNode](ctx, *srcIDorInput.SourceNameID, c)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to return srcNameNode node by ID with error: %w", err)
+			return nil, gqlerror.Errorf("failed to return srcNameNode node by ID with error: %v", err)
 		}
 		return foundSrcNameNode, nil
 	} else {
 		foundSrcNameNode, err := c.getSourceNameFromInput(ctx, *srcIDorInput.SourceInput)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to getSourceNameFromInput with error: %w", err)
+			return nil, gqlerror.Errorf("failed to getSourceNameFromInput with error: %v", err)
 		}
 		return foundSrcNameNode, nil
 	}

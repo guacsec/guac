@@ -8192,7 +8192,7 @@ func (v *IngestArtifactResponse) GetIngestArtifact() string { return v.IngestArt
 
 // IngestArtifactsResponse is returned by IngestArtifacts on success.
 type IngestArtifactsResponse struct {
-	// Bulk ingests new artifacts and returns a list of them. The returned array of IDs must be in the same order as the input.
+	// Bulk ingests new artifacts and returns a list of them. The returned array of IDs must be in the same order as the inputs.
 	IngestArtifacts []string `json:"ingestArtifacts"`
 }
 

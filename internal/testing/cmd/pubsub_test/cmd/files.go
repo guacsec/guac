@@ -25,8 +25,6 @@ import (
 	"syscall"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
@@ -36,8 +34,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type options struct {
 	dbAddr string

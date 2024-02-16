@@ -311,13 +311,13 @@ func (c *demoClient) returnFoundArtifact(ctx context.Context, artIDorInput *mode
 	if artIDorInput.ArtifactID != nil {
 		foundArtStruct, err := byIDkv[*artStruct](ctx, *artIDorInput.ArtifactID, c)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to return artStruct node by ID with error: %w", err)
+			return nil, gqlerror.Errorf("failed to return artStruct node by ID with error: %v", err)
 		}
 		return foundArtStruct, nil
 	} else {
 		foundArtStruct, err := c.artifactByInput(ctx, artIDorInput.ArtifactInput)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to artifactByInput with error: %w", err)
+			return nil, gqlerror.Errorf("failed to artifactByInput with error: %v", err)
 		}
 		return foundArtStruct, nil
 	}

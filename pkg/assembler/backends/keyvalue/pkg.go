@@ -1047,13 +1047,13 @@ func (c *demoClient) returnFoundPkgVersion(ctx context.Context, pkgIDorInput *mo
 	if pkgIDorInput.PackageVersionID != nil {
 		foundPkgVersionNode, err := byIDkv[*pkgVersion](ctx, *pkgIDorInput.PackageVersionID, c)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to return pkgVersion node by ID with error: %w", err)
+			return nil, gqlerror.Errorf("failed to return pkgVersion node by ID with error: %v", err)
 		}
 		return foundPkgVersionNode, nil
 	} else {
 		foundPkgVersionNode, err := c.getPackageVerFromInput(ctx, *pkgIDorInput.PackageInput)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to getPackageVerFromInput with error: %w", err)
+			return nil, gqlerror.Errorf("failed to getPackageVerFromInput with error: %v", err)
 		}
 		return foundPkgVersionNode, nil
 	}
@@ -1065,20 +1065,20 @@ func (c *demoClient) returnFoundPkgBasedOnMatchType(ctx context.Context, pkgIDor
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
 			foundPkgVersionNode, err := byIDkv[*pkgVersion](ctx, *pkgIDorInput.PackageVersionID, c)
 			if err != nil {
-				return "", nil, gqlerror.Errorf("failed to return pkgVersion node by ID with error: %w", err)
+				return "", nil, gqlerror.Errorf("failed to return pkgVersion node by ID with error: %v", err)
 			}
 			return *pkgIDorInput.PackageVersionID, foundPkgVersionNode, nil
 		} else {
 			foundPkgNameNode, err := byIDkv[*pkgName](ctx, *pkgIDorInput.PackageNameID, c)
 			if err != nil {
-				return "", nil, gqlerror.Errorf("failed to return pkgName node by ID with error: %w", err)
+				return "", nil, gqlerror.Errorf("failed to return pkgName node by ID with error: %v", err)
 			}
 			return *pkgIDorInput.PackageNameID, foundPkgNameNode, nil
 		}
 	} else {
 		foundPkgNameorVersionNode, err := c.getPackageNameOrVerFromInput(ctx, *pkgIDorInput.PackageInput, *pkgMatchType)
 		if err != nil {
-			return "", nil, gqlerror.Errorf("failed to getPackageNameOrVerFromInput with error: %w", err)
+			return "", nil, gqlerror.Errorf("failed to getPackageNameOrVerFromInput with error: %v", err)
 		}
 		return foundPkgNameorVersionNode.ID(), foundPkgNameorVersionNode, nil
 	}

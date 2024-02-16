@@ -2914,7 +2914,7 @@ extend type Query {
 extend type Mutation {
   "Ingests a new artifact and returns it."
   ingestArtifact(artifact: IDorArtifactInput): ID!
-  "Bulk ingests new artifacts and returns a list of them. The returned array of IDs must be in the same order as the input."
+  "Bulk ingests new artifacts and returns a list of them. The returned array of IDs must be in the same order as the inputs."
   ingestArtifacts(artifacts: [IDorArtifactInput!]!): [ID!]!
 }
 `, BuiltIn: false},

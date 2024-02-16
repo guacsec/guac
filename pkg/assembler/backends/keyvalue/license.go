@@ -212,13 +212,13 @@ func (c *demoClient) returnFoundLicense(ctx context.Context, licenseIDorInput *m
 	if licenseIDorInput.LicenseID != nil {
 		licStruct, err := byIDkv[*licStruct](ctx, *licenseIDorInput.LicenseID, c)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to return licStruct node by ID with error: %w", err)
+			return nil, gqlerror.Errorf("failed to return licStruct node by ID with error: %v", err)
 		}
 		return licStruct, nil
 	} else {
 		licStruct, err := c.licenseByInput(ctx, licenseIDorInput.LicenseInput)
 		if err != nil {
-			return nil, gqlerror.Errorf("failed to licenseByInput with error: %w", err)
+			return nil, gqlerror.Errorf("failed to licenseByInput with error: %v", err)
 		}
 		return licStruct, nil
 	}
