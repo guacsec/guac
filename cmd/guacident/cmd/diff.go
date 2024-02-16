@@ -24,19 +24,76 @@ import (
 	"net/http"
 	"os"
 	"reflect"
-	"github.com/sergi/go-diff/diffmatchpatch"
+
 	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	
 )
 
 var (
-	hasSBOMOne []model.HasSBOMsHasSBOM
-	hasSBOMTwo []model.HasSBOMsHasSBOM
+	hasSBOMOne model.HasSBOMsHasSBOM
+	hasSBOMTwo model.HasSBOMsHasSBOM
 )
+
+
+type DiffNode struct {
+	tag         string
+	OldValue    interface{}
+	NewValue    interface{}
+	leafChanged bool
+}
+
+// DFSNodeDiff performs a DFS diff between two nodes
+func DFSNodeDiff(oldNode, newNode *Node) []DiffNode {
+	var diffs []DiffNode
+	dfsNodeDiff(oldNode, newNode, &diffs)
+	return diffs
+}
+
+// dfsNodeDiff performs the DFS traversal and comparison
+func dfsNodeDiff(oldNode, newNode *Node, diffs *[]DiffNode) {
+	// Check if both nodes are nil
+	if oldNode == nil && newNode == nil {
+		return
+	}
+
+	// Check if one of the nodes is nil
+	if oldNode == nil || newNode == nil {
+		var tag string
+		if newNode != nil{
+			tag= newNode.tag
+		} 
+
+		if oldNode != nil{
+			tag= oldNode.tag
+		}
+		*diffs = append(*diffs, DiffNode{tag: tag, OldValue: oldNode, NewValue: newNode, leafChanged: true})
+		return
+	}
+
+	// Check if leaf nodes have different values
+	if oldNode.leaf && newNode.leaf && oldNode.Value != newNode.Value {
+		*diffs = append(*diffs, DiffNode{tag: oldNode.tag, OldValue: oldNode.Value, NewValue: newNode.Value, leafChanged: true})
+		return
+	}
+
+	// Recursively process neighbours
+	for i := 0; i  < len(oldNode.neighbours) || i < len(newNode.neighbours); i++ {
+		var oldNeighbor, newNeighbor *Node
+
+		if i < len(oldNode.neighbours) {
+			oldNeighbor = oldNode.neighbours[i]
+		}
+		if i < len(newNode.neighbours) {
+			newNeighbor = newNode.neighbours[i]
+		}
+
+		dfsNodeDiff(oldNeighbor, newNeighbor, diffs)
+	}
+}
 
 func init() {
 	rootCmd.AddCommand(diffCmd)
@@ -45,6 +102,9 @@ func init() {
 	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
 	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
 	rootCmd.PersistentFlags().String("file", "tests/identical.json", "filename to read sbom test cases from")
+	rootCmd.PersistentFlags().Bool("dfs", false, "diff with dfs")
+	rootCmd.PersistentFlags().Bool("fras", true, "diff with flatten and fraser (default)")
+
 }
 
 var diffCmd = &cobra.Command{
@@ -54,6 +114,8 @@ var diffCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		test, _ := cmd.Flags().GetBool("test")
 		testfile, _ := cmd.Flags().GetString("file")
+		dfs, _ := cmd.Flags().GetBool("dfs")
+		fras, _ := cmd.Flags().GetBool("fras")
 
 		if !test {
 			boms, err := cmd.Flags().GetStringSlice("boms")
@@ -128,8 +190,8 @@ var diffCmd = &cobra.Command{
 			if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
 				fmt.Println("Warning: Multiple sboms found for given purl or uri. Using first one")
 			}
-			hasSBOMOne = append( hasSBOMOne,hasSBOMResponseOne.HasSBOM[0])
-			hasSBOMTwo = append( hasSBOMTwo,hasSBOMResponseTwo.HasSBOM[0])
+			hasSBOMOne =  hasSBOMResponseOne.HasSBOM[0]
+			hasSBOMTwo =  hasSBOMResponseTwo.HasSBOM[0]
 
 		}else{
 			jsonData, err := os.ReadFile(testfile)
@@ -138,33 +200,48 @@ var diffCmd = &cobra.Command{
 				return
 			}
 
-			var test []SBOMDiffTest
+			var test SBOMDiffTest
 			err = json.Unmarshal(jsonData, &test)
 			if err != nil {
 				fmt.Println("Error:", err)
 				return
 			}
-			for _, t := range test {
-				hasSBOMOne = append( hasSBOMOne,t.HasSBOMOne)
-				hasSBOMTwo = append( hasSBOMTwo,t.HasSBOMTwo)
-			}
+			hasSBOMOne = test.HasSBOMOne
+			hasSBOMTwo = test.HasSBOMTwo
 		}
 		nodeOne := Node{Value: hasSBOMOne}
 		nodeTwo := Node{Value: hasSBOMTwo}
 
-		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMOne), &nodeOne)
-		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMTwo), &nodeTwo)
+		//convert the HasSBOM to a graph
+		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMOne), &nodeOne, reflect.TypeOf(hasSBOMOne).Name())
+		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMTwo), &nodeTwo, reflect.TypeOf(hasSBOMTwo).Name())
 
-		// //offset to the first node, ignoring the node for the whole struct built twice in the graph
-		nodeOne = *nodeOne.neighbours[0].neighbours[0].neighbours[0]
-		nodeTwo = *nodeTwo.neighbours[0].neighbours[0].neighbours[0]
+		//offset to the first node, ignoring the node for the whole struct built twice as nodes in the graph
+		nodeOne = *nodeOne.neighbours[0]
+		nodeTwo = *nodeTwo.neighbours[0]
 
-		// //flatten the graph
+		if dfs {
+			diffs := DFSNodeDiff(&nodeOne, &nodeTwo)
+
+			// Print differences
+			fmt.Println("Differences:")
+			for _, diff := range diffs {
+				if diff.leafChanged {
+					fmt.Printf("Tag: %s, OldValue: %v, NewValue: %v\n", diff.tag, diff.OldValue, diff.NewValue)
+				}
+			}
+			return 
+		}
+		if !dfs && !fras {
+			fmt.Println("Define one algorithm to diff, dfs or fraser")
+		}
+
+		//flatten the graph
 		nodeOneString := FlattenGraphToString(&nodeOne, nodeOne.tag) 
 		nodeTwoString := FlattenGraphToString(&nodeTwo, nodeTwo.tag) 
-
-		//perform a diff on the flat graph
+		// perform a diff on the flat graph
 		findFraserDiff(nodeOneString, nodeTwoString)
+
 	},
 }
 // The github.com/sergi/go-diff/diffmatchpatch package is a Go implementation of Neil Fraser's Diff Match Patch library,
@@ -229,10 +306,11 @@ func FlattenGraphToString(node *Node, parentTag string) string {
 }
 // This function recursively traverses the fields of a struct using reflection and converts them into nodes of a graph. 
 // It handles nested structs and arrays within the main struct.
-func hasSBOMResponseToGraph(data reflect.Value, head *Node) {
+func hasSBOMResponseToGraph(data reflect.Value, head *Node, nexttag string) {
 
-	node := Node{Value: data.Interface(), tag: data.Type().Name()}
+	node := Node{Value: data.Interface(), tag: nexttag}
 	head.neighbours = append(head.neighbours, &node)
+
 
 	//base case
 	if data.Kind() == reflect.String {
@@ -257,6 +335,7 @@ func hasSBOMResponseToGraph(data reflect.Value, head *Node) {
 	//first input is the HasSBOMsHasSBOM struct, we go over its fields
 	var length = 0
 	var field reflect.Value
+	var fieldtag  = ""
 	if data.Kind() == reflect.Struct {
 		length = data.NumField()
 	}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
@@ -266,10 +345,14 @@ func hasSBOMResponseToGraph(data reflect.Value, head *Node) {
 	for i := 0; i < length; i++ {
 		if data.Kind() == reflect.Struct {
 			field = data.Field(i)
+			structtype := reflect.TypeOf(data.Interface())
+			fieldtag = structtype.Field(i).Tag.Get("json")
 		}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
 			field = data.Index(i)
+			fieldtag = data.Type().Name()
 		}
-		hasSBOMResponseToGraph(field, newHead)
+		
+		hasSBOMResponseToGraph(field, newHead, fieldtag)
 	}
 }
 

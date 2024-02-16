@@ -179,6 +179,72 @@
         "versionRange": ">=1.0.0 <2.0.0",
         "origin": "Organization C",
         "collector": "Collector Z"
+      },
+      {
+        "id": "dependency-55",
+        "justification": "Dependency 44justification",
+        "package": {
+          "id": "package-1",
+          "type": "library",
+          "namespaces": [
+            {
+              "id": "namespace-1",
+              "namespace": "com.example",
+              "names": [
+                {
+                  "id": "name-1",
+                  "name": "library-name",
+                  "versions": [
+                    {
+                      "id": "version-1",
+                      "version": "1.0.0",
+                      "subpath": "/path/to/library",
+                      "qualifiers": [
+                        {
+                          "key": "license",
+                          "value": "MIT"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "dependencyPackage": {
+          "id": "dependency-package-1",
+          "type": "library",
+          "namespaces": [
+            {
+              "id": "dependency-namespace-1",
+              "namespace": "com.example",
+              "names": [
+                {
+                  "id": "dependency-name-1",
+                  "name": "dependency-name",
+                  "versions": [
+                    {
+                      "id": "dependency-version-1",
+                      "version": "2.0.0",
+                      "subpath": "/path/to/dependency",
+                      "qualifiers": [
+                        {
+                          "key": "license",
+                          "value": "Apache-2.0"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "dependencyType": "runtime",
+        "versionRange": ">=1.0.0 <2.0.0",
+        "origin": "Organization C",
+        "collector": "Collector Z"
       }
     ]
   }
