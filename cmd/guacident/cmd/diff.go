@@ -44,7 +44,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
 	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
 	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
-	rootCmd.PersistentFlags().String("file", "guacident_test.json", "filename to read sbom test cases from")
+	rootCmd.PersistentFlags().String("file", "tests/identical.json", "filename to read sbom test cases from")
 }
 
 var diffCmd = &cobra.Command{
@@ -155,21 +155,16 @@ var diffCmd = &cobra.Command{
 		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMOne), &nodeOne)
 		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMTwo), &nodeTwo)
 
-		//offset to the first node, ignoring the node for the whole struct
-		nodeOne = *nodeOne.neighbours[0]
-		nodeTwo = *nodeTwo.neighbours[0]
+		// //offset to the first node, ignoring the node for the whole struct built twice in the graph
+		nodeOne = *nodeOne.neighbours[0].neighbours[0].neighbours[0]
+		nodeTwo = *nodeTwo.neighbours[0].neighbours[0].neighbours[0]
 
-		//flatten the graph
-		// flatGraphOne := make(map[string]string)
-		// flatGraphTwo := make(map[string]string)
-		// FlattenGraph(&nodeOne, "", &flatGraphOne)
-		// FlattenGraph(&nodeTwo, "", &flatGraphTwo)
+		// //flatten the graph
+		nodeOneString := FlattenGraphToString(&nodeOne, nodeOne.tag) 
+		nodeTwoString := FlattenGraphToString(&nodeTwo, nodeTwo.tag) 
 
 		//perform a diff on the flat graph
-		// findFraserDiff(flatGraphOne, flatGraphTwo )
-
-
-
+		findFraserDiff(nodeOneString, nodeTwoString)
 	},
 }
 // The github.com/sergi/go-diff/diffmatchpatch package is a Go implementation of Neil Fraser's Diff Match Patch library,
@@ -177,22 +172,60 @@ var diffCmd = &cobra.Command{
 func findFraserDiff(flatGraphOne, flatGraphTwo string){
 	dmp := diffmatchpatch.New()
 
-	diffs := dmp.DiffMain(flatGraphOne,flatGraphTwo, false)
-
+	// Compute the differences between the two strings
+	diffs := dmp.DiffMain(flatGraphOne,flatGraphTwo, true)
+	identical := true
 	for _, diff := range diffs {
-		fmt.Printf("%v: %s\n", diff.Type, diff.Text)
+		switch diff.Type {
+		case diffmatchpatch.DiffDelete:
+			identical = false
+			fmt.Printf("Deleted: %s\n", diff.Text)
+		case diffmatchpatch.DiffInsert:
+			identical = false
+			fmt.Printf("Inserted: %s\n", diff.Text)
+		case diffmatchpatch.DiffEqual:
+			//do nothing
+		}
+	}
+
+	if identical {
+		fmt.Println("SBOMs are identical")
 	}
 
 }
 
-func FlattenGraph(node *Node, parent string, flatGraph *map[string]string) {
-	// Store the current node and its parent in the flattened map
-	(*flatGraph)[node.tag] = parent
-
-	// Recursively flatten the neighbors
-	for _, neighbor := range node.neighbours {
-		FlattenGraph(neighbor, node.tag, flatGraph)
+func FlattenGraphToString(node *Node, parentTag string) string {
+    var result string
+	
+	if node == nil || node.Value == nil {
+		//ideally nothing should be nil, but since we are ignoring the subject, and a few more fields in HasSBOMsHasSBOM type,
+		//some fields may be nil for now
+		return ""
 	}
+	
+    if node.leaf || parentTag == "Time" {
+        return fmt.Sprintf("\t(%v)\n", node.Value)
+    }
+	
+    // Add the tag of the current node to the result string
+    result += "\n"+node.tag + ":"
+
+    // If the value of the node is a struct, slice or array add a newline and indent the next level
+    if reflect.TypeOf(node.Value).Kind() == reflect.Struct || reflect.TypeOf(node.Value).Kind() == reflect.Slice || reflect.TypeOf(node.Value).Kind() == reflect.Array  {
+        result += "\n"
+    }
+
+    // Add the value of the current node to the result string
+	if isPrimitiveType(reflect.TypeOf(node.Value)) {
+		result += fmt.Sprintf("\t%v\n", node.Value)
+	}
+
+    //  recursively flatten neighbours of the current node
+    for _, neighbor := range node.neighbours {
+        result += FlattenGraphToString(neighbor, node.tag)
+    }
+
+    return result
 }
 // This function recursively traverses the fields of a struct using reflection and converts them into nodes of a graph. 
 // It handles nested structs and arrays within the main struct.
@@ -200,7 +233,7 @@ func hasSBOMResponseToGraph(data reflect.Value, head *Node) {
 
 	node := Node{Value: data.Interface(), tag: data.Type().Name()}
 	head.neighbours = append(head.neighbours, &node)
-	
+
 	//base case
 	if data.Kind() == reflect.String {
 	// if data.Kind() != reflect.Array && data.Kind() != reflect.Slice && data.Kind() != reflect.Struct {
@@ -218,7 +251,6 @@ func hasSBOMResponseToGraph(data reflect.Value, head *Node) {
 
 	//TODO: arorasoham9 this does not consider field type of interfaces or pointers or []json.rawmessage. I still need to work on that
 
-
 	//if we have a struct, we need to go over its fields
 	//update head to be the last element of the neighbours slice
 	newHead := head.neighbours[len(head.neighbours)-1]
@@ -229,6 +261,7 @@ func hasSBOMResponseToGraph(data reflect.Value, head *Node) {
 		length = data.NumField()
 	}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
 		length = data.Len()
+		node.printValue = false
 	}
 	for i := 0; i < length; i++ {
 		if data.Kind() == reflect.Struct {

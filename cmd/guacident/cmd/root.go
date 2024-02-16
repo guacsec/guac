@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/Khan/genqlient/graphql"
@@ -43,6 +44,7 @@ type Node struct {
 	neighbours []*Node
 	leaf bool
 	tag string
+	printValue bool
 }
 
 type Edge struct {
@@ -126,13 +128,6 @@ func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl 
 	return pkgResponse, nil
 }
 
-func truncate(s string, length int) string {
-	if len(s) > length {
-		return s[:length-3] + "..."
-	}
-	return s
-}
-
 func findHasSBOMBy(uri, purl string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
 	var foundHasSBOMPkg *model.HasSBOMsResponse
 	var err error
@@ -159,3 +154,14 @@ func findHasSBOMBy(uri, purl string, ctx context.Context, gqlclient graphql.Clie
 }
 
 
+
+func isPrimitiveType(t reflect.Type) bool {
+	switch t.Kind() {
+	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64, reflect.String:
+		return true
+	default:
+		return false
+	}
+}
