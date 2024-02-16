@@ -1009,7 +1009,7 @@ func TestIngestCertifyBads(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Sources: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}, &model.IDorSourceInput{SourceInput: testdata.S2}},
+						Sources: []*model.IDorSourceInput{{SourceInput: testdata.S2}, {SourceInput: testdata.S2}},
 					},
 					CB: []*model.CertifyBadInputSpec{
 						{

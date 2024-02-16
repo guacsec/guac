@@ -198,7 +198,7 @@ func TestPath(t *testing.T) {
 						stopID = vulnIDs.VulnerabilityNodeID
 					}
 				}
-				_, err := b.IngestCertifyVuln(ctx, model.IDorPkgInput{PackageInput: tt.certifyVulnTwoPkgsCall.Pkg}, model.IDorVulnerabilityInput{VulnerabilityInput: tt.certifyVulnTwoPkgsCall.Vuln}, *tt.certifyVulnCall.CertifyVuln)
+				_, err := b.IngestCertifyVuln(ctx, model.IDorPkgInput{PackageInput: tt.certifyVulnCall.Pkg}, model.IDorVulnerabilityInput{VulnerabilityInput: tt.certifyVulnCall.Vuln}, *tt.certifyVulnCall.CertifyVuln)
 				if (err != nil) != tt.wantErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
 				}
@@ -1013,7 +1013,7 @@ func TestNeighbors(t *testing.T) {
 		Sub    model.PackageOrArtifactInput
 		HS     *model.HasSBOMInputSpec
 		PkgArt *model.PackageOrArtifactInputs
-		inSrc  []*model.SourceInputSpec
+		InSrc  []*model.SourceInputSpec
 		IsDeps []testDependency
 		IsOccs []testOccurrence
 	}
@@ -2260,7 +2260,7 @@ func TestNeighbors(t *testing.T) {
 				DownloadLocation: "location two",
 			},
 			PkgArt: includedPackageArtifacts,
-			inSrc:  includedSources,
+			InSrc:  includedSources,
 			IsDeps: includedTestDependencies,
 			IsOccs: includedTestOccurrences,
 		},
@@ -3411,7 +3411,7 @@ func TestNeighbors(t *testing.T) {
 			}
 			if tt.hasSBOMCall != nil {
 				includes := model.HasSBOMIncludesInputSpec{}
-				for _, s := range tt.hasSBOMCall.inSrc {
+				for _, s := range tt.hasSBOMCall.InSrc {
 					if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 						t.Fatalf("Could not ingest source: %v", err)
 					}

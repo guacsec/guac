@@ -635,7 +635,7 @@ func TestIngestPkgEquals(t *testing.T) {
 			Calls: []call{
 				{
 					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
-					P2: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
 					PE: []*model.PkgEqualInputSpec{
 						{
 							Justification: "test justification",
