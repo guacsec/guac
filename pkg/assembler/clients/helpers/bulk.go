@@ -55,7 +55,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 
 			collectedIDorSrcInputs, err := ingestSources(ctx, gqlclient, sources)
 			if err != nil {
-				return fmt.Errorf("ingestPackages failed with error: %v", err)
+				return fmt.Errorf("ingestSources failed with error: %v", err)
 			}
 
 			// Ingest Artifacts
@@ -219,6 +219,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 func ingestPackages(ctx context.Context, client graphql.Client, packageInputMap map[string]*model.IDorPkgInput) (map[string]*model.IDorPkgInput, error) {
 	var keys []string
 	var pkgInputs []model.IDorPkgInput
+	pkgInputs = make([]model.IDorPkgInput, 0)
 	for key, pkgInput := range packageInputMap {
 		keys = append(keys, key)
 		pkgInputs = append(pkgInputs, *pkgInput)
@@ -247,6 +248,7 @@ func ingestPackages(ctx context.Context, client graphql.Client, packageInputMap 
 func ingestSources(ctx context.Context, client graphql.Client, sourceInputMap map[string]*model.IDorSourceInput) (map[string]*model.IDorSourceInput, error) {
 	var keys []string
 	var srcInputs []model.IDorSourceInput
+	srcInputs = make([]model.IDorSourceInput, 0)
 	for key, srcInput := range sourceInputMap {
 		keys = append(keys, key)
 		srcInputs = append(srcInputs, *srcInput)
@@ -273,6 +275,7 @@ func ingestSources(ctx context.Context, client graphql.Client, sourceInputMap ma
 func ingestArtifacts(ctx context.Context, client graphql.Client, artInputMap map[string]*model.IDorArtifactInput) (map[string]*model.IDorArtifactInput, error) {
 	var keys []string
 	var artInputs []model.IDorArtifactInput
+	artInputs = make([]model.IDorArtifactInput, 0)
 	for key, artInput := range artInputMap {
 		keys = append(keys, key)
 		artInputs = append(artInputs, *artInput)
@@ -297,6 +300,7 @@ func ingestArtifacts(ctx context.Context, client graphql.Client, artInputMap map
 func ingestBuilders(ctx context.Context, client graphql.Client, buildInputMap map[string]*model.IDorBuilderInput) (map[string]*model.IDorBuilderInput, error) {
 	var keys []string
 	var buildInputs []model.IDorBuilderInput
+	buildInputs = make([]model.IDorBuilderInput, 0)
 	for key, srcInput := range buildInputMap {
 		keys = append(keys, key)
 		buildInputs = append(buildInputs, *srcInput)
@@ -322,6 +326,7 @@ func ingestBuilders(ctx context.Context, client graphql.Client, buildInputMap ma
 func ingestVulnerabilities(ctx context.Context, client graphql.Client, vulnInputMap map[string]*model.IDorVulnerabilityInput) (map[string]*model.IDorVulnerabilityInput, error) {
 	var keys []string
 	var vulnInputs []model.IDorVulnerabilityInput
+	vulnInputs = make([]model.IDorVulnerabilityInput, 0)
 	for key, vulnInput := range vulnInputMap {
 		keys = append(keys, key)
 		vulnInputs = append(vulnInputs, *vulnInput)
@@ -347,6 +352,7 @@ func ingestVulnerabilities(ctx context.Context, client graphql.Client, vulnInput
 func ingestLicenses(ctx context.Context, client graphql.Client, licenseInputMap map[string]*model.IDorLicenseInput) (map[string]*model.IDorLicenseInput, error) {
 	var keys []string
 	var licenseInputs []model.IDorLicenseInput
+	licenseInputs = make([]model.IDorLicenseInput, 0)
 	for key, licenseInput := range licenseInputMap {
 		keys = append(keys, key)
 		licenseInputs = append(licenseInputs, *licenseInput)
@@ -371,6 +377,7 @@ func ingestCertifyVulns(ctx context.Context, client graphql.Client, cv []assembl
 	var pkgIDs []model.IDorPkgInput
 	var vulnerabilityIDs []model.IDorVulnerabilityInput
 	var scanMetadataList []model.ScanMetadataInput
+
 	for _, ingest := range cv {
 		if pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(ingest.Pkg)]; found {
 			pkgIDs = append(pkgIDs, *pkgID)
