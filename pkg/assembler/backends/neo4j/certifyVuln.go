@@ -328,7 +328,7 @@ func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.Ce
 
 //  Ingest Vulnerability
 
-func (c *neo4jClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
+func (c *neo4jClient) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
 
 	// err := helper.ValidateVulnerabilityIngestionInput(vulnerability, "IngestVulnerability", true)
 	// if err != nil {
@@ -558,6 +558,6 @@ func (c *neo4jClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputS
 	return "", fmt.Errorf("not implemented - IngestCertifyVuln")
 }
 
-func (c *neo4jClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+func (c *neo4jClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	return []string{}, fmt.Errorf("not implemented - IngestCertifyVulns")
 }

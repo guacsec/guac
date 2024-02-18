@@ -262,8 +262,8 @@ func getCertifyLegalQueryValues(pkg *model.PkgInputSpec, source *model.SourceInp
 func (c *arangoClient) IngestCertifyLegal(
 	ctx context.Context,
 	subject model.PackageOrSourceInput,
-	declaredLicenses []*model.LicenseInputSpec,
-	discoveredLicenses []*model.LicenseInputSpec,
+	declaredLicenses []*model.IDorLicenseInput,
+	discoveredLicenses []*model.IDorLicenseInput,
 	certifyLegal *model.CertifyLegalInputSpec) (string, error) {
 
 	dec, err := c.getLicenses(ctx, declaredLicenses)
@@ -333,7 +333,7 @@ LET discoveredLicensesCollection = (FOR disData IN @discoveredLicensesKeyList
 
 RETURN { 'certifyLegal_id': certifyLegal._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyLegalQueryValues(subject.Package, nil, dec, dis, certifyLegal), "IngestCertifyLegal - Pkg")
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyLegalQueryValues(subject.Package.PackageInput, nil, dec, dis, certifyLegal), "IngestCertifyLegal - Pkg")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest package certifyLegal: %w", err)
 		}
@@ -407,7 +407,7 @@ LET discoveredLicensesCollection = (FOR disData IN @discoveredLicensesKeyList
 
 RETURN { 'certifyLegal_id': certifyLegal._id }`
 
-		cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyLegalQueryValues(nil, subject.Source, dec, dis, certifyLegal), "IngestCertifyLegal - source")
+		cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyLegalQueryValues(nil, subject.Source.SourceInput, dec, dis, certifyLegal), "IngestCertifyLegal - source")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source certifyLegal: %w", err)
 		}
@@ -429,8 +429,8 @@ RETURN { 'certifyLegal_id': certifyLegal._id }`
 func (c *arangoClient) IngestCertifyLegals(
 	ctx context.Context,
 	subjects model.PackageOrSourceInputs,
-	declaredLicensesList [][]*model.LicenseInputSpec,
-	discoveredLicensesList [][]*model.LicenseInputSpec,
+	declaredLicensesList [][]*model.IDorLicenseInput,
+	discoveredLicensesList [][]*model.IDorLicenseInput,
 	certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 
 	if len(subjects.Packages) > 0 {
@@ -447,7 +447,7 @@ func (c *arangoClient) IngestCertifyLegals(
 				return nil, fmt.Errorf("failed to get discovered licenses list with error: %w", err)
 			}
 
-			listOfValues = append(listOfValues, getCertifyLegalQueryValues(subjects.Packages[i], nil, dec, dis, certifyLegals[i]))
+			listOfValues = append(listOfValues, getCertifyLegalQueryValues(subjects.Packages[i].PackageInput, nil, dec, dis, certifyLegals[i]))
 		}
 
 		var documents []string
@@ -562,7 +562,7 @@ RETURN { 'certifyLegal_id': certifyLegal._id }`
 				return nil, fmt.Errorf("failed to get discovered licenses list with error: %w", err)
 			}
 
-			listOfValues = append(listOfValues, getCertifyLegalQueryValues(nil, subjects.Sources[i], dec, dis, certifyLegals[i]))
+			listOfValues = append(listOfValues, getCertifyLegalQueryValues(nil, subjects.Sources[i].SourceInput, dec, dis, certifyLegals[i]))
 		}
 
 		var documents []string

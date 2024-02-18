@@ -8059,9 +8059,131 @@ func (v *HashEqualInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns HashEqualInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 
+// IDorArtifactInput allows for specifying either the artifact ID or the ArtifactInputSpec.
+//
+// Either the ID or the ArtifactInputSpec must be specified. Both cannot be nil.
+//
+// If the ID is specified, the ArtifactInputSpec is not used.
+type IDorArtifactInput struct {
+	ArtifactID    *string            `json:"artifactID"`
+	ArtifactInput *ArtifactInputSpec `json:"artifactInput"`
+}
+
+// GetArtifactID returns IDorArtifactInput.ArtifactID, and is useful for accessing the field via an interface.
+func (v *IDorArtifactInput) GetArtifactID() *string { return v.ArtifactID }
+
+// GetArtifactInput returns IDorArtifactInput.ArtifactInput, and is useful for accessing the field via an interface.
+func (v *IDorArtifactInput) GetArtifactInput() *ArtifactInputSpec { return v.ArtifactInput }
+
+// IDorBuilderInput allows for specifying either the builder ID or the BuilderInputSpec.
+//
+// Either the ID or the BuilderInputSpec must be specified. Both cannot be nil.
+//
+// If the ID is specified, the BuilderInputSpec is not used.
+type IDorBuilderInput struct {
+	BuilderID    *string           `json:"builderID"`
+	BuilderInput *BuilderInputSpec `json:"builderInput"`
+}
+
+// GetBuilderID returns IDorBuilderInput.BuilderID, and is useful for accessing the field via an interface.
+func (v *IDorBuilderInput) GetBuilderID() *string { return v.BuilderID }
+
+// GetBuilderInput returns IDorBuilderInput.BuilderInput, and is useful for accessing the field via an interface.
+func (v *IDorBuilderInput) GetBuilderInput() *BuilderInputSpec { return v.BuilderInput }
+
+// IDorLicenseInput allows for specifying either the license ID or the LicenseInputSpec.
+//
+// Either the ID or the LicenseInputSpec must be specified. Both cannot be nil.
+//
+// If the ID is specified, the LicenseInputSpec is not used.
+type IDorLicenseInput struct {
+	LicenseID    *string           `json:"licenseID"`
+	LicenseInput *LicenseInputSpec `json:"licenseInput"`
+}
+
+// GetLicenseID returns IDorLicenseInput.LicenseID, and is useful for accessing the field via an interface.
+func (v *IDorLicenseInput) GetLicenseID() *string { return v.LicenseID }
+
+// GetLicenseInput returns IDorLicenseInput.LicenseInput, and is useful for accessing the field via an interface.
+func (v *IDorLicenseInput) GetLicenseInput() *LicenseInputSpec { return v.LicenseInput }
+
+// IDorPkgInput allows for specifying either the package IDs or the PkgInputSpec.
+//
+// Either the IDs or the PkgInputSpec must be specified. Both cannot be nil.
+//
+// If the IDs are specified, the PkgInputSpec is not used.
+type IDorPkgInput struct {
+	PackageTypeID      *string       `json:"packageTypeID"`
+	PackageNamespaceID *string       `json:"packageNamespaceID"`
+	PackageNameID      *string       `json:"packageNameID"`
+	PackageVersionID   *string       `json:"packageVersionID"`
+	PackageInput       *PkgInputSpec `json:"packageInput"`
+}
+
+// GetPackageTypeID returns IDorPkgInput.PackageTypeID, and is useful for accessing the field via an interface.
+func (v *IDorPkgInput) GetPackageTypeID() *string { return v.PackageTypeID }
+
+// GetPackageNamespaceID returns IDorPkgInput.PackageNamespaceID, and is useful for accessing the field via an interface.
+func (v *IDorPkgInput) GetPackageNamespaceID() *string { return v.PackageNamespaceID }
+
+// GetPackageNameID returns IDorPkgInput.PackageNameID, and is useful for accessing the field via an interface.
+func (v *IDorPkgInput) GetPackageNameID() *string { return v.PackageNameID }
+
+// GetPackageVersionID returns IDorPkgInput.PackageVersionID, and is useful for accessing the field via an interface.
+func (v *IDorPkgInput) GetPackageVersionID() *string { return v.PackageVersionID }
+
+// GetPackageInput returns IDorPkgInput.PackageInput, and is useful for accessing the field via an interface.
+func (v *IDorPkgInput) GetPackageInput() *PkgInputSpec { return v.PackageInput }
+
+// IDorSourceInput allows for specifying either the source IDs or the SourceInputSpec.
+//
+// Either the IDs or the SourceInputSpec must be specified. Both cannot be nil.
+//
+// If the IDs are specified, the SourceInputSpec is not used.
+type IDorSourceInput struct {
+	SourceTypeID      *string          `json:"sourceTypeID"`
+	SourceNamespaceID *string          `json:"sourceNamespaceID"`
+	SourceNameID      *string          `json:"sourceNameID"`
+	SourceInput       *SourceInputSpec `json:"sourceInput"`
+}
+
+// GetSourceTypeID returns IDorSourceInput.SourceTypeID, and is useful for accessing the field via an interface.
+func (v *IDorSourceInput) GetSourceTypeID() *string { return v.SourceTypeID }
+
+// GetSourceNamespaceID returns IDorSourceInput.SourceNamespaceID, and is useful for accessing the field via an interface.
+func (v *IDorSourceInput) GetSourceNamespaceID() *string { return v.SourceNamespaceID }
+
+// GetSourceNameID returns IDorSourceInput.SourceNameID, and is useful for accessing the field via an interface.
+func (v *IDorSourceInput) GetSourceNameID() *string { return v.SourceNameID }
+
+// GetSourceInput returns IDorSourceInput.SourceInput, and is useful for accessing the field via an interface.
+func (v *IDorSourceInput) GetSourceInput() *SourceInputSpec { return v.SourceInput }
+
+// IDorVulnerabilityInput allows for specifying either the vulnerability IDs or the VulnerabilityInputSpec.
+//
+// Either the IDs or the VulnerabilityInputSpec must be specified. Both cannot be nil.
+//
+// If the IDs are specified, the VulnerabilityInputSpec is not used.
+type IDorVulnerabilityInput struct {
+	VulnerabilityTypeID *string                 `json:"vulnerabilityTypeID"`
+	VulnerabilityNodeID *string                 `json:"vulnerabilityNodeID"`
+	VulnerabilityInput  *VulnerabilityInputSpec `json:"vulnerabilityInput"`
+}
+
+// GetVulnerabilityTypeID returns IDorVulnerabilityInput.VulnerabilityTypeID, and is useful for accessing the field via an interface.
+func (v *IDorVulnerabilityInput) GetVulnerabilityTypeID() *string { return v.VulnerabilityTypeID }
+
+// GetVulnerabilityNodeID returns IDorVulnerabilityInput.VulnerabilityNodeID, and is useful for accessing the field via an interface.
+func (v *IDorVulnerabilityInput) GetVulnerabilityNodeID() *string { return v.VulnerabilityNodeID }
+
+// GetVulnerabilityInput returns IDorVulnerabilityInput.VulnerabilityInput, and is useful for accessing the field via an interface.
+func (v *IDorVulnerabilityInput) GetVulnerabilityInput() *VulnerabilityInputSpec {
+	return v.VulnerabilityInput
+}
+
 // IngestArtifactResponse is returned by IngestArtifact on success.
 type IngestArtifactResponse struct {
-	// Ingests a new artifact and returns it. The returned ID can be empty string.
+	// Ingests a new artifact and returns it.
 	IngestArtifact string `json:"ingestArtifact"`
 }
 
@@ -8070,7 +8192,7 @@ func (v *IngestArtifactResponse) GetIngestArtifact() string { return v.IngestArt
 
 // IngestArtifactsResponse is returned by IngestArtifacts on success.
 type IngestArtifactsResponse struct {
-	// Bulk ingests new artifacts and returns a list of them. The returned array of IDs can be a an array of empty string.
+	// Bulk ingests new artifacts and returns a list of them. The returned array of IDs must be in the same order as the inputs.
 	IngestArtifacts []string `json:"ingestArtifacts"`
 }
 
@@ -8079,7 +8201,7 @@ func (v *IngestArtifactsResponse) GetIngestArtifacts() []string { return v.Inges
 
 // IngestBuilderResponse is returned by IngestBuilder on success.
 type IngestBuilderResponse struct {
-	// Ingests a new builder and returns it. The returned ID can be empty string.
+	// Ingests a new builder and returns it.
 	IngestBuilder string `json:"ingestBuilder"`
 }
 
@@ -8088,7 +8210,7 @@ func (v *IngestBuilderResponse) GetIngestBuilder() string { return v.IngestBuild
 
 // IngestBuildersResponse is returned by IngestBuilders on success.
 type IngestBuildersResponse struct {
-	// Bulk ingests new builders and returns a list of them. The returned array of IDs can be a an array of empty string.
+	// Bulk ingests new builders and returns a list of them. The returned array of IDs must be in the same order as the inputs.
 	IngestBuilders []string `json:"ingestBuilders"`
 }
 
@@ -8470,7 +8592,7 @@ func (v *IngestHashEqualsResponse) GetIngestHashEquals() []string { return v.Ing
 
 // IngestIsDependenciesResponse is returned by IngestIsDependencies on success.
 type IngestIsDependenciesResponse struct {
-	// Bulk adds a dependency between two packages. The returned array of IDs can be a an array of empty string.
+	// Bulk adds a dependency between two packages. The returned array of IDs cannot be an empty string as its used by hasSBOM.
 	IngestDependencies []string `json:"ingestDependencies"`
 }
 
@@ -8479,7 +8601,7 @@ func (v *IngestIsDependenciesResponse) GetIngestDependencies() []string { return
 
 // IngestIsDependencyResponse is returned by IngestIsDependency on success.
 type IngestIsDependencyResponse struct {
-	// Adds a dependency between two packages. The returned ID can be empty string.
+	// Adds a dependency between two packages. The returned ID cannot be empty string as its used by hasSBOM.
 	IngestDependency string `json:"ingestDependency"`
 }
 
@@ -8488,7 +8610,7 @@ func (v *IngestIsDependencyResponse) GetIngestDependency() string { return v.Ing
 
 // IngestIsOccurrencePkgResponse is returned by IngestIsOccurrencePkg on success.
 type IngestIsOccurrencePkgResponse struct {
-	// Ingest that an artifact is produced from a package or source. The returned ID can be empty string.
+	// Ingest that an artifact is produced from a package or source. The returned ID cannot be empty string as its used by hasSBOM.
 	IngestOccurrence string `json:"ingestOccurrence"`
 }
 
@@ -8497,7 +8619,7 @@ func (v *IngestIsOccurrencePkgResponse) GetIngestOccurrence() string { return v.
 
 // IngestIsOccurrenceSrcResponse is returned by IngestIsOccurrenceSrc on success.
 type IngestIsOccurrenceSrcResponse struct {
-	// Ingest that an artifact is produced from a package or source. The returned ID can be empty string.
+	// Ingest that an artifact is produced from a package or source. The returned ID cannot be empty string as its used by hasSBOM.
 	IngestOccurrence string `json:"ingestOccurrence"`
 }
 
@@ -8506,7 +8628,7 @@ func (v *IngestIsOccurrenceSrcResponse) GetIngestOccurrence() string { return v.
 
 // IngestIsOccurrencesPkgResponse is returned by IngestIsOccurrencesPkg on success.
 type IngestIsOccurrencesPkgResponse struct {
-	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string.
+	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs cannot be an empty string as its used by hasSBOM
 	IngestOccurrences []string `json:"ingestOccurrences"`
 }
 
@@ -8515,7 +8637,7 @@ func (v *IngestIsOccurrencesPkgResponse) GetIngestOccurrences() []string { retur
 
 // IngestIsOccurrencesSrcResponse is returned by IngestIsOccurrencesSrc on success.
 type IngestIsOccurrencesSrcResponse struct {
-	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string.
+	// Bulk ingest that an artifact is produced from a package or source. The returned array of IDs cannot be an empty string as its used by hasSBOM
 	IngestOccurrences []string `json:"ingestOccurrences"`
 }
 
@@ -8533,7 +8655,7 @@ func (v *IngestLicenseResponse) GetIngestLicense() string { return v.IngestLicen
 
 // IngestLicensesResponse is returned by IngestLicenses on success.
 type IngestLicensesResponse struct {
-	// Bulk ingests new licenses and returns a list of them.
+	// Bulk ingests new licenses and returns a list of them. The returned array of IDs must be in the same order as the inputs.
 	IngestLicenses []string `json:"ingestLicenses"`
 }
 
@@ -8569,7 +8691,7 @@ func (v *IngestPackageIngestPackagePackageIDs) GetPackageVersionID() string {
 
 // IngestPackageResponse is returned by IngestPackage on success.
 type IngestPackageResponse struct {
-	// Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string.
+	// Ingests a new package and returns a corresponding package hierarchy containing only the IDs.
 	IngestPackage IngestPackageIngestPackagePackageIDs `json:"ingestPackage"`
 }
 
@@ -8607,7 +8729,7 @@ func (v *IngestPackagesIngestPackagesPackageIDs) GetPackageVersionID() string {
 
 // IngestPackagesResponse is returned by IngestPackages on success.
 type IngestPackagesResponse struct {
-	// Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings.
+	// Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs must be in the same order as the inputs.
 	IngestPackages []IngestPackagesIngestPackagesPackageIDs `json:"ingestPackages"`
 }
 
@@ -8739,7 +8861,7 @@ func (v *IngestSourceIngestSourceSourceIDs) GetSourceNameID() string { return v.
 
 // IngestSourceResponse is returned by IngestSource on success.
 type IngestSourceResponse struct {
-	// Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string.
+	// Ingests a new source and returns the corresponding source trie path.
 	IngestSource IngestSourceIngestSourceSourceIDs `json:"ingestSource"`
 }
 
@@ -8771,7 +8893,7 @@ func (v *IngestSourcesIngestSourcesSourceIDs) GetSourceNameID() string { return 
 
 // IngestSourcesResponse is returned by IngestSources on success.
 type IngestSourcesResponse struct {
-	// Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string.
+	// Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs must be in the same order as the inputs.
 	IngestSources []IngestSourcesIngestSourcesSourceIDs `json:"ingestSources"`
 }
 
@@ -8830,7 +8952,7 @@ func (v *IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs) GetVulnerab
 
 // IngestVulnerabilitiesResponse is returned by IngestVulnerabilities on success.
 type IngestVulnerabilitiesResponse struct {
-	// Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs can be a an array of empty string.
+	// Bulk ingests vulnerabilities and returns the list of corresponding vulnerability trie path. The returned array of IDs must be in the same order as the inputs
 	IngestVulnerabilities []IngestVulnerabilitiesIngestVulnerabilitiesVulnerabilityIDs `json:"ingestVulnerabilities"`
 }
 
@@ -8860,7 +8982,7 @@ func (v *IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs) GetVulnerabilit
 
 // IngestVulnerabilityResponse is returned by IngestVulnerability on success.
 type IngestVulnerabilityResponse struct {
-	// Ingests a new vulnerability and returns the corresponding vulnerability trie path. The returned ID can be empty string.
+	// Ingests a new vulnerability and returns the corresponding vulnerability trie path.
 	IngestVulnerability IngestVulnerabilityIngestVulnerabilityVulnerabilityIDs `json:"ingestVulnerability"`
 }
 
@@ -22313,44 +22435,44 @@ func (v *__HasSBOMsInput) GetFilter() HasSBOMSpec { return v.Filter }
 
 // __IngestArtifactInput is used internally by genqlient
 type __IngestArtifactInput struct {
-	Artifact ArtifactInputSpec `json:"artifact"`
+	Artifact IDorArtifactInput `json:"artifact"`
 }
 
 // GetArtifact returns __IngestArtifactInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestArtifactInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // __IngestArtifactsInput is used internally by genqlient
 type __IngestArtifactsInput struct {
-	Artifacts []ArtifactInputSpec `json:"artifacts"`
+	Artifacts []IDorArtifactInput `json:"artifacts"`
 }
 
 // GetArtifacts returns __IngestArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestArtifactsInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // __IngestBuilderInput is used internally by genqlient
 type __IngestBuilderInput struct {
-	Builder BuilderInputSpec `json:"builder"`
+	Builder IDorBuilderInput `json:"builder"`
 }
 
 // GetBuilder returns __IngestBuilderInput.Builder, and is useful for accessing the field via an interface.
-func (v *__IngestBuilderInput) GetBuilder() BuilderInputSpec { return v.Builder }
+func (v *__IngestBuilderInput) GetBuilder() IDorBuilderInput { return v.Builder }
 
 // __IngestBuildersInput is used internally by genqlient
 type __IngestBuildersInput struct {
-	Builders []BuilderInputSpec `json:"builders"`
+	Builders []IDorBuilderInput `json:"builders"`
 }
 
 // GetBuilders returns __IngestBuildersInput.Builders, and is useful for accessing the field via an interface.
-func (v *__IngestBuildersInput) GetBuilders() []BuilderInputSpec { return v.Builders }
+func (v *__IngestBuildersInput) GetBuilders() []IDorBuilderInput { return v.Builders }
 
 // __IngestBulkVulnHasMetadataInput is used internally by genqlient
 type __IngestBulkVulnHasMetadataInput struct {
-	Vulnerabilities           []VulnerabilityInputSpec         `json:"vulnerabilities"`
+	Vulnerabilities           []IDorVulnerabilityInput         `json:"vulnerabilities"`
 	VulnerabilityMetadataList []VulnerabilityMetadataInputSpec `json:"vulnerabilityMetadataList"`
 }
 
 // GetVulnerabilities returns __IngestBulkVulnHasMetadataInput.Vulnerabilities, and is useful for accessing the field via an interface.
-func (v *__IngestBulkVulnHasMetadataInput) GetVulnerabilities() []VulnerabilityInputSpec {
+func (v *__IngestBulkVulnHasMetadataInput) GetVulnerabilities() []IDorVulnerabilityInput {
 	return v.Vulnerabilities
 }
 
@@ -22361,24 +22483,24 @@ func (v *__IngestBulkVulnHasMetadataInput) GetVulnerabilityMetadataList() []Vuln
 
 // __IngestCertifyBadArtifactInput is used internally by genqlient
 type __IngestCertifyBadArtifactInput struct {
-	Artifact   ArtifactInputSpec   `json:"artifact"`
+	Artifact   IDorArtifactInput   `json:"artifact"`
 	CertifyBad CertifyBadInputSpec `json:"certifyBad"`
 }
 
 // GetArtifact returns __IngestCertifyBadArtifactInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyBadArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestCertifyBadArtifactInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetCertifyBad returns __IngestCertifyBadArtifactInput.CertifyBad, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyBadArtifactInput) GetCertifyBad() CertifyBadInputSpec { return v.CertifyBad }
 
 // __IngestCertifyBadArtifactsInput is used internally by genqlient
 type __IngestCertifyBadArtifactsInput struct {
-	Artifacts   []ArtifactInputSpec   `json:"artifacts"`
+	Artifacts   []IDorArtifactInput   `json:"artifacts"`
 	CertifyBads []CertifyBadInputSpec `json:"certifyBads"`
 }
 
 // GetArtifacts returns __IngestCertifyBadArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyBadArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestCertifyBadArtifactsInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetCertifyBads returns __IngestCertifyBadArtifactsInput.CertifyBads, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyBadArtifactsInput) GetCertifyBads() []CertifyBadInputSpec {
@@ -22387,13 +22509,13 @@ func (v *__IngestCertifyBadArtifactsInput) GetCertifyBads() []CertifyBadInputSpe
 
 // __IngestCertifyBadPkgInput is used internally by genqlient
 type __IngestCertifyBadPkgInput struct {
-	Pkg          PkgInputSpec        `json:"pkg"`
+	Pkg          IDorPkgInput        `json:"pkg"`
 	PkgMatchType MatchFlags          `json:"pkgMatchType"`
 	CertifyBad   CertifyBadInputSpec `json:"certifyBad"`
 }
 
 // GetPkg returns __IngestCertifyBadPkgInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyBadPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestCertifyBadPkgInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetPkgMatchType returns __IngestCertifyBadPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyBadPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
@@ -22403,13 +22525,13 @@ func (v *__IngestCertifyBadPkgInput) GetCertifyBad() CertifyBadInputSpec { retur
 
 // __IngestCertifyBadPkgsInput is used internally by genqlient
 type __IngestCertifyBadPkgsInput struct {
-	Pkgs         []PkgInputSpec        `json:"pkgs"`
+	Pkgs         []IDorPkgInput        `json:"pkgs"`
 	PkgMatchType MatchFlags            `json:"pkgMatchType"`
 	CertifyBads  []CertifyBadInputSpec `json:"certifyBads"`
 }
 
 // GetPkgs returns __IngestCertifyBadPkgsInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyBadPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestCertifyBadPkgsInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetPkgMatchType returns __IngestCertifyBadPkgsInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyBadPkgsInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
@@ -22419,36 +22541,36 @@ func (v *__IngestCertifyBadPkgsInput) GetCertifyBads() []CertifyBadInputSpec { r
 
 // __IngestCertifyBadSrcInput is used internally by genqlient
 type __IngestCertifyBadSrcInput struct {
-	Source     SourceInputSpec     `json:"source"`
+	Source     IDorSourceInput     `json:"source"`
 	CertifyBad CertifyBadInputSpec `json:"certifyBad"`
 }
 
 // GetSource returns __IngestCertifyBadSrcInput.Source, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyBadSrcInput) GetSource() SourceInputSpec { return v.Source }
+func (v *__IngestCertifyBadSrcInput) GetSource() IDorSourceInput { return v.Source }
 
 // GetCertifyBad returns __IngestCertifyBadSrcInput.CertifyBad, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyBadSrcInput) GetCertifyBad() CertifyBadInputSpec { return v.CertifyBad }
 
 // __IngestCertifyBadSrcsInput is used internally by genqlient
 type __IngestCertifyBadSrcsInput struct {
-	Sources     []SourceInputSpec     `json:"sources"`
+	Sources     []IDorSourceInput     `json:"sources"`
 	CertifyBads []CertifyBadInputSpec `json:"certifyBads"`
 }
 
 // GetSources returns __IngestCertifyBadSrcsInput.Sources, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyBadSrcsInput) GetSources() []SourceInputSpec { return v.Sources }
+func (v *__IngestCertifyBadSrcsInput) GetSources() []IDorSourceInput { return v.Sources }
 
 // GetCertifyBads returns __IngestCertifyBadSrcsInput.CertifyBads, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyBadSrcsInput) GetCertifyBads() []CertifyBadInputSpec { return v.CertifyBads }
 
 // __IngestCertifyGoodArtifactInput is used internally by genqlient
 type __IngestCertifyGoodArtifactInput struct {
-	Artifact    ArtifactInputSpec    `json:"artifact"`
+	Artifact    IDorArtifactInput    `json:"artifact"`
 	CertifyGood CertifyGoodInputSpec `json:"certifyGood"`
 }
 
 // GetArtifact returns __IngestCertifyGoodArtifactInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyGoodArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestCertifyGoodArtifactInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetCertifyGood returns __IngestCertifyGoodArtifactInput.CertifyGood, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyGoodArtifactInput) GetCertifyGood() CertifyGoodInputSpec {
@@ -22457,12 +22579,12 @@ func (v *__IngestCertifyGoodArtifactInput) GetCertifyGood() CertifyGoodInputSpec
 
 // __IngestCertifyGoodArtifactsInput is used internally by genqlient
 type __IngestCertifyGoodArtifactsInput struct {
-	Artifacts    []ArtifactInputSpec    `json:"artifacts"`
+	Artifacts    []IDorArtifactInput    `json:"artifacts"`
 	CertifyGoods []CertifyGoodInputSpec `json:"certifyGoods"`
 }
 
 // GetArtifacts returns __IngestCertifyGoodArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyGoodArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestCertifyGoodArtifactsInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetCertifyGoods returns __IngestCertifyGoodArtifactsInput.CertifyGoods, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyGoodArtifactsInput) GetCertifyGoods() []CertifyGoodInputSpec {
@@ -22471,13 +22593,13 @@ func (v *__IngestCertifyGoodArtifactsInput) GetCertifyGoods() []CertifyGoodInput
 
 // __IngestCertifyGoodPkgInput is used internally by genqlient
 type __IngestCertifyGoodPkgInput struct {
-	Pkg          PkgInputSpec         `json:"pkg"`
+	Pkg          IDorPkgInput         `json:"pkg"`
 	PkgMatchType MatchFlags           `json:"pkgMatchType"`
 	CertifyGood  CertifyGoodInputSpec `json:"certifyGood"`
 }
 
 // GetPkg returns __IngestCertifyGoodPkgInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyGoodPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestCertifyGoodPkgInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetPkgMatchType returns __IngestCertifyGoodPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyGoodPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
@@ -22487,13 +22609,13 @@ func (v *__IngestCertifyGoodPkgInput) GetCertifyGood() CertifyGoodInputSpec { re
 
 // __IngestCertifyGoodPkgsInput is used internally by genqlient
 type __IngestCertifyGoodPkgsInput struct {
-	Pkgs         []PkgInputSpec         `json:"pkgs"`
+	Pkgs         []IDorPkgInput         `json:"pkgs"`
 	PkgMatchType MatchFlags             `json:"pkgMatchType"`
 	CertifyGoods []CertifyGoodInputSpec `json:"certifyGoods"`
 }
 
 // GetPkgs returns __IngestCertifyGoodPkgsInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyGoodPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestCertifyGoodPkgsInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetPkgMatchType returns __IngestCertifyGoodPkgsInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyGoodPkgsInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
@@ -22505,24 +22627,24 @@ func (v *__IngestCertifyGoodPkgsInput) GetCertifyGoods() []CertifyGoodInputSpec 
 
 // __IngestCertifyGoodSrcInput is used internally by genqlient
 type __IngestCertifyGoodSrcInput struct {
-	Source      SourceInputSpec      `json:"source"`
+	Source      IDorSourceInput      `json:"source"`
 	CertifyGood CertifyGoodInputSpec `json:"certifyGood"`
 }
 
 // GetSource returns __IngestCertifyGoodSrcInput.Source, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyGoodSrcInput) GetSource() SourceInputSpec { return v.Source }
+func (v *__IngestCertifyGoodSrcInput) GetSource() IDorSourceInput { return v.Source }
 
 // GetCertifyGood returns __IngestCertifyGoodSrcInput.CertifyGood, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyGoodSrcInput) GetCertifyGood() CertifyGoodInputSpec { return v.CertifyGood }
 
 // __IngestCertifyGoodSrcsInput is used internally by genqlient
 type __IngestCertifyGoodSrcsInput struct {
-	Sources      []SourceInputSpec      `json:"sources"`
+	Sources      []IDorSourceInput      `json:"sources"`
 	CertifyGoods []CertifyGoodInputSpec `json:"certifyGoods"`
 }
 
 // GetSources returns __IngestCertifyGoodSrcsInput.Sources, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyGoodSrcsInput) GetSources() []SourceInputSpec { return v.Sources }
+func (v *__IngestCertifyGoodSrcsInput) GetSources() []IDorSourceInput { return v.Sources }
 
 // GetCertifyGoods returns __IngestCertifyGoodSrcsInput.CertifyGoods, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyGoodSrcsInput) GetCertifyGoods() []CertifyGoodInputSpec {
@@ -22531,22 +22653,22 @@ func (v *__IngestCertifyGoodSrcsInput) GetCertifyGoods() []CertifyGoodInputSpec 
 
 // __IngestCertifyLegalPkgInput is used internally by genqlient
 type __IngestCertifyLegalPkgInput struct {
-	Pkg                PkgInputSpec          `json:"pkg"`
-	DeclaredLicenses   []LicenseInputSpec    `json:"declaredLicenses"`
-	DiscoveredLicenses []LicenseInputSpec    `json:"discoveredLicenses"`
+	Pkg                IDorPkgInput          `json:"pkg"`
+	DeclaredLicenses   []IDorLicenseInput    `json:"declaredLicenses"`
+	DiscoveredLicenses []IDorLicenseInput    `json:"discoveredLicenses"`
 	Legal              CertifyLegalInputSpec `json:"legal"`
 }
 
 // GetPkg returns __IngestCertifyLegalPkgInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestCertifyLegalPkgInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetDeclaredLicenses returns __IngestCertifyLegalPkgInput.DeclaredLicenses, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalPkgInput) GetDeclaredLicenses() []LicenseInputSpec {
+func (v *__IngestCertifyLegalPkgInput) GetDeclaredLicenses() []IDorLicenseInput {
 	return v.DeclaredLicenses
 }
 
 // GetDiscoveredLicenses returns __IngestCertifyLegalPkgInput.DiscoveredLicenses, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalPkgInput) GetDiscoveredLicenses() []LicenseInputSpec {
+func (v *__IngestCertifyLegalPkgInput) GetDiscoveredLicenses() []IDorLicenseInput {
 	return v.DiscoveredLicenses
 }
 
@@ -22555,22 +22677,22 @@ func (v *__IngestCertifyLegalPkgInput) GetLegal() CertifyLegalInputSpec { return
 
 // __IngestCertifyLegalPkgsInput is used internally by genqlient
 type __IngestCertifyLegalPkgsInput struct {
-	Pkgs                   []PkgInputSpec          `json:"pkgs"`
-	DeclaredLicensesList   [][]LicenseInputSpec    `json:"declaredLicensesList"`
-	DiscoveredLicensesList [][]LicenseInputSpec    `json:"discoveredLicensesList"`
+	Pkgs                   []IDorPkgInput          `json:"pkgs"`
+	DeclaredLicensesList   [][]IDorLicenseInput    `json:"declaredLicensesList"`
+	DiscoveredLicensesList [][]IDorLicenseInput    `json:"discoveredLicensesList"`
 	Legals                 []CertifyLegalInputSpec `json:"legals"`
 }
 
 // GetPkgs returns __IngestCertifyLegalPkgsInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestCertifyLegalPkgsInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetDeclaredLicensesList returns __IngestCertifyLegalPkgsInput.DeclaredLicensesList, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalPkgsInput) GetDeclaredLicensesList() [][]LicenseInputSpec {
+func (v *__IngestCertifyLegalPkgsInput) GetDeclaredLicensesList() [][]IDorLicenseInput {
 	return v.DeclaredLicensesList
 }
 
 // GetDiscoveredLicensesList returns __IngestCertifyLegalPkgsInput.DiscoveredLicensesList, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalPkgsInput) GetDiscoveredLicensesList() [][]LicenseInputSpec {
+func (v *__IngestCertifyLegalPkgsInput) GetDiscoveredLicensesList() [][]IDorLicenseInput {
 	return v.DiscoveredLicensesList
 }
 
@@ -22579,22 +22701,22 @@ func (v *__IngestCertifyLegalPkgsInput) GetLegals() []CertifyLegalInputSpec { re
 
 // __IngestCertifyLegalSrcInput is used internally by genqlient
 type __IngestCertifyLegalSrcInput struct {
-	Src                SourceInputSpec       `json:"src"`
-	DeclaredLicenses   []LicenseInputSpec    `json:"declaredLicenses"`
-	DiscoveredLicenses []LicenseInputSpec    `json:"discoveredLicenses"`
+	Src                IDorSourceInput       `json:"src"`
+	DeclaredLicenses   []IDorLicenseInput    `json:"declaredLicenses"`
+	DiscoveredLicenses []IDorLicenseInput    `json:"discoveredLicenses"`
 	Legal              CertifyLegalInputSpec `json:"legal"`
 }
 
 // GetSrc returns __IngestCertifyLegalSrcInput.Src, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalSrcInput) GetSrc() SourceInputSpec { return v.Src }
+func (v *__IngestCertifyLegalSrcInput) GetSrc() IDorSourceInput { return v.Src }
 
 // GetDeclaredLicenses returns __IngestCertifyLegalSrcInput.DeclaredLicenses, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalSrcInput) GetDeclaredLicenses() []LicenseInputSpec {
+func (v *__IngestCertifyLegalSrcInput) GetDeclaredLicenses() []IDorLicenseInput {
 	return v.DeclaredLicenses
 }
 
 // GetDiscoveredLicenses returns __IngestCertifyLegalSrcInput.DiscoveredLicenses, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalSrcInput) GetDiscoveredLicenses() []LicenseInputSpec {
+func (v *__IngestCertifyLegalSrcInput) GetDiscoveredLicenses() []IDorLicenseInput {
 	return v.DiscoveredLicenses
 }
 
@@ -22603,22 +22725,22 @@ func (v *__IngestCertifyLegalSrcInput) GetLegal() CertifyLegalInputSpec { return
 
 // __IngestCertifyLegalSrcsInput is used internally by genqlient
 type __IngestCertifyLegalSrcsInput struct {
-	Srcs                   []SourceInputSpec       `json:"srcs"`
-	DeclaredLicensesList   [][]LicenseInputSpec    `json:"declaredLicensesList"`
-	DiscoveredLicensesList [][]LicenseInputSpec    `json:"discoveredLicensesList"`
+	Srcs                   []IDorSourceInput       `json:"srcs"`
+	DeclaredLicensesList   [][]IDorLicenseInput    `json:"declaredLicensesList"`
+	DiscoveredLicensesList [][]IDorLicenseInput    `json:"discoveredLicensesList"`
 	Legals                 []CertifyLegalInputSpec `json:"legals"`
 }
 
 // GetSrcs returns __IngestCertifyLegalSrcsInput.Srcs, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalSrcsInput) GetSrcs() []SourceInputSpec { return v.Srcs }
+func (v *__IngestCertifyLegalSrcsInput) GetSrcs() []IDorSourceInput { return v.Srcs }
 
 // GetDeclaredLicensesList returns __IngestCertifyLegalSrcsInput.DeclaredLicensesList, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalSrcsInput) GetDeclaredLicensesList() [][]LicenseInputSpec {
+func (v *__IngestCertifyLegalSrcsInput) GetDeclaredLicensesList() [][]IDorLicenseInput {
 	return v.DeclaredLicensesList
 }
 
 // GetDiscoveredLicensesList returns __IngestCertifyLegalSrcsInput.DiscoveredLicensesList, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyLegalSrcsInput) GetDiscoveredLicensesList() [][]LicenseInputSpec {
+func (v *__IngestCertifyLegalSrcsInput) GetDiscoveredLicensesList() [][]IDorLicenseInput {
 	return v.DiscoveredLicensesList
 }
 
@@ -22627,40 +22749,40 @@ func (v *__IngestCertifyLegalSrcsInput) GetLegals() []CertifyLegalInputSpec { re
 
 // __IngestCertifyScorecardInput is used internally by genqlient
 type __IngestCertifyScorecardInput struct {
-	Source    SourceInputSpec    `json:"source"`
+	Source    IDorSourceInput    `json:"source"`
 	Scorecard ScorecardInputSpec `json:"scorecard"`
 }
 
 // GetSource returns __IngestCertifyScorecardInput.Source, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyScorecardInput) GetSource() SourceInputSpec { return v.Source }
+func (v *__IngestCertifyScorecardInput) GetSource() IDorSourceInput { return v.Source }
 
 // GetScorecard returns __IngestCertifyScorecardInput.Scorecard, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyScorecardInput) GetScorecard() ScorecardInputSpec { return v.Scorecard }
 
 // __IngestCertifyScorecardsInput is used internally by genqlient
 type __IngestCertifyScorecardsInput struct {
-	Sources    []SourceInputSpec    `json:"sources"`
+	Sources    []IDorSourceInput    `json:"sources"`
 	Scorecards []ScorecardInputSpec `json:"scorecards"`
 }
 
 // GetSources returns __IngestCertifyScorecardsInput.Sources, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyScorecardsInput) GetSources() []SourceInputSpec { return v.Sources }
+func (v *__IngestCertifyScorecardsInput) GetSources() []IDorSourceInput { return v.Sources }
 
 // GetScorecards returns __IngestCertifyScorecardsInput.Scorecards, and is useful for accessing the field via an interface.
 func (v *__IngestCertifyScorecardsInput) GetScorecards() []ScorecardInputSpec { return v.Scorecards }
 
 // __IngestCertifyVexArtifactInput is used internally by genqlient
 type __IngestCertifyVexArtifactInput struct {
-	Artifact      ArtifactInputSpec      `json:"artifact"`
-	Vulnerability VulnerabilityInputSpec `json:"vulnerability"`
+	Artifact      IDorArtifactInput      `json:"artifact"`
+	Vulnerability IDorVulnerabilityInput `json:"vulnerability"`
 	VexStatement  VexStatementInputSpec  `json:"vexStatement"`
 }
 
 // GetArtifact returns __IngestCertifyVexArtifactInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVexArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestCertifyVexArtifactInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetVulnerability returns __IngestCertifyVexArtifactInput.Vulnerability, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVexArtifactInput) GetVulnerability() VulnerabilityInputSpec {
+func (v *__IngestCertifyVexArtifactInput) GetVulnerability() IDorVulnerabilityInput {
 	return v.Vulnerability
 }
 
@@ -22671,16 +22793,16 @@ func (v *__IngestCertifyVexArtifactInput) GetVexStatement() VexStatementInputSpe
 
 // __IngestCertifyVexArtifactsInput is used internally by genqlient
 type __IngestCertifyVexArtifactsInput struct {
-	Artifacts       []ArtifactInputSpec      `json:"artifacts"`
-	Vulnerabilities []VulnerabilityInputSpec `json:"vulnerabilities"`
+	Artifacts       []IDorArtifactInput      `json:"artifacts"`
+	Vulnerabilities []IDorVulnerabilityInput `json:"vulnerabilities"`
 	VexStatements   []VexStatementInputSpec  `json:"vexStatements"`
 }
 
 // GetArtifacts returns __IngestCertifyVexArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVexArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestCertifyVexArtifactsInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetVulnerabilities returns __IngestCertifyVexArtifactsInput.Vulnerabilities, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVexArtifactsInput) GetVulnerabilities() []VulnerabilityInputSpec {
+func (v *__IngestCertifyVexArtifactsInput) GetVulnerabilities() []IDorVulnerabilityInput {
 	return v.Vulnerabilities
 }
 
@@ -22691,16 +22813,16 @@ func (v *__IngestCertifyVexArtifactsInput) GetVexStatements() []VexStatementInpu
 
 // __IngestCertifyVexPkgInput is used internally by genqlient
 type __IngestCertifyVexPkgInput struct {
-	Pkg           PkgInputSpec           `json:"pkg"`
-	Vulnerability VulnerabilityInputSpec `json:"vulnerability"`
+	Pkg           IDorPkgInput           `json:"pkg"`
+	Vulnerability IDorVulnerabilityInput `json:"vulnerability"`
 	VexStatement  VexStatementInputSpec  `json:"vexStatement"`
 }
 
 // GetPkg returns __IngestCertifyVexPkgInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVexPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestCertifyVexPkgInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetVulnerability returns __IngestCertifyVexPkgInput.Vulnerability, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVexPkgInput) GetVulnerability() VulnerabilityInputSpec {
+func (v *__IngestCertifyVexPkgInput) GetVulnerability() IDorVulnerabilityInput {
 	return v.Vulnerability
 }
 
@@ -22709,16 +22831,16 @@ func (v *__IngestCertifyVexPkgInput) GetVexStatement() VexStatementInputSpec { r
 
 // __IngestCertifyVexPkgsInput is used internally by genqlient
 type __IngestCertifyVexPkgsInput struct {
-	Pkgs            []PkgInputSpec           `json:"pkgs"`
-	Vulnerabilities []VulnerabilityInputSpec `json:"vulnerabilities"`
+	Pkgs            []IDorPkgInput           `json:"pkgs"`
+	Vulnerabilities []IDorVulnerabilityInput `json:"vulnerabilities"`
 	VexStatements   []VexStatementInputSpec  `json:"vexStatements"`
 }
 
 // GetPkgs returns __IngestCertifyVexPkgsInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVexPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestCertifyVexPkgsInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetVulnerabilities returns __IngestCertifyVexPkgsInput.Vulnerabilities, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVexPkgsInput) GetVulnerabilities() []VulnerabilityInputSpec {
+func (v *__IngestCertifyVexPkgsInput) GetVulnerabilities() []IDorVulnerabilityInput {
 	return v.Vulnerabilities
 }
 
@@ -22729,16 +22851,16 @@ func (v *__IngestCertifyVexPkgsInput) GetVexStatements() []VexStatementInputSpec
 
 // __IngestCertifyVulnPkgInput is used internally by genqlient
 type __IngestCertifyVulnPkgInput struct {
-	Pkg           PkgInputSpec           `json:"pkg"`
-	Vulnerability VulnerabilityInputSpec `json:"vulnerability"`
+	Pkg           IDorPkgInput           `json:"pkg"`
+	Vulnerability IDorVulnerabilityInput `json:"vulnerability"`
 	CertifyVuln   ScanMetadataInput      `json:"certifyVuln"`
 }
 
 // GetPkg returns __IngestCertifyVulnPkgInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVulnPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestCertifyVulnPkgInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetVulnerability returns __IngestCertifyVulnPkgInput.Vulnerability, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVulnPkgInput) GetVulnerability() VulnerabilityInputSpec {
+func (v *__IngestCertifyVulnPkgInput) GetVulnerability() IDorVulnerabilityInput {
 	return v.Vulnerability
 }
 
@@ -22747,16 +22869,16 @@ func (v *__IngestCertifyVulnPkgInput) GetCertifyVuln() ScanMetadataInput { retur
 
 // __IngestCertifyVulnPkgsInput is used internally by genqlient
 type __IngestCertifyVulnPkgsInput struct {
-	Pkgs            []PkgInputSpec           `json:"pkgs"`
-	Vulnerabilities []VulnerabilityInputSpec `json:"vulnerabilities"`
+	Pkgs            []IDorPkgInput           `json:"pkgs"`
+	Vulnerabilities []IDorVulnerabilityInput `json:"vulnerabilities"`
 	CertifyVulns    []ScanMetadataInput      `json:"certifyVulns"`
 }
 
 // GetPkgs returns __IngestCertifyVulnPkgsInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVulnPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestCertifyVulnPkgsInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetVulnerabilities returns __IngestCertifyVulnPkgsInput.Vulnerabilities, and is useful for accessing the field via an interface.
-func (v *__IngestCertifyVulnPkgsInput) GetVulnerabilities() []VulnerabilityInputSpec {
+func (v *__IngestCertifyVulnPkgsInput) GetVulnerabilities() []IDorVulnerabilityInput {
 	return v.Vulnerabilities
 }
 
@@ -22765,12 +22887,12 @@ func (v *__IngestCertifyVulnPkgsInput) GetCertifyVulns() []ScanMetadataInput { r
 
 // __IngestHasMetadataArtifactInput is used internally by genqlient
 type __IngestHasMetadataArtifactInput struct {
-	Artifact    ArtifactInputSpec    `json:"artifact"`
+	Artifact    IDorArtifactInput    `json:"artifact"`
 	HasMetadata HasMetadataInputSpec `json:"hasMetadata"`
 }
 
 // GetArtifact returns __IngestHasMetadataArtifactInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestHasMetadataArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestHasMetadataArtifactInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetHasMetadata returns __IngestHasMetadataArtifactInput.HasMetadata, and is useful for accessing the field via an interface.
 func (v *__IngestHasMetadataArtifactInput) GetHasMetadata() HasMetadataInputSpec {
@@ -22779,12 +22901,12 @@ func (v *__IngestHasMetadataArtifactInput) GetHasMetadata() HasMetadataInputSpec
 
 // __IngestHasMetadataArtifactsInput is used internally by genqlient
 type __IngestHasMetadataArtifactsInput struct {
-	Artifacts       []ArtifactInputSpec    `json:"artifacts"`
+	Artifacts       []IDorArtifactInput    `json:"artifacts"`
 	HasMetadataList []HasMetadataInputSpec `json:"hasMetadataList"`
 }
 
 // GetArtifacts returns __IngestHasMetadataArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestHasMetadataArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestHasMetadataArtifactsInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetHasMetadataList returns __IngestHasMetadataArtifactsInput.HasMetadataList, and is useful for accessing the field via an interface.
 func (v *__IngestHasMetadataArtifactsInput) GetHasMetadataList() []HasMetadataInputSpec {
@@ -22793,13 +22915,13 @@ func (v *__IngestHasMetadataArtifactsInput) GetHasMetadataList() []HasMetadataIn
 
 // __IngestHasMetadataPkgInput is used internally by genqlient
 type __IngestHasMetadataPkgInput struct {
-	Pkg          PkgInputSpec         `json:"pkg"`
+	Pkg          IDorPkgInput         `json:"pkg"`
 	PkgMatchType MatchFlags           `json:"pkgMatchType"`
 	HasMetadata  HasMetadataInputSpec `json:"hasMetadata"`
 }
 
 // GetPkg returns __IngestHasMetadataPkgInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestHasMetadataPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestHasMetadataPkgInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetPkgMatchType returns __IngestHasMetadataPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestHasMetadataPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
@@ -22809,13 +22931,13 @@ func (v *__IngestHasMetadataPkgInput) GetHasMetadata() HasMetadataInputSpec { re
 
 // __IngestHasMetadataPkgsInput is used internally by genqlient
 type __IngestHasMetadataPkgsInput struct {
-	Pkgs            []PkgInputSpec         `json:"pkgs"`
+	Pkgs            []IDorPkgInput         `json:"pkgs"`
 	PkgMatchType    MatchFlags             `json:"pkgMatchType"`
 	HasMetadataList []HasMetadataInputSpec `json:"hasMetadataList"`
 }
 
 // GetPkgs returns __IngestHasMetadataPkgsInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestHasMetadataPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestHasMetadataPkgsInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetPkgMatchType returns __IngestHasMetadataPkgsInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestHasMetadataPkgsInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
@@ -22827,24 +22949,24 @@ func (v *__IngestHasMetadataPkgsInput) GetHasMetadataList() []HasMetadataInputSp
 
 // __IngestHasMetadataSrcInput is used internally by genqlient
 type __IngestHasMetadataSrcInput struct {
-	Source      SourceInputSpec      `json:"source"`
+	Source      IDorSourceInput      `json:"source"`
 	HasMetadata HasMetadataInputSpec `json:"hasMetadata"`
 }
 
 // GetSource returns __IngestHasMetadataSrcInput.Source, and is useful for accessing the field via an interface.
-func (v *__IngestHasMetadataSrcInput) GetSource() SourceInputSpec { return v.Source }
+func (v *__IngestHasMetadataSrcInput) GetSource() IDorSourceInput { return v.Source }
 
 // GetHasMetadata returns __IngestHasMetadataSrcInput.HasMetadata, and is useful for accessing the field via an interface.
 func (v *__IngestHasMetadataSrcInput) GetHasMetadata() HasMetadataInputSpec { return v.HasMetadata }
 
 // __IngestHasMetadataSrcsInput is used internally by genqlient
 type __IngestHasMetadataSrcsInput struct {
-	Sources         []SourceInputSpec      `json:"sources"`
+	Sources         []IDorSourceInput      `json:"sources"`
 	HasMetadataList []HasMetadataInputSpec `json:"hasMetadataList"`
 }
 
 // GetSources returns __IngestHasMetadataSrcsInput.Sources, and is useful for accessing the field via an interface.
-func (v *__IngestHasMetadataSrcsInput) GetSources() []SourceInputSpec { return v.Sources }
+func (v *__IngestHasMetadataSrcsInput) GetSources() []IDorSourceInput { return v.Sources }
 
 // GetHasMetadataList returns __IngestHasMetadataSrcsInput.HasMetadataList, and is useful for accessing the field via an interface.
 func (v *__IngestHasMetadataSrcsInput) GetHasMetadataList() []HasMetadataInputSpec {
@@ -22853,13 +22975,13 @@ func (v *__IngestHasMetadataSrcsInput) GetHasMetadataList() []HasMetadataInputSp
 
 // __IngestHasSBOMArtifactInput is used internally by genqlient
 type __IngestHasSBOMArtifactInput struct {
-	Artifact ArtifactInputSpec        `json:"artifact"`
+	Artifact IDorArtifactInput        `json:"artifact"`
 	HasSBOM  HasSBOMInputSpec         `json:"hasSBOM"`
 	Includes HasSBOMIncludesInputSpec `json:"includes"`
 }
 
 // GetArtifact returns __IngestHasSBOMArtifactInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestHasSBOMArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestHasSBOMArtifactInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetHasSBOM returns __IngestHasSBOMArtifactInput.HasSBOM, and is useful for accessing the field via an interface.
 func (v *__IngestHasSBOMArtifactInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
@@ -22869,13 +22991,13 @@ func (v *__IngestHasSBOMArtifactInput) GetIncludes() HasSBOMIncludesInputSpec { 
 
 // __IngestHasSBOMArtifactsInput is used internally by genqlient
 type __IngestHasSBOMArtifactsInput struct {
-	Artifacts []ArtifactInputSpec        `json:"artifacts"`
+	Artifacts []IDorArtifactInput        `json:"artifacts"`
 	HasSBOMs  []HasSBOMInputSpec         `json:"hasSBOMs"`
 	Includes  []HasSBOMIncludesInputSpec `json:"includes"`
 }
 
 // GetArtifacts returns __IngestHasSBOMArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestHasSBOMArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestHasSBOMArtifactsInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetHasSBOMs returns __IngestHasSBOMArtifactsInput.HasSBOMs, and is useful for accessing the field via an interface.
 func (v *__IngestHasSBOMArtifactsInput) GetHasSBOMs() []HasSBOMInputSpec { return v.HasSBOMs }
@@ -22885,13 +23007,13 @@ func (v *__IngestHasSBOMArtifactsInput) GetIncludes() []HasSBOMIncludesInputSpec
 
 // __IngestHasSBOMPkgInput is used internally by genqlient
 type __IngestHasSBOMPkgInput struct {
-	Pkg      PkgInputSpec             `json:"pkg"`
+	Pkg      IDorPkgInput             `json:"pkg"`
 	HasSBOM  HasSBOMInputSpec         `json:"hasSBOM"`
 	Includes HasSBOMIncludesInputSpec `json:"includes"`
 }
 
 // GetPkg returns __IngestHasSBOMPkgInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestHasSBOMPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestHasSBOMPkgInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetHasSBOM returns __IngestHasSBOMPkgInput.HasSBOM, and is useful for accessing the field via an interface.
 func (v *__IngestHasSBOMPkgInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
@@ -22901,13 +23023,13 @@ func (v *__IngestHasSBOMPkgInput) GetIncludes() HasSBOMIncludesInputSpec { retur
 
 // __IngestHasSBOMPkgsInput is used internally by genqlient
 type __IngestHasSBOMPkgsInput struct {
-	Pkgs     []PkgInputSpec             `json:"pkgs"`
+	Pkgs     []IDorPkgInput             `json:"pkgs"`
 	HasSBOMs []HasSBOMInputSpec         `json:"hasSBOMs"`
 	Includes []HasSBOMIncludesInputSpec `json:"includes"`
 }
 
 // GetPkgs returns __IngestHasSBOMPkgsInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestHasSBOMPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestHasSBOMPkgsInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetHasSBOMs returns __IngestHasSBOMPkgsInput.HasSBOMs, and is useful for accessing the field via an interface.
 func (v *__IngestHasSBOMPkgsInput) GetHasSBOMs() []HasSBOMInputSpec { return v.HasSBOMs }
@@ -22917,89 +23039,89 @@ func (v *__IngestHasSBOMPkgsInput) GetIncludes() []HasSBOMIncludesInputSpec { re
 
 // __IngestHasSourceAtInput is used internally by genqlient
 type __IngestHasSourceAtInput struct {
-	Pkg          PkgInputSpec         `json:"pkg"`
+	Pkg          IDorPkgInput         `json:"pkg"`
 	PkgMatchType MatchFlags           `json:"pkgMatchType"`
-	Source       SourceInputSpec      `json:"source"`
+	Source       IDorSourceInput      `json:"source"`
 	HasSourceAt  HasSourceAtInputSpec `json:"hasSourceAt"`
 }
 
 // GetPkg returns __IngestHasSourceAtInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestHasSourceAtInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestHasSourceAtInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetPkgMatchType returns __IngestHasSourceAtInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestHasSourceAtInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
 
 // GetSource returns __IngestHasSourceAtInput.Source, and is useful for accessing the field via an interface.
-func (v *__IngestHasSourceAtInput) GetSource() SourceInputSpec { return v.Source }
+func (v *__IngestHasSourceAtInput) GetSource() IDorSourceInput { return v.Source }
 
 // GetHasSourceAt returns __IngestHasSourceAtInput.HasSourceAt, and is useful for accessing the field via an interface.
 func (v *__IngestHasSourceAtInput) GetHasSourceAt() HasSourceAtInputSpec { return v.HasSourceAt }
 
 // __IngestHasSourcesAtInput is used internally by genqlient
 type __IngestHasSourcesAtInput struct {
-	Pkgs         []PkgInputSpec         `json:"pkgs"`
+	Pkgs         []IDorPkgInput         `json:"pkgs"`
 	PkgMatchType MatchFlags             `json:"pkgMatchType"`
-	Sources      []SourceInputSpec      `json:"sources"`
+	Sources      []IDorSourceInput      `json:"sources"`
 	HasSourceAts []HasSourceAtInputSpec `json:"hasSourceAts"`
 }
 
 // GetPkgs returns __IngestHasSourcesAtInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestHasSourcesAtInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestHasSourcesAtInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetPkgMatchType returns __IngestHasSourcesAtInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestHasSourcesAtInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
 
 // GetSources returns __IngestHasSourcesAtInput.Sources, and is useful for accessing the field via an interface.
-func (v *__IngestHasSourcesAtInput) GetSources() []SourceInputSpec { return v.Sources }
+func (v *__IngestHasSourcesAtInput) GetSources() []IDorSourceInput { return v.Sources }
 
 // GetHasSourceAts returns __IngestHasSourcesAtInput.HasSourceAts, and is useful for accessing the field via an interface.
 func (v *__IngestHasSourcesAtInput) GetHasSourceAts() []HasSourceAtInputSpec { return v.HasSourceAts }
 
 // __IngestHashEqualInput is used internally by genqlient
 type __IngestHashEqualInput struct {
-	Artifact      ArtifactInputSpec  `json:"artifact"`
-	OtherArtifact ArtifactInputSpec  `json:"otherArtifact"`
+	Artifact      IDorArtifactInput  `json:"artifact"`
+	OtherArtifact IDorArtifactInput  `json:"otherArtifact"`
 	HashEqual     HashEqualInputSpec `json:"hashEqual"`
 }
 
 // GetArtifact returns __IngestHashEqualInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestHashEqualInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestHashEqualInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetOtherArtifact returns __IngestHashEqualInput.OtherArtifact, and is useful for accessing the field via an interface.
-func (v *__IngestHashEqualInput) GetOtherArtifact() ArtifactInputSpec { return v.OtherArtifact }
+func (v *__IngestHashEqualInput) GetOtherArtifact() IDorArtifactInput { return v.OtherArtifact }
 
 // GetHashEqual returns __IngestHashEqualInput.HashEqual, and is useful for accessing the field via an interface.
 func (v *__IngestHashEqualInput) GetHashEqual() HashEqualInputSpec { return v.HashEqual }
 
 // __IngestHashEqualsInput is used internally by genqlient
 type __IngestHashEqualsInput struct {
-	Artifacts      []ArtifactInputSpec  `json:"artifacts"`
-	OtherArtifacts []ArtifactInputSpec  `json:"otherArtifacts"`
+	Artifacts      []IDorArtifactInput  `json:"artifacts"`
+	OtherArtifacts []IDorArtifactInput  `json:"otherArtifacts"`
 	HashEquals     []HashEqualInputSpec `json:"hashEquals"`
 }
 
 // GetArtifacts returns __IngestHashEqualsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestHashEqualsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestHashEqualsInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetOtherArtifacts returns __IngestHashEqualsInput.OtherArtifacts, and is useful for accessing the field via an interface.
-func (v *__IngestHashEqualsInput) GetOtherArtifacts() []ArtifactInputSpec { return v.OtherArtifacts }
+func (v *__IngestHashEqualsInput) GetOtherArtifacts() []IDorArtifactInput { return v.OtherArtifacts }
 
 // GetHashEquals returns __IngestHashEqualsInput.HashEquals, and is useful for accessing the field via an interface.
 func (v *__IngestHashEqualsInput) GetHashEquals() []HashEqualInputSpec { return v.HashEquals }
 
 // __IngestIsDependenciesInput is used internally by genqlient
 type __IngestIsDependenciesInput struct {
-	Pkgs            []PkgInputSpec          `json:"pkgs"`
-	DepPkgs         []PkgInputSpec          `json:"depPkgs"`
+	Pkgs            []IDorPkgInput          `json:"pkgs"`
+	DepPkgs         []IDorPkgInput          `json:"depPkgs"`
 	DepPkgMatchType MatchFlags              `json:"depPkgMatchType"`
 	Dependencies    []IsDependencyInputSpec `json:"dependencies"`
 }
 
 // GetPkgs returns __IngestIsDependenciesInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestIsDependenciesInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestIsDependenciesInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetDepPkgs returns __IngestIsDependenciesInput.DepPkgs, and is useful for accessing the field via an interface.
-func (v *__IngestIsDependenciesInput) GetDepPkgs() []PkgInputSpec { return v.DepPkgs }
+func (v *__IngestIsDependenciesInput) GetDepPkgs() []IDorPkgInput { return v.DepPkgs }
 
 // GetDepPkgMatchType returns __IngestIsDependenciesInput.DepPkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestIsDependenciesInput) GetDepPkgMatchType() MatchFlags { return v.DepPkgMatchType }
@@ -23011,17 +23133,17 @@ func (v *__IngestIsDependenciesInput) GetDependencies() []IsDependencyInputSpec 
 
 // __IngestIsDependencyInput is used internally by genqlient
 type __IngestIsDependencyInput struct {
-	Pkg             PkgInputSpec          `json:"pkg"`
-	DepPkg          PkgInputSpec          `json:"depPkg"`
+	Pkg             IDorPkgInput          `json:"pkg"`
+	DepPkg          IDorPkgInput          `json:"depPkg"`
 	DepPkgMatchType MatchFlags            `json:"depPkgMatchType"`
 	Dependency      IsDependencyInputSpec `json:"dependency"`
 }
 
 // GetPkg returns __IngestIsDependencyInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestIsDependencyInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestIsDependencyInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetDepPkg returns __IngestIsDependencyInput.DepPkg, and is useful for accessing the field via an interface.
-func (v *__IngestIsDependencyInput) GetDepPkg() PkgInputSpec { return v.DepPkg }
+func (v *__IngestIsDependencyInput) GetDepPkg() IDorPkgInput { return v.DepPkg }
 
 // GetDepPkgMatchType returns __IngestIsDependencyInput.DepPkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestIsDependencyInput) GetDepPkgMatchType() MatchFlags { return v.DepPkgMatchType }
@@ -23031,48 +23153,48 @@ func (v *__IngestIsDependencyInput) GetDependency() IsDependencyInputSpec { retu
 
 // __IngestIsOccurrencePkgInput is used internally by genqlient
 type __IngestIsOccurrencePkgInput struct {
-	Pkg        PkgInputSpec          `json:"pkg"`
-	Artifact   ArtifactInputSpec     `json:"artifact"`
+	Pkg        IDorPkgInput          `json:"pkg"`
+	Artifact   IDorArtifactInput     `json:"artifact"`
 	Occurrence IsOccurrenceInputSpec `json:"occurrence"`
 }
 
 // GetPkg returns __IngestIsOccurrencePkgInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestIsOccurrencePkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestIsOccurrencePkgInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetArtifact returns __IngestIsOccurrencePkgInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestIsOccurrencePkgInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestIsOccurrencePkgInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetOccurrence returns __IngestIsOccurrencePkgInput.Occurrence, and is useful for accessing the field via an interface.
 func (v *__IngestIsOccurrencePkgInput) GetOccurrence() IsOccurrenceInputSpec { return v.Occurrence }
 
 // __IngestIsOccurrenceSrcInput is used internally by genqlient
 type __IngestIsOccurrenceSrcInput struct {
-	Source     SourceInputSpec       `json:"source"`
-	Artifact   ArtifactInputSpec     `json:"artifact"`
+	Source     IDorSourceInput       `json:"source"`
+	Artifact   IDorArtifactInput     `json:"artifact"`
 	Occurrence IsOccurrenceInputSpec `json:"occurrence"`
 }
 
 // GetSource returns __IngestIsOccurrenceSrcInput.Source, and is useful for accessing the field via an interface.
-func (v *__IngestIsOccurrenceSrcInput) GetSource() SourceInputSpec { return v.Source }
+func (v *__IngestIsOccurrenceSrcInput) GetSource() IDorSourceInput { return v.Source }
 
 // GetArtifact returns __IngestIsOccurrenceSrcInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestIsOccurrenceSrcInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestIsOccurrenceSrcInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetOccurrence returns __IngestIsOccurrenceSrcInput.Occurrence, and is useful for accessing the field via an interface.
 func (v *__IngestIsOccurrenceSrcInput) GetOccurrence() IsOccurrenceInputSpec { return v.Occurrence }
 
 // __IngestIsOccurrencesPkgInput is used internally by genqlient
 type __IngestIsOccurrencesPkgInput struct {
-	Pkgs        []PkgInputSpec          `json:"pkgs"`
-	Artifacts   []ArtifactInputSpec     `json:"artifacts"`
+	Pkgs        []IDorPkgInput          `json:"pkgs"`
+	Artifacts   []IDorArtifactInput     `json:"artifacts"`
 	Occurrences []IsOccurrenceInputSpec `json:"occurrences"`
 }
 
 // GetPkgs returns __IngestIsOccurrencesPkgInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestIsOccurrencesPkgInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestIsOccurrencesPkgInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetArtifacts returns __IngestIsOccurrencesPkgInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestIsOccurrencesPkgInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestIsOccurrencesPkgInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetOccurrences returns __IngestIsOccurrencesPkgInput.Occurrences, and is useful for accessing the field via an interface.
 func (v *__IngestIsOccurrencesPkgInput) GetOccurrences() []IsOccurrenceInputSpec {
@@ -23081,16 +23203,16 @@ func (v *__IngestIsOccurrencesPkgInput) GetOccurrences() []IsOccurrenceInputSpec
 
 // __IngestIsOccurrencesSrcInput is used internally by genqlient
 type __IngestIsOccurrencesSrcInput struct {
-	Sources     []SourceInputSpec       `json:"sources"`
-	Artifacts   []ArtifactInputSpec     `json:"artifacts"`
+	Sources     []IDorSourceInput       `json:"sources"`
+	Artifacts   []IDorArtifactInput     `json:"artifacts"`
 	Occurrences []IsOccurrenceInputSpec `json:"occurrences"`
 }
 
 // GetSources returns __IngestIsOccurrencesSrcInput.Sources, and is useful for accessing the field via an interface.
-func (v *__IngestIsOccurrencesSrcInput) GetSources() []SourceInputSpec { return v.Sources }
+func (v *__IngestIsOccurrencesSrcInput) GetSources() []IDorSourceInput { return v.Sources }
 
 // GetArtifacts returns __IngestIsOccurrencesSrcInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestIsOccurrencesSrcInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestIsOccurrencesSrcInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetOccurrences returns __IngestIsOccurrencesSrcInput.Occurrences, and is useful for accessing the field via an interface.
 func (v *__IngestIsOccurrencesSrcInput) GetOccurrences() []IsOccurrenceInputSpec {
@@ -23099,76 +23221,76 @@ func (v *__IngestIsOccurrencesSrcInput) GetOccurrences() []IsOccurrenceInputSpec
 
 // __IngestLicenseInput is used internally by genqlient
 type __IngestLicenseInput struct {
-	License LicenseInputSpec `json:"license"`
+	License IDorLicenseInput `json:"license"`
 }
 
 // GetLicense returns __IngestLicenseInput.License, and is useful for accessing the field via an interface.
-func (v *__IngestLicenseInput) GetLicense() LicenseInputSpec { return v.License }
+func (v *__IngestLicenseInput) GetLicense() IDorLicenseInput { return v.License }
 
 // __IngestLicensesInput is used internally by genqlient
 type __IngestLicensesInput struct {
-	Licenses []LicenseInputSpec `json:"licenses"`
+	Licenses []IDorLicenseInput `json:"licenses"`
 }
 
 // GetLicenses returns __IngestLicensesInput.Licenses, and is useful for accessing the field via an interface.
-func (v *__IngestLicensesInput) GetLicenses() []LicenseInputSpec { return v.Licenses }
+func (v *__IngestLicensesInput) GetLicenses() []IDorLicenseInput { return v.Licenses }
 
 // __IngestPackageInput is used internally by genqlient
 type __IngestPackageInput struct {
-	Pkg PkgInputSpec `json:"pkg"`
+	Pkg IDorPkgInput `json:"pkg"`
 }
 
 // GetPkg returns __IngestPackageInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestPackageInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestPackageInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // __IngestPackagesInput is used internally by genqlient
 type __IngestPackagesInput struct {
-	Pkgs []PkgInputSpec `json:"pkgs"`
+	Pkgs []IDorPkgInput `json:"pkgs"`
 }
 
 // GetPkgs returns __IngestPackagesInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestPackagesInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestPackagesInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // __IngestPkgEqualInput is used internally by genqlient
 type __IngestPkgEqualInput struct {
-	Pkg          PkgInputSpec      `json:"pkg"`
-	OtherPackage PkgInputSpec      `json:"otherPackage"`
+	Pkg          IDorPkgInput      `json:"pkg"`
+	OtherPackage IDorPkgInput      `json:"otherPackage"`
 	PkgEqual     PkgEqualInputSpec `json:"pkgEqual"`
 }
 
 // GetPkg returns __IngestPkgEqualInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestPkgEqualInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestPkgEqualInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetOtherPackage returns __IngestPkgEqualInput.OtherPackage, and is useful for accessing the field via an interface.
-func (v *__IngestPkgEqualInput) GetOtherPackage() PkgInputSpec { return v.OtherPackage }
+func (v *__IngestPkgEqualInput) GetOtherPackage() IDorPkgInput { return v.OtherPackage }
 
 // GetPkgEqual returns __IngestPkgEqualInput.PkgEqual, and is useful for accessing the field via an interface.
 func (v *__IngestPkgEqualInput) GetPkgEqual() PkgEqualInputSpec { return v.PkgEqual }
 
 // __IngestPkgEqualsInput is used internally by genqlient
 type __IngestPkgEqualsInput struct {
-	Pkgs          []PkgInputSpec      `json:"pkgs"`
-	OtherPackages []PkgInputSpec      `json:"otherPackages"`
+	Pkgs          []IDorPkgInput      `json:"pkgs"`
+	OtherPackages []IDorPkgInput      `json:"otherPackages"`
 	PkgEquals     []PkgEqualInputSpec `json:"pkgEquals"`
 }
 
 // GetPkgs returns __IngestPkgEqualsInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestPkgEqualsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestPkgEqualsInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetOtherPackages returns __IngestPkgEqualsInput.OtherPackages, and is useful for accessing the field via an interface.
-func (v *__IngestPkgEqualsInput) GetOtherPackages() []PkgInputSpec { return v.OtherPackages }
+func (v *__IngestPkgEqualsInput) GetOtherPackages() []IDorPkgInput { return v.OtherPackages }
 
 // GetPkgEquals returns __IngestPkgEqualsInput.PkgEquals, and is useful for accessing the field via an interface.
 func (v *__IngestPkgEqualsInput) GetPkgEquals() []PkgEqualInputSpec { return v.PkgEquals }
 
 // __IngestPointOfContactArtifactInput is used internally by genqlient
 type __IngestPointOfContactArtifactInput struct {
-	Artifact       ArtifactInputSpec       `json:"artifact"`
+	Artifact       IDorArtifactInput       `json:"artifact"`
 	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
 }
 
 // GetArtifact returns __IngestPointOfContactArtifactInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestPointOfContactArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestPointOfContactArtifactInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetPointOfContact returns __IngestPointOfContactArtifactInput.PointOfContact, and is useful for accessing the field via an interface.
 func (v *__IngestPointOfContactArtifactInput) GetPointOfContact() PointOfContactInputSpec {
@@ -23177,12 +23299,12 @@ func (v *__IngestPointOfContactArtifactInput) GetPointOfContact() PointOfContact
 
 // __IngestPointOfContactArtifactsInput is used internally by genqlient
 type __IngestPointOfContactArtifactsInput struct {
-	Artifacts       []ArtifactInputSpec       `json:"artifacts"`
+	Artifacts       []IDorArtifactInput       `json:"artifacts"`
 	PointOfContacts []PointOfContactInputSpec `json:"pointOfContacts"`
 }
 
 // GetArtifacts returns __IngestPointOfContactArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestPointOfContactArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestPointOfContactArtifactsInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetPointOfContacts returns __IngestPointOfContactArtifactsInput.PointOfContacts, and is useful for accessing the field via an interface.
 func (v *__IngestPointOfContactArtifactsInput) GetPointOfContacts() []PointOfContactInputSpec {
@@ -23191,13 +23313,13 @@ func (v *__IngestPointOfContactArtifactsInput) GetPointOfContacts() []PointOfCon
 
 // __IngestPointOfContactPkgInput is used internally by genqlient
 type __IngestPointOfContactPkgInput struct {
-	Pkg            PkgInputSpec            `json:"pkg"`
+	Pkg            IDorPkgInput            `json:"pkg"`
 	PkgMatchType   MatchFlags              `json:"pkgMatchType"`
 	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
 }
 
 // GetPkg returns __IngestPointOfContactPkgInput.Pkg, and is useful for accessing the field via an interface.
-func (v *__IngestPointOfContactPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
+func (v *__IngestPointOfContactPkgInput) GetPkg() IDorPkgInput { return v.Pkg }
 
 // GetPkgMatchType returns __IngestPointOfContactPkgInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestPointOfContactPkgInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
@@ -23209,13 +23331,13 @@ func (v *__IngestPointOfContactPkgInput) GetPointOfContact() PointOfContactInput
 
 // __IngestPointOfContactPkgsInput is used internally by genqlient
 type __IngestPointOfContactPkgsInput struct {
-	Pkgs            []PkgInputSpec            `json:"pkgs"`
+	Pkgs            []IDorPkgInput            `json:"pkgs"`
 	PkgMatchType    MatchFlags                `json:"pkgMatchType"`
 	PointOfContacts []PointOfContactInputSpec `json:"pointOfContacts"`
 }
 
 // GetPkgs returns __IngestPointOfContactPkgsInput.Pkgs, and is useful for accessing the field via an interface.
-func (v *__IngestPointOfContactPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
+func (v *__IngestPointOfContactPkgsInput) GetPkgs() []IDorPkgInput { return v.Pkgs }
 
 // GetPkgMatchType returns __IngestPointOfContactPkgsInput.PkgMatchType, and is useful for accessing the field via an interface.
 func (v *__IngestPointOfContactPkgsInput) GetPkgMatchType() MatchFlags { return v.PkgMatchType }
@@ -23227,12 +23349,12 @@ func (v *__IngestPointOfContactPkgsInput) GetPointOfContacts() []PointOfContactI
 
 // __IngestPointOfContactSrcInput is used internally by genqlient
 type __IngestPointOfContactSrcInput struct {
-	Source         SourceInputSpec         `json:"source"`
+	Source         IDorSourceInput         `json:"source"`
 	PointOfContact PointOfContactInputSpec `json:"pointOfContact"`
 }
 
 // GetSource returns __IngestPointOfContactSrcInput.Source, and is useful for accessing the field via an interface.
-func (v *__IngestPointOfContactSrcInput) GetSource() SourceInputSpec { return v.Source }
+func (v *__IngestPointOfContactSrcInput) GetSource() IDorSourceInput { return v.Source }
 
 // GetPointOfContact returns __IngestPointOfContactSrcInput.PointOfContact, and is useful for accessing the field via an interface.
 func (v *__IngestPointOfContactSrcInput) GetPointOfContact() PointOfContactInputSpec {
@@ -23241,12 +23363,12 @@ func (v *__IngestPointOfContactSrcInput) GetPointOfContact() PointOfContactInput
 
 // __IngestPointOfContactSrcsInput is used internally by genqlient
 type __IngestPointOfContactSrcsInput struct {
-	Sources         []SourceInputSpec         `json:"sources"`
+	Sources         []IDorSourceInput         `json:"sources"`
 	PointOfContacts []PointOfContactInputSpec `json:"pointOfContacts"`
 }
 
 // GetSources returns __IngestPointOfContactSrcsInput.Sources, and is useful for accessing the field via an interface.
-func (v *__IngestPointOfContactSrcsInput) GetSources() []SourceInputSpec { return v.Sources }
+func (v *__IngestPointOfContactSrcsInput) GetSources() []IDorSourceInput { return v.Sources }
 
 // GetPointOfContacts returns __IngestPointOfContactSrcsInput.PointOfContacts, and is useful for accessing the field via an interface.
 func (v *__IngestPointOfContactSrcsInput) GetPointOfContacts() []PointOfContactInputSpec {
@@ -23255,74 +23377,74 @@ func (v *__IngestPointOfContactSrcsInput) GetPointOfContacts() []PointOfContactI
 
 // __IngestSLSAForArtifactInput is used internally by genqlient
 type __IngestSLSAForArtifactInput struct {
-	Artifact  ArtifactInputSpec   `json:"artifact"`
-	Materials []ArtifactInputSpec `json:"materials"`
-	Builder   BuilderInputSpec    `json:"builder"`
+	Artifact  IDorArtifactInput   `json:"artifact"`
+	Materials []IDorArtifactInput `json:"materials"`
+	Builder   IDorBuilderInput    `json:"builder"`
 	Slsa      SLSAInputSpec       `json:"slsa"`
 }
 
 // GetArtifact returns __IngestSLSAForArtifactInput.Artifact, and is useful for accessing the field via an interface.
-func (v *__IngestSLSAForArtifactInput) GetArtifact() ArtifactInputSpec { return v.Artifact }
+func (v *__IngestSLSAForArtifactInput) GetArtifact() IDorArtifactInput { return v.Artifact }
 
 // GetMaterials returns __IngestSLSAForArtifactInput.Materials, and is useful for accessing the field via an interface.
-func (v *__IngestSLSAForArtifactInput) GetMaterials() []ArtifactInputSpec { return v.Materials }
+func (v *__IngestSLSAForArtifactInput) GetMaterials() []IDorArtifactInput { return v.Materials }
 
 // GetBuilder returns __IngestSLSAForArtifactInput.Builder, and is useful for accessing the field via an interface.
-func (v *__IngestSLSAForArtifactInput) GetBuilder() BuilderInputSpec { return v.Builder }
+func (v *__IngestSLSAForArtifactInput) GetBuilder() IDorBuilderInput { return v.Builder }
 
 // GetSlsa returns __IngestSLSAForArtifactInput.Slsa, and is useful for accessing the field via an interface.
 func (v *__IngestSLSAForArtifactInput) GetSlsa() SLSAInputSpec { return v.Slsa }
 
 // __IngestSLSAForArtifactsInput is used internally by genqlient
 type __IngestSLSAForArtifactsInput struct {
-	Artifacts     []ArtifactInputSpec   `json:"artifacts"`
-	MaterialsList [][]ArtifactInputSpec `json:"materialsList"`
-	Builders      []BuilderInputSpec    `json:"builders"`
+	Artifacts     []IDorArtifactInput   `json:"artifacts"`
+	MaterialsList [][]IDorArtifactInput `json:"materialsList"`
+	Builders      []IDorBuilderInput    `json:"builders"`
 	SlsaList      []SLSAInputSpec       `json:"slsaList"`
 }
 
 // GetArtifacts returns __IngestSLSAForArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
-func (v *__IngestSLSAForArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.Artifacts }
+func (v *__IngestSLSAForArtifactsInput) GetArtifacts() []IDorArtifactInput { return v.Artifacts }
 
 // GetMaterialsList returns __IngestSLSAForArtifactsInput.MaterialsList, and is useful for accessing the field via an interface.
-func (v *__IngestSLSAForArtifactsInput) GetMaterialsList() [][]ArtifactInputSpec {
+func (v *__IngestSLSAForArtifactsInput) GetMaterialsList() [][]IDorArtifactInput {
 	return v.MaterialsList
 }
 
 // GetBuilders returns __IngestSLSAForArtifactsInput.Builders, and is useful for accessing the field via an interface.
-func (v *__IngestSLSAForArtifactsInput) GetBuilders() []BuilderInputSpec { return v.Builders }
+func (v *__IngestSLSAForArtifactsInput) GetBuilders() []IDorBuilderInput { return v.Builders }
 
 // GetSlsaList returns __IngestSLSAForArtifactsInput.SlsaList, and is useful for accessing the field via an interface.
 func (v *__IngestSLSAForArtifactsInput) GetSlsaList() []SLSAInputSpec { return v.SlsaList }
 
 // __IngestSourceInput is used internally by genqlient
 type __IngestSourceInput struct {
-	Source SourceInputSpec `json:"source"`
+	Source IDorSourceInput `json:"source"`
 }
 
 // GetSource returns __IngestSourceInput.Source, and is useful for accessing the field via an interface.
-func (v *__IngestSourceInput) GetSource() SourceInputSpec { return v.Source }
+func (v *__IngestSourceInput) GetSource() IDorSourceInput { return v.Source }
 
 // __IngestSourcesInput is used internally by genqlient
 type __IngestSourcesInput struct {
-	Sources []SourceInputSpec `json:"sources"`
+	Sources []IDorSourceInput `json:"sources"`
 }
 
 // GetSources returns __IngestSourcesInput.Sources, and is useful for accessing the field via an interface.
-func (v *__IngestSourcesInput) GetSources() []SourceInputSpec { return v.Sources }
+func (v *__IngestSourcesInput) GetSources() []IDorSourceInput { return v.Sources }
 
 // __IngestVulnEqualInput is used internally by genqlient
 type __IngestVulnEqualInput struct {
-	Vulnerability      VulnerabilityInputSpec `json:"vulnerability"`
-	OtherVulnerability VulnerabilityInputSpec `json:"otherVulnerability"`
+	Vulnerability      IDorVulnerabilityInput `json:"vulnerability"`
+	OtherVulnerability IDorVulnerabilityInput `json:"otherVulnerability"`
 	VulnEqual          VulnEqualInputSpec     `json:"vulnEqual"`
 }
 
 // GetVulnerability returns __IngestVulnEqualInput.Vulnerability, and is useful for accessing the field via an interface.
-func (v *__IngestVulnEqualInput) GetVulnerability() VulnerabilityInputSpec { return v.Vulnerability }
+func (v *__IngestVulnEqualInput) GetVulnerability() IDorVulnerabilityInput { return v.Vulnerability }
 
 // GetOtherVulnerability returns __IngestVulnEqualInput.OtherVulnerability, and is useful for accessing the field via an interface.
-func (v *__IngestVulnEqualInput) GetOtherVulnerability() VulnerabilityInputSpec {
+func (v *__IngestVulnEqualInput) GetOtherVulnerability() IDorVulnerabilityInput {
 	return v.OtherVulnerability
 }
 
@@ -23331,18 +23453,18 @@ func (v *__IngestVulnEqualInput) GetVulnEqual() VulnEqualInputSpec { return v.Vu
 
 // __IngestVulnEqualsInput is used internally by genqlient
 type __IngestVulnEqualsInput struct {
-	Vulnerabilities      []VulnerabilityInputSpec `json:"vulnerabilities"`
-	OtherVulnerabilities []VulnerabilityInputSpec `json:"otherVulnerabilities"`
+	Vulnerabilities      []IDorVulnerabilityInput `json:"vulnerabilities"`
+	OtherVulnerabilities []IDorVulnerabilityInput `json:"otherVulnerabilities"`
 	VulnEquals           []VulnEqualInputSpec     `json:"vulnEquals"`
 }
 
 // GetVulnerabilities returns __IngestVulnEqualsInput.Vulnerabilities, and is useful for accessing the field via an interface.
-func (v *__IngestVulnEqualsInput) GetVulnerabilities() []VulnerabilityInputSpec {
+func (v *__IngestVulnEqualsInput) GetVulnerabilities() []IDorVulnerabilityInput {
 	return v.Vulnerabilities
 }
 
 // GetOtherVulnerabilities returns __IngestVulnEqualsInput.OtherVulnerabilities, and is useful for accessing the field via an interface.
-func (v *__IngestVulnEqualsInput) GetOtherVulnerabilities() []VulnerabilityInputSpec {
+func (v *__IngestVulnEqualsInput) GetOtherVulnerabilities() []IDorVulnerabilityInput {
 	return v.OtherVulnerabilities
 }
 
@@ -23351,12 +23473,12 @@ func (v *__IngestVulnEqualsInput) GetVulnEquals() []VulnEqualInputSpec { return 
 
 // __IngestVulnHasMetadataInput is used internally by genqlient
 type __IngestVulnHasMetadataInput struct {
-	Vulnerability VulnerabilityInputSpec         `json:"vulnerability"`
+	Vulnerability IDorVulnerabilityInput         `json:"vulnerability"`
 	VulnMetadata  VulnerabilityMetadataInputSpec `json:"vulnMetadata"`
 }
 
 // GetVulnerability returns __IngestVulnHasMetadataInput.Vulnerability, and is useful for accessing the field via an interface.
-func (v *__IngestVulnHasMetadataInput) GetVulnerability() VulnerabilityInputSpec {
+func (v *__IngestVulnHasMetadataInput) GetVulnerability() IDorVulnerabilityInput {
 	return v.Vulnerability
 }
 
@@ -23367,19 +23489,19 @@ func (v *__IngestVulnHasMetadataInput) GetVulnMetadata() VulnerabilityMetadataIn
 
 // __IngestVulnerabilitiesInput is used internally by genqlient
 type __IngestVulnerabilitiesInput struct {
-	Vulns []VulnerabilityInputSpec `json:"vulns"`
+	Vulns []IDorVulnerabilityInput `json:"vulns"`
 }
 
 // GetVulns returns __IngestVulnerabilitiesInput.Vulns, and is useful for accessing the field via an interface.
-func (v *__IngestVulnerabilitiesInput) GetVulns() []VulnerabilityInputSpec { return v.Vulns }
+func (v *__IngestVulnerabilitiesInput) GetVulns() []IDorVulnerabilityInput { return v.Vulns }
 
 // __IngestVulnerabilityInput is used internally by genqlient
 type __IngestVulnerabilityInput struct {
-	Vuln VulnerabilityInputSpec `json:"vuln"`
+	Vuln IDorVulnerabilityInput `json:"vuln"`
 }
 
 // GetVuln returns __IngestVulnerabilityInput.Vuln, and is useful for accessing the field via an interface.
-func (v *__IngestVulnerabilityInput) GetVuln() VulnerabilityInputSpec { return v.Vuln }
+func (v *__IngestVulnerabilityInput) GetVuln() IDorVulnerabilityInput { return v.Vuln }
 
 // __LicensesInput is used internally by genqlient
 type __LicensesInput struct {
@@ -24025,7 +24147,7 @@ func HasSBOMs(
 
 // The query or mutation executed by IngestArtifact.
 const IngestArtifact_Operation = `
-mutation IngestArtifact ($artifact: ArtifactInputSpec!) {
+mutation IngestArtifact ($artifact: IDorArtifactInput!) {
 	ingestArtifact(artifact: $artifact)
 }
 `
@@ -24033,7 +24155,7 @@ mutation IngestArtifact ($artifact: ArtifactInputSpec!) {
 func IngestArtifact(
 	ctx context.Context,
 	client graphql.Client,
-	artifact ArtifactInputSpec,
+	artifact IDorArtifactInput,
 ) (*IngestArtifactResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestArtifact",
@@ -24058,7 +24180,7 @@ func IngestArtifact(
 
 // The query or mutation executed by IngestArtifacts.
 const IngestArtifacts_Operation = `
-mutation IngestArtifacts ($artifacts: [ArtifactInputSpec!]!) {
+mutation IngestArtifacts ($artifacts: [IDorArtifactInput!]!) {
 	ingestArtifacts(artifacts: $artifacts)
 }
 `
@@ -24066,7 +24188,7 @@ mutation IngestArtifacts ($artifacts: [ArtifactInputSpec!]!) {
 func IngestArtifacts(
 	ctx context.Context,
 	client graphql.Client,
-	artifacts []ArtifactInputSpec,
+	artifacts []IDorArtifactInput,
 ) (*IngestArtifactsResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestArtifacts",
@@ -24091,7 +24213,7 @@ func IngestArtifacts(
 
 // The query or mutation executed by IngestBuilder.
 const IngestBuilder_Operation = `
-mutation IngestBuilder ($builder: BuilderInputSpec!) {
+mutation IngestBuilder ($builder: IDorBuilderInput!) {
 	ingestBuilder(builder: $builder)
 }
 `
@@ -24099,7 +24221,7 @@ mutation IngestBuilder ($builder: BuilderInputSpec!) {
 func IngestBuilder(
 	ctx context.Context,
 	client graphql.Client,
-	builder BuilderInputSpec,
+	builder IDorBuilderInput,
 ) (*IngestBuilderResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestBuilder",
@@ -24124,7 +24246,7 @@ func IngestBuilder(
 
 // The query or mutation executed by IngestBuilders.
 const IngestBuilders_Operation = `
-mutation IngestBuilders ($builders: [BuilderInputSpec!]!) {
+mutation IngestBuilders ($builders: [IDorBuilderInput!]!) {
 	ingestBuilders(builders: $builders)
 }
 `
@@ -24132,7 +24254,7 @@ mutation IngestBuilders ($builders: [BuilderInputSpec!]!) {
 func IngestBuilders(
 	ctx context.Context,
 	client graphql.Client,
-	builders []BuilderInputSpec,
+	builders []IDorBuilderInput,
 ) (*IngestBuildersResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestBuilders",
@@ -24157,7 +24279,7 @@ func IngestBuilders(
 
 // The query or mutation executed by IngestBulkVulnHasMetadata.
 const IngestBulkVulnHasMetadata_Operation = `
-mutation IngestBulkVulnHasMetadata ($vulnerabilities: [VulnerabilityInputSpec!]!, $vulnerabilityMetadataList: [VulnerabilityMetadataInputSpec!]!) {
+mutation IngestBulkVulnHasMetadata ($vulnerabilities: [IDorVulnerabilityInput!]!, $vulnerabilityMetadataList: [VulnerabilityMetadataInputSpec!]!) {
 	ingestBulkVulnerabilityMetadata(vulnerabilities: $vulnerabilities, vulnerabilityMetadataList: $vulnerabilityMetadataList)
 }
 `
@@ -24165,7 +24287,7 @@ mutation IngestBulkVulnHasMetadata ($vulnerabilities: [VulnerabilityInputSpec!]!
 func IngestBulkVulnHasMetadata(
 	ctx context.Context,
 	client graphql.Client,
-	vulnerabilities []VulnerabilityInputSpec,
+	vulnerabilities []IDorVulnerabilityInput,
 	vulnerabilityMetadataList []VulnerabilityMetadataInputSpec,
 ) (*IngestBulkVulnHasMetadataResponse, error) {
 	req := &graphql.Request{
@@ -24192,7 +24314,7 @@ func IngestBulkVulnHasMetadata(
 
 // The query or mutation executed by IngestCertifyBadArtifact.
 const IngestCertifyBadArtifact_Operation = `
-mutation IngestCertifyBadArtifact ($artifact: ArtifactInputSpec!, $certifyBad: CertifyBadInputSpec!) {
+mutation IngestCertifyBadArtifact ($artifact: IDorArtifactInput!, $certifyBad: CertifyBadInputSpec!) {
 	ingestCertifyBad(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBad: $certifyBad)
 }
 `
@@ -24200,7 +24322,7 @@ mutation IngestCertifyBadArtifact ($artifact: ArtifactInputSpec!, $certifyBad: C
 func IngestCertifyBadArtifact(
 	ctx context.Context,
 	client graphql.Client,
-	artifact ArtifactInputSpec,
+	artifact IDorArtifactInput,
 	certifyBad CertifyBadInputSpec,
 ) (*IngestCertifyBadArtifactResponse, error) {
 	req := &graphql.Request{
@@ -24227,7 +24349,7 @@ func IngestCertifyBadArtifact(
 
 // The query or mutation executed by IngestCertifyBadArtifacts.
 const IngestCertifyBadArtifacts_Operation = `
-mutation IngestCertifyBadArtifacts ($artifacts: [ArtifactInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
+mutation IngestCertifyBadArtifacts ($artifacts: [IDorArtifactInput!]!, $certifyBads: [CertifyBadInputSpec!]!) {
 	ingestCertifyBads(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBads: $certifyBads)
 }
 `
@@ -24235,7 +24357,7 @@ mutation IngestCertifyBadArtifacts ($artifacts: [ArtifactInputSpec!]!, $certifyB
 func IngestCertifyBadArtifacts(
 	ctx context.Context,
 	client graphql.Client,
-	artifacts []ArtifactInputSpec,
+	artifacts []IDorArtifactInput,
 	certifyBads []CertifyBadInputSpec,
 ) (*IngestCertifyBadArtifactsResponse, error) {
 	req := &graphql.Request{
@@ -24262,7 +24384,7 @@ func IngestCertifyBadArtifacts(
 
 // The query or mutation executed by IngestCertifyBadPkg.
 const IngestCertifyBadPkg_Operation = `
-mutation IngestCertifyBadPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $certifyBad: CertifyBadInputSpec!) {
+mutation IngestCertifyBadPkg ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags!, $certifyBad: CertifyBadInputSpec!) {
 	ingestCertifyBad(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyBad: $certifyBad)
 }
 `
@@ -24270,7 +24392,7 @@ mutation IngestCertifyBadPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $
 func IngestCertifyBadPkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
+	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
 	certifyBad CertifyBadInputSpec,
 ) (*IngestCertifyBadPkgResponse, error) {
@@ -24299,7 +24421,7 @@ func IngestCertifyBadPkg(
 
 // The query or mutation executed by IngestCertifyBadPkgs.
 const IngestCertifyBadPkgs_Operation = `
-mutation IngestCertifyBadPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $certifyBads: [CertifyBadInputSpec!]!) {
+mutation IngestCertifyBadPkgs ($pkgs: [IDorPkgInput!]!, $pkgMatchType: MatchFlags!, $certifyBads: [CertifyBadInputSpec!]!) {
 	ingestCertifyBads(subjects: {packages:$pkgs}, pkgMatchType: $pkgMatchType, certifyBads: $certifyBads)
 }
 `
@@ -24307,7 +24429,7 @@ mutation IngestCertifyBadPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlag
 func IngestCertifyBadPkgs(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
+	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
 	certifyBads []CertifyBadInputSpec,
 ) (*IngestCertifyBadPkgsResponse, error) {
@@ -24336,7 +24458,7 @@ func IngestCertifyBadPkgs(
 
 // The query or mutation executed by IngestCertifyBadSrc.
 const IngestCertifyBadSrc_Operation = `
-mutation IngestCertifyBadSrc ($source: SourceInputSpec!, $certifyBad: CertifyBadInputSpec!) {
+mutation IngestCertifyBadSrc ($source: IDorSourceInput!, $certifyBad: CertifyBadInputSpec!) {
 	ingestCertifyBad(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBad: $certifyBad)
 }
 `
@@ -24344,7 +24466,7 @@ mutation IngestCertifyBadSrc ($source: SourceInputSpec!, $certifyBad: CertifyBad
 func IngestCertifyBadSrc(
 	ctx context.Context,
 	client graphql.Client,
-	source SourceInputSpec,
+	source IDorSourceInput,
 	certifyBad CertifyBadInputSpec,
 ) (*IngestCertifyBadSrcResponse, error) {
 	req := &graphql.Request{
@@ -24371,7 +24493,7 @@ func IngestCertifyBadSrc(
 
 // The query or mutation executed by IngestCertifyBadSrcs.
 const IngestCertifyBadSrcs_Operation = `
-mutation IngestCertifyBadSrcs ($sources: [SourceInputSpec!]!, $certifyBads: [CertifyBadInputSpec!]!) {
+mutation IngestCertifyBadSrcs ($sources: [IDorSourceInput!]!, $certifyBads: [CertifyBadInputSpec!]!) {
 	ingestCertifyBads(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyBads: $certifyBads)
 }
 `
@@ -24379,7 +24501,7 @@ mutation IngestCertifyBadSrcs ($sources: [SourceInputSpec!]!, $certifyBads: [Cer
 func IngestCertifyBadSrcs(
 	ctx context.Context,
 	client graphql.Client,
-	sources []SourceInputSpec,
+	sources []IDorSourceInput,
 	certifyBads []CertifyBadInputSpec,
 ) (*IngestCertifyBadSrcsResponse, error) {
 	req := &graphql.Request{
@@ -24406,7 +24528,7 @@ func IngestCertifyBadSrcs(
 
 // The query or mutation executed by IngestCertifyGoodArtifact.
 const IngestCertifyGoodArtifact_Operation = `
-mutation IngestCertifyGoodArtifact ($artifact: ArtifactInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
+mutation IngestCertifyGoodArtifact ($artifact: IDorArtifactInput!, $certifyGood: CertifyGoodInputSpec!) {
 	ingestCertifyGood(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGood: $certifyGood)
 }
 `
@@ -24414,7 +24536,7 @@ mutation IngestCertifyGoodArtifact ($artifact: ArtifactInputSpec!, $certifyGood:
 func IngestCertifyGoodArtifact(
 	ctx context.Context,
 	client graphql.Client,
-	artifact ArtifactInputSpec,
+	artifact IDorArtifactInput,
 	certifyGood CertifyGoodInputSpec,
 ) (*IngestCertifyGoodArtifactResponse, error) {
 	req := &graphql.Request{
@@ -24441,7 +24563,7 @@ func IngestCertifyGoodArtifact(
 
 // The query or mutation executed by IngestCertifyGoodArtifacts.
 const IngestCertifyGoodArtifacts_Operation = `
-mutation IngestCertifyGoodArtifacts ($artifacts: [ArtifactInputSpec!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
+mutation IngestCertifyGoodArtifacts ($artifacts: [IDorArtifactInput!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
 	ingestCertifyGoods(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGoods: $certifyGoods)
 }
 `
@@ -24449,7 +24571,7 @@ mutation IngestCertifyGoodArtifacts ($artifacts: [ArtifactInputSpec!]!, $certify
 func IngestCertifyGoodArtifacts(
 	ctx context.Context,
 	client graphql.Client,
-	artifacts []ArtifactInputSpec,
+	artifacts []IDorArtifactInput,
 	certifyGoods []CertifyGoodInputSpec,
 ) (*IngestCertifyGoodArtifactsResponse, error) {
 	req := &graphql.Request{
@@ -24476,7 +24598,7 @@ func IngestCertifyGoodArtifacts(
 
 // The query or mutation executed by IngestCertifyGoodPkg.
 const IngestCertifyGoodPkg_Operation = `
-mutation IngestCertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $certifyGood: CertifyGoodInputSpec!) {
+mutation IngestCertifyGoodPkg ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags!, $certifyGood: CertifyGoodInputSpec!) {
 	ingestCertifyGood(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, certifyGood: $certifyGood)
 }
 `
@@ -24484,7 +24606,7 @@ mutation IngestCertifyGoodPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, 
 func IngestCertifyGoodPkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
+	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
 	certifyGood CertifyGoodInputSpec,
 ) (*IngestCertifyGoodPkgResponse, error) {
@@ -24513,7 +24635,7 @@ func IngestCertifyGoodPkg(
 
 // The query or mutation executed by IngestCertifyGoodPkgs.
 const IngestCertifyGoodPkgs_Operation = `
-mutation IngestCertifyGoodPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $certifyGoods: [CertifyGoodInputSpec!]!) {
+mutation IngestCertifyGoodPkgs ($pkgs: [IDorPkgInput!]!, $pkgMatchType: MatchFlags!, $certifyGoods: [CertifyGoodInputSpec!]!) {
 	ingestCertifyGoods(subjects: {packages:$pkgs}, pkgMatchType: $pkgMatchType, certifyGoods: $certifyGoods)
 }
 `
@@ -24521,7 +24643,7 @@ mutation IngestCertifyGoodPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFla
 func IngestCertifyGoodPkgs(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
+	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
 	certifyGoods []CertifyGoodInputSpec,
 ) (*IngestCertifyGoodPkgsResponse, error) {
@@ -24550,7 +24672,7 @@ func IngestCertifyGoodPkgs(
 
 // The query or mutation executed by IngestCertifyGoodSrc.
 const IngestCertifyGoodSrc_Operation = `
-mutation IngestCertifyGoodSrc ($source: SourceInputSpec!, $certifyGood: CertifyGoodInputSpec!) {
+mutation IngestCertifyGoodSrc ($source: IDorSourceInput!, $certifyGood: CertifyGoodInputSpec!) {
 	ingestCertifyGood(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGood: $certifyGood)
 }
 `
@@ -24558,7 +24680,7 @@ mutation IngestCertifyGoodSrc ($source: SourceInputSpec!, $certifyGood: CertifyG
 func IngestCertifyGoodSrc(
 	ctx context.Context,
 	client graphql.Client,
-	source SourceInputSpec,
+	source IDorSourceInput,
 	certifyGood CertifyGoodInputSpec,
 ) (*IngestCertifyGoodSrcResponse, error) {
 	req := &graphql.Request{
@@ -24585,7 +24707,7 @@ func IngestCertifyGoodSrc(
 
 // The query or mutation executed by IngestCertifyGoodSrcs.
 const IngestCertifyGoodSrcs_Operation = `
-mutation IngestCertifyGoodSrcs ($sources: [SourceInputSpec!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
+mutation IngestCertifyGoodSrcs ($sources: [IDorSourceInput!]!, $certifyGoods: [CertifyGoodInputSpec!]!) {
 	ingestCertifyGoods(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, certifyGoods: $certifyGoods)
 }
 `
@@ -24593,7 +24715,7 @@ mutation IngestCertifyGoodSrcs ($sources: [SourceInputSpec!]!, $certifyGoods: [C
 func IngestCertifyGoodSrcs(
 	ctx context.Context,
 	client graphql.Client,
-	sources []SourceInputSpec,
+	sources []IDorSourceInput,
 	certifyGoods []CertifyGoodInputSpec,
 ) (*IngestCertifyGoodSrcsResponse, error) {
 	req := &graphql.Request{
@@ -24620,7 +24742,7 @@ func IngestCertifyGoodSrcs(
 
 // The query or mutation executed by IngestCertifyLegalPkg.
 const IngestCertifyLegalPkg_Operation = `
-mutation IngestCertifyLegalPkg ($pkg: PkgInputSpec!, $declaredLicenses: [LicenseInputSpec!]!, $discoveredLicenses: [LicenseInputSpec!]!, $legal: CertifyLegalInputSpec!) {
+mutation IngestCertifyLegalPkg ($pkg: IDorPkgInput!, $declaredLicenses: [IDorLicenseInput!]!, $discoveredLicenses: [IDorLicenseInput!]!, $legal: CertifyLegalInputSpec!) {
 	ingestCertifyLegal(subject: {package:$pkg}, declaredLicenses: $declaredLicenses, discoveredLicenses: $discoveredLicenses, certifyLegal: $legal)
 }
 `
@@ -24628,9 +24750,9 @@ mutation IngestCertifyLegalPkg ($pkg: PkgInputSpec!, $declaredLicenses: [License
 func IngestCertifyLegalPkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
-	declaredLicenses []LicenseInputSpec,
-	discoveredLicenses []LicenseInputSpec,
+	pkg IDorPkgInput,
+	declaredLicenses []IDorLicenseInput,
+	discoveredLicenses []IDorLicenseInput,
 	legal CertifyLegalInputSpec,
 ) (*IngestCertifyLegalPkgResponse, error) {
 	req := &graphql.Request{
@@ -24659,7 +24781,7 @@ func IngestCertifyLegalPkg(
 
 // The query or mutation executed by IngestCertifyLegalPkgs.
 const IngestCertifyLegalPkgs_Operation = `
-mutation IngestCertifyLegalPkgs ($pkgs: [PkgInputSpec!]!, $declaredLicensesList: [[LicenseInputSpec!]!]!, $discoveredLicensesList: [[LicenseInputSpec!]!]!, $legals: [CertifyLegalInputSpec!]!) {
+mutation IngestCertifyLegalPkgs ($pkgs: [IDorPkgInput!]!, $declaredLicensesList: [[IDorLicenseInput!]!]!, $discoveredLicensesList: [[IDorLicenseInput!]!]!, $legals: [CertifyLegalInputSpec!]!) {
 	ingestCertifyLegals(subjects: {packages:$pkgs}, declaredLicensesList: $declaredLicensesList, discoveredLicensesList: $discoveredLicensesList, certifyLegals: $legals)
 }
 `
@@ -24667,9 +24789,9 @@ mutation IngestCertifyLegalPkgs ($pkgs: [PkgInputSpec!]!, $declaredLicensesList:
 func IngestCertifyLegalPkgs(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
-	declaredLicensesList [][]LicenseInputSpec,
-	discoveredLicensesList [][]LicenseInputSpec,
+	pkgs []IDorPkgInput,
+	declaredLicensesList [][]IDorLicenseInput,
+	discoveredLicensesList [][]IDorLicenseInput,
 	legals []CertifyLegalInputSpec,
 ) (*IngestCertifyLegalPkgsResponse, error) {
 	req := &graphql.Request{
@@ -24698,7 +24820,7 @@ func IngestCertifyLegalPkgs(
 
 // The query or mutation executed by IngestCertifyLegalSrc.
 const IngestCertifyLegalSrc_Operation = `
-mutation IngestCertifyLegalSrc ($src: SourceInputSpec!, $declaredLicenses: [LicenseInputSpec!]!, $discoveredLicenses: [LicenseInputSpec!]!, $legal: CertifyLegalInputSpec!) {
+mutation IngestCertifyLegalSrc ($src: IDorSourceInput!, $declaredLicenses: [IDorLicenseInput!]!, $discoveredLicenses: [IDorLicenseInput!]!, $legal: CertifyLegalInputSpec!) {
 	ingestCertifyLegal(subject: {source:$src}, declaredLicenses: $declaredLicenses, discoveredLicenses: $discoveredLicenses, certifyLegal: $legal)
 }
 `
@@ -24706,9 +24828,9 @@ mutation IngestCertifyLegalSrc ($src: SourceInputSpec!, $declaredLicenses: [Lice
 func IngestCertifyLegalSrc(
 	ctx context.Context,
 	client graphql.Client,
-	src SourceInputSpec,
-	declaredLicenses []LicenseInputSpec,
-	discoveredLicenses []LicenseInputSpec,
+	src IDorSourceInput,
+	declaredLicenses []IDorLicenseInput,
+	discoveredLicenses []IDorLicenseInput,
 	legal CertifyLegalInputSpec,
 ) (*IngestCertifyLegalSrcResponse, error) {
 	req := &graphql.Request{
@@ -24737,7 +24859,7 @@ func IngestCertifyLegalSrc(
 
 // The query or mutation executed by IngestCertifyLegalSrcs.
 const IngestCertifyLegalSrcs_Operation = `
-mutation IngestCertifyLegalSrcs ($srcs: [SourceInputSpec!]!, $declaredLicensesList: [[LicenseInputSpec!]!]!, $discoveredLicensesList: [[LicenseInputSpec!]!]!, $legals: [CertifyLegalInputSpec!]!) {
+mutation IngestCertifyLegalSrcs ($srcs: [IDorSourceInput!]!, $declaredLicensesList: [[IDorLicenseInput!]!]!, $discoveredLicensesList: [[IDorLicenseInput!]!]!, $legals: [CertifyLegalInputSpec!]!) {
 	ingestCertifyLegals(subjects: {sources:$srcs}, declaredLicensesList: $declaredLicensesList, discoveredLicensesList: $discoveredLicensesList, certifyLegals: $legals)
 }
 `
@@ -24745,9 +24867,9 @@ mutation IngestCertifyLegalSrcs ($srcs: [SourceInputSpec!]!, $declaredLicensesLi
 func IngestCertifyLegalSrcs(
 	ctx context.Context,
 	client graphql.Client,
-	srcs []SourceInputSpec,
-	declaredLicensesList [][]LicenseInputSpec,
-	discoveredLicensesList [][]LicenseInputSpec,
+	srcs []IDorSourceInput,
+	declaredLicensesList [][]IDorLicenseInput,
+	discoveredLicensesList [][]IDorLicenseInput,
 	legals []CertifyLegalInputSpec,
 ) (*IngestCertifyLegalSrcsResponse, error) {
 	req := &graphql.Request{
@@ -24776,7 +24898,7 @@ func IngestCertifyLegalSrcs(
 
 // The query or mutation executed by IngestCertifyScorecard.
 const IngestCertifyScorecard_Operation = `
-mutation IngestCertifyScorecard ($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
+mutation IngestCertifyScorecard ($source: IDorSourceInput!, $scorecard: ScorecardInputSpec!) {
 	ingestScorecard(source: $source, scorecard: $scorecard)
 }
 `
@@ -24784,7 +24906,7 @@ mutation IngestCertifyScorecard ($source: SourceInputSpec!, $scorecard: Scorecar
 func IngestCertifyScorecard(
 	ctx context.Context,
 	client graphql.Client,
-	source SourceInputSpec,
+	source IDorSourceInput,
 	scorecard ScorecardInputSpec,
 ) (*IngestCertifyScorecardResponse, error) {
 	req := &graphql.Request{
@@ -24811,7 +24933,7 @@ func IngestCertifyScorecard(
 
 // The query or mutation executed by IngestCertifyScorecards.
 const IngestCertifyScorecards_Operation = `
-mutation IngestCertifyScorecards ($sources: [SourceInputSpec!]!, $scorecards: [ScorecardInputSpec!]!) {
+mutation IngestCertifyScorecards ($sources: [IDorSourceInput!]!, $scorecards: [ScorecardInputSpec!]!) {
 	ingestScorecards(sources: $sources, scorecards: $scorecards)
 }
 `
@@ -24819,7 +24941,7 @@ mutation IngestCertifyScorecards ($sources: [SourceInputSpec!]!, $scorecards: [S
 func IngestCertifyScorecards(
 	ctx context.Context,
 	client graphql.Client,
-	sources []SourceInputSpec,
+	sources []IDorSourceInput,
 	scorecards []ScorecardInputSpec,
 ) (*IngestCertifyScorecardsResponse, error) {
 	req := &graphql.Request{
@@ -24846,7 +24968,7 @@ func IngestCertifyScorecards(
 
 // The query or mutation executed by IngestCertifyVexArtifact.
 const IngestCertifyVexArtifact_Operation = `
-mutation IngestCertifyVexArtifact ($artifact: ArtifactInputSpec!, $vulnerability: VulnerabilityInputSpec!, $vexStatement: VexStatementInputSpec!) {
+mutation IngestCertifyVexArtifact ($artifact: IDorArtifactInput!, $vulnerability: IDorVulnerabilityInput!, $vexStatement: VexStatementInputSpec!) {
 	ingestVEXStatement(subject: {artifact:$artifact}, vulnerability: $vulnerability, vexStatement: $vexStatement)
 }
 `
@@ -24854,8 +24976,8 @@ mutation IngestCertifyVexArtifact ($artifact: ArtifactInputSpec!, $vulnerability
 func IngestCertifyVexArtifact(
 	ctx context.Context,
 	client graphql.Client,
-	artifact ArtifactInputSpec,
-	vulnerability VulnerabilityInputSpec,
+	artifact IDorArtifactInput,
+	vulnerability IDorVulnerabilityInput,
 	vexStatement VexStatementInputSpec,
 ) (*IngestCertifyVexArtifactResponse, error) {
 	req := &graphql.Request{
@@ -24883,7 +25005,7 @@ func IngestCertifyVexArtifact(
 
 // The query or mutation executed by IngestCertifyVexArtifacts.
 const IngestCertifyVexArtifacts_Operation = `
-mutation IngestCertifyVexArtifacts ($artifacts: [ArtifactInputSpec!]!, $vulnerabilities: [VulnerabilityInputSpec!]!, $vexStatements: [VexStatementInputSpec!]!) {
+mutation IngestCertifyVexArtifacts ($artifacts: [IDorArtifactInput!]!, $vulnerabilities: [IDorVulnerabilityInput!]!, $vexStatements: [VexStatementInputSpec!]!) {
 	ingestVEXStatements(subjects: {artifacts:$artifacts}, vulnerabilities: $vulnerabilities, vexStatements: $vexStatements)
 }
 `
@@ -24891,8 +25013,8 @@ mutation IngestCertifyVexArtifacts ($artifacts: [ArtifactInputSpec!]!, $vulnerab
 func IngestCertifyVexArtifacts(
 	ctx context.Context,
 	client graphql.Client,
-	artifacts []ArtifactInputSpec,
-	vulnerabilities []VulnerabilityInputSpec,
+	artifacts []IDorArtifactInput,
+	vulnerabilities []IDorVulnerabilityInput,
 	vexStatements []VexStatementInputSpec,
 ) (*IngestCertifyVexArtifactsResponse, error) {
 	req := &graphql.Request{
@@ -24920,7 +25042,7 @@ func IngestCertifyVexArtifacts(
 
 // The query or mutation executed by IngestCertifyVexPkg.
 const IngestCertifyVexPkg_Operation = `
-mutation IngestCertifyVexPkg ($pkg: PkgInputSpec!, $vulnerability: VulnerabilityInputSpec!, $vexStatement: VexStatementInputSpec!) {
+mutation IngestCertifyVexPkg ($pkg: IDorPkgInput!, $vulnerability: IDorVulnerabilityInput!, $vexStatement: VexStatementInputSpec!) {
 	ingestVEXStatement(subject: {package:$pkg}, vulnerability: $vulnerability, vexStatement: $vexStatement)
 }
 `
@@ -24928,8 +25050,8 @@ mutation IngestCertifyVexPkg ($pkg: PkgInputSpec!, $vulnerability: Vulnerability
 func IngestCertifyVexPkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
-	vulnerability VulnerabilityInputSpec,
+	pkg IDorPkgInput,
+	vulnerability IDorVulnerabilityInput,
 	vexStatement VexStatementInputSpec,
 ) (*IngestCertifyVexPkgResponse, error) {
 	req := &graphql.Request{
@@ -24957,7 +25079,7 @@ func IngestCertifyVexPkg(
 
 // The query or mutation executed by IngestCertifyVexPkgs.
 const IngestCertifyVexPkgs_Operation = `
-mutation IngestCertifyVexPkgs ($pkgs: [PkgInputSpec!]!, $vulnerabilities: [VulnerabilityInputSpec!]!, $vexStatements: [VexStatementInputSpec!]!) {
+mutation IngestCertifyVexPkgs ($pkgs: [IDorPkgInput!]!, $vulnerabilities: [IDorVulnerabilityInput!]!, $vexStatements: [VexStatementInputSpec!]!) {
 	ingestVEXStatements(subjects: {packages:$pkgs}, vulnerabilities: $vulnerabilities, vexStatements: $vexStatements)
 }
 `
@@ -24965,8 +25087,8 @@ mutation IngestCertifyVexPkgs ($pkgs: [PkgInputSpec!]!, $vulnerabilities: [Vulne
 func IngestCertifyVexPkgs(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
-	vulnerabilities []VulnerabilityInputSpec,
+	pkgs []IDorPkgInput,
+	vulnerabilities []IDorVulnerabilityInput,
 	vexStatements []VexStatementInputSpec,
 ) (*IngestCertifyVexPkgsResponse, error) {
 	req := &graphql.Request{
@@ -24994,7 +25116,7 @@ func IngestCertifyVexPkgs(
 
 // The query or mutation executed by IngestCertifyVulnPkg.
 const IngestCertifyVulnPkg_Operation = `
-mutation IngestCertifyVulnPkg ($pkg: PkgInputSpec!, $vulnerability: VulnerabilityInputSpec!, $certifyVuln: ScanMetadataInput!) {
+mutation IngestCertifyVulnPkg ($pkg: IDorPkgInput!, $vulnerability: IDorVulnerabilityInput!, $certifyVuln: ScanMetadataInput!) {
 	ingestCertifyVuln(pkg: $pkg, vulnerability: $vulnerability, certifyVuln: $certifyVuln)
 }
 `
@@ -25002,8 +25124,8 @@ mutation IngestCertifyVulnPkg ($pkg: PkgInputSpec!, $vulnerability: Vulnerabilit
 func IngestCertifyVulnPkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
-	vulnerability VulnerabilityInputSpec,
+	pkg IDorPkgInput,
+	vulnerability IDorVulnerabilityInput,
 	certifyVuln ScanMetadataInput,
 ) (*IngestCertifyVulnPkgResponse, error) {
 	req := &graphql.Request{
@@ -25031,7 +25153,7 @@ func IngestCertifyVulnPkg(
 
 // The query or mutation executed by IngestCertifyVulnPkgs.
 const IngestCertifyVulnPkgs_Operation = `
-mutation IngestCertifyVulnPkgs ($pkgs: [PkgInputSpec!]!, $vulnerabilities: [VulnerabilityInputSpec!]!, $certifyVulns: [ScanMetadataInput!]!) {
+mutation IngestCertifyVulnPkgs ($pkgs: [IDorPkgInput!]!, $vulnerabilities: [IDorVulnerabilityInput!]!, $certifyVulns: [ScanMetadataInput!]!) {
 	ingestCertifyVulns(pkgs: $pkgs, vulnerabilities: $vulnerabilities, certifyVulns: $certifyVulns)
 }
 `
@@ -25039,8 +25161,8 @@ mutation IngestCertifyVulnPkgs ($pkgs: [PkgInputSpec!]!, $vulnerabilities: [Vuln
 func IngestCertifyVulnPkgs(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
-	vulnerabilities []VulnerabilityInputSpec,
+	pkgs []IDorPkgInput,
+	vulnerabilities []IDorVulnerabilityInput,
 	certifyVulns []ScanMetadataInput,
 ) (*IngestCertifyVulnPkgsResponse, error) {
 	req := &graphql.Request{
@@ -25068,7 +25190,7 @@ func IngestCertifyVulnPkgs(
 
 // The query or mutation executed by IngestHasMetadataArtifact.
 const IngestHasMetadataArtifact_Operation = `
-mutation IngestHasMetadataArtifact ($artifact: ArtifactInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
+mutation IngestHasMetadataArtifact ($artifact: IDorArtifactInput!, $hasMetadata: HasMetadataInputSpec!) {
 	ingestHasMetadata(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadata: $hasMetadata)
 }
 `
@@ -25076,7 +25198,7 @@ mutation IngestHasMetadataArtifact ($artifact: ArtifactInputSpec!, $hasMetadata:
 func IngestHasMetadataArtifact(
 	ctx context.Context,
 	client graphql.Client,
-	artifact ArtifactInputSpec,
+	artifact IDorArtifactInput,
 	hasMetadata HasMetadataInputSpec,
 ) (*IngestHasMetadataArtifactResponse, error) {
 	req := &graphql.Request{
@@ -25103,7 +25225,7 @@ func IngestHasMetadataArtifact(
 
 // The query or mutation executed by IngestHasMetadataArtifacts.
 const IngestHasMetadataArtifacts_Operation = `
-mutation IngestHasMetadataArtifacts ($artifacts: [ArtifactInputSpec!]!, $hasMetadataList: [HasMetadataInputSpec!]!) {
+mutation IngestHasMetadataArtifacts ($artifacts: [IDorArtifactInput!]!, $hasMetadataList: [HasMetadataInputSpec!]!) {
 	ingestBulkHasMetadata(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadataList: $hasMetadataList)
 }
 `
@@ -25111,7 +25233,7 @@ mutation IngestHasMetadataArtifacts ($artifacts: [ArtifactInputSpec!]!, $hasMeta
 func IngestHasMetadataArtifacts(
 	ctx context.Context,
 	client graphql.Client,
-	artifacts []ArtifactInputSpec,
+	artifacts []IDorArtifactInput,
 	hasMetadataList []HasMetadataInputSpec,
 ) (*IngestHasMetadataArtifactsResponse, error) {
 	req := &graphql.Request{
@@ -25138,7 +25260,7 @@ func IngestHasMetadataArtifacts(
 
 // The query or mutation executed by IngestHasMetadataPkg.
 const IngestHasMetadataPkg_Operation = `
-mutation IngestHasMetadataPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $hasMetadata: HasMetadataInputSpec!) {
+mutation IngestHasMetadataPkg ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags!, $hasMetadata: HasMetadataInputSpec!) {
 	ingestHasMetadata(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, hasMetadata: $hasMetadata)
 }
 `
@@ -25146,7 +25268,7 @@ mutation IngestHasMetadataPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, 
 func IngestHasMetadataPkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
+	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
 	hasMetadata HasMetadataInputSpec,
 ) (*IngestHasMetadataPkgResponse, error) {
@@ -25175,7 +25297,7 @@ func IngestHasMetadataPkg(
 
 // The query or mutation executed by IngestHasMetadataPkgs.
 const IngestHasMetadataPkgs_Operation = `
-mutation IngestHasMetadataPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $hasMetadataList: [HasMetadataInputSpec!]!) {
+mutation IngestHasMetadataPkgs ($pkgs: [IDorPkgInput!]!, $pkgMatchType: MatchFlags!, $hasMetadataList: [HasMetadataInputSpec!]!) {
 	ingestBulkHasMetadata(subjects: {packages:$pkgs}, pkgMatchType: $pkgMatchType, hasMetadataList: $hasMetadataList)
 }
 `
@@ -25183,7 +25305,7 @@ mutation IngestHasMetadataPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFla
 func IngestHasMetadataPkgs(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
+	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
 	hasMetadataList []HasMetadataInputSpec,
 ) (*IngestHasMetadataPkgsResponse, error) {
@@ -25212,7 +25334,7 @@ func IngestHasMetadataPkgs(
 
 // The query or mutation executed by IngestHasMetadataSrc.
 const IngestHasMetadataSrc_Operation = `
-mutation IngestHasMetadataSrc ($source: SourceInputSpec!, $hasMetadata: HasMetadataInputSpec!) {
+mutation IngestHasMetadataSrc ($source: IDorSourceInput!, $hasMetadata: HasMetadataInputSpec!) {
 	ingestHasMetadata(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadata: $hasMetadata)
 }
 `
@@ -25220,7 +25342,7 @@ mutation IngestHasMetadataSrc ($source: SourceInputSpec!, $hasMetadata: HasMetad
 func IngestHasMetadataSrc(
 	ctx context.Context,
 	client graphql.Client,
-	source SourceInputSpec,
+	source IDorSourceInput,
 	hasMetadata HasMetadataInputSpec,
 ) (*IngestHasMetadataSrcResponse, error) {
 	req := &graphql.Request{
@@ -25247,7 +25369,7 @@ func IngestHasMetadataSrc(
 
 // The query or mutation executed by IngestHasMetadataSrcs.
 const IngestHasMetadataSrcs_Operation = `
-mutation IngestHasMetadataSrcs ($sources: [SourceInputSpec!]!, $hasMetadataList: [HasMetadataInputSpec!]!) {
+mutation IngestHasMetadataSrcs ($sources: [IDorSourceInput!]!, $hasMetadataList: [HasMetadataInputSpec!]!) {
 	ingestBulkHasMetadata(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, hasMetadataList: $hasMetadataList)
 }
 `
@@ -25255,7 +25377,7 @@ mutation IngestHasMetadataSrcs ($sources: [SourceInputSpec!]!, $hasMetadataList:
 func IngestHasMetadataSrcs(
 	ctx context.Context,
 	client graphql.Client,
-	sources []SourceInputSpec,
+	sources []IDorSourceInput,
 	hasMetadataList []HasMetadataInputSpec,
 ) (*IngestHasMetadataSrcsResponse, error) {
 	req := &graphql.Request{
@@ -25282,7 +25404,7 @@ func IngestHasMetadataSrcs(
 
 // The query or mutation executed by IngestHasSBOMArtifact.
 const IngestHasSBOMArtifact_Operation = `
-mutation IngestHasSBOMArtifact ($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!, $includes: HasSBOMIncludesInputSpec!) {
+mutation IngestHasSBOMArtifact ($artifact: IDorArtifactInput!, $hasSBOM: HasSBOMInputSpec!, $includes: HasSBOMIncludesInputSpec!) {
 	ingestHasSBOM(subject: {artifact:$artifact}, hasSBOM: $hasSBOM, includes: $includes)
 }
 `
@@ -25290,7 +25412,7 @@ mutation IngestHasSBOMArtifact ($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOM
 func IngestHasSBOMArtifact(
 	ctx context.Context,
 	client graphql.Client,
-	artifact ArtifactInputSpec,
+	artifact IDorArtifactInput,
 	hasSBOM HasSBOMInputSpec,
 	includes HasSBOMIncludesInputSpec,
 ) (*IngestHasSBOMArtifactResponse, error) {
@@ -25319,7 +25441,7 @@ func IngestHasSBOMArtifact(
 
 // The query or mutation executed by IngestHasSBOMArtifacts.
 const IngestHasSBOMArtifacts_Operation = `
-mutation IngestHasSBOMArtifacts ($artifacts: [ArtifactInputSpec!]!, $hasSBOMs: [HasSBOMInputSpec!]!, $includes: [HasSBOMIncludesInputSpec!]!) {
+mutation IngestHasSBOMArtifacts ($artifacts: [IDorArtifactInput!]!, $hasSBOMs: [HasSBOMInputSpec!]!, $includes: [HasSBOMIncludesInputSpec!]!) {
 	ingestHasSBOMs(subjects: {artifacts:$artifacts}, hasSBOMs: $hasSBOMs, includes: $includes)
 }
 `
@@ -25327,7 +25449,7 @@ mutation IngestHasSBOMArtifacts ($artifacts: [ArtifactInputSpec!]!, $hasSBOMs: [
 func IngestHasSBOMArtifacts(
 	ctx context.Context,
 	client graphql.Client,
-	artifacts []ArtifactInputSpec,
+	artifacts []IDorArtifactInput,
 	hasSBOMs []HasSBOMInputSpec,
 	includes []HasSBOMIncludesInputSpec,
 ) (*IngestHasSBOMArtifactsResponse, error) {
@@ -25356,7 +25478,7 @@ func IngestHasSBOMArtifacts(
 
 // The query or mutation executed by IngestHasSBOMPkg.
 const IngestHasSBOMPkg_Operation = `
-mutation IngestHasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!, $includes: HasSBOMIncludesInputSpec!) {
+mutation IngestHasSBOMPkg ($pkg: IDorPkgInput!, $hasSBOM: HasSBOMInputSpec!, $includes: HasSBOMIncludesInputSpec!) {
 	ingestHasSBOM(subject: {package:$pkg}, hasSBOM: $hasSBOM, includes: $includes)
 }
 `
@@ -25364,7 +25486,7 @@ mutation IngestHasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!, $in
 func IngestHasSBOMPkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
+	pkg IDorPkgInput,
 	hasSBOM HasSBOMInputSpec,
 	includes HasSBOMIncludesInputSpec,
 ) (*IngestHasSBOMPkgResponse, error) {
@@ -25393,7 +25515,7 @@ func IngestHasSBOMPkg(
 
 // The query or mutation executed by IngestHasSBOMPkgs.
 const IngestHasSBOMPkgs_Operation = `
-mutation IngestHasSBOMPkgs ($pkgs: [PkgInputSpec!]!, $hasSBOMs: [HasSBOMInputSpec!]!, $includes: [HasSBOMIncludesInputSpec!]!) {
+mutation IngestHasSBOMPkgs ($pkgs: [IDorPkgInput!]!, $hasSBOMs: [HasSBOMInputSpec!]!, $includes: [HasSBOMIncludesInputSpec!]!) {
 	ingestHasSBOMs(subjects: {packages:$pkgs}, hasSBOMs: $hasSBOMs, includes: $includes)
 }
 `
@@ -25401,7 +25523,7 @@ mutation IngestHasSBOMPkgs ($pkgs: [PkgInputSpec!]!, $hasSBOMs: [HasSBOMInputSpe
 func IngestHasSBOMPkgs(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
+	pkgs []IDorPkgInput,
 	hasSBOMs []HasSBOMInputSpec,
 	includes []HasSBOMIncludesInputSpec,
 ) (*IngestHasSBOMPkgsResponse, error) {
@@ -25430,7 +25552,7 @@ func IngestHasSBOMPkgs(
 
 // The query or mutation executed by IngestHasSourceAt.
 const IngestHasSourceAt_Operation = `
-mutation IngestHasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $source: SourceInputSpec!, $hasSourceAt: HasSourceAtInputSpec!) {
+mutation IngestHasSourceAt ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags!, $source: IDorSourceInput!, $hasSourceAt: HasSourceAtInputSpec!) {
 	ingestHasSourceAt(pkg: $pkg, pkgMatchType: $pkgMatchType, source: $source, hasSourceAt: $hasSourceAt)
 }
 `
@@ -25438,9 +25560,9 @@ mutation IngestHasSourceAt ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $so
 func IngestHasSourceAt(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
+	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
-	source SourceInputSpec,
+	source IDorSourceInput,
 	hasSourceAt HasSourceAtInputSpec,
 ) (*IngestHasSourceAtResponse, error) {
 	req := &graphql.Request{
@@ -25469,7 +25591,7 @@ func IngestHasSourceAt(
 
 // The query or mutation executed by IngestHasSourcesAt.
 const IngestHasSourcesAt_Operation = `
-mutation IngestHasSourcesAt ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $sources: [SourceInputSpec!]!, $hasSourceAts: [HasSourceAtInputSpec!]!) {
+mutation IngestHasSourcesAt ($pkgs: [IDorPkgInput!]!, $pkgMatchType: MatchFlags!, $sources: [IDorSourceInput!]!, $hasSourceAts: [HasSourceAtInputSpec!]!) {
 	ingestHasSourceAts(pkgs: $pkgs, pkgMatchType: $pkgMatchType, sources: $sources, hasSourceAts: $hasSourceAts)
 }
 `
@@ -25477,9 +25599,9 @@ mutation IngestHasSourcesAt ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!
 func IngestHasSourcesAt(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
+	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
-	sources []SourceInputSpec,
+	sources []IDorSourceInput,
 	hasSourceAts []HasSourceAtInputSpec,
 ) (*IngestHasSourcesAtResponse, error) {
 	req := &graphql.Request{
@@ -25508,7 +25630,7 @@ func IngestHasSourcesAt(
 
 // The query or mutation executed by IngestHashEqual.
 const IngestHashEqual_Operation = `
-mutation IngestHashEqual ($artifact: ArtifactInputSpec!, $otherArtifact: ArtifactInputSpec!, $hashEqual: HashEqualInputSpec!) {
+mutation IngestHashEqual ($artifact: IDorArtifactInput!, $otherArtifact: IDorArtifactInput!, $hashEqual: HashEqualInputSpec!) {
 	ingestHashEqual(artifact: $artifact, otherArtifact: $otherArtifact, hashEqual: $hashEqual)
 }
 `
@@ -25516,8 +25638,8 @@ mutation IngestHashEqual ($artifact: ArtifactInputSpec!, $otherArtifact: Artifac
 func IngestHashEqual(
 	ctx context.Context,
 	client graphql.Client,
-	artifact ArtifactInputSpec,
-	otherArtifact ArtifactInputSpec,
+	artifact IDorArtifactInput,
+	otherArtifact IDorArtifactInput,
 	hashEqual HashEqualInputSpec,
 ) (*IngestHashEqualResponse, error) {
 	req := &graphql.Request{
@@ -25545,7 +25667,7 @@ func IngestHashEqual(
 
 // The query or mutation executed by IngestHashEquals.
 const IngestHashEquals_Operation = `
-mutation IngestHashEquals ($artifacts: [ArtifactInputSpec!]!, $otherArtifacts: [ArtifactInputSpec!]!, $hashEquals: [HashEqualInputSpec!]!) {
+mutation IngestHashEquals ($artifacts: [IDorArtifactInput!]!, $otherArtifacts: [IDorArtifactInput!]!, $hashEquals: [HashEqualInputSpec!]!) {
 	ingestHashEquals(artifacts: $artifacts, otherArtifacts: $otherArtifacts, hashEquals: $hashEquals)
 }
 `
@@ -25553,8 +25675,8 @@ mutation IngestHashEquals ($artifacts: [ArtifactInputSpec!]!, $otherArtifacts: [
 func IngestHashEquals(
 	ctx context.Context,
 	client graphql.Client,
-	artifacts []ArtifactInputSpec,
-	otherArtifacts []ArtifactInputSpec,
+	artifacts []IDorArtifactInput,
+	otherArtifacts []IDorArtifactInput,
 	hashEquals []HashEqualInputSpec,
 ) (*IngestHashEqualsResponse, error) {
 	req := &graphql.Request{
@@ -25582,7 +25704,7 @@ func IngestHashEquals(
 
 // The query or mutation executed by IngestIsDependencies.
 const IngestIsDependencies_Operation = `
-mutation IngestIsDependencies ($pkgs: [PkgInputSpec!]!, $depPkgs: [PkgInputSpec!]!, $depPkgMatchType: MatchFlags!, $dependencies: [IsDependencyInputSpec!]!) {
+mutation IngestIsDependencies ($pkgs: [IDorPkgInput!]!, $depPkgs: [IDorPkgInput!]!, $depPkgMatchType: MatchFlags!, $dependencies: [IsDependencyInputSpec!]!) {
 	ingestDependencies(pkgs: $pkgs, depPkgs: $depPkgs, depPkgMatchType: $depPkgMatchType, dependencies: $dependencies)
 }
 `
@@ -25590,8 +25712,8 @@ mutation IngestIsDependencies ($pkgs: [PkgInputSpec!]!, $depPkgs: [PkgInputSpec!
 func IngestIsDependencies(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
-	depPkgs []PkgInputSpec,
+	pkgs []IDorPkgInput,
+	depPkgs []IDorPkgInput,
 	depPkgMatchType MatchFlags,
 	dependencies []IsDependencyInputSpec,
 ) (*IngestIsDependenciesResponse, error) {
@@ -25621,7 +25743,7 @@ func IngestIsDependencies(
 
 // The query or mutation executed by IngestIsDependency.
 const IngestIsDependency_Operation = `
-mutation IngestIsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $depPkgMatchType: MatchFlags!, $dependency: IsDependencyInputSpec!) {
+mutation IngestIsDependency ($pkg: IDorPkgInput!, $depPkg: IDorPkgInput!, $depPkgMatchType: MatchFlags!, $dependency: IsDependencyInputSpec!) {
 	ingestDependency(pkg: $pkg, depPkg: $depPkg, depPkgMatchType: $depPkgMatchType, dependency: $dependency)
 }
 `
@@ -25629,8 +25751,8 @@ mutation IngestIsDependency ($pkg: PkgInputSpec!, $depPkg: PkgInputSpec!, $depPk
 func IngestIsDependency(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
-	depPkg PkgInputSpec,
+	pkg IDorPkgInput,
+	depPkg IDorPkgInput,
 	depPkgMatchType MatchFlags,
 	dependency IsDependencyInputSpec,
 ) (*IngestIsDependencyResponse, error) {
@@ -25660,7 +25782,7 @@ func IngestIsDependency(
 
 // The query or mutation executed by IngestIsOccurrencePkg.
 const IngestIsOccurrencePkg_Operation = `
-mutation IngestIsOccurrencePkg ($pkg: PkgInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
+mutation IngestIsOccurrencePkg ($pkg: IDorPkgInput!, $artifact: IDorArtifactInput!, $occurrence: IsOccurrenceInputSpec!) {
 	ingestOccurrence(subject: {package:$pkg}, artifact: $artifact, occurrence: $occurrence)
 }
 `
@@ -25668,8 +25790,8 @@ mutation IngestIsOccurrencePkg ($pkg: PkgInputSpec!, $artifact: ArtifactInputSpe
 func IngestIsOccurrencePkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
-	artifact ArtifactInputSpec,
+	pkg IDorPkgInput,
+	artifact IDorArtifactInput,
 	occurrence IsOccurrenceInputSpec,
 ) (*IngestIsOccurrencePkgResponse, error) {
 	req := &graphql.Request{
@@ -25697,7 +25819,7 @@ func IngestIsOccurrencePkg(
 
 // The query or mutation executed by IngestIsOccurrenceSrc.
 const IngestIsOccurrenceSrc_Operation = `
-mutation IngestIsOccurrenceSrc ($source: SourceInputSpec!, $artifact: ArtifactInputSpec!, $occurrence: IsOccurrenceInputSpec!) {
+mutation IngestIsOccurrenceSrc ($source: IDorSourceInput!, $artifact: IDorArtifactInput!, $occurrence: IsOccurrenceInputSpec!) {
 	ingestOccurrence(subject: {source:$source}, artifact: $artifact, occurrence: $occurrence)
 }
 `
@@ -25705,8 +25827,8 @@ mutation IngestIsOccurrenceSrc ($source: SourceInputSpec!, $artifact: ArtifactIn
 func IngestIsOccurrenceSrc(
 	ctx context.Context,
 	client graphql.Client,
-	source SourceInputSpec,
-	artifact ArtifactInputSpec,
+	source IDorSourceInput,
+	artifact IDorArtifactInput,
 	occurrence IsOccurrenceInputSpec,
 ) (*IngestIsOccurrenceSrcResponse, error) {
 	req := &graphql.Request{
@@ -25734,7 +25856,7 @@ func IngestIsOccurrenceSrc(
 
 // The query or mutation executed by IngestIsOccurrencesPkg.
 const IngestIsOccurrencesPkg_Operation = `
-mutation IngestIsOccurrencesPkg ($pkgs: [PkgInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
+mutation IngestIsOccurrencesPkg ($pkgs: [IDorPkgInput!]!, $artifacts: [IDorArtifactInput!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
 	ingestOccurrences(subjects: {packages:$pkgs}, artifacts: $artifacts, occurrences: $occurrences)
 }
 `
@@ -25742,8 +25864,8 @@ mutation IngestIsOccurrencesPkg ($pkgs: [PkgInputSpec!]!, $artifacts: [ArtifactI
 func IngestIsOccurrencesPkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
-	artifacts []ArtifactInputSpec,
+	pkgs []IDorPkgInput,
+	artifacts []IDorArtifactInput,
 	occurrences []IsOccurrenceInputSpec,
 ) (*IngestIsOccurrencesPkgResponse, error) {
 	req := &graphql.Request{
@@ -25771,7 +25893,7 @@ func IngestIsOccurrencesPkg(
 
 // The query or mutation executed by IngestIsOccurrencesSrc.
 const IngestIsOccurrencesSrc_Operation = `
-mutation IngestIsOccurrencesSrc ($sources: [SourceInputSpec!]!, $artifacts: [ArtifactInputSpec!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
+mutation IngestIsOccurrencesSrc ($sources: [IDorSourceInput!]!, $artifacts: [IDorArtifactInput!]!, $occurrences: [IsOccurrenceInputSpec!]!) {
 	ingestOccurrences(subjects: {sources:$sources}, artifacts: $artifacts, occurrences: $occurrences)
 }
 `
@@ -25779,8 +25901,8 @@ mutation IngestIsOccurrencesSrc ($sources: [SourceInputSpec!]!, $artifacts: [Art
 func IngestIsOccurrencesSrc(
 	ctx context.Context,
 	client graphql.Client,
-	sources []SourceInputSpec,
-	artifacts []ArtifactInputSpec,
+	sources []IDorSourceInput,
+	artifacts []IDorArtifactInput,
 	occurrences []IsOccurrenceInputSpec,
 ) (*IngestIsOccurrencesSrcResponse, error) {
 	req := &graphql.Request{
@@ -25808,7 +25930,7 @@ func IngestIsOccurrencesSrc(
 
 // The query or mutation executed by IngestLicense.
 const IngestLicense_Operation = `
-mutation IngestLicense ($license: LicenseInputSpec!) {
+mutation IngestLicense ($license: IDorLicenseInput!) {
 	ingestLicense(license: $license)
 }
 `
@@ -25816,7 +25938,7 @@ mutation IngestLicense ($license: LicenseInputSpec!) {
 func IngestLicense(
 	ctx context.Context,
 	client graphql.Client,
-	license LicenseInputSpec,
+	license IDorLicenseInput,
 ) (*IngestLicenseResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestLicense",
@@ -25841,7 +25963,7 @@ func IngestLicense(
 
 // The query or mutation executed by IngestLicenses.
 const IngestLicenses_Operation = `
-mutation IngestLicenses ($licenses: [LicenseInputSpec!]!) {
+mutation IngestLicenses ($licenses: [IDorLicenseInput!]!) {
 	ingestLicenses(licenses: $licenses)
 }
 `
@@ -25849,7 +25971,7 @@ mutation IngestLicenses ($licenses: [LicenseInputSpec!]!) {
 func IngestLicenses(
 	ctx context.Context,
 	client graphql.Client,
-	licenses []LicenseInputSpec,
+	licenses []IDorLicenseInput,
 ) (*IngestLicensesResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestLicenses",
@@ -25874,7 +25996,7 @@ func IngestLicenses(
 
 // The query or mutation executed by IngestPackage.
 const IngestPackage_Operation = `
-mutation IngestPackage ($pkg: PkgInputSpec!) {
+mutation IngestPackage ($pkg: IDorPkgInput!) {
 	ingestPackage(pkg: $pkg) {
 		packageTypeID
 		packageNamespaceID
@@ -25887,7 +26009,7 @@ mutation IngestPackage ($pkg: PkgInputSpec!) {
 func IngestPackage(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
+	pkg IDorPkgInput,
 ) (*IngestPackageResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestPackage",
@@ -25912,7 +26034,7 @@ func IngestPackage(
 
 // The query or mutation executed by IngestPackages.
 const IngestPackages_Operation = `
-mutation IngestPackages ($pkgs: [PkgInputSpec!]!) {
+mutation IngestPackages ($pkgs: [IDorPkgInput!]!) {
 	ingestPackages(pkgs: $pkgs) {
 		packageTypeID
 		packageNamespaceID
@@ -25925,7 +26047,7 @@ mutation IngestPackages ($pkgs: [PkgInputSpec!]!) {
 func IngestPackages(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
+	pkgs []IDorPkgInput,
 ) (*IngestPackagesResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestPackages",
@@ -25950,7 +26072,7 @@ func IngestPackages(
 
 // The query or mutation executed by IngestPkgEqual.
 const IngestPkgEqual_Operation = `
-mutation IngestPkgEqual ($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkgEqual: PkgEqualInputSpec!) {
+mutation IngestPkgEqual ($pkg: IDorPkgInput!, $otherPackage: IDorPkgInput!, $pkgEqual: PkgEqualInputSpec!) {
 	ingestPkgEqual(pkg: $pkg, otherPackage: $otherPackage, pkgEqual: $pkgEqual)
 }
 `
@@ -25958,8 +26080,8 @@ mutation IngestPkgEqual ($pkg: PkgInputSpec!, $otherPackage: PkgInputSpec!, $pkg
 func IngestPkgEqual(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
-	otherPackage PkgInputSpec,
+	pkg IDorPkgInput,
+	otherPackage IDorPkgInput,
 	pkgEqual PkgEqualInputSpec,
 ) (*IngestPkgEqualResponse, error) {
 	req := &graphql.Request{
@@ -25987,7 +26109,7 @@ func IngestPkgEqual(
 
 // The query or mutation executed by IngestPkgEquals.
 const IngestPkgEquals_Operation = `
-mutation IngestPkgEquals ($pkgs: [PkgInputSpec!]!, $otherPackages: [PkgInputSpec!]!, $pkgEquals: [PkgEqualInputSpec!]!) {
+mutation IngestPkgEquals ($pkgs: [IDorPkgInput!]!, $otherPackages: [IDorPkgInput!]!, $pkgEquals: [PkgEqualInputSpec!]!) {
 	ingestPkgEquals(pkgs: $pkgs, otherPackages: $otherPackages, pkgEquals: $pkgEquals)
 }
 `
@@ -25995,8 +26117,8 @@ mutation IngestPkgEquals ($pkgs: [PkgInputSpec!]!, $otherPackages: [PkgInputSpec
 func IngestPkgEquals(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
-	otherPackages []PkgInputSpec,
+	pkgs []IDorPkgInput,
+	otherPackages []IDorPkgInput,
 	pkgEquals []PkgEqualInputSpec,
 ) (*IngestPkgEqualsResponse, error) {
 	req := &graphql.Request{
@@ -26024,7 +26146,7 @@ func IngestPkgEquals(
 
 // The query or mutation executed by IngestPointOfContactArtifact.
 const IngestPointOfContactArtifact_Operation = `
-mutation IngestPointOfContactArtifact ($artifact: ArtifactInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
+mutation IngestPointOfContactArtifact ($artifact: IDorArtifactInput!, $pointOfContact: PointOfContactInputSpec!) {
 	ingestPointOfContact(subject: {artifact:$artifact}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContact: $pointOfContact)
 }
 `
@@ -26032,7 +26154,7 @@ mutation IngestPointOfContactArtifact ($artifact: ArtifactInputSpec!, $pointOfCo
 func IngestPointOfContactArtifact(
 	ctx context.Context,
 	client graphql.Client,
-	artifact ArtifactInputSpec,
+	artifact IDorArtifactInput,
 	pointOfContact PointOfContactInputSpec,
 ) (*IngestPointOfContactArtifactResponse, error) {
 	req := &graphql.Request{
@@ -26059,7 +26181,7 @@ func IngestPointOfContactArtifact(
 
 // The query or mutation executed by IngestPointOfContactArtifacts.
 const IngestPointOfContactArtifacts_Operation = `
-mutation IngestPointOfContactArtifacts ($artifacts: [ArtifactInputSpec!]!, $pointOfContacts: [PointOfContactInputSpec!]!) {
+mutation IngestPointOfContactArtifacts ($artifacts: [IDorArtifactInput!]!, $pointOfContacts: [PointOfContactInputSpec!]!) {
 	ingestPointOfContacts(subjects: {artifacts:$artifacts}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContacts: $pointOfContacts)
 }
 `
@@ -26067,7 +26189,7 @@ mutation IngestPointOfContactArtifacts ($artifacts: [ArtifactInputSpec!]!, $poin
 func IngestPointOfContactArtifacts(
 	ctx context.Context,
 	client graphql.Client,
-	artifacts []ArtifactInputSpec,
+	artifacts []IDorArtifactInput,
 	pointOfContacts []PointOfContactInputSpec,
 ) (*IngestPointOfContactArtifactsResponse, error) {
 	req := &graphql.Request{
@@ -26094,7 +26216,7 @@ func IngestPointOfContactArtifacts(
 
 // The query or mutation executed by IngestPointOfContactPkg.
 const IngestPointOfContactPkg_Operation = `
-mutation IngestPointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags!, $pointOfContact: PointOfContactInputSpec!) {
+mutation IngestPointOfContactPkg ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags!, $pointOfContact: PointOfContactInputSpec!) {
 	ingestPointOfContact(subject: {package:$pkg}, pkgMatchType: $pkgMatchType, pointOfContact: $pointOfContact)
 }
 `
@@ -26102,7 +26224,7 @@ mutation IngestPointOfContactPkg ($pkg: PkgInputSpec!, $pkgMatchType: MatchFlags
 func IngestPointOfContactPkg(
 	ctx context.Context,
 	client graphql.Client,
-	pkg PkgInputSpec,
+	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
 	pointOfContact PointOfContactInputSpec,
 ) (*IngestPointOfContactPkgResponse, error) {
@@ -26131,7 +26253,7 @@ func IngestPointOfContactPkg(
 
 // The query or mutation executed by IngestPointOfContactPkgs.
 const IngestPointOfContactPkgs_Operation = `
-mutation IngestPointOfContactPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: MatchFlags!, $pointOfContacts: [PointOfContactInputSpec!]!) {
+mutation IngestPointOfContactPkgs ($pkgs: [IDorPkgInput!]!, $pkgMatchType: MatchFlags!, $pointOfContacts: [PointOfContactInputSpec!]!) {
 	ingestPointOfContacts(subjects: {packages:$pkgs}, pkgMatchType: $pkgMatchType, pointOfContacts: $pointOfContacts)
 }
 `
@@ -26139,7 +26261,7 @@ mutation IngestPointOfContactPkgs ($pkgs: [PkgInputSpec!]!, $pkgMatchType: Match
 func IngestPointOfContactPkgs(
 	ctx context.Context,
 	client graphql.Client,
-	pkgs []PkgInputSpec,
+	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
 	pointOfContacts []PointOfContactInputSpec,
 ) (*IngestPointOfContactPkgsResponse, error) {
@@ -26168,7 +26290,7 @@ func IngestPointOfContactPkgs(
 
 // The query or mutation executed by IngestPointOfContactSrc.
 const IngestPointOfContactSrc_Operation = `
-mutation IngestPointOfContactSrc ($source: SourceInputSpec!, $pointOfContact: PointOfContactInputSpec!) {
+mutation IngestPointOfContactSrc ($source: IDorSourceInput!, $pointOfContact: PointOfContactInputSpec!) {
 	ingestPointOfContact(subject: {source:$source}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContact: $pointOfContact)
 }
 `
@@ -26176,7 +26298,7 @@ mutation IngestPointOfContactSrc ($source: SourceInputSpec!, $pointOfContact: Po
 func IngestPointOfContactSrc(
 	ctx context.Context,
 	client graphql.Client,
-	source SourceInputSpec,
+	source IDorSourceInput,
 	pointOfContact PointOfContactInputSpec,
 ) (*IngestPointOfContactSrcResponse, error) {
 	req := &graphql.Request{
@@ -26203,7 +26325,7 @@ func IngestPointOfContactSrc(
 
 // The query or mutation executed by IngestPointOfContactSrcs.
 const IngestPointOfContactSrcs_Operation = `
-mutation IngestPointOfContactSrcs ($sources: [SourceInputSpec!]!, $pointOfContacts: [PointOfContactInputSpec!]!) {
+mutation IngestPointOfContactSrcs ($sources: [IDorSourceInput!]!, $pointOfContacts: [PointOfContactInputSpec!]!) {
 	ingestPointOfContacts(subjects: {sources:$sources}, pkgMatchType: {pkg:ALL_VERSIONS}, pointOfContacts: $pointOfContacts)
 }
 `
@@ -26211,7 +26333,7 @@ mutation IngestPointOfContactSrcs ($sources: [SourceInputSpec!]!, $pointOfContac
 func IngestPointOfContactSrcs(
 	ctx context.Context,
 	client graphql.Client,
-	sources []SourceInputSpec,
+	sources []IDorSourceInput,
 	pointOfContacts []PointOfContactInputSpec,
 ) (*IngestPointOfContactSrcsResponse, error) {
 	req := &graphql.Request{
@@ -26238,7 +26360,7 @@ func IngestPointOfContactSrcs(
 
 // The query or mutation executed by IngestSLSAForArtifact.
 const IngestSLSAForArtifact_Operation = `
-mutation IngestSLSAForArtifact ($artifact: ArtifactInputSpec!, $materials: [ArtifactInputSpec!]!, $builder: BuilderInputSpec!, $slsa: SLSAInputSpec!) {
+mutation IngestSLSAForArtifact ($artifact: IDorArtifactInput!, $materials: [IDorArtifactInput!]!, $builder: IDorBuilderInput!, $slsa: SLSAInputSpec!) {
 	ingestSLSA(subject: $artifact, builtFrom: $materials, builtBy: $builder, slsa: $slsa)
 }
 `
@@ -26246,9 +26368,9 @@ mutation IngestSLSAForArtifact ($artifact: ArtifactInputSpec!, $materials: [Arti
 func IngestSLSAForArtifact(
 	ctx context.Context,
 	client graphql.Client,
-	artifact ArtifactInputSpec,
-	materials []ArtifactInputSpec,
-	builder BuilderInputSpec,
+	artifact IDorArtifactInput,
+	materials []IDorArtifactInput,
+	builder IDorBuilderInput,
 	slsa SLSAInputSpec,
 ) (*IngestSLSAForArtifactResponse, error) {
 	req := &graphql.Request{
@@ -26277,7 +26399,7 @@ func IngestSLSAForArtifact(
 
 // The query or mutation executed by IngestSLSAForArtifacts.
 const IngestSLSAForArtifacts_Operation = `
-mutation IngestSLSAForArtifacts ($artifacts: [ArtifactInputSpec!]!, $materialsList: [[ArtifactInputSpec!]!]!, $builders: [BuilderInputSpec!]!, $slsaList: [SLSAInputSpec!]!) {
+mutation IngestSLSAForArtifacts ($artifacts: [IDorArtifactInput!]!, $materialsList: [[IDorArtifactInput!]!]!, $builders: [IDorBuilderInput!]!, $slsaList: [SLSAInputSpec!]!) {
 	ingestSLSAs(subjects: $artifacts, builtFromList: $materialsList, builtByList: $builders, slsaList: $slsaList)
 }
 `
@@ -26285,9 +26407,9 @@ mutation IngestSLSAForArtifacts ($artifacts: [ArtifactInputSpec!]!, $materialsLi
 func IngestSLSAForArtifacts(
 	ctx context.Context,
 	client graphql.Client,
-	artifacts []ArtifactInputSpec,
-	materialsList [][]ArtifactInputSpec,
-	builders []BuilderInputSpec,
+	artifacts []IDorArtifactInput,
+	materialsList [][]IDorArtifactInput,
+	builders []IDorBuilderInput,
 	slsaList []SLSAInputSpec,
 ) (*IngestSLSAForArtifactsResponse, error) {
 	req := &graphql.Request{
@@ -26316,7 +26438,7 @@ func IngestSLSAForArtifacts(
 
 // The query or mutation executed by IngestSource.
 const IngestSource_Operation = `
-mutation IngestSource ($source: SourceInputSpec!) {
+mutation IngestSource ($source: IDorSourceInput!) {
 	ingestSource(source: $source) {
 		sourceTypeID
 		sourceNamespaceID
@@ -26328,7 +26450,7 @@ mutation IngestSource ($source: SourceInputSpec!) {
 func IngestSource(
 	ctx context.Context,
 	client graphql.Client,
-	source SourceInputSpec,
+	source IDorSourceInput,
 ) (*IngestSourceResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestSource",
@@ -26353,7 +26475,7 @@ func IngestSource(
 
 // The query or mutation executed by IngestSources.
 const IngestSources_Operation = `
-mutation IngestSources ($sources: [SourceInputSpec!]!) {
+mutation IngestSources ($sources: [IDorSourceInput!]!) {
 	ingestSources(sources: $sources) {
 		sourceTypeID
 		sourceNamespaceID
@@ -26365,7 +26487,7 @@ mutation IngestSources ($sources: [SourceInputSpec!]!) {
 func IngestSources(
 	ctx context.Context,
 	client graphql.Client,
-	sources []SourceInputSpec,
+	sources []IDorSourceInput,
 ) (*IngestSourcesResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestSources",
@@ -26390,7 +26512,7 @@ func IngestSources(
 
 // The query or mutation executed by IngestVulnEqual.
 const IngestVulnEqual_Operation = `
-mutation IngestVulnEqual ($vulnerability: VulnerabilityInputSpec!, $otherVulnerability: VulnerabilityInputSpec!, $vulnEqual: VulnEqualInputSpec!) {
+mutation IngestVulnEqual ($vulnerability: IDorVulnerabilityInput!, $otherVulnerability: IDorVulnerabilityInput!, $vulnEqual: VulnEqualInputSpec!) {
 	ingestVulnEqual(vulnerability: $vulnerability, otherVulnerability: $otherVulnerability, vulnEqual: $vulnEqual)
 }
 `
@@ -26398,8 +26520,8 @@ mutation IngestVulnEqual ($vulnerability: VulnerabilityInputSpec!, $otherVulnera
 func IngestVulnEqual(
 	ctx context.Context,
 	client graphql.Client,
-	vulnerability VulnerabilityInputSpec,
-	otherVulnerability VulnerabilityInputSpec,
+	vulnerability IDorVulnerabilityInput,
+	otherVulnerability IDorVulnerabilityInput,
 	vulnEqual VulnEqualInputSpec,
 ) (*IngestVulnEqualResponse, error) {
 	req := &graphql.Request{
@@ -26427,7 +26549,7 @@ func IngestVulnEqual(
 
 // The query or mutation executed by IngestVulnEquals.
 const IngestVulnEquals_Operation = `
-mutation IngestVulnEquals ($vulnerabilities: [VulnerabilityInputSpec!]!, $otherVulnerabilities: [VulnerabilityInputSpec!]!, $vulnEquals: [VulnEqualInputSpec!]!) {
+mutation IngestVulnEquals ($vulnerabilities: [IDorVulnerabilityInput!]!, $otherVulnerabilities: [IDorVulnerabilityInput!]!, $vulnEquals: [VulnEqualInputSpec!]!) {
 	ingestVulnEquals(vulnerabilities: $vulnerabilities, otherVulnerabilities: $otherVulnerabilities, vulnEquals: $vulnEquals)
 }
 `
@@ -26435,8 +26557,8 @@ mutation IngestVulnEquals ($vulnerabilities: [VulnerabilityInputSpec!]!, $otherV
 func IngestVulnEquals(
 	ctx context.Context,
 	client graphql.Client,
-	vulnerabilities []VulnerabilityInputSpec,
-	otherVulnerabilities []VulnerabilityInputSpec,
+	vulnerabilities []IDorVulnerabilityInput,
+	otherVulnerabilities []IDorVulnerabilityInput,
 	vulnEquals []VulnEqualInputSpec,
 ) (*IngestVulnEqualsResponse, error) {
 	req := &graphql.Request{
@@ -26464,7 +26586,7 @@ func IngestVulnEquals(
 
 // The query or mutation executed by IngestVulnHasMetadata.
 const IngestVulnHasMetadata_Operation = `
-mutation IngestVulnHasMetadata ($vulnerability: VulnerabilityInputSpec!, $vulnMetadata: VulnerabilityMetadataInputSpec!) {
+mutation IngestVulnHasMetadata ($vulnerability: IDorVulnerabilityInput!, $vulnMetadata: VulnerabilityMetadataInputSpec!) {
 	ingestVulnerabilityMetadata(vulnerability: $vulnerability, vulnerabilityMetadata: $vulnMetadata)
 }
 `
@@ -26472,7 +26594,7 @@ mutation IngestVulnHasMetadata ($vulnerability: VulnerabilityInputSpec!, $vulnMe
 func IngestVulnHasMetadata(
 	ctx context.Context,
 	client graphql.Client,
-	vulnerability VulnerabilityInputSpec,
+	vulnerability IDorVulnerabilityInput,
 	vulnMetadata VulnerabilityMetadataInputSpec,
 ) (*IngestVulnHasMetadataResponse, error) {
 	req := &graphql.Request{
@@ -26499,7 +26621,7 @@ func IngestVulnHasMetadata(
 
 // The query or mutation executed by IngestVulnerabilities.
 const IngestVulnerabilities_Operation = `
-mutation IngestVulnerabilities ($vulns: [VulnerabilityInputSpec!]!) {
+mutation IngestVulnerabilities ($vulns: [IDorVulnerabilityInput!]!) {
 	ingestVulnerabilities(vulns: $vulns) {
 		vulnerabilityTypeID
 		vulnerabilityNodeID
@@ -26510,7 +26632,7 @@ mutation IngestVulnerabilities ($vulns: [VulnerabilityInputSpec!]!) {
 func IngestVulnerabilities(
 	ctx context.Context,
 	client graphql.Client,
-	vulns []VulnerabilityInputSpec,
+	vulns []IDorVulnerabilityInput,
 ) (*IngestVulnerabilitiesResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestVulnerabilities",
@@ -26535,7 +26657,7 @@ func IngestVulnerabilities(
 
 // The query or mutation executed by IngestVulnerability.
 const IngestVulnerability_Operation = `
-mutation IngestVulnerability ($vuln: VulnerabilityInputSpec!) {
+mutation IngestVulnerability ($vuln: IDorVulnerabilityInput!) {
 	ingestVulnerability(vuln: $vuln) {
 		vulnerabilityTypeID
 		vulnerabilityNodeID
@@ -26546,7 +26668,7 @@ mutation IngestVulnerability ($vuln: VulnerabilityInputSpec!) {
 func IngestVulnerability(
 	ctx context.Context,
 	client graphql.Client,
-	vuln VulnerabilityInputSpec,
+	vuln IDorVulnerabilityInput,
 ) (*IngestVulnerabilityResponse, error) {
 	req := &graphql.Request{
 		OpName: "IngestVulnerability",

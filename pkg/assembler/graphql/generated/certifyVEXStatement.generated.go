@@ -558,14 +558,14 @@ func (ec *executionContext) unmarshalInputPackageOrArtifactInput(ctx context.Con
 		switch k {
 		case "package":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
-			data, err := ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, v)
+			data, err := ec.unmarshalOIDorPkgInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Package = data
 		case "artifact":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-			data, err := ec.unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, v)
+			data, err := ec.unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -592,14 +592,14 @@ func (ec *executionContext) unmarshalInputPackageOrArtifactInputs(ctx context.Co
 		switch k {
 		case "packages":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packages"))
-			data, err := ec.unmarshalOPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, v)
+			data, err := ec.unmarshalOIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Packages = data
 		case "artifacts":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-			data, err := ec.unmarshalOArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, v)
+			data, err := ec.unmarshalOIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}

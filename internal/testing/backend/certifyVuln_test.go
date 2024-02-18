@@ -47,7 +47,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		CertifyVuln *model.ScanMetadataInput
 	}
 	tests := []struct {
-		InPkg        []*model.PkgInputSpec
+		InPkg        []*model.IDorPkgInput
 		Name         string
 		InVuln       []*model.VulnerabilityInputSpec
 		Calls        []call
@@ -62,7 +62,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "HappyPath",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.C1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -96,7 +96,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Certify NoVuln",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -131,7 +131,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Certify OSV",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -166,7 +166,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Certify GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -201,7 +201,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query on GHSA",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -236,7 +236,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query on Vulnerability ID",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -267,7 +267,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query ID",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -298,7 +298,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query DbURI",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -339,7 +339,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query DB Version",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -380,7 +380,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query TimeScanned",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -421,7 +421,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query ScannerURI",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -462,7 +462,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query ScannerVersion",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -503,7 +503,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query on Package",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P3},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P3}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P3,
@@ -539,7 +539,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query on Package ID",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P3},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P3}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P3,
@@ -570,7 +570,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query none",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -596,7 +596,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query No Vuln",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput},
-			InPkg:  []*model.PkgInputSpec{testdata.P2},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -631,7 +631,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query No Vuln - with novuln boolen",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.C1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -679,7 +679,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query only cve (exclude novuln) - with novuln boolen",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.C1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -736,7 +736,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 		{
 			Name:   "Query all vulns - with novuln boolean omitted",
 			InVuln: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.C1, testdata.G1},
-			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1, testdata.P1},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
 			Calls: []call{
 				{
 					Pkg:  testdata.P2,
@@ -924,7 +924,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, g := range test.InVuln {
-				if vulnIDs, err := b.IngestVulnerability(ctx, *g); err != nil {
+				if vulnIDs, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: g}); err != nil {
 					t.Fatalf("Could not ingest vulnerability: %a", err)
 				} else {
 					if test.QueryVulnID {
@@ -949,7 +949,7 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 			}
 			ids := make([]string, len(test.Calls))
 			for i, o := range test.Calls {
-				cvID, err := b.IngestCertifyVuln(ctx, *o.Pkg, *o.Vuln, *o.CertifyVuln)
+				cvID, err := b.IngestCertifyVuln(ctx, model.IDorPkgInput{PackageInput: o.Pkg}, model.IDorVulnerabilityInput{VulnerabilityInput: o.Vuln}, *o.CertifyVuln)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -989,8 +989,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
 	type call struct {
-		Pkgs         []*model.PkgInputSpec
-		Vulns        []*model.VulnerabilityInputSpec
+		Pkgs         []*model.IDorPkgInput
+		Vulns        []*model.IDorVulnerabilityInput
 		CertifyVulns []*model.ScanMetadataInput
 	}
 	tests := []struct {
@@ -1009,8 +1009,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
 							Collector:      "test collector",
@@ -1063,8 +1063,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.NoVulnInput},
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.NoVulnInput}, {VulnerabilityInput: testdata.NoVulnInput}},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
 							Collector:      "test collector",
@@ -1117,8 +1117,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{testdata.P2},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.O1},
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
 							Collector:      "test collector",
@@ -1154,8 +1154,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{testdata.P2},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.G1},
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.G1}},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
 							Collector:      "test collector",
@@ -1191,8 +1191,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.G1}, {VulnerabilityInput: testdata.G2}},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
 							Collector:      "test collector",
@@ -1237,8 +1237,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{testdata.P3, testdata.P4},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P3, testdata.P4},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P3}, {PackageInput: testdata.P4}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.G1}, {VulnerabilityInput: testdata.G2}},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
 							Collector:      "test collector",
@@ -1284,8 +1284,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.G1, testdata.G2},
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.G1}, {VulnerabilityInput: testdata.G2}},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
 							Collector:      "test collector",
@@ -1321,8 +1321,8 @@ func TestIngestCertifyVulns(t *testing.T) {
 			InPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
 			Calls: []call{
 				{
-					Pkgs:  []*model.PkgInputSpec{testdata.P2, testdata.P1},
-					Vulns: []*model.VulnerabilityInputSpec{testdata.NoVulnInput, testdata.NoVulnInput},
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.NoVulnInput}, {VulnerabilityInput: testdata.NoVulnInput}},
 					CertifyVulns: []*model.ScanMetadataInput{
 						{
 							Collector:      "test collector",
@@ -1372,11 +1372,15 @@ func TestIngestCertifyVulns(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			if _, err := b.IngestVulnerabilities(ctx, test.InVuln); err != nil {
-				t.Fatalf("Could not ingest vulnerabilities: %a", err)
+			for _, v := range test.InVuln {
+				if _, err := b.IngestVulnerability(ctx, model.IDorVulnerabilityInput{VulnerabilityInput: v}); err != nil {
+					t.Fatalf("Could not ingest vulnerabilities: %a", err)
+				}
 			}
-			if _, err := b.IngestPackages(ctx, test.InPkg); err != nil {
-				t.Fatalf("Could not ingest packages: %v", err)
+			for _, p := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
+					t.Fatalf("Could not ingest packages: %v", err)
+				}
 			}
 			for _, o := range test.Calls {
 				_, err := b.IngestCertifyVulns(ctx, o.Pkgs, o.Vulns, o.CertifyVulns)

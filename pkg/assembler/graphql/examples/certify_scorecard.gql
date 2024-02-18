@@ -58,7 +58,7 @@ query ScorecardQ4 {
   }
 }
 
-mutation Scorecard($source: SourceInputSpec!, $scorecard: ScorecardInputSpec!) {
+mutation Scorecard($source: IDorSourceInput!, $scorecard: ScorecardInputSpec!) {
   ingestSource(source: $source)
   ingestScorecard(source: $source, scorecard: $scorecard)
 }

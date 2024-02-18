@@ -175,6 +175,40 @@ func (ec *executionContext) unmarshalInputBuilderSpec(ctx context.Context, obj i
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputIDorBuilderInput(ctx context.Context, obj interface{}) (model.IDorBuilderInput, error) {
+	var it model.IDorBuilderInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"builderID", "builderInput"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "builderID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builderID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.BuilderID = data
+		case "builderInput":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builderInput"))
+			data, err := ec.unmarshalOBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.BuilderInput = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -285,21 +319,26 @@ func (ec *executionContext) marshalNBuilder2ᚖgithubᚗcomᚋguacsecᚋguacᚋp
 	return ec._Builder(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNBuilderInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx context.Context, v interface{}) (model.BuilderInputSpec, error) {
-	res, err := ec.unmarshalInputBuilderInputSpec(ctx, v)
+func (ec *executionContext) unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx context.Context, v interface{}) (model.BuilderSpec, error) {
+	res, err := ec.unmarshalInputBuilderSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNBuilderInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpecᚄ(ctx context.Context, v interface{}) ([]*model.BuilderInputSpec, error) {
+func (ec *executionContext) unmarshalNIDorBuilderInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx context.Context, v interface{}) (model.IDorBuilderInput, error) {
+	res, err := ec.unmarshalInputIDorBuilderInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNIDorBuilderInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInputᚄ(ctx context.Context, v interface{}) ([]*model.IDorBuilderInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]*model.BuilderInputSpec, len(vSlice))
+	res := make([]*model.IDorBuilderInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -307,14 +346,9 @@ func (ec *executionContext) unmarshalNBuilderInputSpec2ᚕᚖgithubᚗcomᚋguac
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx context.Context, v interface{}) (*model.BuilderInputSpec, error) {
-	res, err := ec.unmarshalInputBuilderInputSpec(ctx, v)
+func (ec *executionContext) unmarshalNIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx context.Context, v interface{}) (*model.IDorBuilderInput, error) {
+	res, err := ec.unmarshalInputIDorBuilderInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx context.Context, v interface{}) (model.BuilderSpec, error) {
-	res, err := ec.unmarshalInputBuilderSpec(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOBuilderInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderInputSpec(ctx context.Context, v interface{}) (*model.BuilderInputSpec, error) {
@@ -330,6 +364,14 @@ func (ec *executionContext) unmarshalOBuilderSpec2ᚖgithubᚗcomᚋguacsecᚋgu
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputBuilderSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOIDorBuilderInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorBuilderInput(ctx context.Context, v interface{}) (*model.IDorBuilderInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputIDorBuilderInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

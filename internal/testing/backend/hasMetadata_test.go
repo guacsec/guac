@@ -57,7 +57,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -92,7 +92,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -127,7 +127,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -154,7 +154,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
@@ -187,7 +187,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P3,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P3},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -198,7 +198,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P3,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P3},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -233,7 +233,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -246,7 +246,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -276,7 +276,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -289,7 +289,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -326,7 +326,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -337,7 +337,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -364,7 +364,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -375,7 +375,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P4,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -386,7 +386,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -416,7 +416,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P4,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -441,7 +441,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -452,7 +452,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -460,7 +460,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S2,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S2},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -488,7 +488,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S2,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S2},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -510,7 +510,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -518,7 +518,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -526,7 +526,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -554,7 +554,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -562,7 +562,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -583,7 +583,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -591,7 +591,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -613,7 +613,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -621,7 +621,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S2,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S2},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -651,7 +651,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -662,7 +662,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -673,7 +673,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Package: testdata.P4,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
@@ -708,7 +708,7 @@ func TestHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -716,7 +716,7 @@ func TestHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					HM: &model.HasMetadataInputSpec{
 						Justification: "test justification",
@@ -735,7 +735,7 @@ func TestHasMetadata(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					if test.QueryPkgID {
@@ -750,7 +750,7 @@ func TestHasMetadata(t *testing.T) {
 				}
 			}
 			for _, s := range test.InSrc {
-				if srcIDs, err := b.IngestSource(ctx, *s); err != nil {
+				if srcIDs, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				} else {
 					if test.QuerySourceID {
@@ -765,7 +765,7 @@ func TestHasMetadata(t *testing.T) {
 				}
 			}
 			for _, a := range test.InArt {
-				if artID, err := b.IngestArtifact(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					if test.QueryArtID {
@@ -832,7 +832,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -860,7 +860,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
@@ -892,7 +892,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P3, testdata.P3},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P3}, {PackageInput: testdata.P3}},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -933,7 +933,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P4},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P4}},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -949,7 +949,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Sources: []*model.SourceInputSpec{testdata.S1},
+						Sources: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 					},
 					HM: []*model.HasMetadataInputSpec{
 						{
@@ -981,7 +981,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -994,7 +994,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Sources: []*model.SourceInputSpec{testdata.S2, testdata.S2},
+						Sources: []*model.IDorSourceInput{{SourceInput: testdata.S2}, {SourceInput: testdata.S2}},
 					},
 					HM: []*model.HasMetadataInputSpec{
 						{
@@ -1027,7 +1027,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 					},
 					HM: []*model.HasMetadataInputSpec{
 						{
@@ -1040,7 +1040,7 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 				},
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Sources: []*model.SourceInputSpec{testdata.S1},
+						Sources: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 					},
 					HM: []*model.HasMetadataInputSpec{
 						{
@@ -1067,17 +1067,17 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}

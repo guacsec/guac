@@ -28,7 +28,7 @@ import (
 
 func TestIngestScorecards(t *testing.T) {
 	type call struct {
-		Src []*model.SourceInputSpec
+		Src []*model.IDorSourceInput
 		SC  []*model.ScorecardInputSpec
 	}
 	tests := []struct {
@@ -40,7 +40,7 @@ func TestIngestScorecards(t *testing.T) {
 			Name: "Ingest with two sources and one Scorecard",
 			Calls: []call{
 				{
-					Src: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+					Src: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S2}},
 					SC: []*model.ScorecardInputSpec{
 						{
 							Origin:    "test origin",
@@ -55,7 +55,7 @@ func TestIngestScorecards(t *testing.T) {
 			Name: "Happy path",
 			Calls: []call{
 				{
-					Src: []*model.SourceInputSpec{testdata.S1},
+					Src: []*model.IDorSourceInput{{SourceInput: testdata.S1}},
 					SC: []*model.ScorecardInputSpec{
 						{
 							Origin:    "test origin",

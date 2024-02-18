@@ -101,14 +101,14 @@ extend type Query {
 extend type Mutation {
   "Adds a certification that a package has been scanned for vulnerabilities. The returned ID can be empty string."
   ingestCertifyVuln(
-    pkg: PkgInputSpec!
-    vulnerability: VulnerabilityInputSpec!
+    pkg: IDorPkgInput!
+    vulnerability: IDorVulnerabilityInput!
     certifyVuln: ScanMetadataInput!
   ): ID!
   "Bulk add certifications that a package has been scanned for vulnerabilities. The returned array of IDs can be a an array of empty string."
   ingestCertifyVulns(
-    pkgs: [PkgInputSpec!]!
-    vulnerabilities: [VulnerabilityInputSpec!]!
+    pkgs: [IDorPkgInput!]!
+    vulnerabilities: [IDorVulnerabilityInput!]!
     certifyVulns: [ScanMetadataInput!]!
   ): [ID!]!
 }

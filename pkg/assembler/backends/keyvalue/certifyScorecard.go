@@ -69,7 +69,7 @@ func (n *scorecardLink) BuildModelNode(ctx context.Context, c *demoClient) (mode
 
 // Ingest Scorecards
 
-func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	var modelCertifyScorecards []string
 	for i := range scorecards {
 		scorecard, err := c.IngestScorecard(ctx, *sources[i], *scorecards[i])
@@ -82,11 +82,11 @@ func (c *demoClient) IngestScorecards(ctx context.Context, sources []*model.Sour
 }
 
 // Ingest CertifyScorecard
-func (c *demoClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+func (c *demoClient) IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error) {
 	return c.certifyScorecard(ctx, source, scorecard, true)
 }
 
-func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) certifyScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec, readOnly bool) (string, error) {
 	funcName := "CertifyScorecard"
 
 	checksMap := getChecksFromInput(scorecard.Checks)
@@ -103,11 +103,11 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.SourceIn
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	srcName, err := c.getSourceNameFromInput(ctx, source)
+	srcName, err := c.returnFoundSource(ctx, &source)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	in.SourceID = srcName.ThisID
+	in.SourceID = srcName.ID()
 
 	out, err := byKeykv[*scorecardLink](ctx, cscCol, in.Key(), c)
 	if err == nil {

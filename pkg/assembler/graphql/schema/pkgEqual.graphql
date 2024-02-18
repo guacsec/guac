@@ -60,14 +60,14 @@ extend type Query {
 extend type Mutation {
   "Adds a certification that two packages are similar. The returned ID can be empty string."
   ingestPkgEqual(
-    pkg: PkgInputSpec!
-    otherPackage: PkgInputSpec!
+    pkg: IDorPkgInput!
+    otherPackage: IDorPkgInput!
     pkgEqual: PkgEqualInputSpec!
   ): ID!
   "Bulk ingest mapping between packages. The returned array of IDs can be a an array of empty string."
   ingestPkgEquals(
-    pkgs: [PkgInputSpec!]!
-    otherPackages: [PkgInputSpec!]!
+    pkgs: [IDorPkgInput!]!
+    otherPackages: [IDorPkgInput!]!
     pkgEquals: [PkgEqualInputSpec!]!
   ): [ID!]!
 }

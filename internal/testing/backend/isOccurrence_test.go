@@ -58,7 +58,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -84,7 +84,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -93,7 +93,7 @@ func TestOccurrence(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -119,7 +119,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -128,7 +128,7 @@ func TestOccurrence(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -154,7 +154,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A4,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -163,7 +163,7 @@ func TestOccurrence(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A2,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -192,7 +192,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A2,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -201,7 +201,7 @@ func TestOccurrence(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A4,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -225,7 +225,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P4,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -234,7 +234,7 @@ func TestOccurrence(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -264,7 +264,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -273,7 +273,7 @@ func TestOccurrence(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P4,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -298,7 +298,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -307,7 +307,7 @@ func TestOccurrence(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -336,7 +336,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -345,7 +345,7 @@ func TestOccurrence(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -369,7 +369,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -390,7 +390,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -414,7 +414,7 @@ func TestOccurrence(t *testing.T) {
 			Calls: []call{
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P4,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 					},
 					Artifact: testdata.A1,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -423,7 +423,7 @@ func TestOccurrence(t *testing.T) {
 				},
 				{
 					PkgSrc: model.PackageOrSourceInput{
-						Package: testdata.P4,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 					},
 					Artifact: testdata.A2,
 					Occurrence: &model.IsOccurrenceInputSpec{
@@ -456,7 +456,7 @@ func TestOccurrence(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					if test.QueryPkgID {
@@ -471,7 +471,7 @@ func TestOccurrence(t *testing.T) {
 				}
 			}
 			for _, s := range test.InSrc {
-				if srcIDs, err := b.IngestSource(ctx, *s); err != nil {
+				if srcIDs, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				} else {
 					if test.QuerySourceID {
@@ -486,7 +486,7 @@ func TestOccurrence(t *testing.T) {
 				}
 			}
 			for _, a := range test.InArt {
-				if artID, err := b.IngestArtifact(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					if test.QueryArtID {
@@ -500,7 +500,7 @@ func TestOccurrence(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				ocurID, err := b.IngestOccurrence(ctx, o.PkgSrc, *o.Artifact, *o.Occurrence)
+				ocurID, err := b.IngestOccurrence(ctx, o.PkgSrc, model.IDorArtifactInput{ArtifactInput: o.Artifact}, *o.Occurrence)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -532,7 +532,7 @@ func TestIngestOccurrences(t *testing.T) {
 	b := setupTest(t)
 	type call struct {
 		PkgSrcs     model.PackageOrSourceInputs
-		Artifacts   []*model.ArtifactInputSpec
+		Artifacts   []*model.IDorArtifactInput
 		Occurrences []*model.IsOccurrenceInputSpec
 	}
 	tests := []struct {
@@ -551,9 +551,9 @@ func TestIngestOccurrences(t *testing.T) {
 		Calls: []call{
 			{
 				PkgSrcs: model.PackageOrSourceInputs{
-					Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+					Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 				},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 				Occurrences: []*model.IsOccurrenceInputSpec{{
 					Justification: "test justification",
 				}, {
@@ -575,9 +575,9 @@ func TestIngestOccurrences(t *testing.T) {
 		Calls: []call{
 			{
 				PkgSrcs: model.PackageOrSourceInputs{
-					Sources: []*model.SourceInputSpec{testdata.S1},
+					Sources: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 				},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 				Occurrences: []*model.IsOccurrenceInputSpec{{
 					Justification: "test justification",
 				}},
@@ -594,17 +594,17 @@ func TestIngestOccurrences(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}

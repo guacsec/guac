@@ -32,11 +32,11 @@ func TestIngestSources(t *testing.T) {
 	b := setupTest(t)
 	tests := []struct {
 		name      string
-		srcInputs []*model.SourceInputSpec
+		srcInputs []*model.IDorSourceInput
 		wantErr   bool
 	}{{
 		name:      "test batch source ingestion",
-		srcInputs: []*model.SourceInputSpec{testdata.S3, testdata.S4},
+		srcInputs: []*model.IDorSourceInput{{SourceInput: testdata.S3}, {SourceInput: testdata.S4}},
 		wantErr:   false,
 	}}
 	for _, tt := range tests {
@@ -105,7 +105,7 @@ func TestSources(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ingestedSrcIDs, err := b.IngestSource(ctx, *tt.srcInput)
+			ingestedSrcIDs, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: tt.srcInput})
 			if (err != nil) != tt.wantErr {
 				t.Errorf("IngestSource() error = %v, wantErr %v", err, tt.wantErr)
 				return

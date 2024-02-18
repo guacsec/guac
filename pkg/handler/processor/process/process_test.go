@@ -41,32 +41,32 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 		doc       processor.Document
 		expected  processor.DocumentTree
 		expectErr bool
-	}{{
-
-		name: "simple test",
-		doc: processor.Document{
-			Blob: []byte(`{
+	}{
+		{
+			name: "simple test",
+			doc: processor.Document{
+				Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expected: dochelper.DocNode(&processor.Document{
-			Blob: []byte(`{
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expected: dochelper.DocNode(&processor.Document{
+				Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		}),
-	}, {
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			}),
+		}, {
 
-		name: "unpack test",
-		doc: processor.Document{
-			Blob: []byte(`{
+			name: "unpack test",
+			doc: processor.Document{
+				Blob: []byte(`{
 						 "issuer": "google.com",
 						 "info": "this is a cool document",
 						 "nested": [{
@@ -77,13 +77,13 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 							 "info": "this is a cooler nested doc 2"
 						 }]
 						}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expected: dochelper.DocNode(
-			&processor.Document{ //root
-				Blob: []byte(`{
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expected: dochelper.DocNode(
+				&processor.Document{ //root
+					Blob: []byte(`{
                            "issuer": "google.com",
                            "info": "this is a cool document",
                            "nested": [{
@@ -94,33 +94,33 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                                "info": "this is a cooler nested doc 2"
                            }]
                           }`),
-				Type:              simpledoc.SimpleDocType,
-				Format:            processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{},
-			},
-			dochelper.DocNode(&processor.Document{ // child 1
-				Blob: []byte(`{
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				},
+				dochelper.DocNode(&processor.Document{ // child 1
+					Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cooler nested doc 1"
 					}`),
-				Type:              simpledoc.SimpleDocType,
-				Format:            processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{},
-			}),
-			dochelper.DocNode(&processor.Document{ //child 2
-				Blob: []byte(`{
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				}),
+				dochelper.DocNode(&processor.Document{ //child 2
+					Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cooler nested doc 2"
 					}`),
-				Type:              simpledoc.SimpleDocType,
-				Format:            processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{},
-			})),
-	}, {
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				})),
+		}, {
 
-		name: "unpack twice test",
-		doc: processor.Document{
-			Blob: []byte(`{
+			name: "unpack twice test",
+			doc: processor.Document{
+				Blob: []byte(`{
 						 "issuer": "google.com",
 						 "info": "this is a cool document",
 						 "nested": [{
@@ -139,13 +139,13 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 							 }]
 						 }]
 						}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expected: dochelper.DocNode(
-			&processor.Document{ // root
-				Blob: []byte(`{
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expected: dochelper.DocNode(
+				&processor.Document{ // root
+					Blob: []byte(`{
                            "issuer": "google.com",
                            "info": "this is a cool document",
                            "nested": [{
@@ -164,12 +164,12 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                                }]
                            }]
                           }`),
-				Type:              simpledoc.SimpleDocType,
-				Format:            processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{},
-			},
-			dochelper.DocNode(&processor.Document{
-				Blob: []byte(`{
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				},
+				dochelper.DocNode(&processor.Document{
+					Blob: []byte(`{
 							"issuer": "google.com",
 							 "info": "this is a cooler nested doc 1",
 							 "nested": [{
@@ -177,21 +177,21 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 							   "info": "this is a cooler nested doc 3"
 							 }]
 							 }`),
-				Type:              simpledoc.SimpleDocType,
-				Format:            processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{},
-			},
-				dochelper.DocNode(&processor.Document{
-					Blob: []byte(`{
-                        "issuer": "google.com",
-                        "info": "this is a cooler nested doc 3"
-                    }`),
 					Type:              simpledoc.SimpleDocType,
 					Format:            processor.FormatJSON,
 					SourceInformation: processor.SourceInformation{},
-				})),
-			dochelper.DocNode(&processor.Document{
-				Blob: []byte(`{
+				},
+					dochelper.DocNode(&processor.Document{
+						Blob: []byte(`{
+                        "issuer": "google.com",
+                        "info": "this is a cooler nested doc 3"
+                    }`),
+						Type:              simpledoc.SimpleDocType,
+						Format:            processor.FormatJSON,
+						SourceInformation: processor.SourceInformation{},
+					})),
+				dochelper.DocNode(&processor.Document{
+					Blob: []byte(`{
                               "issuer": "google.com",
                                "info": "this is a cooler nested doc 2",
                                "nested": [{
@@ -199,24 +199,24 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                                  "info": "this is a cooler nested doc 4"
                                }]
                                }`),
-				Type:              simpledoc.SimpleDocType,
-				Format:            processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{},
-			},
-				dochelper.DocNode(&processor.Document{
-					Blob: []byte(`{
-                        "issuer": "google.com",
-                        "info": "this is a cooler nested doc 4"
-                    }`),
 					Type:              simpledoc.SimpleDocType,
 					Format:            processor.FormatJSON,
 					SourceInformation: processor.SourceInformation{},
-				}))),
-	}, {
+				},
+					dochelper.DocNode(&processor.Document{
+						Blob: []byte(`{
+                        "issuer": "google.com",
+                        "info": "this is a cooler nested doc 4"
+                    }`),
+						Type:              simpledoc.SimpleDocType,
+						Format:            processor.FormatJSON,
+						SourceInformation: processor.SourceInformation{},
+					}))),
+		}, {
 
-		name: "unpack assymetric test",
-		doc: processor.Document{
-			Blob: []byte(`{
+			name: "unpack assymetric test",
+			doc: processor.Document{
+				Blob: []byte(`{
 				 "issuer": "google.com",
 				 "info": "this is a cool document",
 				 "nested": [{
@@ -231,13 +231,13 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 					 }]
 				 }]
 				}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expected: dochelper.DocNode(
-			&processor.Document{ //root
-				Blob: []byte(`{
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expected: dochelper.DocNode(
+				&processor.Document{ //root
+					Blob: []byte(`{
                    "issuer": "google.com",
                    "info": "this is a cool document",
                    "nested": [{
@@ -252,21 +252,21 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                        }]
                    }]
                   }`),
-				Type:              simpledoc.SimpleDocType,
-				Format:            processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{},
-			},
-			dochelper.DocNode(&processor.Document{ // child 1
-				Blob: []byte(`{
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				},
+				dochelper.DocNode(&processor.Document{ // child 1
+					Blob: []byte(`{
 				"issuer": "google.com",
 				"info": "this is a cooler nested doc 1"
 			}`),
-				Type:              simpledoc.SimpleDocType,
-				Format:            processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{},
-			}),
-			dochelper.DocNode(&processor.Document{ // child 2
-				Blob: []byte(`{
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				}),
+				dochelper.DocNode(&processor.Document{ // child 2
+					Blob: []byte(`{
 				"issuer": "google.com",
 				"info": "this is a cooler nested doc 2",
 				"nested": [{
@@ -274,131 +274,131 @@ func Test_SimpleDocProcessTest(t *testing.T) {
 				   "info": "this is a cooler nested doc 4"
 				 }]
 				}`),
+					Type:              simpledoc.SimpleDocType,
+					Format:            processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{},
+				},
+					dochelper.DocNode(&processor.Document{ // child 2.1
+						Blob: []byte(`{
+                  "issuer": "google.com",
+                  "info": "this is a cooler nested doc 4"
+                  }`),
+						Type:              simpledoc.SimpleDocType,
+						Format:            processor.FormatJSON,
+						SourceInformation: processor.SourceInformation{},
+					})),
+			),
+		}, {
+
+			name: "bad format",
+			doc: processor.Document{
+				Blob: []byte(`{ NOT JSON YO
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
 				Type:              simpledoc.SimpleDocType,
 				Format:            processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{},
 			},
-				dochelper.DocNode(&processor.Document{ // child 2.1
-					Blob: []byte(`{
-                  "issuer": "google.com",
-                  "info": "this is a cooler nested doc 4"
-                  }`),
-					Type:              simpledoc.SimpleDocType,
-					Format:            processor.FormatJSON,
-					SourceInformation: processor.SourceInformation{},
-				})),
-		),
-	}, {
+			expectErr: true,
+		}, {
 
-		name: "bad format",
-		doc: processor.Document{
-			Blob: []byte(`{ NOT JSON YO
+			name: "bad format type",
+			doc: processor.Document{
+				Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectErr: true,
-	}, {
+				Type:              simpledoc.SimpleDocType,
+				Format:            "invalid-format",
+				SourceInformation: processor.SourceInformation{},
+			},
+			expectErr: true,
+		}, {
 
-		name: "bad format type",
-		doc: processor.Document{
-			Blob: []byte(`{
-						"issuer": "google.com",
-						"info": "this is a cool document"
-					}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            "invalid-format",
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectErr: true,
-	}, {
-
-		name: "bad document schema",
-		doc: processor.Document{
-			// simpledoc requires issuer
-			Blob: []byte(`{
+			name: "bad document schema",
+			doc: processor.Document{
+				// simpledoc requires issuer
+				Blob: []byte(`{
                         "info": "this is a cool document"
                     }`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectErr: true,
-	}, {
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expectErr: true,
+		}, {
 
-		name: "bad schema type",
-		doc: processor.Document{
-			Blob: []byte(`{
+			name: "bad schema type",
+			doc: processor.Document{
+				Blob: []byte(`{
                         "issuer": "google.com",
                         "info": "this is a cool document"
                     }`),
-			Type:              "invalid-document-type",
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectErr: true,
-	}, {
+				Type:              "invalid-document-type",
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expectErr: true,
+		}, {
 
-		name: "unknown format",
-		doc: processor.Document{
-			Blob: []byte(`{ NOT JSON YO
+			name: "unknown format",
+			doc: processor.Document{
+				Blob: []byte(`{ NOT JSON YO
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:              processor.DocumentUnknown,
-			Format:            processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectErr: true,
-	}, {
+				Type:              processor.DocumentUnknown,
+				Format:            processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expectErr: true,
+		}, {
 
-		name: "unknown document",
-		doc: processor.Document{
-			Blob: []byte(`{
+			name: "unknown document",
+			doc: processor.Document{
+				Blob: []byte(`{
 						"abc": "def"
 					}`),
-			Type:              processor.DocumentUnknown,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expectErr: true,
-	}, {
+				Type:              processor.DocumentUnknown,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expectErr: true,
+		}, {
 
-		// misc
-		name: "propagate source info",
-		doc: processor.Document{
-			Blob: []byte(`{
+			// misc
+			name: "propagate source info",
+			doc: processor.Document{
+				Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{
-				Collector: "a-collector",
-				Source:    "a-source",
+				Type:   simpledoc.SimpleDocType,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: "a-collector",
+					Source:    "a-source",
+				},
 			},
-		},
-		expected: dochelper.DocNode(&processor.Document{
-			Blob: []byte(`{
+			expected: dochelper.DocNode(&processor.Document{
+				Blob: []byte(`{
 						"issuer": "google.com",
 						"info": "this is a cool document"
 					}`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{
-				Collector: "a-collector",
-				Source:    "a-source",
-			},
-		}),
-	}, {
+				Type:   simpledoc.SimpleDocType,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: "a-collector",
+					Source:    "a-source",
+				},
+			}),
+		}, {
 
-		// misc
-		name: "propagate nested source info",
-		doc: processor.Document{
-			Blob: []byte(`{
+			// misc
+			name: "propagate nested source info",
+			doc: processor.Document{
+				Blob: []byte(`{
                          "issuer": "google.com",
                          "info": "this is a cool document",
                          "nested": [{
@@ -409,16 +409,16 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                              "info": "this is a cooler nested doc 2"
                          }]
                         }`),
-			Type:   simpledoc.SimpleDocType,
-			Format: processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{
-				Collector: "a-collector",
-				Source:    "a-source",
+				Type:   simpledoc.SimpleDocType,
+				Format: processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{
+					Collector: "a-collector",
+					Source:    "a-source",
+				},
 			},
-		},
-		expected: dochelper.DocNode(
-			&processor.Document{ //root
-				Blob: []byte(`{
+			expected: dochelper.DocNode(
+				&processor.Document{ //root
+					Blob: []byte(`{
                            "issuer": "google.com",
                            "info": "this is a cool document",
                            "nested": [{
@@ -429,82 +429,100 @@ func Test_SimpleDocProcessTest(t *testing.T) {
                                "info": "this is a cooler nested doc 2"
                            }]
                           }`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: "a-collector",
-					Source:    "a-source",
+					Type:   simpledoc.SimpleDocType,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: "a-collector",
+						Source:    "a-source",
+					},
 				},
-			},
-			dochelper.DocNode(&processor.Document{ //child 1
-				Blob: []byte(`{
+				dochelper.DocNode(&processor.Document{ //child 1
+					Blob: []byte(`{
                         "issuer": "google.com",
                         "info": "this is a cooler nested doc 1"
                     }`),
-				Type:   simpledoc.SimpleDocType,
-				Format: processor.FormatJSON,
-				SourceInformation: processor.SourceInformation{
-					Collector: "a-collector",
-					Source:    "a-source",
-				},
-			}),
-			dochelper.DocNode(&processor.Document{ //child 2
-				Blob: []byte(`{
+					Type:   simpledoc.SimpleDocType,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: "a-collector",
+						Source:    "a-source",
+					},
+				}),
+				dochelper.DocNode(&processor.Document{ //child 2
+					Blob: []byte(`{
                         "issuer": "google.com",
                         "info": "this is a cooler nested doc 2"
                     }`),
-				Type:   simpledoc.SimpleDocType,
+					Type:   simpledoc.SimpleDocType,
+					Format: processor.FormatJSON,
+					SourceInformation: processor.SourceInformation{
+						Collector: "a-collector",
+						Source:    "a-source",
+					},
+				})),
+		}, {
+
+			// preprocessor tests
+			name: "preprocessor on format JSON",
+			doc: processor.Document{
+				Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expected: dochelper.DocNode(&processor.Document{
+				Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			}),
+		}, {
+
+			name: "preprocessor on simpledoc",
+			doc: processor.Document{
+				Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+				Type:              processor.DocumentUnknown,
+				Format:            processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{},
+			},
+			expected: dochelper.DocNode(&processor.Document{
+				Blob: []byte(`{
+						"issuer": "google.com",
+						"info": "this is a cool document"
+					}`),
+				Type:              simpledoc.SimpleDocType,
+				Format:            processor.FormatJSON,
+				SourceInformation: processor.SourceInformation{},
+			}),
+		}, {
+			name: "JsonBz2Ingestion",
+			doc: processor.Document{
+				Blob:   testdata.CycloneDXBz2Example,
+				Type:   processor.DocumentCycloneDX,
 				Format: processor.FormatJSON,
 				SourceInformation: processor.SourceInformation{
-					Collector: "a-collector",
-					Source:    "a-source",
+					Source: "exampledata/busybox-cyclonedx.json.bz2",
 				},
-			})),
-	}, {
-
-		// preprocessor tests
-		name: "preprocessor on format JSON",
-		doc: processor.Document{
-			Blob: []byte(`{
-						"issuer": "google.com",
-						"info": "this is a cool document"
-					}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expected: dochelper.DocNode(&processor.Document{
-			Blob: []byte(`{
-						"issuer": "google.com",
-						"info": "this is a cool document"
-					}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		}),
-	}, {
-
-		name: "preprocessor on simpledoc",
-		doc: processor.Document{
-			Blob: []byte(`{
-						"issuer": "google.com",
-						"info": "this is a cool document"
-					}`),
-			Type:              processor.DocumentUnknown,
-			Format:            processor.FormatUnknown,
-			SourceInformation: processor.SourceInformation{},
-		},
-		expected: dochelper.DocNode(&processor.Document{
-			Blob: []byte(`{
-						"issuer": "google.com",
-						"info": "this is a cool document"
-					}`),
-			Type:              simpledoc.SimpleDocType,
-			Format:            processor.FormatJSON,
-			SourceInformation: processor.SourceInformation{},
-		}),
-	},
-	}
+			},
+			expected: dochelper.DocNode(&processor.Document{
+				Blob:     testdata.CycloneDXBusyboxExample,
+				Type:     processor.DocumentCycloneDX,
+				Format:   processor.FormatJSON,
+				Encoding: processor.EncodingBzip2,
+				SourceInformation: processor.SourceInformation{
+					Source: "exampledata/busybox-cyclonedx.json.bz2",
+				},
+			}),
+		}}
 
 	// Register
 	err := RegisterDocumentProcessor(&simpledoc.SimpleDocProc{}, simpledoc.SimpleDocType)

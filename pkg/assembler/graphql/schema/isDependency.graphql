@@ -81,17 +81,17 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Adds a dependency between two packages. The returned ID can be empty string."
+  "Adds a dependency between two packages. The returned ID cannot be empty string as its used by hasSBOM."
   ingestDependency(
-    pkg: PkgInputSpec!
-    depPkg: PkgInputSpec!
+    pkg: IDorPkgInput!
+    depPkg: IDorPkgInput!
     depPkgMatchType: MatchFlags!
     dependency: IsDependencyInputSpec!
   ): ID!
-  "Bulk adds a dependency between two packages. The returned array of IDs can be a an array of empty string."
+  "Bulk adds a dependency between two packages. The returned array of IDs cannot be an empty string as its used by hasSBOM."
   ingestDependencies(
-    pkgs: [PkgInputSpec!]!
-    depPkgs: [PkgInputSpec!]!
+    pkgs: [IDorPkgInput!]!
+    depPkgs: [IDorPkgInput!]!
     depPkgMatchType: MatchFlags!
     dependencies: [IsDependencyInputSpec!]!
   ): [ID!]!

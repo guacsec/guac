@@ -126,7 +126,7 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 
 	switch {
 	case subject.Artifact != nil:
-		art, err := client.Artifact.Query().Where(artifactQueryInputPredicates(*subject.Artifact)).Only(ctx)
+		art, err := client.Artifact.Query().Where(artifactQueryInputPredicates(*subject.Artifact.ArtifactInput)).Only(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve subject artifact :: %s", err)
 		}
@@ -141,7 +141,7 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 
 	case subject.Package != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			pv, err := getPkgVersion(ctx, client.Client(), *subject.Package)
+			pv, err := getPkgVersion(ctx, client.Client(), *subject.Package.PackageInput)
 			if err != nil {
 				return nil, fmt.Errorf("failed to retrieve subject package version :: %s", err)
 			}
@@ -154,7 +154,7 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 				sql.IsNull(pointofcontact.FieldSourceID),
 			)
 		} else {
-			pn, err := getPkgName(ctx, client.Client(), *subject.Package)
+			pn, err := getPkgName(ctx, client.Client(), *subject.Package.PackageInput)
 			if err != nil {
 				return nil, fmt.Errorf("failed to retrieve subject package name :: %s", err)
 			}
@@ -169,7 +169,7 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 		}
 
 	case subject.Source != nil:
-		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source)
+		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source.SourceInput)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve subject source :: %s", err)
 		}
@@ -237,18 +237,18 @@ func pointOfContactInputPredicate(subject model.PackageSourceOrArtifactInput, pk
 	var subjectSpec *model.PackageSourceOrArtifactSpec
 	if subject.Package != nil {
 		if pkgMatchType != nil && pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-			subject.Package.Version = nil
+			subject.Package.PackageInput.Version = nil
 		}
 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package),
+			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
 		}
 	} else if subject.Artifact != nil {
 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact),
+			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
 		}
 	} else {
 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source),
+			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
 		}
 	}
 	return pointOfContactPredicate(&model.PointOfContactSpec{

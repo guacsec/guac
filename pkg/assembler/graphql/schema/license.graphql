@@ -71,6 +71,18 @@ input LicenseInputSpec {
   listVersion: String
 }
 
+"""
+IDorLicenseInput allows for specifying either the license ID or the LicenseInputSpec.
+
+Either the ID or the LicenseInputSpec must be specified. Both cannot be nil.
+
+If the ID is specified, the LicenseInputSpec is not used.
+"""
+input IDorLicenseInput {
+  licenseID: ID
+  licenseInput: LicenseInputSpec
+}
+
 extend type Query {
   "Returns all licenses matching a filter."
   licenses(licenseSpec: LicenseSpec!): [License!]!
@@ -78,7 +90,7 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new license and returns it."
-  ingestLicense(license: LicenseInputSpec): ID!
-  "Bulk ingests new licenses and returns a list of them."
-  ingestLicenses(licenses: [LicenseInputSpec!]!): [ID!]!
+  ingestLicense(license: IDorLicenseInput): ID!
+  "Bulk ingests new licenses and returns a list of them. The returned array of IDs must be in the same order as the inputs."
+  ingestLicenses(licenses: [IDorLicenseInput!]!): [ID!]!
 }

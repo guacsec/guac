@@ -69,7 +69,7 @@ func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalS
 	return collect(records, toModelCertifyLegal), nil
 }
 
-func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
+func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 	modelCertifyLegals := make([]string, len(certifyLegals))
 	eg, ctx := errgroup.WithContext(ctx)
 	for i := range certifyLegals {
@@ -97,7 +97,7 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 	return modelCertifyLegals, nil
 }
 
-func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, spec *model.CertifyLegalInputSpec) (string, error) {
+func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, spec *model.CertifyLegalInputSpec) (string, error) {
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		tx := ent.TxFromContext(ctx)
@@ -127,7 +127,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
-			pkgVersion, err := getPkgVersion(ctx, client, *subject.Package)
+			pkgVersion, err := getPkgVersion(ctx, client, *subject.Package.PackageInput)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get package version")
 			}
@@ -138,7 +138,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 				sql.IsNull(certifylegal.FieldSourceID),
 			)
 		} else if subject.Source != nil {
-			srcNameID, err := getSourceNameID(ctx, client, *subject.Source)
+			srcNameID, err := getSourceNameID(ctx, client, *subject.Source.SourceInput)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get source name ID")
 			}
@@ -152,7 +152,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 
 		declaredLicenseIDs := make([]int, len(declaredLicenses))
 		for i := range declaredLicenses {
-			licenseID, err := getLicenseID(ctx, client, *declaredLicenses[i])
+			licenseID, err := getLicenseID(ctx, client, *declaredLicenses[i].LicenseInput)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get license ID")
 			}
@@ -163,7 +163,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 
 		discoveredLicenseIDs := make([]int, len(discoveredLicenses))
 		for i := range discoveredLicenses {
-			licenseID, err := getLicenseID(ctx, client, *discoveredLicenses[i])
+			licenseID, err := getLicenseID(ctx, client, *discoveredLicenses[i].LicenseInput)
 			if err != nil {
 				return nil, err
 			}
@@ -293,15 +293,15 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 	return certifylegal.And(predicates...)
 }
 
-func certifyLegalInputQuery(subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, filter model.CertifyLegalInputSpec) predicate.CertifyLegal {
+func certifyLegalInputQuery(subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, filter model.CertifyLegalInputSpec) predicate.CertifyLegal {
 	var subjectSpec *model.PackageOrSourceSpec
 	if subject.Package != nil {
 		subjectSpec = &model.PackageOrSourceSpec{
-			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package),
+			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
 		}
 	} else {
 		subjectSpec = &model.PackageOrSourceSpec{
-			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source),
+			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
 		}
 	}
 	declaredLicenseSpecs := collect(declaredLicenses, helper.ConvertLicenseInputSpecToLicenseSpec)

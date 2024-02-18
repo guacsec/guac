@@ -110,14 +110,28 @@ input SourceInputSpec {
   commit: String = ""
 }
 
+"""
+IDorSourceInput allows for specifying either the source IDs or the SourceInputSpec.
+
+Either the IDs or the SourceInputSpec must be specified. Both cannot be nil.
+
+If the IDs are specified, the SourceInputSpec is not used.
+"""
+input IDorSourceInput {
+  sourceTypeID: ID
+  sourceNamespaceID: ID
+  sourceNameID: ID
+  sourceInput: SourceInputSpec
+}
+
 extend type Query {
   "Returns all sources matching a filter."
   sources(sourceSpec: SourceSpec!): [Source!]!
 }
 
 extend type Mutation {
-  "Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string."
-  ingestSource(source: SourceInputSpec!): SourceIDs!
-  "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string."
-  ingestSources(sources: [SourceInputSpec!]!): [SourceIDs!]!
+  "Ingests a new source and returns the corresponding source trie path."
+  ingestSource(source: IDorSourceInput!): SourceIDs!
+  "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs must be in the same order as the inputs."
+  ingestSources(sources: [IDorSourceInput!]!): [SourceIDs!]!
 }

@@ -596,6 +596,72 @@ type HashEqualSpec struct {
 	Collector     *string         `json:"collector,omitempty"`
 }
 
+// IDorArtifactInput allows for specifying either the artifact ID or the ArtifactInputSpec.
+//
+// Either the ID or the ArtifactInputSpec must be specified. Both cannot be nil.
+//
+// If the ID is specified, the ArtifactInputSpec is not used.
+type IDorArtifactInput struct {
+	ArtifactID    *string            `json:"artifactID,omitempty"`
+	ArtifactInput *ArtifactInputSpec `json:"artifactInput,omitempty"`
+}
+
+// IDorBuilderInput allows for specifying either the builder ID or the BuilderInputSpec.
+//
+// Either the ID or the BuilderInputSpec must be specified. Both cannot be nil.
+//
+// If the ID is specified, the BuilderInputSpec is not used.
+type IDorBuilderInput struct {
+	BuilderID    *string           `json:"builderID,omitempty"`
+	BuilderInput *BuilderInputSpec `json:"builderInput,omitempty"`
+}
+
+// IDorLicenseInput allows for specifying either the license ID or the LicenseInputSpec.
+//
+// Either the ID or the LicenseInputSpec must be specified. Both cannot be nil.
+//
+// If the ID is specified, the LicenseInputSpec is not used.
+type IDorLicenseInput struct {
+	LicenseID    *string           `json:"licenseID,omitempty"`
+	LicenseInput *LicenseInputSpec `json:"licenseInput,omitempty"`
+}
+
+// IDorPkgInput allows for specifying either the package IDs or the PkgInputSpec.
+//
+// Either the IDs or the PkgInputSpec must be specified. Both cannot be nil.
+//
+// If the IDs are specified, the PkgInputSpec is not used.
+type IDorPkgInput struct {
+	PackageTypeID      *string       `json:"packageTypeID,omitempty"`
+	PackageNamespaceID *string       `json:"packageNamespaceID,omitempty"`
+	PackageNameID      *string       `json:"packageNameID,omitempty"`
+	PackageVersionID   *string       `json:"packageVersionID,omitempty"`
+	PackageInput       *PkgInputSpec `json:"packageInput,omitempty"`
+}
+
+// IDorSourceInput allows for specifying either the source IDs or the SourceInputSpec.
+//
+// Either the IDs or the SourceInputSpec must be specified. Both cannot be nil.
+//
+// If the IDs are specified, the SourceInputSpec is not used.
+type IDorSourceInput struct {
+	SourceTypeID      *string          `json:"sourceTypeID,omitempty"`
+	SourceNamespaceID *string          `json:"sourceNamespaceID,omitempty"`
+	SourceNameID      *string          `json:"sourceNameID,omitempty"`
+	SourceInput       *SourceInputSpec `json:"sourceInput,omitempty"`
+}
+
+// IDorVulnerabilityInput allows for specifying either the vulnerability IDs or the VulnerabilityInputSpec.
+//
+// Either the IDs or the VulnerabilityInputSpec must be specified. Both cannot be nil.
+//
+// If the IDs are specified, the VulnerabilityInputSpec is not used.
+type IDorVulnerabilityInput struct {
+	VulnerabilityTypeID *string                 `json:"vulnerabilityTypeID,omitempty"`
+	VulnerabilityNodeID *string                 `json:"vulnerabilityNodeID,omitempty"`
+	VulnerabilityInput  *VulnerabilityInputSpec `json:"vulnerabilityInput,omitempty"`
+}
+
 // IsDependency is an attestation to record that a package depends on another.
 type IsDependency struct {
 	ID string `json:"id"`
@@ -736,6 +802,9 @@ type MatchFlags struct {
 	Pkg PkgMatchType `json:"pkg"`
 }
 
+type Mutation struct {
+}
+
 // Package represents the root of the package trie/tree.
 //
 // We map package information to a trie, closely matching the pURL specification
@@ -805,15 +874,15 @@ type PackageNamespace struct {
 //
 // Exactly one of the value must be set to non-nil.
 type PackageOrArtifactInput struct {
-	Package  *PkgInputSpec      `json:"package,omitempty"`
-	Artifact *ArtifactInputSpec `json:"artifact,omitempty"`
+	Package  *IDorPkgInput      `json:"package,omitempty"`
+	Artifact *IDorArtifactInput `json:"artifact,omitempty"`
 }
 
 // PackageOrArtifactInputs allows using packages and artifacts as input for batch mutations.
 // Exactly one list must be specified.
 type PackageOrArtifactInputs struct {
-	Packages  []*PkgInputSpec      `json:"packages,omitempty"`
-	Artifacts []*ArtifactInputSpec `json:"artifacts,omitempty"`
+	Packages  []*IDorPkgInput      `json:"packages,omitempty"`
+	Artifacts []*IDorArtifactInput `json:"artifacts,omitempty"`
 }
 
 // PackageOrArtifactSpec allows using PackageOrArtifact union as
@@ -829,15 +898,15 @@ type PackageOrArtifactSpec struct {
 //
 // Exactly one field must be specified.
 type PackageOrSourceInput struct {
-	Package *PkgInputSpec    `json:"package,omitempty"`
-	Source  *SourceInputSpec `json:"source,omitempty"`
+	Package *IDorPkgInput    `json:"package,omitempty"`
+	Source  *IDorSourceInput `json:"source,omitempty"`
 }
 
 // PackageOrSourceInputs allows using packages and sources as input for batch mutations.
 // Exactly one list must be specified.
 type PackageOrSourceInputs struct {
-	Packages []*PkgInputSpec    `json:"packages,omitempty"`
-	Sources  []*SourceInputSpec `json:"sources,omitempty"`
+	Packages []*IDorPkgInput    `json:"packages,omitempty"`
+	Sources  []*IDorSourceInput `json:"sources,omitempty"`
 }
 
 // PackageOrSourceSpec allows using PackageOrSource union as input for queries.
@@ -885,9 +954,9 @@ type PackageQualifierSpec struct {
 //
 // Exactly one of the value must be set to non-nil.
 type PackageSourceOrArtifactInput struct {
-	Package  *PkgInputSpec      `json:"package,omitempty"`
-	Source   *SourceInputSpec   `json:"source,omitempty"`
-	Artifact *ArtifactInputSpec `json:"artifact,omitempty"`
+	Package  *IDorPkgInput      `json:"package,omitempty"`
+	Source   *IDorSourceInput   `json:"source,omitempty"`
+	Artifact *IDorArtifactInput `json:"artifact,omitempty"`
 }
 
 // PackageSourceOrArtifactInputs allows using PackageSourceOrArtifact union as
@@ -895,9 +964,9 @@ type PackageSourceOrArtifactInput struct {
 //
 // Exactly one list must be specified.
 type PackageSourceOrArtifactInputs struct {
-	Packages  []*PkgInputSpec      `json:"packages,omitempty"`
-	Sources   []*SourceInputSpec   `json:"sources,omitempty"`
-	Artifacts []*ArtifactInputSpec `json:"artifacts,omitempty"`
+	Packages  []*IDorPkgInput      `json:"packages,omitempty"`
+	Sources   []*IDorSourceInput   `json:"sources,omitempty"`
+	Artifacts []*IDorArtifactInput `json:"artifacts,omitempty"`
 }
 
 // PackageSourceOrArtifactSpec allows using PackageSourceOrArtifact union as
@@ -1075,6 +1144,9 @@ type PointOfContactSpec struct {
 	Justification *string                      `json:"justification,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
+}
+
+type Query struct {
 }
 
 // SLSA contains all of the fields present in a SLSA attestation.

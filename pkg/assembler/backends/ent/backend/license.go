@@ -28,7 +28,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
+func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error) {
 	var modelLicenses []string
 	for i, license := range licenses {
 		modelLicense, err := b.IngestLicense(ctx, license)
@@ -40,10 +40,10 @@ func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.Licen
 	return modelLicenses, nil
 }
 
-func (b *EntBackend) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
+func (b *EntBackend) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
-		licenseID, err := upsertLicense(ctx, client, *license)
+		licenseID, err := upsertLicense(ctx, client, *license.LicenseInput)
 		if err != nil {
 			return nil, err
 		}

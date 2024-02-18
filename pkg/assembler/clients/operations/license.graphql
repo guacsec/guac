@@ -17,13 +17,13 @@
 
 # Ingest License
 
-mutation IngestLicense($license: LicenseInputSpec!) {
+mutation IngestLicense($license: IDorLicenseInput!) {
   ingestLicense(license: $license)
 }
 
 # Bulk Ingest Licenses
 
-mutation IngestLicenses($licenses: [LicenseInputSpec!]!) {
+mutation IngestLicenses($licenses: [IDorLicenseInput!]!) {
   ingestLicenses(licenses: $licenses)
 }
 

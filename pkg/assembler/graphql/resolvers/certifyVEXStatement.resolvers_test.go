@@ -31,7 +31,7 @@ import (
 func TestIngestVEXStatement(t *testing.T) {
 	type call struct {
 		Sub  model.PackageOrArtifactInput
-		Vuln *model.VulnerabilityInputSpec
+		Vuln *model.IDorVulnerabilityInput
 		In   *model.VexStatementInputSpec
 	}
 	tests := []struct {
@@ -44,10 +44,10 @@ func TestIngestVEXStatement(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package:  testdata.P1,
-						Artifact: testdata.A1,
+						Package:  &model.IDorPkgInput{PackageInput: testdata.P1},
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
-					Vuln: testdata.V1,
+					Vuln: &model.IDorVulnerabilityInput{VulnerabilityInput: testdata.V1},
 					In: &model.VexStatementInputSpec{
 						VexJustification: "test justification",
 						KnownSince:       time.Unix(1e9, 0),
@@ -61,9 +61,9 @@ func TestIngestVEXStatement(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
-					Vuln: testdata.V1,
+					Vuln: &model.IDorVulnerabilityInput{VulnerabilityInput: testdata.V1},
 					In: &model.VexStatementInputSpec{
 						Status:           model.VexStatusNotAffected,
 						VexJustification: model.VexJustificationNotProvided,
@@ -77,9 +77,9 @@ func TestIngestVEXStatement(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
-					Vuln: testdata.V1,
+					Vuln: &model.IDorVulnerabilityInput{VulnerabilityInput: testdata.V1},
 					In: &model.VexStatementInputSpec{
 						Status:           model.VexStatusAffected,
 						VexJustification: model.VexJustificationNotProvided,
@@ -93,11 +93,11 @@ func TestIngestVEXStatement(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
-					Vuln: &model.VulnerabilityInputSpec{
+					Vuln: &model.IDorVulnerabilityInput{VulnerabilityInput: &model.VulnerabilityInputSpec{
 						Type: "NoVuln",
-					},
+					}},
 					In: &model.VexStatementInputSpec{
 						Status:           model.VexStatusAffected,
 						VexJustification: "test justification",
@@ -111,12 +111,12 @@ func TestIngestVEXStatement(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
-					Vuln: &model.VulnerabilityInputSpec{
+					Vuln: &model.IDorVulnerabilityInput{VulnerabilityInput: &model.VulnerabilityInputSpec{
 						Type:            "cve",
 						VulnerabilityID: "",
-					},
+					}},
 					In: &model.VexStatementInputSpec{
 						Status:           model.VexStatusAffected,
 						VexJustification: "test justification",
@@ -130,9 +130,9 @@ func TestIngestVEXStatement(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
-					Vuln: testdata.V1,
+					Vuln: &model.IDorVulnerabilityInput{VulnerabilityInput: testdata.V1},
 					In: &model.VexStatementInputSpec{
 						VexJustification: "test justification",
 						KnownSince:       time.Unix(1e9, 0),

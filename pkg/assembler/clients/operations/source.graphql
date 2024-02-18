@@ -17,7 +17,7 @@
 
 # Ingest Source
 
-mutation IngestSource($source: SourceInputSpec!) {
+mutation IngestSource($source: IDorSourceInput!) {
   ingestSource(source: $source) {
     sourceTypeID
     sourceNamespaceID
@@ -27,7 +27,7 @@ mutation IngestSource($source: SourceInputSpec!) {
 
 # Bulk Ingest Sources
 
-mutation IngestSources($sources: [SourceInputSpec!]!) {
+mutation IngestSources($sources: [IDorSourceInput!]!) {
   ingestSources(sources: $sources) {
     sourceTypeID
     sourceNamespaceID

@@ -81,7 +81,7 @@ func (n *certifyLegalStruct) BuildModelNode(ctx context.Context, c *demoClient) 
 	return c.convLegal(ctx, n)
 }
 
-func (c *demoClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.LicenseInputSpec, discoveredLicensesList [][]*model.LicenseInputSpec, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
+func (c *demoClient) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 	var rv []string
 
 	for i, v := range certifyLegals {
@@ -105,11 +105,11 @@ func (c *demoClient) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 	return rv, nil
 }
 
-func (c *demoClient) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec) (string, error) {
+func (c *demoClient) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, certifyLegal *model.CertifyLegalInputSpec) (string, error) {
 	return c.ingestCertifyLegal(ctx, subject, declaredLicenses, discoveredLicenses, certifyLegal, true)
 }
 
-func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.LicenseInputSpec, discoveredLicenses []*model.LicenseInputSpec, certifyLegal *model.CertifyLegalInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, certifyLegal *model.CertifyLegalInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestCertifyLegal"
 
 	in := &certifyLegalStruct{
@@ -127,9 +127,9 @@ func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.Packa
 
 	var dec []string
 	for _, lis := range declaredLicenses {
-		l, err := c.licenseByInput(ctx, lis)
+		l, err := c.returnFoundLicense(ctx, lis)
 		if err != nil {
-			return "", gqlerror.Errorf("%v :: License not found %q %v", funcName, lis.Name, err)
+			return "", gqlerror.Errorf("%v :: License not found %q %v", funcName, lis.LicenseInput.Name, err)
 		}
 		dec = append(dec, l.ThisID)
 	}
@@ -138,9 +138,9 @@ func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.Packa
 
 	var dis []string
 	for _, lis := range discoveredLicenses {
-		l, err := c.licenseByInput(ctx, lis)
+		l, err := c.returnFoundLicense(ctx, lis)
 		if err != nil {
-			return "", gqlerror.Errorf("%v :: License not found %q %v", funcName, lis.Name, err)
+			return "", gqlerror.Errorf("%v :: License not found %q %v", funcName, lis.LicenseInput.Name, err)
 		}
 		dis = append(dis, l.ThisID)
 	}
@@ -150,21 +150,21 @@ func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.Packa
 	var pkg *pkgVersion
 	if subject.Package != nil {
 		var err error
-		pkg, err = c.getPackageVerFromInput(ctx, *subject.Package)
+		pkg, err = c.returnFoundPkgVersion(ctx, subject.Package)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.Pkg = pkg.ThisID
+		in.Pkg = pkg.ID()
 	}
 
 	var src *srcNameNode
 	if subject.Source != nil {
 		var err error
-		src, err = c.getSourceNameFromInput(ctx, *subject.Source)
+		src, err = c.returnFoundSource(ctx, subject.Source)
 		if err != nil {
-			return "", gqlerror.Errorf("%v :: %v", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.Source = src.ThisID
+		in.Source = src.ID()
 	}
 
 	out, err := byKeykv[*certifyLegalStruct](ctx, clCol, in.Key(), c)

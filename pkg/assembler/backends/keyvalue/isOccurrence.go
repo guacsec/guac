@@ -72,7 +72,7 @@ func (n *isOccurrenceStruct) Key() string {
 
 // Ingest IngestOccurrences
 
-func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	var modelIsOccurrences []string
 
 	for i := range occurrences {
@@ -98,11 +98,11 @@ func (c *demoClient) IngestOccurrences(ctx context.Context, subjects model.Packa
 
 // Ingest IsOccurrence
 
-func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+func (c *demoClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error) {
 	return c.ingestOccurrence(ctx, subject, artifact, occurrence, true)
 }
 
-func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestOccurrence"
 
 	in := &isOccurrenceStruct{
@@ -114,7 +114,7 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	a, err := c.artifactByInput(ctx, &artifact)
+	a, err := c.returnFoundArtifact(ctx, &artifact)
 	if err != nil {
 		return "", gqlerror.Errorf("%v :: Artifact not found %s", funcName, err)
 	}
@@ -123,9 +123,9 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 	var pkgVer *pkgVersion
 	if subject.Package != nil {
 		var err error
-		pkgVer, err = c.getPackageVerFromInput(ctx, *subject.Package)
+		pkgVer, err = c.returnFoundPkgVersion(ctx, subject.Package)
 		if err != nil {
-			return "", gqlerror.Errorf("IngestOccurrence :: %v", err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.Pkg = pkgVer.ThisID
 	}
@@ -133,9 +133,9 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 	var src *srcNameNode
 	if subject.Source != nil {
 		var err error
-		src, err = c.getSourceNameFromInput(ctx, *subject.Source)
+		src, err = c.returnFoundSource(ctx, subject.Source)
 		if err != nil {
-			return "", gqlerror.Errorf("IngestOccurrence :: %v", err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		in.Source = src.ThisID
 	}

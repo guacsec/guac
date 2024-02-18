@@ -36,8 +36,8 @@ PackageOrSourceInput allows using PackageOrSource union as input for mutations.
 Exactly one field must be specified.
 """
 input PackageOrSourceInput {
-  package: PkgInputSpec
-  source: SourceInputSpec
+  package: IDorPkgInput
+  source: IDorSourceInput
 }
 
 """
@@ -45,8 +45,8 @@ PackageOrSourceInputs allows using packages and sources as input for batch mutat
 Exactly one list must be specified.
 """
 input PackageOrSourceInputs {
-  packages: [PkgInputSpec!]
-  sources: [SourceInputSpec!]
+  packages: [IDorPkgInput!]
+  sources: [IDorSourceInput!]
 }
 
 """
@@ -94,16 +94,16 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingest that an artifact is produced from a package or source. The returned ID can be empty string."
+  "Ingest that an artifact is produced from a package or source. The returned ID cannot be empty string as its used by hasSBOM."
   ingestOccurrence(
     subject: PackageOrSourceInput!
-    artifact: ArtifactInputSpec!
+    artifact: IDorArtifactInput!
     occurrence: IsOccurrenceInputSpec!
   ): ID!
-  "Bulk ingest that an artifact is produced from a package or source. The returned array of IDs can be a an array of empty string."
+  "Bulk ingest that an artifact is produced from a package or source. The returned array of IDs cannot be an empty string as its used by hasSBOM"
   ingestOccurrences(
     subjects: PackageOrSourceInputs!
-    artifacts: [ArtifactInputSpec!]!
+    artifacts: [IDorArtifactInput!]!
     occurrences: [IsOccurrenceInputSpec!]!
   ): [ID!]!
 }

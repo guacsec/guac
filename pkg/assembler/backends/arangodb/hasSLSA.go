@@ -196,7 +196,7 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 	return values
 }
 
-func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.ArtifactInputSpec, builtFromList [][]*model.ArtifactInputSpec, builtByList []*model.BuilderInputSpec, slsaList []*model.SLSAInputSpec) ([]string, error) {
+func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) ([]string, error) {
 	builtFromMap := map[string][]*model.Artifact{}
 	var listOfValues []map[string]any
 
@@ -206,8 +206,8 @@ func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifa
 		if err != nil {
 			return nil, fmt.Errorf("failed to get built from artifact with error: %w", err)
 		}
-		builtFromMap[artifactKey(subjects[i].Algorithm, subjects[i].Digest)] = materialList
-		listOfValues = append(listOfValues, getSLSAValues(*subjects[i], materialList, *builtByList[i], *slsaList[i]))
+		builtFromMap[artifactKey(subjects[i].ArtifactInput.Algorithm, subjects[i].ArtifactInput.Digest)] = materialList
+		listOfValues = append(listOfValues, getSLSAValues(*subjects[i].ArtifactInput, materialList, *builtByList[i].BuilderInput, *slsaList[i]))
 	}
 
 	var documents []string
@@ -274,7 +274,7 @@ func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.Artifa
 	return hasSLSAIDList, nil
 }
 
-func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (string, error) {
+func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (string, error) {
 	// get materials (builtFrom artifacts) as they should already be ingested
 	artifacts, err := c.getMaterials(ctx, builtFrom)
 	if err != nil {
@@ -303,13 +303,13 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.ArtifactInp
 
 	RETURN { 'hasSLSA_id': hasSLSA._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getSLSAValues(subject, artifacts, builtBy, slsa), "IngestSLSA")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getSLSAValues(*subject.ArtifactInput, artifacts, *builtBy.BuilderInput, slsa), "IngestSLSA")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest hasSLSA: %w", err)
 	}
 	defer cursor.Close()
 
-	hasSLSAList, err := getHasSLSAFromCursor(c, ctx, cursor, map[string][]*model.Artifact{artifactKey(subject.Algorithm, subject.Digest): artifacts}, nil, true)
+	hasSLSAList, err := getHasSLSAFromCursor(c, ctx, cursor, map[string][]*model.Artifact{artifactKey(subject.ArtifactInput.Algorithm, subject.ArtifactInput.Digest): artifacts}, nil, true)
 	if err != nil {
 		return "", fmt.Errorf("failed to get hasSLSA from arango cursor: %w", err)
 	}

@@ -178,18 +178,18 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 
 	if subject.Package != nil {
 		var err error
-		pkg, err = c.getPackageVerFromInput(ctx, *subject.Package)
+		pkg, err = c.returnFoundPkgVersion(ctx, subject.Package)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.Pkg = pkg.ThisID
+		in.Pkg = pkg.ID()
 	} else {
 		var err error
-		art, err = c.artifactByInput(ctx, subject.Artifact)
+		art, err = c.returnFoundArtifact(ctx, subject.Artifact)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.Artifact = art.ThisID
+		in.Artifact = art.ID()
 	}
 
 	out, err := byKeykv[*hasSBOMStruct](ctx, hasSBOMCol, in.Key(), c)

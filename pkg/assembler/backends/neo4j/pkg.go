@@ -355,29 +355,29 @@ func removeInvalidCharFromProperty(key string) string {
 	return strings.ReplaceAll(key, ".", "_")
 }
 
-func (c *neo4jClient) IngestPackages(ctx context.Context, pkgs []*model.PkgInputSpec) ([]*model.PackageIDs, error) {
+func (c *neo4jClient) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error) {
 	return []*model.PackageIDs{}, fmt.Errorf("not implemented: IngestPackages")
 }
 
-func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
+func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
 	values := map[string]any{}
-	values["pkgType"] = pkg.Type
-	values["name"] = pkg.Name
-	if pkg.Namespace != nil {
-		values["namespace"] = *pkg.Namespace
+	values["pkgType"] = pkg.PackageInput.Type
+	values["name"] = pkg.PackageInput.Name
+	if pkg.PackageInput.Namespace != nil {
+		values["namespace"] = *pkg.PackageInput.Namespace
 	} else {
 		values["namespace"] = ""
 	}
-	if pkg.Version != nil {
-		values["version"] = *pkg.Version
+	if pkg.PackageInput.Version != nil {
+		values["version"] = *pkg.PackageInput.Version
 	} else {
 		values["version"] = ""
 	}
-	if pkg.Subpath != nil {
-		values["subpath"] = *pkg.Subpath
+	if pkg.PackageInput.Subpath != nil {
+		values["subpath"] = *pkg.PackageInput.Subpath
 	} else {
 		values["subpath"] = ""
 	}
@@ -385,7 +385,7 @@ func (c *neo4jClient) IngestPackage(ctx context.Context, pkg model.PkgInputSpec)
 	// To ensure consistency, always sort the qualifiers by key
 	qualifiersMap := map[string]string{}
 	keys := []string{}
-	for _, kv := range pkg.Qualifiers {
+	for _, kv := range pkg.PackageInput.Qualifiers {
 		qualifiersMap[kv.Key] = kv.Value
 		keys = append(keys, kv.Key)
 	}

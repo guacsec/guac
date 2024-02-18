@@ -119,31 +119,30 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	var foundPkgNameorVersionNode pkgNameOrVersion
-	var foundArtStrct *artStruct
+	var foundPkgNameOrVersionNode pkgNameOrVersion
+	var foundArtStruct *artStruct
 	var foundSrcName *srcNameNode
 
 	if subject.Package != nil {
 		var err error
-		foundPkgNameorVersionNode, err = c.getPackageNameOrVerFromInput(ctx, *subject.Package, *pkgMatchType)
+		in.PackageID, foundPkgNameOrVersionNode, err = c.returnFoundPkgBasedOnMatchType(ctx, subject.Package, pkgMatchType)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.PackageID = foundPkgNameorVersionNode.ID()
 	} else if subject.Artifact != nil {
 		var err error
-		foundArtStrct, err = c.artifactByInput(ctx, subject.Artifact)
+		foundArtStruct, err = c.returnFoundArtifact(ctx, subject.Artifact)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.ArtifactID = foundArtStrct.ThisID
+		in.ArtifactID = foundArtStruct.ID()
 	} else {
 		var err error
-		foundSrcName, err = c.getSourceNameFromInput(ctx, *subject.Source)
+		foundSrcName, err = c.returnFoundSource(ctx, subject.Source)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.SourceID = foundSrcName.ThisID
+		in.SourceID = foundSrcName.ID()
 	}
 
 	out, err := byKeykv[*goodLink](ctx, cgCol, in.Key(), c)
@@ -165,12 +164,12 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 	if err := c.addToIndex(ctx, cgCol, in); err != nil {
 		return "", err
 	}
-	if foundPkgNameorVersionNode != nil {
-		if err := foundPkgNameorVersionNode.setCertifyGoodLinks(ctx, in.ThisID, c); err != nil {
+	if foundPkgNameOrVersionNode != nil {
+		if err := foundPkgNameOrVersionNode.setCertifyGoodLinks(ctx, in.ThisID, c); err != nil {
 			return "", err
 		}
-	} else if foundArtStrct != nil {
-		if err := foundArtStrct.setCertifyGoodLinks(ctx, in.ThisID, c); err != nil {
+	} else if foundArtStruct != nil {
+		if err := foundArtStruct.setCertifyGoodLinks(ctx, in.ThisID, c); err != nil {
 			return "", err
 		}
 	} else {

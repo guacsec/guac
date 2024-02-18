@@ -17,12 +17,12 @@
 
 # Ingest Builder
 
-mutation IngestBuilder($builder: BuilderInputSpec!) {
+mutation IngestBuilder($builder: IDorBuilderInput!) {
   ingestBuilder(builder: $builder)
 }
 
 # Bulk Ingest Builder
 
-mutation IngestBuilders($builders: [BuilderInputSpec!]!) {
+mutation IngestBuilders($builders: [IDorBuilderInput!]!) {
   ingestBuilders(builders: $builders)
 }

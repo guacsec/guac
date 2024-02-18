@@ -38,14 +38,26 @@ input BuilderInputSpec {
   uri: String!
 }
 
+"""
+IDorBuilderInput allows for specifying either the builder ID or the BuilderInputSpec.
+
+Either the ID or the BuilderInputSpec must be specified. Both cannot be nil.
+
+If the ID is specified, the BuilderInputSpec is not used.
+"""
+input IDorBuilderInput {
+  builderID: ID
+  builderInput: BuilderInputSpec
+}
+
 extend type Query {
   "Returns all builders matching a filter."
   builders(builderSpec: BuilderSpec!): [Builder!]!
 }
 
 extend type Mutation {
-  "Ingests a new builder and returns it. The returned ID can be empty string."
-  ingestBuilder(builder: BuilderInputSpec): ID!
-  "Bulk ingests new builders and returns a list of them. The returned array of IDs can be a an array of empty string."
-  ingestBuilders(builders: [BuilderInputSpec!]!): [ID!]!
+  "Ingests a new builder and returns it."
+  ingestBuilder(builder: IDorBuilderInput): ID!
+  "Bulk ingests new builders and returns a list of them. The returned array of IDs must be in the same order as the inputs."
+  ingestBuilders(builders: [IDorBuilderInput!]!): [ID!]!
 }

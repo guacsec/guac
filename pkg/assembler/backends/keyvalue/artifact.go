@@ -141,7 +141,7 @@ func (c *demoClient) artifactModelByID(ctx context.Context, id string) (*model.A
 
 // Ingest Artifacts
 
-func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.IDorArtifactInput) ([]string, error) {
 	var modelArtifacts []string
 	for _, art := range artifacts {
 		modelArt, err := c.IngestArtifact(ctx, art)
@@ -153,13 +153,13 @@ func (c *demoClient) IngestArtifacts(ctx context.Context, artifacts []*model.Art
 	return modelArtifacts, nil
 }
 
-func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
+func (c *demoClient) IngestArtifact(ctx context.Context, artifact *model.IDorArtifactInput) (string, error) {
 	return c.ingestArtifact(ctx, artifact, true)
 }
 
-func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec, readOnly bool) (string, error) {
-	algorithm := strings.ToLower(artifact.Algorithm)
-	digest := strings.ToLower(artifact.Digest)
+func (c *demoClient) ingestArtifact(ctx context.Context, artifact *model.IDorArtifactInput, readOnly bool) (string, error) {
+	algorithm := strings.ToLower(artifact.ArtifactInput.Algorithm)
+	digest := strings.ToLower(artifact.ArtifactInput.Digest)
 
 	inA := &artStruct{
 		Algorithm: algorithm,
@@ -304,4 +304,21 @@ func (c *demoClient) buildArtifactResponse(ctx context.Context, ID string, filte
 	}
 
 	return art, nil
+}
+
+// returnFoundArtifact return the node by first searching via ID. If the ID is not specified, it defaults to searching via inputspec
+func (c *demoClient) returnFoundArtifact(ctx context.Context, artIDorInput *model.IDorArtifactInput) (*artStruct, error) {
+	if artIDorInput.ArtifactID != nil {
+		foundArtStruct, err := byIDkv[*artStruct](ctx, *artIDorInput.ArtifactID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to return artStruct node by ID with error: %v", err)
+		}
+		return foundArtStruct, nil
+	} else {
+		foundArtStruct, err := c.artifactByInput(ctx, artIDorInput.ArtifactInput)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to artifactByInput with error: %v", err)
+		}
+		return foundArtStruct, nil
+	}
 }

@@ -549,7 +549,7 @@ func TestHasSourceAt(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					if test.QueryPkgID {
@@ -562,7 +562,7 @@ func TestHasSourceAt(t *testing.T) {
 				}
 			}
 			for _, s := range test.InSrc {
-				if srcIDs, err := b.IngestSource(ctx, *s); err != nil {
+				if srcIDs, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				} else {
 					if test.QuerySourceID {
@@ -575,7 +575,7 @@ func TestHasSourceAt(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				hsID, err := b.IngestHasSourceAt(ctx, *o.Pkg, *o.Match, *o.Src, *o.HSA)
+				hsID, err := b.IngestHasSourceAt(ctx, model.IDorPkgInput{PackageInput: o.Pkg}, *o.Match, model.IDorSourceInput{SourceInput: o.Src}, *o.HSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -606,8 +606,8 @@ func TestIngestHasSourceAts(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
 	type call struct {
-		Pkgs  []*model.PkgInputSpec
-		Srcs  []*model.SourceInputSpec
+		Pkgs  []*model.IDorPkgInput
+		Srcs  []*model.IDorSourceInput
 		Match *model.MatchFlags
 		HSAs  []*model.HasSourceAtInputSpec
 	}
@@ -627,8 +627,8 @@ func TestIngestHasSourceAts(t *testing.T) {
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1},
+					Pkgs: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					Srcs: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -656,8 +656,8 @@ func TestIngestHasSourceAts(t *testing.T) {
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1},
+					Pkgs: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					Srcs: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,
 					},
@@ -690,8 +690,8 @@ func TestIngestHasSourceAts(t *testing.T) {
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P3, testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1, testdata.S1},
+					Pkgs: []*model.IDorPkgInput{{PackageInput: testdata.P3}, {PackageInput: testdata.P3}},
+					Srcs: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S1}},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -730,8 +730,8 @@ func TestIngestHasSourceAts(t *testing.T) {
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P1, testdata.P4},
-					Srcs: []*model.SourceInputSpec{testdata.S1, testdata.S1},
+					Pkgs: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P4}},
+					Srcs: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S1}},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -766,8 +766,8 @@ func TestIngestHasSourceAts(t *testing.T) {
 			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S3},
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P1, testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1, testdata.S3},
+					Pkgs: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
+					Srcs: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S3}},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -803,8 +803,8 @@ func TestIngestHasSourceAts(t *testing.T) {
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			Calls: []call{
 				{
-					Pkgs: []*model.PkgInputSpec{testdata.P1, testdata.P1},
-					Srcs: []*model.SourceInputSpec{testdata.S1, testdata.S1},
+					Pkgs: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
+					Srcs: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S1}},
 					Match: &model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
 					},
@@ -833,12 +833,12 @@ func TestIngestHasSourceAts(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, s := range test.InSrc {
-				if _, err := b.IngestSource(ctx, *s); err != nil {
+				if _, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				}
 			}

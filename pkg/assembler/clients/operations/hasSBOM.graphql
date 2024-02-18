@@ -17,12 +17,12 @@
 
 # Defines the GraphQL operations to ingest that a package or source has an SBOM (specified by a URI) into GUAC
 
-mutation IngestHasSBOMPkg($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!, $includes: HasSBOMIncludesInputSpec!) {
+mutation IngestHasSBOMPkg($pkg: IDorPkgInput!, $hasSBOM: HasSBOMInputSpec!, $includes: HasSBOMIncludesInputSpec!) {
   ingestHasSBOM(subject: { package: $pkg }, hasSBOM: $hasSBOM, includes: $includes)
 }
 
 mutation IngestHasSBOMArtifact(
-  $artifact: ArtifactInputSpec!
+  $artifact: IDorArtifactInput!
   $hasSBOM: HasSBOMInputSpec!
   $includes: HasSBOMIncludesInputSpec!
 ) {
@@ -31,12 +31,12 @@ mutation IngestHasSBOMArtifact(
 
 # Defines the GraphQL operations to bulk ingest hasSBOM information into GUAC
 
-mutation IngestHasSBOMPkgs($pkgs: [PkgInputSpec!]!, $hasSBOMs: [HasSBOMInputSpec!]!, $includes: [HasSBOMIncludesInputSpec!]!) {
+mutation IngestHasSBOMPkgs($pkgs: [IDorPkgInput!]!, $hasSBOMs: [HasSBOMInputSpec!]!, $includes: [HasSBOMIncludesInputSpec!]!) {
   ingestHasSBOMs(subjects: { packages: $pkgs }, hasSBOMs: $hasSBOMs, includes: $includes)
 }
 
 mutation IngestHasSBOMArtifacts(
-  $artifacts: [ArtifactInputSpec!]!
+  $artifacts: [IDorArtifactInput!]!
   $hasSBOMs: [HasSBOMInputSpec!]!
   $includes: [HasSBOMIncludesInputSpec!]!
 ) {

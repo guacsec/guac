@@ -89,9 +89,9 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 // IngestScorecard takes a scorecard and a source and creates a certifyScorecard
-func (b *EntBackend) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+func (b *EntBackend) IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error) {
 	cscID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		return upsertScorecard(ctx, ent.TxFromContext(ctx), source, scorecard)
+		return upsertScorecard(ctx, ent.TxFromContext(ctx), *source.SourceInput, scorecard)
 	})
 	if err != nil {
 		return "", err
@@ -99,7 +99,7 @@ func (b *EntBackend) IngestScorecard(ctx context.Context, source model.SourceInp
 	return strconv.Itoa(*cscID), nil
 }
 
-func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	var modelScorecardIDs []string
 	for i, sc := range scorecards {
 		modelScorecardID, err := b.IngestScorecard(ctx, *sources[i], *sc)

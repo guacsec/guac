@@ -39,9 +39,9 @@ input type to be used in mutations.
 Exactly one of the value must be set to non-nil.
 """
 input PackageSourceOrArtifactInput {
-  package: PkgInputSpec
-  source: SourceInputSpec
-  artifact: ArtifactInputSpec
+  package: IDorPkgInput
+  source: IDorSourceInput
+  artifact: IDorArtifactInput
 }
 
 """
@@ -51,9 +51,9 @@ input type to be used in bulk mutations.
 Exactly one list must be specified.
 """
 input PackageSourceOrArtifactInputs {
-  packages: [PkgInputSpec!]
-  sources: [SourceInputSpec!]
-  artifacts: [ArtifactInputSpec!]
+  packages: [IDorPkgInput!]
+  sources: [IDorSourceInput!]
+  artifacts: [IDorArtifactInput!]
 }
 
 """

@@ -83,6 +83,8 @@ var includedPackage3 = &model.PkgInputSpec{
 
 var includedPackages = []*model.PkgInputSpec{includedPackage1, includedPackage2, includedPackage3}
 
+var includedIDorPackages = []*model.IDorPkgInput{{PackageInput: includedPackage1}, {PackageInput: includedPackage2}, {PackageInput: includedPackage3}}
+
 var includedArtifact1 = &model.ArtifactInputSpec{
 	Algorithm: "a1_algorithm",
 	Digest:    "a1_digest",
@@ -95,9 +97,11 @@ var includedArtifact2 = &model.ArtifactInputSpec{
 
 var includedArtifacts = []*model.ArtifactInputSpec{includedArtifact1, includedArtifact2}
 
+var includedIDorArtifacts = []*model.IDorArtifactInput{{ArtifactInput: includedArtifact1}, {ArtifactInput: includedArtifact2}}
+
 var includedPackageArtifacts = &model.PackageOrArtifactInputs{
-	Packages:  includedPackages,
-	Artifacts: includedArtifacts,
+	Packages:  includedIDorPackages,
+	Artifacts: includedIDorArtifacts,
 }
 
 var includedDependency1 = &model.IsDependencyInputSpec{
@@ -149,11 +153,11 @@ var includedOccurrence = &model.IsOccurrenceInputSpec{
 }
 
 var includedTestOccurrences = []testOccurrence{{
-	Subj:  &model.PackageOrSourceInput{Package: includedPackage1},
+	Subj:  &model.PackageOrSourceInput{Package: &model.IDorPkgInput{PackageInput: includedPackage1}},
 	Art:   includedArtifact1,
 	isOcc: includedOccurrence,
 }, {
-	Subj:  &model.PackageOrSourceInput{Source: includedSource},
+	Subj:  &model.PackageOrSourceInput{Source: &model.IDorSourceInput{SourceInput: includedSource}},
 	Art:   includedArtifact1,
 	isOcc: includedOccurrence,
 }}
@@ -333,7 +337,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -344,12 +348,12 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "HappyPath",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -371,12 +375,12 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Ingest same twice",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -384,7 +388,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -406,12 +410,12 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query on URI",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri one",
@@ -419,7 +423,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri two",
@@ -443,7 +447,7 @@ func TestHasSBOM(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI:        "test uri one",
@@ -452,7 +456,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI:        "test uri two",
@@ -477,8 +481,8 @@ func TestHasSBOM(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
 			InArt: []*model.ArtifactInputSpec{testdata.A1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P2, testdata.P4},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
 				pkg:       testdata.P2,
@@ -489,14 +493,14 @@ func TestHasSBOM(t *testing.T) {
 				},
 			}},
 			IsOccs: []testOccurrence{{
-				Subj:  &model.PackageOrSourceInput{Package: testdata.P4},
+				Subj:  &model.PackageOrSourceInput{Package: &model.IDorPkgInput{PackageInput: testdata.P4}},
 				Art:   testdata.A1,
 				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
 			}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -504,7 +508,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P4,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P4},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -512,7 +516,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -552,7 +556,7 @@ func TestHasSBOM(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -560,7 +564,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -568,7 +572,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -604,13 +608,13 @@ func TestHasSBOM(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{testdata.P2},
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P2},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -618,7 +622,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -626,7 +630,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -655,7 +659,7 @@ func TestHasSBOM(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -663,7 +667,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A1,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -671,7 +675,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Artifact: testdata.A2,
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						URI: "test uri",
@@ -695,12 +699,12 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query on Algorithm",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						Algorithm: "QWERasdf",
@@ -708,7 +712,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						Algorithm: "QWERasdf two",
@@ -730,8 +734,8 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query on Digest",
 			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P2, testdata.P4},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
 				pkg:       testdata.P2,
@@ -742,14 +746,14 @@ func TestHasSBOM(t *testing.T) {
 				},
 			}},
 			IsOccs: []testOccurrence{{
-				Subj:  &model.PackageOrSourceInput{Package: testdata.P4},
+				Subj:  &model.PackageOrSourceInput{Package: &model.IDorPkgInput{PackageInput: testdata.P4}},
 				Art:   testdata.A1,
 				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
 			}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						Digest: "QWERasdf",
@@ -757,7 +761,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						Digest: "QWERasdf two",
@@ -790,12 +794,12 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query on DownloadLocation",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
@@ -803,7 +807,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
@@ -825,12 +829,12 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query none",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
@@ -838,7 +842,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
@@ -856,7 +860,7 @@ func TestHasSBOM(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
@@ -864,7 +868,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
@@ -872,7 +876,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P2,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P2},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
@@ -902,12 +906,12 @@ func TestHasSBOM(t *testing.T) {
 			Name:  "Query on ID",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
@@ -915,7 +919,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInput{
-						Package: testdata.P1,
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
 					},
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location two",
@@ -941,7 +945,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -958,7 +962,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -975,7 +979,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -992,7 +996,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1009,7 +1013,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1026,7 +1030,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1043,7 +1047,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1060,7 +1064,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1077,7 +1081,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1094,7 +1098,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1111,7 +1115,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1128,7 +1132,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1145,7 +1149,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1162,7 +1166,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1180,7 +1184,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1197,7 +1201,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1214,7 +1218,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1231,7 +1235,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1248,7 +1252,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1265,7 +1269,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1283,7 +1287,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1300,7 +1304,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1317,7 +1321,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1334,7 +1338,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1351,7 +1355,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1368,7 +1372,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1385,7 +1389,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1402,7 +1406,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1419,7 +1423,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1436,7 +1440,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1453,7 +1457,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1470,7 +1474,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1487,7 +1491,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1504,7 +1508,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1522,7 +1526,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1539,7 +1543,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1556,7 +1560,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1573,7 +1577,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1590,7 +1594,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1607,7 +1611,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1624,7 +1628,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1641,7 +1645,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1658,7 +1662,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1675,7 +1679,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1692,7 +1696,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1709,7 +1713,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1726,7 +1730,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1743,7 +1747,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1761,7 +1765,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1778,7 +1782,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1795,7 +1799,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1812,7 +1816,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1829,7 +1833,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1846,7 +1850,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1863,7 +1867,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1880,7 +1884,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1901,7 +1905,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1924,7 +1928,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1941,7 +1945,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1958,7 +1962,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1975,7 +1979,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -1992,7 +1996,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2009,7 +2013,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2026,7 +2030,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2044,7 +2048,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2061,7 +2065,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2078,7 +2082,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2095,7 +2099,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2112,7 +2116,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2129,7 +2133,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2146,7 +2150,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2163,7 +2167,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2180,7 +2184,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2197,7 +2201,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2214,7 +2218,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2231,7 +2235,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2248,7 +2252,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2265,7 +2269,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2282,7 +2286,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2299,7 +2303,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2316,7 +2320,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2343,7 +2347,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2365,7 +2369,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2387,7 +2391,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2409,7 +2413,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2431,7 +2435,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2453,7 +2457,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2470,7 +2474,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2493,7 +2497,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2510,7 +2514,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2527,7 +2531,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2544,7 +2548,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2561,7 +2565,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2578,7 +2582,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2595,7 +2599,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2612,7 +2616,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2629,7 +2633,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2646,7 +2650,7 @@ func TestHasSBOM(t *testing.T) {
 			IsOccs: includedTestOccurrences,
 			Calls: []call{{
 				Sub: model.PackageOrArtifactInput{
-					Package: includedPackage1,
+					Package: &model.IDorPkgInput{PackageInput: includedPackage1},
 				},
 				HS: includedHasSBOM,
 			}},
@@ -2657,7 +2661,7 @@ func TestHasSBOM(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if pkgIDs, err := b.IngestPackage(ctx, *p); err != nil {
+				if pkgIDs, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					if test.QueryPkgID {
@@ -2672,7 +2676,7 @@ func TestHasSBOM(t *testing.T) {
 				}
 			}
 			for _, a := range test.InArt {
-				if artID, err := b.IngestArtifact(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					if test.QueryArtID {
@@ -2688,7 +2692,7 @@ func TestHasSBOM(t *testing.T) {
 			}
 			includes := model.HasSBOMIncludesInputSpec{}
 			for _, s := range test.InSrc {
-				if srcIDs, err := b.IngestSource(ctx, *s); err != nil {
+				if srcIDs, err := b.IngestSource(ctx, model.IDorSourceInput{SourceInput: s}); err != nil {
 					t.Fatalf("Could not ingest source: %v", err)
 				} else {
 					if test.QueryIncludeOccurSrcID {
@@ -2737,7 +2741,7 @@ func TestHasSBOM(t *testing.T) {
 			}
 
 			for _, dep := range test.IsDeps {
-				if isDep, err := b.IngestDependency(ctx, *dep.pkg, *dep.depPkg, dep.matchType, *dep.isDep); err != nil {
+				if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, dep.matchType, *dep.isDep); err != nil {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
 					includes.Dependencies = append(includes.Dependencies, isDep)
@@ -2748,7 +2752,7 @@ func TestHasSBOM(t *testing.T) {
 			}
 
 			for _, occ := range test.IsOccs {
-				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, *occ.Art, *occ.isOcc); err != nil {
+				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, model.IDorArtifactInput{ArtifactInput: occ.Art}, *occ.isOcc); err != nil {
 					t.Fatalf("Could not ingest occurrence: %v", err)
 				} else {
 					includes.Occurrences = append(includes.Occurrences, isOcc)
@@ -2811,12 +2815,12 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Name:  "HappyPath",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2840,12 +2844,12 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Name:  "Ingest same twice",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2872,12 +2876,12 @@ func TestIngestHasSBOMs(t *testing.T) {
 			Name:  "Query on URI",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages: []*model.PkgInputSpec{testdata.P1},
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 			},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P1},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2905,8 +2909,8 @@ func TestIngestHasSBOMs(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{testdata.P2, testdata.P4},
 			InArt: []*model.ArtifactInputSpec{testdata.A1},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P2, testdata.P4},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 			},
 			IsDeps: []testDependency{{
 				pkg:       testdata.P2,
@@ -2917,14 +2921,14 @@ func TestIngestHasSBOMs(t *testing.T) {
 				},
 			}},
 			IsOccs: []testOccurrence{{
-				Subj:  &model.PackageOrSourceInput{Package: testdata.P4},
+				Subj:  &model.PackageOrSourceInput{Package: &model.IDorPkgInput{PackageInput: testdata.P4}},
 				Art:   testdata.A1,
 				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
 			}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P2, testdata.P4},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P2}, &model.IDorPkgInput{PackageInput: testdata.P4}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2937,7 +2941,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2976,18 +2980,18 @@ func TestIngestHasSBOMs(t *testing.T) {
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
 			PkgArt: &model.PackageOrArtifactInputs{
-				Packages:  []*model.PkgInputSpec{testdata.P1},
-				Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+				Packages:  []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 			},
 			IsOccs: []testOccurrence{{
-				Subj:  &model.PackageOrSourceInput{Package: testdata.P1},
+				Subj:  &model.PackageOrSourceInput{Package: &model.IDorPkgInput{PackageInput: testdata.P1}},
 				Art:   testdata.A2,
 				isOcc: &model.IsOccurrenceInputSpec{Justification: "test justification"},
 			}},
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -2997,7 +3001,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 				},
 				{
 					Sub: model.PackageOrArtifactInputs{
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
@@ -3033,12 +3037,12 @@ func TestIngestHasSBOMs(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, p := range test.InPkg {
-				if _, err := b.IngestPackage(ctx, *p); err != nil {
+				if _, err := b.IngestPackage(ctx, model.IDorPkgInput{PackageInput: p}); err != nil {
 					t.Fatalf("Could not ingest package: %v", err)
 				}
 			}
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
@@ -3059,7 +3063,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 			}
 
 			for _, dep := range test.IsDeps {
-				if isDep, err := b.IngestDependency(ctx, *dep.pkg, *dep.depPkg, dep.matchType, *dep.isDep); err != nil {
+				if isDep, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: dep.pkg}, model.IDorPkgInput{PackageInput: dep.depPkg}, dep.matchType, *dep.isDep); err != nil {
 					t.Fatalf("Could not ingest dependency: %v", err)
 				} else {
 					includes.Dependencies = append(includes.Dependencies, isDep)
@@ -3067,7 +3071,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 			}
 
 			for _, occ := range test.IsOccs {
-				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, *occ.Art, *occ.isOcc); err != nil {
+				if isOcc, err := b.IngestOccurrence(ctx, *occ.Subj, model.IDorArtifactInput{ArtifactInput: occ.Art}, *occ.isOcc); err != nil {
 					t.Fatalf("Could not ingest occurrence: %v", err)
 				} else {
 					includes.Occurrences = append(includes.Occurrences, isOcc)

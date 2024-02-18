@@ -30,9 +30,9 @@ import (
 func TestIngestHasSLSA(t *testing.T) {
 	testTime := time.Unix(1e9+5, 0)
 	type call struct {
-		Sub  *model.ArtifactInputSpec
-		BF   []*model.ArtifactInputSpec
-		BB   *model.BuilderInputSpec
+		Sub  *model.IDorArtifactInput
+		BF   []*model.IDorArtifactInput
+		BB   *model.IDorBuilderInput
 		SLSA *model.SLSAInputSpec
 	}
 	tests := []struct {
@@ -44,9 +44,9 @@ func TestIngestHasSLSA(t *testing.T) {
 			Name: "Ingest with no builtFrom",
 			Calls: []call{
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						StartedOn: &testTime,
 					},
@@ -58,9 +58,9 @@ func TestIngestHasSLSA(t *testing.T) {
 			Name: "Happy path",
 			Calls: []call{
 				{
-					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
-					BB:  testdata.B1,
+					Sub: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
+					BF:  []*model.IDorArtifactInput{{ArtifactInput: testdata.A2}},
+					BB:  &model.IDorBuilderInput{BuilderInput: testdata.B1},
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
 					},
@@ -99,9 +99,9 @@ func TestIngestHasSLSA(t *testing.T) {
 
 func TestIngestHasSLSAs(t *testing.T) {
 	type call struct {
-		Sub  []*model.ArtifactInputSpec
-		BF   [][]*model.ArtifactInputSpec
-		BB   []*model.BuilderInputSpec
+		Sub  []*model.IDorArtifactInput
+		BF   [][]*model.IDorArtifactInput
+		BB   []*model.IDorBuilderInput
 		SLSA []*model.SLSAInputSpec
 	}
 	tests := []struct {
@@ -113,9 +113,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 			Name: "Ingest without slsaList",
 			Calls: []call{
 				{
-					Sub:  []*model.ArtifactInputSpec{testdata.A1},
-					BF:   [][]*model.ArtifactInputSpec{{testdata.A2}},
-					BB:   []*model.BuilderInputSpec{testdata.B1},
+					Sub:  []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					BF:   [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}},
+					BB:   []*model.IDorBuilderInput{{BuilderInput: testdata.B1}},
 					SLSA: []*model.SLSAInputSpec{},
 				},
 			},
@@ -125,9 +125,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 			Name: "Ingest without builtFrom",
 			Calls: []call{
 				{
-					Sub: []*model.ArtifactInputSpec{testdata.A1},
-					BF:  [][]*model.ArtifactInputSpec{},
-					BB:  []*model.BuilderInputSpec{testdata.B1},
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}},
 					SLSA: []*model.SLSAInputSpec{
 						{
 							BuildType: "test type",
@@ -141,9 +141,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 			Name: "Ingest without builtByList",
 			Calls: []call{
 				{
-					Sub: []*model.ArtifactInputSpec{testdata.A1},
-					BF:  [][]*model.ArtifactInputSpec{{testdata.A2}},
-					BB:  []*model.BuilderInputSpec{},
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{},
 					SLSA: []*model.SLSAInputSpec{
 						{
 							BuildType: "test type",
@@ -157,9 +157,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 			Name: "HappyPath",
 			Calls: []call{
 				{
-					Sub: []*model.ArtifactInputSpec{testdata.A1},
-					BF:  [][]*model.ArtifactInputSpec{{testdata.A2}},
-					BB:  []*model.BuilderInputSpec{testdata.B1},
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}},
 					SLSA: []*model.SLSAInputSpec{
 						{
 							BuildType: "test type",

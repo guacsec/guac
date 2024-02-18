@@ -33,7 +33,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, spec model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
+func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, spec model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
 
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
 		client := ent.TxFromContext(ctx)
@@ -49,14 +49,14 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSp
 			certifyvuln.FieldDbVersion,
 		}
 
-		vuln, err := getVulnerabilityFromInput(ctx, client.Client(), spec)
+		vuln, err := getVulnerabilityFromInput(ctx, client.Client(), *spec.VulnerabilityInput)
 		if err != nil {
 			return nil, err
 		}
 		insert.SetVulnerability(vuln)
 		columns = append(columns, certifyvuln.FieldVulnerabilityID)
 
-		pv, err := getPkgVersion(ctx, client.Client(), pkg)
+		pv, err := getPkgVersion(ctx, client.Client(), *pkg.PackageInput)
 		if err != nil {
 			return nil, err
 		}
@@ -90,7 +90,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSp
 	return nodeID(*record), nil
 }
 
-func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	var modelCertifyVulns = make([]string, len(vulnerabilities))
 	eg, ctx := errgroup.WithContext(ctx)
 	for i := range certifyVulns {

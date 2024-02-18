@@ -433,21 +433,21 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInput(ctx conte
 		switch k {
 		case "package":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
-			data, err := ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, v)
+			data, err := ec.unmarshalOIDorPkgInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Package = data
 		case "source":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-			data, err := ec.unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, v)
+			data, err := ec.unmarshalOIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Source = data
 		case "artifact":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifact"))
-			data, err := ec.unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx, v)
+			data, err := ec.unmarshalOIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -474,21 +474,21 @@ func (ec *executionContext) unmarshalInputPackageSourceOrArtifactInputs(ctx cont
 		switch k {
 		case "packages":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packages"))
-			data, err := ec.unmarshalOPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, v)
+			data, err := ec.unmarshalOIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Packages = data
 		case "sources":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
-			data, err := ec.unmarshalOSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx, v)
+			data, err := ec.unmarshalOIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Sources = data
 		case "artifacts":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
-			data, err := ec.unmarshalOArtifactInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpecᚄ(ctx, v)
+			data, err := ec.unmarshalOIDorArtifactInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}

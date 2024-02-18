@@ -61,16 +61,16 @@ extend type Query {
 extend type Mutation {
   "Adds a certification that a package (PackageName or PackageVersion) is built from the source. The returned ID can be empty string."
   ingestHasSourceAt(
-    pkg: PkgInputSpec!
+    pkg: IDorPkgInput!
     pkgMatchType: MatchFlags!
-    source: SourceInputSpec!
+    source: IDorSourceInput!
     hasSourceAt: HasSourceAtInputSpec!
   ): ID!
   "Bulk ingestion of certifications that a package (PackageName or PackageVersion) is built from the source. The returned array of IDs can be a an array of empty string."
   ingestHasSourceAts(
-    pkgs: [PkgInputSpec!]!
+    pkgs: [IDorPkgInput!]!
     pkgMatchType: MatchFlags!
-    sources: [SourceInputSpec!]!
+    sources: [IDorSourceInput!]!
     hasSourceAts: [HasSourceAtInputSpec!]!
   ):[ID!]!
 }

@@ -159,13 +159,13 @@ func setIsDependencyValues(sb *strings.Builder, isDependencySpec *model.IsDepend
 
 // Ingest IngestDependencies
 
-func (c *neo4jClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (c *neo4jClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	return []string{}, fmt.Errorf("not implemented: IngestDependencies")
 }
 
 // Ingest IsDependency
 
-func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 	// TODO: handle depPkgMatchType
@@ -175,15 +175,15 @@ func (c *neo4jClient) IngestDependency(ctx context.Context, pkg model.PkgInputSp
 	queryValues := map[string]any{}
 
 	// TODO: use generics here between PkgInputSpec and PkgSpec?
-	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(&pkg)
+	selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(pkg.PackageInput)
 	// Note: depPkgSpec only takes up to the pkgName as IsDependency does not allow for the attestation
 	// to be made at the pkgVersion level. Version range for the dependent package is defined as a property
 	// on IsDependency.
 	matchEmpty := false
 	depPkgSpec := model.PkgSpec{
-		Type:                     &depPkg.Type,
-		Namespace:                depPkg.Namespace,
-		Name:                     &depPkg.Name,
+		Type:                     &depPkg.PackageInput.Type,
+		Namespace:                depPkg.PackageInput.Namespace,
+		Name:                     &depPkg.PackageInput.Name,
 		Version:                  nil,
 		Subpath:                  nil,
 		Qualifiers:               nil,

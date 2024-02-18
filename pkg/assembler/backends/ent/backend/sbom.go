@@ -125,7 +125,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 
 		if subject.Package != nil {
 			var err error
-			p, err := getPkgVersion(ctx, client.Client(), *subject.Package)
+			p, err := getPkgVersion(ctx, client.Client(), *subject.Package.PackageInput)
 			if err != nil {
 				return nil, Errorf("%v ::  %s", funcName, err)
 			}
@@ -138,7 +138,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		} else if subject.Artifact != nil {
 			var err error
 			art, err := client.Artifact.Query().
-				Where(artifactQueryInputPredicates(*subject.Artifact)).
+				Where(artifactQueryInputPredicates(*subject.Artifact.ArtifactInput)).
 				Only(ctx)
 			if err != nil {
 				return nil, Errorf("%v ::  %s", funcName, err)

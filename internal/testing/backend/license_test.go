@@ -97,7 +97,7 @@ func TestLicenses(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			for i, ingest := range tt.Ingests {
-				ingestedLicenseID, err := b.IngestLicense(ctx, ingest)
+				ingestedLicenseID, err := b.IngestLicense(ctx, &model.IDorLicenseInput{LicenseInput: ingest})
 				if (err != nil) != tt.ExpIngestErr {
 					t.Errorf("arangoClient.IngestLicense() error = %v, wantErr %v", err, tt.ExpIngestErr)
 					return
@@ -129,7 +129,7 @@ func TestLicensesBulk(t *testing.T) {
 	b := setupTest(t)
 	tests := []struct {
 		Name         string
-		Ingests      []*model.LicenseInputSpec
+		Ingests      []*model.IDorLicenseInput
 		ExpIngestErr bool
 		Query        *model.LicenseSpec
 		Exp          []*model.License
@@ -137,7 +137,7 @@ func TestLicensesBulk(t *testing.T) {
 	}{
 		{
 			Name:    "Query by Name",
-			Ingests: []*model.LicenseInputSpec{testdata.L1, testdata.L1, testdata.L2, testdata.L3, testdata.L4},
+			Ingests: []*model.IDorLicenseInput{{LicenseInput: testdata.L1}, {LicenseInput: testdata.L1}, {LicenseInput: testdata.L2}, {LicenseInput: testdata.L3}, {LicenseInput: testdata.L4}},
 			Query: &model.LicenseSpec{
 				Name: ptrfrom.String("BSD-3-Clause"),
 			},

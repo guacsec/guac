@@ -179,11 +179,11 @@ func getScorecardValues(src *model.SourceInputSpec, scorecard *model.ScorecardIn
 
 // Ingest Scorecards
 
-func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.SourceInputSpec, scorecards []*model.ScorecardInputSpec) ([]string, error) {
+func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range sources {
-		listOfValues = append(listOfValues, getScorecardValues(sources[i], scorecards[i]))
+		listOfValues = append(listOfValues, getScorecardValues(sources[i].SourceInput, scorecards[i]))
 	}
 
 	var documents []string
@@ -255,7 +255,7 @@ func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.So
 
 // Ingest Scorecard
 
-func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceInputSpec, scorecard model.ScorecardInputSpec) (string, error) {
+func (c *arangoClient) IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error) {
 	query := `
 	LET firstSrc = FIRST(
 		FOR sName in srcNames
@@ -282,7 +282,7 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.SourceI
 	  
 	RETURN { 'scorecard_id': scorecard._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getScorecardValues(&source, &scorecard), "IngestScorecard")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getScorecardValues(source.SourceInput, &scorecard), "IngestScorecard")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest source occurrence: %w", err)
 	}

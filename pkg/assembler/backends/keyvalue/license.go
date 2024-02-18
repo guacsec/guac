@@ -69,7 +69,7 @@ func (c *demoClient) licenseByInput(ctx context.Context, b *model.LicenseInputSp
 
 // Ingest Licenses
 
-func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
+func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error) {
 	var modelLicenses []string
 	for _, lic := range licenses {
 		modelLic, err := c.IngestLicense(ctx, lic)
@@ -81,15 +81,15 @@ func (c *demoClient) IngestLicenses(ctx context.Context, licenses []*model.Licen
 	return modelLicenses, nil
 }
 
-func (c *demoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
+func (c *demoClient) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
 	return c.ingestLicense(ctx, license, true)
 }
 
-func (c *demoClient) ingestLicense(ctx context.Context, license *model.LicenseInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestLicense(ctx context.Context, license *model.IDorLicenseInput, readOnly bool) (string, error) {
 	in := &licStruct{
-		Name:        license.Name,
-		Inline:      nilToEmpty(license.Inline),
-		ListVersion: nilToEmpty(license.ListVersion),
+		Name:        license.LicenseInput.Name,
+		Inline:      nilToEmpty(license.LicenseInput.Inline),
+		ListVersion: nilToEmpty(license.LicenseInput.ListVersion),
 	}
 
 	lock(&c.m, readOnly)
@@ -205,4 +205,21 @@ func (c *demoClient) convLicense(a *licStruct) *model.License {
 		rv.ListVersion = &a.ListVersion
 	}
 	return rv
+}
+
+// returnFoundLicense return the node by first searching via ID. If the ID is not specified, it defaults to searching via inputspec
+func (c *demoClient) returnFoundLicense(ctx context.Context, licenseIDorInput *model.IDorLicenseInput) (*licStruct, error) {
+	if licenseIDorInput.LicenseID != nil {
+		licStruct, err := byIDkv[*licStruct](ctx, *licenseIDorInput.LicenseID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to return licStruct node by ID with error: %v", err)
+		}
+		return licStruct, nil
+	} else {
+		licStruct, err := c.licenseByInput(ctx, licenseIDorInput.LicenseInput)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to licenseByInput with error: %v", err)
+		}
+		return licStruct, nil
+	}
 }

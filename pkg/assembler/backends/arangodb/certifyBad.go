@@ -341,7 +341,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 		  
 		  RETURN { 'certifyBad_id': certifyBad._id }`
 
-			cursor, err = executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(subject.Package, pkgMatchType, nil, nil, &certifyBad), "IngestCertifyBad - PkgVersion")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(subject.Package.PackageInput, pkgMatchType, nil, nil, &certifyBad), "IngestCertifyBad - PkgVersion")
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package certifyBad: %w", err)
 			}
@@ -373,7 +373,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 			  
 			  RETURN { 'certifyBad_id': certifyBad._id }`
 
-			cursor, err = executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(subject.Package, pkgMatchType, nil, nil, &certifyBad), "IngestCertifyBad - PkgName")
+			cursor, err = executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(subject.Package.PackageInput, pkgMatchType, nil, nil, &certifyBad), "IngestCertifyBad - PkgName")
 			if err != nil {
 				return "", fmt.Errorf("failed to ingest package certifyBad: %w", err)
 			}
@@ -398,7 +398,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 		
 		RETURN { 'certifyBad_id': certifyBad._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(nil, nil, subject.Artifact, nil, &certifyBad), "IngestCertifyBad - artifact")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(nil, nil, subject.Artifact.ArtifactInput, nil, &certifyBad), "IngestCertifyBad - artifact")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest artifact certifyBad: %w", err)
 		}
@@ -430,7 +430,7 @@ func (c *arangoClient) IngestCertifyBad(ctx context.Context, subject model.Packa
 		
 		RETURN { 'certifyBad_id': certifyBad._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(nil, nil, nil, subject.Source, &certifyBad), "IngestCertifyBad - source")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getCertifyBadQueryValues(nil, nil, nil, subject.Source.SourceInput, &certifyBad), "IngestCertifyBad - source")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest source certifyBad: %w", err)
 		}
@@ -457,7 +457,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		var listOfValues []map[string]any
 
 		for i := range subjects.Packages {
-			listOfValues = append(listOfValues, getCertifyBadQueryValues(subjects.Packages[i], pkgMatchType, nil, nil, certifyBads[i]))
+			listOfValues = append(listOfValues, getCertifyBadQueryValues(subjects.Packages[i].PackageInput, pkgMatchType, nil, nil, certifyBads[i]))
 		}
 
 		var documents []string
@@ -557,7 +557,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		var listOfValues []map[string]any
 
 		for i := range subjects.Artifacts {
-			listOfValues = append(listOfValues, getCertifyBadQueryValues(nil, nil, subjects.Artifacts[i], nil, certifyBads[i]))
+			listOfValues = append(listOfValues, getCertifyBadQueryValues(nil, nil, subjects.Artifacts[i].ArtifactInput, nil, certifyBads[i]))
 		}
 
 		var documents []string
@@ -611,7 +611,7 @@ func (c *arangoClient) IngestCertifyBads(ctx context.Context, subjects model.Pac
 		var listOfValues []map[string]any
 
 		for i := range subjects.Sources {
-			listOfValues = append(listOfValues, getCertifyBadQueryValues(nil, nil, nil, subjects.Sources[i], certifyBads[i]))
+			listOfValues = append(listOfValues, getCertifyBadQueryValues(nil, nil, nil, subjects.Sources[i].SourceInput, certifyBads[i]))
 		}
 
 		var documents []string

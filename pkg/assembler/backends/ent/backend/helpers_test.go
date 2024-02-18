@@ -13,15 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package backend
 
 import (
-	"reflect"
-	"strconv"
 	"strings"
-	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -29,20 +24,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
-func ptr[T any](s T) *T {
-	return &s
-}
-
 var ignoreID = cmp.FilterPath(func(p cmp.Path) bool {
 	return strings.Compare(".ID", p[len(p)-1].String()) == 0
-}, cmp.Ignore())
-
-var ignoreEmptySlices = cmp.FilterValues(func(x, y interface{}) bool {
-	xv, yv := reflect.ValueOf(x), reflect.ValueOf(y)
-	if xv.Kind() == reflect.Slice && yv.Kind() == reflect.Slice {
-		return xv.Len() == 0 && yv.Len() == 0
-	}
-	return false
 }, cmp.Ignore())
 
 var IngestPredicatesCmpOpts = []cmp.Option{
@@ -132,15 +115,4 @@ func certifyLegalLess(e1, e2 *model.CertifyLegal) bool {
 		}
 	}
 	return false
-}
-
-func rewriteID(t *testing.T, queryID *string, realIDs []string) {
-	idIdx, err := strconv.Atoi(*queryID)
-	if err == nil {
-		if idIdx >= len(realIDs) {
-			t.Logf("ID index out of range, want: %d, got: %d. So ID %d will be directly used to query.", len(realIDs), idIdx, idIdx)
-		} else {
-			*queryID = realIDs[idIdx]
-		}
-	}
 }

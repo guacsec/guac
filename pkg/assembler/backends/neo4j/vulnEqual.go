@@ -192,10 +192,10 @@ func (c *neo4jClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEq
 // 	return &isVulnerability
 // }
 
-func (c *neo4jClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
+func (c *neo4jClient) IngestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	return "", fmt.Errorf("not implemented - IngestVulnEqual")
 }
 
-func (c *neo4jClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+func (c *neo4jClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
 	return []string{}, fmt.Errorf("not implemented - IngestVulnEquals")
 }

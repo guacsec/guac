@@ -44,8 +44,8 @@ func TestIngestPointOfContact(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source:   testdata.S1,
-						Artifact: testdata.A1,
+						Source:   &model.IDorSourceInput{SourceInput: testdata.S1},
+						Artifact: &model.IDorArtifactInput{ArtifactInput: testdata.A1},
 					},
 					HM: &model.PointOfContactInputSpec{
 						Justification: "test justification",
@@ -59,7 +59,7 @@ func TestIngestPointOfContact(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInput{
-						Source: testdata.S1,
+						Source: &model.IDorSourceInput{SourceInput: testdata.S1},
 					},
 					HM: &model.PointOfContactInputSpec{
 						Justification: "test justification",
@@ -113,7 +113,7 @@ func TestIngestPointOfContacts(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
 					},
 					Match: model.MatchFlags{
 						Pkg: model.PkgMatchTypeSpecificVersion,
@@ -132,7 +132,7 @@ func TestIngestPointOfContacts(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Sources: []*model.SourceInputSpec{testdata.S1, testdata.S2},
+						Sources: []*model.IDorSourceInput{{SourceInput: testdata.S1}, {SourceInput: testdata.S2}},
 					},
 					PC: []*model.PointOfContactInputSpec{
 						{
@@ -148,7 +148,7 @@ func TestIngestPointOfContacts(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
 					},
 					PC: []*model.PointOfContactInputSpec{
 						{
@@ -164,9 +164,9 @@ func TestIngestPointOfContacts(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages:  []*model.PkgInputSpec{testdata.P1},
-						Sources:   []*model.SourceInputSpec{testdata.S1},
-						Artifacts: []*model.ArtifactInputSpec{testdata.A1},
+						Packages:  []*model.IDorPkgInput{{PackageInput: testdata.P1}},
+						Sources:   []*model.IDorSourceInput{{SourceInput: testdata.S1}},
+						Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
 					},
 					PC: []*model.PointOfContactInputSpec{
 						{
@@ -182,7 +182,7 @@ func TestIngestPointOfContacts(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: model.PackageSourceOrArtifactInputs{
-						Packages: []*model.PkgInputSpec{testdata.P1},
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
 					},
 					Match: model.MatchFlags{
 						Pkg: model.PkgMatchTypeAllVersions,

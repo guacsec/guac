@@ -65,7 +65,7 @@ func (n *isDependencyLink) BuildModelNode(ctx context.Context, c *demoClient) (m
 
 // Ingest IngestDependencies
 
-func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
+func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	// TODO(LUMJJB): match flags
 
 	var modelIsDependencies []string
@@ -80,11 +80,11 @@ func (c *demoClient) IngestDependencies(ctx context.Context, pkgs []*model.PkgIn
 }
 
 // Ingest IsDependency
-func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
+func (c *demoClient) IngestDependency(ctx context.Context, packageArg model.IDorPkgInput, dependentPackageArg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) (string, error) {
 	return c.ingestDependency(ctx, packageArg, dependentPackageArg, depPkgMatchType, dependency, true)
 }
 
-func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgInputSpec, dependentPackageArg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDorPkgInput, dependentPackageArg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestDependency"
 
 	inLink := &isDependencyLink{
@@ -99,20 +99,18 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.PkgI
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	// for IsDependency the dependent package will return the ID at the
-	// packageName node. VersionRange will be used to specify the versions are
-	// the attestation relates to
-	foundPkgVersion, err := c.getPackageVerFromInput(ctx, packageArg)
+	var depPkg pkgNameOrVersion
+	var err error
+	inLink.DepPackageID, depPkg, err = c.returnFoundPkgBasedOnMatchType(ctx, &dependentPackageArg, &depPkgMatchType)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	inLink.PackageID = foundPkgVersion.ThisID
 
-	depPkg, err := c.getPackageNameOrVerFromInput(ctx, dependentPackageArg, depPkgMatchType)
+	foundPkgVersion, err := c.returnFoundPkgVersion(ctx, &packageArg)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
-	inLink.DepPackageID = depPkg.ID()
+	inLink.PackageID = foundPkgVersion.ID()
 
 	outLink, err := byKeykv[*isDependencyLink](ctx, isDepCol, inLink.Key(), c)
 	if err == nil {

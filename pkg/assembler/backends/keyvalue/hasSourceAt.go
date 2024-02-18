@@ -67,7 +67,7 @@ func (n *srcMapLink) BuildModelNode(ctx context.Context, c *demoClient) (model.N
 
 // Ingest HasSourceAt
 
-func (c *demoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType *model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
+func (c *demoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
 	var modelHasMetadataIDs []string
 
 	for i := range hasSourceAts {
@@ -80,11 +80,11 @@ func (c *demoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgIn
 	return modelHasMetadataIDs, nil
 }
 
-func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
+func (c *demoClient) IngestHasSourceAt(ctx context.Context, packageArg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	return c.ingestHasSourceAt(ctx, packageArg, pkgMatchType, source, hasSourceAt, true)
 }
 
-func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, hasSourceAt model.HasSourceAtInputSpec, readOnly bool) (string, error) {
 	funcName := "IngestHasSourceAt"
 
 	in := &srcMapLink{
@@ -97,17 +97,18 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.Pkg
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	srcName, err := c.getSourceNameFromInput(ctx, source)
+	var pkgNameOrVersionNode pkgNameOrVersion
+	var err error
+	in.PackageID, pkgNameOrVersionNode, err = c.returnFoundPkgBasedOnMatchType(ctx, &packageArg, &pkgMatchType)
+	if err != nil {
+		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
+	}
+
+	srcName, err := c.returnFoundSource(ctx, &source)
 	if err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	in.SourceID = srcName.ThisID
-
-	pkgNameOrVersionNode, err := c.getPackageNameOrVerFromInput(ctx, packageArg, pkgMatchType)
-	if err != nil {
-		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
-	}
-	in.PackageID = pkgNameOrVersionNode.ID()
 
 	out, err := byKeykv[*srcMapLink](ctx, hsaCol, in.Key(), c)
 	if err == nil {

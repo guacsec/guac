@@ -256,7 +256,7 @@ func getHasSourceAtQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 	return values
 }
 
-func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
+func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
 	var cursor driver.Cursor
 	var err error
 	if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
@@ -294,7 +294,7 @@ func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInput
 		  
 		  RETURN { 'hasSourceAt_id': hasSourceAt._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSourceAtQueryValues(&pkg, &pkgMatchType, &source, &hasSourceAt), "IngestHasSourceAt - PkgVersion")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSourceAtQueryValues(pkg.PackageInput, &pkgMatchType, source.SourceInput, &hasSourceAt), "IngestHasSourceAt - PkgVersion")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
@@ -334,7 +334,7 @@ func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInput
 			  
 			  RETURN { 'hasSourceAt_id': hasSourceAt._id }`
 
-		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSourceAtQueryValues(&pkg, &pkgMatchType, &source, &hasSourceAt), "IngestHasSourceAt - PkgName")
+		cursor, err = executeQueryWithRetry(ctx, c.db, query, getHasSourceAtQueryValues(pkg.PackageInput, &pkgMatchType, source.SourceInput, &hasSourceAt), "IngestHasSourceAt - PkgName")
 		if err != nil {
 			return "", fmt.Errorf("failed to ingest package hasSourceAt: %w", err)
 		}
@@ -352,13 +352,13 @@ func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.PkgInput
 	}
 }
 
-func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.PkgInputSpec, pkgMatchType *model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
+func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
 	var cursor driver.Cursor
 	var err error
 	var listOfValues []map[string]any
 
 	for i := range pkgs {
-		listOfValues = append(listOfValues, getHasSourceAtQueryValues(pkgs[i], pkgMatchType, sources[i], hasSourceAts[i]))
+		listOfValues = append(listOfValues, getHasSourceAtQueryValues(pkgs[i].PackageInput, pkgMatchType, sources[i].SourceInput, hasSourceAts[i]))
 	}
 
 	var documents []string

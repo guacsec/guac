@@ -83,12 +83,12 @@ func nilToEmpty(s *string) string {
 	return *s
 }
 
-func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]string, error) {
+func (c *arangoClient) IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error) {
 
 	var listOfValues []map[string]any
 
 	for i := range licenses {
-		listOfValues = append(listOfValues, getLicenseQueryValues(licenses[i]))
+		listOfValues = append(listOfValues, getLicenseQueryValues(licenses[i].LicenseInput))
 	}
 
 	var documents []string
@@ -139,14 +139,14 @@ RETURN { "id": NEW._id }`
 	return licenseIDs, nil
 }
 
-func (c *arangoClient) IngestLicense(ctx context.Context, license *model.LicenseInputSpec) (string, error) {
+func (c *arangoClient) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
 	query := `
 UPSERT { name:@name, inline:@inline, listversion:@listversion }
 INSERT { name:@name, inline:@inline, listversion:@listversion }
 UPDATE {} IN licenses OPTIONS { indexHint: "byNameInlineListVer" }
 RETURN { "id": NEW._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getLicenseQueryValues(license), "IngestLicense")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getLicenseQueryValues(license.LicenseInput), "IngestLicense")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest license: %w", err)
 	}
@@ -191,10 +191,10 @@ func getLicenses(ctx context.Context, cursor driver.Cursor) ([]*model.License, e
 	return createdLicenses, nil
 }
 
-func (c *arangoClient) getLicenses(ctx context.Context, licenses []*model.LicenseInputSpec) ([]*model.License, error) {
+func (c *arangoClient) getLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]*model.License, error) {
 	var listOfValues []map[string]any
 	for i := range licenses {
-		listOfValues = append(listOfValues, getLicenseQueryValues(licenses[i]))
+		listOfValues = append(listOfValues, getLicenseQueryValues(licenses[i].LicenseInput))
 	}
 
 	var documents []string

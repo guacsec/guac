@@ -406,14 +406,14 @@ func (ec *executionContext) unmarshalInputPackageOrSourceInput(ctx context.Conte
 		switch k {
 		case "package":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
-			data, err := ec.unmarshalOPkgInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpec(ctx, v)
+			data, err := ec.unmarshalOIDorPkgInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Package = data
 		case "source":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("source"))
-			data, err := ec.unmarshalOSourceInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpec(ctx, v)
+			data, err := ec.unmarshalOIDorSourceInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -440,14 +440,14 @@ func (ec *executionContext) unmarshalInputPackageOrSourceInputs(ctx context.Cont
 		switch k {
 		case "packages":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packages"))
-			data, err := ec.unmarshalOPkgInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgInputSpecᚄ(ctx, v)
+			data, err := ec.unmarshalOIDorPkgInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorPkgInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Packages = data
 		case "sources":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sources"))
-			data, err := ec.unmarshalOSourceInputSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceInputSpecᚄ(ctx, v)
+			data, err := ec.unmarshalOIDorSourceInput2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorSourceInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -201,13 +201,13 @@ func generateModelIsOccurrence(subject model.PackageOrSource, artifact *model.Ar
 
 // Ingest IngestOccurrences
 
-func (c *neo4jClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.ArtifactInputSpec, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
+func (c *neo4jClient) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	return []string{}, fmt.Errorf("not implemented: IngestOccurrences")
 }
 
 // Ingest IngestOccurrence
 
-func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.ArtifactInputSpec, occurrence model.IsOccurrenceInputSpec) (string, error) {
+func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error) {
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
@@ -216,7 +216,7 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.Packag
 	var firstMatch bool = true
 	queryValues := map[string]any{}
 
-	occurrenceArt := helper.ConvertArtInputSpecToArtSpec(&artifact)
+	occurrenceArt := helper.ConvertArtInputSpecToArtSpec(artifact.ArtifactInput)
 
 	queryValues[justification] = occurrence.Justification
 	queryValues[origin] = occurrence.Origin
@@ -224,7 +224,7 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.Packag
 
 	if subject.Package != nil {
 		// TODO: use generics here between PkgInputSpec and PkgSpecs?
-		selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(subject.Package)
+		selectedPkgSpec := helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput)
 
 		query := "MATCH (root:Pkg)-[:PkgHasType]->(type:PkgType)-[:PkgHasNamespace]->(namespace:PkgNamespace)" +
 			"-[:PkgHasName]->(name:PkgName)-[:PkgHasVersion]->(version:PkgVersion), (objArt:Artifact)"
@@ -285,7 +285,7 @@ func (c *neo4jClient) IngestOccurrence(ctx context.Context, subject model.Packag
 		return result.(*model.IsOccurrence).ID, nil
 	} else if subject.Source != nil {
 		// TODO: use generics here between SourceInputSpec and SourceSpec?
-		selectedSrcSpec := helper.ConvertSrcInputSpecToSrcSpec(subject.Source)
+		selectedSrcSpec := helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput)
 
 		returnValue := " RETURN type.type, namespace.namespace, name.name, name.tag, name.commit, isOccurrence, objArt.algorithm, objArt.digest"
 

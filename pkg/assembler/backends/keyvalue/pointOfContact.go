@@ -125,30 +125,29 @@ func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.Pac
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	var foundPkgNameorVersionNode pkgNameOrVersion
-	var foundArtStrct *artStruct
+	var foundPkgNameOrVersionNode pkgNameOrVersion
+	var foundArtStruct *artStruct
 	var srcName *srcNameNode
 	if subject.Package != nil {
 		var err error
-		foundPkgNameorVersionNode, err = c.getPackageNameOrVerFromInput(ctx, *subject.Package, *pkgMatchType)
+		in.PackageID, foundPkgNameOrVersionNode, err = c.returnFoundPkgBasedOnMatchType(ctx, subject.Package, pkgMatchType)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.PackageID = foundPkgNameorVersionNode.ID()
 	} else if subject.Artifact != nil {
 		var err error
-		foundArtStrct, err = c.artifactByInput(ctx, subject.Artifact)
+		foundArtStruct, err = c.returnFoundArtifact(ctx, subject.Artifact)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.ArtifactID = foundArtStrct.ThisID
+		in.ArtifactID = foundArtStruct.ID()
 	} else {
 		var err error
-		srcName, err = c.getSourceNameFromInput(ctx, *subject.Source)
+		srcName, err = c.returnFoundSource(ctx, subject.Source)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
-		in.SourceID = srcName.ThisID
+		in.SourceID = srcName.ID()
 	}
 
 	out, err := byKeykv[*pointOfContactLink](ctx, pocCol, in.Key(), c)
@@ -171,13 +170,13 @@ func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.Pac
 		return "", err
 	}
 
-	if foundPkgNameorVersionNode != nil {
-		if err := foundPkgNameorVersionNode.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
+	if foundPkgNameOrVersionNode != nil {
+		if err := foundPkgNameOrVersionNode.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
 			return "", err
 		}
 	}
-	if foundArtStrct != nil {
-		if err := foundArtStrct.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
+	if foundArtStruct != nil {
+		if err := foundArtStruct.setPointOfContactLinks(ctx, in.ThisID, c); err != nil {
 			return "", err
 		}
 	}

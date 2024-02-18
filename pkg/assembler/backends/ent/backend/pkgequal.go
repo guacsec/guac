@@ -45,9 +45,9 @@ func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]
 	return collect(records, toModelPkgEqual), nil
 }
 
-func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, pkgEqual model.PkgEqualInputSpec) (string, error) {
+func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error) {
 	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		return upsertPackageEqual(ctx, ent.TxFromContext(ctx), pkg, depPkg, pkgEqual)
+		return upsertPackageEqual(ctx, ent.TxFromContext(ctx), *pkg.PackageInput, *depPkg.PackageInput, pkgEqual)
 	})
 	if err != nil {
 		return "", err
@@ -56,7 +56,7 @@ func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.PkgInputSpec,
 	return strconv.Itoa(*id), nil
 }
 
-func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.PkgInputSpec, otherPackages []*model.PkgInputSpec, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
+func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
 	var ids []string
 	for i, pkgEqual := range pkgEquals {
 		id, err := b.IngestPkgEqual(ctx, *pkgs[i], *otherPackages[i], *pkgEqual)

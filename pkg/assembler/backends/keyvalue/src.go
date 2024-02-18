@@ -184,7 +184,7 @@ func (n *srcNamespace) addName(ctx context.Context, name string, c *demoClient) 
 
 // Ingest Source
 
-func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceInputSpec) ([]*model.SourceIDs, error) {
+func (c *demoClient) IngestSources(ctx context.Context, sources []*model.IDorSourceInput) ([]*model.SourceIDs, error) {
 	var modelSources []*model.SourceIDs
 	for _, src := range sources {
 		modelSrc, err := c.IngestSource(ctx, *src)
@@ -196,9 +196,9 @@ func (c *demoClient) IngestSources(ctx context.Context, sources []*model.SourceI
 	return modelSources, nil
 }
 
-func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSpec) (*model.SourceIDs, error) {
+func (c *demoClient) IngestSource(ctx context.Context, input model.IDorSourceInput) (*model.SourceIDs, error) {
 	inType := &srcType{
-		Type: input.Type,
+		Type: input.SourceInput.Type,
 	}
 	c.m.RLock()
 	outType, err := byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
@@ -230,7 +230,7 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 
 	inNamespace := &srcNamespace{
 		Parent:    outType.ThisID,
-		Namespace: input.Namespace,
+		Namespace: input.SourceInput.Namespace,
 	}
 	c.m.RLock()
 	outNamespace, err := byKeykv[*srcNamespace](ctx, srcNSCol, inNamespace.Key(), c)
@@ -266,9 +266,9 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.SourceInputSp
 
 	inName := &srcNameNode{
 		Parent: outNamespace.ThisID,
-		Name:   input.Name,
-		Tag:    nilToEmpty(input.Tag),
-		Commit: nilToEmpty(input.Commit),
+		Name:   input.SourceInput.Name,
+		Tag:    nilToEmpty(input.SourceInput.Tag),
+		Commit: nilToEmpty(input.SourceInput.Commit),
 	}
 	c.m.RLock()
 	outName, err := byKeykv[*srcNameNode](ctx, srcNameCol, inName.Key(), c)
@@ -620,4 +620,21 @@ func (c *demoClient) exactSource(ctx context.Context, filter *model.SourceSpec) 
 		return srcN, nil
 	}
 	return nil, nil
+}
+
+// returnFoundSource return the node by first searching via ID. If the ID is not specified, it defaults to searching via inputspec
+func (c *demoClient) returnFoundSource(ctx context.Context, srcIDorInput *model.IDorSourceInput) (*srcNameNode, error) {
+	if srcIDorInput.SourceNameID != nil {
+		foundSrcNameNode, err := byIDkv[*srcNameNode](ctx, *srcIDorInput.SourceNameID, c)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to return srcNameNode node by ID with error: %v", err)
+		}
+		return foundSrcNameNode, nil
+	} else {
+		foundSrcNameNode, err := c.getSourceNameFromInput(ctx, *srcIDorInput.SourceInput)
+		if err != nil {
+			return nil, gqlerror.Errorf("failed to getSourceNameFromInput with error: %v", err)
+		}
+		return foundSrcNameNode, nil
+	}
 }

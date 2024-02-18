@@ -59,7 +59,7 @@ func (n *vulnerabilityEqualLink) BuildModelNode(ctx context.Context, c *demoClie
 
 // Ingest IngestVulnEqual
 
-func (c *demoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.VulnerabilityInputSpec, otherVulnerabilities []*model.VulnerabilityInputSpec, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
+func (c *demoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
 	var modelHashEqualsIDs []string
 	for i := range vulnEquals {
 		vulnEqual, err := c.IngestVulnEqual(ctx, *vulnerabilities[i], *otherVulnerabilities[i], *vulnEquals[i])
@@ -71,11 +71,11 @@ func (c *demoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*mo
 	return modelHashEqualsIDs, nil
 }
 
-func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (string, error) {
+func (c *demoClient) IngestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec) (string, error) {
 	return c.ingestVulnEqual(ctx, vulnerability, otherVulnerability, vulnEqual, true)
 }
 
-func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec, readOnly bool) (string, error) {
 	funcName := "ingestVulnEqual"
 
 	in := &vulnerabilityEqualLink{
@@ -89,10 +89,10 @@ func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.Vu
 
 	vIDs := make([]string, 0, 2)
 	vs := make([]*vulnIDNode, 0, 2)
-	for _, vi := range []model.VulnerabilityInputSpec{vulnerability, otherVulnerability} {
-		v, err := c.getVulnerabilityFromInput(ctx, vi)
+	for _, vi := range []model.IDorVulnerabilityInput{vulnerability, otherVulnerability} {
+		v, err := c.returnFoundVulnerability(ctx, &vi)
 		if err != nil {
-			return "", gqlerror.Errorf("%v :: %v", funcName, err)
+			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		vs = append(vs, v)
 		vIDs = append(vIDs, v.ThisID)

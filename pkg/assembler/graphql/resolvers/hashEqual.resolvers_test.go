@@ -29,8 +29,8 @@ import (
 
 func TestIngestHashEquals(t *testing.T) {
 	type call struct {
-		A1 []*model.ArtifactInputSpec
-		A2 []*model.ArtifactInputSpec
+		A1 []*model.IDorArtifactInput
+		A2 []*model.IDorArtifactInput
 		HE []*model.HashEqualInputSpec
 	}
 	tests := []struct {
@@ -42,8 +42,8 @@ func TestIngestHashEquals(t *testing.T) {
 			Name: "Ingest with different number of artifacts",
 			Calls: []call{
 				{
-					A1: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
-					A2: []*model.ArtifactInputSpec{testdata.A2},
+					A1: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
+					A2: []*model.IDorArtifactInput{{ArtifactInput: testdata.A2}},
 					HE: []*model.HashEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -57,8 +57,8 @@ func TestIngestHashEquals(t *testing.T) {
 			Name: "Ingest with different number of HashEqual",
 			Calls: []call{
 				{
-					A1: []*model.ArtifactInputSpec{testdata.A1},
-					A2: []*model.ArtifactInputSpec{testdata.A2},
+					A1: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					A2: []*model.IDorArtifactInput{{ArtifactInput: testdata.A2}},
 					HE: []*model.HashEqualInputSpec{
 						{
 							Justification: "test justification",
@@ -75,8 +75,8 @@ func TestIngestHashEquals(t *testing.T) {
 			Name: "HappyPath",
 			Calls: []call{
 				{
-					A1: []*model.ArtifactInputSpec{testdata.A1},
-					A2: []*model.ArtifactInputSpec{testdata.A2},
+					A1: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					A2: []*model.IDorArtifactInput{{ArtifactInput: testdata.A2}},
 					HE: []*model.HashEqualInputSpec{
 						{
 							Justification: "test justification",

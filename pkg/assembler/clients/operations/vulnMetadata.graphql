@@ -18,7 +18,7 @@
 # Defines the GraphQL operations to ingest metadata for a vulnerability into GUAC
 
 mutation IngestVulnHasMetadata(
-  $vulnerability: VulnerabilityInputSpec!, 
+  $vulnerability: IDorVulnerabilityInput!, 
   $vulnMetadata: VulnerabilityMetadataInputSpec!
   ) {
   ingestVulnerabilityMetadata(
@@ -30,7 +30,7 @@ mutation IngestVulnHasMetadata(
 # Defines the GraphQL operations to bulk ingest metadata for a vulnerability into GUAC
 
 mutation IngestBulkVulnHasMetadata(
-  $vulnerabilities: [VulnerabilityInputSpec!]!, 
+  $vulnerabilities: [IDorVulnerabilityInput!]!, 
   $vulnerabilityMetadataList: [VulnerabilityMetadataInputSpec!]!
   ) {
   ingestBulkVulnerabilityMetadata(

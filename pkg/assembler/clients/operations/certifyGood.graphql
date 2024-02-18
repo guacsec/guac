@@ -18,7 +18,7 @@
 # Defines the GraphQL operations to ingest a CertifyGood into GUAC
 
 mutation IngestCertifyGoodPkg(
-  $pkg: PkgInputSpec!
+  $pkg: IDorPkgInput!
   $pkgMatchType: MatchFlags!
   $certifyGood: CertifyGoodInputSpec!
 ) {
@@ -30,7 +30,7 @@ mutation IngestCertifyGoodPkg(
 }
 
 mutation IngestCertifyGoodSrc(
-  $source: SourceInputSpec!
+  $source: IDorSourceInput!
   $certifyGood: CertifyGoodInputSpec!
 ) {
   ingestCertifyGood(
@@ -41,7 +41,7 @@ mutation IngestCertifyGoodSrc(
 }
 
 mutation IngestCertifyGoodArtifact(
-  $artifact: ArtifactInputSpec!
+  $artifact: IDorArtifactInput!
   $certifyGood: CertifyGoodInputSpec!
 ) {
   ingestCertifyGood(
@@ -54,7 +54,7 @@ mutation IngestCertifyGoodArtifact(
 # Defines the GraphQL operations to bulk ingest a CertifyGood into GUAC
 
 mutation IngestCertifyGoodPkgs(
-  $pkgs: [PkgInputSpec!]!
+  $pkgs: [IDorPkgInput!]!
   $pkgMatchType: MatchFlags!
   $certifyGoods: [CertifyGoodInputSpec!]!
 ) {
@@ -66,7 +66,7 @@ mutation IngestCertifyGoodPkgs(
 }
 
 mutation IngestCertifyGoodSrcs(
-  $sources: [SourceInputSpec!]!
+  $sources: [IDorSourceInput!]!
   $certifyGoods: [CertifyGoodInputSpec!]!
 ) {
   ingestCertifyGoods(
@@ -77,7 +77,7 @@ mutation IngestCertifyGoodSrcs(
 }
 
 mutation IngestCertifyGoodArtifacts(
-  $artifacts: [ArtifactInputSpec!]!
+  $artifacts: [IDorArtifactInput!]!
   $certifyGoods: [CertifyGoodInputSpec!]!
 ) {
   ingestCertifyGoods(

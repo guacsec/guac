@@ -60,7 +60,7 @@ func (n *hashEqualStruct) BuildModelNode(ctx context.Context, c *demoClient) (mo
 
 // Ingest HashEqual
 
-func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.ArtifactInputSpec, otherArtifacts []*model.ArtifactInputSpec, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
+func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
 	var modelHashEquals []string
 	for i := range hashEquals {
 		hashEqual, err := c.IngestHashEqual(ctx, *artifacts[i], *otherArtifacts[i], *hashEquals[i])
@@ -72,11 +72,11 @@ func (c *demoClient) IngestHashEquals(ctx context.Context, artifacts []*model.Ar
 	return modelHashEquals, nil
 }
 
-func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) (string, error) {
+func (c *demoClient) IngestHashEqual(ctx context.Context, artifact model.IDorArtifactInput, equalArtifact model.IDorArtifactInput, hashEqual model.HashEqualInputSpec) (string, error) {
 	return c.ingestHashEqual(ctx, artifact, equalArtifact, hashEqual, true)
 }
 
-func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.ArtifactInputSpec, equalArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec, readOnly bool) (string, error) {
+func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.IDorArtifactInput, equalArtifact model.IDorArtifactInput, hashEqual model.HashEqualInputSpec, readOnly bool) (string, error) {
 	in := &hashEqualStruct{
 		Justification: hashEqual.Justification,
 		Origin:        hashEqual.Origin,
@@ -86,11 +86,11 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.Artifac
 	lock(&c.m, readOnly)
 	defer unlock(&c.m, readOnly)
 
-	aInt1, err := c.artifactByInput(ctx, &artifact)
+	aInt1, err := c.returnFoundArtifact(ctx, &artifact)
 	if err != nil {
 		return "", gqlerror.Errorf("IngestHashEqual :: Artifact not found")
 	}
-	aInt2, err := c.artifactByInput(ctx, &equalArtifact)
+	aInt2, err := c.returnFoundArtifact(ctx, &equalArtifact)
 	if err != nil {
 		return "", gqlerror.Errorf("IngestHashEqual :: Artifact not found")
 	}

@@ -109,7 +109,7 @@ extend type Query {
 
 extend type Mutation {
   "Adds metadata about a vulnerability. The returned ID can be empty string."
-  ingestVulnerabilityMetadata(vulnerability: VulnerabilityInputSpec!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
+  ingestVulnerabilityMetadata(vulnerability: IDorVulnerabilityInput!, vulnerabilityMetadata: VulnerabilityMetadataInputSpec!): ID!
   "Bulk add certifications that vulnerability has a specific score. The returned array of IDs can be a an array of empty string."
-  ingestBulkVulnerabilityMetadata(vulnerabilities: [VulnerabilityInputSpec!]!, vulnerabilityMetadataList: [VulnerabilityMetadataInputSpec!]!): [ID!]!
+  ingestBulkVulnerabilityMetadata(vulnerabilities: [IDorVulnerabilityInput!]!, vulnerabilityMetadataList: [VulnerabilityMetadataInputSpec!]!): [ID!]!
 }

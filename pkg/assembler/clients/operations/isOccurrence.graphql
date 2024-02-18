@@ -18,8 +18,8 @@
 # Defines the GraphQL operations to ingest occurrence information into GUAC
 
 mutation IngestIsOccurrencePkg(
-  $pkg: PkgInputSpec!
-  $artifact: ArtifactInputSpec!
+  $pkg: IDorPkgInput!
+  $artifact: IDorArtifactInput!
   $occurrence: IsOccurrenceInputSpec!
 ) {
   ingestOccurrence(
@@ -30,8 +30,8 @@ mutation IngestIsOccurrencePkg(
 }
 
 mutation IngestIsOccurrenceSrc(
-  $source: SourceInputSpec!
-  $artifact: ArtifactInputSpec!
+  $source: IDorSourceInput!
+  $artifact: IDorArtifactInput!
   $occurrence: IsOccurrenceInputSpec!
 ) {
   ingestOccurrence(
@@ -44,8 +44,8 @@ mutation IngestIsOccurrenceSrc(
 # Defines the GraphQL operations to bulk ingest occurrences information into GUAC
 
 mutation IngestIsOccurrencesPkg(
-  $pkgs: [PkgInputSpec!]!
-  $artifacts: [ArtifactInputSpec!]!
+  $pkgs: [IDorPkgInput!]!
+  $artifacts: [IDorArtifactInput!]!
   $occurrences: [IsOccurrenceInputSpec!]!
 ) {
   ingestOccurrences(
@@ -56,8 +56,8 @@ mutation IngestIsOccurrencesPkg(
 }
 
 mutation IngestIsOccurrencesSrc(
-  $sources: [SourceInputSpec!]!
-  $artifacts: [ArtifactInputSpec!]!
+  $sources: [IDorSourceInput!]!
+  $artifacts: [IDorArtifactInput!]!
   $occurrences: [IsOccurrenceInputSpec!]!
 ) {
   ingestOccurrences(

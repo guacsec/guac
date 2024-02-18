@@ -53,14 +53,26 @@ input ArtifactInputSpec {
   digest: String!
 }
 
+"""
+IDorArtifactInput allows for specifying either the artifact ID or the ArtifactInputSpec.
+
+Either the ID or the ArtifactInputSpec must be specified. Both cannot be nil.
+
+If the ID is specified, the ArtifactInputSpec is not used.
+"""
+input IDorArtifactInput {
+  artifactID: ID
+  artifactInput: ArtifactInputSpec
+}
+
 extend type Query {
   "Returns all artifacts matching a filter."
   artifacts(artifactSpec: ArtifactSpec!): [Artifact!]!
 }
 
 extend type Mutation {
-  "Ingests a new artifact and returns it. The returned ID can be empty string."
-  ingestArtifact(artifact: ArtifactInputSpec): ID!
-  "Bulk ingests new artifacts and returns a list of them. The returned array of IDs can be a an array of empty string."
-  ingestArtifacts(artifacts: [ArtifactInputSpec!]!): [ID!]!
+  "Ingests a new artifact and returns it."
+  ingestArtifact(artifact: IDorArtifactInput): ID!
+  "Bulk ingests new artifacts and returns a list of them. The returned array of IDs must be in the same order as the inputs."
+  ingestArtifacts(artifacts: [IDorArtifactInput!]!): [ID!]!
 }

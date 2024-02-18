@@ -61,7 +61,7 @@ func TestHasSLSA(t *testing.T) {
 	}
 	type call struct {
 		Sub  *model.ArtifactInputSpec
-		BF   []*model.ArtifactInputSpec
+		BF   []*model.IDorArtifactInput
 		BB   *model.BuilderInputSpec
 		SLSA *model.SLSAInputSpec
 	}
@@ -101,10 +101,10 @@ func TestHasSLSA(t *testing.T) {
 						Digest:    "5a787865sd676dacb0142afa0b83029cd7befd9",
 						Algorithm: "sha1",
 					},
-					BF: []*model.ArtifactInputSpec{{
+					BF: []*model.IDorArtifactInput{{ArtifactInput: &model.ArtifactInputSpec{
 						Digest:    "0123456789abcdef0000000fedcba9876543210",
 						Algorithm: "sha1",
-					}},
+					}}},
 					BB: &model.BuilderInputSpec{
 						URI: "https://github.com/BuildPythonWheel/HubHostedActions@v1",
 					},
@@ -154,7 +154,7 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
@@ -182,7 +182,7 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
@@ -190,7 +190,7 @@ func TestHasSLSA(t *testing.T) {
 				},
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type",
@@ -218,7 +218,7 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type one",
@@ -226,7 +226,7 @@ func TestHasSLSA(t *testing.T) {
 				},
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						BuildType: "test type two",
@@ -254,7 +254,7 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						SlsaVersion: "test type one",
@@ -262,7 +262,7 @@ func TestHasSLSA(t *testing.T) {
 				},
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						SlsaVersion: "test type two",
@@ -290,7 +290,7 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						StartedOn: &testTime2,
@@ -298,7 +298,7 @@ func TestHasSLSA(t *testing.T) {
 				},
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						StartedOn: &testTime,
@@ -326,7 +326,7 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						FinishedOn: &testTime2,
@@ -334,7 +334,7 @@ func TestHasSLSA(t *testing.T) {
 				},
 				{
 					Sub: testdata.A1,
-					BF:  []*model.ArtifactInputSpec{testdata.A2},
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:  testdata.B1,
 					SLSA: &model.SLSAInputSpec{
 						FinishedOn: &testTime,
@@ -362,13 +362,13 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A3,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -398,13 +398,13 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A3,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -427,19 +427,19 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2, testdata.A3},
+					BF:   []*model.IDorArtifactInput{{ArtifactInput: testdata.A2}, {ArtifactInput: testdata.A3}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A4},
+					BF:   []*model.IDorArtifactInput{{ArtifactInput: testdata.A4}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -466,13 +466,13 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -499,13 +499,13 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A3,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -535,13 +535,13 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -564,13 +564,13 @@ func TestHasSLSA(t *testing.T) {
 			Calls: []call{
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B1,
 					SLSA: &model.SLSAInputSpec{},
 				},
 				{
 					Sub:  testdata.A1,
-					BF:   []*model.ArtifactInputSpec{testdata.A2},
+					BF:   []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
 					BB:   testdata.B2,
 					SLSA: &model.SLSAInputSpec{},
 				},
@@ -586,7 +586,7 @@ func TestHasSLSA(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if artID, err := b.IngestArtifact(ctx, a); err != nil {
+				if artID, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					if test.QuerySubjectID {
@@ -599,7 +599,7 @@ func TestHasSLSA(t *testing.T) {
 				}
 			}
 			for _, bld := range test.InBld {
-				if buildID, err := b.IngestBuilder(ctx, bld); err != nil {
+				if buildID, err := b.IngestBuilder(ctx, &model.IDorBuilderInput{BuilderInput: bld}); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				} else {
 					if test.QueryBuilderID {
@@ -612,7 +612,7 @@ func TestHasSLSA(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
-				slsaID, err := b.IngestSLSA(ctx, *o.Sub, o.BF, *o.BB, *o.SLSA)
+				slsaID, err := b.IngestSLSA(ctx, model.IDorArtifactInput{ArtifactInput: o.Sub}, o.BF, model.IDorBuilderInput{BuilderInput: o.BB}, *o.SLSA)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -643,9 +643,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 	ctx := context.Background()
 	b := setupTest(t)
 	type call struct {
-		Sub  []*model.ArtifactInputSpec
-		BF   [][]*model.ArtifactInputSpec
-		BB   []*model.BuilderInputSpec
+		Sub  []*model.IDorArtifactInput
+		BF   [][]*model.IDorArtifactInput
+		BB   []*model.IDorBuilderInput
 		SLSA []*model.SLSAInputSpec
 	}
 	tests := []struct {
@@ -664,9 +664,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: []*model.ArtifactInputSpec{testdata.A1},
-					BF:  [][]*model.ArtifactInputSpec{{testdata.A2}},
-					BB:  []*model.BuilderInputSpec{testdata.B1},
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}},
 					SLSA: []*model.SLSAInputSpec{
 						{
 							BuildType: "test type",
@@ -694,9 +694,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: []*model.ArtifactInputSpec{testdata.A1, testdata.A1},
-					BF:  [][]*model.ArtifactInputSpec{{testdata.A2}, {testdata.A2}},
-					BB:  []*model.BuilderInputSpec{testdata.B1, testdata.B1},
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}, {{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}},
 					SLSA: []*model.SLSAInputSpec{
 						{
 							BuildType: "test type",
@@ -727,9 +727,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: []*model.ArtifactInputSpec{testdata.A1, testdata.A1},
-					BF:  [][]*model.ArtifactInputSpec{{testdata.A2}, {testdata.A2}},
-					BB:  []*model.BuilderInputSpec{testdata.B1, testdata.B1},
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}, {{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}},
 					SLSA: []*model.SLSAInputSpec{
 						{
 							BuildType: "test type one",
@@ -760,9 +760,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: []*model.ArtifactInputSpec{testdata.A1, testdata.A3},
-					BF:  [][]*model.ArtifactInputSpec{{testdata.A2}, {testdata.A2}},
-					BB:  []*model.BuilderInputSpec{testdata.B1, testdata.B1},
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A3}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}, {{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}},
 					SLSA: []*model.SLSAInputSpec{
 						{SlsaVersion: "test type one"},
 						{},
@@ -793,9 +793,9 @@ func TestIngestHasSLSAs(t *testing.T) {
 			InBld: []*model.BuilderInputSpec{testdata.B1},
 			Calls: []call{
 				{
-					Sub: []*model.ArtifactInputSpec{testdata.A1, testdata.A1, testdata.A1},
-					BF:  [][]*model.ArtifactInputSpec{{testdata.A2}, {testdata.A2, testdata.A3}, {testdata.A4}},
-					BB:  []*model.BuilderInputSpec{testdata.B1, testdata.B1, testdata.B1},
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}, {{ArtifactInput: testdata.A2}, {ArtifactInput: testdata.A3}}, {{ArtifactInput: testdata.A4}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}, {BuilderInput: testdata.B1}},
 					SLSA: []*model.SLSAInputSpec{
 						{},
 						{},
@@ -822,12 +822,12 @@ func TestIngestHasSLSAs(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			for _, a := range test.InArt {
-				if _, err := b.IngestArtifact(ctx, a); err != nil {
+				if _, err := b.IngestArtifact(ctx, &model.IDorArtifactInput{ArtifactInput: a}); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				}
 			}
 			for _, bld := range test.InBld {
-				if _, err := b.IngestBuilder(ctx, bld); err != nil {
+				if _, err := b.IngestBuilder(ctx, &model.IDorBuilderInput{BuilderInput: bld}); err != nil {
 					t.Fatalf("Could not ingest builder: %v", err)
 				}
 			}

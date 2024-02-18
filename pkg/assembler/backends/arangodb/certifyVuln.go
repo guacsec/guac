@@ -189,11 +189,11 @@ func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.Vul
 	return values
 }
 
-func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.PkgInputSpec, vulnerabilities []*model.VulnerabilityInputSpec, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
+func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	var listOfValues []map[string]any
 
 	for i := range certifyVulns {
-		listOfValues = append(listOfValues, getCertifyVulnQueryValues(pkgs[i], vulnerabilities[i], certifyVulns[i]))
+		listOfValues = append(listOfValues, getCertifyVulnQueryValues(pkgs[i].PackageInput, vulnerabilities[i].VulnerabilityInput, certifyVulns[i]))
 	}
 
 	var documents []string
@@ -273,7 +273,7 @@ func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.Pkg
 	return certifyVulnIDList, nil
 }
 
-func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInputSpec, vulnerability model.VulnerabilityInputSpec, certifyVuln model.ScanMetadataInput) (string, error) {
+func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
 	query := `
 		LET firstPkg = FIRST(
 			FOR pVersion in pkgVersions
@@ -308,7 +308,7 @@ func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.PkgInput
 		  
 		  RETURN { 'certifyVuln_id': certifyVuln._id }`
 
-	cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyVulnQueryValues(&pkg, &vulnerability, &certifyVuln), "IngestCertifyVuln")
+	cursor, err := executeQueryWithRetry(ctx, c.db, query, getCertifyVulnQueryValues(pkg.PackageInput, vulnerability.VulnerabilityInput, &certifyVuln), "IngestCertifyVuln")
 	if err != nil {
 		return "", fmt.Errorf("failed to ingest certifyVuln: %w", err)
 	}

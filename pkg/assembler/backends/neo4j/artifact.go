@@ -65,17 +65,17 @@ func (c *neo4jClient) Artifacts(ctx context.Context, artifactSpec *model.Artifac
 	return result.([]*model.Artifact), nil
 }
 
-func (c *neo4jClient) IngestArtifacts(ctx context.Context, artifacts []*model.ArtifactInputSpec) ([]string, error) {
+func (c *neo4jClient) IngestArtifacts(ctx context.Context, artifacts []*model.IDorArtifactInput) ([]string, error) {
 	return []string{}, fmt.Errorf("not implemented: IngestArtifacts")
 }
 
-func (c *neo4jClient) IngestArtifact(ctx context.Context, artifact *model.ArtifactInputSpec) (string, error) {
+func (c *neo4jClient) IngestArtifact(ctx context.Context, artifact *model.IDorArtifactInput) (string, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
 	values := map[string]any{}
-	values["algorithm"] = strings.ToLower(artifact.Algorithm)
-	values["digest"] = strings.ToLower(artifact.Digest)
+	values["algorithm"] = strings.ToLower(artifact.ArtifactInput.Algorithm)
+	values["digest"] = strings.ToLower(artifact.ArtifactInput.Digest)
 
 	result, err := session.WriteTransaction(
 		func(tx neo4j.Transaction) (interface{}, error) {
