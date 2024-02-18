@@ -87,8 +87,8 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifact
 	return *id, nil
 }
 
-func upsertBulkArtifact(ctx context.Context, client *ent.Tx, artifacts []*model.IDorArtifactInput) (*[]string, error) {
-	batches := chunk(artifacts, 100)
+func upsertBulkArtifact(ctx context.Context, client *ent.Tx, artInputs []*model.IDorArtifactInput) (*[]string, error) {
+	batches := chunk(artInputs, 100)
 	ids := make([]string, 0)
 
 	for _, artifacts := range batches {
@@ -132,6 +132,7 @@ func upsertArtifact(ctx context.Context, client *ent.Tx, art *model.IDorArtifact
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert artifact")
 		}
+		id = artifactID
 	}
 	return ptrfrom.String(id.String()), nil
 }
