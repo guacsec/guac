@@ -17,10 +17,11 @@ package helpers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
 func ArtifactKey(input *generated.ArtifactInputSpec) string {
-	return fmt.Sprintf("%s:%s", input.Algorithm, input.Digest)
+	return fmt.Sprintf("%s:%s", strings.ToLower(input.Algorithm), strings.ToLower(input.Digest))
 }

@@ -18,7 +18,6 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
-	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -60,14 +59,14 @@ func builderInputQueryPredicate(spec model.BuilderInputSpec) predicate.Builder {
 
 func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.IDorBuilderInput) (string, error) {
 	funcName := "IngestBuilder"
-	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
 		return upsertBuilder(ctx, client, build.BuilderInput)
 	})
 	if err != nil {
 		return "", errors.Wrap(err, funcName)
 	}
-	return strconv.Itoa(*id), nil
+	return *id, nil
 }
 
 func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorBuilderInput) ([]string, error) {
@@ -90,7 +89,7 @@ func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorB
 	return buildersID, nil
 }
 
-func upsertBuilder(ctx context.Context, client *ent.Tx, spec *model.BuilderInputSpec) (*int, error) {
+func upsertBuilder(ctx context.Context, client *ent.Tx, spec *model.BuilderInputSpec) (*string, error) {
 	id, err := client.Builder.Create().SetURI(spec.URI).OnConflict(
 		sql.ConflictColumns(builder.FieldURI),
 	).

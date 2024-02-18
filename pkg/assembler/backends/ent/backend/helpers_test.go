@@ -17,6 +17,7 @@ package backend
 
 import (
 	"strings"
+	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -115,4 +116,44 @@ func certifyLegalLess(e1, e2 *model.CertifyLegal) bool {
 		}
 	}
 	return false
+}
+
+func TestArtifactKey(t *testing.T) {
+	tests := []struct {
+		name  string
+		input *model.ArtifactInputSpec
+		want  string
+	}{
+		{
+			name: "sha1",
+			input: &model.ArtifactInputSpec{
+				Algorithm: "sha1",
+				Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+			},
+			want: "sha1:7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+		},
+		{
+			name: "sha256",
+			input: &model.ArtifactInputSpec{
+				Algorithm: "sha256",
+				Digest:    "1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+			},
+			want: "sha256:1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+		},
+		{
+			name: "sha256",
+			input: &model.ArtifactInputSpec{
+				Algorithm: "sha256",
+				Digest:    "575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
+			},
+			want: "sha256:575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ArtifactKey(tt.input); got != tt.want {
+				t.Errorf("ArtifactKey() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

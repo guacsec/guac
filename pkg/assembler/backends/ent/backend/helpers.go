@@ -16,7 +16,11 @@
 package backend
 
 import (
+	"fmt"
+	"strings"
+
 	"entgo.io/ent/dialect/sql"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func IDEQ(id string) func(*sql.Selector) {
@@ -64,4 +68,39 @@ func fromPtrSlice[T any](slice []*T) []T {
 		ptrs[i] = *slice[i]
 	}
 	return ptrs
+}
+
+func toLowerPtr(s *string) *string {
+	if s == nil {
+		return nil
+	}
+	lower := strings.ToLower(*s)
+	return &lower
+}
+
+func chunk[T any](collection []T, size int) [][]T {
+	if size <= 0 {
+		panic("Second parameter must be greater than 0")
+	}
+
+	chunksNum := len(collection) / size
+	if len(collection)%size != 0 {
+		chunksNum += 1
+	}
+
+	result := make([][]T, 0, chunksNum)
+
+	for i := 0; i < chunksNum; i++ {
+		last := (i + 1) * size
+		if last > len(collection) {
+			last = len(collection)
+		}
+		result = append(result, collection[i*size:last])
+	}
+
+	return result
+}
+
+func artifactKey(input *model.ArtifactInputSpec) string {
+	return fmt.Sprintf("%s:%s", strings.ToLower(input.Algorithm), strings.ToLower(input.Digest))
 }
