@@ -13,10 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package cmd
 
 import (
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func TestValidateGCSFlags(t *testing.T) {
@@ -81,18 +85,17 @@ func TestValidateGCSFlags(t *testing.T) {
 
 }
 
-// TODO: what is the purpose of this test?
-// func TestJsonBz2Ingestion(t *testing.T) {
-// 	rootCmd := &cobra.Command{
-// 		Use:   "guacone",
-// 		Short: "guacone",
-// 	}
-// 	rootCmd.AddCommand(collectCmd)
-// 	rootCmd.AddCommand(filesCmd)
-// 	bz2Path := "./../../../internal/testing/testdata/exampledata/busybox-cyclonedx.json.bz2"
-// 	rootCmd.SetArgs([]string{"collect", "files", bz2Path})
-// 	err := rootCmd.Execute()
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+func TestJsonBz2Ingestion(t *testing.T) {
+	rootCmd := &cobra.Command{
+		Use:   "guacone",
+		Short: "guacone",
+	}
+	rootCmd.AddCommand(collectCmd)
+	rootCmd.AddCommand(filesCmd)
+	bz2Path := "./../../../internal/testing/testdata/exampledata/busybox-cyclonedx.json.bz2"
+	rootCmd.SetArgs([]string{"collect", "files", bz2Path})
+	err := rootCmd.Execute()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
