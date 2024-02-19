@@ -195,11 +195,11 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := lc.mutation.Inline(); ok {
 		_spec.SetField(license.FieldInline, field.TypeString, value)
-		_node.Inline = &value
+		_node.Inline = value
 	}
 	if value, ok := lc.mutation.ListVersion(); ok {
 		_spec.SetField(license.FieldListVersion, field.TypeString, value)
-		_node.ListVersion = &value
+		_node.ListVersion = value
 	}
 	if nodes := lc.mutation.DeclaredInCertifyLegalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -33,7 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 const (
@@ -96,24 +96,25 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 }
 
 func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error) {
-	// FIXME: (ivanvanderbyl) This will be suboptimal because we can't batch insert relations with upserts. See Readme.
-	pkgsID := make([]*model.PackageIDs, len(pkgs))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range pkgs {
-		index := i
-		pkg := pkgs[index]
-		concurrently(eg, func() error {
-			p, err := b.IngestPackage(ctx, *pkg)
-			if err == nil {
-				pkgsID[index] = p
-			}
-			return err
-		})
+	funcName := "IngestPackages"
+	var collectedPkgIDs []*model.PackageIDs
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]model.PackageIDs, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkPackage(ctx, client, pkgs)
+		if err != nil {
+			return nil, err
+		}
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
+
+	for _, pkgIDs := range *ids {
+		collectedPkgIDs = append(collectedPkgIDs, &pkgIDs)
 	}
-	return pkgsID, nil
+
+	return collectedPkgIDs, nil
 }
 
 func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
@@ -129,6 +130,73 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) 
 	}
 
 	return pkgVersionID, nil
+}
+
+func upsertBulkPackage(ctx context.Context, client *ent.Tx, pkgInputs []*model.IDorPkgInput) (*[]model.PackageIDs, error) {
+	batches := chunk(pkgInputs, 100)
+	pkgNameIDs := make([]string, 0)
+	pkgVersionIDs := make([]string, 0)
+
+	for _, pkgs := range batches {
+		pkgNameCreates := make([]*ent.PackageNameCreate, len(pkgs))
+		pkgVersionCreates := make([]*ent.PackageVersionCreate, len(pkgs))
+
+		for i, pkg := range pkgs {
+			pkgIDs := helper.GuacPkgId(*pkg.PackageInput)
+			pkgNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.NameId), 5)
+			pkgVersionID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.VersionId), 5)
+
+			pkgNameCreates[i] = client.PackageName.Create().
+				SetID(pkgNameID).
+				SetType(pkg.PackageInput.Type).
+				SetNamespace(stringOrEmpty(pkg.PackageInput.Namespace)).
+				SetName(pkg.PackageInput.Name)
+
+			pkgVersionCreates[i] = client.PackageVersion.Create().
+				SetID(pkgVersionID).
+				SetNameID(pkgNameID).
+				SetNillableVersion(pkg.PackageInput.Version).
+				SetSubpath(ptrWithDefault(pkg.PackageInput.Subpath, "")).
+				SetQualifiers(normalizeInputQualifiers(pkg.PackageInput.Qualifiers)).
+				SetHash(versionHashFromInputSpec(*pkg.PackageInput))
+
+			pkgNameIDs = append(pkgNameIDs, pkgNameID.String())
+			pkgVersionIDs = append(pkgVersionIDs, pkgVersionID.String())
+		}
+
+		if err := client.PackageName.CreateBulk(pkgNameCreates...).
+			OnConflict(
+				sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType),
+			).
+			DoNothing().
+			Exec(ctx); err != nil {
+
+			return nil, err
+		}
+
+		if err := client.PackageVersion.CreateBulk(pkgVersionCreates...).
+			OnConflict(
+				sql.ConflictColumns(
+					packageversion.FieldHash,
+					packageversion.FieldNameID,
+				),
+			).
+			DoNothing().
+			Exec(ctx); err != nil {
+
+			return nil, err
+		}
+	}
+	var collectedPkgIDs []model.PackageIDs
+	for i := range pkgVersionIDs {
+		collectedPkgIDs = append(collectedPkgIDs, model.PackageIDs{
+			PackageTypeID:      fmt.Sprintf("%s:%s", pkgTypeString, pkgNameIDs[i]),
+			PackageNamespaceID: fmt.Sprintf("%s:%s", pkgNamespaceString, pkgNameIDs[i]),
+			PackageNameID:      pkgNameIDs[i],
+			PackageVersionID:   pkgVersionIDs[i]})
+	}
+
+	return &collectedPkgIDs, nil
 }
 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
@@ -328,6 +396,16 @@ func pkgNameQueryFromPkgSpec(filter *model.PkgSpec) *model.PkgSpec {
 		Type:      filter.Type,
 		ID:        filter.ID,
 	}
+}
+
+func backReferencePackageName(pn *ent.PackageName) *ent.PackageName {
+	pt := &ent.PackageName{
+		ID:        pn.ID,
+		Type:      pn.Type,
+		Namespace: pn.Namespace,
+		Name:      pn.Name,
+	}
+	return pt
 }
 
 func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageName {

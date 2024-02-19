@@ -108,7 +108,7 @@ func upsertBulkArtifact(ctx context.Context, client *ent.Tx, artInputs []*model.
 			OnConflict(
 				sql.ConflictColumns(artifact.FieldDigest),
 			).
-			UpdateNewValues().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, err

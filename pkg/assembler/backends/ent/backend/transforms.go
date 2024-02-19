@@ -25,7 +25,7 @@ import (
 
 func toModelArtifact(a *ent.Artifact) *model.Artifact {
 	return &model.Artifact{
-		ID:        nodeID(a.ID),
+		ID:        a.ID.String(),
 		Algorithm: a.Algorithm,
 		Digest:    a.Digest,
 	}
@@ -33,30 +33,30 @@ func toModelArtifact(a *ent.Artifact) *model.Artifact {
 
 func toModelBuilder(b *ent.Builder) *model.Builder {
 	return &model.Builder{
-		ID:  nodeID(b.ID),
+		ID:  b.ID.String(),
 		URI: b.URI,
 	}
 }
 
-func toModelPackage(p *ent.PackageType) *model.Package {
+func toModelPackage(p *ent.PackageName) *model.Package {
 	if p == nil {
 		return nil
 	}
 	return &model.Package{
-		ID:         nodeID(p.ID),
+		ID:         fmt.Sprintf("%s:%s", pkgTypeString, p.ID.String()),
 		Type:       p.Type,
-		Namespaces: collect(p.Edges.Namespaces, toModelNamespace),
+		Namespaces: collect([]*ent.PackageName{}, toModelNamespace),
 	}
 }
 
-func toModelNamespace(n *ent.PackageNamespace) *model.PackageNamespace {
+func toModelNamespace(n *ent.PackageName) *model.PackageNamespace {
 	if n == nil {
 		return nil
 	}
 	return &model.PackageNamespace{
-		ID:        nodeID(n.ID),
+		ID:        fmt.Sprintf("%s:%s", pkgNamespaceString, n.ID.String()),
 		Namespace: n.Namespace,
-		Names:     collect(n.Edges.Names, toModelPackageName),
+		Names:     collect([]*ent.PackageName{}, toModelPackageName),
 	}
 }
 
@@ -65,7 +65,7 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 		return nil
 	}
 	return &model.PackageName{
-		ID:       nodeID(n.ID),
+		ID:       n.ID.String(),
 		Name:     n.Name,
 		Versions: collect(n.Edges.Versions, toModelPackageVersion),
 	}
@@ -74,7 +74,7 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 func toModelPackageVersion(v *ent.PackageVersion) *model.PackageVersion {
 
 	return &model.PackageVersion{
-		ID:         nodeID(v.ID),
+		ID:         v.ID.String(),
 		Version:    v.Version,
 		Qualifiers: toPtrSlice(v.Qualifiers),
 		Subpath:    v.Subpath,
@@ -180,7 +180,7 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 	}
 
 	return &model.IsDependency{
-		ID:                nodeID(id.ID),
+		ID:                id.String(),
 		Package:           pkg,
 		DependencyPackage: depPkg,
 		VersionRange:      id.VersionRange,

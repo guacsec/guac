@@ -20,9 +20,9 @@ type License struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Inline holds the value of the "inline" field.
-	Inline *string `json:"inline,omitempty"`
+	Inline string `json:"inline,omitempty"`
 	// ListVersion holds the value of the "list_version" field.
-	ListVersion *string `json:"list_version,omitempty"`
+	ListVersion string `json:"list_version,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LicenseQuery when eager-loading is set.
 	Edges        LicenseEdges `json:"edges"`
@@ -103,15 +103,13 @@ func (l *License) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field inline", values[i])
 			} else if value.Valid {
-				l.Inline = new(string)
-				*l.Inline = value.String
+				l.Inline = value.String
 			}
 		case license.FieldListVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field list_version", values[i])
 			} else if value.Valid {
-				l.ListVersion = new(string)
-				*l.ListVersion = value.String
+				l.ListVersion = value.String
 			}
 		default:
 			l.selectValues.Set(columns[i], values[i])
@@ -162,15 +160,11 @@ func (l *License) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(l.Name)
 	builder.WriteString(", ")
-	if v := l.Inline; v != nil {
-		builder.WriteString("inline=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("inline=")
+	builder.WriteString(l.Inline)
 	builder.WriteString(", ")
-	if v := l.ListVersion; v != nil {
-		builder.WriteString("list_version=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("list_version=")
+	builder.WriteString(l.ListVersion)
 	builder.WriteByte(')')
 	return builder.String()
 }

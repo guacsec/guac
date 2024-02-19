@@ -37,8 +37,8 @@ func (License) Fields() []ent.Field {
 			Unique().
 			Immutable(),
 		field.String("name").NotEmpty(),
-		field.String("inline").Optional().Nillable(),
-		field.String("list_version").Optional().Nillable(),
+		field.String("inline").Optional(),
+		field.String("list_version").Optional(),
 	}
 }
 

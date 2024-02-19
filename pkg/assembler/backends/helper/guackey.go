@@ -49,6 +49,13 @@ func GuacArtifactKey(input *model.ArtifactInputSpec) string {
 	return fmt.Sprintf("%s:%s", strings.ToLower(input.Algorithm), strings.ToLower(input.Digest))
 }
 
+func GuacLicenseKey(l *model.LicenseInputSpec) string {
+	if l.ListVersion != nil && *l.ListVersion != "" {
+		return strings.Join([]string{l.Name, *l.ListVersion}, ":")
+	}
+	return l.Name
+}
+
 func GuacPkgId(pkg model.PkgInputSpec) PkgIds {
 	ids := PkgIds{}
 

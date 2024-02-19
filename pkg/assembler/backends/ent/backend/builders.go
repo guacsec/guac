@@ -108,7 +108,7 @@ func upsertBulkBuilder(ctx context.Context, client *ent.Tx, buildInputs []*model
 			OnConflict(
 				sql.ConflictColumns(builder.FieldURI),
 			).
-			UpdateNewValues().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, err

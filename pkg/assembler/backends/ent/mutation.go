@@ -11320,7 +11320,7 @@ func (m *LicenseMutation) Inline() (r string, exists bool) {
 // OldInline returns the old "inline" field's value of the License entity.
 // If the License object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LicenseMutation) OldInline(ctx context.Context) (v *string, err error) {
+func (m *LicenseMutation) OldInline(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldInline is only allowed on UpdateOne operations")
 	}
@@ -11369,7 +11369,7 @@ func (m *LicenseMutation) ListVersion() (r string, exists bool) {
 // OldListVersion returns the old "list_version" field's value of the License entity.
 // If the License object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LicenseMutation) OldListVersion(ctx context.Context) (v *string, err error) {
+func (m *LicenseMutation) OldListVersion(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldListVersion is only allowed on UpdateOne operations")
 	}

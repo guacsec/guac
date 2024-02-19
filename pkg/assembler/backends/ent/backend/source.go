@@ -17,20 +17,26 @@ package backend
 
 import (
 	"context"
+	"crypto/sha256"
 	stdsql "database/sql"
-	"strconv"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/sync/errgroup"
+)
+
+const (
+	srcTypeString      = "srcType"
+	srcNamespaceString = "srcNamespace"
 )
 
 func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
@@ -70,20 +76,20 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 }
 
 func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.HasSourceAt, error) {
-		return upsertHasSourceAt(ctx, ent.TxFromContext(ctx), *pkg.PackageInput, pkgMatchType, *source.SourceInput, hasSourceAt)
+	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		return upsertHasSourceAt(ctx, ent.TxFromContext(ctx), pkg, pkgMatchType, source, hasSourceAt)
 	})
 	if err != nil {
 		return "", err
 	}
 
-	//TODO optimize for only returning ID
-	return nodeID(record.ID), nil
+	return *record, nil
 }
 
 func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
 	var result []string
 	for i := range hasSourceAts {
+		sdss
 		hsa, err := b.IngestHasSourceAt(ctx, *pkgs[i], *pkgMatchType, *sources[i], *hasSourceAts[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSourceAts failed with err: %v", err)
@@ -93,10 +99,14 @@ func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorP
 	return result, nil
 }
 
-func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, spec model.HasSourceAtInputSpec) (*ent.HasSourceAt, error) {
-	srcID, err := getSourceNameID(ctx, client.Client(), source)
+func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, spec model.HasSourceAtInputSpec) (*string, error) {
+
+	if source.SourceNameID == nil {
+		return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+	}
+	sourceID, err := uuid.Parse(*source.SourceNameID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
 	}
 
 	conflictColumns := []string{hassourceat.FieldSourceID, hassourceat.FieldJustification}
@@ -108,22 +118,28 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSp
 		SetOrigin(spec.Origin).
 		SetJustification(spec.Justification).
 		SetKnownSince(spec.KnownSince).
-		SetSourceID(srcID)
+		SetSourceID(sourceID)
 
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		pkgName, err := client.PackageName.Query().Where(packageNameInputQuery(pkg)).Only(ctx)
-		if err != nil {
-			return nil, err
+		if pkg.PackageNameID == nil {
+			return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
 		}
-		insert.SetAllVersions(pkgName)
+		pkgNameID, err := uuid.Parse(*pkg.PackageNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+		}
+		insert.SetNillableAllVersionsID(&pkgNameID)
 		conflictColumns = append(conflictColumns, hassourceat.FieldPackageNameID)
 		conflictWhere = sql.And(sql.IsNull(hassourceat.FieldPackageVersionID), sql.NotNull(hassourceat.FieldPackageNameID))
 	} else {
-		pkgVersion, err := client.PackageVersion.Query().Where(packageVersionInputQuery(pkg)).Only(ctx)
-		if err != nil {
-			return nil, err
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 		}
-		insert.SetPackageVersion(pkgVersion)
+		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+		}
+		insert.SetNillablePackageVersionID(&pkgVersionID)
 		conflictColumns = append(conflictColumns, hassourceat.FieldPackageVersionID)
 		conflictWhere = sql.And(sql.NotNull(hassourceat.FieldPackageVersionID), sql.IsNull(hassourceat.FieldPackageNameID))
 	}
@@ -132,27 +148,19 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.PkgInputSp
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		UpdateNewValues().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return client.HasSourceAt.Query().
-		Where(hassourceat.ID(id)).
-		WithSource(withSourceNameTreeQuery()).
-		WithAllVersions(withPackageNameTree()).
-		WithPackageVersion(withPackageVersionTree()).
-		Only(ctx)
+	return ptrfrom.String(id.String()), nil
 }
 
 func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
 	records, err := b.client.SourceName.Query().
 		Where(sourceQuery(filter)).
 		Limit(MaxPageSize).
-		WithNamespace(func(q *ent.SourceNamespaceQuery) {
-			q.WithSourceType()
-		}).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -162,23 +170,25 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 }
 
 func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.IDorSourceInput) ([]*model.SourceIDs, error) {
-	ids := make([]*model.SourceIDs, len(sources))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range sources {
-		index := i
-		src := sources[index]
-		concurrently(eg, func() error {
-			s, err := b.IngestSource(ctx, *src)
-			if err == nil {
-				ids[index] = s
-			}
-			return err
-		})
+	funcName := "IngestSources"
+	var collectedSrcIDs []*model.SourceIDs
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]model.SourceIDs, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkSource(ctx, client, sources)
+		if err != nil {
+			return nil, err
+		}
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
+
+	for _, srcIDs := range *ids {
+		collectedSrcIDs = append(collectedSrcIDs, &srcIDs)
 	}
-	return ids, nil
+
+	return collectedSrcIDs, nil
 }
 
 func (b *EntBackend) IngestSource(ctx context.Context, source model.IDorSourceInput) (*model.SourceIDs, error) {
@@ -192,62 +202,72 @@ func (b *EntBackend) IngestSource(ctx context.Context, source model.IDorSourceIn
 	return sourceNameID, nil
 }
 
-func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec) (*model.SourceIDs, error) {
-	sourceTypeID, err := client.SourceType.Create().
-		SetType(src.Type).
-		OnConflict(
-			sql.ConflictColumns(sourcetype.FieldType),
-		).
-		DoNothing().
-		ID(ctx)
+func upsertBulkSource(ctx context.Context, client *ent.Tx, srcInputs []*model.IDorSourceInput) (*[]model.SourceIDs, error) {
+	batches := chunk(srcInputs, 100)
+	srcNameIDs := make([]string, 0)
 
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert source")
-		}
-		sourceTypeID, err = client.SourceType.Query().
-			Where(sourcetype.TypeEQ(src.Type)).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get source type")
-		}
-	}
+	for _, srcs := range batches {
+		srcNameCreates := make([]*ent.SourceNameCreate, len(srcs))
 
-	sourceNamespaceID, err := client.SourceNamespace.Create().
-		SetSourceTypeID(sourceTypeID).
-		SetNamespace(src.Namespace).
-		OnConflict(
-			sql.ConflictColumns(sourcenamespace.FieldNamespace, sourcenamespace.FieldSourceID),
-		).
-		DoNothing().
-		ID(ctx)
+		for i, src := range srcs {
+			srcIDs := helper.GuacSrcId(*src.SourceInput)
+			srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
 
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert source namespace")
+			srcNameCreates[i] = client.SourceName.Create().
+				SetID(srcNameID).
+				SetType(src.SourceInput.Type).
+				SetNamespace(src.SourceInput.Namespace).
+				SetName(src.SourceInput.Name).
+				SetTag(stringOrEmpty(src.SourceInput.Tag)).
+				SetCommit(stringOrEmpty(src.SourceInput.Commit))
+
+			srcNameIDs = append(srcNameIDs, srcNameID.String())
 		}
 
-		sourceNamespaceID, err = client.SourceNamespace.Query().
-			Where(
-				sourcenamespace.HasSourceTypeWith(sourcetype.IDEQ(sourceTypeID)),
-				sourcenamespace.NamespaceEQ(src.Namespace),
+		if err := client.SourceName.CreateBulk(srcNameCreates...).
+			OnConflict(
+				sql.ConflictColumns(
+					sourcename.FieldType,
+					sourcename.FieldNamespace,
+					sourcename.FieldName,
+					sourcename.FieldTag,
+					sourcename.FieldCommit,
+				),
 			).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get source namespace")
+			DoNothing().
+			Exec(ctx); err != nil {
+
+			return nil, err
 		}
 	}
+	var collectedSrcIDs []model.SourceIDs
+	for i := range srcNameIDs {
+		collectedSrcIDs = append(collectedSrcIDs, model.SourceIDs{
+			SourceTypeID:      fmt.Sprintf("%s:%s", srcTypeString, srcNameIDs[i]),
+			SourceNamespaceID: fmt.Sprintf("%s:%s", srcNamespaceString, srcNameIDs[i]),
+			SourceNameID:      srcNameIDs[i]})
+	}
+
+	return &collectedSrcIDs, nil
+}
+
+func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec) (*model.SourceIDs, error) {
+	srcIDs := helper.GuacSrcId(src)
+	srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
 
 	create := client.SourceName.Create().
-		SetNamespaceID(sourceNamespaceID).
+		SetID(srcNameID).
+		SetType(src.Type).
+		SetNamespace(src.Namespace).
 		SetName(src.Name).
 		SetTag(stringOrEmpty(src.Tag)).
 		SetCommit(stringOrEmpty(src.Commit))
 
-	sourceNameID, err := create.
+	_, err := create.
 		OnConflict(
 			sql.ConflictColumns(
-				sourcename.FieldNamespaceID,
+				sourcename.FieldType,
+				sourcename.FieldNamespace,
 				sourcename.FieldName,
 				sourcename.FieldTag,
 				sourcename.FieldCommit,
@@ -259,24 +279,12 @@ func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert source name")
 		}
-
-		sourceNameID, err = client.SourceName.Query().
-			Where(
-				sourcename.HasNamespaceWith(sourcenamespace.ID(sourceNamespaceID)),
-				optionalPredicate(&src.Name, sourcename.NameEQ),
-				optionalPredicate(src.Tag, sourcename.TagEQ),
-				optionalPredicate(src.Commit, sourcename.CommitEQ),
-			).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get sourcename ID")
-		}
 	}
 
 	return &model.SourceIDs{
-		SourceTypeID:      strconv.Itoa(sourceTypeID),
-		SourceNamespaceID: strconv.Itoa(sourceNamespaceID),
-		SourceNameID:      strconv.Itoa(sourceNameID)}, nil
+		SourceTypeID:      fmt.Sprintf("%s:%s", srcTypeString, srcNameID.String()),
+		SourceNamespaceID: fmt.Sprintf("%s:%s", srcNamespaceString, srcNameID.String()),
+		SourceNameID:      srcNameID.String()}, nil
 }
 
 func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
@@ -290,27 +298,17 @@ func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
 }
 
 func withSourceNameTreeQuery() func(*ent.SourceNameQuery) {
-	return func(q *ent.SourceNameQuery) {
-		q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
-			q.WithSourceType()
-		})
-	}
+	return func(q *ent.SourceNameQuery) {}
 }
 
 func sourceQuery(filter *model.SourceSpec) predicate.SourceName {
 	query := []predicate.SourceName{
 		optionalPredicate(filter.ID, IDEQ),
-		optionalPredicate(filter.Commit, sourcename.CommitEqualFold),
+		optionalPredicate(filter.Type, sourcename.TypeEQ),
+		optionalPredicate(filter.Namespace, sourcename.NamespaceEQ),
 		optionalPredicate(filter.Name, sourcename.NameEQ),
+		optionalPredicate(filter.Commit, sourcename.CommitEqualFold),
 		optionalPredicate(filter.Tag, sourcename.TagEQ),
-	}
-
-	if filter.Namespace != nil {
-		query = append(query, sourcename.HasNamespaceWith(sourcenamespace.NamespaceEQ(*filter.Namespace)))
-	}
-
-	if filter.Type != nil {
-		query = append(query, sourcename.HasNamespaceWith(sourcenamespace.HasSourceTypeWith(sourcetype.TypeEQ(*filter.Type))))
 	}
 
 	return sourcename.And(query...)
@@ -329,7 +327,7 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 	return &model.HasSourceAt{
 		Source:        toModelSourceName(record.Edges.Source),
 		Package:       pkg,
-		ID:            nodeID(record.ID),
+		ID:            record.ID.String(),
 		KnownSince:    record.KnownSince,
 		Justification: record.Justification,
 		Origin:        record.Origin,
@@ -337,50 +335,45 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 	}
 }
 
-func backReferenceSourceName(sn *ent.SourceName) *ent.SourceType {
-	if sn.Edges.Namespace != nil {
-		sns := sn.Edges.Namespace
-		sns.Edges.Names = []*ent.SourceName{sn}
-		st := sns.Edges.SourceType
-		st.Edges.Namespaces = []*ent.SourceNamespace{sns}
-		return st
-	}
-	return nil
-}
+// func backReferenceSourceName(sn *ent.SourceName) *ent.SourceName {
+// 	if sn.Edges.Namespace != nil {
+// 		sns := sn.Edges.Namespace
+// 		sns.Edges.Names = []*ent.SourceName{sn}
+// 		st := sns.Edges.SourceType
+// 		st.Edges.Namespaces = []*ent.SourceNamespace{sns}
+// 		return st
+// 	}
+// 	return nil
+// }
 
 func toModelSourceName(s *ent.SourceName) *model.Source {
-	return toModelSource(backReferenceSourceName(s))
+	return toModelSource(s)
 }
 
-func toModelSource(s *ent.SourceType) *model.Source {
+func toModelSource(s *ent.SourceName) *model.Source {
 	if s == nil {
 		return nil
 	}
-	return &model.Source{
-		ID:   nodeID(s.ID),
-		Type: s.Type,
-		Namespaces: collect(s.Edges.Namespaces, func(n *ent.SourceNamespace) *model.SourceNamespace {
-			return &model.SourceNamespace{
-				ID:        nodeID(n.ID),
-				Namespace: n.Namespace,
-				Names: collect(n.Edges.Names, func(n *ent.SourceName) *model.SourceName {
-					sn := &model.SourceName{
-						ID:   nodeID(n.ID),
-						Name: n.Name,
-					}
-					if n.Tag != "" {
-						sn.Tag = &n.Tag
-					}
-					if n.Commit != "" {
-						sn.Commit = &n.Commit
-					}
-					return sn
-				}),
-			}
-		}),
-	}
-}
 
-func getSourceNameID(ctx context.Context, client *ent.Client, s model.SourceInputSpec) (int, error) {
-	return client.SourceName.Query().Where(sourceInputQuery(s)).OnlyID(ctx)
+	sourceName := &model.SourceName{
+		ID:   s.ID.String(),
+		Name: s.Name,
+	}
+
+	if s.Tag != "" {
+		sourceName.Tag = &s.Tag
+	}
+	if s.Commit != "" {
+		sourceName.Commit = &s.Commit
+	}
+
+	return &model.Source{
+		ID:   fmt.Sprintf("%s:%s", srcTypeString, s.ID.String()),
+		Type: s.Type,
+		Namespaces: []*model.SourceNamespace{{
+			ID:        fmt.Sprintf("%s:%s", srcNamespaceString, s.ID.String()),
+			Namespace: s.Namespace,
+			Names:     []*model.SourceName{sourceName},
+		}},
+	}
 }
