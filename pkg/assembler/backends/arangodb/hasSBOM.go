@@ -208,7 +208,7 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := guacPkgId(*pkg)
+		pkgId := helper.GuacPkgId(*pkg)
 		values["pkgVersionGuacKey"] = pkgId.VersionId
 	} else {
 		values["art_algorithm"] = strings.ToLower(artifact.Algorithm)

@@ -15,7 +15,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 )
 
 // SourceNameQuery is the builder for querying SourceName entities.
@@ -25,7 +24,6 @@ type SourceNameQuery struct {
 	order                []sourcename.OrderOption
 	inters               []Interceptor
 	predicates           []predicate.SourceName
-	withNamespace        *SourceNamespaceQuery
 	withOccurrences      *OccurrenceQuery
 	modifiers            []func(*sql.Selector)
 	loadTotal            []func(context.Context, []*SourceName) error
@@ -64,28 +62,6 @@ func (snq *SourceNameQuery) Unique(unique bool) *SourceNameQuery {
 func (snq *SourceNameQuery) Order(o ...sourcename.OrderOption) *SourceNameQuery {
 	snq.order = append(snq.order, o...)
 	return snq
-}
-
-// QueryNamespace chains the current query on the "namespace" edge.
-func (snq *SourceNameQuery) QueryNamespace() *SourceNamespaceQuery {
-	query := (&SourceNamespaceClient{config: snq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := snq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := snq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(sourcename.Table, sourcename.FieldID, selector),
-			sqlgraph.To(sourcenamespace.Table, sourcenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, sourcename.NamespaceTable, sourcename.NamespaceColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryOccurrences chains the current query on the "occurrences" edge.
@@ -302,23 +278,11 @@ func (snq *SourceNameQuery) Clone() *SourceNameQuery {
 		order:           append([]sourcename.OrderOption{}, snq.order...),
 		inters:          append([]Interceptor{}, snq.inters...),
 		predicates:      append([]predicate.SourceName{}, snq.predicates...),
-		withNamespace:   snq.withNamespace.Clone(),
 		withOccurrences: snq.withOccurrences.Clone(),
 		// clone intermediate query.
 		sql:  snq.sql.Clone(),
 		path: snq.path,
 	}
-}
-
-// WithNamespace tells the query-builder to eager-load the nodes that are connected to
-// the "namespace" edge. The optional arguments are used to configure the query builder of the edge.
-func (snq *SourceNameQuery) WithNamespace(opts ...func(*SourceNamespaceQuery)) *SourceNameQuery {
-	query := (&SourceNamespaceClient{config: snq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	snq.withNamespace = query
-	return snq
 }
 
 // WithOccurrences tells the query-builder to eager-load the nodes that are connected to
@@ -338,12 +302,12 @@ func (snq *SourceNameQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *Sou
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Type string `json:"type,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.SourceName.Query().
-//		GroupBy(sourcename.FieldName).
+//		GroupBy(sourcename.FieldType).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (snq *SourceNameQuery) GroupBy(field string, fields ...string) *SourceNameGroupBy {
@@ -361,11 +325,11 @@ func (snq *SourceNameQuery) GroupBy(field string, fields ...string) *SourceNameG
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Type string `json:"type,omitempty"`
 //	}
 //
 //	client.SourceName.Query().
-//		Select(sourcename.FieldName).
+//		Select(sourcename.FieldType).
 //		Scan(ctx, &v)
 func (snq *SourceNameQuery) Select(fields ...string) *SourceNameSelect {
 	snq.ctx.Fields = append(snq.ctx.Fields, fields...)
@@ -410,8 +374,7 @@ func (snq *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	var (
 		nodes       = []*SourceName{}
 		_spec       = snq.querySpec()
-		loadedTypes = [2]bool{
-			snq.withNamespace != nil,
+		loadedTypes = [1]bool{
 			snq.withOccurrences != nil,
 		}
 	)
@@ -436,12 +399,6 @@ func (snq *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := snq.withNamespace; query != nil {
-		if err := snq.loadNamespace(ctx, query, nodes, nil,
-			func(n *SourceName, e *SourceNamespace) { n.Edges.Namespace = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := snq.withOccurrences; query != nil {
 		if err := snq.loadOccurrences(ctx, query, nodes,
 			func(n *SourceName) { n.Edges.Occurrences = []*Occurrence{} },
@@ -464,35 +421,6 @@ func (snq *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	return nodes, nil
 }
 
-func (snq *SourceNameQuery) loadNamespace(ctx context.Context, query *SourceNamespaceQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *SourceNamespace)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*SourceName)
-	for i := range nodes {
-		fk := nodes[i].NamespaceID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(sourcenamespace.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "namespace_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 func (snq *SourceNameQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *Occurrence)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*SourceName)
@@ -554,9 +482,6 @@ func (snq *SourceNameQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != sourcename.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if snq.withNamespace != nil {
-			_spec.Node.AddColumnOnce(sourcename.FieldNamespaceID)
 		}
 	}
 	if ps := snq.predicates; len(ps) > 0 {

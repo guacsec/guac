@@ -44,10 +44,6 @@ type Tx struct {
 	Occurrence *OccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
 	PackageName *PackageNameClient
-	// PackageNamespace is the client for interacting with the PackageNamespace builders.
-	PackageNamespace *PackageNamespaceClient
-	// PackageType is the client for interacting with the PackageType builders.
-	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
 	// PkgEqual is the client for interacting with the PkgEqual builders.
@@ -60,18 +56,12 @@ type Tx struct {
 	Scorecard *ScorecardClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
-	// SourceNamespace is the client for interacting with the SourceNamespace builders.
-	SourceNamespace *SourceNamespaceClient
-	// SourceType is the client for interacting with the SourceType builders.
-	SourceType *SourceTypeClient
 	// VulnEqual is the client for interacting with the VulnEqual builders.
 	VulnEqual *VulnEqualClient
 	// VulnerabilityID is the client for interacting with the VulnerabilityID builders.
 	VulnerabilityID *VulnerabilityIDClient
 	// VulnerabilityMetadata is the client for interacting with the VulnerabilityMetadata builders.
 	VulnerabilityMetadata *VulnerabilityMetadataClient
-	// VulnerabilityType is the client for interacting with the VulnerabilityType builders.
-	VulnerabilityType *VulnerabilityTypeClient
 
 	// lazily loaded.
 	client     *Client
@@ -219,20 +209,15 @@ func (tx *Tx) init() {
 	tx.License = NewLicenseClient(tx.config)
 	tx.Occurrence = NewOccurrenceClient(tx.config)
 	tx.PackageName = NewPackageNameClient(tx.config)
-	tx.PackageNamespace = NewPackageNamespaceClient(tx.config)
-	tx.PackageType = NewPackageTypeClient(tx.config)
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
 	tx.PkgEqual = NewPkgEqualClient(tx.config)
 	tx.PointOfContact = NewPointOfContactClient(tx.config)
 	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
 	tx.Scorecard = NewScorecardClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
-	tx.SourceNamespace = NewSourceNamespaceClient(tx.config)
-	tx.SourceType = NewSourceTypeClient(tx.config)
 	tx.VulnEqual = NewVulnEqualClient(tx.config)
 	tx.VulnerabilityID = NewVulnerabilityIDClient(tx.config)
 	tx.VulnerabilityMetadata = NewVulnerabilityMetadataClient(tx.config)
-	tx.VulnerabilityType = NewVulnerabilityTypeClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

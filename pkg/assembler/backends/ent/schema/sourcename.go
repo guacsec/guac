@@ -35,17 +35,17 @@ func (SourceName) Fields() []ent.Field {
 			Default(uuid.New).
 			Unique().
 			Immutable(),
+		field.String("type").Unique(),
+		field.String("namespace"),
 		field.String("name"),
 		field.String("commit").Optional(),
 		field.String("tag").Optional(),
-		field.UUID("namespace_id", uuid.New()),
 	}
 }
 
 // Edges of the SourceName.
 func (SourceName) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("namespace", SourceNamespace.Type).Unique().Required().Field("namespace_id"),
 		edge.From("occurrences", Occurrence.Type).Ref("source"),
 	}
 }
@@ -53,6 +53,6 @@ func (SourceName) Edges() []ent.Edge {
 // Indexes of the SourceName.
 func (SourceName) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("namespace_id", "name", "commit", "tag").Unique(),
+		index.Fields("type", "namespace", "name", "commit", "tag").Unique(),
 	}
 }

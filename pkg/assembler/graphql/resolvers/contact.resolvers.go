@@ -7,7 +7,6 @@ package resolvers
 import (
 	"context"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -15,7 +14,7 @@ import (
 // IngestPointOfContact is the resolver for the ingestPointOfContact field.
 func (r *mutationResolver) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
 	funcName := "IngestPointOfContact"
-	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
+	if err := validatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 	return r.Backend.IngestPointOfContact(ctx, subject, &pkgMatchType, pointOfContact)
@@ -51,7 +50,7 @@ func (r *mutationResolver) IngestPointOfContacts(ctx context.Context, subjects m
 
 // PointOfContact is the resolver for the PointOfContact field.
 func (r *queryResolver) PointOfContact(ctx context.Context, pointOfContactSpec model.PointOfContactSpec) ([]*model.PointOfContact, error) {
-	if err := helper.ValidatePackageSourceOrArtifactQueryFilter(pointOfContactSpec.Subject); err != nil {
+	if err := validatePackageSourceOrArtifactQueryFilter(pointOfContactSpec.Subject); err != nil {
 		return nil, gqlerror.Errorf("PointOfContact :: %s", err)
 	}
 	return r.Backend.PointOfContact(ctx, &pointOfContactSpec)

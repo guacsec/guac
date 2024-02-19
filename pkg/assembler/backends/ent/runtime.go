@@ -22,8 +22,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
@@ -31,12 +29,9 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -139,30 +134,18 @@ func init() {
 	occurrence.DefaultID = occurrenceDescID.Default.(func() uuid.UUID)
 	packagenameFields := schema.PackageName{}.Fields()
 	_ = packagenameFields
+	// packagenameDescType is the schema descriptor for type field.
+	packagenameDescType := packagenameFields[1].Descriptor()
+	// packagename.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	packagename.TypeValidator = packagenameDescType.Validators[0].(func(string) error)
 	// packagenameDescName is the schema descriptor for name field.
-	packagenameDescName := packagenameFields[2].Descriptor()
+	packagenameDescName := packagenameFields[3].Descriptor()
 	// packagename.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	packagename.NameValidator = packagenameDescName.Validators[0].(func(string) error)
 	// packagenameDescID is the schema descriptor for id field.
 	packagenameDescID := packagenameFields[0].Descriptor()
 	// packagename.DefaultID holds the default value on creation for the id field.
 	packagename.DefaultID = packagenameDescID.Default.(func() uuid.UUID)
-	packagenamespaceFields := schema.PackageNamespace{}.Fields()
-	_ = packagenamespaceFields
-	// packagenamespaceDescID is the schema descriptor for id field.
-	packagenamespaceDescID := packagenamespaceFields[0].Descriptor()
-	// packagenamespace.DefaultID holds the default value on creation for the id field.
-	packagenamespace.DefaultID = packagenamespaceDescID.Default.(func() uuid.UUID)
-	packagetypeFields := schema.PackageType{}.Fields()
-	_ = packagetypeFields
-	// packagetypeDescType is the schema descriptor for type field.
-	packagetypeDescType := packagetypeFields[1].Descriptor()
-	// packagetype.TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	packagetype.TypeValidator = packagetypeDescType.Validators[0].(func(string) error)
-	// packagetypeDescID is the schema descriptor for id field.
-	packagetypeDescID := packagetypeFields[0].Descriptor()
-	// packagetype.DefaultID holds the default value on creation for the id field.
-	packagetype.DefaultID = packagetypeDescID.Default.(func() uuid.UUID)
 	packageversionFields := schema.PackageVersion{}.Fields()
 	_ = packageversionFields
 	// packageversionDescVersion is the schema descriptor for version field.
@@ -215,18 +198,6 @@ func init() {
 	sourcenameDescID := sourcenameFields[0].Descriptor()
 	// sourcename.DefaultID holds the default value on creation for the id field.
 	sourcename.DefaultID = sourcenameDescID.Default.(func() uuid.UUID)
-	sourcenamespaceFields := schema.SourceNamespace{}.Fields()
-	_ = sourcenamespaceFields
-	// sourcenamespaceDescID is the schema descriptor for id field.
-	sourcenamespaceDescID := sourcenamespaceFields[0].Descriptor()
-	// sourcenamespace.DefaultID holds the default value on creation for the id field.
-	sourcenamespace.DefaultID = sourcenamespaceDescID.Default.(func() uuid.UUID)
-	sourcetypeFields := schema.SourceType{}.Fields()
-	_ = sourcetypeFields
-	// sourcetypeDescID is the schema descriptor for id field.
-	sourcetypeDescID := sourcetypeFields[0].Descriptor()
-	// sourcetype.DefaultID holds the default value on creation for the id field.
-	sourcetype.DefaultID = sourcetypeDescID.Default.(func() uuid.UUID)
 	vulnequalFields := schema.VulnEqual{}.Fields()
 	_ = vulnequalFields
 	// vulnequalDescID is the schema descriptor for id field.
@@ -235,6 +206,10 @@ func init() {
 	vulnequal.DefaultID = vulnequalDescID.Default.(func() uuid.UUID)
 	vulnerabilityidFields := schema.VulnerabilityID{}.Fields()
 	_ = vulnerabilityidFields
+	// vulnerabilityidDescType is the schema descriptor for type field.
+	vulnerabilityidDescType := vulnerabilityidFields[2].Descriptor()
+	// vulnerabilityid.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	vulnerabilityid.TypeValidator = vulnerabilityidDescType.Validators[0].(func(string) error)
 	// vulnerabilityidDescID is the schema descriptor for id field.
 	vulnerabilityidDescID := vulnerabilityidFields[0].Descriptor()
 	// vulnerabilityid.DefaultID holds the default value on creation for the id field.
@@ -245,14 +220,4 @@ func init() {
 	vulnerabilitymetadataDescID := vulnerabilitymetadataFields[0].Descriptor()
 	// vulnerabilitymetadata.DefaultID holds the default value on creation for the id field.
 	vulnerabilitymetadata.DefaultID = vulnerabilitymetadataDescID.Default.(func() uuid.UUID)
-	vulnerabilitytypeFields := schema.VulnerabilityType{}.Fields()
-	_ = vulnerabilitytypeFields
-	// vulnerabilitytypeDescType is the schema descriptor for type field.
-	vulnerabilitytypeDescType := vulnerabilitytypeFields[1].Descriptor()
-	// vulnerabilitytype.TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	vulnerabilitytype.TypeValidator = vulnerabilitytypeDescType.Validators[0].(func(string) error)
-	// vulnerabilitytypeDescID is the schema descriptor for id field.
-	vulnerabilitytypeDescID := vulnerabilitytypeFields[0].Descriptor()
-	// vulnerabilitytype.DefaultID holds the default value on creation for the id field.
-	vulnerabilitytype.DefaultID = vulnerabilitytypeDescID.Default.(func() uuid.UUID)
 }

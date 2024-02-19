@@ -54,9 +54,14 @@ func IDLTE(id uuid.UUID) predicate.PackageName {
 	return predicate.PackageName(sql.FieldLTE(FieldID, id))
 }
 
-// NamespaceID applies equality check predicate on the "namespace_id" field. It's identical to NamespaceIDEQ.
-func NamespaceID(v uuid.UUID) predicate.PackageName {
-	return predicate.PackageName(sql.FieldEQ(FieldNamespaceID, v))
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldEQ(FieldType, v))
+}
+
+// Namespace applies equality check predicate on the "namespace" field. It's identical to NamespaceEQ.
+func Namespace(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldEQ(FieldNamespace, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
@@ -64,24 +69,134 @@ func Name(v string) predicate.PackageName {
 	return predicate.PackageName(sql.FieldEQ(FieldName, v))
 }
 
-// NamespaceIDEQ applies the EQ predicate on the "namespace_id" field.
-func NamespaceIDEQ(v uuid.UUID) predicate.PackageName {
-	return predicate.PackageName(sql.FieldEQ(FieldNamespaceID, v))
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldEQ(FieldType, v))
 }
 
-// NamespaceIDNEQ applies the NEQ predicate on the "namespace_id" field.
-func NamespaceIDNEQ(v uuid.UUID) predicate.PackageName {
-	return predicate.PackageName(sql.FieldNEQ(FieldNamespaceID, v))
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldNEQ(FieldType, v))
 }
 
-// NamespaceIDIn applies the In predicate on the "namespace_id" field.
-func NamespaceIDIn(vs ...uuid.UUID) predicate.PackageName {
-	return predicate.PackageName(sql.FieldIn(FieldNamespaceID, vs...))
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldIn(FieldType, vs...))
 }
 
-// NamespaceIDNotIn applies the NotIn predicate on the "namespace_id" field.
-func NamespaceIDNotIn(vs ...uuid.UUID) predicate.PackageName {
-	return predicate.PackageName(sql.FieldNotIn(FieldNamespaceID, vs...))
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldNotIn(FieldType, vs...))
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldGT(FieldType, v))
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldGTE(FieldType, v))
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldLT(FieldType, v))
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldLTE(FieldType, v))
+}
+
+// TypeContains applies the Contains predicate on the "type" field.
+func TypeContains(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldContains(FieldType, v))
+}
+
+// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
+func TypeHasPrefix(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldHasPrefix(FieldType, v))
+}
+
+// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
+func TypeHasSuffix(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldHasSuffix(FieldType, v))
+}
+
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldEqualFold(FieldType, v))
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldContainsFold(FieldType, v))
+}
+
+// NamespaceEQ applies the EQ predicate on the "namespace" field.
+func NamespaceEQ(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldEQ(FieldNamespace, v))
+}
+
+// NamespaceNEQ applies the NEQ predicate on the "namespace" field.
+func NamespaceNEQ(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldNEQ(FieldNamespace, v))
+}
+
+// NamespaceIn applies the In predicate on the "namespace" field.
+func NamespaceIn(vs ...string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldIn(FieldNamespace, vs...))
+}
+
+// NamespaceNotIn applies the NotIn predicate on the "namespace" field.
+func NamespaceNotIn(vs ...string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldNotIn(FieldNamespace, vs...))
+}
+
+// NamespaceGT applies the GT predicate on the "namespace" field.
+func NamespaceGT(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldGT(FieldNamespace, v))
+}
+
+// NamespaceGTE applies the GTE predicate on the "namespace" field.
+func NamespaceGTE(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldGTE(FieldNamespace, v))
+}
+
+// NamespaceLT applies the LT predicate on the "namespace" field.
+func NamespaceLT(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldLT(FieldNamespace, v))
+}
+
+// NamespaceLTE applies the LTE predicate on the "namespace" field.
+func NamespaceLTE(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldLTE(FieldNamespace, v))
+}
+
+// NamespaceContains applies the Contains predicate on the "namespace" field.
+func NamespaceContains(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldContains(FieldNamespace, v))
+}
+
+// NamespaceHasPrefix applies the HasPrefix predicate on the "namespace" field.
+func NamespaceHasPrefix(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldHasPrefix(FieldNamespace, v))
+}
+
+// NamespaceHasSuffix applies the HasSuffix predicate on the "namespace" field.
+func NamespaceHasSuffix(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldHasSuffix(FieldNamespace, v))
+}
+
+// NamespaceEqualFold applies the EqualFold predicate on the "namespace" field.
+func NamespaceEqualFold(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldEqualFold(FieldNamespace, v))
+}
+
+// NamespaceContainsFold applies the ContainsFold predicate on the "namespace" field.
+func NamespaceContainsFold(v string) predicate.PackageName {
+	return predicate.PackageName(sql.FieldContainsFold(FieldNamespace, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -147,29 +262,6 @@ func NameEqualFold(v string) predicate.PackageName {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.PackageName {
 	return predicate.PackageName(sql.FieldContainsFold(FieldName, v))
-}
-
-// HasNamespace applies the HasEdge predicate on the "namespace" edge.
-func HasNamespace() predicate.PackageName {
-	return predicate.PackageName(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, NamespaceTable, NamespaceColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasNamespaceWith applies the HasEdge predicate on the "namespace" edge with a given conditions (other predicates).
-func HasNamespaceWith(preds ...predicate.PackageNamespace) predicate.PackageName {
-	return predicate.PackageName(func(s *sql.Selector) {
-		step := newNamespaceStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // HasVersions applies the HasEdge predicate on the "versions" edge.

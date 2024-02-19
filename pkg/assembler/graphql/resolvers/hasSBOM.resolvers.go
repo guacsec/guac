@@ -7,7 +7,6 @@ package resolvers
 import (
 	"context"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -15,7 +14,7 @@ import (
 // IngestHasSbom is the resolver for the ingestHasSBOM field.
 func (r *mutationResolver) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
-	if err := helper.ValidatePackageOrArtifactInput(&subject, funcName); err != nil {
+	if err := validatePackageOrArtifactInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	if hasSbom.KnownSince.IsZero() {
@@ -60,7 +59,7 @@ func (r *mutationResolver) IngestHasSBOMs(ctx context.Context, subjects model.Pa
 
 // HasSbom is the resolver for the HasSBOM field.
 func (r *queryResolver) HasSbom(ctx context.Context, hasSBOMSpec model.HasSBOMSpec) ([]*model.HasSbom, error) {
-	if err := helper.ValidatePackageOrArtifactQueryFilter(hasSBOMSpec.Subject); err != nil {
+	if err := validatePackageOrArtifactQueryFilter(hasSBOMSpec.Subject); err != nil {
 		return nil, gqlerror.Errorf("%v :: %s", "HasSBOM", err)
 	}
 	return r.Backend.HasSBOM(ctx, &hasSBOMSpec)

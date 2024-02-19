@@ -23,6 +23,7 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	purl "github.com/package-url/packageurl-go"
 )
@@ -324,10 +325,10 @@ func getPkgEqualQueryValues(currentPkg *model.PkgInputSpec, otherPkg *model.PkgI
 
 	values := map[string]any{}
 	// add guac keys
-	pkgId := guacPkgId(*sortedPkgs[0])
+	pkgId := helper.GuacPkgId(*sortedPkgs[0])
 	values["pkgVersionGuacKey"] = pkgId.VersionId
 
-	equalPkgId := guacPkgId(*sortedPkgs[1])
+	equalPkgId := helper.GuacPkgId(*sortedPkgs[1])
 	values["equalPkgVersionGuacKey"] = equalPkgId.VersionId
 
 	values[justification] = pkgEqual.Justification

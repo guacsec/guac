@@ -32,20 +32,15 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
 // Client is the client that holds all ent builders.
@@ -85,10 +80,6 @@ type Client struct {
 	Occurrence *OccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
 	PackageName *PackageNameClient
-	// PackageNamespace is the client for interacting with the PackageNamespace builders.
-	PackageNamespace *PackageNamespaceClient
-	// PackageType is the client for interacting with the PackageType builders.
-	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
 	// PkgEqual is the client for interacting with the PkgEqual builders.
@@ -101,18 +92,12 @@ type Client struct {
 	Scorecard *ScorecardClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
-	// SourceNamespace is the client for interacting with the SourceNamespace builders.
-	SourceNamespace *SourceNamespaceClient
-	// SourceType is the client for interacting with the SourceType builders.
-	SourceType *SourceTypeClient
 	// VulnEqual is the client for interacting with the VulnEqual builders.
 	VulnEqual *VulnEqualClient
 	// VulnerabilityID is the client for interacting with the VulnerabilityID builders.
 	VulnerabilityID *VulnerabilityIDClient
 	// VulnerabilityMetadata is the client for interacting with the VulnerabilityMetadata builders.
 	VulnerabilityMetadata *VulnerabilityMetadataClient
-	// VulnerabilityType is the client for interacting with the VulnerabilityType builders.
-	VulnerabilityType *VulnerabilityTypeClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -140,20 +125,15 @@ func (c *Client) init() {
 	c.License = NewLicenseClient(c.config)
 	c.Occurrence = NewOccurrenceClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
-	c.PackageNamespace = NewPackageNamespaceClient(c.config)
-	c.PackageType = NewPackageTypeClient(c.config)
 	c.PackageVersion = NewPackageVersionClient(c.config)
 	c.PkgEqual = NewPkgEqualClient(c.config)
 	c.PointOfContact = NewPointOfContactClient(c.config)
 	c.SLSAAttestation = NewSLSAAttestationClient(c.config)
 	c.Scorecard = NewScorecardClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
-	c.SourceNamespace = NewSourceNamespaceClient(c.config)
-	c.SourceType = NewSourceTypeClient(c.config)
 	c.VulnEqual = NewVulnEqualClient(c.config)
 	c.VulnerabilityID = NewVulnerabilityIDClient(c.config)
 	c.VulnerabilityMetadata = NewVulnerabilityMetadataClient(c.config)
-	c.VulnerabilityType = NewVulnerabilityTypeClient(c.config)
 }
 
 type (
@@ -262,20 +242,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		License:               NewLicenseClient(cfg),
 		Occurrence:            NewOccurrenceClient(cfg),
 		PackageName:           NewPackageNameClient(cfg),
-		PackageNamespace:      NewPackageNamespaceClient(cfg),
-		PackageType:           NewPackageTypeClient(cfg),
 		PackageVersion:        NewPackageVersionClient(cfg),
 		PkgEqual:              NewPkgEqualClient(cfg),
 		PointOfContact:        NewPointOfContactClient(cfg),
 		SLSAAttestation:       NewSLSAAttestationClient(cfg),
 		Scorecard:             NewScorecardClient(cfg),
 		SourceName:            NewSourceNameClient(cfg),
-		SourceNamespace:       NewSourceNamespaceClient(cfg),
-		SourceType:            NewSourceTypeClient(cfg),
 		VulnEqual:             NewVulnEqualClient(cfg),
 		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
 		VulnerabilityMetadata: NewVulnerabilityMetadataClient(cfg),
-		VulnerabilityType:     NewVulnerabilityTypeClient(cfg),
 	}, nil
 }
 
@@ -311,20 +286,15 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		License:               NewLicenseClient(cfg),
 		Occurrence:            NewOccurrenceClient(cfg),
 		PackageName:           NewPackageNameClient(cfg),
-		PackageNamespace:      NewPackageNamespaceClient(cfg),
-		PackageType:           NewPackageTypeClient(cfg),
 		PackageVersion:        NewPackageVersionClient(cfg),
 		PkgEqual:              NewPkgEqualClient(cfg),
 		PointOfContact:        NewPointOfContactClient(cfg),
 		SLSAAttestation:       NewSLSAAttestationClient(cfg),
 		Scorecard:             NewScorecardClient(cfg),
 		SourceName:            NewSourceNameClient(cfg),
-		SourceNamespace:       NewSourceNamespaceClient(cfg),
-		SourceType:            NewSourceTypeClient(cfg),
 		VulnEqual:             NewVulnEqualClient(cfg),
 		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
 		VulnerabilityMetadata: NewVulnerabilityMetadataClient(cfg),
-		VulnerabilityType:     NewVulnerabilityTypeClient(cfg),
 	}, nil
 }
 
@@ -357,10 +327,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyLegal,
 		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasMetadata,
 		c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.License, c.Occurrence,
-		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
-		c.PointOfContact, c.SLSAAttestation, c.Scorecard, c.SourceName,
-		c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
-		c.VulnerabilityMetadata, c.VulnerabilityType,
+		c.PackageName, c.PackageVersion, c.PkgEqual, c.PointOfContact,
+		c.SLSAAttestation, c.Scorecard, c.SourceName, c.VulnEqual, c.VulnerabilityID,
+		c.VulnerabilityMetadata,
 	} {
 		n.Use(hooks...)
 	}
@@ -373,10 +342,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyLegal,
 		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasMetadata,
 		c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.License, c.Occurrence,
-		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
-		c.PointOfContact, c.SLSAAttestation, c.Scorecard, c.SourceName,
-		c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
-		c.VulnerabilityMetadata, c.VulnerabilityType,
+		c.PackageName, c.PackageVersion, c.PkgEqual, c.PointOfContact,
+		c.SLSAAttestation, c.Scorecard, c.SourceName, c.VulnEqual, c.VulnerabilityID,
+		c.VulnerabilityMetadata,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -417,10 +385,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Occurrence.mutate(ctx, m)
 	case *PackageNameMutation:
 		return c.PackageName.mutate(ctx, m)
-	case *PackageNamespaceMutation:
-		return c.PackageNamespace.mutate(ctx, m)
-	case *PackageTypeMutation:
-		return c.PackageType.mutate(ctx, m)
 	case *PackageVersionMutation:
 		return c.PackageVersion.mutate(ctx, m)
 	case *PkgEqualMutation:
@@ -433,18 +397,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Scorecard.mutate(ctx, m)
 	case *SourceNameMutation:
 		return c.SourceName.mutate(ctx, m)
-	case *SourceNamespaceMutation:
-		return c.SourceNamespace.mutate(ctx, m)
-	case *SourceTypeMutation:
-		return c.SourceType.mutate(ctx, m)
 	case *VulnEqualMutation:
 		return c.VulnEqual.mutate(ctx, m)
 	case *VulnerabilityIDMutation:
 		return c.VulnerabilityID.mutate(ctx, m)
 	case *VulnerabilityMetadataMutation:
 		return c.VulnerabilityMetadata.mutate(ctx, m)
-	case *VulnerabilityTypeMutation:
-		return c.VulnerabilityType.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -2778,31 +2736,15 @@ func (c *IsVulnerabilityClient) GetX(ctx context.Context, id uuid.UUID) *IsVulne
 	return obj
 }
 
-// QueryOsv queries the osv edge of a IsVulnerability.
-func (c *IsVulnerabilityClient) QueryOsv(iv *IsVulnerability) *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: c.config}).Query()
+// QueryVulnerabilities queries the vulnerabilities edge of a IsVulnerability.
+func (c *IsVulnerabilityClient) QueryVulnerabilities(iv *IsVulnerability) *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := iv.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(isvulnerability.Table, isvulnerability.FieldID, id),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isvulnerability.OsvTable, isvulnerability.OsvColumn),
-		)
-		fromV = sqlgraph.Neighbors(iv.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryVulnerability queries the vulnerability edge of a IsVulnerability.
-func (c *IsVulnerabilityClient) QueryVulnerability(iv *IsVulnerability) *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := iv.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(isvulnerability.Table, isvulnerability.FieldID, id),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isvulnerability.VulnerabilityTable, isvulnerability.VulnerabilityColumn),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, isvulnerability.VulnerabilitiesTable, isvulnerability.VulnerabilitiesColumn),
 		)
 		fromV = sqlgraph.Neighbors(iv.driver.Dialect(), step)
 		return fromV, nil
@@ -3305,22 +3247,6 @@ func (c *PackageNameClient) GetX(ctx context.Context, id uuid.UUID) *PackageName
 	return obj
 }
 
-// QueryNamespace queries the namespace edge of a PackageName.
-func (c *PackageNameClient) QueryNamespace(pn *PackageName) *PackageNamespaceQuery {
-	query := (&PackageNamespaceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packagename.Table, packagename.FieldID, id),
-			sqlgraph.To(packagenamespace.Table, packagenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, packagename.NamespaceTable, packagename.NamespaceColumn),
-		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryVersions queries the versions edge of a PackageName.
 func (c *PackageNameClient) QueryVersions(pn *PackageName) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
@@ -3359,320 +3285,6 @@ func (c *PackageNameClient) mutate(ctx context.Context, m *PackageNameMutation) 
 		return (&PackageNameDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown PackageName mutation op: %q", m.Op())
-	}
-}
-
-// PackageNamespaceClient is a client for the PackageNamespace schema.
-type PackageNamespaceClient struct {
-	config
-}
-
-// NewPackageNamespaceClient returns a client for the PackageNamespace from the given config.
-func NewPackageNamespaceClient(c config) *PackageNamespaceClient {
-	return &PackageNamespaceClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `packagenamespace.Hooks(f(g(h())))`.
-func (c *PackageNamespaceClient) Use(hooks ...Hook) {
-	c.hooks.PackageNamespace = append(c.hooks.PackageNamespace, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `packagenamespace.Intercept(f(g(h())))`.
-func (c *PackageNamespaceClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PackageNamespace = append(c.inters.PackageNamespace, interceptors...)
-}
-
-// Create returns a builder for creating a PackageNamespace entity.
-func (c *PackageNamespaceClient) Create() *PackageNamespaceCreate {
-	mutation := newPackageNamespaceMutation(c.config, OpCreate)
-	return &PackageNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of PackageNamespace entities.
-func (c *PackageNamespaceClient) CreateBulk(builders ...*PackageNamespaceCreate) *PackageNamespaceCreateBulk {
-	return &PackageNamespaceCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *PackageNamespaceClient) MapCreateBulk(slice any, setFunc func(*PackageNamespaceCreate, int)) *PackageNamespaceCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &PackageNamespaceCreateBulk{err: fmt.Errorf("calling to PackageNamespaceClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*PackageNamespaceCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &PackageNamespaceCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PackageNamespace.
-func (c *PackageNamespaceClient) Update() *PackageNamespaceUpdate {
-	mutation := newPackageNamespaceMutation(c.config, OpUpdate)
-	return &PackageNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PackageNamespaceClient) UpdateOne(pn *PackageNamespace) *PackageNamespaceUpdateOne {
-	mutation := newPackageNamespaceMutation(c.config, OpUpdateOne, withPackageNamespace(pn))
-	return &PackageNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PackageNamespaceClient) UpdateOneID(id uuid.UUID) *PackageNamespaceUpdateOne {
-	mutation := newPackageNamespaceMutation(c.config, OpUpdateOne, withPackageNamespaceID(id))
-	return &PackageNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PackageNamespace.
-func (c *PackageNamespaceClient) Delete() *PackageNamespaceDelete {
-	mutation := newPackageNamespaceMutation(c.config, OpDelete)
-	return &PackageNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *PackageNamespaceClient) DeleteOne(pn *PackageNamespace) *PackageNamespaceDeleteOne {
-	return c.DeleteOneID(pn.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PackageNamespaceClient) DeleteOneID(id uuid.UUID) *PackageNamespaceDeleteOne {
-	builder := c.Delete().Where(packagenamespace.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PackageNamespaceDeleteOne{builder}
-}
-
-// Query returns a query builder for PackageNamespace.
-func (c *PackageNamespaceClient) Query() *PackageNamespaceQuery {
-	return &PackageNamespaceQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypePackageNamespace},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a PackageNamespace entity by its id.
-func (c *PackageNamespaceClient) Get(ctx context.Context, id uuid.UUID) (*PackageNamespace, error) {
-	return c.Query().Where(packagenamespace.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PackageNamespaceClient) GetX(ctx context.Context, id uuid.UUID) *PackageNamespace {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryPackage queries the package edge of a PackageNamespace.
-func (c *PackageNamespaceClient) QueryPackage(pn *PackageNamespace) *PackageTypeQuery {
-	query := (&PackageTypeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packagenamespace.Table, packagenamespace.FieldID, id),
-			sqlgraph.To(packagetype.Table, packagetype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, packagenamespace.PackageTable, packagenamespace.PackageColumn),
-		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryNames queries the names edge of a PackageNamespace.
-func (c *PackageNamespaceClient) QueryNames(pn *PackageNamespace) *PackageNameQuery {
-	query := (&PackageNameClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packagenamespace.Table, packagenamespace.FieldID, id),
-			sqlgraph.To(packagename.Table, packagename.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, packagenamespace.NamesTable, packagenamespace.NamesColumn),
-		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *PackageNamespaceClient) Hooks() []Hook {
-	return c.hooks.PackageNamespace
-}
-
-// Interceptors returns the client interceptors.
-func (c *PackageNamespaceClient) Interceptors() []Interceptor {
-	return c.inters.PackageNamespace
-}
-
-func (c *PackageNamespaceClient) mutate(ctx context.Context, m *PackageNamespaceMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&PackageNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&PackageNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&PackageNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&PackageNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown PackageNamespace mutation op: %q", m.Op())
-	}
-}
-
-// PackageTypeClient is a client for the PackageType schema.
-type PackageTypeClient struct {
-	config
-}
-
-// NewPackageTypeClient returns a client for the PackageType from the given config.
-func NewPackageTypeClient(c config) *PackageTypeClient {
-	return &PackageTypeClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `packagetype.Hooks(f(g(h())))`.
-func (c *PackageTypeClient) Use(hooks ...Hook) {
-	c.hooks.PackageType = append(c.hooks.PackageType, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `packagetype.Intercept(f(g(h())))`.
-func (c *PackageTypeClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PackageType = append(c.inters.PackageType, interceptors...)
-}
-
-// Create returns a builder for creating a PackageType entity.
-func (c *PackageTypeClient) Create() *PackageTypeCreate {
-	mutation := newPackageTypeMutation(c.config, OpCreate)
-	return &PackageTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of PackageType entities.
-func (c *PackageTypeClient) CreateBulk(builders ...*PackageTypeCreate) *PackageTypeCreateBulk {
-	return &PackageTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *PackageTypeClient) MapCreateBulk(slice any, setFunc func(*PackageTypeCreate, int)) *PackageTypeCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &PackageTypeCreateBulk{err: fmt.Errorf("calling to PackageTypeClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*PackageTypeCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &PackageTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PackageType.
-func (c *PackageTypeClient) Update() *PackageTypeUpdate {
-	mutation := newPackageTypeMutation(c.config, OpUpdate)
-	return &PackageTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PackageTypeClient) UpdateOne(pt *PackageType) *PackageTypeUpdateOne {
-	mutation := newPackageTypeMutation(c.config, OpUpdateOne, withPackageType(pt))
-	return &PackageTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PackageTypeClient) UpdateOneID(id uuid.UUID) *PackageTypeUpdateOne {
-	mutation := newPackageTypeMutation(c.config, OpUpdateOne, withPackageTypeID(id))
-	return &PackageTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PackageType.
-func (c *PackageTypeClient) Delete() *PackageTypeDelete {
-	mutation := newPackageTypeMutation(c.config, OpDelete)
-	return &PackageTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *PackageTypeClient) DeleteOne(pt *PackageType) *PackageTypeDeleteOne {
-	return c.DeleteOneID(pt.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PackageTypeClient) DeleteOneID(id uuid.UUID) *PackageTypeDeleteOne {
-	builder := c.Delete().Where(packagetype.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PackageTypeDeleteOne{builder}
-}
-
-// Query returns a query builder for PackageType.
-func (c *PackageTypeClient) Query() *PackageTypeQuery {
-	return &PackageTypeQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypePackageType},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a PackageType entity by its id.
-func (c *PackageTypeClient) Get(ctx context.Context, id uuid.UUID) (*PackageType, error) {
-	return c.Query().Where(packagetype.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PackageTypeClient) GetX(ctx context.Context, id uuid.UUID) *PackageType {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryNamespaces queries the namespaces edge of a PackageType.
-func (c *PackageTypeClient) QueryNamespaces(pt *PackageType) *PackageNamespaceQuery {
-	query := (&PackageNamespaceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pt.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packagetype.Table, packagetype.FieldID, id),
-			sqlgraph.To(packagenamespace.Table, packagenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, packagetype.NamespacesTable, packagetype.NamespacesColumn),
-		)
-		fromV = sqlgraph.Neighbors(pt.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *PackageTypeClient) Hooks() []Hook {
-	return c.hooks.PackageType
-}
-
-// Interceptors returns the client interceptors.
-func (c *PackageTypeClient) Interceptors() []Interceptor {
-	return c.inters.PackageType
-}
-
-func (c *PackageTypeClient) mutate(ctx context.Context, m *PackageTypeMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&PackageTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&PackageTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&PackageTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&PackageTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown PackageType mutation op: %q", m.Op())
 	}
 }
 
@@ -4673,22 +4285,6 @@ func (c *SourceNameClient) GetX(ctx context.Context, id uuid.UUID) *SourceName {
 	return obj
 }
 
-// QueryNamespace queries the namespace edge of a SourceName.
-func (c *SourceNameClient) QueryNamespace(sn *SourceName) *SourceNamespaceQuery {
-	query := (&SourceNamespaceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
-			sqlgraph.To(sourcenamespace.Table, sourcenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, sourcename.NamespaceTable, sourcename.NamespaceColumn),
-		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryOccurrences queries the occurrences edge of a SourceName.
 func (c *SourceNameClient) QueryOccurrences(sn *SourceName) *OccurrenceQuery {
 	query := (&OccurrenceClient{config: c.config}).Query()
@@ -4727,320 +4323,6 @@ func (c *SourceNameClient) mutate(ctx context.Context, m *SourceNameMutation) (V
 		return (&SourceNameDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown SourceName mutation op: %q", m.Op())
-	}
-}
-
-// SourceNamespaceClient is a client for the SourceNamespace schema.
-type SourceNamespaceClient struct {
-	config
-}
-
-// NewSourceNamespaceClient returns a client for the SourceNamespace from the given config.
-func NewSourceNamespaceClient(c config) *SourceNamespaceClient {
-	return &SourceNamespaceClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `sourcenamespace.Hooks(f(g(h())))`.
-func (c *SourceNamespaceClient) Use(hooks ...Hook) {
-	c.hooks.SourceNamespace = append(c.hooks.SourceNamespace, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `sourcenamespace.Intercept(f(g(h())))`.
-func (c *SourceNamespaceClient) Intercept(interceptors ...Interceptor) {
-	c.inters.SourceNamespace = append(c.inters.SourceNamespace, interceptors...)
-}
-
-// Create returns a builder for creating a SourceNamespace entity.
-func (c *SourceNamespaceClient) Create() *SourceNamespaceCreate {
-	mutation := newSourceNamespaceMutation(c.config, OpCreate)
-	return &SourceNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of SourceNamespace entities.
-func (c *SourceNamespaceClient) CreateBulk(builders ...*SourceNamespaceCreate) *SourceNamespaceCreateBulk {
-	return &SourceNamespaceCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *SourceNamespaceClient) MapCreateBulk(slice any, setFunc func(*SourceNamespaceCreate, int)) *SourceNamespaceCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &SourceNamespaceCreateBulk{err: fmt.Errorf("calling to SourceNamespaceClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*SourceNamespaceCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &SourceNamespaceCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for SourceNamespace.
-func (c *SourceNamespaceClient) Update() *SourceNamespaceUpdate {
-	mutation := newSourceNamespaceMutation(c.config, OpUpdate)
-	return &SourceNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *SourceNamespaceClient) UpdateOne(sn *SourceNamespace) *SourceNamespaceUpdateOne {
-	mutation := newSourceNamespaceMutation(c.config, OpUpdateOne, withSourceNamespace(sn))
-	return &SourceNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *SourceNamespaceClient) UpdateOneID(id uuid.UUID) *SourceNamespaceUpdateOne {
-	mutation := newSourceNamespaceMutation(c.config, OpUpdateOne, withSourceNamespaceID(id))
-	return &SourceNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for SourceNamespace.
-func (c *SourceNamespaceClient) Delete() *SourceNamespaceDelete {
-	mutation := newSourceNamespaceMutation(c.config, OpDelete)
-	return &SourceNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *SourceNamespaceClient) DeleteOne(sn *SourceNamespace) *SourceNamespaceDeleteOne {
-	return c.DeleteOneID(sn.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SourceNamespaceClient) DeleteOneID(id uuid.UUID) *SourceNamespaceDeleteOne {
-	builder := c.Delete().Where(sourcenamespace.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &SourceNamespaceDeleteOne{builder}
-}
-
-// Query returns a query builder for SourceNamespace.
-func (c *SourceNamespaceClient) Query() *SourceNamespaceQuery {
-	return &SourceNamespaceQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeSourceNamespace},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a SourceNamespace entity by its id.
-func (c *SourceNamespaceClient) Get(ctx context.Context, id uuid.UUID) (*SourceNamespace, error) {
-	return c.Query().Where(sourcenamespace.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *SourceNamespaceClient) GetX(ctx context.Context, id uuid.UUID) *SourceNamespace {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QuerySourceType queries the source_type edge of a SourceNamespace.
-func (c *SourceNamespaceClient) QuerySourceType(sn *SourceNamespace) *SourceTypeQuery {
-	query := (&SourceTypeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(sourcenamespace.Table, sourcenamespace.FieldID, id),
-			sqlgraph.To(sourcetype.Table, sourcetype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, sourcenamespace.SourceTypeTable, sourcenamespace.SourceTypeColumn),
-		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryNames queries the names edge of a SourceNamespace.
-func (c *SourceNamespaceClient) QueryNames(sn *SourceNamespace) *SourceNameQuery {
-	query := (&SourceNameClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(sourcenamespace.Table, sourcenamespace.FieldID, id),
-			sqlgraph.To(sourcename.Table, sourcename.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, sourcenamespace.NamesTable, sourcenamespace.NamesColumn),
-		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *SourceNamespaceClient) Hooks() []Hook {
-	return c.hooks.SourceNamespace
-}
-
-// Interceptors returns the client interceptors.
-func (c *SourceNamespaceClient) Interceptors() []Interceptor {
-	return c.inters.SourceNamespace
-}
-
-func (c *SourceNamespaceClient) mutate(ctx context.Context, m *SourceNamespaceMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&SourceNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&SourceNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&SourceNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&SourceNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown SourceNamespace mutation op: %q", m.Op())
-	}
-}
-
-// SourceTypeClient is a client for the SourceType schema.
-type SourceTypeClient struct {
-	config
-}
-
-// NewSourceTypeClient returns a client for the SourceType from the given config.
-func NewSourceTypeClient(c config) *SourceTypeClient {
-	return &SourceTypeClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `sourcetype.Hooks(f(g(h())))`.
-func (c *SourceTypeClient) Use(hooks ...Hook) {
-	c.hooks.SourceType = append(c.hooks.SourceType, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `sourcetype.Intercept(f(g(h())))`.
-func (c *SourceTypeClient) Intercept(interceptors ...Interceptor) {
-	c.inters.SourceType = append(c.inters.SourceType, interceptors...)
-}
-
-// Create returns a builder for creating a SourceType entity.
-func (c *SourceTypeClient) Create() *SourceTypeCreate {
-	mutation := newSourceTypeMutation(c.config, OpCreate)
-	return &SourceTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of SourceType entities.
-func (c *SourceTypeClient) CreateBulk(builders ...*SourceTypeCreate) *SourceTypeCreateBulk {
-	return &SourceTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *SourceTypeClient) MapCreateBulk(slice any, setFunc func(*SourceTypeCreate, int)) *SourceTypeCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &SourceTypeCreateBulk{err: fmt.Errorf("calling to SourceTypeClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*SourceTypeCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &SourceTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for SourceType.
-func (c *SourceTypeClient) Update() *SourceTypeUpdate {
-	mutation := newSourceTypeMutation(c.config, OpUpdate)
-	return &SourceTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *SourceTypeClient) UpdateOne(st *SourceType) *SourceTypeUpdateOne {
-	mutation := newSourceTypeMutation(c.config, OpUpdateOne, withSourceType(st))
-	return &SourceTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *SourceTypeClient) UpdateOneID(id uuid.UUID) *SourceTypeUpdateOne {
-	mutation := newSourceTypeMutation(c.config, OpUpdateOne, withSourceTypeID(id))
-	return &SourceTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for SourceType.
-func (c *SourceTypeClient) Delete() *SourceTypeDelete {
-	mutation := newSourceTypeMutation(c.config, OpDelete)
-	return &SourceTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *SourceTypeClient) DeleteOne(st *SourceType) *SourceTypeDeleteOne {
-	return c.DeleteOneID(st.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SourceTypeClient) DeleteOneID(id uuid.UUID) *SourceTypeDeleteOne {
-	builder := c.Delete().Where(sourcetype.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &SourceTypeDeleteOne{builder}
-}
-
-// Query returns a query builder for SourceType.
-func (c *SourceTypeClient) Query() *SourceTypeQuery {
-	return &SourceTypeQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeSourceType},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a SourceType entity by its id.
-func (c *SourceTypeClient) Get(ctx context.Context, id uuid.UUID) (*SourceType, error) {
-	return c.Query().Where(sourcetype.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *SourceTypeClient) GetX(ctx context.Context, id uuid.UUID) *SourceType {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryNamespaces queries the namespaces edge of a SourceType.
-func (c *SourceTypeClient) QueryNamespaces(st *SourceType) *SourceNamespaceQuery {
-	query := (&SourceNamespaceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := st.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(sourcetype.Table, sourcetype.FieldID, id),
-			sqlgraph.To(sourcenamespace.Table, sourcenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, sourcetype.NamespacesTable, sourcetype.NamespacesColumn),
-		)
-		fromV = sqlgraph.Neighbors(st.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *SourceTypeClient) Hooks() []Hook {
-	return c.hooks.SourceType
-}
-
-// Interceptors returns the client interceptors.
-func (c *SourceTypeClient) Interceptors() []Interceptor {
-	return c.inters.SourceType
-}
-
-func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&SourceTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&SourceTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&SourceTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&SourceTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown SourceType mutation op: %q", m.Op())
 	}
 }
 
@@ -5301,22 +4583,6 @@ func (c *VulnerabilityIDClient) GetX(ctx context.Context, id uuid.UUID) *Vulnera
 	return obj
 }
 
-// QueryType queries the type edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryType(vi *VulnerabilityID) *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := vi.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, vulnerabilityid.TypeTable, vulnerabilityid.TypeColumn),
-		)
-		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryVulnEquals queries the vuln_equals edge of a VulnerabilityID.
 func (c *VulnerabilityIDClient) QueryVulnEquals(vi *VulnerabilityID) *VulnEqualQuery {
 	query := (&VulnEqualClient{config: c.config}).Query()
@@ -5523,171 +4789,20 @@ func (c *VulnerabilityMetadataClient) mutate(ctx context.Context, m *Vulnerabili
 	}
 }
 
-// VulnerabilityTypeClient is a client for the VulnerabilityType schema.
-type VulnerabilityTypeClient struct {
-	config
-}
-
-// NewVulnerabilityTypeClient returns a client for the VulnerabilityType from the given config.
-func NewVulnerabilityTypeClient(c config) *VulnerabilityTypeClient {
-	return &VulnerabilityTypeClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `vulnerabilitytype.Hooks(f(g(h())))`.
-func (c *VulnerabilityTypeClient) Use(hooks ...Hook) {
-	c.hooks.VulnerabilityType = append(c.hooks.VulnerabilityType, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `vulnerabilitytype.Intercept(f(g(h())))`.
-func (c *VulnerabilityTypeClient) Intercept(interceptors ...Interceptor) {
-	c.inters.VulnerabilityType = append(c.inters.VulnerabilityType, interceptors...)
-}
-
-// Create returns a builder for creating a VulnerabilityType entity.
-func (c *VulnerabilityTypeClient) Create() *VulnerabilityTypeCreate {
-	mutation := newVulnerabilityTypeMutation(c.config, OpCreate)
-	return &VulnerabilityTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of VulnerabilityType entities.
-func (c *VulnerabilityTypeClient) CreateBulk(builders ...*VulnerabilityTypeCreate) *VulnerabilityTypeCreateBulk {
-	return &VulnerabilityTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *VulnerabilityTypeClient) MapCreateBulk(slice any, setFunc func(*VulnerabilityTypeCreate, int)) *VulnerabilityTypeCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &VulnerabilityTypeCreateBulk{err: fmt.Errorf("calling to VulnerabilityTypeClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*VulnerabilityTypeCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &VulnerabilityTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for VulnerabilityType.
-func (c *VulnerabilityTypeClient) Update() *VulnerabilityTypeUpdate {
-	mutation := newVulnerabilityTypeMutation(c.config, OpUpdate)
-	return &VulnerabilityTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *VulnerabilityTypeClient) UpdateOne(vt *VulnerabilityType) *VulnerabilityTypeUpdateOne {
-	mutation := newVulnerabilityTypeMutation(c.config, OpUpdateOne, withVulnerabilityType(vt))
-	return &VulnerabilityTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *VulnerabilityTypeClient) UpdateOneID(id uuid.UUID) *VulnerabilityTypeUpdateOne {
-	mutation := newVulnerabilityTypeMutation(c.config, OpUpdateOne, withVulnerabilityTypeID(id))
-	return &VulnerabilityTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for VulnerabilityType.
-func (c *VulnerabilityTypeClient) Delete() *VulnerabilityTypeDelete {
-	mutation := newVulnerabilityTypeMutation(c.config, OpDelete)
-	return &VulnerabilityTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *VulnerabilityTypeClient) DeleteOne(vt *VulnerabilityType) *VulnerabilityTypeDeleteOne {
-	return c.DeleteOneID(vt.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *VulnerabilityTypeClient) DeleteOneID(id uuid.UUID) *VulnerabilityTypeDeleteOne {
-	builder := c.Delete().Where(vulnerabilitytype.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &VulnerabilityTypeDeleteOne{builder}
-}
-
-// Query returns a query builder for VulnerabilityType.
-func (c *VulnerabilityTypeClient) Query() *VulnerabilityTypeQuery {
-	return &VulnerabilityTypeQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeVulnerabilityType},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a VulnerabilityType entity by its id.
-func (c *VulnerabilityTypeClient) Get(ctx context.Context, id uuid.UUID) (*VulnerabilityType, error) {
-	return c.Query().Where(vulnerabilitytype.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *VulnerabilityTypeClient) GetX(ctx context.Context, id uuid.UUID) *VulnerabilityType {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryVulnerabilityIds queries the vulnerability_ids edge of a VulnerabilityType.
-func (c *VulnerabilityTypeClient) QueryVulnerabilityIds(vt *VulnerabilityType) *VulnerabilityIDQuery {
-	query := (&VulnerabilityIDClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := vt.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(vulnerabilitytype.Table, vulnerabilitytype.FieldID, id),
-			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, vulnerabilitytype.VulnerabilityIdsTable, vulnerabilitytype.VulnerabilityIdsColumn),
-		)
-		fromV = sqlgraph.Neighbors(vt.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *VulnerabilityTypeClient) Hooks() []Hook {
-	return c.hooks.VulnerabilityType
-}
-
-// Interceptors returns the client interceptors.
-func (c *VulnerabilityTypeClient) Interceptors() []Interceptor {
-	return c.inters.VulnerabilityType
-}
-
-func (c *VulnerabilityTypeClient) mutate(ctx context.Context, m *VulnerabilityTypeMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&VulnerabilityTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&VulnerabilityTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&VulnerabilityTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&VulnerabilityTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown VulnerabilityType mutation op: %q", m.Op())
-	}
-}
-
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
 		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasMetadata,
 		HasSourceAt, HashEqual, IsVulnerability, License, Occurrence, PackageName,
-		PackageNamespace, PackageType, PackageVersion, PkgEqual, PointOfContact,
-		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
-		VulnerabilityID, VulnerabilityMetadata, VulnerabilityType []ent.Hook
+		PackageVersion, PkgEqual, PointOfContact, SLSAAttestation, Scorecard,
+		SourceName, VulnEqual, VulnerabilityID, VulnerabilityMetadata []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
 		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasMetadata,
 		HasSourceAt, HashEqual, IsVulnerability, License, Occurrence, PackageName,
-		PackageNamespace, PackageType, PackageVersion, PkgEqual, PointOfContact,
-		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
-		VulnerabilityID, VulnerabilityMetadata, VulnerabilityType []ent.Interceptor
+		PackageVersion, PkgEqual, PointOfContact, SLSAAttestation, Scorecard,
+		SourceName, VulnEqual, VulnerabilityID, VulnerabilityMetadata []ent.Interceptor
 	}
 )

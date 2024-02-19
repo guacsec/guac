@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 )
 
@@ -25,9 +24,15 @@ type PackageNameCreate struct {
 	conflict []sql.ConflictOption
 }
 
-// SetNamespaceID sets the "namespace_id" field.
-func (pnc *PackageNameCreate) SetNamespaceID(u uuid.UUID) *PackageNameCreate {
-	pnc.mutation.SetNamespaceID(u)
+// SetType sets the "type" field.
+func (pnc *PackageNameCreate) SetType(s string) *PackageNameCreate {
+	pnc.mutation.SetType(s)
+	return pnc
+}
+
+// SetNamespace sets the "namespace" field.
+func (pnc *PackageNameCreate) SetNamespace(s string) *PackageNameCreate {
+	pnc.mutation.SetNamespace(s)
 	return pnc
 }
 
@@ -49,11 +54,6 @@ func (pnc *PackageNameCreate) SetNillableID(u *uuid.UUID) *PackageNameCreate {
 		pnc.SetID(*u)
 	}
 	return pnc
-}
-
-// SetNamespace sets the "namespace" edge to the PackageNamespace entity.
-func (pnc *PackageNameCreate) SetNamespace(p *PackageNamespace) *PackageNameCreate {
-	return pnc.SetNamespaceID(p.ID)
 }
 
 // AddVersionIDs adds the "versions" edge to the PackageVersion entity by IDs.
@@ -114,8 +114,16 @@ func (pnc *PackageNameCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pnc *PackageNameCreate) check() error {
-	if _, ok := pnc.mutation.NamespaceID(); !ok {
-		return &ValidationError{Name: "namespace_id", err: errors.New(`ent: missing required field "PackageName.namespace_id"`)}
+	if _, ok := pnc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "PackageName.type"`)}
+	}
+	if v, ok := pnc.mutation.GetType(); ok {
+		if err := packagename.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "PackageName.type": %w`, err)}
+		}
+	}
+	if _, ok := pnc.mutation.Namespace(); !ok {
+		return &ValidationError{Name: "namespace", err: errors.New(`ent: missing required field "PackageName.namespace"`)}
 	}
 	if _, ok := pnc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "PackageName.name"`)}
@@ -124,9 +132,6 @@ func (pnc *PackageNameCreate) check() error {
 		if err := packagename.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "PackageName.name": %w`, err)}
 		}
-	}
-	if _, ok := pnc.mutation.NamespaceID(); !ok {
-		return &ValidationError{Name: "namespace", err: errors.New(`ent: missing required edge "PackageName.namespace"`)}
 	}
 	return nil
 }
@@ -164,26 +169,17 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := pnc.mutation.GetType(); ok {
+		_spec.SetField(packagename.FieldType, field.TypeString, value)
+		_node.Type = value
+	}
+	if value, ok := pnc.mutation.Namespace(); ok {
+		_spec.SetField(packagename.FieldNamespace, field.TypeString, value)
+		_node.Namespace = value
+	}
 	if value, ok := pnc.mutation.Name(); ok {
 		_spec.SetField(packagename.FieldName, field.TypeString, value)
 		_node.Name = value
-	}
-	if nodes := pnc.mutation.NamespaceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   packagename.NamespaceTable,
-			Columns: []string{packagename.NamespaceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.NamespaceID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := pnc.mutation.VersionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -208,7 +204,7 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 // of the `INSERT` statement. For example:
 //
 //	client.PackageName.Create().
-//		SetNamespaceID(v).
+//		SetType(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -217,7 +213,7 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PackageNameUpsert) {
-//			SetNamespaceID(v+v).
+//			SetType(v+v).
 //		}).
 //		Exec(ctx)
 func (pnc *PackageNameCreate) OnConflict(opts ...sql.ConflictOption) *PackageNameUpsertOne {
@@ -253,15 +249,27 @@ type (
 	}
 )
 
-// SetNamespaceID sets the "namespace_id" field.
-func (u *PackageNameUpsert) SetNamespaceID(v uuid.UUID) *PackageNameUpsert {
-	u.Set(packagename.FieldNamespaceID, v)
+// SetType sets the "type" field.
+func (u *PackageNameUpsert) SetType(v string) *PackageNameUpsert {
+	u.Set(packagename.FieldType, v)
 	return u
 }
 
-// UpdateNamespaceID sets the "namespace_id" field to the value that was provided on create.
-func (u *PackageNameUpsert) UpdateNamespaceID() *PackageNameUpsert {
-	u.SetExcluded(packagename.FieldNamespaceID)
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *PackageNameUpsert) UpdateType() *PackageNameUpsert {
+	u.SetExcluded(packagename.FieldType)
+	return u
+}
+
+// SetNamespace sets the "namespace" field.
+func (u *PackageNameUpsert) SetNamespace(v string) *PackageNameUpsert {
+	u.Set(packagename.FieldNamespace, v)
+	return u
+}
+
+// UpdateNamespace sets the "namespace" field to the value that was provided on create.
+func (u *PackageNameUpsert) UpdateNamespace() *PackageNameUpsert {
+	u.SetExcluded(packagename.FieldNamespace)
 	return u
 }
 
@@ -325,17 +333,31 @@ func (u *PackageNameUpsertOne) Update(set func(*PackageNameUpsert)) *PackageName
 	return u
 }
 
-// SetNamespaceID sets the "namespace_id" field.
-func (u *PackageNameUpsertOne) SetNamespaceID(v uuid.UUID) *PackageNameUpsertOne {
+// SetType sets the "type" field.
+func (u *PackageNameUpsertOne) SetType(v string) *PackageNameUpsertOne {
 	return u.Update(func(s *PackageNameUpsert) {
-		s.SetNamespaceID(v)
+		s.SetType(v)
 	})
 }
 
-// UpdateNamespaceID sets the "namespace_id" field to the value that was provided on create.
-func (u *PackageNameUpsertOne) UpdateNamespaceID() *PackageNameUpsertOne {
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *PackageNameUpsertOne) UpdateType() *PackageNameUpsertOne {
 	return u.Update(func(s *PackageNameUpsert) {
-		s.UpdateNamespaceID()
+		s.UpdateType()
+	})
+}
+
+// SetNamespace sets the "namespace" field.
+func (u *PackageNameUpsertOne) SetNamespace(v string) *PackageNameUpsertOne {
+	return u.Update(func(s *PackageNameUpsert) {
+		s.SetNamespace(v)
+	})
+}
+
+// UpdateNamespace sets the "namespace" field to the value that was provided on create.
+func (u *PackageNameUpsertOne) UpdateNamespace() *PackageNameUpsertOne {
+	return u.Update(func(s *PackageNameUpsert) {
+		s.UpdateNamespace()
 	})
 }
 
@@ -489,7 +511,7 @@ func (pncb *PackageNameCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PackageNameUpsert) {
-//			SetNamespaceID(v+v).
+//			SetType(v+v).
 //		}).
 //		Exec(ctx)
 func (pncb *PackageNameCreateBulk) OnConflict(opts ...sql.ConflictOption) *PackageNameUpsertBulk {
@@ -568,17 +590,31 @@ func (u *PackageNameUpsertBulk) Update(set func(*PackageNameUpsert)) *PackageNam
 	return u
 }
 
-// SetNamespaceID sets the "namespace_id" field.
-func (u *PackageNameUpsertBulk) SetNamespaceID(v uuid.UUID) *PackageNameUpsertBulk {
+// SetType sets the "type" field.
+func (u *PackageNameUpsertBulk) SetType(v string) *PackageNameUpsertBulk {
 	return u.Update(func(s *PackageNameUpsert) {
-		s.SetNamespaceID(v)
+		s.SetType(v)
 	})
 }
 
-// UpdateNamespaceID sets the "namespace_id" field to the value that was provided on create.
-func (u *PackageNameUpsertBulk) UpdateNamespaceID() *PackageNameUpsertBulk {
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *PackageNameUpsertBulk) UpdateType() *PackageNameUpsertBulk {
 	return u.Update(func(s *PackageNameUpsert) {
-		s.UpdateNamespaceID()
+		s.UpdateType()
+	})
+}
+
+// SetNamespace sets the "namespace" field.
+func (u *PackageNameUpsertBulk) SetNamespace(v string) *PackageNameUpsertBulk {
+	return u.Update(func(s *PackageNameUpsert) {
+		s.SetNamespace(v)
+	})
+}
+
+// UpdateNamespace sets the "namespace" field to the value that was provided on create.
+func (u *PackageNameUpsertBulk) UpdateNamespace() *PackageNameUpsertBulk {
+	return u.Update(func(s *PackageNameUpsert) {
+		s.UpdateNamespace()
 	})
 }
 

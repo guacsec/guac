@@ -580,35 +580,12 @@ var (
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
-		{Name: "osv_id", Type: field.TypeUUID},
-		{Name: "vulnerability_id", Type: field.TypeUUID},
 	}
 	// IsVulnerabilitiesTable holds the schema information for the "is_vulnerabilities" table.
 	IsVulnerabilitiesTable = &schema.Table{
 		Name:       "is_vulnerabilities",
 		Columns:    IsVulnerabilitiesColumns,
 		PrimaryKey: []*schema.Column{IsVulnerabilitiesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "is_vulnerabilities_vulnerability_types_osv",
-				Columns:    []*schema.Column{IsVulnerabilitiesColumns[4]},
-				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "is_vulnerabilities_vulnerability_types_vulnerability",
-				Columns:    []*schema.Column{IsVulnerabilitiesColumns[5]},
-				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "isvulnerability_origin_justification_osv_id_vulnerability_id",
-				Unique:  true,
-				Columns: []*schema.Column{IsVulnerabilitiesColumns[2], IsVulnerabilitiesColumns[1], IsVulnerabilitiesColumns[4], IsVulnerabilitiesColumns[5]},
-			},
-		},
 	}
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
@@ -706,67 +683,22 @@ var (
 	// PackageNamesColumns holds the columns for the "package_names" table.
 	PackageNamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "type", Type: field.TypeString, Unique: true},
+		{Name: "namespace", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
-		{Name: "namespace_id", Type: field.TypeUUID},
 	}
 	// PackageNamesTable holds the schema information for the "package_names" table.
 	PackageNamesTable = &schema.Table{
 		Name:       "package_names",
 		Columns:    PackageNamesColumns,
 		PrimaryKey: []*schema.Column{PackageNamesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "package_names_package_namespaces_names",
-				Columns:    []*schema.Column{PackageNamesColumns[2]},
-				RefColumns: []*schema.Column{PackageNamespacesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "packagename_name_namespace_id",
+				Name:    "packagename_name_namespace_type",
 				Unique:  true,
-				Columns: []*schema.Column{PackageNamesColumns[1], PackageNamesColumns[2]},
+				Columns: []*schema.Column{PackageNamesColumns[3], PackageNamesColumns[2], PackageNamesColumns[1]},
 			},
 		},
-	}
-	// PackageNamespacesColumns holds the columns for the "package_namespaces" table.
-	PackageNamespacesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "namespace", Type: field.TypeString},
-		{Name: "package_id", Type: field.TypeUUID},
-	}
-	// PackageNamespacesTable holds the schema information for the "package_namespaces" table.
-	PackageNamespacesTable = &schema.Table{
-		Name:       "package_namespaces",
-		Columns:    PackageNamespacesColumns,
-		PrimaryKey: []*schema.Column{PackageNamespacesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "package_namespaces_package_types_namespaces",
-				Columns:    []*schema.Column{PackageNamespacesColumns[2]},
-				RefColumns: []*schema.Column{PackageTypesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "packagenamespace_namespace_package_id",
-				Unique:  true,
-				Columns: []*schema.Column{PackageNamespacesColumns[1], PackageNamespacesColumns[2]},
-			},
-		},
-	}
-	// PackageTypesColumns holds the columns for the "package_types" table.
-	PackageTypesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "type", Type: field.TypeString, Unique: true},
-	}
-	// PackageTypesTable holds the schema information for the "package_types" table.
-	PackageTypesTable = &schema.Table{
-		Name:       "package_types",
-		Columns:    PackageTypesColumns,
-		PrimaryKey: []*schema.Column{PackageTypesColumns[0]},
 	}
 	// PackageVersionsColumns holds the columns for the "package_versions" table.
 	PackageVersionsColumns = []*schema.Column{
@@ -992,69 +924,24 @@ var (
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "type", Type: field.TypeString, Unique: true},
+		{Name: "namespace", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
 		{Name: "commit", Type: field.TypeString, Nullable: true},
 		{Name: "tag", Type: field.TypeString, Nullable: true},
-		{Name: "namespace_id", Type: field.TypeUUID},
 	}
 	// SourceNamesTable holds the schema information for the "source_names" table.
 	SourceNamesTable = &schema.Table{
 		Name:       "source_names",
 		Columns:    SourceNamesColumns,
 		PrimaryKey: []*schema.Column{SourceNamesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "source_names_source_namespaces_namespace",
-				Columns:    []*schema.Column{SourceNamesColumns[4]},
-				RefColumns: []*schema.Column{SourceNamespacesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "sourcename_namespace_id_name_commit_tag",
+				Name:    "sourcename_type_namespace_name_commit_tag",
 				Unique:  true,
-				Columns: []*schema.Column{SourceNamesColumns[4], SourceNamesColumns[1], SourceNamesColumns[2], SourceNamesColumns[3]},
+				Columns: []*schema.Column{SourceNamesColumns[1], SourceNamesColumns[2], SourceNamesColumns[3], SourceNamesColumns[4], SourceNamesColumns[5]},
 			},
 		},
-	}
-	// SourceNamespacesColumns holds the columns for the "source_namespaces" table.
-	SourceNamespacesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "namespace", Type: field.TypeString},
-		{Name: "source_id", Type: field.TypeUUID},
-	}
-	// SourceNamespacesTable holds the schema information for the "source_namespaces" table.
-	SourceNamespacesTable = &schema.Table{
-		Name:       "source_namespaces",
-		Columns:    SourceNamespacesColumns,
-		PrimaryKey: []*schema.Column{SourceNamespacesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "source_namespaces_source_types_source_type",
-				Columns:    []*schema.Column{SourceNamespacesColumns[2]},
-				RefColumns: []*schema.Column{SourceTypesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "sourcenamespace_namespace_source_id",
-				Unique:  true,
-				Columns: []*schema.Column{SourceNamespacesColumns[1], SourceNamespacesColumns[2]},
-			},
-		},
-	}
-	// SourceTypesColumns holds the columns for the "source_types" table.
-	SourceTypesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "type", Type: field.TypeString, Unique: true},
-	}
-	// SourceTypesTable holds the schema information for the "source_types" table.
-	SourceTypesTable = &schema.Table{
-		Name:       "source_types",
-		Columns:    SourceTypesColumns,
-		PrimaryKey: []*schema.Column{SourceTypesColumns[0]},
 	}
 	// VulnEqualsColumns holds the columns for the "vuln_equals" table.
 	VulnEqualsColumns = []*schema.Column{
@@ -1073,7 +960,8 @@ var (
 	VulnerabilityIdsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "vulnerability_id", Type: field.TypeString},
-		{Name: "type_id", Type: field.TypeUUID},
+		{Name: "type", Type: field.TypeString},
+		{Name: "is_vulnerability_vulnerabilities", Type: field.TypeUUID, Nullable: true},
 	}
 	// VulnerabilityIdsTable holds the schema information for the "vulnerability_ids" table.
 	VulnerabilityIdsTable = &schema.Table{
@@ -1082,15 +970,15 @@ var (
 		PrimaryKey: []*schema.Column{VulnerabilityIdsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "vulnerability_ids_vulnerability_types_vulnerability_ids",
-				Columns:    []*schema.Column{VulnerabilityIdsColumns[2]},
-				RefColumns: []*schema.Column{VulnerabilityTypesColumns[0]},
-				OnDelete:   schema.NoAction,
+				Symbol:     "vulnerability_ids_is_vulnerabilities_vulnerabilities",
+				Columns:    []*schema.Column{VulnerabilityIdsColumns[3]},
+				RefColumns: []*schema.Column{IsVulnerabilitiesColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "vulnerabilityid_vulnerability_id_type_id",
+				Name:    "vulnerabilityid_vulnerability_id_type",
 				Unique:  true,
 				Columns: []*schema.Column{VulnerabilityIdsColumns[1], VulnerabilityIdsColumns[2]},
 			},
@@ -1124,24 +1012,6 @@ var (
 				Name:    "vulnerabilitymetadata_vulnerability_id_id_score_type_score_value_timestamp_origin_collector",
 				Unique:  true,
 				Columns: []*schema.Column{VulnerabilityMetadataColumns[6], VulnerabilityMetadataColumns[1], VulnerabilityMetadataColumns[2], VulnerabilityMetadataColumns[3], VulnerabilityMetadataColumns[4], VulnerabilityMetadataColumns[5]},
-			},
-		},
-	}
-	// VulnerabilityTypesColumns holds the columns for the "vulnerability_types" table.
-	VulnerabilityTypesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "type", Type: field.TypeString},
-	}
-	// VulnerabilityTypesTable holds the schema information for the "vulnerability_types" table.
-	VulnerabilityTypesTable = &schema.Table{
-		Name:       "vulnerability_types",
-		Columns:    VulnerabilityTypesColumns,
-		PrimaryKey: []*schema.Column{VulnerabilityTypesColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "vulnerabilitytype_type",
-				Unique:  true,
-				Columns: []*schema.Column{VulnerabilityTypesColumns[1]},
 			},
 		},
 	}
@@ -1413,20 +1283,15 @@ var (
 		LicensesTable,
 		OccurrencesTable,
 		PackageNamesTable,
-		PackageNamespacesTable,
-		PackageTypesTable,
 		PackageVersionsTable,
 		PkgEqualsTable,
 		PointOfContactsTable,
 		SlsaAttestationsTable,
 		ScorecardsTable,
 		SourceNamesTable,
-		SourceNamespacesTable,
-		SourceTypesTable,
 		VulnEqualsTable,
 		VulnerabilityIdsTable,
 		VulnerabilityMetadataTable,
-		VulnerabilityTypesTable,
 		BillOfMaterialsIncludedSoftwarePackagesTable,
 		BillOfMaterialsIncludedSoftwareArtifactsTable,
 		BillOfMaterialsIncludedDependenciesTable,
@@ -1466,13 +1331,9 @@ func init() {
 	HasSourceAtsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	HasSourceAtsTable.ForeignKeys[1].RefTable = PackageNamesTable
 	HasSourceAtsTable.ForeignKeys[2].RefTable = SourceNamesTable
-	IsVulnerabilitiesTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
-	IsVulnerabilitiesTable.ForeignKeys[1].RefTable = VulnerabilityTypesTable
 	OccurrencesTable.ForeignKeys[0].RefTable = ArtifactsTable
 	OccurrencesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	OccurrencesTable.ForeignKeys[2].RefTable = SourceNamesTable
-	PackageNamesTable.ForeignKeys[0].RefTable = PackageNamespacesTable
-	PackageNamespacesTable.ForeignKeys[0].RefTable = PackageTypesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
 	PointOfContactsTable.ForeignKeys[0].RefTable = SourceNamesTable
 	PointOfContactsTable.ForeignKeys[1].RefTable = PackageVersionsTable
@@ -1483,9 +1344,7 @@ func init() {
 	SlsaAttestationsTable.Annotation = &entsql.Annotation{
 		Table: "slsa_attestations",
 	}
-	SourceNamesTable.ForeignKeys[0].RefTable = SourceNamespacesTable
-	SourceNamespacesTable.ForeignKeys[0].RefTable = SourceTypesTable
-	VulnerabilityIdsTable.ForeignKeys[0].RefTable = VulnerabilityTypesTable
+	VulnerabilityIdsTable.ForeignKeys[0].RefTable = IsVulnerabilitiesTable
 	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable

@@ -8,7 +8,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -18,11 +17,11 @@ func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability mo
 	funcName := "IngestVulnEqual"
 	var vulnLowerCase model.IDorVulnerabilityInput
 	if vulnerability.VulnerabilityInput != nil {
-		if err := helper.ValidateNoVul(*vulnerability.VulnerabilityInput); err != nil {
+		if err := validateNoVul(*vulnerability.VulnerabilityInput); err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
-		if err := helper.ValidateVulnerabilityIDInputSpec(*vulnerability.VulnerabilityInput); err != nil {
+		if err := validateVulnerabilityIDInputSpec(*vulnerability.VulnerabilityInput); err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
@@ -37,11 +36,11 @@ func (r *mutationResolver) IngestVulnEqual(ctx context.Context, vulnerability mo
 
 	var otherVulnLowerCase model.IDorVulnerabilityInput
 	if otherVulnerability.VulnerabilityInput != nil {
-		if err := helper.ValidateNoVul(*otherVulnerability.VulnerabilityInput); err != nil {
+		if err := validateNoVul(*otherVulnerability.VulnerabilityInput); err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
-		if err := helper.ValidateVulnerabilityIDInputSpec(*otherVulnerability.VulnerabilityInput); err != nil {
+		if err := validateVulnerabilityIDInputSpec(*otherVulnerability.VulnerabilityInput); err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 		otherVulnLowerCase = model.IDorVulnerabilityInput{
@@ -75,11 +74,11 @@ func (r *mutationResolver) IngestVulnEquals(ctx context.Context, vulnerabilities
 		if vulnerabilities[i].VulnerabilityInput == nil {
 			lowercaseVulnList = append(lowercaseVulnList, vulnerabilities[i])
 		} else {
-			if err := helper.ValidateNoVul(*vulnerabilities[i].VulnerabilityInput); err != nil {
+			if err := validateNoVul(*vulnerabilities[i].VulnerabilityInput); err != nil {
 				return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 			}
 
-			if err := helper.ValidateVulnerabilityIDInputSpec(*vulnerabilities[i].VulnerabilityInput); err != nil {
+			if err := validateVulnerabilityIDInputSpec(*vulnerabilities[i].VulnerabilityInput); err != nil {
 				return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 			}
 
@@ -98,11 +97,11 @@ func (r *mutationResolver) IngestVulnEquals(ctx context.Context, vulnerabilities
 		if otherVulnerabilities[i].VulnerabilityInput == nil {
 			lowercaseOtherVulnList = append(lowercaseOtherVulnList, otherVulnerabilities[i])
 		} else {
-			if err := helper.ValidateNoVul(*otherVulnerabilities[i].VulnerabilityInput); err != nil {
+			if err := validateNoVul(*otherVulnerabilities[i].VulnerabilityInput); err != nil {
 				return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 			}
 
-			if err := helper.ValidateVulnerabilityIDInputSpec(*otherVulnerabilities[i].VulnerabilityInput); err != nil {
+			if err := validateVulnerabilityIDInputSpec(*otherVulnerabilities[i].VulnerabilityInput); err != nil {
 				return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 			}
 

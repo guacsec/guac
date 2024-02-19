@@ -13,23 +13,16 @@ const (
 	Label = "package_name"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldNamespaceID holds the string denoting the namespace_id field in the database.
-	FieldNamespaceID = "namespace_id"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
+	// FieldNamespace holds the string denoting the namespace field in the database.
+	FieldNamespace = "namespace"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgeNamespace holds the string denoting the namespace edge name in mutations.
-	EdgeNamespace = "namespace"
 	// EdgeVersions holds the string denoting the versions edge name in mutations.
 	EdgeVersions = "versions"
 	// Table holds the table name of the packagename in the database.
 	Table = "package_names"
-	// NamespaceTable is the table that holds the namespace relation/edge.
-	NamespaceTable = "package_names"
-	// NamespaceInverseTable is the table name for the PackageNamespace entity.
-	// It exists in this package in order to avoid circular dependency with the "packagenamespace" package.
-	NamespaceInverseTable = "package_namespaces"
-	// NamespaceColumn is the table column denoting the namespace relation/edge.
-	NamespaceColumn = "namespace_id"
 	// VersionsTable is the table that holds the versions relation/edge.
 	VersionsTable = "package_versions"
 	// VersionsInverseTable is the table name for the PackageVersion entity.
@@ -42,7 +35,8 @@ const (
 // Columns holds all SQL columns for packagename fields.
 var Columns = []string{
 	FieldID,
-	FieldNamespaceID,
+	FieldType,
+	FieldNamespace,
 	FieldName,
 }
 
@@ -57,6 +51,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	TypeValidator func(string) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
@@ -71,21 +67,19 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByNamespaceID orders the results by the namespace_id field.
-func ByNamespaceID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldNamespaceID, opts...).ToFunc()
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByNamespace orders the results by the namespace field.
+func ByNamespace(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNamespace, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
-// ByNamespaceField orders the results by namespace field.
-func ByNamespaceField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newNamespaceStep(), sql.OrderByField(field, opts...))
-	}
 }
 
 // ByVersionsCount orders the results by versions count.
@@ -100,13 +94,6 @@ func ByVersions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newVersionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
-}
-func newNamespaceStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(NamespaceInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, NamespaceTable, NamespaceColumn),
-	)
 }
 func newVersionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

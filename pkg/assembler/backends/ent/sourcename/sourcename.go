@@ -13,27 +13,20 @@ const (
 	Label = "source_name"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
+	// FieldNamespace holds the string denoting the namespace field in the database.
+	FieldNamespace = "namespace"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldCommit holds the string denoting the commit field in the database.
 	FieldCommit = "commit"
 	// FieldTag holds the string denoting the tag field in the database.
 	FieldTag = "tag"
-	// FieldNamespaceID holds the string denoting the namespace_id field in the database.
-	FieldNamespaceID = "namespace_id"
-	// EdgeNamespace holds the string denoting the namespace edge name in mutations.
-	EdgeNamespace = "namespace"
 	// EdgeOccurrences holds the string denoting the occurrences edge name in mutations.
 	EdgeOccurrences = "occurrences"
 	// Table holds the table name of the sourcename in the database.
 	Table = "source_names"
-	// NamespaceTable is the table that holds the namespace relation/edge.
-	NamespaceTable = "source_names"
-	// NamespaceInverseTable is the table name for the SourceNamespace entity.
-	// It exists in this package in order to avoid circular dependency with the "sourcenamespace" package.
-	NamespaceInverseTable = "source_namespaces"
-	// NamespaceColumn is the table column denoting the namespace relation/edge.
-	NamespaceColumn = "namespace_id"
 	// OccurrencesTable is the table that holds the occurrences relation/edge.
 	OccurrencesTable = "occurrences"
 	// OccurrencesInverseTable is the table name for the Occurrence entity.
@@ -46,10 +39,11 @@ const (
 // Columns holds all SQL columns for sourcename fields.
 var Columns = []string{
 	FieldID,
+	FieldType,
+	FieldNamespace,
 	FieldName,
 	FieldCommit,
 	FieldTag,
-	FieldNamespaceID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -75,6 +69,16 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByNamespace orders the results by the namespace field.
+func ByNamespace(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNamespace, opts...).ToFunc()
+}
+
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
@@ -90,18 +94,6 @@ func ByTag(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTag, opts...).ToFunc()
 }
 
-// ByNamespaceID orders the results by the namespace_id field.
-func ByNamespaceID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldNamespaceID, opts...).ToFunc()
-}
-
-// ByNamespaceField orders the results by namespace field.
-func ByNamespaceField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newNamespaceStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByOccurrencesCount orders the results by occurrences count.
 func ByOccurrencesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -114,13 +106,6 @@ func ByOccurrences(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newOccurrencesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
-}
-func newNamespaceStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(NamespaceInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, NamespaceTable, NamespaceColumn),
-	)
 }
 func newOccurrencesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

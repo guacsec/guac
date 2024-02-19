@@ -376,18 +376,14 @@ func (he *HashEqual) Artifacts(ctx context.Context) (result []*Artifact, err err
 	return result, err
 }
 
-func (iv *IsVulnerability) Osv(ctx context.Context) (*VulnerabilityType, error) {
-	result, err := iv.Edges.OsvOrErr()
-	if IsNotLoaded(err) {
-		result, err = iv.QueryOsv().Only(ctx)
+func (iv *IsVulnerability) Vulnerabilities(ctx context.Context) (result []*VulnerabilityID, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = iv.NamedVulnerabilities(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = iv.Edges.VulnerabilitiesOrErr()
 	}
-	return result, err
-}
-
-func (iv *IsVulnerability) Vulnerability(ctx context.Context) (*VulnerabilityType, error) {
-	result, err := iv.Edges.VulnerabilityOrErr()
 	if IsNotLoaded(err) {
-		result, err = iv.QueryVulnerability().Only(ctx)
+		result, err = iv.QueryVulnerabilities().All(ctx)
 	}
 	return result, err
 }
@@ -452,14 +448,6 @@ func (o *Occurrence) IncludedInSboms(ctx context.Context) (result []*BillOfMater
 	return result, err
 }
 
-func (pn *PackageName) Namespace(ctx context.Context) (*PackageNamespace, error) {
-	result, err := pn.Edges.NamespaceOrErr()
-	if IsNotLoaded(err) {
-		result, err = pn.QueryNamespace().Only(ctx)
-	}
-	return result, err
-}
-
 func (pn *PackageName) Versions(ctx context.Context) (result []*PackageVersion, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = pn.NamedVersions(graphql.GetFieldContext(ctx).Field.Alias)
@@ -468,38 +456,6 @@ func (pn *PackageName) Versions(ctx context.Context) (result []*PackageVersion, 
 	}
 	if IsNotLoaded(err) {
 		result, err = pn.QueryVersions().All(ctx)
-	}
-	return result, err
-}
-
-func (pn *PackageNamespace) Package(ctx context.Context) (*PackageType, error) {
-	result, err := pn.Edges.PackageOrErr()
-	if IsNotLoaded(err) {
-		result, err = pn.QueryPackage().Only(ctx)
-	}
-	return result, err
-}
-
-func (pn *PackageNamespace) Names(ctx context.Context) (result []*PackageName, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pn.NamedNames(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = pn.Edges.NamesOrErr()
-	}
-	if IsNotLoaded(err) {
-		result, err = pn.QueryNames().All(ctx)
-	}
-	return result, err
-}
-
-func (pt *PackageType) Namespaces(ctx context.Context) (result []*PackageNamespace, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pt.NamedNamespaces(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = pt.Edges.NamespacesOrErr()
-	}
-	if IsNotLoaded(err) {
-		result, err = pt.QueryNamespaces().All(ctx)
 	}
 	return result, err
 }
@@ -644,14 +600,6 @@ func (s *Scorecard) Certifications(ctx context.Context) (result []*CertifyScorec
 	return result, err
 }
 
-func (sn *SourceName) Namespace(ctx context.Context) (*SourceNamespace, error) {
-	result, err := sn.Edges.NamespaceOrErr()
-	if IsNotLoaded(err) {
-		result, err = sn.QueryNamespace().Only(ctx)
-	}
-	return result, err
-}
-
 func (sn *SourceName) Occurrences(ctx context.Context) (result []*Occurrence, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = sn.NamedOccurrences(graphql.GetFieldContext(ctx).Field.Alias)
@@ -664,38 +612,6 @@ func (sn *SourceName) Occurrences(ctx context.Context) (result []*Occurrence, er
 	return result, err
 }
 
-func (sn *SourceNamespace) SourceType(ctx context.Context) (*SourceType, error) {
-	result, err := sn.Edges.SourceTypeOrErr()
-	if IsNotLoaded(err) {
-		result, err = sn.QuerySourceType().Only(ctx)
-	}
-	return result, err
-}
-
-func (sn *SourceNamespace) Names(ctx context.Context) (result []*SourceName, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = sn.NamedNames(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = sn.Edges.NamesOrErr()
-	}
-	if IsNotLoaded(err) {
-		result, err = sn.QueryNames().All(ctx)
-	}
-	return result, err
-}
-
-func (st *SourceType) Namespaces(ctx context.Context) (result []*SourceNamespace, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = st.NamedNamespaces(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = st.Edges.NamespacesOrErr()
-	}
-	if IsNotLoaded(err) {
-		result, err = st.QueryNamespaces().All(ctx)
-	}
-	return result, err
-}
-
 func (ve *VulnEqual) VulnerabilityIds(ctx context.Context) (result []*VulnerabilityID, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = ve.NamedVulnerabilityIds(graphql.GetFieldContext(ctx).Field.Alias)
@@ -704,14 +620,6 @@ func (ve *VulnEqual) VulnerabilityIds(ctx context.Context) (result []*Vulnerabil
 	}
 	if IsNotLoaded(err) {
 		result, err = ve.QueryVulnerabilityIds().All(ctx)
-	}
-	return result, err
-}
-
-func (vi *VulnerabilityID) Type(ctx context.Context) (*VulnerabilityType, error) {
-	result, err := vi.Edges.TypeOrErr()
-	if IsNotLoaded(err) {
-		result, err = vi.QueryType().Only(ctx)
 	}
 	return result, err
 }
@@ -744,18 +652,6 @@ func (vm *VulnerabilityMetadata) VulnerabilityID(ctx context.Context) (*Vulnerab
 	result, err := vm.Edges.VulnerabilityIDOrErr()
 	if IsNotLoaded(err) {
 		result, err = vm.QueryVulnerabilityID().Only(ctx)
-	}
-	return result, err
-}
-
-func (vt *VulnerabilityType) VulnerabilityIds(ctx context.Context) (result []*VulnerabilityID, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = vt.NamedVulnerabilityIds(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = vt.Edges.VulnerabilityIdsOrErr()
-	}
-	if IsNotLoaded(err) {
-		result, err = vt.QueryVulnerabilityIds().All(ctx)
 	}
 	return result, err
 }

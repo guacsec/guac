@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 )
 
 // SourceName is the model entity for the SourceName schema.
@@ -18,14 +17,16 @@ type SourceName struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// Type holds the value of the "type" field.
+	Type string `json:"type,omitempty"`
+	// Namespace holds the value of the "namespace" field.
+	Namespace string `json:"namespace,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Commit holds the value of the "commit" field.
 	Commit string `json:"commit,omitempty"`
 	// Tag holds the value of the "tag" field.
 	Tag string `json:"tag,omitempty"`
-	// NamespaceID holds the value of the "namespace_id" field.
-	NamespaceID uuid.UUID `json:"namespace_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SourceNameQuery when eager-loading is set.
 	Edges        SourceNameEdges `json:"edges"`
@@ -34,36 +35,21 @@ type SourceName struct {
 
 // SourceNameEdges holds the relations/edges for other nodes in the graph.
 type SourceNameEdges struct {
-	// Namespace holds the value of the namespace edge.
-	Namespace *SourceNamespace `json:"namespace,omitempty"`
 	// Occurrences holds the value of the occurrences edge.
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]map[string]int
+	totalCount [1]map[string]int
 
 	namedOccurrences map[string][]*Occurrence
-}
-
-// NamespaceOrErr returns the Namespace value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e SourceNameEdges) NamespaceOrErr() (*SourceNamespace, error) {
-	if e.loadedTypes[0] {
-		if e.Namespace == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: sourcenamespace.Label}
-		}
-		return e.Namespace, nil
-	}
-	return nil, &NotLoadedError{edge: "namespace"}
 }
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
 // was not loaded in eager-loading.
 func (e SourceNameEdges) OccurrencesOrErr() ([]*Occurrence, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.Occurrences, nil
 	}
 	return nil, &NotLoadedError{edge: "occurrences"}
@@ -74,9 +60,9 @@ func (*SourceName) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case sourcename.FieldName, sourcename.FieldCommit, sourcename.FieldTag:
+		case sourcename.FieldType, sourcename.FieldNamespace, sourcename.FieldName, sourcename.FieldCommit, sourcename.FieldTag:
 			values[i] = new(sql.NullString)
-		case sourcename.FieldID, sourcename.FieldNamespaceID:
+		case sourcename.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -99,6 +85,18 @@ func (sn *SourceName) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				sn.ID = *value
 			}
+		case sourcename.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				sn.Type = value.String
+			}
+		case sourcename.FieldNamespace:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field namespace", values[i])
+			} else if value.Valid {
+				sn.Namespace = value.String
+			}
 		case sourcename.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -117,12 +115,6 @@ func (sn *SourceName) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				sn.Tag = value.String
 			}
-		case sourcename.FieldNamespaceID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field namespace_id", values[i])
-			} else if value != nil {
-				sn.NamespaceID = *value
-			}
 		default:
 			sn.selectValues.Set(columns[i], values[i])
 		}
@@ -134,11 +126,6 @@ func (sn *SourceName) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (sn *SourceName) Value(name string) (ent.Value, error) {
 	return sn.selectValues.Get(name)
-}
-
-// QueryNamespace queries the "namespace" edge of the SourceName entity.
-func (sn *SourceName) QueryNamespace() *SourceNamespaceQuery {
-	return NewSourceNameClient(sn.config).QueryNamespace(sn)
 }
 
 // QueryOccurrences queries the "occurrences" edge of the SourceName entity.
@@ -169,6 +156,12 @@ func (sn *SourceName) String() string {
 	var builder strings.Builder
 	builder.WriteString("SourceName(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", sn.ID))
+	builder.WriteString("type=")
+	builder.WriteString(sn.Type)
+	builder.WriteString(", ")
+	builder.WriteString("namespace=")
+	builder.WriteString(sn.Namespace)
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(sn.Name)
 	builder.WriteString(", ")
@@ -177,9 +170,6 @@ func (sn *SourceName) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tag=")
 	builder.WriteString(sn.Tag)
-	builder.WriteString(", ")
-	builder.WriteString("namespace_id=")
-	builder.WriteString(fmt.Sprintf("%v", sn.NamespaceID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -218,10 +218,10 @@ func getOccurrenceQueryValues(pkg *model.PkgInputSpec, src *model.SourceInputSpe
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := guacPkgId(*pkg)
+		pkgId := helper.GuacPkgId(*pkg)
 		values["pkgVersionGuacKey"] = pkgId.VersionId
 	} else {
-		source := guacSrcId(*src)
+		source := helper.GuacSrcId(*src)
 		values["srcNameGuacKey"] = source.NameId
 	}
 	values["art_algorithm"] = strings.ToLower(artifact.Algorithm)

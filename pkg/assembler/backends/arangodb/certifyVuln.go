@@ -23,6 +23,7 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -170,11 +171,11 @@ func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.Vul
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := guacPkgId(*pkg)
+		pkgId := helper.GuacPkgId(*pkg)
 		values["pkgVersionGuacKey"] = pkgId.VersionId
 	}
 	if vulnerability != nil {
-		vuln := guacVulnId(*vulnerability)
+		vuln := helper.GuacVulnId(*vulnerability)
 		values["guacVulnKey"] = vuln.VulnerabilityID
 	}
 

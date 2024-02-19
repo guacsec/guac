@@ -7,7 +7,6 @@ package resolvers
 import (
 	"context"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -15,7 +14,7 @@ import (
 // IngestCertifyLegal is the resolver for the ingestCertifyLegal field.
 func (r *mutationResolver) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, certifyLegal model.CertifyLegalInputSpec) (string, error) {
 	funcName := "IngestCertifyLegal"
-	if err := helper.ValidatePackageOrSourceInput(&subject, funcName); err != nil {
+	if err := validatePackageOrSourceInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 
@@ -50,7 +49,7 @@ func (r *mutationResolver) IngestCertifyLegals(ctx context.Context, subjects mod
 
 // CertifyLegal is the resolver for the CertifyLegal field.
 func (r *queryResolver) CertifyLegal(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
-	if err := helper.ValidatePackageOrSourceQueryFilter(certifyLegalSpec.Subject); err != nil {
+	if err := validatePackageOrSourceQueryFilter(certifyLegalSpec.Subject); err != nil {
 		return nil, gqlerror.Errorf("CertifyLegal :: %v", err)
 	}
 

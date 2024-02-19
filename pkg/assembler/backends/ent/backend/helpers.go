@@ -16,11 +16,9 @@
 package backend
 
 import (
-	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func IDEQ(id string) func(*sql.Selector) {
@@ -99,8 +97,4 @@ func chunk[T any](collection []T, size int) [][]T {
 	}
 
 	return result
-}
-
-func artifactKey(input *model.ArtifactInputSpec) string {
-	return fmt.Sprintf("%s:%s", strings.ToLower(input.Algorithm), strings.ToLower(input.Digest))
 }

@@ -325,8 +325,8 @@ func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpe
 	values := map[string]any{}
 
 	// add guac keys
-	pkgId := guacPkgId(*pkg)
-	depPkgId := guacPkgId(*depPkg)
+	pkgId := helper.GuacPkgId(*pkg)
+	depPkgId := helper.GuacPkgId(*depPkg)
 	values["pkgVersionGuacKey"] = pkgId.VersionId
 	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 		values["secondPkgGuacKey"] = depPkgId.NameId

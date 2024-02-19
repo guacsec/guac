@@ -20,7 +20,6 @@ const (
 	knownSince      string        = "knownSince"
 	maxRetires      int           = 100
 	retryTimer      time.Duration = time.Microsecond
-	guacEmpty       string        = "guac-empty-@@"
 
 	// Package collections
 	pkgTypesStr        string = "pkgTypes"

@@ -28,20 +28,15 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -118,20 +113,15 @@ func checkColumn(table, column string) error {
 			license.Table:               license.ValidColumn,
 			occurrence.Table:            occurrence.ValidColumn,
 			packagename.Table:           packagename.ValidColumn,
-			packagenamespace.Table:      packagenamespace.ValidColumn,
-			packagetype.Table:           packagetype.ValidColumn,
 			packageversion.Table:        packageversion.ValidColumn,
 			pkgequal.Table:              pkgequal.ValidColumn,
 			pointofcontact.Table:        pointofcontact.ValidColumn,
 			slsaattestation.Table:       slsaattestation.ValidColumn,
 			scorecard.Table:             scorecard.ValidColumn,
 			sourcename.Table:            sourcename.ValidColumn,
-			sourcenamespace.Table:       sourcenamespace.ValidColumn,
-			sourcetype.Table:            sourcetype.ValidColumn,
 			vulnequal.Table:             vulnequal.ValidColumn,
 			vulnerabilityid.Table:       vulnerabilityid.ValidColumn,
 			vulnerabilitymetadata.Table: vulnerabilitymetadata.ValidColumn,
-			vulnerabilitytype.Table:     vulnerabilitytype.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

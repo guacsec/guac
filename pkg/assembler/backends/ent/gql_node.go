@@ -25,20 +25,15 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/hashicorp/go-multierror"
 )
 
@@ -96,12 +91,6 @@ func (n *Occurrence) IsNode() {}
 func (n *PackageName) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *PackageNamespace) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
-func (n *PackageType) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
 func (n *PackageVersion) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
@@ -120,12 +109,6 @@ func (n *Scorecard) IsNode() {}
 func (n *SourceName) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *SourceNamespace) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
-func (n *SourceType) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
 func (n *VulnEqual) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
@@ -133,9 +116,6 @@ func (n *VulnerabilityID) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *VulnerabilityMetadata) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
-func (n *VulnerabilityType) IsNode() {}
 
 var errNodeInvalidID = &NotFoundError{"node"}
 
@@ -387,30 +367,6 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 			return nil, err
 		}
 		return n, nil
-	case packagenamespace.Table:
-		query := c.PackageNamespace.Query().
-			Where(packagenamespace.ID(id))
-		query, err := query.CollectFields(ctx, "PackageNamespace")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case packagetype.Table:
-		query := c.PackageType.Query().
-			Where(packagetype.ID(id))
-		query, err := query.CollectFields(ctx, "PackageType")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
 	case packageversion.Table:
 		query := c.PackageVersion.Query().
 			Where(packageversion.ID(id))
@@ -483,30 +439,6 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 			return nil, err
 		}
 		return n, nil
-	case sourcenamespace.Table:
-		query := c.SourceNamespace.Query().
-			Where(sourcenamespace.ID(id))
-		query, err := query.CollectFields(ctx, "SourceNamespace")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case sourcetype.Table:
-		query := c.SourceType.Query().
-			Where(sourcetype.ID(id))
-		query, err := query.CollectFields(ctx, "SourceType")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
 	case vulnequal.Table:
 		query := c.VulnEqual.Query().
 			Where(vulnequal.ID(id))
@@ -535,18 +467,6 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 		query := c.VulnerabilityMetadata.Query().
 			Where(vulnerabilitymetadata.ID(id))
 		query, err := query.CollectFields(ctx, "VulnerabilityMetadata")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case vulnerabilitytype.Table:
-		query := c.VulnerabilityType.Query().
-			Where(vulnerabilitytype.ID(id))
-		query, err := query.CollectFields(ctx, "VulnerabilityType")
 		if err != nil {
 			return nil, err
 		}
@@ -884,38 +804,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 				*noder = node
 			}
 		}
-	case packagenamespace.Table:
-		query := c.PackageNamespace.Query().
-			Where(packagenamespace.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "PackageNamespace")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case packagetype.Table:
-		query := c.PackageType.Query().
-			Where(packagetype.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "PackageType")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	case packageversion.Table:
 		query := c.PackageVersion.Query().
 			Where(packageversion.IDIn(ids...))
@@ -1012,38 +900,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 				*noder = node
 			}
 		}
-	case sourcenamespace.Table:
-		query := c.SourceNamespace.Query().
-			Where(sourcenamespace.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "SourceNamespace")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case sourcetype.Table:
-		query := c.SourceType.Query().
-			Where(sourcetype.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "SourceType")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	case vulnequal.Table:
 		query := c.VulnEqual.Query().
 			Where(vulnequal.IDIn(ids...))
@@ -1080,22 +936,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 		query := c.VulnerabilityMetadata.Query().
 			Where(vulnerabilitymetadata.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "VulnerabilityMetadata")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case vulnerabilitytype.Table:
-		query := c.VulnerabilityType.Query().
-			Where(vulnerabilitytype.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "VulnerabilityType")
 		if err != nil {
 			return nil, err
 		}

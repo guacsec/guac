@@ -23,6 +23,7 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -220,10 +221,10 @@ func getCertifyLegalQueryValues(pkg *model.PkgInputSpec, source *model.SourceInp
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := guacPkgId(*pkg)
+		pkgId := helper.GuacPkgId(*pkg)
 		values["pkgVersionGuacKey"] = pkgId.VersionId
 	} else {
-		source := guacSrcId(*source)
+		source := helper.GuacSrcId(*source)
 		values["srcNameGuacKey"] = source.NameId
 	}
 

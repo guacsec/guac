@@ -49,51 +49,10 @@ type dbSrcType struct {
 	SrcType string `json:"type"`
 }
 
-type srcIds struct {
-	TypeId      string
-	NamespaceId string
-	NameId      string
-}
-
-func guacSrcId(src model.SourceInputSpec) srcIds {
-	ids := srcIds{}
-
-	ids.TypeId = src.Type
-
-	var ns string
-	if src.Namespace != "" {
-		ns = src.Namespace
-	} else {
-		ns = guacEmpty
-	}
-	ids.NamespaceId = fmt.Sprintf("%s::%s", ids.TypeId, ns)
-
-	var tag string
-	if src.Tag != nil {
-		if *src.Tag != "" {
-			tag = *src.Tag
-		} else {
-			tag = guacEmpty
-		}
-	}
-
-	var commit string
-	if src.Commit != nil {
-		if *src.Commit != "" {
-			commit = *src.Commit
-		} else {
-			commit = guacEmpty
-		}
-	}
-
-	ids.NameId = fmt.Sprintf("%s::%s::%s::%s?", ids.NamespaceId, src.Name, tag, commit)
-	return ids
-}
-
 func getSourceQueryValues(source *model.SourceInputSpec) map[string]any {
 	values := map[string]any{}
 	// add guac keys
-	guacIds := guacSrcId(*source)
+	guacIds := helper.GuacSrcId(*source)
 	values["guacNsKey"] = guacIds.NamespaceId
 	values["guacNameKey"] = guacIds.NameId
 

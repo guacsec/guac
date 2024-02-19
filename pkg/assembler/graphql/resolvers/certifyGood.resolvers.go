@@ -7,7 +7,6 @@ package resolvers
 import (
 	"context"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -15,7 +14,7 @@ import (
 // IngestCertifyGood is the resolver for the ingestCertifyGood field.
 func (r *mutationResolver) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyGood model.CertifyGoodInputSpec) (string, error) {
 	funcName := "IngestCertifyGood"
-	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
+	if err := validatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
 		return "", err
 	}
 	if certifyGood.KnownSince.IsZero() {
@@ -62,7 +61,7 @@ func (r *mutationResolver) IngestCertifyGoods(ctx context.Context, subjects mode
 
 // CertifyGood is the resolver for the CertifyGood field.
 func (r *queryResolver) CertifyGood(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
-	if err := helper.ValidatePackageSourceOrArtifactQueryFilter(certifyGoodSpec.Subject); err != nil {
+	if err := validatePackageSourceOrArtifactQueryFilter(certifyGoodSpec.Subject); err != nil {
 		return nil, gqlerror.Errorf("CertifyGood :: %s", err)
 	}
 	return r.Backend.CertifyGood(ctx, &certifyGoodSpec)

@@ -23,6 +23,7 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -288,7 +289,7 @@ func getCertifyBadQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Match
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := guacPkgId(*pkg)
+		pkgId := helper.GuacPkgId(*pkg)
 		if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 			values["pkgNameGuacKey"] = pkgId.NameId
 		} else {
@@ -298,7 +299,7 @@ func getCertifyBadQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Match
 		values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
 		values["art_digest"] = strings.ToLower(artifact.Digest)
 	} else {
-		source := guacSrcId(*source)
+		source := helper.GuacSrcId(*source)
 		values["srcNameGuacKey"] = source.NameId
 	}
 

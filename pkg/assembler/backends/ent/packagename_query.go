@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
@@ -25,7 +24,6 @@ type PackageNameQuery struct {
 	order             []packagename.OrderOption
 	inters            []Interceptor
 	predicates        []predicate.PackageName
-	withNamespace     *PackageNamespaceQuery
 	withVersions      *PackageVersionQuery
 	modifiers         []func(*sql.Selector)
 	loadTotal         []func(context.Context, []*PackageName) error
@@ -64,28 +62,6 @@ func (pnq *PackageNameQuery) Unique(unique bool) *PackageNameQuery {
 func (pnq *PackageNameQuery) Order(o ...packagename.OrderOption) *PackageNameQuery {
 	pnq.order = append(pnq.order, o...)
 	return pnq
-}
-
-// QueryNamespace chains the current query on the "namespace" edge.
-func (pnq *PackageNameQuery) QueryNamespace() *PackageNamespaceQuery {
-	query := (&PackageNamespaceClient{config: pnq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pnq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pnq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packagename.Table, packagename.FieldID, selector),
-			sqlgraph.To(packagenamespace.Table, packagenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, packagename.NamespaceTable, packagename.NamespaceColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryVersions chains the current query on the "versions" edge.
@@ -297,28 +273,16 @@ func (pnq *PackageNameQuery) Clone() *PackageNameQuery {
 		return nil
 	}
 	return &PackageNameQuery{
-		config:        pnq.config,
-		ctx:           pnq.ctx.Clone(),
-		order:         append([]packagename.OrderOption{}, pnq.order...),
-		inters:        append([]Interceptor{}, pnq.inters...),
-		predicates:    append([]predicate.PackageName{}, pnq.predicates...),
-		withNamespace: pnq.withNamespace.Clone(),
-		withVersions:  pnq.withVersions.Clone(),
+		config:       pnq.config,
+		ctx:          pnq.ctx.Clone(),
+		order:        append([]packagename.OrderOption{}, pnq.order...),
+		inters:       append([]Interceptor{}, pnq.inters...),
+		predicates:   append([]predicate.PackageName{}, pnq.predicates...),
+		withVersions: pnq.withVersions.Clone(),
 		// clone intermediate query.
 		sql:  pnq.sql.Clone(),
 		path: pnq.path,
 	}
-}
-
-// WithNamespace tells the query-builder to eager-load the nodes that are connected to
-// the "namespace" edge. The optional arguments are used to configure the query builder of the edge.
-func (pnq *PackageNameQuery) WithNamespace(opts ...func(*PackageNamespaceQuery)) *PackageNameQuery {
-	query := (&PackageNamespaceClient{config: pnq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	pnq.withNamespace = query
-	return pnq
 }
 
 // WithVersions tells the query-builder to eager-load the nodes that are connected to
@@ -338,12 +302,12 @@ func (pnq *PackageNameQuery) WithVersions(opts ...func(*PackageVersionQuery)) *P
 // Example:
 //
 //	var v []struct {
-//		NamespaceID uuid.UUID `json:"namespace_id,omitempty"`
+//		Type string `json:"type,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.PackageName.Query().
-//		GroupBy(packagename.FieldNamespaceID).
+//		GroupBy(packagename.FieldType).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pnq *PackageNameQuery) GroupBy(field string, fields ...string) *PackageNameGroupBy {
@@ -361,11 +325,11 @@ func (pnq *PackageNameQuery) GroupBy(field string, fields ...string) *PackageNam
 // Example:
 //
 //	var v []struct {
-//		NamespaceID uuid.UUID `json:"namespace_id,omitempty"`
+//		Type string `json:"type,omitempty"`
 //	}
 //
 //	client.PackageName.Query().
-//		Select(packagename.FieldNamespaceID).
+//		Select(packagename.FieldType).
 //		Scan(ctx, &v)
 func (pnq *PackageNameQuery) Select(fields ...string) *PackageNameSelect {
 	pnq.ctx.Fields = append(pnq.ctx.Fields, fields...)
@@ -410,8 +374,7 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	var (
 		nodes       = []*PackageName{}
 		_spec       = pnq.querySpec()
-		loadedTypes = [2]bool{
-			pnq.withNamespace != nil,
+		loadedTypes = [1]bool{
 			pnq.withVersions != nil,
 		}
 	)
@@ -436,12 +399,6 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := pnq.withNamespace; query != nil {
-		if err := pnq.loadNamespace(ctx, query, nodes, nil,
-			func(n *PackageName, e *PackageNamespace) { n.Edges.Namespace = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := pnq.withVersions; query != nil {
 		if err := pnq.loadVersions(ctx, query, nodes,
 			func(n *PackageName) { n.Edges.Versions = []*PackageVersion{} },
@@ -464,35 +421,6 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	return nodes, nil
 }
 
-func (pnq *PackageNameQuery) loadNamespace(ctx context.Context, query *PackageNamespaceQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *PackageNamespace)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*PackageName)
-	for i := range nodes {
-		fk := nodes[i].NamespaceID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(packagenamespace.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "namespace_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 func (pnq *PackageNameQuery) loadVersions(ctx context.Context, query *PackageVersionQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *PackageVersion)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*PackageName)
@@ -551,9 +479,6 @@ func (pnq *PackageNameQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != packagename.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if pnq.withNamespace != nil {
-			_spec.Node.AddColumnOnce(packagename.FieldNamespaceID)
 		}
 	}
 	if ps := pnq.predicates; len(ps) > 0 {

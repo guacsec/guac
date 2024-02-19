@@ -19,17 +19,15 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"crypto/sha256"
 	stdsql "database/sql"
 	"fmt"
-	"slices"
 	"sort"
-	"strconv"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
@@ -38,53 +36,56 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const (
+	pkgTypeString      = "pkgType"
+	pkgNamespaceString = "pkgNamespace"
+)
+
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	if pkgSpec == nil {
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	query := b.client.PackageType.Query().Limit(MaxPageSize)
+	query := b.client.PackageName.Query().Limit(MaxPageSize)
 
-	paths, isGQL := getPreloads(ctx)
+	// TODO: Fix preloads
+	//paths, isGQL := getPreloads(ctx)
 
 	query.Where(
-		optionalPredicate(pkgSpec.Type, packagetype.TypeEQ),
-		packagetype.HasNamespacesWith(
-			optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ),
-			packagenamespace.HasNamesWith(
-				optionalPredicate(pkgSpec.Name, packagename.NameEQ),
-				packagename.HasVersionsWith(
-					optionalPredicate(pkgSpec.ID, IDEQ),
-					optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
-					optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
-					packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
-				),
-			),
+		optionalPredicate(pkgSpec.Type, packagename.TypeEQ),
+		optionalPredicate(pkgSpec.Namespace, packagename.NamespaceEQ),
+		optionalPredicate(pkgSpec.Name, packagename.NameEQ),
+		packagename.HasVersionsWith(
+			optionalPredicate(pkgSpec.ID, IDEQ),
+			optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
+			optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
+			packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
 		),
 	)
 
-	if slices.Contains(paths, "namespaces") || !isGQL {
-		query.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-			q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
+	// TODO: Fix preloads
+	// if slices.Contains(paths, "namespaces") || !isGQL {
+	// 	query.WithNamedVersions(func(q *ent.PackageNameQuery) {
+	// 		q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
+	// 		if slices.Contains(paths, "namespaces.names") || !isGQL {
+	// 			q.WithNames(func(q *ent.PackageNameQuery) {
+	// 				q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
+	// 				q.Where(optionalPredicate(pkgSpec.Namespace, packagename.NameEQ))
 
-			if slices.Contains(paths, "namespaces.names") || !isGQL {
-				q.WithNames(func(q *ent.PackageNameQuery) {
-					q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
-
-					if slices.Contains(paths, "namespaces.names.versions") || !isGQL {
-						q.WithVersions(func(q *ent.PackageVersionQuery) {
-							q.Where(
-								optionalPredicate(pkgSpec.ID, IDEQ),
-								optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
-								optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
-								packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
-							)
-						})
-					}
-				})
-			}
-		})
-	}
+	// 				if slices.Contains(paths, "namespaces.names.versions") || !isGQL {
+	// 					q.WithVersions(func(q *ent.PackageVersionQuery) {
+	// 						q.Where(
+	// 							optionalPredicate(pkgSpec.ID, IDEQ),
+	// 							optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
+	// 							optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
+	// 							packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
+	// 						)
+	// 					})
+	// 				}
+	// 			})
+	// 		}
+	// 	})
+	// }
 
 	pkgs, err := query.All(ctx)
 	if err != nil {
@@ -133,68 +134,27 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
 func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
-
-	pkgID, err := client.PackageType.Create().
-		SetType(pkg.Type).
-		OnConflict(sql.ConflictColumns(packagetype.FieldType)).
-		DoNothing().
-		ID(ctx)
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert package node")
-		}
-		pkgID, err = client.PackageType.Query().
-			Where(packagetype.TypeEQ(pkg.Type)).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get package type")
-		}
-	}
-
-	// Add in new fields for guacKeys and make them indexable
-	nsID, err := client.PackageNamespace.Create().
-		SetPackageID(pkgID).
-		SetNamespace(valueOrDefault(pkg.Namespace, "")).
-		OnConflict(sql.ConflictColumns(packagenamespace.FieldNamespace, packagenamespace.FieldPackageID)).
-		DoNothing().
-		ID(ctx)
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert package namespace")
-		}
-		nsID, err = client.PackageNamespace.Query().
-			Where(
-				packagenamespace.PackageIDEQ(pkgID),
-				packagenamespace.NamespaceEQ(valueOrDefault(pkg.Namespace, "")),
-			).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get package namespace")
-		}
-	}
+	pkgIDs := helper.GuacPkgId(pkg)
+	pkgNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.NameId), 5)
+	pkgVersionID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.VersionId), 5)
 
 	nameID, err := client.PackageName.Create().
-		SetNamespaceID(nsID).
+		SetID(pkgNameID).
+		SetType(pkg.Type).
+		SetNamespace(valueOrDefault(pkg.Namespace, "")).
 		SetName(pkg.Name).
-		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespaceID)).
+		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType)).
 		DoNothing().
 		ID(ctx)
 	if err != nil {
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert package name")
 		}
-		nameID, err = client.PackageName.Query().
-			Where(
-				packagename.NamespaceIDEQ(nsID),
-				packagename.NameEQ(pkg.Name),
-			).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get package name")
-		}
+		nameID = pkgNameID
 	}
 
 	id, err := client.PackageVersion.Create().
+		SetID(pkgVersionID).
 		SetNameID(nameID).
 		SetNillableVersion(pkg.Version).
 		SetSubpath(ptrWithDefault(pkg.Subpath, "")).
@@ -212,22 +172,14 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert package version")
 		}
-		id, err = client.PackageVersion.Query().
-			Where(
-				packageversion.HashEQ(versionHashFromInputSpec(pkg)),
-				packageversion.NameIDEQ(nameID),
-			).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get package version")
-		}
+		id = pkgVersionID
 	}
 
 	return &model.PackageIDs{
-		PackageTypeID:      strconv.Itoa(pkgID),
-		PackageNamespaceID: strconv.Itoa(nsID),
-		PackageNameID:      strconv.Itoa(nameID),
-		PackageVersionID:   strconv.Itoa(id)}, nil
+		PackageTypeID:      fmt.Sprintf("%s:%s", pkgTypeString, pkgNameID.String()),
+		PackageNamespaceID: fmt.Sprintf("%s:%s", pkgNamespaceString, pkgNameID.String()),
+		PackageNameID:      nameID.String(),
+		PackageVersionID:   id.String()}, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {
@@ -238,11 +190,7 @@ func withPackageVersionTree() func(*ent.PackageVersionQuery) {
 
 func withPackageNameTree() func(q *ent.PackageNameQuery) {
 	// TODO: (ivanvanderbyl) Filter the depth of this query using preloads
-	return func(q *ent.PackageNameQuery) {
-		q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-			q.WithPackage()
-		})
-	}
+	return func(q *ent.PackageNameQuery) {}
 }
 
 func versionHashFromInputSpec(pkg model.PkgInputSpec) string {
@@ -337,12 +285,8 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 		packageversion.QualifiersMatch(filter.Qualifiers, ptrWithDefault(filter.MatchOnlyEmptyQualifiers, false)),
 		packageversion.HasNameWith(
 			optionalPredicate(filter.Name, packagename.Name),
-			packagename.HasNamespaceWith(
-				optionalPredicate(filter.Namespace, packagenamespace.Namespace),
-				packagenamespace.HasPackageWith(
-					optionalPredicate(filter.Type, packagetype.Type),
-				),
-			),
+			optionalPredicate(filter.Namespace, packagename.Namespace),
+			optionalPredicate(filter.Type, packagename.Type),
 		),
 	}
 
@@ -352,12 +296,8 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 func packageNameInputQuery(spec model.PkgInputSpec) predicate.PackageName {
 	rv := []predicate.PackageName{
 		packagename.NameEQ(spec.Name),
-		packagename.HasNamespaceWith(
-			packagenamespace.Namespace(stringOrEmpty(spec.Namespace)),
-			packagenamespace.HasPackageWith(
-				packagetype.TypeEQ(spec.Type),
-			),
-		),
+		packagename.Namespace(stringOrEmpty(spec.Namespace)),
+		packagename.Type(spec.Type),
 	}
 
 	return packagename.And(rv...)
@@ -370,12 +310,8 @@ func packageNameQuery(spec *model.PkgSpec) predicate.PackageName {
 	query := []predicate.PackageName{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.Name, packagename.Name),
-		packagename.HasNamespaceWith(
-			optionalPredicate(spec.Namespace, packagenamespace.Namespace),
-			packagenamespace.HasPackageWith(
-				optionalPredicate(spec.Type, packagetype.Type),
-			),
-		),
+		optionalPredicate(spec.Namespace, packagename.Namespace),
+		optionalPredicate(spec.Namespace, packagename.Type),
 	}
 
 	return packagename.And(query...)
@@ -394,62 +330,22 @@ func pkgNameQueryFromPkgSpec(filter *model.PkgSpec) *model.PkgSpec {
 	}
 }
 
-func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageType {
+func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageName {
 	if pv != nil &&
-		pv.Edges.Name != nil &&
-		pv.Edges.Name.Edges.Namespace != nil &&
-		pv.Edges.Name.Edges.Namespace.Edges.Package != nil {
+		pv.Edges.Name != nil {
 		pn := pv.Edges.Name
-		ns := pn.Edges.Namespace
 
 		// Rebuild a fresh package type from the back reference so that
 		// we don't mutate the edges of the original package type.
-		pt := &ent.PackageType{
-			ID:   ns.Edges.Package.ID,
-			Type: ns.Edges.Package.Type,
-			Edges: ent.PackageTypeEdges{
-				Namespaces: []*ent.PackageNamespace{
-					{
-						ID:        ns.ID,
-						PackageID: ns.PackageID,
-						Namespace: ns.Namespace,
-						Edges: ent.PackageNamespaceEdges{
-							Names: []*ent.PackageName{
-								{
-									ID:          pn.ID,
-									NamespaceID: pn.NamespaceID,
-									Name:        pn.Name,
-									Edges: ent.PackageNameEdges{
-										Versions: []*ent.PackageVersion{pv},
-									},
-								},
-							},
-						},
-					},
-				},
+		pt := &ent.PackageName{
+			ID:        pn.ID,
+			Type:      pn.Type,
+			Namespace: pn.Namespace,
+			Name:      pn.Name,
+			Edges: ent.PackageNameEdges{
+				Versions: []*ent.PackageVersion{pv},
 			},
 		}
-		return pt
-	}
-	return nil
-}
-
-func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
-	if pn.Edges.Namespace != nil &&
-		pn.Edges.Namespace.Edges.Package != nil {
-		ns := pn.Edges.Namespace
-		pt := ns.Edges.Package
-		ns.Edges.Names = []*ent.PackageName{pn}
-		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
-		return pt
-	}
-	return nil
-}
-
-func backReferencePackageNamespace(pns *ent.PackageNamespace) *ent.PackageType {
-	if pns.Edges.Package != nil {
-		pt := pns.Edges.Package
-		pt.Edges.Namespaces = []*ent.PackageNamespace{pns}
 		return pt
 	}
 	return nil

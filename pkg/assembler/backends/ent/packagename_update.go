@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
@@ -30,16 +29,30 @@ func (pnu *PackageNameUpdate) Where(ps ...predicate.PackageName) *PackageNameUpd
 	return pnu
 }
 
-// SetNamespaceID sets the "namespace_id" field.
-func (pnu *PackageNameUpdate) SetNamespaceID(u uuid.UUID) *PackageNameUpdate {
-	pnu.mutation.SetNamespaceID(u)
+// SetType sets the "type" field.
+func (pnu *PackageNameUpdate) SetType(s string) *PackageNameUpdate {
+	pnu.mutation.SetType(s)
 	return pnu
 }
 
-// SetNillableNamespaceID sets the "namespace_id" field if the given value is not nil.
-func (pnu *PackageNameUpdate) SetNillableNamespaceID(u *uuid.UUID) *PackageNameUpdate {
-	if u != nil {
-		pnu.SetNamespaceID(*u)
+// SetNillableType sets the "type" field if the given value is not nil.
+func (pnu *PackageNameUpdate) SetNillableType(s *string) *PackageNameUpdate {
+	if s != nil {
+		pnu.SetType(*s)
+	}
+	return pnu
+}
+
+// SetNamespace sets the "namespace" field.
+func (pnu *PackageNameUpdate) SetNamespace(s string) *PackageNameUpdate {
+	pnu.mutation.SetNamespace(s)
+	return pnu
+}
+
+// SetNillableNamespace sets the "namespace" field if the given value is not nil.
+func (pnu *PackageNameUpdate) SetNillableNamespace(s *string) *PackageNameUpdate {
+	if s != nil {
+		pnu.SetNamespace(*s)
 	}
 	return pnu
 }
@@ -56,11 +69,6 @@ func (pnu *PackageNameUpdate) SetNillableName(s *string) *PackageNameUpdate {
 		pnu.SetName(*s)
 	}
 	return pnu
-}
-
-// SetNamespace sets the "namespace" edge to the PackageNamespace entity.
-func (pnu *PackageNameUpdate) SetNamespace(p *PackageNamespace) *PackageNameUpdate {
-	return pnu.SetNamespaceID(p.ID)
 }
 
 // AddVersionIDs adds the "versions" edge to the PackageVersion entity by IDs.
@@ -81,12 +89,6 @@ func (pnu *PackageNameUpdate) AddVersions(p ...*PackageVersion) *PackageNameUpda
 // Mutation returns the PackageNameMutation object of the builder.
 func (pnu *PackageNameUpdate) Mutation() *PackageNameMutation {
 	return pnu.mutation
-}
-
-// ClearNamespace clears the "namespace" edge to the PackageNamespace entity.
-func (pnu *PackageNameUpdate) ClearNamespace() *PackageNameUpdate {
-	pnu.mutation.ClearNamespace()
-	return pnu
 }
 
 // ClearVersions clears all "versions" edges to the PackageVersion entity.
@@ -139,13 +141,15 @@ func (pnu *PackageNameUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pnu *PackageNameUpdate) check() error {
+	if v, ok := pnu.mutation.GetType(); ok {
+		if err := packagename.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "PackageName.type": %w`, err)}
+		}
+	}
 	if v, ok := pnu.mutation.Name(); ok {
 		if err := packagename.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "PackageName.name": %w`, err)}
 		}
-	}
-	if _, ok := pnu.mutation.NamespaceID(); pnu.mutation.NamespaceCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "PackageName.namespace"`)
 	}
 	return nil
 }
@@ -162,37 +166,14 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := pnu.mutation.GetType(); ok {
+		_spec.SetField(packagename.FieldType, field.TypeString, value)
+	}
+	if value, ok := pnu.mutation.Namespace(); ok {
+		_spec.SetField(packagename.FieldNamespace, field.TypeString, value)
+	}
 	if value, ok := pnu.mutation.Name(); ok {
 		_spec.SetField(packagename.FieldName, field.TypeString, value)
-	}
-	if pnu.mutation.NamespaceCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   packagename.NamespaceTable,
-			Columns: []string{packagename.NamespaceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pnu.mutation.NamespaceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   packagename.NamespaceTable,
-			Columns: []string{packagename.NamespaceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if pnu.mutation.VersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -259,16 +240,30 @@ type PackageNameUpdateOne struct {
 	mutation *PackageNameMutation
 }
 
-// SetNamespaceID sets the "namespace_id" field.
-func (pnuo *PackageNameUpdateOne) SetNamespaceID(u uuid.UUID) *PackageNameUpdateOne {
-	pnuo.mutation.SetNamespaceID(u)
+// SetType sets the "type" field.
+func (pnuo *PackageNameUpdateOne) SetType(s string) *PackageNameUpdateOne {
+	pnuo.mutation.SetType(s)
 	return pnuo
 }
 
-// SetNillableNamespaceID sets the "namespace_id" field if the given value is not nil.
-func (pnuo *PackageNameUpdateOne) SetNillableNamespaceID(u *uuid.UUID) *PackageNameUpdateOne {
-	if u != nil {
-		pnuo.SetNamespaceID(*u)
+// SetNillableType sets the "type" field if the given value is not nil.
+func (pnuo *PackageNameUpdateOne) SetNillableType(s *string) *PackageNameUpdateOne {
+	if s != nil {
+		pnuo.SetType(*s)
+	}
+	return pnuo
+}
+
+// SetNamespace sets the "namespace" field.
+func (pnuo *PackageNameUpdateOne) SetNamespace(s string) *PackageNameUpdateOne {
+	pnuo.mutation.SetNamespace(s)
+	return pnuo
+}
+
+// SetNillableNamespace sets the "namespace" field if the given value is not nil.
+func (pnuo *PackageNameUpdateOne) SetNillableNamespace(s *string) *PackageNameUpdateOne {
+	if s != nil {
+		pnuo.SetNamespace(*s)
 	}
 	return pnuo
 }
@@ -285,11 +280,6 @@ func (pnuo *PackageNameUpdateOne) SetNillableName(s *string) *PackageNameUpdateO
 		pnuo.SetName(*s)
 	}
 	return pnuo
-}
-
-// SetNamespace sets the "namespace" edge to the PackageNamespace entity.
-func (pnuo *PackageNameUpdateOne) SetNamespace(p *PackageNamespace) *PackageNameUpdateOne {
-	return pnuo.SetNamespaceID(p.ID)
 }
 
 // AddVersionIDs adds the "versions" edge to the PackageVersion entity by IDs.
@@ -310,12 +300,6 @@ func (pnuo *PackageNameUpdateOne) AddVersions(p ...*PackageVersion) *PackageName
 // Mutation returns the PackageNameMutation object of the builder.
 func (pnuo *PackageNameUpdateOne) Mutation() *PackageNameMutation {
 	return pnuo.mutation
-}
-
-// ClearNamespace clears the "namespace" edge to the PackageNamespace entity.
-func (pnuo *PackageNameUpdateOne) ClearNamespace() *PackageNameUpdateOne {
-	pnuo.mutation.ClearNamespace()
-	return pnuo
 }
 
 // ClearVersions clears all "versions" edges to the PackageVersion entity.
@@ -381,13 +365,15 @@ func (pnuo *PackageNameUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pnuo *PackageNameUpdateOne) check() error {
+	if v, ok := pnuo.mutation.GetType(); ok {
+		if err := packagename.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "PackageName.type": %w`, err)}
+		}
+	}
 	if v, ok := pnuo.mutation.Name(); ok {
 		if err := packagename.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "PackageName.name": %w`, err)}
 		}
-	}
-	if _, ok := pnuo.mutation.NamespaceID(); pnuo.mutation.NamespaceCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "PackageName.namespace"`)
 	}
 	return nil
 }
@@ -421,37 +407,14 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 			}
 		}
 	}
+	if value, ok := pnuo.mutation.GetType(); ok {
+		_spec.SetField(packagename.FieldType, field.TypeString, value)
+	}
+	if value, ok := pnuo.mutation.Namespace(); ok {
+		_spec.SetField(packagename.FieldNamespace, field.TypeString, value)
+	}
 	if value, ok := pnuo.mutation.Name(); ok {
 		_spec.SetField(packagename.FieldName, field.TypeString, value)
-	}
-	if pnuo.mutation.NamespaceCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   packagename.NamespaceTable,
-			Columns: []string{packagename.NamespaceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pnuo.mutation.NamespaceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   packagename.NamespaceTable,
-			Columns: []string{packagename.NamespaceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagenamespace.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if pnuo.mutation.VersionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
