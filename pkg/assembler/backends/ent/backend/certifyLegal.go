@@ -105,6 +105,9 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
+			if subject.Package.PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+			}
 			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
@@ -116,6 +119,9 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 				sql.IsNull(certifylegal.FieldSourceID),
 			)
 		} else if subject.Source != nil {
+			if subject.Source.SourceNameID == nil {
+				return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+			}
 			sourceID, err := uuid.Parse(*subject.Source.SourceNameID)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
@@ -130,6 +136,9 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 
 		declaredLicenseIDs := make([]uuid.UUID, len(declaredLicenses))
 		for i := range declaredLicenses {
+			if declaredLicenses[i].LicenseID == nil {
+				return nil, fmt.Errorf("LicenseID not specified in declaredLicenses")
+			}
 			licenseID, err := uuid.Parse(*declaredLicenses[i].LicenseID)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from LicenseID failed with error: %w", err)
@@ -141,6 +150,9 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 
 		discoveredLicenseIDs := make([]uuid.UUID, len(discoveredLicenses))
 		for i := range discoveredLicenses {
+			if discoveredLicenses[i].LicenseID == nil {
+				return nil, fmt.Errorf("LicenseID not specified in discoveredLicenses")
+			}
 			licenseID, err := uuid.Parse(*discoveredLicenses[i].LicenseID)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from LicenseID failed with error: %w", err)
@@ -240,6 +252,9 @@ func upsertBulkCertifyLegal(ctx context.Context, client *ent.Tx, subjects model.
 
 			declaredLicenseIDs := make([]uuid.UUID, len(declaredLicensesList[index]))
 			for i := range declaredLicensesList[index] {
+				if declaredLicensesList[index][i].LicenseID == nil {
+					return nil, fmt.Errorf("LicenseID not specified in declaredLicenses")
+				}
 				licenseID, err := uuid.Parse(*declaredLicensesList[index][i].LicenseID)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from LicenseID failed with error: %w", err)
@@ -251,6 +266,9 @@ func upsertBulkCertifyLegal(ctx context.Context, client *ent.Tx, subjects model.
 
 			discoveredLicenseIDs := make([]uuid.UUID, len(discoveredLicensesList[index]))
 			for i := range discoveredLicensesList[index] {
+				if discoveredLicensesList[index][i].LicenseID == nil {
+					return nil, fmt.Errorf("LicenseID not specified in discoveredLicenses")
+				}
 				licenseID, err := uuid.Parse(*discoveredLicensesList[index][i].LicenseID)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from LicenseID failed with error: %w", err)

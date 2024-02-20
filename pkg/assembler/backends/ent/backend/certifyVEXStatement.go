@@ -18,24 +18,25 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.IDorVulnerabilityInput, vexStatement model.VexStatementInputSpec) (string, error) {
 	funcName := "IngestVEXStatement"
 
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
 		insert := client.CertifyVex.Create()
 
@@ -50,14 +51,12 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 		}
 
 		// manage vulnerability
-		vulnID, err := client.VulnerabilityID.Query().
-			Where(
-				vulnerabilityid.VulnerabilityIDEqualFold(vulnerability.VulnerabilityInput.VulnerabilityID),
-				vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(vulnerability.VulnerabilityInput.Type)),
-			).
-			OnlyID(ctx)
+		if vulnerability.VulnerabilityNodeID == nil {
+			return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
+		}
+		vulnID, err := uuid.Parse(*vulnerability.VulnerabilityNodeID)
 		if err != nil {
-			return nil, Errorf("%v ::  %s", funcName, err)
+			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
 		insert.SetVulnerabilityID(vulnID)
 		conflictColumns = append(conflictColumns, certifyvex.FieldVulnerabilityID)
@@ -65,22 +64,26 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 
 		// manage package or artifact
 		if subject.Package != nil {
-			p, err := getPkgVersion(ctx, client.Client(), *subject.Package.PackageInput)
-			if err != nil {
-				return nil, Errorf("%v ::  %s", funcName, err)
+			if subject.Package.PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 			}
-			insert.SetPackage(p)
+			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+			insert.SetPackageID(pkgVersionID)
 			conflictColumns = append(conflictColumns, certifyvex.FieldPackageID)
 			conflictWhere = sql.And(
 				sql.NotNull(certifyvex.FieldPackageID),
 				sql.IsNull(certifyvex.FieldArtifactID),
 			)
 		} else if subject.Artifact != nil {
-			artID, err := client.Artifact.Query().
-				Where(artifactQueryInputPredicates(*subject.Artifact.ArtifactInput)).
-				OnlyID(ctx)
+			if subject.Artifact.ArtifactID == nil {
+				return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+			}
+			artID, err := uuid.Parse(*subject.Artifact.ArtifactID)
 			if err != nil {
-				return nil, Errorf("%v ::  %s", funcName, err)
+				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
 			}
 			insert.SetArtifactID(artID)
 			conflictColumns = append(conflictColumns, certifyvex.FieldArtifactID)
@@ -101,71 +104,135 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 			SetOrigin(vexStatement.Origin).
 			SetCollector(vexStatement.Collector)
 
-		id, err := insert.
+		if _, err := insert.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
 			DoNothing().
-			ID(ctx)
-		if err != nil {
+			ID(ctx); err != nil {
+
 			if err != stdsql.ErrNoRows {
 				return nil, errors.Wrap(err, "upsert certify vex statement node")
 			}
-			id, err = client.CertifyVex.Query().
-				Where(vexStatementInputPredicate(subject, *vulnerability.VulnerabilityInput, vexStatement)).
-				WithPackage(func(q *ent.PackageVersionQuery) {
-					q.WithName(func(q *ent.PackageNameQuery) {
-						q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-							q.WithPackage()
-						})
-					})
-				}).
-				WithVulnerability(func(q *ent.VulnerabilityIDQuery) {
-					q.WithType()
-				}).
-				OnlyID(ctx)
-			if err != nil {
-				return nil, errors.Wrap(err, "get certify vex statement")
-			}
 		}
-		return &id, nil
+		return ptrfrom.String(""), nil
 	})
 
 	if err != nil {
 		return "", err
 	}
 
-	return nodeID(*recordID), nil
+	return *recordID, nil
 }
 
 func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
-	var ids = make([]string, len(vexStatements))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range vexStatements {
-		index := i
-		var subject model.PackageOrArtifactInput
-		if len(subjects.Packages) > 0 {
-			subject = model.PackageOrArtifactInput{Package: subjects.Packages[index]}
-		} else {
-			subject = model.PackageOrArtifactInput{Artifact: subjects.Artifacts[index]}
+	funcName := "IngestVEXStatements"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkVEX(ctx, client, subjects, vulnerabilities, vexStatements)
+		if err != nil {
+			return nil, err
 		}
-		vuln := *vulnerabilities[index]
-		vexStatement := *vexStatements[index]
-		concurrently(eg, func() error {
-			statement, err := b.IngestVEXStatement(ctx, subject, vuln, vexStatement)
-			if err == nil {
-				ids[index] = statement
-				return err
-			} else {
-				return gqlerror.Errorf("IngestVEXStatements failed with element #%v with err: %v", i, err)
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
+
+	return *ids, nil
+}
+
+func upsertBulkVEX(ctx context.Context, client *ent.Tx, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		certifyvex.FieldKnownSince,
+		certifyvex.FieldStatus,
+		certifyvex.FieldStatement,
+		certifyvex.FieldStatusNotes,
+		certifyvex.FieldJustification,
+		certifyvex.FieldOrigin,
+		certifyvex.FieldCollector,
+	}
+
+	var conflictWhere *sql.Predicate
+
+	if len(subjects.Packages) > 0 {
+		conflictColumns = append(conflictColumns, certifyvex.FieldPackageID)
+		conflictWhere = sql.And(
+			sql.NotNull(certifyvex.FieldPackageID),
+			sql.IsNull(certifyvex.FieldArtifactID),
+		)
+	} else if len(subjects.Artifacts) > 0 {
+		conflictColumns = append(conflictColumns, certifyvex.FieldArtifactID)
+		conflictWhere = sql.And(
+			sql.IsNull(certifyvex.FieldPackageID),
+			sql.NotNull(certifyvex.FieldArtifactID),
+		)
+	}
+
+	batches := chunk(vexStatements, 100)
+
+	index := 0
+	for _, vexs := range batches {
+		creates := make([]*ent.CertifyVexCreate, len(vexs))
+		for i, vex := range vexs {
+			creates[i] = client.CertifyVex.Create().
+				SetKnownSince(vex.KnownSince).
+				SetStatus(vex.Status.String()).
+				SetStatement(vex.Statement).
+				SetStatusNotes(vex.StatusNotes).
+				SetJustification(vex.VexJustification.String()).
+				SetOrigin(vex.Origin).
+				SetCollector(vex.Collector)
+
+			if len(subjects.Packages) > 0 {
+				if subjects.Packages[index].PackageVersionID == nil {
+					return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+				}
+				pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				}
+				creates[i].SetPackageID(pkgVersionID)
+			} else if len(subjects.Artifacts) > 0 {
+				if subjects.Artifacts[index].ArtifactID == nil {
+					return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+				}
+				artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				}
+				creates[i].SetArtifactID(artID)
 			}
-		})
+
+			if vulnerabilities[index].VulnerabilityNodeID == nil {
+				return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
+			}
+			vulnID, err := uuid.Parse(*vulnerabilities[index].VulnerabilityNodeID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+			}
+			creates[i].SetVulnerabilityID(vulnID)
+			conflictColumns = append(conflictColumns, certifyvex.FieldVulnerabilityID)
+
+			index++
+		}
+
+		err := client.CertifyVex.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictWhere(conflictWhere),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
-	return ids, nil
+
+	return &ids, nil
 }
 
 func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
@@ -175,14 +242,10 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.Certif
 	records, err := query.
 		Where(certifyVexPredicate(*spec)).
 		WithVulnerability(func(q *ent.VulnerabilityIDQuery) {
-			q.WithType()
+
 		}).
 		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
+			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
 		WithArtifact().
 		Limit(MaxPageSize).
@@ -196,7 +259,7 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.Certif
 
 func toModelCertifyVEXStatement(record *ent.CertifyVex) *model.CertifyVEXStatement {
 	return &model.CertifyVEXStatement{
-		ID:               nodeID(record.ID),
+		ID:               record.ID.String(),
 		Subject:          toPackageOrArtifact(record.Edges.Package, record.Edges.Artifact),
 		Vulnerability:    toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		KnownSince:       record.KnownSince,
@@ -244,9 +307,7 @@ func certifyVexPredicate(filter model.CertifyVEXStatementSpec) predicate.Certify
 				certifyvex.HasVulnerabilityWith(
 					optionalPredicate(filter.Vulnerability.ID, IDEQ),
 					optionalPredicate(filter.Vulnerability.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold),
-					vulnerabilityid.HasTypeWith(
-						optionalPredicate(filter.Vulnerability.Type, vulnerabilitytype.TypeEqualFold),
-					),
+					optionalPredicate(filter.Vulnerability.Type, vulnerabilityid.TypeEqualFold),
 				),
 			)
 		}

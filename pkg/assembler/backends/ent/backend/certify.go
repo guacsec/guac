@@ -418,7 +418,6 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 						return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
 					}
 					creates[i].SetArtifactID(artID)
-
 				case len(subjects.Packages) > 0:
 					if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
 						if subjects.Packages[index].PackageVersionID == nil {
