@@ -57,7 +57,7 @@ type GEDGraph struct {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "guacident",
+	Use:   "guacdiff",
 	Short: "",
 	Long: ``,
 	Version: version.Version,
@@ -75,13 +75,14 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
-	set, err := cli.BuildFlags([]string{"gql-addr", "csub-addr", "csub-tls", "csub-tls-skip-verify"})
+	set, err := cli.BuildFlags([]string{"gql-addr"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
 	}
 
 	rootCmd.PersistentFlags().AddFlagSet(set)
+
 	if err := viper.BindPFlags(rootCmd.PersistentFlags()); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
 		os.Exit(1)

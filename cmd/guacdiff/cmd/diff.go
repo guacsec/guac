@@ -18,20 +18,19 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	"time"
-
-	// "time"
-
 	"fmt"
 	"net/http"
 	"os"
+
 	"reflect"
+	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 var (
@@ -39,70 +38,101 @@ var (
 	hasSBOMTwo model.HasSBOMsHasSBOM
 )
 
-
-type DiffNode struct {
-	tag         string
-	OldValue    interface{}
-	NewValue    interface{}
-	leafChanged bool
+func CreateGraphFile(pathsOne, pathsTwo [][]*Node, filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	file.WriteString("graph G {\n")
+	connectNodes(pathsOne, file, " [color=red]")
+	connectNodes(pathsTwo, file, " [color=green]")
+	file.WriteString("}\n")
+	return nil
 }
 
-// DFSNodeDiff performs a DFS diff between two nodes
-func DFSNodeDiff(oldNode, newNode *Node) []DiffNode {
-	var diffs []DiffNode
-	dfsNodeDiff(oldNode, newNode, &diffs)
-	return diffs
+func connectNodes(paths [][]*Node, file *os.File, colorText string) {
+	for _, path := range paths {
+		if len(path) > 1 {
+			for i := 0; i < len(path)-1; i++ {
+				if i+1 < len(path) {
+					edge := fmt.Sprintf("\t%s -- %s" +colorText+ ";\n", path[i].tag, path[i+1].tag)
+					file.WriteString(edge)
+				}
+			}
+		}
+	}
 }
 
-// dfsNodeDiff performs the DFS traversal and comparison
-func dfsNodeDiff(oldNode, newNode *Node, diffs *[]DiffNode) {
-	// Check if both nodes are nil
-	if oldNode == nil && newNode == nil {
+
+func findPathsRecursively(node *Node, currentPath []*Node, currentPathString string, allPaths *[][]*Node, allPathsString *[]string) {
+	if node == nil {
 		return
 	}
 
-	// Check if one of the nodes is nil
-	if oldNode == nil || newNode == nil {
-		var tag string
-		if newNode != nil{
-			tag= newNode.tag
-		} 
+	currentPath = append(currentPath, node)
+	if currentPathString!= "" {
+		currentPathString = currentPathString + " -> "
+	}
+	currentPathString = currentPathString + node.tag
 
-		if oldNode != nil{
-			tag= oldNode.tag
-		}
-		*diffs = append(*diffs, DiffNode{tag: tag, OldValue: oldNode, NewValue: newNode, leafChanged: true})
-		return
+	if node.leaf {
+		pathCopy := make([]*Node, len(currentPath))
+		copy(pathCopy, currentPath)
+		*allPaths = append(*allPaths, pathCopy)
+		*allPathsString = append(*allPathsString, currentPathString)
 	}
 
-	// Check if leaf nodes have different values
-	if oldNode.leaf && newNode.leaf && oldNode.Value != newNode.Value {
-		*diffs = append(*diffs, DiffNode{tag: oldNode.tag, OldValue: oldNode.Value, NewValue: newNode.Value, leafChanged: true})
-		return
+	for _, neighbor := range node.neighbours {
+		findPathsRecursively(neighbor, currentPath, currentPathString, allPaths, allPathsString)
 	}
 
-	// Recursively process neighbours
-	for i := 0; i  < len(oldNode.neighbours) || i < len(newNode.neighbours); i++ {
-		var oldNeighbor, newNeighbor *Node
-
-		if i < len(oldNode.neighbours) {
-			oldNeighbor = oldNode.neighbours[i]
-		}
-		if i < len(newNode.neighbours) {
-			newNeighbor = newNode.neighbours[i]
-		}
-		dfsNodeDiff(oldNeighbor, newNeighbor, diffs)
-	}
+	currentPath = currentPath[:len(currentPath)-1]
+	
 }
+
+func getPaths(head *Node)([][]*Node, []string){
+	var allPaths [][]*Node
+	var allPathsString []string
+	currentPathString := ""
+	currentPath := []*Node{}
+	findPathsRecursively(head, currentPath, currentPathString, &allPaths, &allPathsString)
+	return allPaths, allPathsString
+}
+
+
+func printPaths(paths [][]*Node) {
+	count := 0
+	for _, path := range paths {
+		count += 1
+		fmt.Println(getPathString(path)+"\n")
+	}
+	fmt.Println("Total Paths:", count)
+}
+
+func getPathString(path []*Node) string {
+	pathStr := ""
+	for i, node := range path {
+		
+		pathStr = pathStr + node.tag
+		if (i != (len(path) -1) ) {
+			pathStr = pathStr + "->"
+		}
+	}
+	return pathStr
+}
+
+
 
 func init() {
 	rootCmd.AddCommand(diffCmd)
-	rootCmd.PersistentFlags().StringSlice("boms", []string{}, "two sboms to find the diff between")
+	rootCmd.PersistentFlags().StringSlice("sbom", []string{}, "two sboms to find the diff between")
+	rootCmd.PersistentFlags().StringSlice("slsa", []string{}, "two slsa to find the diff between")
 	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
 	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
 	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
+	rootCmd.PersistentFlags().Bool("dot", false, "create a dot file to visualize the diff")
 	rootCmd.PersistentFlags().String("file", "tests/identical.json", "filename to read sbom test cases from")
-
 }
 
 var diffCmd = &cobra.Command{
@@ -112,8 +142,15 @@ var diffCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		test, _ := cmd.Flags().GetBool("test")
 		testfile, _ := cmd.Flags().GetString("file")
+		dot, _ := cmd.Flags().GetBool("dot")
 
 		if !test {
+			slsas, _ := cmd.Flags().GetStringSlice("slsa")
+			fmt.Println(slsas)
+			if len(slsas) > 0 {
+				fmt.Println("To be implemented...")
+				return
+			}
 			boms, err := cmd.Flags().GetStringSlice("boms")
 			if err!= nil {
 				fmt.Println("Must provide two sboms to find the diff between")
@@ -137,7 +174,6 @@ var diffCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-
 			if uri && purl {
 				fmt.Println("Must provide only one of --uri or --purl")
 				os.Exit(1)
@@ -149,7 +185,7 @@ var diffCmd = &cobra.Command{
 			gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
 			var hasSBOMResponseOne *model.HasSBOMsResponse
 			var hasSBOMResponseTwo *model.HasSBOMsResponse
-		
+
 			if uri {
 				hasSBOMResponseOne, err = findHasSBOMBy(boms[0],"",  ctx, gqlclient)
 				if err != nil {
@@ -205,9 +241,23 @@ var diffCmd = &cobra.Command{
 			hasSBOMOne = test.HasSBOMOne
 			hasSBOMTwo = test.HasSBOMTwo
 		}
+		//TODO: @abhi 
+		//some sort of sorting should be done here? @abhi
+		//Each call to findHasSBOMBy even using the same uri can and does return a struct with arrays that
+		//have their elements in random order, when using this to construct the graph the order of the nodes differs
+		//so does the returned paths list. When performing the diff, we will need some order to be maintained. 
+
+
+
+
+
+
+
+
+
 		//init first node
-		nodeOne := Node{Value: hasSBOMOne.Id, tag: "id"}
-		nodeTwo := Node{Value: hasSBOMTwo.Id, tag: "id"}
+		nodeOne := Node{Value: hasSBOMOne.Id, tag: "Id"}
+		nodeTwo := Node{Value: hasSBOMTwo.Id, tag: "Id"}
 
 		// offset to field(0) to come to get to AllHasSBOMTree
 		allHasSBOMTreeOne := reflect.ValueOf(hasSBOMOne).Field(0)
@@ -221,42 +271,73 @@ var diffCmd = &cobra.Command{
 			fieldTypeOne := reflect.TypeOf(allHasSBOMTreeOne.Interface()).Field(i).Name 
 			fieldTypeTwo := reflect.TypeOf(allHasSBOMTreeTwo.Interface()).Field(i).Name 
 			//TODO  @abhi If you could take a look at taking care of cases where the field type is []json.RawMessage, interface or pointers 
-			// this would be great.
-			if  fieldTypeOne != "Id" || fieldTypeOne != "Subject" || fieldTypeOne != "IncludedSoftware" { //not id, subject, included softwares then
-				hasSBOMResponsFieldsToGraph(fieldOne, &nodeOne,  allHasSBOMTreeTwo.Type().Name() + "|" + fieldTypeOne)
+			// this would be great. Then we can remove the constraint for not including type Subjeect and Included Software below.
+			if  fieldTypeOne != "Id" && fieldTypeOne != "Subject" && fieldTypeOne != "IncludedSoftware" { //not id, subject, included softwares then
+				hasSBOMResponsFieldsToGraph(fieldOne, &nodeOne, fieldTypeOne)
 			}
-			if fieldTypeTwo != "Id" || fieldTypeTwo != "Subject" || fieldTypeTwo != "IncludedSoftware" { //not id, subject, included softwares then
-				hasSBOMResponsFieldsToGraph(fieldTwo, &nodeTwo, allHasSBOMTreeTwo.Type().Name() +  "|" + fieldTypeTwo)
+			if fieldTypeTwo != "Id" && fieldTypeTwo != "Subject" && fieldTypeTwo != "IncludedSoftware" { //not id, subject, included softwares then
+				hasSBOMResponsFieldsToGraph(fieldTwo, &nodeTwo,  fieldTypeTwo)
 			}
 		}
 
 		//get list of paths in the graph
-		// pathsOne := getPaths(&nodeOne)
-		// pathsTwo := getPaths(&nodeTwo)
+		pathsOne, pathsOneStrings := getPaths(&nodeOne)
+		pathsTwo, pathsTwoStrings := getPaths(&nodeTwo)
 
+		//find the diff
+		diffedPathsOne, diffedPathsTwo := getDiff(pathsOne, pathsTwo, pathsOneStrings, pathsTwoStrings, dot)
+		if len(diffedPathsOne) == 0 && len(diffedPathsTwo) == 0 {
+			fmt.Println("Identical")
+			return
+		}
 
-
-
-
-		
-
+		//create the dot files
+		if dot{
+			if len(diffedPathsOne) == 0 && len(diffedPathsTwo) == 0 {
+				fmt.Println("...Skipping graphviz")
+				return
+			}
+			randfilename := rand.String(10)+".dot"
+			err := CreateGraphFile(diffedPathsOne, diffedPathsTwo, randfilename ); if err!= nil {
+				fmt.Println("Error creating graph file:", err)	
+				return
+			}else{
+				fmt.Println(randfilename)
+			}
+		}
 
 
 	},
 }
 
-// func getPaths(head *Node) [][]*Node {
 
 
-// }
+func getDiff(pathsOne, pathsTwo [][]*Node, pathsOneStrings, pathsTwoStrings []string, dot bool) ([][]*Node, [][]*Node ){
+	var diffOne, diffTwo [][]*Node
+	for i := 0; i < len(pathsOne) || i < len(pathsTwo); i++ {
+		if i < len(pathsOne) && i < len(pathsTwo) {
+			if pathsOneStrings[i] != pathsTwoStrings[i] {
+				diffOne = append(diffOne, pathsOne[i])
+				diffTwo = append(diffTwo, pathsTwo[i])
+			}
+		}else if  i < len(pathsOne) && i >= len(pathsTwo) {
+			diffOne = append(diffOne, pathsOne[i])
+		}else if i >= len(pathsOne) && i < len(pathsTwo){
+			diffTwo = append(diffTwo, pathsTwo[i])
+		}
+	}
+
+	return diffOne, diffTwo
+}
+
 
 // This function recursively traverses the fields of a struct using reflection and converts them into nodes of a graph. 
 // It handles nested structs and arrays within the main struct.
 func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy string) {
 	//base case
-	if data.Kind() == reflect.String {
+	if data.Kind() == reflect.String || isPrimitiveType(data.Type()) {
 		//just add a neighbour and return
-		node := Node{Value: data.Interface(), tag: heirarchy}
+		node := Node{Value: data.Interface(), tag: heirarchy+ ": " + data.String()}
 		node.leaf = true
 		head.neighbours = append(head.neighbours, &node)
 		return
@@ -264,21 +345,30 @@ func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy strin
 
 	// edge base case for time.Time to not go into recursion, while being a "struct"
 	if data.Kind() == reflect.Struct && data.Type() == reflect.TypeOf(time.Time{}) {
-		node := Node{Value: data.Interface(), tag: heirarchy}
+		//just add a neighbour and return
+		node := Node{Value: data.Interface(), tag: heirarchy+ ": " + data.Interface().(time.Time).String()}
 		node.leaf = true
 		head.neighbours = append(head.neighbours, &node)
 		return
 	}
-	newHeirarchy :=  heirarchy + "|"+data.Type().Name()
-	node := Node{tag: newHeirarchy}
-	node.leaf = false
-	head.neighbours = append(head.neighbours, &node)
-	//TODO: arorasoham9 this does not consider field type of interfaces or pointers or []json.rawmessage. I still need to work on that
 
-	
+	node := Node{ tag: data.Type().Name()}
+	var newHead *Node
+
 	// if we have a struct, we need to go over its fields
 	// update head to be the last element of the neighbours slice
-	newHead := head.neighbours[len(head.neighbours)-1]
+
+	//this is a check for slices/arrays
+	if (node.tag =="" && (data.Kind() == reflect.Slice) || (node.tag =="" && data.Kind() == reflect.Array)) {
+		//instead of adding a completely empty node, no value no tag, we are skipping from adding it as a neighbour node, it's fields will 
+		//just be neighbours of the parent node
+		newHead = head
+	}else {
+		node.leaf = false
+		head.neighbours = append(head.neighbours, &node)
+		newHead = head.neighbours[len(head.neighbours)-1]
+	}
+	
 	var length = 0
 	var field reflect.Value
 
@@ -297,7 +387,6 @@ func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy strin
 			field = data.Index(i)
 			fieldtag = data.Type().Name()
 		}
-		hasSBOMResponsFieldsToGraph(field, newHead, newHeirarchy + "|"+fieldtag)
+		hasSBOMResponsFieldsToGraph(field, newHead, fieldtag)
 	}
 }
-
