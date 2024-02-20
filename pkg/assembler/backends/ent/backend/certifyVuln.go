@@ -17,30 +17,30 @@ package backend
 
 import (
 	"context"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/sync/errgroup"
 )
 
-func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, spec model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
+func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
 
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
 		insert := client.CertifyVuln.Create()
 
 		columns := []string{
 			certifyvuln.FieldPackageID,
+			certifyvuln.FieldVulnerabilityID,
 			certifyvuln.FieldCollector,
 			certifyvuln.FieldScannerURI,
 			certifyvuln.FieldScannerVersion,
@@ -49,20 +49,25 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 			certifyvuln.FieldDbVersion,
 		}
 
-		vuln, err := getVulnerabilityFromInput(ctx, client.Client(), *spec.VulnerabilityInput)
-		if err != nil {
-			return nil, err
+		if vulnerability.VulnerabilityNodeID == nil {
+			return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
 		}
-		insert.SetVulnerability(vuln)
-		columns = append(columns, certifyvuln.FieldVulnerabilityID)
-
-		pv, err := getPkgVersion(ctx, client.Client(), *pkg.PackageInput)
+		vulnID, err := uuid.Parse(*vulnerability.VulnerabilityNodeID)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+		}
+		insert.SetVulnerabilityID(vulnID)
+
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		}
+		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
 
 		insert.
-			SetPackage(pv).
+			SetPackageID(pkgVersionID).
 			SetCollector(certifyVuln.Collector).
 			SetDbURI(certifyVuln.DbURI).
 			SetDbVersion(certifyVuln.DbVersion).
@@ -71,76 +76,103 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 			SetScannerVersion(certifyVuln.ScannerVersion).
 			SetTimeScanned(certifyVuln.TimeScanned)
 
-		id, err := insert.
+		if _, err := insert.
 			OnConflict(
 				sql.ConflictColumns(columns...),
 			).
 			Ignore().
-			ID(ctx)
-		if err != nil {
+			ID(ctx); err != nil {
 			return nil, err
 		}
 
-		return &id, nil
+		return ptrfrom.String(""), nil
 	})
 	if err != nil {
 		return "", err
 	}
 
-	return nodeID(*record), nil
+	return *record, nil
 }
 
 func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
-	var modelCertifyVulns = make([]string, len(vulnerabilities))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range certifyVulns {
-		index := i
-		pkg := *pkgs[index]
-		vuln := *vulnerabilities[index]
-		certifyVuln := *certifyVulns[index]
-		concurrently(eg, func() error {
-			modelCertifyVuln, err := b.IngestCertifyVuln(ctx, pkg, vuln, certifyVuln)
-			if err == nil {
-				modelCertifyVulns[index] = modelCertifyVuln
-				return err
-			} else {
-				return gqlerror.Errorf("IngestCertifyVulns failed with err: %v", err)
-			}
-		})
-	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
-	return modelCertifyVulns, nil
-}
-
-func getVulnerability(ctx context.Context, client *ent.Client, query model.VulnerabilitySpec) (*ent.VulnerabilityID, error) {
-	results, err := getVulnerabilities(ctx, client, query)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(results) == 0 {
-		return nil, &ent.NotFoundError{}
-	}
-
-	if len(results) > 1 {
-		return nil, &ent.NotSingularError{}
-	}
-
-	return results[0].Edges.VulnerabilityIds[0], nil
-}
-
-func getVulnerabilityFromInput(ctx context.Context, client *ent.Client, spec model.VulnerabilityInputSpec) (*ent.VulnerabilityID, error) {
-	var vuln *ent.VulnerabilityID
-	vuln, err := getVulnerability(ctx, client, model.VulnerabilitySpec{
-		Type:            &spec.Type,
-		VulnerabilityID: &spec.VulnerabilityID,
+	funcName := "IngestCertifyVulns"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkCertifyVuln(ctx, client, pkgs, vulnerabilities, certifyVulns)
+		if err != nil {
+			return nil, err
+		}
+		return slc, nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return vuln, nil
+
+	return *ids, nil
+}
+
+func upsertBulkCertifyVuln(ctx context.Context, client *ent.Tx, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		certifyvuln.FieldPackageID,
+		certifyvuln.FieldVulnerabilityID,
+		certifyvuln.FieldCollector,
+		certifyvuln.FieldScannerURI,
+		certifyvuln.FieldScannerVersion,
+		certifyvuln.FieldOrigin,
+		certifyvuln.FieldDbURI,
+		certifyvuln.FieldDbVersion,
+	}
+
+	batches := chunk(certifyVulns, 100)
+
+	index := 0
+	for _, vulns := range batches {
+		creates := make([]*ent.CertifyVulnCreate, len(vulns))
+		for i, vuln := range vulns {
+			creates[i] = client.CertifyVuln.Create().
+				SetCollector(vuln.Collector).
+				SetDbURI(vuln.DbURI).
+				SetDbVersion(vuln.DbVersion).
+				SetOrigin(vuln.Origin).
+				SetScannerURI(vuln.ScannerURI).
+				SetScannerVersion(vuln.ScannerVersion).
+				SetTimeScanned(vuln.TimeScanned)
+
+			if pkgs[index].PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+			}
+			pkgVersionID, err := uuid.Parse(*pkgs[index].PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+			}
+			creates[i].SetPackageID(pkgVersionID)
+
+			if vulnerabilities[index].VulnerabilityNodeID == nil {
+				return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
+			}
+			vulnID, err := uuid.Parse(*vulnerabilities[index].VulnerabilityNodeID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+			}
+			creates[i].SetVulnerabilityID(vulnID)
+
+			index++
+		}
+
+		err := client.CertifyVuln.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &ids, nil
 }
 
 func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
@@ -161,23 +193,15 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 
 				packageversion.HasNameWith(
 					optionalPredicate(pkg.Name, packagename.Name),
-					packagename.HasNamespaceWith(
-						optionalPredicate(pkg.Namespace, packagenamespace.Namespace),
-						packagenamespace.HasPackageWith(
-							optionalPredicate(pkg.Type, packagetype.Type),
-						),
-					),
+					optionalPredicate(pkg.Namespace, packagename.Namespace),
+					optionalPredicate(pkg.Type, packagename.Type),
 				),
 			)
 		}),
 		optionalPredicate(spec.Vulnerability, func(vuln model.VulnerabilitySpec) predicate.CertifyVuln {
 			return certifyvuln.HasVulnerabilityWith(
 				optionalPredicate(vuln.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold),
-				optionalPredicate(vuln.Type, func(vulnID string) predicate.VulnerabilityID {
-					return vulnerabilityid.HasTypeWith(
-						optionalPredicate(&vulnID, vulnerabilitytype.TypeEqualFold),
-					)
-				}),
+				optionalPredicate(vuln.Type, vulnerabilityid.TypeEqualFold),
 			)
 		}),
 	}
@@ -187,13 +211,13 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 		if *spec.Vulnerability.NoVuln {
 			predicates = append(predicates,
 				certifyvuln.HasVulnerabilityWith(
-					vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(NoVuln)),
+					vulnerabilityid.TypeEqualFold(NoVuln),
 				),
 			)
 		} else {
 			predicates = append(predicates,
 				certifyvuln.HasVulnerabilityWith(
-					vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeNEQ(NoVuln)),
+					vulnerabilityid.TypeNEQ(NoVuln),
 				),
 			)
 		}
@@ -202,15 +226,9 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 	records, err := b.client.CertifyVuln.Query().
 		Where(predicates...).
 		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
+			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
-		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {
-			query.WithType()
-		}).
+		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -221,7 +239,7 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 
 func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 	return &model.CertifyVuln{
-		ID:            nodeID(record.ID),
+		ID:            record.ID.String(),
 		Package:       toModelPackage(backReferencePackageVersion(record.Edges.Package)),
 		Vulnerability: toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		Metadata: &model.ScanMetadata{
