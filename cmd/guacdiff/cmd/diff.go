@@ -144,26 +144,23 @@ var diffCmd = &cobra.Command{
 		test, _ := cmd.Flags().GetBool("test")
 		testfile, _ := cmd.Flags().GetString("file")
 		dot, _ := cmd.Flags().GetBool("dot")
+		var err error
 
 		if !test {
-			slsas, _ := cmd.Flags().GetStringSlice("slsa")
-			fmt.Println(slsas)
-			if len(slsas) > 0 {
-				fmt.Println("To be implemented...")
-				return
-			}
-			boms, err := cmd.Flags().GetStringSlice("boms")
-			if err!= nil {
-				fmt.Println("Must provide two sboms to find the diff between")
+
+			slsa, errSlsa := cmd.Flags().GetStringSlice("slsa")
+			sboms, errSbom := cmd.Flags().GetStringSlice("sbom")
+
+			if errSlsa != nil && errSbom != nil {
+				fmt.Println("Must specify slsa or sboms")
 				os.Exit(1)
 			}
 
-			if len(boms) < 2 {
-				fmt.Println("Must provide two sboms to find the diff between")
-				fmt.Println(boms)
+			if errSlsa == nil && len(slsa) != 2 {
+				fmt.Println("Must provide exactly two slsas to find the diff between")
 				os.Exit(1)
-			}else if len(boms) > 2{
-				fmt.Println("Must provide only two sboms to find the diff between")
+			} else if errSbom == nil && len(sboms) != 2 {
+				fmt.Println("Must provide exactly two sboms to find the diff between")
 				os.Exit(1)
 			}
 
