@@ -23,8 +23,8 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 const (
@@ -239,14 +239,14 @@ func getVEXStatementQueryValues(pkg *model.PkgInputSpec, artifact *model.Artifac
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := helper.GuacPkgId(*pkg)
+		pkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg, helpers.PkgServerKey)
 		values["pkgVersionGuacKey"] = pkgId.VersionId
 	} else {
 		values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
 		values["art_digest"] = strings.ToLower(artifact.Digest)
 	}
 	if vulnerability != nil {
-		vuln := helper.GuacVulnId(*vulnerability)
+		vuln := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](vulnerability, helpers.VulnServerKey)
 		values["guacVulnKey"] = vuln.VulnerabilityID
 	}
 	values[statusStr] = vexStatement.Status

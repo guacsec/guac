@@ -24,6 +24,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 type dbSrcName struct {
@@ -52,7 +53,7 @@ type dbSrcType struct {
 func getSourceQueryValues(source *model.SourceInputSpec) map[string]any {
 	values := map[string]any{}
 	// add guac keys
-	guacIds := helper.GuacSrcId(*source)
+	guacIds := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](source, helpers.SrcServerKey)
 	values["guacNsKey"] = guacIds.NamespaceId
 	values["guacNameKey"] = guacIds.NameId
 

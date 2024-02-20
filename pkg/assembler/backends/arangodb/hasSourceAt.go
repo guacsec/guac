@@ -23,8 +23,8 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
@@ -239,14 +239,14 @@ func setHasSourceAtMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSource
 func getHasSourceAtQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.MatchFlags, source *model.SourceInputSpec, hasSourceAt *model.HasSourceAtInputSpec) map[string]any {
 	values := map[string]any{}
 	// add guac keys
-	pkgId := helper.GuacPkgId(*pkg)
+	pkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg, helpers.PkgServerKey)
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 		values["pkgNameGuacKey"] = pkgId.NameId
 	} else {
 		values["pkgVersionGuacKey"] = pkgId.VersionId
 	}
 
-	src := helper.GuacSrcId(*source)
+	src := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](source, helpers.SrcServerKey)
 	values["srcNameGuacKey"] = src.NameId
 
 	values[knownSinceStr] = hasSourceAt.KnownSince.UTC()

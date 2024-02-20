@@ -23,8 +23,8 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 const (
@@ -309,7 +309,7 @@ func getHasMetadataQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := helper.GuacPkgId(*pkg)
+		pkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg, helpers.PkgServerKey)
 		if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 			values["pkgNameGuacKey"] = pkgId.NameId
 		} else {
@@ -319,7 +319,7 @@ func getHasMetadataQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 		values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
 		values["art_digest"] = strings.ToLower(artifact.Digest)
 	} else {
-		source := helper.GuacSrcId(*source)
+		source := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](source, helpers.SrcServerKey)
 		values["srcNameGuacKey"] = source.NameId
 	}
 

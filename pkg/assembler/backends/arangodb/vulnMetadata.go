@@ -23,8 +23,8 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 const (
@@ -150,7 +150,7 @@ func getVulnMetadataQueryValues(vulnerability *model.VulnerabilityInputSpec, vul
 	values := map[string]any{}
 	// add guac keys
 	if vulnerability != nil {
-		vuln := helper.GuacVulnId(*vulnerability)
+		vuln := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](vulnerability, helpers.VulnServerKey)
 		values["guacVulnKey"] = vuln.VulnerabilityID
 	}
 

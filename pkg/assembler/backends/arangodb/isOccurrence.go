@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 // Query IsOccurrence
@@ -218,10 +219,10 @@ func getOccurrenceQueryValues(pkg *model.PkgInputSpec, src *model.SourceInputSpe
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := helper.GuacPkgId(*pkg)
+		pkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg, helpers.PkgServerKey)
 		values["pkgVersionGuacKey"] = pkgId.VersionId
 	} else {
-		source := helper.GuacSrcId(*src)
+		source := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](src, helpers.SrcServerKey)
 		values["srcNameGuacKey"] = source.NameId
 	}
 	values["art_algorithm"] = strings.ToLower(artifact.Algorithm)

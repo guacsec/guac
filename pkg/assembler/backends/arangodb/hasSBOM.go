@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
@@ -208,7 +209,7 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := helper.GuacPkgId(*pkg)
+		pkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg, helpers.PkgServerKey)
 		values["pkgVersionGuacKey"] = pkgId.VersionId
 	} else {
 		values["art_algorithm"] = strings.ToLower(artifact.Algorithm)

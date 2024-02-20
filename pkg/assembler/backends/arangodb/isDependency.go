@@ -24,6 +24,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 const (
@@ -325,8 +326,8 @@ func getDependencyQueryValues(pkg *model.PkgInputSpec, depPkg *model.PkgInputSpe
 	values := map[string]any{}
 
 	// add guac keys
-	pkgId := helper.GuacPkgId(*pkg)
-	depPkgId := helper.GuacPkgId(*depPkg)
+	pkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg, helpers.PkgServerKey)
+	depPkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](depPkg, helpers.PkgServerKey)
 	values["pkgVersionGuacKey"] = pkgId.VersionId
 	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 		values["secondPkgGuacKey"] = depPkgId.NameId

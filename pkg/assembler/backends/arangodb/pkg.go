@@ -26,6 +26,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 type dbPkgVersion struct {
@@ -66,7 +67,7 @@ func getPackageQueryValues(pkg *model.PkgInputSpec) map[string]any {
 	values := map[string]any{}
 
 	// add guac keys
-	guacIds := helper.GuacPkgId(*pkg)
+	guacIds := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg, helpers.PkgServerKey)
 	values["guacNsKey"] = guacIds.NamespaceId
 	values["guacNameKey"] = guacIds.NameId
 	values["guacVersionKey"] = guacIds.VersionId
