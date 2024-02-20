@@ -17,19 +17,15 @@ package backend
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"log"
-	"strings"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -269,27 +265,124 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 }
 
 func upsertBulkCertification[T certificationInputSpec](ctx context.Context, client *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, spec []*T) (*[]string, error) {
+	ids := make([]string, 0)
 
-	switch v := any(spec).(type) {
+	var conflictWhere *sql.Predicate
+
+	conflictColumns := []string{
+		certification.FieldType,
+		certification.FieldCollector,
+		certification.FieldOrigin,
+		certification.FieldJustification,
+		certification.FieldKnownSince,
+	}
+
+	switch {
+	case len(subjects.Artifacts) > 0:
+		conflictColumns = append(conflictColumns, certification.FieldArtifactID)
+		conflictWhere = sql.And(
+			sql.NotNull(certification.FieldArtifactID),
+			sql.IsNull(certification.FieldPackageNameID),
+			sql.IsNull(certification.FieldPackageVersionID),
+			sql.IsNull(certification.FieldSourceID),
+		)
+
+	case len(subjects.Packages) > 0:
+		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+			conflictColumns = append(conflictColumns, certification.FieldPackageVersionID)
+			conflictWhere = sql.And(
+				sql.IsNull(certification.FieldArtifactID),
+				sql.NotNull(certification.FieldPackageVersionID),
+				sql.IsNull(certification.FieldPackageNameID),
+				sql.IsNull(certification.FieldSourceID),
+			)
+		} else {
+			conflictColumns = append(conflictColumns, certification.FieldPackageNameID)
+			conflictWhere = sql.And(
+				sql.IsNull(certification.FieldArtifactID),
+				sql.IsNull(certification.FieldPackageVersionID),
+				sql.NotNull(certification.FieldPackageNameID),
+				sql.IsNull(certification.FieldSourceID),
+			)
+		}
+
+	case len(subjects.Sources) > 0:
+		conflictColumns = append(conflictColumns, certification.FieldSourceID)
+		conflictWhere = sql.And(
+			sql.IsNull(certification.FieldArtifactID),
+			sql.IsNull(certification.FieldPackageVersionID),
+			sql.IsNull(certification.FieldPackageNameID),
+			sql.NotNull(certification.FieldSourceID),
+		)
+	}
+
+	switch certifies := any(spec).(type) {
 	case []*model.CertifyBadInputSpec:
-		batches := chunk(artInputs, 100)
-		ids := make([]string, 0)
+		batches := chunk(certifies, 100)
 
-		for _, artifacts := range batches {
-			creates := make([]*ent.ArtifactCreate, len(artifacts))
-			for i, art := range artifacts {
-				artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helper.GuacArtifactKey(art.ArtifactInput)), 5)
-				creates[i] = client.Artifact.Create().
-					SetID(artifactID).
-					SetAlgorithm(strings.ToLower(art.ArtifactInput.Algorithm)).
-					SetDigest(strings.ToLower(art.ArtifactInput.Digest))
+		index := 0
+		for _, certifyBads := range batches {
+			creates := make([]*ent.CertificationCreate, len(certifyBads))
+			for i, cb := range certifyBads {
+				creates[i] = client.Certification.Create().
+					SetType(certification.TypeBAD).
+					SetJustification(cb.Justification).
+					SetOrigin(cb.Origin).
+					SetCollector(cb.Collector).
+					SetKnownSince(cb.KnownSince)
 
-				ids = append(ids, artifactID.String())
+				switch {
+				case len(subjects.Artifacts) > 0:
+					if subjects.Artifacts[index].ArtifactID == nil {
+						return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+					}
+					artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					}
+					creates[i].SetArtifactID(artID)
+
+				case len(subjects.Packages) > 0:
+					if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+						if subjects.Packages[index].PackageVersionID == nil {
+							return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+						}
+						pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
+						if err != nil {
+							return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+						}
+						creates[i].SetPackageVersionID(pkgVersionID)
+
+					} else {
+						if subjects.Packages[index].PackageNameID == nil {
+							return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
+						}
+						pkgNameID, err := uuid.Parse(*subjects.Packages[index].PackageNameID)
+						if err != nil {
+							return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+						}
+						creates[i].SetAllVersionsID(pkgNameID)
+
+					}
+
+				case len(subjects.Sources) > 0:
+					if subjects.Sources[index].SourceNameID == nil {
+						return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+					}
+					sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					}
+					creates[i].SetSourceID(sourceID)
+
+				}
+				index++
 			}
 
-			err := client.Artifact.CreateBulk(creates...).
+			err := client.Certification.CreateBulk(creates...).
 				OnConflict(
-					sql.ConflictColumns(artifact.FieldDigest),
+					sql.ConflictColumns(conflictColumns...),
+					sql.ConflictWhere(conflictWhere),
 				).
 				DoNothing().
 				Exec(ctx)
@@ -298,24 +391,71 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 			}
 		}
 	case []*model.CertifyGoodInputSpec:
-		batches := chunk(artInputs, 100)
-		ids := make([]string, 0)
+		batches := chunk(certifies, 100)
 
-		for _, artifacts := range batches {
-			creates := make([]*ent.ArtifactCreate, len(artifacts))
-			for i, art := range artifacts {
-				artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helper.GuacArtifactKey(art.ArtifactInput)), 5)
-				creates[i] = client.Artifact.Create().
-					SetID(artifactID).
-					SetAlgorithm(strings.ToLower(art.ArtifactInput.Algorithm)).
-					SetDigest(strings.ToLower(art.ArtifactInput.Digest))
+		index := 0
+		for _, certifyGoods := range batches {
+			creates := make([]*ent.CertificationCreate, len(certifyGoods))
+			for i, cb := range certifyGoods {
+				creates[i] = client.Certification.Create().
+					SetType(certification.TypeGOOD).
+					SetJustification(cb.Justification).
+					SetOrigin(cb.Origin).
+					SetCollector(cb.Collector).
+					SetKnownSince(cb.KnownSince)
 
-				ids = append(ids, artifactID.String())
+				switch {
+				case len(subjects.Artifacts) > 0:
+					if subjects.Artifacts[index].ArtifactID == nil {
+						return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+					}
+					artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					}
+					creates[i].SetArtifactID(artID)
+
+				case len(subjects.Packages) > 0:
+					if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+						if subjects.Packages[index].PackageVersionID == nil {
+							return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+						}
+						pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
+						if err != nil {
+							return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+						}
+						creates[i].SetPackageVersionID(pkgVersionID)
+
+					} else {
+						if subjects.Packages[index].PackageNameID == nil {
+							return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
+						}
+						pkgNameID, err := uuid.Parse(*subjects.Packages[index].PackageNameID)
+						if err != nil {
+							return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+						}
+						creates[i].SetAllVersionsID(pkgNameID)
+
+					}
+
+				case len(subjects.Sources) > 0:
+					if subjects.Sources[index].SourceNameID == nil {
+						return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+					}
+					sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					}
+					creates[i].SetSourceID(sourceID)
+
+				}
+				index++
 			}
 
-			err := client.Artifact.CreateBulk(creates...).
+			err := client.Certification.CreateBulk(creates...).
 				OnConflict(
-					sql.ConflictColumns(artifact.FieldDigest),
+					sql.ConflictColumns(conflictColumns...),
+					sql.ConflictWhere(conflictWhere),
 				).
 				DoNothing().
 				Exec(ctx)
@@ -324,7 +464,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 			}
 		}
 	default:
-		log.Printf("Unknown spec: %+T", v)
+		return nil, fmt.Errorf("Unknown spec: %+T", certifies)
 	}
 
 	return &ids, nil
