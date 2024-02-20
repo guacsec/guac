@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -95,7 +96,7 @@ func upsertBulkArtifact(ctx context.Context, client *ent.Tx, artInputs []*model.
 	for _, artifacts := range batches {
 		creates := make([]*ent.ArtifactCreate, len(artifacts))
 		for i, art := range artifacts {
-			artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helper.GuacArtifactKey(art.ArtifactInput)), 5)
+			artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.ArtifactInputSpec, string](art.ArtifactInput, helpers.ArtifactServerKey)), 5)
 			creates[i] = client.Artifact.Create().
 				SetID(artifactID).
 				SetAlgorithm(strings.ToLower(art.ArtifactInput.Algorithm)).

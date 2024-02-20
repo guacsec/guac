@@ -16,19 +16,57 @@
 package helpers
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func ConcatenateSourceInput(source *generated.SourceInputSpec) string {
-	var sourceElements []string
-	sourceElements = append(sourceElements, source.Type, source.Namespace, source.Name)
-	if source.Tag != nil {
-		sourceElements = append(sourceElements, *source.Tag)
+type SrcIds struct {
+	TypeId      string
+	NamespaceId string
+	NameId      string
+}
+
+func SrcServerKey(src *model.SourceInputSpec) SrcIds {
+	return guacSrcId(src.Type, src.Namespace, src.Name, src.Tag, src.Commit)
+}
+
+func SrcClientKey(src *generated.SourceInputSpec) SrcIds {
+	return guacSrcId(src.Type, src.Namespace, src.Name, src.Tag, src.Commit)
+}
+
+func guacSrcId(srcType, namespace, name string, stcTag, srcCommit *string) SrcIds {
+	ids := SrcIds{}
+
+	ids.TypeId = srcType
+
+	var ns string
+	if namespace != "" {
+		ns = namespace
+	} else {
+		ns = guacEmpty
 	}
-	if source.Commit != nil {
-		sourceElements = append(sourceElements, *source.Commit)
+	ids.NamespaceId = fmt.Sprintf("%s::%s", ids.TypeId, ns)
+
+	var tag string
+	if stcTag != nil {
+		if *stcTag != "" {
+			tag = *stcTag
+		} else {
+			tag = guacEmpty
+		}
 	}
-	return strings.Join(sourceElements, "/")
+
+	var commit string
+	if srcCommit != nil {
+		if *srcCommit != "" {
+			commit = *srcCommit
+		} else {
+			commit = guacEmpty
+		}
+	}
+
+	ids.NameId = fmt.Sprintf("%s::%s::%s::%s?", ids.NamespaceId, name, tag, commit)
+	return ids
 }

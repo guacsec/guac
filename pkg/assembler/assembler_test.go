@@ -796,7 +796,7 @@ func TestIngestPredicates(t *testing.T) {
 
 			gotVulns := i.GetVulnerabilities(ctx)
 			vulnSort := func(a, b *generated.VulnerabilityInputSpec) bool {
-				return helpers.VulnInputToVURI(a) < helpers.VulnInputToVURI(b)
+				return helpers.GetKey[*generated.VulnerabilityInputSpec, helpers.VulnIds](a, helpers.VulnClientKey).VulnerabilityID < helpers.GetKey[*generated.VulnerabilityInputSpec, helpers.VulnIds](b, helpers.VulnClientKey).VulnerabilityID
 			}
 			if diff := cmp.Diff(tt.wantVuln, gotVulns, cmpopts.SortSlices(vulnSort)); diff != "" {
 				t.Errorf("Unexpected gotVulns results. (-want +got):\n%s", diff)

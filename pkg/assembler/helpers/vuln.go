@@ -20,11 +20,27 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func VulnInputToVURI(vuln *generated.VulnerabilityInputSpec) string {
-	s := fmt.Sprintf("vuln://%s/%s", strings.ToLower(vuln.Type), strings.ToLower(vuln.VulnerabilityID))
-	return s
+type VulnIds struct {
+	TypeId          string
+	VulnerabilityID string
+}
+
+func VulnServerKey(vuln *model.VulnerabilityInputSpec) VulnIds {
+	return guacVulnId(vuln.Type, vuln.VulnerabilityID)
+}
+
+func VulnClientKey(vuln *generated.VulnerabilityInputSpec) VulnIds {
+	return guacVulnId(vuln.Type, vuln.VulnerabilityID)
+}
+
+func guacVulnId(vulnType, vulnID string) VulnIds {
+	ids := VulnIds{}
+	ids.TypeId = strings.ToLower(vulnType)
+	ids.VulnerabilityID = fmt.Sprintf("%s::%s", ids.TypeId, strings.ToLower(vulnID))
+	return ids
 }
 
 func CreateVulnInput(vulnID string) (*generated.VulnerabilityInputSpec, error) {

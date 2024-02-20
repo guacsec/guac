@@ -20,48 +20,68 @@ import (
 
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func TestConcatenateSourceInput(t *testing.T) {
 	tests := []struct {
-		name   string
-		source *generated.SourceInputSpec
-		want   string
+		name         string
+		sourceClient *generated.SourceInputSpec
+		sourceServer *model.SourceInputSpec
+		want         SrcIds
 	}{
 		{
-			name: "commit",
-			source: &generated.SourceInputSpec{
+			name: "commit - client",
+			sourceClient: &generated.SourceInputSpec{
 				Type:      "git",
 				Namespace: "github.com/kubernetes",
 				Name:      "kubernetes",
 				Commit:    ptrfrom.String("5835544ca568b757a8ecae5c153f317e5736700e"),
 			},
-			want: "git/github.com/kubernetes/kubernetes/5835544ca568b757a8ecae5c153f317e5736700e",
+			want: SrcIds{
+				TypeId:      "git",
+				NamespaceId: "git::github.com/kubernetes",
+				NameId:      "git::github.com/kubernetes::kubernetes::::5835544ca568b757a8ecae5c153f317e5736700e?",
+			},
 		},
 		{
-			name: "tag",
-			source: &generated.SourceInputSpec{
+			name: "tag - server",
+			sourceServer: &model.SourceInputSpec{
 				Type:      "git",
 				Namespace: "github.com/guacsec",
 				Name:      "guac",
 				Tag:       ptrfrom.String("v0.4.0"),
 			},
-			want: "git/github.com/guacsec/guac/v0.4.0",
+			want: SrcIds{
+				TypeId:      "git",
+				NamespaceId: "git::github.com/guacsec",
+				NameId:      "git::github.com/guacsec::guac::v0.4.0::?",
+			},
 		},
 		{
-			name: "no tag or commit",
-			source: &generated.SourceInputSpec{
+			name: "no tag or commit - client",
+			sourceClient: &generated.SourceInputSpec{
 				Type:      "git",
 				Namespace: "github.com/guacsec",
 				Name:      "guac",
 			},
-			want: "git/github.com/guacsec/guac",
+			want: SrcIds{
+				TypeId:      "git",
+				NamespaceId: "git::github.com/guacsec",
+				NameId:      "git::github.com/guacsec::guac::::?",
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ConcatenateSourceInput(tt.source); got != tt.want {
-				t.Errorf("ConcatenateSourceInput() = %v, want %v", got, tt.want)
+			if tt.sourceClient != nil {
+				if got := GetKey[*generated.SourceInputSpec, SrcIds](tt.sourceClient, SrcClientKey); got != tt.want {
+					t.Errorf("SourceKey() = %v, want %v", got, tt.want)
+				}
+			} else {
+				if got := GetKey[*model.SourceInputSpec, SrcIds](tt.sourceServer, SrcServerKey); got != tt.want {
+					t.Errorf("SourceKey() = %v, want %v", got, tt.want)
+				}
 			}
 		})
 	}
