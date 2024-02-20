@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
 	"fmt"
 	"log"
 
@@ -27,6 +28,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -205,7 +207,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 			}
 			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
 			insert.SetPackageVersionID(pkgVersionID)
 			conflictColumns = append(conflictColumns, certification.FieldPackageVersionID)
@@ -221,7 +223,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 			}
 			pkgNameID, err := uuid.Parse(*subject.Package.PackageNameID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 			}
 			insert.SetAllVersionsID(pkgNameID)
 			conflictColumns = append(conflictColumns, certification.FieldPackageNameID)
@@ -239,7 +241,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 		}
 		sourceID, err := uuid.Parse(*subject.Source.SourceNameID)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 		}
 		insert.SetSourceID(sourceID)
 		conflictColumns = append(conflictColumns, certification.FieldSourceID)
@@ -251,17 +253,19 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 		)
 	}
 
-	id, err := insert.OnConflict(
+	_, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
-		return nil, err
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert certify legal node")
+		}
 	}
 
-	return ptrfrom.String(id.String()), nil
+	return ptrfrom.String(""), nil
 }
 
 func upsertBulkCertification[T certificationInputSpec](ctx context.Context, client *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, spec []*T) (*[]string, error) {
