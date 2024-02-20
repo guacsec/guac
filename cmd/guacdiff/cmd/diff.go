@@ -164,6 +164,11 @@ var diffCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
+			if errSlsa == nil && len(slsa) == 2 {
+				fmt.Println("slsa diff to be implemented.")
+				return
+			}
+
 			uri, _ := cmd.Flags().GetBool("uri")
 			purl, _ := cmd.Flags().GetBool("purl")
 
@@ -185,27 +190,27 @@ var diffCmd = &cobra.Command{
 			var hasSBOMResponseTwo *model.HasSBOMsResponse
 
 			if uri {
-				hasSBOMResponseOne, err = findHasSBOMBy(boms[0],"",  ctx, gqlclient)
+				hasSBOMResponseOne, err = findHasSBOMBy(sboms[0],"",  ctx, gqlclient)
 				if err != nil {
-					fmt.Println("failed to lookup sbom: %s %v", boms[0], err)
+					fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
 					return
 				}
 
-				hasSBOMResponseTwo, err = findHasSBOMBy( boms[1],"",  ctx, gqlclient)
+				hasSBOMResponseTwo, err = findHasSBOMBy( sboms[1],"",  ctx, gqlclient)
 				if err != nil {
-					fmt.Println("failed to lookup sbom: %s %v", boms[1], err)
+					fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
 					return
 				}
 			} else if purl {
 
-				hasSBOMResponseTwo, err = findHasSBOMBy( "", boms[0],  ctx, gqlclient)
+				hasSBOMResponseTwo, err = findHasSBOMBy( "", sboms[0],  ctx, gqlclient)
 				if err != nil {
-					fmt.Println("failed to lookup sbom: %s %v", boms[0], err)
+					fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
 					return
 				}
-				hasSBOMResponseTwo, err = findHasSBOMBy( "", boms[1], ctx, gqlclient)
+				hasSBOMResponseTwo, err = findHasSBOMBy( "", sboms[1], ctx, gqlclient)
 				if err != nil {
-					fmt.Println("failed to lookup sbom: %s %v", boms[1], err)
+					fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
 					return
 				}
 			}
