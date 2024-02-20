@@ -17,14 +17,21 @@ package backend
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
 	"log"
+	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-	"golang.org/x/sync/errgroup"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type certificationInputSpec interface {
@@ -54,8 +61,7 @@ func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 }
 
 func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (string, error) {
-
-	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
+	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
 	})
 	if err != nil {
@@ -63,40 +69,28 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 	}
 
 	//TODO optimize for only returning ID
-	return nodeID(certRecord.ID), nil
+	return *certRecord, nil
 }
 
 func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
-	result := make([]string, len(certifyBads))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range certifyBads {
-		index := i
-		var subject model.PackageSourceOrArtifactInput
-		if len(subjects.Packages) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[index]}
-		} else if len(subjects.Artifacts) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[index]}
-		} else {
-			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[index]}
+	funcName := "IngestCertifyBads"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkCertification(ctx, client, subjects, pkgMatchType, certifyBads)
+		if err != nil {
+			return nil, err
 		}
-		certifyBad := *certifyBads[index]
-		concurrently(eg, func() error {
-			cb, err := b.IngestCertifyBad(ctx, subject, pkgMatchType, certifyBad)
-			if err == nil {
-				result[index] = cb
-			}
-			return err
-		})
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
-	return result, nil
+
+	return *ids, nil
 }
 
 func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (string, error) {
-
-	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.Certification, error) {
+	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
 	})
 	if err != nil {
@@ -104,35 +98,24 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 	}
 
 	//TODO optimize for only returning ID
-	return nodeID(certRecord.ID), nil
+	return *certRecord, nil
 }
 
 func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
-	result := make([]string, len(certifyGoods))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range certifyGoods {
-		index := i
-		var subject model.PackageSourceOrArtifactInput
-		if len(subjects.Packages) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[index]}
-		} else if len(subjects.Artifacts) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[index]}
-		} else {
-			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[index]}
+	funcName := "IngestCertifyGoods"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkCertification(ctx, client, subjects, pkgMatchType, certifyGoods)
+		if err != nil {
+			return nil, err
 		}
-		certifyGood := *certifyGoods[index]
-		concurrently(eg, func() error {
-			cg, err := b.IngestCertifyGood(ctx, subject, pkgMatchType, certifyGood)
-			if err == nil {
-				result[index] = cg
-			}
-			return err
-		})
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
-	return result, nil
+
+	return *ids, nil
 }
 
 func queryCertifications(ctx context.Context, client *ent.Client, typ certification.Type, filter *model.CertifyBadSpec) ([]*ent.Certification, error) {
@@ -170,7 +153,7 @@ func queryCertifications(ctx context.Context, client *ent.Client, typ certificat
 		All(ctx)
 }
 
-func upsertCertification[T certificationInputSpec](ctx context.Context, client *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*ent.Certification, error) {
+func upsertCertification[T certificationInputSpec](ctx context.Context, client *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*string, error) {
 	insert := client.Certification.Create()
 
 	switch v := any(spec).(type) {
@@ -203,11 +186,14 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 
 	switch {
 	case subject.Artifact != nil:
-		art, err := client.Artifact.Query().Where(artifactQueryInputPredicates(*subject.Artifact.ArtifactInput)).Only(ctx)
-		if err != nil {
-			return nil, err
+		if subject.Artifact.ArtifactID == nil {
+			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
 		}
-		insert.SetArtifact(art)
+		artID, err := uuid.Parse(*subject.Artifact.ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+		}
+		insert.SetArtifactID(artID)
 		conflictColumns = append(conflictColumns, certification.FieldArtifactID)
 		conflictWhere = sql.And(
 			sql.NotNull(certification.FieldArtifactID),
@@ -218,11 +204,14 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 
 	case subject.Package != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			pv, err := getPkgVersion(ctx, client.Client(), *subject.Package.PackageInput)
-			if err != nil {
-				return nil, err
+			if subject.Package.PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 			}
-			insert.SetPackageVersion(pv)
+			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+			}
+			insert.SetPackageVersionID(pkgVersionID)
 			conflictColumns = append(conflictColumns, certification.FieldPackageVersionID)
 			conflictWhere = sql.And(
 				sql.IsNull(certification.FieldArtifactID),
@@ -231,11 +220,14 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 				sql.IsNull(certification.FieldSourceID),
 			)
 		} else {
-			pn, err := getPkgName(ctx, client.Client(), *subject.Package.PackageInput)
-			if err != nil {
-				return nil, err
+			if subject.Package.PackageNameID == nil {
+				return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
 			}
-			insert.SetAllVersions(pn)
+			pkgNameID, err := uuid.Parse(*subject.Package.PackageNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+			}
+			insert.SetAllVersionsID(pkgNameID)
 			conflictColumns = append(conflictColumns, certification.FieldPackageNameID)
 			conflictWhere = sql.And(
 				sql.IsNull(certification.FieldArtifactID),
@@ -246,11 +238,14 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 		}
 
 	case subject.Source != nil:
-		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source.SourceInput)
-		if err != nil {
-			return nil, err
+		if subject.Source.SourceNameID == nil {
+			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
 		}
-		insert.SetSourceID(srcID)
+		sourceID, err := uuid.Parse(*subject.Source.SourceNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+		}
+		insert.SetSourceID(sourceID)
 		conflictColumns = append(conflictColumns, certification.FieldSourceID)
 		conflictWhere = sql.And(
 			sql.IsNull(certification.FieldArtifactID),
@@ -270,13 +265,69 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 		return nil, err
 	}
 
-	return client.Certification.Query().
-		Where(certification.ID(id)).
-		WithSource(withSourceNameTreeQuery()).
-		WithArtifact().
-		WithPackageVersion(withPackageVersionTree()).
-		WithAllVersions(withPackageNameTree()).
-		Only(ctx)
+	return ptrfrom.String(id.String()), nil
+}
+
+func upsertBulkCertification[T certificationInputSpec](ctx context.Context, client *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, spec []*T) (*[]string, error) {
+
+	switch v := any(spec).(type) {
+	case []*model.CertifyBadInputSpec:
+		batches := chunk(artInputs, 100)
+		ids := make([]string, 0)
+
+		for _, artifacts := range batches {
+			creates := make([]*ent.ArtifactCreate, len(artifacts))
+			for i, art := range artifacts {
+				artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helper.GuacArtifactKey(art.ArtifactInput)), 5)
+				creates[i] = client.Artifact.Create().
+					SetID(artifactID).
+					SetAlgorithm(strings.ToLower(art.ArtifactInput.Algorithm)).
+					SetDigest(strings.ToLower(art.ArtifactInput.Digest))
+
+				ids = append(ids, artifactID.String())
+			}
+
+			err := client.Artifact.CreateBulk(creates...).
+				OnConflict(
+					sql.ConflictColumns(artifact.FieldDigest),
+				).
+				DoNothing().
+				Exec(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case []*model.CertifyGoodInputSpec:
+		batches := chunk(artInputs, 100)
+		ids := make([]string, 0)
+
+		for _, artifacts := range batches {
+			creates := make([]*ent.ArtifactCreate, len(artifacts))
+			for i, art := range artifacts {
+				artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helper.GuacArtifactKey(art.ArtifactInput)), 5)
+				creates[i] = client.Artifact.Create().
+					SetID(artifactID).
+					SetAlgorithm(strings.ToLower(art.ArtifactInput.Algorithm)).
+					SetDigest(strings.ToLower(art.ArtifactInput.Digest))
+
+				ids = append(ids, artifactID.String())
+			}
+
+			err := client.Artifact.CreateBulk(creates...).
+				OnConflict(
+					sql.ConflictColumns(artifact.FieldDigest),
+				).
+				DoNothing().
+				Exec(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+	default:
+		log.Printf("Unknown spec: %+T", v)
+	}
+
+	return &ids, nil
 }
 
 func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
@@ -284,7 +335,7 @@ func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
 
 	switch {
 	case v.Edges.Source != nil:
-		sub = toModelSource(backReferenceSourceName(v.Edges.Source))
+		sub = toModelSource(v.Edges.Source)
 	case v.Edges.PackageVersion != nil:
 		sub = toModelPackage(backReferencePackageVersion(v.Edges.PackageVersion))
 	case v.Edges.AllVersions != nil:
@@ -297,7 +348,7 @@ func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
 	}
 
 	return &model.CertifyBad{
-		ID:            nodeID(v.ID),
+		ID:            v.ID.String(),
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
@@ -311,7 +362,7 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 
 	switch {
 	case v.Edges.Source != nil:
-		sub = toModelSource(backReferenceSourceName(v.Edges.Source))
+		sub = toModelSource(v.Edges.Source)
 	case v.Edges.PackageVersion != nil:
 		sub = toModelPackage(backReferencePackageVersion(v.Edges.PackageVersion))
 	case v.Edges.AllVersions != nil:
@@ -324,7 +375,7 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 	}
 
 	return &model.CertifyGood{
-		ID:            nodeID(v.ID),
+		ID:            v.ID.String(),
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,

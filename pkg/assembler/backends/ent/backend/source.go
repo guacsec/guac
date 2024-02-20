@@ -335,17 +335,6 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 	}
 }
 
-// func backReferenceSourceName(sn *ent.SourceName) *ent.SourceName {
-// 	if sn.Edges.Namespace != nil {
-// 		sns := sn.Edges.Namespace
-// 		sns.Edges.Names = []*ent.SourceName{sn}
-// 		st := sns.Edges.SourceType
-// 		st.Edges.Namespaces = []*ent.SourceNamespace{sns}
-// 		return st
-// 	}
-// 	return nil
-// }
-
 func toModelSourceName(s *ent.SourceName) *model.Source {
 	return toModelSource(s)
 }
