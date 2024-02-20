@@ -17,14 +17,17 @@ package backend
 
 import (
 	"context"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencySpec) ([]*model.IsDependency, error) {
@@ -49,41 +52,124 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 }
 
 func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
-	// TODO: This looks like a good candidate for using BulkCreate()
+	funcName := "IngestCertifyVulns"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkDependencies(ctx, client, pkgs, depPkgs, depPkgMatchType, dependencies)
+		if err != nil {
+			return nil, err
+		}
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	}
 
-	var modelIsDependencies = make([]string, len(dependencies))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range dependencies {
-		index := i
-		pkg := *pkgs[index]
-		depPkg := *depPkgs[index]
-		dpmt := depPkgMatchType
-		dep := *dependencies[index]
-		concurrently(eg, func() error {
-			p, err := b.IngestDependency(ctx, pkg, depPkg, dpmt, dep)
-			if err == nil {
-				modelIsDependencies[index] = p
+	return *ids, nil
+}
+
+func upsertBulkDependencies(ctx context.Context, client *ent.Tx, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		dependency.FieldPackageID,
+		dependency.FieldVersionRange,
+		dependency.FieldDependencyType,
+		dependency.FieldJustification,
+		dependency.FieldOrigin,
+		dependency.FieldCollector,
+	}
+
+	var conflictWhere *sql.Predicate
+
+	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+		conflictColumns = append(conflictColumns, dependency.FieldDependentPackageNameID)
+		conflictWhere = sql.And(
+			sql.NotNull(dependency.FieldDependentPackageNameID),
+			sql.IsNull(dependency.FieldDependentPackageVersionID),
+		)
+	} else {
+		conflictColumns = append(conflictColumns, dependency.FieldDependentPackageVersionID)
+		conflictWhere = sql.And(
+			sql.IsNull(dependency.FieldDependentPackageNameID),
+			sql.NotNull(dependency.FieldDependentPackageVersionID),
+		)
+	}
+
+	batches := chunk(dependencies, 100)
+
+	index := 0
+	for _, deps := range batches {
+		creates := make([]*ent.DependencyCreate, len(deps))
+		for i, dep := range deps {
+			creates[i] = client.Dependency.Create().
+				SetVersionRange(dep.VersionRange).
+				SetDependencyType(dependencyTypeToEnum(dep.DependencyType)).
+				SetJustification(dep.Justification).
+				SetOrigin(dep.Origin).
+				SetCollector(dep.Collector)
+
+			if pkgs[index].PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 			}
-			return err
-		})
+			pkgVersionID, err := uuid.Parse(*pkgs[index].PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+			}
+			creates[i].SetPackageID(pkgVersionID)
+
+			if depPkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+				if depPkgs[index].PackageVersionID == nil {
+					return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+				}
+				pkgVersionID, err := uuid.Parse(*depPkgs[index].PackageVersionID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				}
+				creates[i].SetDependentPackageNameID(pkgVersionID)
+
+			} else {
+				if depPkgs[index].PackageNameID == nil {
+					return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
+				}
+				pkgNameID, err := uuid.Parse(*depPkgs[index].PackageNameID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				}
+				creates[i].SetDependentPackageVersionID(pkgNameID)
+			}
+			index++
+		}
+
+		err := client.Dependency.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictWhere(conflictWhere),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
-	return modelIsDependencies, nil
+
+	return &ids, nil
 }
 
 func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
 	funcName := "IngestDependency"
 
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
-		p, err := getPkgVersion(ctx, client.Client(), *pkg.PackageInput)
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		}
+		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
 		query := client.Dependency.Create().
-			SetPackage(p).
+			SetPackageID(pkgVersionID).
 			SetVersionRange(dep.VersionRange).
 			SetDependencyType(dependencyTypeToEnum(dep.DependencyType)).
 			SetJustification(dep.Justification).
@@ -102,22 +188,28 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 		var conflictWhere *sql.Predicate
 
 		if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-			dpn, err := getPkgName(ctx, client.Client(), *depPkg.PackageInput)
-			if err != nil {
-				return nil, err
+			if depPkg.PackageNameID == nil {
+				return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
 			}
-			query.SetDependentPackageName(dpn)
+			depPkgNameID, err := uuid.Parse(*depPkg.PackageNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+			}
+			query.SetDependentPackageNameID(depPkgNameID)
 			conflictColumns = append(conflictColumns, dependency.FieldDependentPackageNameID)
 			conflictWhere = sql.And(
 				sql.NotNull(dependency.FieldDependentPackageNameID),
 				sql.IsNull(dependency.FieldDependentPackageVersionID),
 			)
 		} else {
-			dpv, err := getPkgVersion(ctx, client.Client(), *depPkg.PackageInput)
-			if err != nil {
-				return nil, err
+			if depPkg.PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 			}
-			query.SetDependentPackageVersion(dpv)
+			depPkgVersionID, err := uuid.Parse(*depPkg.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+			query.SetDependentPackageVersionID(depPkgVersionID)
 			conflictColumns = append(conflictColumns, dependency.FieldDependentPackageVersionID)
 			conflictWhere = sql.And(
 				sql.IsNull(dependency.FieldDependentPackageNameID),
@@ -125,23 +217,22 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 			)
 		}
 
-		id, err := query.
+		if _, err := query.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
 			Ignore().
-			ID(ctx)
-		if err != nil {
+			ID(ctx); err != nil {
 			return nil, err
 		}
-		return &id, nil
+		return ptrfrom.String(""), nil
 	})
 	if err != nil {
 		return "", errors.Wrap(err, funcName)
 	}
 
-	return nodeID(*recordID), nil
+	return *recordID, nil
 }
 
 func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
