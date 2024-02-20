@@ -28,6 +28,7 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -224,7 +225,6 @@ var diffCmd = &cobra.Command{
 			}
 			hasSBOMOne =  hasSBOMResponseOne.HasSBOM[0]
 			hasSBOMTwo =  hasSBOMResponseTwo.HasSBOM[0]
-
 		}else{
 			jsonData, err := os.ReadFile(testfile)
 			if err != nil {
@@ -249,12 +249,6 @@ var diffCmd = &cobra.Command{
 
 
 
-
-
-
-
-
-
 		//init first node
 		nodeOne := Node{Value: hasSBOMOne.Id, tag: "Id"}
 		nodeTwo := Node{Value: hasSBOMTwo.Id, tag: "Id"}
@@ -271,7 +265,7 @@ var diffCmd = &cobra.Command{
 			fieldTypeOne := reflect.TypeOf(allHasSBOMTreeOne.Interface()).Field(i).Name 
 			fieldTypeTwo := reflect.TypeOf(allHasSBOMTreeTwo.Interface()).Field(i).Name 
 			//TODO  @abhi If you could take a look at taking care of cases where the field type is []json.RawMessage, interface or pointers 
-			// this would be great. Then we can remove the constraint for not including type Subjeect and Included Software below.
+			// this would be great. Then we can remove the constraint for not including type Subject and Included Software below.
 			if  fieldTypeOne != "Id" && fieldTypeOne != "Subject" && fieldTypeOne != "IncludedSoftware" { //not id, subject, included softwares then
 				hasSBOMResponsFieldsToGraph(fieldOne, &nodeOne, fieldTypeOne)
 			}
@@ -305,28 +299,51 @@ var diffCmd = &cobra.Command{
 				fmt.Println(randfilename)
 			}
 		}
-
-
 	},
 }
 
 
+func getPatchMatch(stringOne, stringTwo string, dmp *diffmatchpatch.DiffMatchPatch, enabled bool)  {
+	if enabled {
+		return
+	}
+	if stringOne!= "" && stringTwo!= "" {
+		fmt.Println(stringOne)
+	}
+	diffs := dmp.DiffMain(stringOne,stringTwo, false)
+	for _, diff := range diffs {
+		switch diff.Type {
+		case diffmatchpatch.DiffDelete:
+			fmt.Printf("(-)%s\n", diff.Text)
+		case diffmatchpatch.DiffInsert:
+			fmt.Printf("(+)%s\n", diff.Text)
+		}
+	}
+}
 
 func getDiff(pathsOne, pathsTwo [][]*Node, pathsOneStrings, pathsTwoStrings []string, dot bool) ([][]*Node, [][]*Node ){
 	var diffOne, diffTwo [][]*Node
+	var dmp *diffmatchpatch.DiffMatchPatch
+	if !dot {
+		dmp = diffmatchpatch.New()
+	}
+
 	for i := 0; i < len(pathsOne) || i < len(pathsTwo); i++ {
 		if i < len(pathsOne) && i < len(pathsTwo) {
 			if pathsOneStrings[i] != pathsTwoStrings[i] {
 				diffOne = append(diffOne, pathsOne[i])
 				diffTwo = append(diffTwo, pathsTwo[i])
+				
+				getPatchMatch(pathsOneStrings[i], pathsTwoStrings[i], dmp, dot)
 			}
 		}else if  i < len(pathsOne) && i >= len(pathsTwo) {
 			diffOne = append(diffOne, pathsOne[i])
+			getPatchMatch(pathsOneStrings[i], "", dmp, dot)
 		}else if i >= len(pathsOne) && i < len(pathsTwo){
 			diffTwo = append(diffTwo, pathsTwo[i])
+			getPatchMatch("", pathsTwoStrings[i], dmp, dot)
 		}
 	}
-
 	return diffOne, diffTwo
 }
 
