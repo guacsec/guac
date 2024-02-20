@@ -567,12 +567,20 @@ var (
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "justification", Type: field.TypeString},
+		{Name: "artifacts_hash", Type: field.TypeString},
 	}
 	// HashEqualsTable holds the schema information for the "hash_equals" table.
 	HashEqualsTable = &schema.Table{
 		Name:       "hash_equals",
 		Columns:    HashEqualsColumns,
 		PrimaryKey: []*schema.Column{HashEqualsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "hashequal_artifacts_hash_origin_justification_collector",
+				Unique:  true,
+				Columns: []*schema.Column{HashEqualsColumns[4], HashEqualsColumns[1], HashEqualsColumns[3], HashEqualsColumns[2]},
+			},
+		},
 	}
 	// IsVulnerabilitiesColumns holds the columns for the "is_vulnerabilities" table.
 	IsVulnerabilitiesColumns = []*schema.Column{
@@ -949,12 +957,20 @@ var (
 		{Name: "justification", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
+		{Name: "vulnerabilities_hash", Type: field.TypeString},
 	}
 	// VulnEqualsTable holds the schema information for the "vuln_equals" table.
 	VulnEqualsTable = &schema.Table{
 		Name:       "vuln_equals",
 		Columns:    VulnEqualsColumns,
 		PrimaryKey: []*schema.Column{VulnEqualsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "vulnequal_vulnerabilities_hash_justification_origin_collector",
+				Unique:  false,
+				Columns: []*schema.Column{VulnEqualsColumns[4], VulnEqualsColumns[1], VulnEqualsColumns[2], VulnEqualsColumns[3]},
+			},
+		},
 	}
 	// VulnerabilityIdsColumns holds the columns for the "vulnerability_ids" table.
 	VulnerabilityIdsColumns = []*schema.Column{

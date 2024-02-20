@@ -71,6 +71,20 @@ func (veu *VulnEqualUpdate) SetNillableCollector(s *string) *VulnEqualUpdate {
 	return veu
 }
 
+// SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
+func (veu *VulnEqualUpdate) SetVulnerabilitiesHash(s string) *VulnEqualUpdate {
+	veu.mutation.SetVulnerabilitiesHash(s)
+	return veu
+}
+
+// SetNillableVulnerabilitiesHash sets the "vulnerabilities_hash" field if the given value is not nil.
+func (veu *VulnEqualUpdate) SetNillableVulnerabilitiesHash(s *string) *VulnEqualUpdate {
+	if s != nil {
+		veu.SetVulnerabilitiesHash(*s)
+	}
+	return veu
+}
+
 // AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by IDs.
 func (veu *VulnEqualUpdate) AddVulnerabilityIDIDs(ids ...uuid.UUID) *VulnEqualUpdate {
 	veu.mutation.AddVulnerabilityIDIDs(ids...)
@@ -156,6 +170,9 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := veu.mutation.Collector(); ok {
 		_spec.SetField(vulnequal.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := veu.mutation.VulnerabilitiesHash(); ok {
+		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)
 	}
 	if veu.mutation.VulnerabilityIdsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -260,6 +277,20 @@ func (veuo *VulnEqualUpdateOne) SetCollector(s string) *VulnEqualUpdateOne {
 func (veuo *VulnEqualUpdateOne) SetNillableCollector(s *string) *VulnEqualUpdateOne {
 	if s != nil {
 		veuo.SetCollector(*s)
+	}
+	return veuo
+}
+
+// SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
+func (veuo *VulnEqualUpdateOne) SetVulnerabilitiesHash(s string) *VulnEqualUpdateOne {
+	veuo.mutation.SetVulnerabilitiesHash(s)
+	return veuo
+}
+
+// SetNillableVulnerabilitiesHash sets the "vulnerabilities_hash" field if the given value is not nil.
+func (veuo *VulnEqualUpdateOne) SetNillableVulnerabilitiesHash(s *string) *VulnEqualUpdateOne {
+	if s != nil {
+		veuo.SetVulnerabilitiesHash(*s)
 	}
 	return veuo
 }
@@ -379,6 +410,9 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 	}
 	if value, ok := veuo.mutation.Collector(); ok {
 		_spec.SetField(vulnequal.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := veuo.mutation.VulnerabilitiesHash(); ok {
+		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)
 	}
 	if veuo.mutation.VulnerabilityIdsCleared() {
 		edge := &sqlgraph.EdgeSpec{

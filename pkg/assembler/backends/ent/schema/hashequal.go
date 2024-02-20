@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 )
 
@@ -37,6 +38,7 @@ func (HashEqual) Fields() []ent.Field {
 		field.String("origin"),
 		field.String("collector"),
 		field.String("justification"),
+		field.String("artifacts_hash").Comment("An opaque hash of the artifacts that are equal"),
 	}
 }
 
@@ -44,5 +46,12 @@ func (HashEqual) Fields() []ent.Field {
 func (HashEqual) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("artifacts", Artifact.Type).Required(),
+	}
+}
+
+// Indexes of the HashEqual.
+func (HashEqual) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("artifacts_hash", "origin", "justification", "collector").Unique(),
 	}
 }

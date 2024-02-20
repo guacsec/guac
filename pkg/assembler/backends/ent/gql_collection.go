@@ -1627,6 +1627,11 @@ func (he *HashEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, hashequal.FieldJustification)
 				fieldSeen[hashequal.FieldJustification] = struct{}{}
 			}
+		case "artifactsHash":
+			if _, ok := fieldSeen[hashequal.FieldArtifactsHash]; !ok {
+				selectedFields = append(selectedFields, hashequal.FieldArtifactsHash)
+				fieldSeen[hashequal.FieldArtifactsHash] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -2878,6 +2883,11 @@ func (ve *VulnEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if _, ok := fieldSeen[vulnequal.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, vulnequal.FieldCollector)
 				fieldSeen[vulnequal.FieldCollector] = struct{}{}
+			}
+		case "vulnerabilitiesHash":
+			if _, ok := fieldSeen[vulnequal.FieldVulnerabilitiesHash]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldVulnerabilitiesHash)
+				fieldSeen[vulnequal.FieldVulnerabilitiesHash] = struct{}{}
 			}
 		case "id":
 		case "__typename":

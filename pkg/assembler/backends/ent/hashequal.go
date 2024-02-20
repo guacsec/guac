@@ -23,6 +23,8 @@ type HashEqual struct {
 	Collector string `json:"collector,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
+	// An opaque hash of the artifacts that are equal
+	ArtifactsHash string `json:"artifacts_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the HashEqualQuery when eager-loading is set.
 	Edges        HashEqualEdges `json:"edges"`
@@ -56,7 +58,7 @@ func (*HashEqual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case hashequal.FieldOrigin, hashequal.FieldCollector, hashequal.FieldJustification:
+		case hashequal.FieldOrigin, hashequal.FieldCollector, hashequal.FieldJustification, hashequal.FieldArtifactsHash:
 			values[i] = new(sql.NullString)
 		case hashequal.FieldID:
 			values[i] = new(uuid.UUID)
@@ -98,6 +100,12 @@ func (he *HashEqual) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
 				he.Justification = value.String
+			}
+		case hashequal.FieldArtifactsHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field artifacts_hash", values[i])
+			} else if value.Valid {
+				he.ArtifactsHash = value.String
 			}
 		default:
 			he.selectValues.Set(columns[i], values[i])
@@ -148,6 +156,9 @@ func (he *HashEqual) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
 	builder.WriteString(he.Justification)
+	builder.WriteString(", ")
+	builder.WriteString("artifacts_hash=")
+	builder.WriteString(he.ArtifactsHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

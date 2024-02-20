@@ -114,7 +114,7 @@ func upsertBulkDependencies(ctx context.Context, client *ent.Tx, pkgs []*model.I
 			}
 			pkgVersionID, err := uuid.Parse(*pkgs[index].PackageVersionID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 			}
 			creates[i].SetPackageID(pkgVersionID)
 
@@ -124,7 +124,7 @@ func upsertBulkDependencies(ctx context.Context, client *ent.Tx, pkgs []*model.I
 				}
 				pkgVersionID, err := uuid.Parse(*depPkgs[index].PackageVersionID)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 				}
 				creates[i].SetDependentPackageNameID(pkgVersionID)
 
@@ -134,7 +134,7 @@ func upsertBulkDependencies(ctx context.Context, client *ent.Tx, pkgs []*model.I
 				}
 				pkgNameID, err := uuid.Parse(*depPkgs[index].PackageNameID)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 				}
 				creates[i].SetDependentPackageVersionID(pkgNameID)
 			}

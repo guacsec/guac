@@ -23,6 +23,8 @@ type VulnEqual struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// An opaque hash of the vulnerabilities that are equal
+	VulnerabilitiesHash string `json:"vulnerabilities_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the VulnEqualQuery when eager-loading is set.
 	Edges        VulnEqualEdges `json:"edges"`
@@ -56,7 +58,7 @@ func (*VulnEqual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case vulnequal.FieldJustification, vulnequal.FieldOrigin, vulnequal.FieldCollector:
+		case vulnequal.FieldJustification, vulnequal.FieldOrigin, vulnequal.FieldCollector, vulnequal.FieldVulnerabilitiesHash:
 			values[i] = new(sql.NullString)
 		case vulnequal.FieldID:
 			values[i] = new(uuid.UUID)
@@ -98,6 +100,12 @@ func (ve *VulnEqual) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				ve.Collector = value.String
+			}
+		case vulnequal.FieldVulnerabilitiesHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field vulnerabilities_hash", values[i])
+			} else if value.Valid {
+				ve.VulnerabilitiesHash = value.String
 			}
 		default:
 			ve.selectValues.Set(columns[i], values[i])
@@ -148,6 +156,9 @@ func (ve *VulnEqual) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(ve.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("vulnerabilities_hash=")
+	builder.WriteString(ve.VulnerabilitiesHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

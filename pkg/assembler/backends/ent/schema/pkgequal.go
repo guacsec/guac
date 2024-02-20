@@ -41,8 +41,6 @@ func (PkgEqual) Fields() []ent.Field {
 			Default(uuid.New).
 			Unique().
 			Immutable(),
-		// field.Int("package_version_id"),
-		// field.Int("equal_package_id"),
 		field.String("origin"),
 		field.String("collector"),
 		field.String("justification"),

@@ -83,7 +83,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 			}
 			artID, err := uuid.Parse(*subject.Artifact.ArtifactID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
 			insert.SetArtifactID(artID)
 			conflictColumns = append(conflictColumns, certifyvex.FieldArtifactID)
@@ -193,7 +193,7 @@ func upsertBulkVEX(ctx context.Context, client *ent.Tx, subjects model.PackageOr
 				}
 				pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 				}
 				creates[i].SetPackageID(pkgVersionID)
 			} else if len(subjects.Artifacts) > 0 {
@@ -202,7 +202,7 @@ func upsertBulkVEX(ctx context.Context, client *ent.Tx, subjects model.PackageOr
 				}
 				artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 				}
 				creates[i].SetArtifactID(artID)
 			}

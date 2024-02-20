@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 )
 
@@ -37,6 +38,7 @@ func (VulnEqual) Fields() []ent.Field {
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
+		field.String("vulnerabilities_hash").Comment("An opaque hash of the vulnerabilities that are equal"),
 	}
 }
 
@@ -48,8 +50,8 @@ func (VulnEqual) Edges() []ent.Edge {
 }
 
 // Indexes of the VulnEqual.
-//func (VulnEqual) Indexes() []ent.Index {
-//	return []ent.Index{
-//		index.Fields("justification", "origin", "collector")/*.Edges("vulnerability_ids")*/,
-//	}
-//}
+func (VulnEqual) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("vulnerabilities_hash", "justification", "origin", "collector"),
+	}
+}

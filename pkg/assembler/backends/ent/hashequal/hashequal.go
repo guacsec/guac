@@ -19,6 +19,8 @@ const (
 	FieldCollector = "collector"
 	// FieldJustification holds the string denoting the justification field in the database.
 	FieldJustification = "justification"
+	// FieldArtifactsHash holds the string denoting the artifacts_hash field in the database.
+	FieldArtifactsHash = "artifacts_hash"
 	// EdgeArtifacts holds the string denoting the artifacts edge name in mutations.
 	EdgeArtifacts = "artifacts"
 	// Table holds the table name of the hashequal in the database.
@@ -36,6 +38,7 @@ var Columns = []string{
 	FieldOrigin,
 	FieldCollector,
 	FieldJustification,
+	FieldArtifactsHash,
 }
 
 var (
@@ -80,6 +83,11 @@ func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 // ByJustification orders the results by the justification field.
 func ByJustification(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldJustification, opts...).ToFunc()
+}
+
+// ByArtifactsHash orders the results by the artifacts_hash field.
+func ByArtifactsHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldArtifactsHash, opts...).ToFunc()
 }
 
 // ByArtifactsCount orders the results by artifacts count.

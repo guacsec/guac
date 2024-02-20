@@ -145,7 +145,7 @@ func upsertBulkCertifyVuln(ctx context.Context, client *ent.Tx, pkgs []*model.ID
 			}
 			pkgVersionID, err := uuid.Parse(*pkgs[index].PackageVersionID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 			}
 			creates[i].SetPackageID(pkgVersionID)
 

@@ -69,6 +69,11 @@ func Collector(v string) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldEQ(FieldCollector, v))
 }
 
+// VulnerabilitiesHash applies equality check predicate on the "vulnerabilities_hash" field. It's identical to VulnerabilitiesHashEQ.
+func VulnerabilitiesHash(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEQ(FieldVulnerabilitiesHash, v))
+}
+
 // JustificationEQ applies the EQ predicate on the "justification" field.
 func JustificationEQ(v string) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldEQ(FieldJustification, v))
@@ -262,6 +267,71 @@ func CollectorEqualFold(v string) predicate.VulnEqual {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// VulnerabilitiesHashEQ applies the EQ predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashEQ(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEQ(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashNEQ applies the NEQ predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashNEQ(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldNEQ(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashIn applies the In predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashIn(vs ...string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldIn(FieldVulnerabilitiesHash, vs...))
+}
+
+// VulnerabilitiesHashNotIn applies the NotIn predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashNotIn(vs ...string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldNotIn(FieldVulnerabilitiesHash, vs...))
+}
+
+// VulnerabilitiesHashGT applies the GT predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashGT(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldGT(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashGTE applies the GTE predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashGTE(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldGTE(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashLT applies the LT predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashLT(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldLT(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashLTE applies the LTE predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashLTE(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldLTE(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashContains applies the Contains predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashContains(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldContains(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashHasPrefix applies the HasPrefix predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashHasPrefix(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldHasPrefix(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashHasSuffix applies the HasSuffix predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashHasSuffix(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldHasSuffix(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashEqualFold applies the EqualFold predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashEqualFold(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEqualFold(FieldVulnerabilitiesHash, v))
+}
+
+// VulnerabilitiesHashContainsFold applies the ContainsFold predicate on the "vulnerabilities_hash" field.
+func VulnerabilitiesHashContainsFold(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldContainsFold(FieldVulnerabilitiesHash, v))
 }
 
 // HasVulnerabilityIds applies the HasEdge predicate on the "vulnerability_ids" edge.

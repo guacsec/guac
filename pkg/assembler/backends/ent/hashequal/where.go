@@ -69,6 +69,11 @@ func Justification(v string) predicate.HashEqual {
 	return predicate.HashEqual(sql.FieldEQ(FieldJustification, v))
 }
 
+// ArtifactsHash applies equality check predicate on the "artifacts_hash" field. It's identical to ArtifactsHashEQ.
+func ArtifactsHash(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldEQ(FieldArtifactsHash, v))
+}
+
 // OriginEQ applies the EQ predicate on the "origin" field.
 func OriginEQ(v string) predicate.HashEqual {
 	return predicate.HashEqual(sql.FieldEQ(FieldOrigin, v))
@@ -262,6 +267,71 @@ func JustificationEqualFold(v string) predicate.HashEqual {
 // JustificationContainsFold applies the ContainsFold predicate on the "justification" field.
 func JustificationContainsFold(v string) predicate.HashEqual {
 	return predicate.HashEqual(sql.FieldContainsFold(FieldJustification, v))
+}
+
+// ArtifactsHashEQ applies the EQ predicate on the "artifacts_hash" field.
+func ArtifactsHashEQ(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldEQ(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashNEQ applies the NEQ predicate on the "artifacts_hash" field.
+func ArtifactsHashNEQ(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldNEQ(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashIn applies the In predicate on the "artifacts_hash" field.
+func ArtifactsHashIn(vs ...string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldIn(FieldArtifactsHash, vs...))
+}
+
+// ArtifactsHashNotIn applies the NotIn predicate on the "artifacts_hash" field.
+func ArtifactsHashNotIn(vs ...string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldNotIn(FieldArtifactsHash, vs...))
+}
+
+// ArtifactsHashGT applies the GT predicate on the "artifacts_hash" field.
+func ArtifactsHashGT(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldGT(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashGTE applies the GTE predicate on the "artifacts_hash" field.
+func ArtifactsHashGTE(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldGTE(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashLT applies the LT predicate on the "artifacts_hash" field.
+func ArtifactsHashLT(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldLT(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashLTE applies the LTE predicate on the "artifacts_hash" field.
+func ArtifactsHashLTE(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldLTE(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashContains applies the Contains predicate on the "artifacts_hash" field.
+func ArtifactsHashContains(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldContains(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashHasPrefix applies the HasPrefix predicate on the "artifacts_hash" field.
+func ArtifactsHashHasPrefix(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldHasPrefix(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashHasSuffix applies the HasSuffix predicate on the "artifacts_hash" field.
+func ArtifactsHashHasSuffix(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldHasSuffix(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashEqualFold applies the EqualFold predicate on the "artifacts_hash" field.
+func ArtifactsHashEqualFold(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldEqualFold(FieldArtifactsHash, v))
+}
+
+// ArtifactsHashContainsFold applies the ContainsFold predicate on the "artifacts_hash" field.
+func ArtifactsHashContainsFold(v string) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldContainsFold(FieldArtifactsHash, v))
 }
 
 // HasArtifacts applies the HasEdge predicate on the "artifacts" edge.

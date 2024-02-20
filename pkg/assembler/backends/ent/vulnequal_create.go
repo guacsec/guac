@@ -42,6 +42,12 @@ func (vec *VulnEqualCreate) SetCollector(s string) *VulnEqualCreate {
 	return vec
 }
 
+// SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
+func (vec *VulnEqualCreate) SetVulnerabilitiesHash(s string) *VulnEqualCreate {
+	vec.mutation.SetVulnerabilitiesHash(s)
+	return vec
+}
+
 // SetID sets the "id" field.
 func (vec *VulnEqualCreate) SetID(u uuid.UUID) *VulnEqualCreate {
 	vec.mutation.SetID(u)
@@ -123,6 +129,9 @@ func (vec *VulnEqualCreate) check() error {
 	if _, ok := vec.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "VulnEqual.collector"`)}
 	}
+	if _, ok := vec.mutation.VulnerabilitiesHash(); !ok {
+		return &ValidationError{Name: "vulnerabilities_hash", err: errors.New(`ent: missing required field "VulnEqual.vulnerabilities_hash"`)}
+	}
 	if len(vec.mutation.VulnerabilityIdsIDs()) == 0 {
 		return &ValidationError{Name: "vulnerability_ids", err: errors.New(`ent: missing required edge "VulnEqual.vulnerability_ids"`)}
 	}
@@ -173,6 +182,10 @@ func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 	if value, ok := vec.mutation.Collector(); ok {
 		_spec.SetField(vulnequal.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := vec.mutation.VulnerabilitiesHash(); ok {
+		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)
+		_node.VulnerabilitiesHash = value
 	}
 	if nodes := vec.mutation.VulnerabilityIdsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -278,6 +291,18 @@ func (u *VulnEqualUpsert) UpdateCollector() *VulnEqualUpsert {
 	return u
 }
 
+// SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
+func (u *VulnEqualUpsert) SetVulnerabilitiesHash(v string) *VulnEqualUpsert {
+	u.Set(vulnequal.FieldVulnerabilitiesHash, v)
+	return u
+}
+
+// UpdateVulnerabilitiesHash sets the "vulnerabilities_hash" field to the value that was provided on create.
+func (u *VulnEqualUpsert) UpdateVulnerabilitiesHash() *VulnEqualUpsert {
+	u.SetExcluded(vulnequal.FieldVulnerabilitiesHash)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -365,6 +390,20 @@ func (u *VulnEqualUpsertOne) SetCollector(v string) *VulnEqualUpsertOne {
 func (u *VulnEqualUpsertOne) UpdateCollector() *VulnEqualUpsertOne {
 	return u.Update(func(s *VulnEqualUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
+func (u *VulnEqualUpsertOne) SetVulnerabilitiesHash(v string) *VulnEqualUpsertOne {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.SetVulnerabilitiesHash(v)
+	})
+}
+
+// UpdateVulnerabilitiesHash sets the "vulnerabilities_hash" field to the value that was provided on create.
+func (u *VulnEqualUpsertOne) UpdateVulnerabilitiesHash() *VulnEqualUpsertOne {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.UpdateVulnerabilitiesHash()
 	})
 }
 
@@ -622,6 +661,20 @@ func (u *VulnEqualUpsertBulk) SetCollector(v string) *VulnEqualUpsertBulk {
 func (u *VulnEqualUpsertBulk) UpdateCollector() *VulnEqualUpsertBulk {
 	return u.Update(func(s *VulnEqualUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
+func (u *VulnEqualUpsertBulk) SetVulnerabilitiesHash(v string) *VulnEqualUpsertBulk {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.SetVulnerabilitiesHash(v)
+	})
+}
+
+// UpdateVulnerabilitiesHash sets the "vulnerabilities_hash" field to the value that was provided on create.
+func (u *VulnEqualUpsertBulk) UpdateVulnerabilitiesHash() *VulnEqualUpsertBulk {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.UpdateVulnerabilitiesHash()
 	})
 }
 

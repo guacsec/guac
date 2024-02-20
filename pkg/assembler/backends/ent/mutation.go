@@ -10085,6 +10085,7 @@ type HashEqualMutation struct {
 	origin           *string
 	collector        *string
 	justification    *string
+	artifacts_hash   *string
 	clearedFields    map[string]struct{}
 	artifacts        map[uuid.UUID]struct{}
 	removedartifacts map[uuid.UUID]struct{}
@@ -10306,6 +10307,42 @@ func (m *HashEqualMutation) ResetJustification() {
 	m.justification = nil
 }
 
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (m *HashEqualMutation) SetArtifactsHash(s string) {
+	m.artifacts_hash = &s
+}
+
+// ArtifactsHash returns the value of the "artifacts_hash" field in the mutation.
+func (m *HashEqualMutation) ArtifactsHash() (r string, exists bool) {
+	v := m.artifacts_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldArtifactsHash returns the old "artifacts_hash" field's value of the HashEqual entity.
+// If the HashEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HashEqualMutation) OldArtifactsHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldArtifactsHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldArtifactsHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldArtifactsHash: %w", err)
+	}
+	return oldValue.ArtifactsHash, nil
+}
+
+// ResetArtifactsHash resets all changes to the "artifacts_hash" field.
+func (m *HashEqualMutation) ResetArtifactsHash() {
+	m.artifacts_hash = nil
+}
+
 // AddArtifactIDs adds the "artifacts" edge to the Artifact entity by ids.
 func (m *HashEqualMutation) AddArtifactIDs(ids ...uuid.UUID) {
 	if m.artifacts == nil {
@@ -10394,7 +10431,7 @@ func (m *HashEqualMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *HashEqualMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.origin != nil {
 		fields = append(fields, hashequal.FieldOrigin)
 	}
@@ -10403,6 +10440,9 @@ func (m *HashEqualMutation) Fields() []string {
 	}
 	if m.justification != nil {
 		fields = append(fields, hashequal.FieldJustification)
+	}
+	if m.artifacts_hash != nil {
+		fields = append(fields, hashequal.FieldArtifactsHash)
 	}
 	return fields
 }
@@ -10418,6 +10458,8 @@ func (m *HashEqualMutation) Field(name string) (ent.Value, bool) {
 		return m.Collector()
 	case hashequal.FieldJustification:
 		return m.Justification()
+	case hashequal.FieldArtifactsHash:
+		return m.ArtifactsHash()
 	}
 	return nil, false
 }
@@ -10433,6 +10475,8 @@ func (m *HashEqualMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldCollector(ctx)
 	case hashequal.FieldJustification:
 		return m.OldJustification(ctx)
+	case hashequal.FieldArtifactsHash:
+		return m.OldArtifactsHash(ctx)
 	}
 	return nil, fmt.Errorf("unknown HashEqual field %s", name)
 }
@@ -10462,6 +10506,13 @@ func (m *HashEqualMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetJustification(v)
+		return nil
+	case hashequal.FieldArtifactsHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetArtifactsHash(v)
 		return nil
 	}
 	return fmt.Errorf("unknown HashEqual field %s", name)
@@ -10520,6 +10571,9 @@ func (m *HashEqualMutation) ResetField(name string) error {
 		return nil
 	case hashequal.FieldJustification:
 		m.ResetJustification()
+		return nil
+	case hashequal.FieldArtifactsHash:
+		m.ResetArtifactsHash()
 		return nil
 	}
 	return fmt.Errorf("unknown HashEqual field %s", name)
@@ -18442,6 +18496,7 @@ type VulnEqualMutation struct {
 	justification            *string
 	origin                   *string
 	collector                *string
+	vulnerabilities_hash     *string
 	clearedFields            map[string]struct{}
 	vulnerability_ids        map[uuid.UUID]struct{}
 	removedvulnerability_ids map[uuid.UUID]struct{}
@@ -18663,6 +18718,42 @@ func (m *VulnEqualMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
+func (m *VulnEqualMutation) SetVulnerabilitiesHash(s string) {
+	m.vulnerabilities_hash = &s
+}
+
+// VulnerabilitiesHash returns the value of the "vulnerabilities_hash" field in the mutation.
+func (m *VulnEqualMutation) VulnerabilitiesHash() (r string, exists bool) {
+	v := m.vulnerabilities_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVulnerabilitiesHash returns the old "vulnerabilities_hash" field's value of the VulnEqual entity.
+// If the VulnEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VulnEqualMutation) OldVulnerabilitiesHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVulnerabilitiesHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVulnerabilitiesHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVulnerabilitiesHash: %w", err)
+	}
+	return oldValue.VulnerabilitiesHash, nil
+}
+
+// ResetVulnerabilitiesHash resets all changes to the "vulnerabilities_hash" field.
+func (m *VulnEqualMutation) ResetVulnerabilitiesHash() {
+	m.vulnerabilities_hash = nil
+}
+
 // AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by ids.
 func (m *VulnEqualMutation) AddVulnerabilityIDIDs(ids ...uuid.UUID) {
 	if m.vulnerability_ids == nil {
@@ -18751,7 +18842,7 @@ func (m *VulnEqualMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VulnEqualMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.justification != nil {
 		fields = append(fields, vulnequal.FieldJustification)
 	}
@@ -18760,6 +18851,9 @@ func (m *VulnEqualMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, vulnequal.FieldCollector)
+	}
+	if m.vulnerabilities_hash != nil {
+		fields = append(fields, vulnequal.FieldVulnerabilitiesHash)
 	}
 	return fields
 }
@@ -18775,6 +18869,8 @@ func (m *VulnEqualMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case vulnequal.FieldCollector:
 		return m.Collector()
+	case vulnequal.FieldVulnerabilitiesHash:
+		return m.VulnerabilitiesHash()
 	}
 	return nil, false
 }
@@ -18790,6 +18886,8 @@ func (m *VulnEqualMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldOrigin(ctx)
 	case vulnequal.FieldCollector:
 		return m.OldCollector(ctx)
+	case vulnequal.FieldVulnerabilitiesHash:
+		return m.OldVulnerabilitiesHash(ctx)
 	}
 	return nil, fmt.Errorf("unknown VulnEqual field %s", name)
 }
@@ -18819,6 +18917,13 @@ func (m *VulnEqualMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case vulnequal.FieldVulnerabilitiesHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVulnerabilitiesHash(v)
 		return nil
 	}
 	return fmt.Errorf("unknown VulnEqual field %s", name)
@@ -18877,6 +18982,9 @@ func (m *VulnEqualMutation) ResetField(name string) error {
 		return nil
 	case vulnequal.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case vulnequal.FieldVulnerabilitiesHash:
+		m.ResetVulnerabilitiesHash()
 		return nil
 	}
 	return fmt.Errorf("unknown VulnEqual field %s", name)

@@ -189,7 +189,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 		}
 		artID, err := uuid.Parse(*subject.Artifact.ArtifactID)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
 		insert.SetArtifactID(artID)
 		conflictColumns = append(conflictColumns, certification.FieldArtifactID)
@@ -342,7 +342,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 					}
 					artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
 					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+						return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 					}
 					creates[i].SetArtifactID(artID)
 
@@ -353,7 +353,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 						}
 						pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
 						if err != nil {
-							return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+							return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 						}
 						creates[i].SetPackageVersionID(pkgVersionID)
 
@@ -363,7 +363,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 						}
 						pkgNameID, err := uuid.Parse(*subjects.Packages[index].PackageNameID)
 						if err != nil {
-							return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+							return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 						}
 						creates[i].SetAllVersionsID(pkgNameID)
 
@@ -415,7 +415,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 					}
 					artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
 					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+						return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 					}
 					creates[i].SetArtifactID(artID)
 				case len(subjects.Packages) > 0:
@@ -425,7 +425,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 						}
 						pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
 						if err != nil {
-							return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+							return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 						}
 						creates[i].SetPackageVersionID(pkgVersionID)
 
@@ -435,7 +435,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 						}
 						pkgNameID, err := uuid.Parse(*subjects.Packages[index].PackageNameID)
 						if err != nil {
-							return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+							return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 						}
 						creates[i].SetAllVersionsID(pkgNameID)
 
@@ -447,7 +447,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 					}
 					sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
 					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+						return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 					}
 					creates[i].SetSourceID(sourceID)
 

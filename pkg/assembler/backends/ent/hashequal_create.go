@@ -42,6 +42,12 @@ func (hec *HashEqualCreate) SetJustification(s string) *HashEqualCreate {
 	return hec
 }
 
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (hec *HashEqualCreate) SetArtifactsHash(s string) *HashEqualCreate {
+	hec.mutation.SetArtifactsHash(s)
+	return hec
+}
+
 // SetID sets the "id" field.
 func (hec *HashEqualCreate) SetID(u uuid.UUID) *HashEqualCreate {
 	hec.mutation.SetID(u)
@@ -123,6 +129,9 @@ func (hec *HashEqualCreate) check() error {
 	if _, ok := hec.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "HashEqual.justification"`)}
 	}
+	if _, ok := hec.mutation.ArtifactsHash(); !ok {
+		return &ValidationError{Name: "artifacts_hash", err: errors.New(`ent: missing required field "HashEqual.artifacts_hash"`)}
+	}
 	if len(hec.mutation.ArtifactsIDs()) == 0 {
 		return &ValidationError{Name: "artifacts", err: errors.New(`ent: missing required edge "HashEqual.artifacts"`)}
 	}
@@ -173,6 +182,10 @@ func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 	if value, ok := hec.mutation.Justification(); ok {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
 		_node.Justification = value
+	}
+	if value, ok := hec.mutation.ArtifactsHash(); ok {
+		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
+		_node.ArtifactsHash = value
 	}
 	if nodes := hec.mutation.ArtifactsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -278,6 +291,18 @@ func (u *HashEqualUpsert) UpdateJustification() *HashEqualUpsert {
 	return u
 }
 
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (u *HashEqualUpsert) SetArtifactsHash(v string) *HashEqualUpsert {
+	u.Set(hashequal.FieldArtifactsHash, v)
+	return u
+}
+
+// UpdateArtifactsHash sets the "artifacts_hash" field to the value that was provided on create.
+func (u *HashEqualUpsert) UpdateArtifactsHash() *HashEqualUpsert {
+	u.SetExcluded(hashequal.FieldArtifactsHash)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -365,6 +390,20 @@ func (u *HashEqualUpsertOne) SetJustification(v string) *HashEqualUpsertOne {
 func (u *HashEqualUpsertOne) UpdateJustification() *HashEqualUpsertOne {
 	return u.Update(func(s *HashEqualUpsert) {
 		s.UpdateJustification()
+	})
+}
+
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (u *HashEqualUpsertOne) SetArtifactsHash(v string) *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetArtifactsHash(v)
+	})
+}
+
+// UpdateArtifactsHash sets the "artifacts_hash" field to the value that was provided on create.
+func (u *HashEqualUpsertOne) UpdateArtifactsHash() *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateArtifactsHash()
 	})
 }
 
@@ -622,6 +661,20 @@ func (u *HashEqualUpsertBulk) SetJustification(v string) *HashEqualUpsertBulk {
 func (u *HashEqualUpsertBulk) UpdateJustification() *HashEqualUpsertBulk {
 	return u.Update(func(s *HashEqualUpsert) {
 		s.UpdateJustification()
+	})
+}
+
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (u *HashEqualUpsertBulk) SetArtifactsHash(v string) *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetArtifactsHash(v)
+	})
+}
+
+// UpdateArtifactsHash sets the "artifacts_hash" field to the value that was provided on create.
+func (u *HashEqualUpsertBulk) UpdateArtifactsHash() *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateArtifactsHash()
 	})
 }
 

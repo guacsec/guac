@@ -71,6 +71,20 @@ func (heu *HashEqualUpdate) SetNillableJustification(s *string) *HashEqualUpdate
 	return heu
 }
 
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (heu *HashEqualUpdate) SetArtifactsHash(s string) *HashEqualUpdate {
+	heu.mutation.SetArtifactsHash(s)
+	return heu
+}
+
+// SetNillableArtifactsHash sets the "artifacts_hash" field if the given value is not nil.
+func (heu *HashEqualUpdate) SetNillableArtifactsHash(s *string) *HashEqualUpdate {
+	if s != nil {
+		heu.SetArtifactsHash(*s)
+	}
+	return heu
+}
+
 // AddArtifactIDs adds the "artifacts" edge to the Artifact entity by IDs.
 func (heu *HashEqualUpdate) AddArtifactIDs(ids ...uuid.UUID) *HashEqualUpdate {
 	heu.mutation.AddArtifactIDs(ids...)
@@ -156,6 +170,9 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := heu.mutation.Justification(); ok {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
+	}
+	if value, ok := heu.mutation.ArtifactsHash(); ok {
+		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
 	}
 	if heu.mutation.ArtifactsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -260,6 +277,20 @@ func (heuo *HashEqualUpdateOne) SetJustification(s string) *HashEqualUpdateOne {
 func (heuo *HashEqualUpdateOne) SetNillableJustification(s *string) *HashEqualUpdateOne {
 	if s != nil {
 		heuo.SetJustification(*s)
+	}
+	return heuo
+}
+
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (heuo *HashEqualUpdateOne) SetArtifactsHash(s string) *HashEqualUpdateOne {
+	heuo.mutation.SetArtifactsHash(s)
+	return heuo
+}
+
+// SetNillableArtifactsHash sets the "artifacts_hash" field if the given value is not nil.
+func (heuo *HashEqualUpdateOne) SetNillableArtifactsHash(s *string) *HashEqualUpdateOne {
+	if s != nil {
+		heuo.SetArtifactsHash(*s)
 	}
 	return heuo
 }
@@ -379,6 +410,9 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 	}
 	if value, ok := heuo.mutation.Justification(); ok {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
+	}
+	if value, ok := heuo.mutation.ArtifactsHash(); ok {
+		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
 	}
 	if heuo.mutation.ArtifactsCleared() {
 		edge := &sqlgraph.EdgeSpec{
