@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"time"
 
+	// "time"
+
 	"fmt"
 	"net/http"
 	"os"
@@ -28,7 +30,6 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -90,7 +91,6 @@ func dfsNodeDiff(oldNode, newNode *Node, diffs *[]DiffNode) {
 		if i < len(newNode.neighbours) {
 			newNeighbor = newNode.neighbours[i]
 		}
-
 		dfsNodeDiff(oldNeighbor, newNeighbor, diffs)
 	}
 }
@@ -102,8 +102,6 @@ func init() {
 	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
 	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
 	rootCmd.PersistentFlags().String("file", "tests/identical.json", "filename to read sbom test cases from")
-	rootCmd.PersistentFlags().Bool("dfs", false, "diff with dfs")
-	rootCmd.PersistentFlags().Bool("fras", true, "diff with flatten and fraser (default)")
 
 }
 
@@ -114,8 +112,6 @@ var diffCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		test, _ := cmd.Flags().GetBool("test")
 		testfile, _ := cmd.Flags().GetString("file")
-		dfs, _ := cmd.Flags().GetBool("dfs")
-		fras, _ := cmd.Flags().GetBool("fras")
 
 		if !test {
 			boms, err := cmd.Flags().GetStringSlice("boms")
@@ -209,150 +205,99 @@ var diffCmd = &cobra.Command{
 			hasSBOMOne = test.HasSBOMOne
 			hasSBOMTwo = test.HasSBOMTwo
 		}
-		nodeOne := Node{Value: hasSBOMOne}
-		nodeTwo := Node{Value: hasSBOMTwo}
+		//init first node
+		nodeOne := Node{Value: hasSBOMOne.Id, tag: "id"}
+		nodeTwo := Node{Value: hasSBOMTwo.Id, tag: "id"}
 
-		//convert the HasSBOM to a graph
-		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMOne), &nodeOne, reflect.TypeOf(hasSBOMOne).Name())
-		hasSBOMResponseToGraph(reflect.ValueOf(hasSBOMTwo), &nodeTwo, reflect.TypeOf(hasSBOMTwo).Name())
+		// offset to field(0) to come to get to AllHasSBOMTree
+		allHasSBOMTreeOne := reflect.ValueOf(hasSBOMOne).Field(0)
+		allHasSBOMTreeTwo := reflect.ValueOf(hasSBOMTwo).Field(0)
 
-		//offset to the first node, ignoring the node for the whole struct built twice as nodes in the graph
-		nodeOne = *nodeOne.neighbours[0]
-		nodeTwo = *nodeTwo.neighbours[0]
-
-		if dfs {
-			diffs := DFSNodeDiff(&nodeOne, &nodeTwo)
-
-			// Print differences
-			fmt.Println("Differences:")
-			for _, diff := range diffs {
-				if diff.leafChanged {
-					fmt.Printf("Tag: %s\n\tOldValue: %v\n\tNewValue: %v\n", diff.tag, diff.OldValue, diff.NewValue)
-				}
+		//AllHasSBOMTree is a struct
+		//convert the HasSBOM to a graph, 
+		for i := 0; i < allHasSBOMTreeOne.NumField(); i++ {
+			fieldOne := allHasSBOMTreeOne.Field(i)
+			fieldTwo := allHasSBOMTreeTwo.Field(i)
+			fieldTypeOne := reflect.TypeOf(allHasSBOMTreeOne.Interface()).Field(i).Name 
+			fieldTypeTwo := reflect.TypeOf(allHasSBOMTreeTwo.Interface()).Field(i).Name 
+			//TODO  @abhi If you could take a look at taking care of cases where the field type is []json.RawMessage, interface or pointers 
+			// this would be great.
+			if  fieldTypeOne != "Id" || fieldTypeOne != "Subject" || fieldTypeOne != "IncludedSoftware" { //not id, subject, included softwares then
+				hasSBOMResponsFieldsToGraph(fieldOne, &nodeOne,  allHasSBOMTreeTwo.Type().Name() + "|" + fieldTypeOne)
 			}
-			return 
-		}
-		if !dfs && !fras {
-			fmt.Println("Define one algorithm to diff, dfs or fraser")
+			if fieldTypeTwo != "Id" || fieldTypeTwo != "Subject" || fieldTypeTwo != "IncludedSoftware" { //not id, subject, included softwares then
+				hasSBOMResponsFieldsToGraph(fieldTwo, &nodeTwo, allHasSBOMTreeTwo.Type().Name() +  "|" + fieldTypeTwo)
+			}
 		}
 
-		//flatten the graph
-		nodeOneString := FlattenGraphToString(&nodeOne, nodeOne.tag) 
-		nodeTwoString := FlattenGraphToString(&nodeTwo, nodeTwo.tag) 
-		// perform a diff on the flat graph
-		findFraserDiff(nodeOneString, nodeTwoString)
+		//get list of paths in the graph
+		// pathsOne := getPaths(&nodeOne)
+		// pathsTwo := getPaths(&nodeTwo)
+
+
+
+
+
+		
+
+
 
 	},
 }
-// The github.com/sergi/go-diff/diffmatchpatch package is a Go implementation of Neil Fraser's Diff Match Patch library,
-// which provides robust algorithms to perform diff, match, and patch operations on plain text.
-func findFraserDiff(flatGraphOne, flatGraphTwo string){
-	dmp := diffmatchpatch.New()
 
-	// Compute the differences between the two strings
-	diffs := dmp.DiffMain(flatGraphOne,flatGraphTwo, true)
-	identical := true
-	for _, diff := range diffs {
-		switch diff.Type {
-		case diffmatchpatch.DiffDelete:
-			identical = false
-			fmt.Printf("- %s\n", diff.Text)
-		case diffmatchpatch.DiffInsert:
-			identical = false
-			fmt.Printf("+ %s\n", diff.Text)
-		case diffmatchpatch.DiffEqual:
-			//do nothing
-		}
-	}
+// func getPaths(head *Node) [][]*Node {
 
-	if identical {
-		fmt.Println("SBOMs are identical")
-	}
 
-}
+// }
 
-func FlattenGraphToString(node *Node, parentTag string) string {
-    var result string
-	
-	if node == nil || node.Value == nil {
-		//ideally nothing should be nil, but since we are ignoring the subject, and a few more fields in HasSBOMsHasSBOM type,
-		//some fields may be nil for now
-		return ""
-	}
-	
-    if node.leaf || parentTag == "Time" {
-        return fmt.Sprintf("\t(%v)\n", node.Value)
-    }
-	
-    // Add the tag of the current node to the result string
-    result += "\n"+node.tag + ":"
-
-    // If the value of the node is a struct, slice or array add a newline and indent the next level
-    if reflect.TypeOf(node.Value).Kind() == reflect.Struct || reflect.TypeOf(node.Value).Kind() == reflect.Slice || reflect.TypeOf(node.Value).Kind() == reflect.Array  {
-        result += "\n"
-    }
-
-    // Add the value of the current node to the result string
-	if isPrimitiveType(reflect.TypeOf(node.Value)) {
-		result += fmt.Sprintf("\t%v\n", node.Value)
-	}
-
-    //  recursively flatten neighbours of the current node
-    for _, neighbor := range node.neighbours {
-        result += FlattenGraphToString(neighbor, node.tag)
-    }
-
-    return result
-}
 // This function recursively traverses the fields of a struct using reflection and converts them into nodes of a graph. 
 // It handles nested structs and arrays within the main struct.
-func hasSBOMResponseToGraph(data reflect.Value, head *Node, nexttag string) {
-
-	node := Node{Value: data.Interface(), tag: nexttag}
-	head.neighbours = append(head.neighbours, &node)
-
-
+func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy string) {
 	//base case
 	if data.Kind() == reflect.String {
-	// if data.Kind() != reflect.Array && data.Kind() != reflect.Slice && data.Kind() != reflect.Struct {
 		//just add a neighbour and return
+		node := Node{Value: data.Interface(), tag: heirarchy}
 		node.leaf = true
+		head.neighbours = append(head.neighbours, &node)
 		return
 	}
+
 	// edge base case for time.Time to not go into recursion, while being a "struct"
 	if data.Kind() == reflect.Struct && data.Type() == reflect.TypeOf(time.Time{}) {
-		node.tag = "Time"
+		node := Node{Value: data.Interface(), tag: heirarchy}
 		node.leaf = true
+		head.neighbours = append(head.neighbours, &node)
 		return
 	}
+	newHeirarchy :=  heirarchy + "|"+data.Type().Name()
+	node := Node{tag: newHeirarchy}
 	node.leaf = false
-
+	head.neighbours = append(head.neighbours, &node)
 	//TODO: arorasoham9 this does not consider field type of interfaces or pointers or []json.rawmessage. I still need to work on that
 
-	//if we have a struct, we need to go over its fields
-	//update head to be the last element of the neighbours slice
+	
+	// if we have a struct, we need to go over its fields
+	// update head to be the last element of the neighbours slice
 	newHead := head.neighbours[len(head.neighbours)-1]
-	//first input is the HasSBOMsHasSBOM struct, we go over its fields
 	var length = 0
 	var field reflect.Value
-	var fieldtag  = ""
+
 	if data.Kind() == reflect.Struct {
 		length = data.NumField()
 	}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
 		length = data.Len()
-		node.printValue = false
 	}
+	fieldtag := ""
 	for i := 0; i < length; i++ {
 		if data.Kind() == reflect.Struct {
 			field = data.Field(i)
 			structtype := reflect.TypeOf(data.Interface())
-			fieldtag = structtype.Field(i).Tag.Get("json")
+			fieldtag = structtype.Field(i).Name
 		}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
 			field = data.Index(i)
 			fieldtag = data.Type().Name()
 		}
-		
-		hasSBOMResponseToGraph(field, newHead, fieldtag)
+		hasSBOMResponsFieldsToGraph(field, newHead, newHeirarchy + "|"+fieldtag)
 	}
 }
 

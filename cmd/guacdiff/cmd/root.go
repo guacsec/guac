@@ -44,7 +44,6 @@ type Node struct {
 	neighbours []*Node
 	leaf bool
 	tag string
-	printValue bool
 }
 
 type Edge struct {
