@@ -27,6 +27,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -69,13 +70,13 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 }
 
 func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (string, error) {
-	var builtFromInput []*model.ArtifactInputSpec
-	for _, bf := range builtFrom {
-		builtFromInput = append(builtFromInput, bf.ArtifactInput)
-	}
+	// var builtFromInput []*model.ArtifactInputSpec
+	// for _, bf := range builtFrom {
+	// 	builtFromInput = append(builtFromInput, bf.ArtifactInput)
+	// }
 
 	att, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SLSAAttestation, error) {
-		return upsertSLSA(ctx, ent.TxFromContext(ctx), *subject.ArtifactInput, builtFromInput, *builtBy.BuilderInput, slsa)
+		return upsertSLSA(ctx, ent.TxFromContext(ctx), subject, builtFrom, builtBy, slsa)
 	})
 	if err != nil {
 		return "", err
@@ -97,15 +98,22 @@ func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArti
 	return modelHasSlsas, nil
 }
 
-func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*ent.SLSAAttestation, error) {
-	builder, err := client.Builder.Query().Where(builderInputQueryPredicate(builtBy)).Only(ctx)
+func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (*ent.SLSAAttestation, error) {
+	builder, err := client.Builder.Query().Where(builderInputQueryPredicate(*builtBy.BuilderInput)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	var builtFromIDs []string
+	for _, bf := range builtFrom {
+		builtFromIDs = append(builtFromIDs, *bf.ArtifactID)
+	}
+
+	sortedBuildFromIDs := helper.SortAndRemoveDups(builtFromIDs)
+
 	// artifacts, err := ingestArtifacts(ctx, client.Client(), builtFrom)
 	artifacts, err := client.Artifact.Query().Where(
-		artifact.Or(collect(fromPtrSlice(builtFrom), artifactQueryInputPredicates)...),
+		artifact.Or(collect(sortedBuildFromIDs), artifactQueryInputPredicates)...),
 	).All(ctx)
 	if err != nil {
 		return nil, err

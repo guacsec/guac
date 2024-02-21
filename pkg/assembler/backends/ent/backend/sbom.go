@@ -18,10 +18,12 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
+	"fmt"
 	"strconv"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -70,11 +72,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 	records, err := b.client.BillOfMaterials.Query().
 		Where(predicates...).
 		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
+			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
 		WithArtifact().
 		WithIncludedSoftwareArtifacts().
@@ -125,26 +123,28 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
-			var err error
-			p, err := getPkgVersion(ctx, client.Client(), *subject.Package.PackageInput)
-			if err != nil {
-				return nil, Errorf("%v ::  %s", funcName, err)
+			if subject.Package.PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 			}
-			sbomCreate.SetPackage(p)
+			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+			sbomCreate.SetPackageID(pkgVersionID)
 			conflictColumns = append(conflictColumns, billofmaterials.FieldPackageID)
 			conflictWhere = sql.And(
 				sql.NotNull(billofmaterials.FieldPackageID),
 				sql.IsNull(billofmaterials.FieldArtifactID),
 			)
 		} else if subject.Artifact != nil {
-			var err error
-			art, err := client.Artifact.Query().
-				Where(artifactQueryInputPredicates(*subject.Artifact.ArtifactInput)).
-				Only(ctx)
-			if err != nil {
-				return nil, Errorf("%v ::  %s", funcName, err)
+			if subject.Artifact.ArtifactID == nil {
+				return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
 			}
-			sbomCreate.SetArtifact(art)
+			artID, err := uuid.Parse(*subject.Artifact.ArtifactID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			}
+			sbomCreate.SetArtifactID(artID)
 			conflictColumns = append(conflictColumns, billofmaterials.FieldArtifactID)
 			conflictWhere = sql.And(
 				sql.IsNull(billofmaterials.FieldPackageID),
