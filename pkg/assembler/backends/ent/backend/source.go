@@ -28,8 +28,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -87,16 +87,99 @@ func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInp
 }
 
 func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
-	var result []string
-	for i := range hasSourceAts {
-		sdss
-		hsa, err := b.IngestHasSourceAt(ctx, *pkgs[i], *pkgMatchType, *sources[i], *hasSourceAts[i])
+	funcName := "IngestHasSourceAts"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkHasSourceAts(ctx, client, pkgs, pkgMatchType, sources, hasSourceAts)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestHasSourceAts failed with err: %v", err)
+			return nil, err
 		}
-		result = append(result, hsa)
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return result, nil
+
+	return *ids, nil
+}
+
+func upsertBulkHasSourceAts(ctx context.Context, client *ent.Tx, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		hassourceat.FieldSourceID,
+		hassourceat.FieldJustification,
+		hassourceat.FieldKnownSince,
+		hassourceat.FieldCollector,
+		hassourceat.FieldOrigin,
+	}
+	var conflictWhere *sql.Predicate
+
+	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+		conflictColumns = append(conflictColumns, hassourceat.FieldPackageNameID)
+		conflictWhere = sql.And(sql.IsNull(hassourceat.FieldPackageVersionID), sql.NotNull(hassourceat.FieldPackageNameID))
+	} else {
+		conflictColumns = append(conflictColumns, hassourceat.FieldPackageVersionID)
+		conflictWhere = sql.And(sql.NotNull(hassourceat.FieldPackageVersionID), sql.IsNull(hassourceat.FieldPackageNameID))
+	}
+
+	batches := chunk(hasSourceAts, 100)
+
+	index := 0
+	for _, hsas := range batches {
+		creates := make([]*ent.HasSourceAtCreate, len(hsas))
+		for i, hsa := range hsas {
+			creates[i] = client.HasSourceAt.Create().
+				SetCollector(hsa.Collector).
+				SetOrigin(hsa.Origin).
+				SetJustification(hsa.Justification).
+				SetKnownSince(hsa.KnownSince.UTC())
+
+			if sources[index].SourceNameID == nil {
+				return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+			}
+			sourceID, err := uuid.Parse(*sources[index].SourceNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+			}
+			creates[i].SetSourceID(sourceID)
+
+			if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+				if pkgs[index].PackageVersionID == nil {
+					return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+				}
+				pkgVersionID, err := uuid.Parse(*pkgs[index].PackageVersionID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+				}
+				creates[i].SetNillablePackageVersionID(&pkgVersionID)
+
+			} else {
+				if pkgs[index].PackageNameID == nil {
+					return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
+				}
+				pkgNameID, err := uuid.Parse(*pkgs[index].PackageNameID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+				}
+				creates[i].SetNillableAllVersionsID(&pkgNameID)
+			}
+			index++
+		}
+
+		err := client.HasSourceAt.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictWhere(conflictWhere),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &ids, nil
 }
 
 func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, spec model.HasSourceAtInputSpec) (*string, error) {
@@ -109,7 +192,13 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.IDorPkgInp
 		return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
 	}
 
-	conflictColumns := []string{hassourceat.FieldSourceID, hassourceat.FieldJustification}
+	conflictColumns := []string{
+		hassourceat.FieldSourceID,
+		hassourceat.FieldJustification,
+		hassourceat.FieldKnownSince,
+		hassourceat.FieldCollector,
+		hassourceat.FieldOrigin,
+	}
 	// conflictWhere MUST match the IndexWhere() defined on the index we plan to use for this query
 	var conflictWhere *sql.Predicate
 
@@ -117,7 +206,7 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.IDorPkgInp
 		SetCollector(spec.Collector).
 		SetOrigin(spec.Origin).
 		SetJustification(spec.Justification).
-		SetKnownSince(spec.KnownSince).
+		SetKnownSince(spec.KnownSince.UTC()).
 		SetSourceID(sourceID)
 
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
@@ -210,7 +299,7 @@ func upsertBulkSource(ctx context.Context, client *ent.Tx, srcInputs []*model.ID
 		srcNameCreates := make([]*ent.SourceNameCreate, len(srcs))
 
 		for i, src := range srcs {
-			srcIDs := helper.GuacSrcId(*src.SourceInput)
+			srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](src.SourceInput, helpers.SrcServerKey)
 			srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
 
 			srcNameCreates[i] = client.SourceName.Create().
@@ -252,7 +341,7 @@ func upsertBulkSource(ctx context.Context, client *ent.Tx, srcInputs []*model.ID
 }
 
 func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec) (*model.SourceIDs, error) {
-	srcIDs := helper.GuacSrcId(src)
+	srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](&src, helpers.SrcServerKey)
 	srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
 
 	create := client.SourceName.Create().

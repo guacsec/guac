@@ -32,6 +32,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -142,7 +143,7 @@ func upsertBulkPackage(ctx context.Context, client *ent.Tx, pkgInputs []*model.I
 		pkgVersionCreates := make([]*ent.PackageVersionCreate, len(pkgs))
 
 		for i, pkg := range pkgs {
-			pkgIDs := helper.GuacPkgId(*pkg.PackageInput)
+			pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg.PackageInput, helpers.PkgServerKey)
 			pkgNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.NameId), 5)
 			pkgVersionID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.VersionId), 5)
 
@@ -202,7 +203,7 @@ func upsertBulkPackage(ctx context.Context, client *ent.Tx, pkgInputs []*model.I
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
 func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
-	pkgIDs := helper.GuacPkgId(pkg)
+	pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](&pkg, helpers.PkgServerKey)
 	pkgNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.NameId), 5)
 	pkgVersionID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.VersionId), 5)
 
