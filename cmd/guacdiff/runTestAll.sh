@@ -4,11 +4,6 @@ clear
 
 make clean
 
-if [ $? -ne 0 ]; then
-    echo "Error: 'make clean' failed"
-    exit 1
-fi
-
 make build
 
 if [ $? -ne 0 ]; then
