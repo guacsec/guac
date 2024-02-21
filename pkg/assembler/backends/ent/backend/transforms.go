@@ -18,6 +18,7 @@ package backend
 import (
 	"fmt"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -114,7 +115,7 @@ func valueOrDefault[T any](v *T, def T) T {
 
 func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
 	return &model.IsOccurrence{
-		ID:            nodeID(o.ID),
+		ID:            o.ID.String(),
 		Subject:       toModelPackageOrSource(o.Edges.Package, o.Edges.Source),
 		Artifact:      toModelArtifact(o.Edges.Artifact),
 		Justification: o.Justification,
@@ -169,13 +170,13 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 			depPkg = toModelPackage(backReferencePackageVersion(id.Edges.DependentPackageVersion))
 		}
 	} else {
-		pkg = toModelPackage(id.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
+		pkg = toModelPackage(id.Edges.Package.Edges.Name)
 		if id.Edges.DependentPackageName != nil {
-			depPkg = toModelPackage(id.Edges.DependentPackageName.Edges.Namespace.Edges.Package)
+			depPkg = toModelPackage(id.Edges.DependentPackageName)
 			// in this case, the expected response is package name with an empty package version array
 			depPkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
 		} else {
-			depPkg = toModelPackage(id.Edges.DependentPackageVersion.Edges.Name.Edges.Namespace.Edges.Package)
+			depPkg = toModelPackage(id.Edges.DependentPackageVersion.Edges.Name)
 		}
 	}
 
@@ -204,7 +205,7 @@ func dependencyTypeFromEnum(t dependency.DependencyType) model.DependencyType {
 
 func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 	return &model.HasSbom{
-		ID:                   nodeID(sbom.ID),
+		ID:                   sbom.ID.String(),
 		Subject:              toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
 		URI:                  sbom.URI,
 		Algorithm:            sbom.Algorithm,
@@ -241,16 +242,16 @@ func toIncludedSoftware(pkgs []*ent.PackageVersion, artifacts []*ent.Artifact) [
 
 func toModelLicense(license *ent.License) *model.License {
 	return &model.License{
-		ID:          nodeID(license.ID),
+		ID:          license.ID.String(),
 		Name:        license.Name,
-		Inline:      license.Inline,
-		ListVersion: license.ListVersion,
+		Inline:      ptrfrom.String(license.Inline),
+		ListVersion: ptrfrom.String(license.ListVersion),
 	}
 }
 
 func toModelCertifyLegal(cl *ent.CertifyLegal) *model.CertifyLegal {
 	return &model.CertifyLegal{
-		ID:                 nodeID(cl.ID),
+		ID:                 cl.ID.String(),
 		Subject:            toModelPackageOrSource(cl.Edges.Package, cl.Edges.Source),
 		DeclaredLicense:    cl.DeclaredLicense,
 		DeclaredLicenses:   collect(cl.Edges.DeclaredLicenses, toModelLicense),
@@ -267,15 +268,8 @@ func toModelCertifyLegal(cl *ent.CertifyLegal) *model.CertifyLegal {
 func toModelPackageOrSource(pkg *ent.PackageVersion, src *ent.SourceName) model.PackageOrSource {
 	if pkg != nil {
 		return toModelPackage(backReferencePackageVersion(pkg))
-	} else if src != nil &&
-		src.Edges.Namespace != nil &&
-		src.Edges.Namespace.Edges.SourceType != nil {
-		// Manually construct back references to avoid another 3 queries
-		ns := src.Edges.Namespace
-		ns.Edges.Names = []*ent.SourceName{src}
-		st := ns.Edges.SourceType
-		st.Edges.Namespaces = []*ent.SourceNamespace{ns}
-		return toModelSource(st)
+	} else if src != nil {
+		return toModelSource(src)
 	}
 	return nil
 }

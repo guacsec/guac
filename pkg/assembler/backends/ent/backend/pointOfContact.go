@@ -21,6 +21,8 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -48,34 +50,31 @@ func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfCo
 }
 
 func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertPointOfContact(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, pointOfContact)
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to execute IngestPointOfContact :: %s", err)
 	}
 
-	return nodeID(*recordID), nil
+	return *recordID, nil
 }
 
 func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) ([]string, error) {
-	var results []string
-	for i := range pointOfContactList {
-		var subject model.PackageSourceOrArtifactInput
-		if len(subjects.Packages) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
-		} else if len(subjects.Artifacts) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
-		} else {
-			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
-		}
-		hm, err := b.IngestPointOfContact(ctx, subject, pkgMatchType, *pointOfContactList[i])
+	funcName := "IngestPointOfContacts"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkPointOfContact(ctx, client, subjects, pkgMatchType, pointOfContactList)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestBulkPointOfContact failed with element #%v with err: %v", i, err)
+			return nil, err
 		}
-		results = append(results, hm)
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return results, nil
+
+	return *ids, nil
 }
 
 func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOfContact {
@@ -105,7 +104,133 @@ func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOf
 	return pointofcontact.And(predicates...)
 }
 
-func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.PointOfContactInputSpec) (*int, error) {
+func upsertBulkPointOfContact(ctx context.Context, client *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		pointofcontact.FieldEmail,
+		pointofcontact.FieldInfo,
+		pointofcontact.FieldSince,
+		pointofcontact.FieldJustification,
+		pointofcontact.FieldOrigin,
+		pointofcontact.FieldCollector,
+	}
+	var conflictWhere *sql.Predicate
+
+	switch {
+	case len(subjects.Artifacts) > 0:
+		conflictColumns = append(conflictColumns, pointofcontact.FieldArtifactID)
+		conflictWhere = sql.And(
+			sql.NotNull(pointofcontact.FieldArtifactID),
+			sql.IsNull(pointofcontact.FieldPackageNameID),
+			sql.IsNull(pointofcontact.FieldPackageVersionID),
+			sql.IsNull(pointofcontact.FieldSourceID),
+		)
+	case len(subjects.Packages) > 0:
+		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+			conflictColumns = append(conflictColumns, pointofcontact.FieldPackageVersionID)
+			conflictWhere = sql.And(
+				sql.IsNull(pointofcontact.FieldArtifactID),
+				sql.NotNull(pointofcontact.FieldPackageVersionID),
+				sql.IsNull(pointofcontact.FieldPackageNameID),
+				sql.IsNull(pointofcontact.FieldSourceID),
+			)
+		} else {
+			conflictColumns = append(conflictColumns, pointofcontact.FieldPackageNameID)
+			conflictWhere = sql.And(
+				sql.IsNull(pointofcontact.FieldArtifactID),
+				sql.IsNull(pointofcontact.FieldPackageVersionID),
+				sql.NotNull(pointofcontact.FieldPackageNameID),
+				sql.IsNull(pointofcontact.FieldSourceID),
+			)
+		}
+	case len(subjects.Sources) > 0:
+		conflictColumns = append(conflictColumns, pointofcontact.FieldSourceID)
+		conflictWhere = sql.And(
+			sql.IsNull(pointofcontact.FieldArtifactID),
+			sql.IsNull(pointofcontact.FieldPackageVersionID),
+			sql.IsNull(pointofcontact.FieldPackageNameID),
+			sql.NotNull(pointofcontact.FieldSourceID),
+		)
+	}
+
+	batches := chunk(pointOfContactList, 100)
+
+	index := 0
+	for _, pocs := range batches {
+		creates := make([]*ent.PointOfContactCreate, len(pocs))
+		for i, poc := range pocs {
+			creates[i] = client.PointOfContact.Create().
+				SetEmail(poc.Email).
+				SetInfo(poc.Info).
+				SetSince(poc.Since.UTC()).
+				SetJustification(poc.Justification).
+				SetOrigin(poc.Origin).
+				SetCollector(poc.Collector)
+
+			switch {
+			case len(subjects.Artifacts) > 0:
+				if subjects.Artifacts[index].ArtifactID == nil {
+					return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+				}
+				artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+				}
+				creates[i].SetArtifactID(artID)
+
+			case len(subjects.Packages) > 0:
+				if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+					if subjects.Packages[index].PackageVersionID == nil {
+						return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+					}
+					pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+					}
+					creates[i].SetPackageVersionID(pkgVersionID)
+
+				} else {
+					if subjects.Packages[index].PackageNameID == nil {
+						return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
+					}
+					pkgNameID, err := uuid.Parse(*subjects.Packages[index].PackageNameID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+					}
+					creates[i].SetAllVersionsID(pkgNameID)
+
+				}
+			case len(subjects.Sources) > 0:
+				if subjects.Sources[index].SourceNameID == nil {
+					return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+				}
+				sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				}
+				creates[i].SetSourceID(sourceID)
+
+			}
+			index++
+		}
+
+		err := client.PointOfContact.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictWhere(conflictWhere),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &ids, nil
+}
+
+func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.PointOfContactInputSpec) (*string, error) {
 	insert := client.PointOfContact.Create().
 		SetEmail(spec.Email).
 		SetInfo(spec.Info).
@@ -126,11 +251,14 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 
 	switch {
 	case subject.Artifact != nil:
-		art, err := client.Artifact.Query().Where(artifactQueryInputPredicates(*subject.Artifact.ArtifactInput)).Only(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve subject artifact :: %s", err)
+		if subject.Artifact.ArtifactID == nil {
+			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
 		}
-		insert.SetArtifact(art)
+		artID, err := uuid.Parse(*subject.Artifact.ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		}
+		insert.SetArtifactID(artID)
 		conflictColumns = append(conflictColumns, pointofcontact.FieldArtifactID)
 		conflictWhere = sql.And(
 			sql.NotNull(pointofcontact.FieldArtifactID),
@@ -141,11 +269,14 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 
 	case subject.Package != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			pv, err := getPkgVersion(ctx, client.Client(), *subject.Package.PackageInput)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve subject package version :: %s", err)
+			if subject.Package.PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 			}
-			insert.SetPackageVersion(pv)
+			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+			insert.SetPackageVersionID(pkgVersionID)
 			conflictColumns = append(conflictColumns, pointofcontact.FieldPackageVersionID)
 			conflictWhere = sql.And(
 				sql.IsNull(pointofcontact.FieldArtifactID),
@@ -154,11 +285,14 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 				sql.IsNull(pointofcontact.FieldSourceID),
 			)
 		} else {
-			pn, err := getPkgName(ctx, client.Client(), *subject.Package.PackageInput)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve subject package name :: %s", err)
+			if subject.Package.PackageNameID == nil {
+				return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
 			}
-			insert.SetAllVersions(pn)
+			pkgNameID, err := uuid.Parse(*subject.Package.PackageNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+			}
+			insert.SetAllVersionsID(pkgNameID)
 			conflictColumns = append(conflictColumns, pointofcontact.FieldPackageNameID)
 			conflictWhere = sql.And(
 				sql.IsNull(pointofcontact.FieldArtifactID),
@@ -169,11 +303,14 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 		}
 
 	case subject.Source != nil:
-		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source.SourceInput)
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve subject source :: %s", err)
+		if subject.Source.SourceNameID == nil {
+			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
 		}
-		insert.SetSourceID(srcID)
+		sourceID, err := uuid.Parse(*subject.Source.SourceNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		}
+		insert.SetSourceID(sourceID)
 		conflictColumns = append(conflictColumns, pointofcontact.FieldSourceID)
 		conflictWhere = sql.And(
 			sql.IsNull(pointofcontact.FieldArtifactID),
@@ -183,7 +320,7 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 		)
 	}
 
-	id, err := insert.OnConflict(
+	_, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
@@ -193,15 +330,9 @@ func upsertPointOfContact(ctx context.Context, client *ent.Tx, subject model.Pac
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert PointOfContact node")
 		}
-		id, err = client.PointOfContact.Query().
-			Where(pointOfContactInputPredicate(subject, pkgMatchType, spec)).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get PointOfContact")
-		}
 	}
 
-	return &id, nil
+	return ptrfrom.String(""), nil
 }
 
 func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
@@ -209,7 +340,7 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 
 	switch {
 	case v.Edges.Source != nil:
-		sub = toModelSource(backReferenceSourceName(v.Edges.Source))
+		sub = toModelSource(v.Edges.Source)
 	case v.Edges.PackageVersion != nil:
 		sub = toModelPackage(backReferencePackageVersion(v.Edges.PackageVersion))
 	case v.Edges.AllVersions != nil:
@@ -222,7 +353,7 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 	}
 
 	return &model.PointOfContact{
-		ID:            nodeID(v.ID),
+		ID:            v.ID.String(),
 		Subject:       sub,
 		Email:         v.Email,
 		Info:          v.Info,
