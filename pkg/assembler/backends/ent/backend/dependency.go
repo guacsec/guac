@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -102,7 +103,15 @@ func upsertBulkDependencies(ctx context.Context, client *ent.Tx, pkgs []*model.I
 	for _, deps := range batches {
 		creates := make([]*ent.DependencyCreate, len(deps))
 		for i, dep := range deps {
+
+			isDependencyID, err := guacDependencyKey(*pkgs[index], *depPkgs[index], depPkgMatchType, *dep)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+			}
+			ids = append(ids, isDependencyID.String())
+
 			creates[i] = client.Dependency.Create().
+				SetID(*isDependencyID).
 				SetVersionRange(dep.VersionRange).
 				SetDependencyType(dependencyTypeToEnum(dep.DependencyType)).
 				SetJustification(dep.Justification).
@@ -138,6 +147,7 @@ func upsertBulkDependencies(ctx context.Context, client *ent.Tx, pkgs []*model.I
 				}
 				creates[i].SetDependentPackageVersionID(pkgNameID)
 			}
+
 			index++
 		}
 
@@ -168,7 +178,14 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
+
+		isDependencyID, err := guacDependencyKey(pkg, depPkg, depPkgMatchType, dep)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+		}
+
 		query := client.Dependency.Create().
+			SetID(*isDependencyID).
 			SetPackageID(pkgVersionID).
 			SetVersionRange(dep.VersionRange).
 			SetDependencyType(dependencyTypeToEnum(dep.DependencyType)).
@@ -226,7 +243,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 			ID(ctx); err != nil {
 			return nil, err
 		}
-		return ptrfrom.String(""), nil
+		return ptrfrom.String(isDependencyID.String()), nil
 	})
 	if err != nil {
 		return "", errors.Wrap(err, funcName)
@@ -279,4 +296,28 @@ func isDependencyQuery(filter *model.IsDependencySpec) predicate.Dependency {
 	}
 
 	return dependency.And(predicates...)
+}
+
+func canonicalDependencyString(dep model.IsDependencyInputSpec) string {
+	return fmt.Sprintf("%s::%s::%s::%s::%s", dep.VersionRange, dep.DependencyType.String(), dep.Justification, dep.Origin, dep.Collector)
+}
+
+func guacDependencyKey(pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (*uuid.UUID, error) {
+	var depPkgID string
+	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+		if depPkg.PackageNameID == nil {
+			return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
+		}
+		depPkgID = *depPkg.PackageNameID
+	} else {
+		if depPkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		}
+		depPkgID = *depPkg.PackageVersionID
+	}
+
+	depIDString := fmt.Sprintf("%s::%s::%s?", pkg.PackageVersionID, depPkgID, canonicalDependencyString)
+
+	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
+	return &depID, nil
 }

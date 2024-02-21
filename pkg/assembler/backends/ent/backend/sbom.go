@@ -19,11 +19,11 @@ import (
 	"context"
 	stdsql "database/sql"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -99,7 +99,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
 
-	sbomId, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	sbomId, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
 
 		sbomCreate := client.BillOfMaterials.Create().
@@ -159,48 +159,39 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		sortedDependencyIDs := helper.SortAndRemoveDups(includes.Dependencies)
 		sortedOccurrenceIDs := helper.SortAndRemoveDups(includes.Occurrences)
 
-		for _, pkgVersionOrArtifactID := range sortedPkgIDs {
-			if pkgID, err := client.PackageVersion.Query().
-				Where(IDEQ(pkgVersionOrArtifactID)).
-				OnlyID(ctx); err != nil {
-				return nil, Errorf("%v %v :: %s", funcName, "error querying for PackageVersion by ID", err)
-			} else {
-				sbomCreate.AddIncludedSoftwarePackageIDs(pkgID)
+		for _, pkgID := range sortedPkgIDs {
+			pkgIncludesID, err := uuid.Parse(pkgID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
+			sbomCreate.AddIncludedSoftwarePackageIDs(pkgIncludesID)
 		}
 
 		for _, artID := range sortedArtIDs {
-			if artifactId, err := client.Artifact.Query().
-				Where(IDEQ(artID)).
-				OnlyID(ctx); err != nil {
-
-				return nil, Errorf("%v :: %s", funcName, "error querying for artifact by ID")
-			} else {
-				sbomCreate.AddIncludedSoftwareArtifactIDs(artifactId)
+			artIncludesID, err := uuid.Parse(artID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
+			sbomCreate.AddIncludedSoftwareArtifactIDs(artIncludesID)
 		}
 
 		for _, isDependencyID := range sortedDependencyIDs {
-			isDepID, err := client.Dependency.Query().
-				Where(IDEQ(isDependencyID)).
-				OnlyID(ctx)
+			isDepIncludesID, err := uuid.Parse(isDependencyID)
 			if err != nil {
-				return nil, Errorf("%v :: %s", funcName, "includes.Dependencies must be a valid IsDependency ID")
+				return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
 			}
-			sbomCreate.AddIncludedDependencyIDs(isDepID)
+			sbomCreate.AddIncludedDependencyIDs(isDepIncludesID)
 		}
 
-		for _, isOccurenceID := range sortedOccurrenceIDs {
-			isOccID, err := client.Occurrence.Query().
-				Where(IDEQ(isOccurenceID)).
-				OnlyID(ctx)
+		for _, isOccurrenceID := range sortedOccurrenceIDs {
+			isOccurIncludesID, err := uuid.Parse(isOccurrenceID)
 			if err != nil {
-				return nil, Errorf("%v :: %s", funcName, "includes.Occurrences must be a valid IsOccurrence ID")
+				return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
 			}
-			sbomCreate.AddIncludedOccurrenceIDs(isOccID)
+			sbomCreate.AddIncludedOccurrenceIDs(isOccurIncludesID)
 		}
 
-		id, err := sbomCreate.
+		_, err := sbomCreate.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
@@ -211,37 +202,149 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			if err != stdsql.ErrNoRows {
 				return nil, errors.Wrap(err, "IngestHasSbom")
 			}
-			id, err = client.BillOfMaterials.Query().
-				Where(billofmaterials.URIEQ(spec.URI)).
-				OnlyID(ctx)
-			if err != nil {
-				return nil, Errorf("%v ::  %s", funcName, err)
-			}
-
 		}
-		return &id, nil
+		return ptrfrom.String(""), nil
 	})
 	if err != nil {
 		return "", Errorf("%v :: %s", funcName, err)
 	}
 
-	return strconv.Itoa(*sbomId), nil
+	return *sbomId, nil
 }
 
 func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
-	var modelHasSboms []string
-	for i, hasSbom := range hasSBOMs {
-		var subject model.PackageOrArtifactInput
-		if len(subjects.Artifacts) > 0 {
-			subject = model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
-		} else {
-			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
-		}
-		modelHasSbom, err := b.IngestHasSbom(ctx, subject, *hasSbom, *includes[i])
+	funcName := "IngestHasSBOMs"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkHasSBOM(ctx, client, subjects, hasSBOMs, includes)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
+			return nil, err
 		}
-		modelHasSboms = append(modelHasSboms, modelHasSbom)
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return modelHasSboms, nil
+
+	return *ids, nil
+}
+
+func upsertBulkHasSBOM(ctx context.Context, client *ent.Tx, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		billofmaterials.FieldURI,
+		billofmaterials.FieldAlgorithm,
+		billofmaterials.FieldDigest,
+		billofmaterials.FieldDownloadLocation,
+		billofmaterials.FieldKnownSince,
+	}
+
+	var conflictWhere *sql.Predicate
+
+	switch {
+	case len(subjects.Packages) > 0:
+		conflictColumns = append(conflictColumns, billofmaterials.FieldPackageID)
+		conflictWhere = sql.And(
+			sql.NotNull(billofmaterials.FieldPackageID),
+			sql.IsNull(billofmaterials.FieldArtifactID),
+		)
+	case len(subjects.Artifacts) > 0:
+		conflictColumns = append(conflictColumns, billofmaterials.FieldArtifactID)
+		conflictWhere = sql.And(
+			sql.IsNull(billofmaterials.FieldPackageID),
+			sql.NotNull(billofmaterials.FieldArtifactID),
+		)
+	}
+
+	batches := chunk(hasSBOMs, 100)
+
+	index := 0
+	for _, hsboms := range batches {
+		creates := make([]*ent.BillOfMaterialsCreate, len(hsboms))
+		for i, hsbom := range hsboms {
+
+			creates[i] = client.BillOfMaterials.Create().
+				SetURI(hsbom.URI).
+				SetAlgorithm(strings.ToLower(hsbom.Algorithm)).
+				SetDigest(strings.ToLower(hsbom.Digest)).
+				SetDownloadLocation(hsbom.DownloadLocation).
+				SetOrigin(hsbom.Origin).
+				SetCollector(hsbom.Collector).
+				SetKnownSince(hsbom.KnownSince.UTC())
+
+			switch {
+			case len(subjects.Packages) > 0:
+				if subjects.Packages[index].PackageVersionID == nil {
+					return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+				}
+				pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+				}
+				creates[i].SetPackageID(pkgVersionID)
+			case len(subjects.Artifacts) > 0:
+				if subjects.Artifacts[index].ArtifactID == nil {
+					return nil, fmt.Errorf("ArtifactID not specified in IDorArtifactInput")
+				}
+				artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+				}
+				creates[i].SetArtifactID(artID)
+			}
+
+			sortedPkgIDs := helper.SortAndRemoveDups(includes[index].Packages)
+			sortedArtIDs := helper.SortAndRemoveDups(includes[index].Artifacts)
+			sortedDependencyIDs := helper.SortAndRemoveDups(includes[index].Dependencies)
+			sortedOccurrenceIDs := helper.SortAndRemoveDups(includes[index].Occurrences)
+
+			for _, pkgID := range sortedPkgIDs {
+				pkgIncludesID, err := uuid.Parse(pkgID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+				}
+				creates[i].AddIncludedSoftwarePackageIDs(pkgIncludesID)
+			}
+
+			for _, artID := range sortedArtIDs {
+				artIncludesID, err := uuid.Parse(artID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+				}
+				creates[i].AddIncludedSoftwareArtifactIDs(artIncludesID)
+			}
+
+			for _, isDependencyID := range sortedDependencyIDs {
+				isDepIncludesID, err := uuid.Parse(isDependencyID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
+				}
+				creates[i].AddIncludedDependencyIDs(isDepIncludesID)
+			}
+
+			for _, isOccurrenceID := range sortedOccurrenceIDs {
+				isOccurIncludesID, err := uuid.Parse(isOccurrenceID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
+				}
+				creates[i].AddIncludedOccurrenceIDs(isOccurIncludesID)
+			}
+
+			index++
+		}
+
+		err := client.BillOfMaterials.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictWhere(conflictWhere),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &ids, nil
 }

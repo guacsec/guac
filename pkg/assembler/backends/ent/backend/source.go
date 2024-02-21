@@ -140,7 +140,7 @@ func upsertBulkHasSourceAts(ctx context.Context, client *ent.Tx, pkgs []*model.I
 			}
 			sourceID, err := uuid.Parse(*sources[index].SourceNameID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
 			creates[i].SetSourceID(sourceID)
 
@@ -189,7 +189,7 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.IDorPkgInp
 	}
 	sourceID, err := uuid.Parse(*source.SourceNameID)
 	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+		return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 	}
 
 	conflictColumns := []string{
@@ -215,7 +215,7 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.IDorPkgInp
 		}
 		pkgNameID, err := uuid.Parse(*pkg.PackageNameID)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+			return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 		}
 		insert.SetNillableAllVersionsID(&pkgNameID)
 		conflictColumns = append(conflictColumns, hassourceat.FieldPackageNameID)
@@ -226,7 +226,7 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.IDorPkgInp
 		}
 		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+			return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 		}
 		insert.SetNillablePackageVersionID(&pkgVersionID)
 		conflictColumns = append(conflictColumns, hassourceat.FieldPackageVersionID)

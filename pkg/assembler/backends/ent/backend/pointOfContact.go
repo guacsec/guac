@@ -207,7 +207,7 @@ func upsertBulkPointOfContact(ctx context.Context, client *ent.Tx, subjects mode
 				}
 				sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 				}
 				creates[i].SetSourceID(sourceID)
 

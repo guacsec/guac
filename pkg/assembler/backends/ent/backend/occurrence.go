@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -103,7 +104,15 @@ func upsertBulkOccurrences(ctx context.Context, client *ent.Tx, subjects model.P
 	for _, occurs := range batches {
 		creates := make([]*ent.OccurrenceCreate, len(occurs))
 		for i, occur := range occurs {
+
+			isOccurrenceID, err := guacOccurrenceKey(subjects.Packages[index], subjects.Sources[index], *artifacts[index], *occur)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+			}
+			ids = append(ids, isOccurrenceID.String())
+
 			creates[i] = client.Occurrence.Create().
+				SetID(*isOccurrenceID).
 				SetJustification(occur.Justification).
 				SetOrigin(occur.Origin).
 				SetCollector(occur.Collector)
@@ -133,7 +142,7 @@ func upsertBulkOccurrences(ctx context.Context, client *ent.Tx, subjects model.P
 				}
 				sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+					return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 				}
 				creates[i].SetSourceID(sourceID)
 			}
@@ -175,7 +184,13 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
 
+		isOccurrenceID, err := guacOccurrenceKey(subject.Package, subject.Source, art, spec)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+		}
+
 		occurrenceCreate := client.Occurrence.Create().
+			SetID(*isOccurrenceID).
 			SetArtifactID(artID).
 			SetJustification(spec.Justification).
 			SetOrigin(spec.Origin).
@@ -232,7 +247,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			return nil, err
 		}
 
-		return ptrfrom.String(""), nil
+		return ptrfrom.String(isOccurrenceID.String()), nil
 	})
 	if err != nil {
 		return "", gqlerror.Errorf("%v :: %s", funcName, err)
@@ -281,4 +296,30 @@ func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
 		}
 	}
 	return occurrence.And(predicates...)
+}
+
+func canonicalOccurrenceString(occur model.IsOccurrenceInputSpec) string {
+	return fmt.Sprintf("%s::%s::%s", occur.Justification, occur.Origin, occur.Collector)
+}
+
+func guacOccurrenceKey(pkg *model.IDorPkgInput, src *model.IDorSourceInput, art model.IDorArtifactInput, occur model.IsOccurrenceInputSpec) (*uuid.UUID, error) {
+	var subjectID string
+	if pkg != nil {
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		}
+		subjectID = *pkg.PackageVersionID
+	} else if src != nil {
+		if src.SourceNameID == nil {
+			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+		}
+		subjectID = *src.SourceNameID
+	} else {
+		return nil, gqlerror.Errorf("%v :: %s", "guacOccurrenceKey", "subject must be either a package or source")
+	}
+
+	occurIDString := fmt.Sprintf("%s::%s::%s?", subjectID, *art.ArtifactID, canonicalOccurrenceString)
+
+	occurID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(occurIDString), 5)
+	return &occurID, nil
 }
