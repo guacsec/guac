@@ -117,8 +117,14 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 	funcName := "IngestHasSbom"
 
 	c.m.RLock()
-	for _, id := range includes.Software {
-		if err := c.validateSoftwareId(ctx, funcName, id); err != nil {
+	for _, id := range includes.Packages {
+		if err := c.validatePkgId(ctx, funcName, id); err != nil {
+			c.m.RUnlock()
+			return "", err
+		}
+	}
+	for _, id := range includes.Artifacts {
+		if err := c.validateArtId(ctx, funcName, id); err != nil {
 			c.m.RUnlock()
 			return "", err
 		}
@@ -137,17 +143,26 @@ func (c *demoClient) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 	}
 	c.m.RUnlock()
 
-	softwareIDs := helper.SortAndRemoveDups(includes.Software)
+	var includesSoftware []string
+	includesSoftware = append(includesSoftware, includes.Packages...)
+	includesSoftware = append(includesSoftware, includes.Artifacts...)
+
+	softwareIDs := helper.SortAndRemoveDups(includesSoftware)
 	dependencyIDs := helper.SortAndRemoveDups(includes.Dependencies)
 	occurrenceIDs := helper.SortAndRemoveDups(includes.Occurrences)
 	return c.ingestHasSbom(ctx, subject, input, softwareIDs, dependencyIDs, occurrenceIDs, true)
 }
 
-func (c *demoClient) validateSoftwareId(ctx context.Context, funcName string, id string) error {
+func (c *demoClient) validatePkgId(ctx context.Context, funcName string, id string) error {
 	if _, err := byIDkv[*pkgVersion](ctx, id, c); err != nil {
-		if _, err := byIDkv[*artStruct](ctx, id, c); err != nil {
-			return gqlerror.Errorf("%v :: software id %v is neither an ingested Package nor an ingested Artifact", funcName, id)
-		}
+		return gqlerror.Errorf("%v :: package id %v is not an ingested Package", funcName, id)
+	}
+	return nil
+}
+
+func (c *demoClient) validateArtId(ctx context.Context, funcName string, id string) error {
+	if _, err := byIDkv[*artStruct](ctx, id, c); err != nil {
+		return gqlerror.Errorf("%v :: artifact id %v is not an ingested Artifact", funcName, id)
 	}
 	return nil
 }

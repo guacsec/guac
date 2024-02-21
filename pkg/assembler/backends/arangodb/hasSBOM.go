@@ -216,16 +216,20 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 	}
 
 	// initialize as empty slices for the query to run. Nil slice will cause an error
-	dedupedIncludedSoftwareIDs := []string{}
-	dedupedIncludedDependenciesIDs := []string{}
-	dedupedIncludesOccurrencesIDs := []string{}
-	includedSoftwarePkgKeys := []string{}
-	includedSoftwareArtKeys := []string{}
-	includedDependenciesKeys := []string{}
-	includedOccurrencesKeys := []string{}
+	dedupedIncludedSoftwareIDs := make([]string, 0)
+	dedupedIncludedDependenciesIDs := make([]string, 0)
+	dedupedIncludesOccurrencesIDs := make([]string, 0)
+	includedSoftwarePkgKeys := make([]string, 0)
+	includedSoftwareArtKeys := make([]string, 0)
+	includedDependenciesKeys := make([]string, 0)
+	includedOccurrencesKeys := make([]string, 0)
 
-	if includes.Software != nil {
-		dedupedIncludedSoftwareIDs = helper.SortAndRemoveDups(includes.Software)
+	var includesSoftware []string
+	includesSoftware = append(includesSoftware, includes.Packages...)
+	includesSoftware = append(includesSoftware, includes.Artifacts...)
+
+	if includesSoftware != nil {
+		dedupedIncludedSoftwareIDs = helper.SortAndRemoveDups(includesSoftware)
 	}
 	if includes.Dependencies != nil {
 		dedupedIncludedDependenciesIDs = helper.SortAndRemoveDups(includes.Dependencies)

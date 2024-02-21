@@ -33,7 +33,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 		for _, p := range preds {
 
 			// Ingest Packages
-			var packageAndArtifactIDs []string
+			var packageIDs []string
 
 			packages := p.GetPackages(ctx)
 			logger.Infof("assembling Package: %v", len(packages))
@@ -47,7 +47,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			for _, pkgVersionID := range collectedIDorPkgInputs {
 				pkgVersionIDs = append(pkgVersionIDs, *pkgVersionID.PackageVersionID)
 			}
-			packageAndArtifactIDs = append(packageAndArtifactIDs, pkgVersionIDs...)
+			packageIDs = append(packageIDs, pkgVersionIDs...)
 
 			// Ingest sources
 			sources := p.GetSources(ctx)
@@ -59,6 +59,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 
 			// Ingest Artifacts
+			var artifactIDs []string
 			artifacts := p.GetArtifacts(ctx)
 			logger.Infof("assembling Artifact: %v", len(artifacts))
 
@@ -70,7 +71,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			for _, artID := range collectedIDorArtInputs {
 				artIDs = append(artIDs, *artID.ArtifactID)
 			}
-			packageAndArtifactIDs = append(packageAndArtifactIDs, artIDs...)
+			artifactIDs = append(artifactIDs, artIDs...)
 
 			// Ingest Materials
 			materials := p.GetMaterials(ctx)
@@ -80,11 +81,6 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			if err != nil {
 				return fmt.Errorf("ingestArtifacts failed with error: %v", err)
 			}
-			var matIDs []string
-			for _, matID := range collectedIDorMatInputs {
-				matIDs = append(matIDs, *matID.ArtifactID)
-			}
-			packageAndArtifactIDs = append(packageAndArtifactIDs, matIDs...)
 
 			// Ingest Builders
 			builders := p.GetBuilders(ctx)
@@ -184,7 +180,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
 			if err := ingestHasSBOMs(ctx, gqlclient, p.HasSBOM, model.HasSBOMIncludesInputSpec{
-				Software:     packageAndArtifactIDs,
+				Packages:     packageIDs,
+				Artifacts:    artifactIDs,
 				Dependencies: isDependenciesIDs,
 				Occurrences:  isOccurrencesIDs,
 			}, collectedIDorPkgInputs, collectedIDorArtInputs); err != nil {

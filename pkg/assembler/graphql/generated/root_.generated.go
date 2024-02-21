@@ -3913,7 +3913,8 @@ input HasSBOMSpec {
 }
 
 input HasSBOMIncludesInputSpec {
-  software: [ID!]!
+  packages: [ID!]!
+  artifacts: [ID!]!
   dependencies: [ID!]!
   occurrences: [ID!]!
 }

@@ -31,7 +31,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
-			var packageAndArtifactIDs []string
+			var packageIDs []string
 			collectedIDorPkgInputs := make(map[string]*model.IDorPkgInput)
 			packages := p.GetPackages(ctx)
 			logger.Infof("assembling Package: %v", len(packages))
@@ -40,7 +40,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 					return fmt.Errorf("failed package ingest with error: %w", err)
 				} else {
 					collectedIDorPkgInputs[helpers.PkgInputSpecToPurl(p.PackageInput)] = id
-					packageAndArtifactIDs = append(packageAndArtifactIDs, *id.PackageVersionID)
+					packageIDs = append(packageIDs, *id.PackageVersionID)
 				}
 			}
 
@@ -55,6 +55,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
+			var artifactIDs []string
 			collectedIDorArtInputs := make(map[string]*model.IDorArtifactInput)
 			artifacts := p.GetArtifacts(ctx)
 			logger.Infof("assembling Artifact: %v", len(artifacts))
@@ -63,7 +64,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 					return fmt.Errorf("failed artifact ingest with error: %w", err)
 				} else {
 					collectedIDorArtInputs[helpers.ArtifactKey(a.ArtifactInput)] = id
-					packageAndArtifactIDs = append(packageAndArtifactIDs, *id.ArtifactID)
+					artifactIDs = append(artifactIDs, *id.ArtifactID)
 				}
 			}
 
@@ -73,11 +74,6 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 			if err != nil {
 				return fmt.Errorf("failed materials (artifacts) ingest with error: %w", err)
 			}
-			var matIDs []string
-			for _, matID := range collectedIDorMatInputs {
-				matIDs = append(matIDs, *matID.ArtifactID)
-			}
-			packageAndArtifactIDs = append(packageAndArtifactIDs, matIDs...)
 
 			collectedIDorBuilderInputs := make(map[string]*model.IDorBuilderInput)
 			builders := p.GetBuilders(ctx)
@@ -203,7 +199,8 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 			}
 
 			includes := model.HasSBOMIncludesInputSpec{
-				Software:     packageAndArtifactIDs,
+				Packages:     packageIDs,
+				Artifacts:    artifactIDs,
 				Dependencies: isDependenciesIDs,
 				Occurrences:  isOccurrencesIDs,
 			}
