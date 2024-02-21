@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sort"
 
 	"reflect"
 	"time"
@@ -123,17 +124,52 @@ func getPathString(path []*Node) string {
 	return pathStr
 }
 
-
-
 func init() {
 	rootCmd.AddCommand(diffCmd)
-	rootCmd.PersistentFlags().StringSlice("sbom", []string{}, "two sboms to find the diff between")
+	rootCmd.PersistentFlags().StringSlice("sboms", []string{}, "two sboms to find the diff between")
 	rootCmd.PersistentFlags().StringSlice("slsa", []string{}, "two slsa to find the diff between")
 	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
 	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
 	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
 	rootCmd.PersistentFlags().Bool("dot", false, "create a dot file to visualize the diff")
 	rootCmd.PersistentFlags().String("file", "tests/identical.json", "filename to read sbom test cases from")
+}
+
+func verifyFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, purl bool) {
+	if (errSlsa != nil && errSbom != nil) || (len(slsas) ==0  && len(sboms) == 0 ){
+		fmt.Println("Must specify slsa or sboms")
+		os.Exit(0)
+	}
+
+	if len(slsas) >0  && len(sboms) >0 {
+		fmt.Println("Must either specify slsa or sbom")
+		os.Exit(0)
+	}
+
+	if errSlsa == nil && (len(slsas) <= 1|| len(slsas) > 2) && len(sboms) == 0{
+		fmt.Println("Must specify exactly two slsas to find the diff between, specified", len(slsas))
+		os.Exit(0)
+	}
+
+	if errSbom == nil && (len(sboms) <= 1|| len(sboms) > 2) && len(slsas) == 0{
+		fmt.Println("Must specify exactly two sboms to find the diff between, specified", len(sboms))
+		os.Exit(0)
+	}
+
+	if errSlsa == nil && len(slsas) == 2 {
+		fmt.Println("slsa diff to be implemented.")
+		os.Exit(0)
+	}
+
+	if !uri && !purl {
+		fmt.Println("Must provide one of --uri or --purl")
+		os.Exit(0)
+	}
+
+	if uri && purl {
+		fmt.Println("Must provide only one of --uri or --purl")
+		os.Exit(0)
+	}
 }
 
 var diffCmd = &cobra.Command{
@@ -147,41 +183,11 @@ var diffCmd = &cobra.Command{
 		var err error
 
 		if !test {
-
-			slsa, errSlsa := cmd.Flags().GetStringSlice("slsa")
-			sboms, errSbom := cmd.Flags().GetStringSlice("sbom")
-
-			if errSlsa != nil && errSbom != nil {
-				fmt.Println("Must specify slsa or sboms")
-				os.Exit(1)
-			}
-
-			if errSlsa == nil && len(slsa) != 2 {
-				fmt.Println("Must provide exactly two slsas to find the diff between")
-				os.Exit(1)
-			} else if errSbom == nil && len(sboms) != 2 {
-				fmt.Println("Must provide exactly two sboms to find the diff between")
-				os.Exit(1)
-			}
-
-			if errSlsa == nil && len(slsa) == 2 {
-				fmt.Println("slsa diff to be implemented.")
-				return
-			}
-
+			slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
+			sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
 			uri, _ := cmd.Flags().GetBool("uri")
 			purl, _ := cmd.Flags().GetBool("purl")
-
-			if !uri && !purl {
-				fmt.Println("Must provide one of --uri or --purl")
-				os.Exit(1)
-			}
-
-			if uri && purl {
-				fmt.Println("Must provide only one of --uri or --purl")
-				os.Exit(1)
-			}
-
+			verifyFlags(slsas, sboms,  errSlsa, errSbom, uri, purl)
 
 			ctx := logging.WithLogger(context.Background())
 			httpClient := http.Client{}
@@ -227,6 +233,8 @@ var diffCmd = &cobra.Command{
 			}
 			hasSBOMOne =  hasSBOMResponseOne.HasSBOM[0]
 			hasSBOMTwo =  hasSBOMResponseTwo.HasSBOM[0]
+			fmt.Println(hasSBOMOne.IncludedSoftware[0].GetTypename())
+			return
 		}else{
 			jsonData, err := os.ReadFile(testfile)
 			if err != nil {
@@ -243,13 +251,6 @@ var diffCmd = &cobra.Command{
 			hasSBOMOne = test.HasSBOMOne
 			hasSBOMTwo = test.HasSBOMTwo
 		}
-		//TODO: @abhi 
-		//some sort of sorting should be done here? @abhi
-		//Each call to findHasSBOMBy even using the same uri can and does return a struct with arrays that
-		//have their elements in random order, when using this to construct the graph the order of the nodes differs
-		//so does the returned paths list. When performing the diff, we will need some order to be maintained. 
-
-
 
 		//init first node
 		nodeOne := Node{Value: hasSBOMOne.Id, tag: "Id"}
@@ -266,12 +267,13 @@ var diffCmd = &cobra.Command{
 			fieldTwo := allHasSBOMTreeTwo.Field(i)
 			fieldTypeOne := reflect.TypeOf(allHasSBOMTreeOne.Interface()).Field(i).Name 
 			fieldTypeTwo := reflect.TypeOf(allHasSBOMTreeTwo.Interface()).Field(i).Name 
-			//TODO  @abhi If you could take a look at taking care of cases where the field type is []json.RawMessage, interface or pointers 
-			// this would be great. Then we can remove the constraint for not including type Subject and Included Software below.
-			if  fieldTypeOne != "Id" && fieldTypeOne != "Subject" && fieldTypeOne != "IncludedSoftware" { //not id, subject, included softwares then
+
+			//TODO Add support for support for the type interfaces AllHasSBOMTreeIncludedSoftwarePackageOrArtifact & AllHasSBOMTreeSubjectPackageOrArtifact
+			//remove Subject and IncludedSoftware from the graph for now.
+			if  fieldTypeOne != "Id" && fieldTypeOne != "Subject" && fieldTypeOne != "IncludedSoftware"{ //id is root node, so ignore it as it has been already created
 				hasSBOMResponsFieldsToGraph(fieldOne, &nodeOne, fieldTypeOne)
 			}
-			if fieldTypeTwo != "Id" && fieldTypeTwo != "Subject" && fieldTypeTwo != "IncludedSoftware" { //not id, subject, included softwares then
+			if fieldTypeTwo != "Id" && fieldTypeTwo != "Subject" && fieldTypeTwo != "IncludedSoftware"  { //id is root node, so ignore it as it has been already created
 				hasSBOMResponsFieldsToGraph(fieldTwo, &nodeTwo,  fieldTypeTwo)
 			}
 		}
@@ -289,10 +291,6 @@ var diffCmd = &cobra.Command{
 
 		//create the dot files
 		if dot{
-			if len(diffedPathsOne) == 0 && len(diffedPathsTwo) == 0 {
-				fmt.Println("...Skipping graphviz")
-				return
-			}
 			randfilename := rand.String(10)+".dot"
 			err := CreateGraphFile(diffedPathsOne, diffedPathsTwo, randfilename ); if err!= nil {
 				fmt.Println("Error creating graph file:", err)	
@@ -353,6 +351,12 @@ func getDiff(pathsOne, pathsTwo [][]*Node, pathsOneStrings, pathsTwoStrings []st
 // This function recursively traverses the fields of a struct using reflection and converts them into nodes of a graph. 
 // It handles nested structs and arrays within the main struct.
 func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy string) {
+
+	//TODO Update, only support for the type interfaces(Subject and IncludedSoftwares) needs to be implemented.
+
+
+
+
 	//base case
 	if data.Kind() == reflect.String || isPrimitiveType(data.Type()) {
 		//just add a neighbour and return
@@ -395,6 +399,7 @@ func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy strin
 		length = data.NumField()
 	}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
 		length = data.Len()
+		data = sortDataArray(data)
 	}
 	fieldtag := ""
 	for i := 0; i < length; i++ {
@@ -408,4 +413,32 @@ func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy strin
 		}
 		hasSBOMResponsFieldsToGraph(field, newHead, fieldtag)
 	}
+}
+
+func sortDataArray(data reflect.Value) reflect.Value {
+	if data.Kind() != reflect.Array && data.Kind() != reflect.Slice {
+		fmt.Println("Sorting error, incorrect data type")
+		os.Exit(1)
+	}
+
+	sort.SliceStable(data.Interface(), func(i, j int) bool {
+		fmt.Println("dsddsdsds")
+		id1 := data.Index(i).FieldByName("sabun").String()
+		fmt.Println("dsddsdsds")
+		id2 := data.Index(j).FieldByName("Id").String()
+		return id1 < id2
+	})
+	return data
+
+}
+func isStringPointer(value interface{}) bool {
+	valueType := reflect.TypeOf(value)
+	if valueType.Kind() == reflect.Ptr {
+		elemType := valueType.Elem()
+		if elemType.Kind() == reflect.String {
+			return true
+		}
+	}
+
+	return false
 }

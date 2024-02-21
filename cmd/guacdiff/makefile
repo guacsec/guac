@@ -23,9 +23,10 @@ clean:
 	@echo "Cleaning $(BINARY_NAME)..."
 	@$(GOCLEAN)
 	@rm -f $(BINARY_NAME)
+	@rm *.dot
 
 test: build
 	@echo "Running $(BINARY_NAME) diff --test..."
-	@./$(BINARY_NAME) diff --test
+	@./$(BINARY_NAME) diff --test 
 
 
