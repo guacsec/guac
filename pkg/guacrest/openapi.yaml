@@ -92,7 +92,7 @@ paths:
               - scorecard
       responses:
         "200":
-          $ref: "#/components/responses/PurlList"
+          $ref: "#/components/responses/PackageNameList"
         "400":
           $ref: "#/components/responses/BadRequest"
         "500":
@@ -138,6 +138,13 @@ components:
       properties:
         Message:
           type: string
+    PackageName:
+      type: object
+      properties:
+        Name:
+          type: string
+        DependentCount:
+          type: integer
   responses:
     # for code 200
     PurlList:
@@ -145,18 +152,18 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            required: 
-              - PaginationInfo
-              - PurlList
-            properties:
-              PaginationInfo:
-                $ref: "#/components/schemas/PaginationInfo"
-              PurlList:
-                type: array
-                items: 
-                  $ref: "#/components/schemas/Purl"
-    # for code 400, client side error
+            type: array
+            items:
+              $ref: "#/components/schemas/Purl"
+    PackageNameList:
+      description: A list of package names with their dependent counts
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/PackageName"
+    # intended for code 400, client side error
     BadRequest:
       description: Bad request, such as from invalid or missing parameters
       content:

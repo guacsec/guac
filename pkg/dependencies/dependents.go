@@ -21,7 +21,6 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/cmd/guacone/cmd"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"net/http"
 	"sort"
 )
 
@@ -35,25 +34,27 @@ type PackageName struct {
 }
 
 type Dependencies interface {
-	GetSortedDependents() []PackageName
+	GetSortedDependents() ([]PackageName, error)
 }
 
 type dependencies struct {
-	ctx         context.Context
-	gqlEndpoint string
+	ctx       context.Context
+	gqlClient graphql.Client
 }
 
-func New(ctx context.Context, gqlEndpoint string) Dependencies {
+func New(ctx context.Context, gqlClient graphql.Client) Dependencies {
 	return &dependencies{
-		gqlEndpoint: gqlEndpoint,
-		ctx:         ctx,
+		gqlClient: gqlClient,
+		ctx:       ctx,
 	}
 }
 
-func (deps *dependencies) GetSortedDependents() []PackageName {
-	httpClient := http.Client{}
-	gqlClient := graphql.NewClient(deps.gqlEndpoint, &httpClient)
-	packages, _ := findAllDependents(gqlClient)
+func (deps *dependencies) GetSortedDependents() ([]PackageName, error) {
+	packages, err := findAllDependents(deps.gqlClient)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get dependents: %v", err)
+	}
 
 	var packagesArr []PackageName
 
@@ -64,7 +65,7 @@ func (deps *dependencies) GetSortedDependents() []PackageName {
 	sort.Slice(packagesArr, func(i, j int) bool {
 		return packagesArr[i].DependentCount > packagesArr[j].DependentCount
 	})
-	return packagesArr
+	return packagesArr, nil
 }
 
 // findAllDependents queries a GraphQL endpoint to find all dependencies and constructs a map of dependencyNode.
