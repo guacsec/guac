@@ -7757,13 +7757,17 @@ func (v *HasMetadataInputSpec) GetOrigin() string { return v.Origin }
 func (v *HasMetadataInputSpec) GetCollector() string { return v.Collector }
 
 type HasSBOMIncludesInputSpec struct {
-	Software     []string `json:"software"`
+	Packages     []string `json:"packages"`
+	Artifacts    []string `json:"artifacts"`
 	Dependencies []string `json:"dependencies"`
 	Occurrences  []string `json:"occurrences"`
 }
 
-// GetSoftware returns HasSBOMIncludesInputSpec.Software, and is useful for accessing the field via an interface.
-func (v *HasSBOMIncludesInputSpec) GetSoftware() []string { return v.Software }
+// GetPackages returns HasSBOMIncludesInputSpec.Packages, and is useful for accessing the field via an interface.
+func (v *HasSBOMIncludesInputSpec) GetPackages() []string { return v.Packages }
+
+// GetArtifacts returns HasSBOMIncludesInputSpec.Artifacts, and is useful for accessing the field via an interface.
+func (v *HasSBOMIncludesInputSpec) GetArtifacts() []string { return v.Artifacts }
 
 // GetDependencies returns HasSBOMIncludesInputSpec.Dependencies, and is useful for accessing the field via an interface.
 func (v *HasSBOMIncludesInputSpec) GetDependencies() []string { return v.Dependencies }

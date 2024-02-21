@@ -460,7 +460,8 @@ type HasSbom struct {
 func (HasSbom) IsNode() {}
 
 type HasSBOMIncludesInputSpec struct {
-	Software     []string `json:"software"`
+	Packages     []string `json:"packages"`
+	Artifacts    []string `json:"artifacts"`
 	Dependencies []string `json:"dependencies"`
 	Occurrences  []string `json:"occurrences"`
 }

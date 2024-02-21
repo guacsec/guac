@@ -565,20 +565,27 @@ func (ec *executionContext) unmarshalInputHasSBOMIncludesInputSpec(ctx context.C
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"software", "dependencies", "occurrences"}
+	fieldsInOrder := [...]string{"packages", "artifacts", "dependencies", "occurrences"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "software":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("software"))
+		case "packages":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("packages"))
 			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Software = data
+			it.Packages = data
+		case "artifacts":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifacts"))
+			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Artifacts = data
 		case "dependencies":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dependencies"))
 			data, err := ec.unmarshalNID2ᚕstringᚄ(ctx, v)

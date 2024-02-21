@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -153,29 +154,33 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			return nil, Errorf("%v :: %s", funcName, "subject must be either a package or artifact")
 		}
 
-		for _, pkgVersionOrArtifactID := range includes.Software {
-			pkgID, err := client.PackageVersion.Query().
+		sortedPkgIDs := helper.SortAndRemoveDups(includes.Packages)
+		sortedArtIDs := helper.SortAndRemoveDups(includes.Artifacts)
+		sortedDependencyIDs := helper.SortAndRemoveDups(includes.Dependencies)
+		sortedOccurrenceIDs := helper.SortAndRemoveDups(includes.Occurrences)
+
+		for _, pkgVersionOrArtifactID := range sortedPkgIDs {
+			if pkgID, err := client.PackageVersion.Query().
 				Where(IDEQ(pkgVersionOrArtifactID)).
-				OnlyID(ctx)
-			if err != nil {
-				if !ent.IsNotFound(err) {
-					return nil, Errorf("%v %v :: %s", funcName, "error querying for PackageVersion", err)
-				} else {
-					artifactId, err := client.Artifact.Query().
-						Where(IDEQ(pkgVersionOrArtifactID)).
-						OnlyID(ctx)
-					if err != nil {
-						return nil, Errorf("%v :: %s", funcName, "includes.Software must be either a package or artifact")
-					} else {
-						sbomCreate.AddIncludedSoftwareArtifactIDs(artifactId)
-					}
-				}
+				OnlyID(ctx); err != nil {
+				return nil, Errorf("%v %v :: %s", funcName, "error querying for PackageVersion by ID", err)
 			} else {
 				sbomCreate.AddIncludedSoftwarePackageIDs(pkgID)
 			}
 		}
 
-		for _, isDependencyID := range includes.Dependencies {
+		for _, artID := range sortedArtIDs {
+			if artifactId, err := client.Artifact.Query().
+				Where(IDEQ(artID)).
+				OnlyID(ctx); err != nil {
+
+				return nil, Errorf("%v :: %s", funcName, "error querying for artifact by ID")
+			} else {
+				sbomCreate.AddIncludedSoftwareArtifactIDs(artifactId)
+			}
+		}
+
+		for _, isDependencyID := range sortedDependencyIDs {
 			isDepID, err := client.Dependency.Query().
 				Where(IDEQ(isDependencyID)).
 				OnlyID(ctx)
@@ -185,7 +190,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			sbomCreate.AddIncludedDependencyIDs(isDepID)
 		}
 
-		for _, isOccurenceID := range includes.Occurrences {
+		for _, isOccurenceID := range sortedOccurrenceIDs {
 			isOccID, err := client.Occurrence.Query().
 				Where(IDEQ(isOccurenceID)).
 				OnlyID(ctx)
