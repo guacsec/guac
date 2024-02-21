@@ -360,7 +360,7 @@ func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy strin
 	//base case
 	if data.Kind() == reflect.String || isPrimitiveType(data.Type()) {
 		//just add a neighbour and return
-		node := Node{Value: data.Interface(), tag: heirarchy+ ": " + data.String()}
+		node := Node{Value: data.Interface(), tag: heirarchy+ "_" + data.String()}
 		node.leaf = true
 		head.neighbours = append(head.neighbours, &node)
 		return
@@ -369,7 +369,7 @@ func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy strin
 	// edge base case for time.Time to not go into recursion, while being a "struct"
 	if data.Kind() == reflect.Struct && data.Type() == reflect.TypeOf(time.Time{}) {
 		//just add a neighbour and return
-		node := Node{Value: data.Interface(), tag: heirarchy+ ": " + data.Interface().(time.Time).String()}
+		node := Node{Value: data.Interface(), tag: heirarchy+ "_" + data.Interface().(time.Time).String()}
 		node.leaf = true
 		head.neighbours = append(head.neighbours, &node)
 		return

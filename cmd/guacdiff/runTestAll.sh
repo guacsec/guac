@@ -3,7 +3,6 @@
 clear
 
 make clean
-
 make build
 
 if [ $? -ne 0 ]; then
@@ -25,10 +24,13 @@ if [ -d "$INPUT_DIR" ]; then
         echo
         echo "Running './guacdiff diff --test --file=$file' $2"
         if [ -f "$file" ]; then
-            ./guacdiff diff --test --file="$file" $2
-            if [ $? -ne 0 ]; then
-                echo "Error: './guacdiff diff --test --file=$file' $2 failed"
-                exit 1
+            output=$(./guacdiff diff --test --file="$file" $2 | tail -n 1)  # Capture the last line of the command output
+            echo "output dot file: $output"  # Print the last line of output
+            if [ "$output" != "Identical" ]; then
+
+                dot -Tjpg "$output" -o "${file%.dot}.jpg"  # Run the dot command and output as JPG
+            else
+                echo "Skipping 'dot' command because sboms are 'Identical'"
             fi
             sleep 10
         fi
