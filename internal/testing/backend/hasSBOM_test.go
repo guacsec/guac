@@ -2706,7 +2706,7 @@ func TestHasSBOM(t *testing.T) {
 				} else {
 					if pkgs != nil {
 						for _, pkg := range pkgs {
-							includes.Software = append(includes.Software, pkg.PackageVersionID)
+							includes.Packages = append(includes.Packages, pkg.PackageVersionID)
 						}
 						if test.QueryIncludePkgID {
 							test.Query = &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Package: &model.PkgSpec{ID: ptrfrom.String(pkgs[0].PackageVersionID)}}}}
@@ -2729,7 +2729,7 @@ func TestHasSBOM(t *testing.T) {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
 					if arts != nil {
-						includes.Software = append(includes.Software, arts...)
+						includes.Artifacts = append(includes.Artifacts, arts...)
 						if test.QueryIncludeArtID {
 							test.Query = &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String(arts[0])}}}}
 						}
@@ -3052,13 +3052,13 @@ func TestIngestHasSBOMs(t *testing.T) {
 					t.Fatalf("Could not ingest package: %v", err)
 				} else {
 					for _, pkg := range pkgs {
-						includes.Software = append(includes.Software, pkg.PackageVersionID)
+						includes.Packages = append(includes.Packages, pkg.PackageVersionID)
 					}
 				}
 				if arts, err := b.IngestArtifacts(ctx, test.PkgArt.Artifacts); err != nil {
 					t.Fatalf("Could not ingest artifact: %v", err)
 				} else {
-					includes.Software = append(includes.Software, arts...)
+					includes.Artifacts = append(includes.Artifacts, arts...)
 				}
 			}
 

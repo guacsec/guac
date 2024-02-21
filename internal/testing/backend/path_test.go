@@ -3423,14 +3423,14 @@ func TestNeighbors(t *testing.T) {
 						t.Fatalf("Could not ingest package: %v", err)
 					} else {
 						for _, pkg := range pkgs {
-							includes.Software = append(includes.Software, pkg.PackageVersionID)
+							includes.Packages = append(includes.Packages, pkg.PackageVersionID)
 						}
 					}
 					if arts, err := b.IngestArtifacts(ctx, tt.hasSBOMCall.PkgArt.Artifacts); err != nil {
 						t.Fatalf("Could not ingest artifact: %v", err)
 					} else {
 						if arts != nil {
-							includes.Software = append(includes.Software, arts...)
+							includes.Artifacts = append(includes.Artifacts, arts...)
 						}
 					}
 				}
