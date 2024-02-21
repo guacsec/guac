@@ -17,15 +17,13 @@ package backend
 
 import (
 	"context"
+	"fmt"
 	"log"
-	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -36,12 +34,12 @@ func (b *EntBackend) Neighbors(ctx context.Context, node string, usingOnly []mod
 }
 
 func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) {
-	id, err := strconv.Atoi(node)
+	nodID, err := uuid.Parse(node)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
 	}
 
-	record, err := b.client.Noder(ctx, id)
+	record, err := b.client.Noder(ctx, nodID)
 	if err != nil {
 		return nil, err
 	}
@@ -52,11 +50,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 	case *ent.PackageVersion:
 		pv, err := b.client.PackageVersion.Query().
 			Where(packageversion.ID(v.ID)).
-			WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			}).
+			WithName(func(q *ent.PackageNameQuery) {}).
 			Only(ctx)
 		if err != nil {
 			return nil, err
@@ -65,51 +59,45 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 	case *ent.PackageName:
 		pn, err := b.client.PackageName.Query().
 			Where(packagename.ID(v.ID)).
-			WithNamespace(func(q *ent.PackageNamespaceQuery) {
-				q.WithPackage()
-			}).
 			WithVersions().
 			Only(ctx)
 		if err != nil {
 			return nil, err
 		}
 		return toModelPackage(backReferencePackageName(pn)), nil
-	case *ent.PackageNamespace:
-		pns, err := b.client.PackageNamespace.Query().
-			Where(packagenamespace.ID(v.ID)).
-			WithPackage().
-			WithNames(func(q *ent.PackageNameQuery) {
-				q.WithVersions()
-			}).
-			Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return toModelPackage(backReferencePackageNamespace(pns)), nil
-	case *ent.PackageType:
-		pt, err := b.client.PackageType.Query().
-			Where(packagetype.ID(v.ID)).
-			WithNamespaces().
-			Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return toModelPackage(pt), nil
-	case *ent.SourceType:
-		s, err := b.client.SourceType.Query().
-			Where(sourcetype.ID(v.ID)).
-			WithNamespaces().
-			Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return toModelSource(s), nil
+	// case *ent.PackageNamespace:
+	// 	pns, err := b.client.PackageNamespace.Query().
+	// 		Where(packagenamespace.ID(v.ID)).
+	// 		WithPackage().
+	// 		WithNames(func(q *ent.PackageNameQuery) {
+	// 			q.WithVersions()
+	// 		}).
+	// 		Only(ctx)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	return toModelPackage(backReferencePackageNamespace(pns)), nil
+	// case *ent.PackageType:
+	// 	pt, err := b.client.PackageType.Query().
+	// 		Where(packagetype.ID(v.ID)).
+	// 		WithNamespaces().
+	// 		Only(ctx)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	return toModelPackage(pt), nil
+	// case *ent.SourceType:
+	// 	s, err := b.client.SourceType.Query().
+	// 		Where(sourcetype.ID(v.ID)).
+	// 		WithNamespaces().
+	// 		Only(ctx)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	return toModelSource(s), nil
 	case *ent.SourceName:
 		s, err := b.client.SourceName.Query().
 			Where(sourcename.IDIn(v.ID)).
-			WithNamespace(func(q *ent.SourceNamespaceQuery) {
-				q.WithSourceType()
-			}).
 			Only(ctx)
 		if err != nil {
 			return nil, err
@@ -117,8 +105,8 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		return toModelSourceName(s), nil
 	case *ent.Builder:
 		return toModelBuilder(v), nil
-	case *ent.VulnerabilityType:
-		return toModelVulnerability(v), nil
+	// case *ent.VulnerabilityType:
+	// 	return toModelVulnerability(v), nil
 	default:
 		log.Printf("Unknown node type: %T", v)
 	}

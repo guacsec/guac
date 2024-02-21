@@ -26,8 +26,8 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -92,7 +92,7 @@ func upsertBulkLicense(ctx context.Context, client *ent.Tx, licenseInputs []*mod
 	for _, licenses := range batches {
 		creates := make([]*ent.LicenseCreate, len(licenses))
 		for i, lic := range licenses {
-			licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helper.GuacLicenseKey(lic.LicenseInput)), 5)
+			licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](lic.LicenseInput, helpers.LicenseServerKey)), 5)
 			creates[i] = client.License.Create().
 				SetID(licenseID).
 				SetName(lic.LicenseInput.Name).
@@ -121,7 +121,7 @@ func upsertBulkLicense(ctx context.Context, client *ent.Tx, licenseInputs []*mod
 }
 
 func upsertLicense(ctx context.Context, client *ent.Tx, spec model.LicenseInputSpec) (*string, error) {
-	licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helper.GuacLicenseKey(&spec)), 5)
+	licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](&spec, helpers.LicenseServerKey)), 5)
 
 	licenseId, err := client.License.Create().
 		SetID(licenseID).
@@ -161,8 +161,4 @@ func licenseInputQuery(filter model.LicenseInputSpec) predicate.License {
 		Inline:      filter.Inline,
 		ListVersion: filter.ListVersion,
 	})
-}
-
-func getLicenseID(_ context.Context, license model.LicenseInputSpec) string {
-	return uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helper.GuacLicenseKey(&license)), 5).String()
 }
