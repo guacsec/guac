@@ -16,7 +16,11 @@
 package backend
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha1"
+	"fmt"
+	"sort"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -132,6 +136,23 @@ func upsertVulnEquals(ctx context.Context, client *ent.Tx, vulnerability model.V
 	}
 	return &record.ID, nil
 }
+
+// hashPackages is used to create a unique key for the M2M edge between PkgEquals <-M2M-> PackageVersions
+func hashVulnerabilities(slc []model.IDorVulnerabilityInput) string {
+	vulns := slc
+	hash := sha1.New()
+	content := bytes.NewBuffer(nil)
+
+	sort.SliceStable(vulns, func(i, j int) bool { return *vulns[i].VulnerabilityNodeID < *vulns[j].VulnerabilityNodeID })
+
+	for _, v := range vulns {
+		content.WriteString(fmt.Sprintf("%d", v.VulnerabilityNodeID))
+	}
+
+	hash.Write(content.Bytes())
+	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
 func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
 	return &model.VulnEqual{
 		ID:              nodeID(record.ID),

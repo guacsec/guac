@@ -22,9 +22,10 @@ import (
 	stdsql "database/sql"
 	"fmt"
 	"sort"
-	"strconv"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -46,50 +47,110 @@ func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]
 }
 
 func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error) {
-	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		return upsertPackageEqual(ctx, ent.TxFromContext(ctx), *pkg.PackageInput, *depPkg.PackageInput, pkgEqual)
+	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		return upsertPackageEqual(ctx, ent.TxFromContext(ctx), pkg, depPkg, pkgEqual)
 	})
 	if err != nil {
 		return "", err
 	}
 
-	return strconv.Itoa(*id), nil
+	return *id, nil
 }
 
 func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
-	var ids []string
-	for i, pkgEqual := range pkgEquals {
-		id, err := b.IngestPkgEqual(ctx, *pkgs[i], *otherPackages[i], *pkgEqual)
+	funcName := "IngestPkgEquals"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkPkgEquals(ctx, client, pkgs, otherPackages, pkgEquals)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestPkgEquals failed with err: %v", err)
+			return nil, err
 		}
-		ids = append(ids, id)
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return ids, nil
+
+	return *ids, nil
 }
 
-func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInputSpec, pkgB model.PkgInputSpec, spec model.PkgEqualInputSpec) (*int, error) {
-	pkgARecord, err := client.PackageVersion.Query().Where(packageVersionInputQuery(pkgA)).Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	pkgBRecord, err := client.PackageVersion.Query().Where(packageVersionInputQuery(pkgB)).Only(ctx)
-	if err != nil {
-		return nil, err
-	}
+func upsertBulkPkgEquals(ctx context.Context, client *ent.Tx, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
-	if pkgARecord.ID == pkgBRecord.ID {
-		return nil, fmt.Errorf("cannot create a PkgEqual between the same package")
+	conflictColumns := []string{
+		pkgequal.FieldPackagesHash,
+		pkgequal.FieldOrigin,
+		pkgequal.FieldCollector,
+		pkgequal.FieldJustification,
 	}
 
-	sortedPackages := []*ent.PackageVersion{pkgARecord, pkgBRecord}
-	sort.Slice(sortedPackages, func(i, j int) bool {
-		return sortedPackages[i].ID < sortedPackages[j].ID
-	})
+	batches := chunk(pkgEquals, 100)
 
-	id, err := client.PkgEqual.Create().
-		AddPackages(sortedPackages...).
-		SetPackagesHash(hashPackages(sortedPackages)).
+	index := 0
+	for _, pes := range batches {
+		creates := make([]*ent.PkgEqualCreate, len(pes))
+		for i, pe := range pes {
+
+			sortedPkgs := []model.IDorPkgInput{*pkgs[index], *otherPackages[index]}
+
+			sort.SliceStable(sortedPkgs, func(i, j int) bool { return *sortedPkgs[i].PackageVersionID < *sortedPkgs[j].PackageVersionID })
+
+			var sortedPkgIDs []uuid.UUID
+			for _, pkg := range sortedPkgs {
+				if pkg.PackageVersionID == nil {
+					return nil, fmt.Errorf("PackageVersionID not specified in IDorPkgInput")
+				}
+				pkgID, err := uuid.Parse(*pkg.PackageVersionID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+				}
+				sortedPkgIDs = append(sortedPkgIDs, pkgID)
+			}
+
+			creates[i] = client.PkgEqual.Create().
+				AddPackageIDs(sortedPkgIDs...).
+				SetPackagesHash(hashPackages(sortedPkgs)).
+				SetCollector(pe.Collector).
+				SetJustification(pe.Justification).
+				SetOrigin(pe.Origin)
+
+			index++
+		}
+
+		err := client.PkgEqual.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &ids, nil
+}
+
+func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.IDorPkgInput, pkgB model.IDorPkgInput, spec model.PkgEqualInputSpec) (*string, error) {
+
+	sortedPkgs := []model.IDorPkgInput{pkgA, pkgB}
+
+	sort.SliceStable(sortedPkgs, func(i, j int) bool { return *sortedPkgs[i].PackageVersionID < *sortedPkgs[j].PackageVersionID })
+
+	var sortedPkgIDs []uuid.UUID
+	for _, pkg := range sortedPkgs {
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("PackageVersionID not specified in IDorPkgInput")
+		}
+		pkgID, err := uuid.Parse(*pkg.PackageVersionID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+		}
+		sortedPkgIDs = append(sortedPkgIDs, pkgID)
+	}
+
+	_, err := client.PkgEqual.Create().
+		AddPackageIDs(sortedPkgIDs...).
+		SetPackagesHash(hashPackages(sortedPkgs)).
 		SetCollector(spec.Collector).
 		SetJustification(spec.Justification).
 		SetOrigin(spec.Origin).
@@ -107,18 +168,9 @@ func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.PkgInput
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsertPackageEqual")
 		}
-		id, err = client.PkgEqual.Query().
-			Where(pkgequal.CollectorEQ(spec.Collector),
-				pkgequal.OriginEQ(spec.Origin),
-				pkgequal.JustificationEQ(spec.Justification),
-				pkgequal.PackagesHashEQ(hashPackages(sortedPackages))).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get Scorecard ID")
-		}
 	}
 
-	return &id, nil
+	return ptrfrom.String(""), nil
 }
 
 func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {
@@ -156,7 +208,7 @@ func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 	// }
 
 	return &model.PkgEqual{
-		ID:            nodeID(record.ID),
+		ID:            record.ID.String(),
 		Origin:        record.Origin,
 		Collector:     record.Collector,
 		Justification: record.Justification,
@@ -168,15 +220,13 @@ func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 }
 
 // hashPackages is used to create a unique key for the M2M edge between PkgEquals <-M2M-> PackageVersions
-func hashPackages(slc ent.PackageVersions) string {
+func hashPackages(slc []model.IDorPkgInput) string {
 	pkgs := slc
 	hash := sha1.New()
 	content := bytes.NewBuffer(nil)
 
-	sort.Slice(pkgs, func(i, j int) bool { return pkgs[i].ID < pkgs[j].ID })
-
 	for _, v := range pkgs {
-		content.WriteString(fmt.Sprintf("%d", v.ID))
+		content.WriteString(fmt.Sprintf("%d", v.PackageVersionID))
 	}
 
 	hash.Write(content.Bytes())

@@ -102,28 +102,30 @@ func upsertBulkHashEqual(ctx context.Context, client *ent.Tx, artifacts []*model
 	for _, hes := range batches {
 		creates := make([]*ent.HashEqualCreate, len(hes))
 		for i, he := range hes {
+
+			sortedArtifacts := []model.IDorArtifactInput{*artifacts[index], *otherArtifacts[index]}
+
+			sort.SliceStable(sortedArtifacts, func(i, j int) bool { return *sortedArtifacts[i].ArtifactID < *sortedArtifacts[j].ArtifactID })
+
+			var sortedArtIDs []uuid.UUID
+			for _, art := range sortedArtifacts {
+				if art.ArtifactID == nil {
+					return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+				}
+				artID, err := uuid.Parse(*art.ArtifactID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+				}
+				sortedArtIDs = append(sortedArtIDs, artID)
+			}
+
 			creates[i] = client.HashEqual.Create().
-				SetArtifactsHash(hashArtifacts([]model.IDorArtifactInput{*artifacts[index], *otherArtifacts[index]})).
+				AddArtifactIDs(sortedArtIDs...).
+				SetArtifactsHash(hashArtifacts(sortedArtifacts)).
 				SetJustification(he.Justification).
 				SetOrigin(he.Origin).
 				SetCollector(he.Collector)
 
-			if artifacts[index].ArtifactID == nil {
-				return nil, fmt.Errorf("ArtifactID not specified in IDorArtifactInput")
-			}
-			artAID, err := uuid.Parse(*artifacts[index].ArtifactID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-			}
-
-			if otherArtifacts[index].ArtifactID == nil {
-				return nil, fmt.Errorf("ArtifactID not specified in IDorArtifactInput")
-			}
-			artBID, err := uuid.Parse(*otherArtifacts[index].ArtifactID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-			}
-			creates[i].AddArtifactIDs(artAID, artBID)
 			index++
 		}
 
@@ -142,34 +144,25 @@ func upsertBulkHashEqual(ctx context.Context, client *ent.Tx, artifacts []*model
 
 func upsertHashEqual(ctx context.Context, client *ent.Tx, artifactA model.IDorArtifactInput, artifactB model.IDorArtifactInput, spec model.HashEqualInputSpec) (*string, error) {
 
-	if artifactA.ArtifactID == nil {
-		return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-	}
-	artAID, err := uuid.Parse(*artifactA.ArtifactID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-	}
-	// artifactARecord, err := client.Artifact.Get(ctx, artAID)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	sortedArtifacts := []model.IDorArtifactInput{artifactA, artifactB}
 
-	if artifactB.ArtifactID == nil {
-		return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-	}
-	artBID, err := uuid.Parse(*artifactB.ArtifactID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-	}
+	sort.SliceStable(sortedArtifacts, func(i, j int) bool { return *sortedArtifacts[i].ArtifactID < *sortedArtifacts[j].ArtifactID })
 
-	// record, err := artifactARecord.QuerySame().Where(hashequal.HasArtifactsWith(artifactQueryInputPredicates(*artifactB.ArtifactInput))).Only(ctx)
-	// if ent.MaskNotFound(err) != nil {
-	// 	return nil, err
-	// }
+	var sortedArtIDs []uuid.UUID
+	for _, art := range sortedArtifacts {
+		if art.ArtifactID == nil {
+			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+		}
+		artID, err := uuid.Parse(*art.ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		}
+		sortedArtIDs = append(sortedArtIDs, artID)
+	}
 
 	if _, err := client.HashEqual.Create().
-		AddArtifactIDs(artAID, artBID).
-		SetArtifactsHash(hashArtifacts([]model.IDorArtifactInput{artifactA, artifactB})).
+		AddArtifactIDs(sortedArtIDs...).
+		SetArtifactsHash(hashArtifacts(sortedArtifacts)).
 		SetJustification(spec.Justification).
 		SetOrigin(spec.Origin).
 		SetCollector(spec.Collector).
@@ -191,11 +184,10 @@ func upsertHashEqual(ctx context.Context, client *ent.Tx, artifactA model.IDorAr
 }
 
 // hashArtifacts is used to create a unique key for the M2M edge between HashEquals <-M2M-> artifacts
-func hashArtifacts(arts []model.IDorArtifactInput) string {
+func hashArtifacts(slc []model.IDorArtifactInput) string {
+	arts := slc
 	hash := sha1.New()
 	content := bytes.NewBuffer(nil)
-
-	sort.Slice(arts, func(i, j int) bool { return arts[i].ArtifactInput.Digest < arts[j].ArtifactInput.Digest })
 
 	for _, v := range arts {
 		content.WriteString(fmt.Sprintf("%d", v.ArtifactID))
