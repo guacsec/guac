@@ -31,7 +31,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
 		for _, p := range preds {
-			var packageIDs []string
+			packageIDs := make([]string, 0)
 			collectedIDorPkgInputs := make(map[string]*model.IDorPkgInput)
 			packages := p.GetPackages(ctx)
 			logger.Infof("assembling Package: %v", len(packages))
@@ -55,7 +55,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
-			var artifactIDs []string
+			artifactIDs := make([]string, 0)
 			collectedIDorArtInputs := make(map[string]*model.IDorArtifactInput)
 			artifacts := p.GetArtifacts(ctx)
 			logger.Infof("assembling Artifact: %v", len(artifacts))
@@ -115,7 +115,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
-			var isDependenciesIDs []string
+			isDependenciesIDs := make([]string, 0)
 			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
 			for _, v := range p.IsDependency {
 				if id, err := ingestIsDependency(ctx, gqlclient, v, collectedIDorPkgInputs); err != nil {
@@ -125,7 +125,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				}
 			}
 
-			var isOccurrencesIDs []string
+			isOccurrencesIDs := make([]string, 0)
 			logger.Infof("assembling IsOccurrence: %v", len(p.IsOccurrence))
 			for _, v := range p.IsOccurrence {
 				if id, err := ingestIsOccurrence(ctx, gqlclient, v, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIDorSrcInputs); err != nil {

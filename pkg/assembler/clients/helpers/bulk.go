@@ -33,7 +33,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 		for _, p := range preds {
 
 			// Ingest Packages
-			var packageIDs []string
+			packageIDs := make([]string, 0)
 
 			packages := p.GetPackages(ctx)
 			logger.Infof("assembling Package: %v", len(packages))
@@ -59,7 +59,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 
 			// Ingest Artifacts
-			var artifactIDs []string
+			artifactIDs := make([]string, 0)
 			artifacts := p.GetArtifacts(ctx)
 			logger.Infof("assembling Artifact: %v", len(artifacts))
 
@@ -115,7 +115,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 
 			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
-			isDependenciesIDs := []string{}
+			isDependenciesIDs := make([]string, 0)
 			if ingestedIsDependenciesIDs, err := ingestIsDependencies(ctx, gqlclient, p.IsDependency, collectedIDorPkgInputs); err != nil {
 				logger.Errorf("ingestIsDependencies failed with error: %v", err)
 			} else {
@@ -123,7 +123,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 
 			logger.Infof("assembling IsOccurrence: %v", len(p.IsOccurrence))
-			isOccurrencesIDs := []string{}
+			isOccurrencesIDs := make([]string, 0)
 			if ingestedIsOccurrencesIDs, err := ingestIsOccurrences(ctx, gqlclient, p.IsOccurrence, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIDorSrcInputs); err != nil {
 				logger.Errorf("ingestIsOccurrences failed with error: %v", err)
 			} else {
