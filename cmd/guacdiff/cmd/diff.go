@@ -422,10 +422,14 @@ func sortDataArray(data reflect.Value) reflect.Value {
 	}
 
 	sort.SliceStable(data.Interface(), func(i, j int) bool {
-		fmt.Println("dsddsdsds")
-		id1 := data.Index(i).FieldByName("sabun").String()
-		fmt.Println("dsddsdsds")
+		id1 := data.Index(i).FieldByName("Id").String()
 		id2 := data.Index(j).FieldByName("Id").String()
+
+		if id1 == "" || id2 == "" {
+			fmt.Println("Sorting error,", data.Type().Name(),"Id is empty")
+			os.Exit(1)
+		}
+
 		return id1 < id2
 	})
 	return data
