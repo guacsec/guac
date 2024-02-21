@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
+//go:build integrationMerge
 
 package dependencies
 
@@ -266,11 +266,11 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, dependencyIds, so
 	}
 	for _, ingest := range ingestHasSBOMStruct {
 		if ingest.pkg != nil {
-			if _, err := model.IngestPackage(ctx, client, *ingest.pkg); err != nil {
+			if _, err := model.IngestPackage(ctx, client, model.IDorPkgInput{PackageInput: ingest.pkg}); err != nil {
 				return fmt.Errorf("Error in ingesting package: %v\n", err)
 			}
 
-			if _, err := model.HasSBOMPkg(ctx, client, *ingest.pkg, ingest.hasSBOM, ingest.includes); err != nil {
+			if _, err := model.IngestHasSBOMPkg(ctx, client, model.IDorPkgInput{PackageInput: ingest.pkg}, ingest.hasSBOM, ingest.includes); err != nil {
 				return fmt.Errorf("Error in ingesting: %v\n", err)
 			}
 		} else {
@@ -283,23 +283,29 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, dependencyIds, so
 
 // createOccurrenceAndArtifact creates a test artifact and a test occurrence.
 // The values in artifact and occurrence are fake values and won't work for anything other than tests
-func createOccurrenceAndArtifact(t *testing.T, ctx context.Context, gqlClient graphql.Client, info specInfo) (error, *model.IsOccurrencePkgResponse) {
-	_, err := model.IngestArtifact(ctx, gqlClient, model.ArtifactInputSpec{
-		Algorithm: "sha265",
-		Digest:    "123",
+func createOccurrenceAndArtifact(t *testing.T, ctx context.Context, gqlClient graphql.Client, info specInfo) (error, *model.IngestIsOccurrencePkgResponse) {
+	_, err := model.IngestArtifact(ctx, gqlClient, model.IDorArtifactInput{
+		ArtifactInput: &model.ArtifactInputSpec{
+			Algorithm: "sha265",
+			Digest:    "123",
+		},
 	})
 
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
 
-	id, err := model.IsOccurrencePkg(ctx, gqlClient, model.PkgInputSpec{
-		Type:    info.typeName,
-		Name:    info.name,
-		Version: &info.version,
-	}, model.ArtifactInputSpec{
-		Algorithm: "sha265",
-		Digest:    "123",
+	id, err := model.IngestIsOccurrencePkg(ctx, gqlClient, model.IDorPkgInput{
+		PackageInput: &model.PkgInputSpec{
+			Type:    info.typeName,
+			Name:    info.name,
+			Version: &info.version,
+		},
+	}, model.IDorArtifactInput{
+		ArtifactInput: &model.ArtifactInputSpec{
+			Algorithm: "sha265",
+			Digest:    "123",
+		},
 	}, model.IsOccurrenceInputSpec{
 		Justification: "test-justification",
 		Origin:        "test-origin",
@@ -334,19 +340,21 @@ func check(t *testing.T, wantErr bool, want map[string]int) {
 func createPackageNodes(ctx context.Context, gqlClient graphql.Client, packages map[string]testPkgInputSpec, pkgSpecInfo []specInfo) ([]string, error) {
 	var res []string
 	for _, info := range pkgSpecInfo {
-		spec := model.PkgInputSpec{
-			Type:    info.typeName,
-			Name:    info.name,
-			Version: &info.version,
+		spec := model.IDorPkgInput{
+			PackageInput: &model.PkgInputSpec{
+				Type:    info.typeName,
+				Name:    info.name,
+				Version: &info.version,
+			},
 		}
 		id, err := model.IngestPackage(ctx, gqlClient, spec)
 		if err != nil {
 			return nil, fmt.Errorf("failed to ingest package: %v", err)
 		}
-		packages[spec.Type+spec.Name+"Version"+*spec.Version] = testPkgInputSpec{
+		packages[spec.PackageInput.Type+spec.PackageInput.Name+"Version"+*spec.PackageInput.Version] = testPkgInputSpec{
 			id:       id.IngestPackage.PackageVersionID,
-			name:     spec.Name,
-			typeName: spec.Type,
+			name:     spec.PackageInput.Name,
+			typeName: spec.PackageInput.Type,
 			version:  info.version,
 		}
 		res = append(res, id.IngestPackage.PackageVersionID)
@@ -362,20 +370,24 @@ func createDependencyNodes(ctx context.Context, gqlClient graphql.Client, packag
 		depPkgName := connection.depPkg.typeName + connection.depPkg.name + "Version" + connection.depPkg.version
 
 		pkgVersion := packages[pkgName].version
-		pkSpec := model.PkgInputSpec{
-			Type:    packages[pkgName].typeName,
-			Name:    packages[pkgName].name,
-			Version: &pkgVersion,
+		pkSpec := model.IDorPkgInput{
+			PackageInput: &model.PkgInputSpec{
+				Type:    packages[pkgName].typeName,
+				Name:    packages[pkgName].name,
+				Version: &pkgVersion,
+			},
 		}
 
 		depPkgVersion := packages[depPkgName].version
-		depPkgSpec := model.PkgInputSpec{
-			Type:    packages[depPkgName].typeName,
-			Name:    packages[depPkgName].name,
-			Version: &depPkgVersion,
+		depPkgSpec := model.IDorPkgInput{
+			PackageInput: &model.PkgInputSpec{
+				Type:    packages[depPkgName].typeName,
+				Name:    packages[depPkgName].name,
+				Version: &depPkgVersion,
+			},
 		}
 
-		id, err := model.IsDependency(
+		id, err := model.IngestIsDependency(
 			ctx,
 			gqlClient,
 			pkSpec,
