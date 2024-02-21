@@ -21,6 +21,8 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -28,7 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
@@ -49,44 +50,31 @@ func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 }
 
 func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertHasMetadata(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, hasMetadata)
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to execute IngestHasMetadata :: %s", err)
 	}
 
-	return nodeID(*recordID), nil
+	return *recordID, nil
 }
 
 func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
-	var results = make([]string, len(hasMetadataList))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range hasMetadataList {
-		index := i
-		hmSpec := *hasMetadataList[i]
-		var subject model.PackageSourceOrArtifactInput
-		if len(subjects.Packages) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Package: subjects.Packages[i]}
-		} else if len(subjects.Artifacts) > 0 {
-			subject = model.PackageSourceOrArtifactInput{Artifact: subjects.Artifacts[i]}
-		} else {
-			subject = model.PackageSourceOrArtifactInput{Source: subjects.Sources[i]}
+	funcName := "IngestBulkHasMetadata"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkHasMetadata(ctx, client, subjects, pkgMatchType, hasMetadataList)
+		if err != nil {
+			return nil, err
 		}
-		concurrently(eg, func() error {
-			hm, err := b.IngestHasMetadata(ctx, subject, pkgMatchType, hmSpec)
-			if err == nil {
-				results[index] = hm
-				return err
-			} else {
-				return gqlerror.Errorf("IngestBulkHasMetadata failed with element #%v %+v with err: %v", i, *subject.Package, err)
-			}
-		})
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
-	return results, nil
+
+	return *ids, nil
 }
 
 func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {
@@ -116,7 +104,7 @@ func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {
 	return hasmetadata.And(predicates...)
 }
 
-func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.HasMetadataInputSpec) (*int, error) {
+func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.HasMetadataInputSpec) (*string, error) {
 	insert := client.HasMetadata.Create().
 		SetKey(spec.Key).
 		SetValue(spec.Value).
@@ -136,11 +124,14 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 
 	switch {
 	case subject.Artifact != nil:
-		art, err := client.Artifact.Query().Where(artifactQueryInputPredicates(*subject.Artifact.ArtifactInput)).Only(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve subject artifact :: %s", err)
+		if subject.Artifact.ArtifactID == nil {
+			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
 		}
-		insert.SetArtifact(art)
+		artID, err := uuid.Parse(*subject.Artifact.ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		}
+		insert.SetArtifactID(artID)
 		conflictColumns = append(conflictColumns, hasmetadata.FieldArtifactID)
 		conflictWhere = sql.And(
 			sql.NotNull(hasmetadata.FieldArtifactID),
@@ -151,11 +142,14 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 
 	case subject.Package != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			pv, err := getPkgVersion(ctx, client.Client(), *subject.Package.PackageInput)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve subject package version :: %s", err)
+			if subject.Package.PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 			}
-			insert.SetPackageVersion(pv)
+			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+			insert.SetPackageVersionID(pkgVersionID)
 			conflictColumns = append(conflictColumns, hasmetadata.FieldPackageVersionID)
 			conflictWhere = sql.And(
 				sql.IsNull(hasmetadata.FieldArtifactID),
@@ -164,11 +158,14 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 				sql.IsNull(hasmetadata.FieldSourceID),
 			)
 		} else {
-			pn, err := getPkgName(ctx, client.Client(), *subject.Package.PackageInput)
-			if err != nil {
-				return nil, fmt.Errorf("failed to retrieve subject package name :: %s", err)
+			if subject.Package.PackageNameID == nil {
+				return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
 			}
-			insert.SetAllVersions(pn)
+			pkgNameID, err := uuid.Parse(*subject.Package.PackageNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+			}
+			insert.SetAllVersionsID(pkgNameID)
 			conflictColumns = append(conflictColumns, hasmetadata.FieldPackageNameID)
 			conflictWhere = sql.And(
 				sql.IsNull(hasmetadata.FieldArtifactID),
@@ -179,11 +176,14 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 		}
 
 	case subject.Source != nil:
-		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source.SourceInput)
-		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve subject source :: %s", err)
+		if subject.Source.SourceNameID == nil {
+			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
 		}
-		insert.SetSourceID(srcID)
+		sourceID, err := uuid.Parse(*subject.Source.SourceNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		}
+		insert.SetSourceID(sourceID)
 		conflictColumns = append(conflictColumns, hasmetadata.FieldSourceID)
 		conflictWhere = sql.And(
 			sql.IsNull(hasmetadata.FieldArtifactID),
@@ -193,7 +193,7 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 		)
 	}
 
-	id, err := insert.OnConflict(
+	_, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
@@ -203,15 +203,136 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert HasMetadata node")
 		}
-		id, err = client.HasMetadata.Query().
-			Where(hasMetadataInputPredicate(subject, pkgMatchType, spec)).
-			OnlyID(ctx)
+	}
+
+	return ptrfrom.String(""), nil
+}
+
+func upsertBulkHasMetadata(ctx context.Context, client *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		hasmetadata.FieldKey,
+		hasmetadata.FieldValue,
+		hasmetadata.FieldJustification,
+		hasmetadata.FieldOrigin,
+		hasmetadata.FieldCollector,
+	}
+	var conflictWhere *sql.Predicate
+
+	switch {
+	case len(subjects.Artifacts) > 0:
+		conflictColumns = append(conflictColumns, hasmetadata.FieldArtifactID)
+		conflictWhere = sql.And(
+			sql.NotNull(hasmetadata.FieldArtifactID),
+			sql.IsNull(hasmetadata.FieldPackageNameID),
+			sql.IsNull(hasmetadata.FieldPackageVersionID),
+			sql.IsNull(hasmetadata.FieldSourceID),
+		)
+
+	case len(subjects.Packages) > 0:
+		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+			conflictColumns = append(conflictColumns, hasmetadata.FieldPackageVersionID)
+			conflictWhere = sql.And(
+				sql.IsNull(hasmetadata.FieldArtifactID),
+				sql.NotNull(hasmetadata.FieldPackageVersionID),
+				sql.IsNull(hasmetadata.FieldPackageNameID),
+				sql.IsNull(hasmetadata.FieldSourceID),
+			)
+		} else {
+			conflictColumns = append(conflictColumns, hasmetadata.FieldPackageNameID)
+			conflictWhere = sql.And(
+				sql.IsNull(hasmetadata.FieldArtifactID),
+				sql.IsNull(hasmetadata.FieldPackageVersionID),
+				sql.NotNull(hasmetadata.FieldPackageNameID),
+				sql.IsNull(hasmetadata.FieldSourceID),
+			)
+		}
+
+	case len(subjects.Sources) > 0:
+		conflictColumns = append(conflictColumns, hasmetadata.FieldSourceID)
+		conflictWhere = sql.And(
+			sql.IsNull(hasmetadata.FieldArtifactID),
+			sql.IsNull(hasmetadata.FieldPackageVersionID),
+			sql.IsNull(hasmetadata.FieldPackageNameID),
+			sql.NotNull(hasmetadata.FieldSourceID),
+		)
+	}
+
+	batches := chunk(hasMetadataList, 100)
+
+	index := 0
+	for _, hms := range batches {
+		creates := make([]*ent.HasMetadataCreate, len(hms))
+		for i, hm := range hms {
+			creates[i] = client.HasMetadata.Create().
+				SetKey(hm.Key).
+				SetValue(hm.Value).
+				SetTimestamp(hm.Timestamp.UTC()).
+				SetJustification(hm.Justification).
+				SetOrigin(hm.Origin).
+				SetCollector(hm.Collector)
+
+			switch {
+			case len(subjects.Artifacts) > 0:
+				if subjects.Artifacts[index].ArtifactID == nil {
+					return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+				}
+				artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+				}
+				creates[i].SetArtifactID(artID)
+
+			case len(subjects.Packages) > 0:
+				if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+					if subjects.Packages[index].PackageVersionID == nil {
+						return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+					}
+					pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+					}
+					creates[i].SetPackageVersionID(pkgVersionID)
+
+				} else {
+					if subjects.Packages[index].PackageNameID == nil {
+						return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
+					}
+					pkgNameID, err := uuid.Parse(*subjects.Packages[index].PackageNameID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+					}
+					creates[i].SetAllVersionsID(pkgNameID)
+
+				}
+			case len(subjects.Sources) > 0:
+				if subjects.Sources[index].SourceNameID == nil {
+					return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+				}
+				sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
+				}
+				creates[i].SetSourceID(sourceID)
+
+			}
+			index++
+		}
+
+		err := client.HasMetadata.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictWhere(conflictWhere),
+			).
+			DoNothing().
+			Exec(ctx)
 		if err != nil {
-			return nil, errors.Wrap(err, "get HasMetadata")
+			return nil, err
 		}
 	}
 
-	return &id, nil
+	return &ids, nil
 }
 
 func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
@@ -219,7 +340,7 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 
 	switch {
 	case v.Edges.Source != nil:
-		sub = toModelSource(backReferenceSourceName(v.Edges.Source))
+		sub = toModelSource((v.Edges.Source))
 	case v.Edges.PackageVersion != nil:
 		sub = toModelPackage(backReferencePackageVersion(v.Edges.PackageVersion))
 	case v.Edges.AllVersions != nil:
@@ -232,7 +353,7 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 	}
 
 	return &model.HasMetadata{
-		ID:            nodeID(v.ID),
+		ID:            v.ID.String(),
 		Subject:       sub,
 		Key:           v.Key,
 		Value:         v.Value,
