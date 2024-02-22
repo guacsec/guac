@@ -39,23 +39,6 @@ type SBOMDiffTest struct {
     HasSBOMTwo model.HasSBOMsHasSBOM `json:"hasSBOMTwo"`
 }
 
-type Node struct {
-	Value interface{}
-	neighbours []*Node
-	leaf bool
-	tag string
-}
-
-type Edge struct {
-	Source Node
-	Target Node
-}
-
-type GEDGraph struct {
-	Nodes []Node
-	Edges []Edge
-}
-
 var rootCmd = &cobra.Command{
 	Use:   "guacdiff",
 	Short: "",

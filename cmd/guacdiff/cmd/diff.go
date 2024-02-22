@@ -21,15 +21,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sort"
-
-	"reflect"
-	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/dominikbraun/graph"
+	"github.com/dominikbraun/graph/draw"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -39,89 +36,46 @@ var (
 	hasSBOMOne model.HasSBOMsHasSBOM
 	hasSBOMTwo model.HasSBOMsHasSBOM
 )
-
-func CreateGraphFile(pathsOne, pathsTwo [][]*Node, filename string) error {
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	file.WriteString("graph G {\n")
-	connectNodes(pathsOne, file, " [color=red]")
-	connectNodes(pathsTwo, file, " [color=green]")
-	file.WriteString("}\n")
-	return nil
+type Node struct {
+	ID string
+	Attributes map[string]interface{}
+	color string
+}
+type Graph struct {
+    graph graph.Graph[string, string]        
+    Attributes map[string]interface{}
+	Nodes map[string]*Node
 }
 
-func connectNodes(paths [][]*Node, file *os.File, colorText string) {
-	for _, path := range paths {
-		if len(path) > 1 {
-			for i := 0; i < len(path)-1; i++ {
-				if i+1 < len(path) {
-					edge := fmt.Sprintf("\t%s -- %s" +colorText+ ";\n", path[i].tag, path[i+1].tag)
-					file.WriteString(edge)
-				}
-			}
-		}
+func (g *Graph) AddGraphNode(node *Node) {
+	g.Nodes[node.ID] = node
+	g.graph.AddVertex(node.ID)
+}
+
+func (g *Graph) AddGraphEdge(to, from string) {
+    g.graph.AddEdge(to, from)
+	if g.Nodes[to] != nil {
+		g.Nodes[to] = &Node{ID: to, color: "black"}
+	}
+	if g.Nodes[to] != nil {
+		g.Nodes[from] = &Node{ID: from, color: "black"}
 	}
 }
 
-
-func findPathsRecursively(node *Node, currentPath []*Node, currentPathString string, allPaths *[][]*Node, allPathsString *[]string) {
-	if node == nil {
-		return
-	}
-
-	currentPath = append(currentPath, node)
-	if currentPathString!= "" {
-		currentPathString = currentPathString + " -> "
-	}
-	currentPathString = currentPathString + node.tag
-
-	if node.leaf {
-		pathCopy := make([]*Node, len(currentPath))
-		copy(pathCopy, currentPath)
-		*allPaths = append(*allPaths, pathCopy)
-		*allPathsString = append(*allPathsString, currentPathString)
-	}
-
-	for _, neighbor := range node.neighbours {
-		findPathsRecursively(neighbor, currentPath, currentPathString, allPaths, allPathsString)
-	}
-
-	currentPath = currentPath[:len(currentPath)-1]
-	
+func (g *Graph) SetAttribute(key string, value interface{}) {
+    g.Attributes[key] = value
 }
 
-func getPaths(head *Node)([][]*Node, []string){
-	var allPaths [][]*Node
-	var allPathsString []string
-	currentPathString := ""
-	currentPath := []*Node{}
-	findPathsRecursively(head, currentPath, currentPathString, &allPaths, &allPathsString)
-	return allPaths, allPathsString
+func NewGraph() *Graph {
+    return &Graph{
+        graph:      graph.New(graph.StringHash, graph.Directed()),
+        Attributes: make(map[string]interface{}),
+		Nodes: make(map[string]*Node),
+    }
 }
 
-
-func printPaths(paths [][]*Node) {
-	count := 0
-	for _, path := range paths {
-		count += 1
-		fmt.Println(getPathString(path)+"\n")
-	}
-	fmt.Println("Total Paths:", count)
-}
-
-func getPathString(path []*Node) string {
-	pathStr := ""
-	for i, node := range path {
-		
-		pathStr = pathStr + node.tag
-		if (i != (len(path) -1) ) {
-			pathStr = pathStr + "->"
-		}
-	}
-	return pathStr
+func (g *Graph) SetNodeAttribute(id, key string, value interface{}){
+	g.Nodes[id].Attributes[key] = value
 }
 
 func init() {
@@ -131,7 +85,6 @@ func init() {
 	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
 	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
 	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
-	rootCmd.PersistentFlags().Bool("dot", false, "create a dot file to visualize the diff")
 	rootCmd.PersistentFlags().String("file", "tests/identical.json", "filename to read sbom test cases from")
 }
 
@@ -179,7 +132,6 @@ var diffCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		test, _ := cmd.Flags().GetBool("test")
 		testfile, _ := cmd.Flags().GetString("file")
-		dot, _ := cmd.Flags().GetBool("dot")
 		var err error
 
 		if !test {
@@ -251,198 +203,115 @@ var diffCmd = &cobra.Command{
 			hasSBOMOne = test.HasSBOMOne
 			hasSBOMTwo = test.HasSBOMTwo
 		}
+		//create graphs
+		gOne := makeGraph(hasSBOMOne)
+		gTwo := makeGraph(hasSBOMTwo)
 
-		//init first node
-		nodeOne := Node{Value: hasSBOMOne.Id, tag: "Id"}
-		nodeTwo := Node{Value: hasSBOMTwo.Id, tag: "Id"}
+		//diff
+		diffGraph := highlightDiff(gOne, gTwo)
 
-		// offset to field(0) to come to get to AllHasSBOMTree
-		allHasSBOMTreeOne := reflect.ValueOf(hasSBOMOne).Field(0)
-		allHasSBOMTreeTwo := reflect.ValueOf(hasSBOMTwo).Field(0)
-
-		//AllHasSBOMTree is a struct
-		//convert the HasSBOM to a graph, 
-		for i := 0; i < allHasSBOMTreeOne.NumField(); i++ {
-			fieldOne := allHasSBOMTreeOne.Field(i)
-			fieldTwo := allHasSBOMTreeTwo.Field(i)
-			fieldTypeOne := reflect.TypeOf(allHasSBOMTreeOne.Interface()).Field(i).Name 
-			fieldTypeTwo := reflect.TypeOf(allHasSBOMTreeTwo.Interface()).Field(i).Name 
-
-			//TODO Add support for support for the type interfaces AllHasSBOMTreeIncludedSoftwarePackageOrArtifact & AllHasSBOMTreeSubjectPackageOrArtifact
-			//remove Subject and IncludedSoftware from the graph for now.
-			if  fieldTypeOne != "Id" && fieldTypeOne != "Subject" && fieldTypeOne != "IncludedSoftware"{ //id is root node, so ignore it as it has been already created
-				hasSBOMResponsFieldsToGraph(fieldOne, &nodeOne, fieldTypeOne)
-			}
-			if fieldTypeTwo != "Id" && fieldTypeTwo != "Subject" && fieldTypeTwo != "IncludedSoftware"  { //id is root node, so ignore it as it has been already created
-				hasSBOMResponsFieldsToGraph(fieldTwo, &nodeTwo,  fieldTypeTwo)
-			}
-		}
-
-		//get list of paths in the graph
-		pathsOne, pathsOneStrings := getPaths(&nodeOne)
-		pathsTwo, pathsTwoStrings := getPaths(&nodeTwo)
-
-		//find the diff
-		diffedPathsOne, diffedPathsTwo := getDiff(pathsOne, pathsTwo, pathsOneStrings, pathsTwoStrings, dot)
-		if len(diffedPathsOne) == 0 && len(diffedPathsTwo) == 0 {
-			fmt.Println("Identical")
-			return
-		}
-
-		//create the dot files
-		if dot{
-			randfilename := rand.String(10)+".dot"
-			err := CreateGraphFile(diffedPathsOne, diffedPathsTwo, randfilename ); if err!= nil {
-				fmt.Println("Error creating graph file:", err)	
-				return
-			}else{
-				fmt.Println(randfilename)
-			}
-		}
+		//create the dot file
+		createGraphDotFile(diffGraph)
 	},
 }
 
+func createGraphDotFile(g *Graph){
+	filename := rand.String(10)+".dot"
+	file, _ := os.Create(filename)
+	err := draw.DOT(g.graph, file)
+	if err!= nil {
+		fmt.Println("Error creating dot file:", err)
+		os.Exit(1)
+	}
+	fmt.Println(filename)
+}
+func graphCopy(g *Graph) *Graph {
+	gclone := NewGraph()
 
-func getPatchMatch(stringOne, stringTwo string, dmp *diffmatchpatch.DiffMatchPatch, enabled bool)  {
-	if enabled {
-		return
+	graphCopy, err := g.graph.Clone()
+	if err!= nil {
+		fmt.Println("Error copying graph:", err)
+		os.Exit(1)
 	}
-	if stringOne!= "" && stringTwo!= "" {
-		fmt.Println(stringOne)
-	}
-	diffs := dmp.DiffMain(stringOne,stringTwo, false)
-	for _, diff := range diffs {
-		switch diff.Type {
-		case diffmatchpatch.DiffDelete:
-			fmt.Printf("(-)%s\n", diff.Text)
-		case diffmatchpatch.DiffInsert:
-			fmt.Printf("(+)%s\n", diff.Text)
+	gclone.graph = graphCopy
+
+	//copy nodes
+	for _, node := range(g.Nodes){
+		if node, ok := g.Nodes[node.ID]; ok {
+			g.AddGraphNode(node)
 		}
 	}
+
+	return gclone
 }
 
-func getDiff(pathsOne, pathsTwo [][]*Node, pathsOneStrings, pathsTwoStrings []string, dot bool) ([][]*Node, [][]*Node ){
-	var diffOne, diffTwo [][]*Node
-	var dmp *diffmatchpatch.DiffMatchPatch
-	if !dot {
-		dmp = diffmatchpatch.New()
-	}
+func highlightDiff(base, overlay *Graph) *Graph {
+	//create diff graph
+	g := graphCopy(base)
 
-	for i := 0; i < len(pathsOne) || i < len(pathsTwo); i++ {
-		if i < len(pathsOne) && i < len(pathsTwo) {
-			if pathsOneStrings[i] != pathsTwoStrings[i] {
-				diffOne = append(diffOne, pathsOne[i])
-				diffTwo = append(diffTwo, pathsTwo[i])
-				
-				getPatchMatch(pathsOneStrings[i], pathsTwoStrings[i], dmp, dot)
-			}
-		}else if  i < len(pathsOne) && i >= len(pathsTwo) {
-			diffOne = append(diffOne, pathsOne[i])
-			getPatchMatch(pathsOneStrings[i], "", dmp, dot)
-		}else if i >= len(pathsOne) && i < len(pathsTwo){
-			diffTwo = append(diffTwo, pathsTwo[i])
-			getPatchMatch("", pathsTwoStrings[i], dmp, dot)
+	//check nodes and their data
+	for _, node := range(overlay.Nodes){
+		if _, ok := g.Nodes[node.ID]; ok {
+			for key, _ := range node.Attributes {
+				if (overlay.Nodes[node.ID].Attributes[key] != g.Nodes[node.ID].Attributes[key]) {
+					g.AddGraphNode(&Node{
+						ID: node.ID,
+						Attributes: node.Attributes,
+						color: "yellow", //change color to yellow
+					}) 
+				}
 		}
-	}
-	return diffOne, diffTwo
-}
-
-
-// This function recursively traverses the fields of a struct using reflection and converts them into nodes of a graph. 
-// It handles nested structs and arrays within the main struct.
-func hasSBOMResponsFieldsToGraph(data reflect.Value, head *Node, heirarchy string) {
-
-	//TODO Update, only support for the type interfaces(Subject and IncludedSoftwares) needs to be implemented.
-
-
-
-
-	//base case
-	if data.Kind() == reflect.String || isPrimitiveType(data.Type()) {
-		//just add a neighbour and return
-		node := Node{Value: data.Interface(), tag: heirarchy+ "_" + data.String()}
-		node.leaf = true
-		head.neighbours = append(head.neighbours, &node)
-		return
-	}
-
-	// edge base case for time.Time to not go into recursion, while being a "struct"
-	if data.Kind() == reflect.Struct && data.Type() == reflect.TypeOf(time.Time{}) {
-		//just add a neighbour and return
-		node := Node{Value: data.Interface(), tag: heirarchy+ "_" + data.Interface().(time.Time).String()}
-		node.leaf = true
-		head.neighbours = append(head.neighbours, &node)
-		return
-	}
-
-	node := Node{ tag: data.Type().Name()}
-	var newHead *Node
-
-	// if we have a struct, we need to go over its fields
-	// update head to be the last element of the neighbours slice
-
-	//this is a check for slices/arrays
-	if (node.tag =="" && (data.Kind() == reflect.Slice) || (node.tag =="" && data.Kind() == reflect.Array)) {
-		//instead of adding a completely empty node, no value no tag, we are skipping from adding it as a neighbour node, it's fields will 
-		//just be neighbours of the parent node
-		newHead = head
-	}else {
-		node.leaf = false
-		head.neighbours = append(head.neighbours, &node)
-		newHead = head.neighbours[len(head.neighbours)-1]
-	}
-	
-	var length = 0
-	var field reflect.Value
-
-	if data.Kind() == reflect.Struct {
-		length = data.NumField()
-	}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
-		length = data.Len()
-		data = sortDataArray(data)
-	}
-	fieldtag := ""
-	for i := 0; i < length; i++ {
-		if data.Kind() == reflect.Struct {
-			field = data.Field(i)
-			structtype := reflect.TypeOf(data.Interface())
-			fieldtag = structtype.Field(i).Name
-		}else if data.Kind() == reflect.Array || data.Kind() == reflect.Slice {
-			field = data.Index(i)
-			fieldtag = data.Type().Name()
+		}else {
+			g.AddGraphNode(&Node{
+				ID: node.ID,
+				Attributes: node.Attributes,
+				color: "red",
+			}) //change color to red
 		}
-		hasSBOMResponsFieldsToGraph(field, newHead, fieldtag)
-	}
-}
+	}	
 
-func sortDataArray(data reflect.Value) reflect.Value {
-	if data.Kind() != reflect.Array && data.Kind() != reflect.Slice {
-		fmt.Println("Sorting error, incorrect data type")
+	//add edges not in diff but from g2
+	edges, err := overlay.graph.Edges()
+	if err != nil {
+		fmt.Println("Error getting edges:", err)
 		os.Exit(1)
 	}
 
-	sort.SliceStable(data.Interface(), func(i, j int) bool {
-		id1 := data.Index(i).FieldByName("Id").String()
-		id2 := data.Index(j).FieldByName("Id").String()
-
-		if id1 == "" || id2 == "" {
-			fmt.Println("Sorting error,", data.Type().Name(),"Id is empty")
-			os.Exit(1)
-		}
-
-		return id1 < id2
-	})
-	return data
-
-}
-func isStringPointer(value interface{}) bool {
-	valueType := reflect.TypeOf(value)
-	if valueType.Kind() == reflect.Ptr {
-		elemType := valueType.Elem()
-		if elemType.Kind() == reflect.String {
-			return true
+	for _, edge := range edges {
+		_, err := g.graph.Edge(edge.Source, edge.Target)
+		if err != nil { //missing edge, add with red color
+			g.AddGraphEdge(edge.Source, edge.Target) //hmm how to add color?
 		}
 	}
-
-	return false
+	return g
 }
+
+func makeGraph(hasSBOM model.HasSBOMsHasSBOM) *Graph {
+	g := NewGraph()
+	g.SetAttribute("Id", hasSBOM.Id)
+	g.SetAttribute("Uri", hasSBOM.Uri)
+	g.SetAttribute("Algorithm", hasSBOM.Algorithm)
+	g.SetAttribute("Digest", hasSBOM.Digest)
+	g.SetAttribute("DownloadLocation", hasSBOM.DownloadLocation)
+	g.SetAttribute("Origin", hasSBOM.Origin)
+	g.SetAttribute("Collector", hasSBOM.Collector)
+	g.SetAttribute("KnownSince", hasSBOM.KnownSince.String())
+	g.SetAttribute("Subject", hasSBOM.Subject)
+
+	for _, dependency := range hasSBOMOne.IncludedDependencies {
+		packageId := dependency.Package.Id
+		includedDepsId := dependency.Id
+		g.AddGraphEdge(packageId, includedDepsId)
+		if dependency.DependencyPackage.Id != "" {
+			dependPkgId := dependency.DependencyPackage.Id
+			g.AddGraphEdge(includedDepsId, dependPkgId)
+			g.SetNodeAttribute(dependPkgId, "namespaces" , dependency.DependencyPackage.Namespaces )//change from abhi's implementation
+		}
+		g.SetNodeAttribute(packageId, "namespaces" , dependency.Package.Namespaces  ) //change from abhi's implementation
+		g.SetNodeAttribute(includedDepsId, "version" , dependency.VersionRange) //change from abhi's implementation
+	}
+	return g
+}
+
+
+
