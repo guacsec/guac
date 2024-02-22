@@ -19,15 +19,19 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	stdsql "database/sql"
 	"fmt"
 	"sort"
 
+	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -41,12 +45,12 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 	}
 	for _, vulnID := range filter.Vulnerabilities {
 		where = append(where, vulnequal.HasVulnerabilityIdsWith(optionalPredicate(vulnID.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold)))
-		where = append(where, vulnequal.HasVulnerabilityIdsWith(vulnerabilityid.HasTypeWith(optionalPredicate(vulnID.Type, vulnerabilitytype.TypeEqualFold))))
+		where = append(where, vulnequal.HasVulnerabilityIdsWith(optionalPredicate(vulnID.Type, vulnerabilityid.TypeEqualFold)))
 		if vulnID.NoVuln != nil {
 			if *vulnID.NoVuln {
-				where = append(where, vulnequal.HasVulnerabilityIdsWith(vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(NoVuln))))
+				where = append(where, vulnequal.HasVulnerabilityIdsWith(vulnerabilityid.TypeEqualFold(NoVuln)))
 			} else {
-				where = append(where, vulnequal.HasVulnerabilityIdsWith(vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeNEQ(NoVuln))))
+				where = append(where, vulnequal.HasVulnerabilityIdsWith(vulnerabilityid.TypeNEQ(NoVuln)))
 			}
 		}
 	}
@@ -54,7 +58,7 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 	query := b.client.VulnEqual.Query().
 		Where(where...).
 		WithVulnerabilityIds(func(query *ent.VulnerabilityIDQuery) {
-			query.WithType().Order(vulnerabilityid.ByID())
+			query.Order(vulnerabilityid.ByID())
 		})
 
 	results, err := query.Limit(MaxPageSize).All(ctx)
@@ -66,75 +70,132 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 }
 
 func (b *EntBackend) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
-	var ids []string
-	for i, vulnEqual := range vulnEquals {
-		ve, err := b.IngestVulnEqual(ctx, *vulnerabilities[i], *otherVulnerabilities[i], *vulnEqual)
+	funcName := "IngestVulnEquals"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkVulnEquals(ctx, client, vulnerabilities, otherVulnerabilities, vulnEquals)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestVulnEquals failed with err: %v", err)
+			return nil, err
 		}
-		ids = append(ids, ve)
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return ids, nil
+
+	return *ids, nil
 }
 
 func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec) (string, error) {
-
-	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
-		return upsertVulnEquals(ctx, tx, *vulnerability.VulnerabilityInput, *otherVulnerability.VulnerabilityInput, vulnEqual)
+		return upsertVulnEquals(ctx, tx, vulnerability, otherVulnerability, vulnEqual)
 	})
 
 	if err != nil {
 		return "", err
 	}
 
-	return nodeID(*id), nil
+	return *id, nil
 }
 
-func upsertVulnEquals(ctx context.Context, client *ent.Tx, vulnerability model.VulnerabilityInputSpec, otherVulnerability model.VulnerabilityInputSpec, vulnEqual model.VulnEqualInputSpec) (*int, error) {
-	vulnerabilityRecord, err := client.VulnerabilityID.Query().
-		Where(
-			vulnerabilityid.VulnerabilityIDEqualFold(vulnerability.VulnerabilityID),
-			vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(vulnerability.Type)),
-		).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	otherVulnerabilityRecord, err := client.VulnerabilityID.Query().
-		Where(
-			vulnerabilityid.VulnerabilityIDEqualFold(otherVulnerability.VulnerabilityID),
-			vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(otherVulnerability.Type)),
-		).
-		Only(ctx)
-	if err != nil {
-		return nil, err
+func upsertBulkVulnEquals(ctx context.Context, client *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		vulnequal.FieldVulnerabilitiesHash,
+		vulnequal.FieldOrigin,
+		vulnequal.FieldCollector,
+		vulnequal.FieldJustification,
 	}
 
-	record, err := vulnerabilityRecord.QueryVulnEquals().
-		Where(
-			vulnequal.HasVulnerabilityIdsWith(
-				vulnerabilityid.VulnerabilityIDEqualFold(otherVulnerability.VulnerabilityID),
-				vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(otherVulnerability.Type)),
-			),
-		).
-		Only(ctx)
-	if ent.MaskNotFound(err) != nil {
-		return nil, err
-	}
+	batches := chunk(vulnEquals, 100)
 
-	if record == nil {
-		record, err = client.VulnEqual.Create().
-			AddVulnerabilityIds(vulnerabilityRecord, otherVulnerabilityRecord).
-			SetJustification(vulnEqual.Justification).
-			SetOrigin(vulnEqual.Origin).
-			SetCollector(vulnEqual.Collector).
-			Save(ctx)
+	index := 0
+	for _, ves := range batches {
+		creates := make([]*ent.VulnEqualCreate, len(ves))
+		for i, ve := range ves {
+
+			sortedVulns := []model.IDorVulnerabilityInput{*vulnerabilities[index], *otherVulnerabilities[index]}
+
+			sort.SliceStable(sortedVulns, func(i, j int) bool { return *sortedVulns[i].VulnerabilityNodeID < *sortedVulns[j].VulnerabilityNodeID })
+
+			var sortedVulnIDs []uuid.UUID
+			for _, vuln := range sortedVulns {
+				if vuln.VulnerabilityNodeID == nil {
+					return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
+				}
+				vulnID, err := uuid.Parse(*vuln.VulnerabilityNodeID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+				}
+				sortedVulnIDs = append(sortedVulnIDs, vulnID)
+			}
+
+			creates[i] = client.VulnEqual.Create().
+				AddVulnerabilityIDIDs(sortedVulnIDs...).
+				SetVulnerabilitiesHash(hashVulnerabilities(sortedVulns)).
+				SetCollector(ve.Collector).
+				SetJustification(ve.Justification).
+				SetOrigin(ve.Origin)
+
+			index++
+		}
+
+		err := client.VulnEqual.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+			).
+			DoNothing().
+			Exec(ctx)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return &record.ID, nil
+	return &ids, nil
+}
+
+func upsertVulnEquals(ctx context.Context, client *ent.Tx, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqualInput model.VulnEqualInputSpec) (*string, error) {
+
+	sortedVulns := []model.IDorVulnerabilityInput{vulnerability, otherVulnerability}
+
+	sort.SliceStable(sortedVulns, func(i, j int) bool { return *sortedVulns[i].VulnerabilityNodeID < *sortedVulns[j].VulnerabilityNodeID })
+
+	var sortedVulnIDs []uuid.UUID
+	for _, vuln := range sortedVulns {
+		if vuln.VulnerabilityNodeID == nil {
+			return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
+		}
+		vulnID, err := uuid.Parse(*vuln.VulnerabilityNodeID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+		}
+		sortedVulnIDs = append(sortedVulnIDs, vulnID)
+	}
+
+	_, err := client.VulnEqual.Create().
+		AddVulnerabilityIDIDs(sortedVulnIDs...).
+		SetVulnerabilitiesHash(hashVulnerabilities(sortedVulns)).
+		SetCollector(vulnEqualInput.Collector).
+		SetJustification(vulnEqualInput.Justification).
+		SetOrigin(vulnEqualInput.Origin).
+		OnConflict(
+			sql.ConflictColumns(
+				vulnequal.FieldVulnerabilitiesHash,
+				vulnequal.FieldOrigin,
+				vulnequal.FieldCollector,
+				vulnequal.FieldJustification,
+			),
+		).
+		DoNothing().
+		ID(ctx)
+	if err != nil {
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsertVulnEquals")
+		}
+	}
+
+	return ptrfrom.String(""), nil
 }
 
 // hashPackages is used to create a unique key for the M2M edge between PkgEquals <-M2M-> PackageVersions
@@ -142,8 +203,6 @@ func hashVulnerabilities(slc []model.IDorVulnerabilityInput) string {
 	vulns := slc
 	hash := sha1.New()
 	content := bytes.NewBuffer(nil)
-
-	sort.SliceStable(vulns, func(i, j int) bool { return *vulns[i].VulnerabilityNodeID < *vulns[j].VulnerabilityNodeID })
 
 	for _, v := range vulns {
 		content.WriteString(fmt.Sprintf("%d", v.VulnerabilityNodeID))
@@ -155,7 +214,7 @@ func hashVulnerabilities(slc []model.IDorVulnerabilityInput) string {
 
 func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
 	return &model.VulnEqual{
-		ID:              nodeID(record.ID),
+		ID:              record.ID.String(),
 		Vulnerabilities: collect(record.Edges.VulnerabilityIds, toModelVulnerabilityFromVulnerabilityID),
 		Justification:   record.Justification,
 		Origin:          record.Origin,
@@ -164,12 +223,9 @@ func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
 }
 
 func toModelVulnerabilityFromVulnerabilityID(vulnID *ent.VulnerabilityID) *model.Vulnerability {
-	if vulnID.Edges.Type != nil {
-		return &model.Vulnerability{
-			ID:               nodeID(vulnID.Edges.Type.ID),
-			Type:             vulnID.Edges.Type.Type,
-			VulnerabilityIDs: []*model.VulnerabilityID{toModelVulnerabilityID(vulnID)},
-		}
+	return &model.Vulnerability{
+		ID:               fmt.Sprintf("%s:%s", vulnTypeString, vulnID.ID.String()),
+		Type:             vulnID.Type,
+		VulnerabilityIDs: []*model.VulnerabilityID{toModelVulnerabilityID(vulnID)},
 	}
-	return nil
 }
