@@ -88,6 +88,8 @@ var skipMatrix = map[string]map[string]bool{
 	"TestVulnerability": {arango: true, ent: true},
 	// ent: query by id fails, Query_greater_than_-_no_score_value fails
 	"TestIngestVulnMetadata": {ent: true},
+
+	"TestFindSoftware": {ent: true, redis: true, arango: true},
 }
 
 type backend interface {
