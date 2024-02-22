@@ -318,7 +318,7 @@ func guacOccurrenceKey(pkg *model.IDorPkgInput, src *model.IDorSourceInput, art 
 		return nil, gqlerror.Errorf("%v :: %s", "guacOccurrenceKey", "subject must be either a package or source")
 	}
 
-	occurIDString := fmt.Sprintf("%s::%s::%s?", subjectID, *art.ArtifactID, canonicalOccurrenceString)
+	occurIDString := fmt.Sprintf("%s::%s::%s?", subjectID, *art.ArtifactID, canonicalOccurrenceString(occur))
 
 	occurID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(occurIDString), 5)
 	return &occurID, nil

@@ -316,7 +316,7 @@ func guacDependencyKey(pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkg
 		depPkgID = *depPkg.PackageVersionID
 	}
 
-	depIDString := fmt.Sprintf("%s::%s::%s?", pkg.PackageVersionID, depPkgID, canonicalDependencyString)
+	depIDString := fmt.Sprintf("%s::%s::%s?", *pkg.PackageVersionID, depPkgID, canonicalDependencyString(dep))
 
 	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
 	return &depID, nil
