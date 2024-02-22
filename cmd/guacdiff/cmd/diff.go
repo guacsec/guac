@@ -49,17 +49,39 @@ type Graph struct {
 
 func (g *Graph) AddGraphNode(node *Node) {
 	g.Nodes[node.ID] = node
+	g.Nodes[node.ID].Attributes = make(map[string]interface{})
+
 	g.graph.AddVertex(node.ID)
+
+	// if err != nil { //check if the err is "node Exists error"
+	// 	fmt.Println("Error adding graph vertex:", err)
+	// 	os.Exit(1)
+	// }
+}
+
+func (g *Graph) NodeExists(ID string) bool {
+	_, ok := g.Nodes[ID]
+	return ok
 }
 
 func (g *Graph) AddGraphEdge(to, from string) {
-    g.graph.AddEdge(to, from)
-	if g.Nodes[to] != nil {
-		g.Nodes[to] = &Node{ID: to, color: "black"}
+	//check if both edges exist first
+	if !g.NodeExists(to) {
+		// fmt.Println("from here1")
+		g.AddGraphNode(&Node{ID: to, color: "black"})
 	}
-	if g.Nodes[to] != nil {
-		g.Nodes[from] = &Node{ID: from, color: "black"}
+
+	if !g.NodeExists(from) {
+		// fmt.Println("from here2")
+		g.AddGraphNode(&Node{ID: from, color: "black"})
 	}
+
+    err := g.graph.AddEdge(to, from)
+	if err != nil { 
+		fmt.Println("Error adding graph edge:", err)
+		os.Exit(1)
+	}
+
 }
 
 func (g *Graph) SetAttribute(key string, value interface{}) {
@@ -185,8 +207,6 @@ var diffCmd = &cobra.Command{
 			}
 			hasSBOMOne =  hasSBOMResponseOne.HasSBOM[0]
 			hasSBOMTwo =  hasSBOMResponseTwo.HasSBOM[0]
-			fmt.Println(hasSBOMOne.IncludedSoftware[0].GetTypename())
-			return
 		}else{
 			jsonData, err := os.ReadFile(testfile)
 			if err != nil {
@@ -211,6 +231,7 @@ var diffCmd = &cobra.Command{
 		diffGraph := highlightDiff(gOne, gTwo)
 
 		//create the dot file
+		// fmt.Println(diffGraph.graph.Edges())
 		createGraphDotFile(diffGraph)
 	},
 }
@@ -225,8 +246,10 @@ func createGraphDotFile(g *Graph){
 	}
 	fmt.Println(filename)
 }
+
 func graphCopy(g *Graph) *Graph {
 	gclone := NewGraph()
+
 
 	graphCopy, err := g.graph.Clone()
 	if err!= nil {
@@ -235,9 +258,11 @@ func graphCopy(g *Graph) *Graph {
 	}
 	gclone.graph = graphCopy
 
+
 	//copy nodes
 	for _, node := range(g.Nodes){
 		if node, ok := g.Nodes[node.ID]; ok {
+
 			g.AddGraphNode(node)
 		}
 	}
@@ -254,7 +279,7 @@ func highlightDiff(base, overlay *Graph) *Graph {
 		if _, ok := g.Nodes[node.ID]; ok {
 			for key, _ := range node.Attributes {
 				if (overlay.Nodes[node.ID].Attributes[key] != g.Nodes[node.ID].Attributes[key]) {
-					g.AddGraphNode(&Node{
+					g.AddGraphNode(&Node{ //
 						ID: node.ID,
 						Attributes: node.Attributes,
 						color: "yellow", //change color to yellow
@@ -262,6 +287,7 @@ func highlightDiff(base, overlay *Graph) *Graph {
 				}
 		}
 		}else {
+
 			g.AddGraphNode(&Node{
 				ID: node.ID,
 				Attributes: node.Attributes,
@@ -287,6 +313,7 @@ func highlightDiff(base, overlay *Graph) *Graph {
 }
 
 func makeGraph(hasSBOM model.HasSBOMsHasSBOM) *Graph {
+
 	g := NewGraph()
 	g.SetAttribute("Id", hasSBOM.Id)
 	g.SetAttribute("Uri", hasSBOM.Uri)

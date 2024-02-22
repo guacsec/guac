@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/Khan/genqlient/graphql"
@@ -134,17 +133,4 @@ func findHasSBOMBy(uri, purl string, ctx context.Context, gqlclient graphql.Clie
 		}
 	}
 	return foundHasSBOMPkg, nil
-}
-
-
-
-func isPrimitiveType(t reflect.Type) bool {
-	switch t.Kind() {
-	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-		reflect.Float32, reflect.Float64, reflect.String:
-		return true
-	default:
-		return false
-	}
 }
