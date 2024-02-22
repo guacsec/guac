@@ -32,10 +32,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 
-var (
-	hasSBOMOne model.HasSBOMsHasSBOM
-	hasSBOMTwo model.HasSBOMsHasSBOM
-)
+
 type Node struct {
 	ID string
 	Attributes map[string]interface{}
@@ -155,6 +152,10 @@ var diffCmd = &cobra.Command{
 		test, _ := cmd.Flags().GetBool("test")
 		testfile, _ := cmd.Flags().GetString("file")
 		var err error
+		var (
+			hasSBOMOne model.HasSBOMsHasSBOM
+			hasSBOMTwo model.HasSBOMsHasSBOM
+		)
 
 		if !test {
 			slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
@@ -222,6 +223,7 @@ var diffCmd = &cobra.Command{
 			}
 			hasSBOMOne = test.HasSBOMOne
 			hasSBOMTwo = test.HasSBOMTwo
+
 		}
 		//create graphs
 		gOne := makeGraph(hasSBOMOne)
@@ -231,7 +233,6 @@ var diffCmd = &cobra.Command{
 		diffGraph := highlightDiff(gOne, gTwo)
 
 		//create the dot file
-		// fmt.Println(diffGraph.graph.Edges())
 		createGraphDotFile(diffGraph)
 	},
 }
@@ -262,7 +263,6 @@ func graphCopy(g *Graph) *Graph {
 	//copy nodes
 	for _, node := range(g.Nodes){
 		if node, ok := g.Nodes[node.ID]; ok {
-
 			g.AddGraphNode(node)
 		}
 	}
@@ -324,8 +324,7 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM) *Graph {
 	g.SetAttribute("Collector", hasSBOM.Collector)
 	g.SetAttribute("KnownSince", hasSBOM.KnownSince.String())
 	g.SetAttribute("Subject", hasSBOM.Subject)
-
-	for _, dependency := range hasSBOMOne.IncludedDependencies {
+	for _, dependency := range hasSBOM.IncludedDependencies {
 		packageId := dependency.Package.Id
 		includedDepsId := dependency.Id
 		g.AddGraphEdge(packageId, includedDepsId)
