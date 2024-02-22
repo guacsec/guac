@@ -53,7 +53,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 }
 
 func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
-	funcName := "IngestCertifyVulns"
+	funcName := "IngestDependencies"
 	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkDependencies(ctx, client, pkgs, depPkgs, depPkgMatchType, dependencies)
@@ -135,7 +135,7 @@ func upsertBulkDependencies(ctx context.Context, client *ent.Tx, pkgs []*model.I
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 				}
-				creates[i].SetDependentPackageNameID(pkgVersionID)
+				creates[i].SetDependentPackageVersionID(pkgVersionID)
 
 			} else {
 				if depPkgs[index].PackageNameID == nil {
@@ -145,7 +145,7 @@ func upsertBulkDependencies(ctx context.Context, client *ent.Tx, pkgs []*model.I
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 				}
-				creates[i].SetDependentPackageVersionID(pkgNameID)
+				creates[i].SetDependentPackageNameID(pkgNameID)
 			}
 
 			index++
