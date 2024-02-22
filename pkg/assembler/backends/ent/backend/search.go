@@ -23,7 +23,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -57,11 +56,7 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 		packageversion.HasNameWith(
 			packagename.NameContainsFold(searchText),
 		),
-	).WithName(func(q *ent.PackageNameQuery) {
-		q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-			q.WithPackage()
-		})
-	}).
+	).WithName(func(q *ent.PackageNameQuery) {}).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -76,20 +71,16 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 	sources, err := b.client.SourceName.Query().Where(
 		sourcename.Or(
 			sourcename.NameContainsFold(searchText),
-			sourcename.HasNamespaceWith(
-				sourcenamespace.NamespaceContainsFold(searchText),
-			),
+			sourcename.NamespaceContainsFold(searchText),
 		),
-	).WithNamespace(func(q *ent.SourceNamespaceQuery) {
-		q.WithSourceType()
-	}).
+	).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	results = append(results, collect(sources, func(v *ent.SourceName) model.PackageSourceOrArtifact {
-		return toModelSource(backReferenceSourceName(v))
+		return toModelSource(v)
 	})...)
 
 	artifacts, err := b.client.Artifact.Query().Where(
