@@ -64,28 +64,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	)
 
 	// TODO: Fix preloads
-	// if slices.Contains(paths, "namespaces") || !isGQL {
-	// 	query.WithNamedVersions(func(q *ent.PackageNameQuery) {
-	// 		q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
-	// 		if slices.Contains(paths, "namespaces.names") || !isGQL {
-	// 			q.WithNames(func(q *ent.PackageNameQuery) {
-	// 				q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
-	// 				q.Where(optionalPredicate(pkgSpec.Namespace, packagename.NameEQ))
-
-	// 				if slices.Contains(paths, "namespaces.names.versions") || !isGQL {
-	// 					q.WithVersions(func(q *ent.PackageVersionQuery) {
-	// 						q.Where(
-	// 							optionalPredicate(pkgSpec.ID, IDEQ),
-	// 							optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
-	// 							optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
-	// 							packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
-	// 						)
-	// 					})
-	// 				}
-	// 			})
-	// 		}
-	// 	})
-	// }
+	query.WithVersions(func(q *ent.PackageVersionQuery) {})
 
 	pkgs, err := query.All(ctx)
 	if err != nil {

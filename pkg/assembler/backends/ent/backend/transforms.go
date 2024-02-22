@@ -46,7 +46,7 @@ func toModelPackage(p *ent.PackageName) *model.Package {
 	return &model.Package{
 		ID:         fmt.Sprintf("%s:%s", pkgTypeString, p.ID.String()),
 		Type:       p.Type,
-		Namespaces: collect([]*ent.PackageName{}, toModelNamespace),
+		Namespaces: collect([]*ent.PackageName{p}, toModelNamespace),
 	}
 }
 
@@ -57,7 +57,7 @@ func toModelNamespace(n *ent.PackageName) *model.PackageNamespace {
 	return &model.PackageNamespace{
 		ID:        fmt.Sprintf("%s:%s", pkgNamespaceString, n.ID.String()),
 		Namespace: n.Namespace,
-		Names:     collect([]*ent.PackageName{}, toModelPackageName),
+		Names:     collect([]*ent.PackageName{n}, toModelPackageName),
 	}
 }
 

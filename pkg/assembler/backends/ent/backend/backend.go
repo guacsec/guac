@@ -30,7 +30,8 @@ import (
 var Errorf = gqlerror.Errorf
 
 // MaxPageSize is the maximum number of results that will be returned in a single query.
-const MaxPageSize = 1000
+// const MaxPageSize = 1000
+const MaxPageSize = 999999
 
 type EntBackend struct {
 	client *ent.Client
