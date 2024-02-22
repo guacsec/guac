@@ -13,21 +13,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
 // CertifyScorecardQuery is the builder for querying CertifyScorecard entities.
 type CertifyScorecardQuery struct {
 	config
-	ctx           *QueryContext
-	order         []certifyscorecard.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.CertifyScorecard
-	withScorecard *ScorecardQuery
-	withSource    *SourceNameQuery
-	modifiers     []func(*sql.Selector)
-	loadTotal     []func(context.Context, []*CertifyScorecard) error
+	ctx        *QueryContext
+	order      []certifyscorecard.OrderOption
+	inters     []Interceptor
+	predicates []predicate.CertifyScorecard
+	withSource *SourceNameQuery
+	modifiers  []func(*sql.Selector)
+	loadTotal  []func(context.Context, []*CertifyScorecard) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,28 +60,6 @@ func (csq *CertifyScorecardQuery) Unique(unique bool) *CertifyScorecardQuery {
 func (csq *CertifyScorecardQuery) Order(o ...certifyscorecard.OrderOption) *CertifyScorecardQuery {
 	csq.order = append(csq.order, o...)
 	return csq
-}
-
-// QueryScorecard chains the current query on the "scorecard" edge.
-func (csq *CertifyScorecardQuery) QueryScorecard() *ScorecardQuery {
-	query := (&ScorecardClient{config: csq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := csq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := csq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(certifyscorecard.Table, certifyscorecard.FieldID, selector),
-			sqlgraph.To(scorecard.Table, scorecard.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, certifyscorecard.ScorecardTable, certifyscorecard.ScorecardColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(csq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QuerySource chains the current query on the "source" edge.
@@ -295,28 +271,16 @@ func (csq *CertifyScorecardQuery) Clone() *CertifyScorecardQuery {
 		return nil
 	}
 	return &CertifyScorecardQuery{
-		config:        csq.config,
-		ctx:           csq.ctx.Clone(),
-		order:         append([]certifyscorecard.OrderOption{}, csq.order...),
-		inters:        append([]Interceptor{}, csq.inters...),
-		predicates:    append([]predicate.CertifyScorecard{}, csq.predicates...),
-		withScorecard: csq.withScorecard.Clone(),
-		withSource:    csq.withSource.Clone(),
+		config:     csq.config,
+		ctx:        csq.ctx.Clone(),
+		order:      append([]certifyscorecard.OrderOption{}, csq.order...),
+		inters:     append([]Interceptor{}, csq.inters...),
+		predicates: append([]predicate.CertifyScorecard{}, csq.predicates...),
+		withSource: csq.withSource.Clone(),
 		// clone intermediate query.
 		sql:  csq.sql.Clone(),
 		path: csq.path,
 	}
-}
-
-// WithScorecard tells the query-builder to eager-load the nodes that are connected to
-// the "scorecard" edge. The optional arguments are used to configure the query builder of the edge.
-func (csq *CertifyScorecardQuery) WithScorecard(opts ...func(*ScorecardQuery)) *CertifyScorecardQuery {
-	query := (&ScorecardClient{config: csq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	csq.withScorecard = query
-	return csq
 }
 
 // WithSource tells the query-builder to eager-load the nodes that are connected to
@@ -408,8 +372,7 @@ func (csq *CertifyScorecardQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	var (
 		nodes       = []*CertifyScorecard{}
 		_spec       = csq.querySpec()
-		loadedTypes = [2]bool{
-			csq.withScorecard != nil,
+		loadedTypes = [1]bool{
 			csq.withSource != nil,
 		}
 	)
@@ -434,12 +397,6 @@ func (csq *CertifyScorecardQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := csq.withScorecard; query != nil {
-		if err := csq.loadScorecard(ctx, query, nodes, nil,
-			func(n *CertifyScorecard, e *Scorecard) { n.Edges.Scorecard = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := csq.withSource; query != nil {
 		if err := csq.loadSource(ctx, query, nodes, nil,
 			func(n *CertifyScorecard, e *SourceName) { n.Edges.Source = e }); err != nil {
@@ -454,35 +411,6 @@ func (csq *CertifyScorecardQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	return nodes, nil
 }
 
-func (csq *CertifyScorecardQuery) loadScorecard(ctx context.Context, query *ScorecardQuery, nodes []*CertifyScorecard, init func(*CertifyScorecard), assign func(*CertifyScorecard, *Scorecard)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*CertifyScorecard)
-	for i := range nodes {
-		fk := nodes[i].ScorecardID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(scorecard.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "scorecard_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 func (csq *CertifyScorecardQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*CertifyScorecard, init func(*CertifyScorecard), assign func(*CertifyScorecard, *SourceName)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*CertifyScorecard)
@@ -540,9 +468,6 @@ func (csq *CertifyScorecardQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != certifyscorecard.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if csq.withScorecard != nil {
-			_spec.Node.AddColumnOnce(certifyscorecard.FieldScorecardID)
 		}
 		if csq.withSource != nil {
 			_spec.Node.AddColumnOnce(certifyscorecard.FieldSourceID)

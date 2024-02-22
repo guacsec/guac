@@ -3,15 +3,17 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // CertifyScorecard is the model entity for the CertifyScorecard schema.
@@ -21,8 +23,20 @@ type CertifyScorecard struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// SourceID holds the value of the "source_id" field.
 	SourceID uuid.UUID `json:"source_id,omitempty"`
-	// ScorecardID holds the value of the "scorecard_id" field.
-	ScorecardID uuid.UUID `json:"scorecard_id,omitempty"`
+	// Checks holds the value of the "checks" field.
+	Checks []*model.ScorecardCheck `json:"checks,omitempty"`
+	// Overall Scorecard score for the source
+	AggregateScore float64 `json:"aggregate_score,omitempty"`
+	// TimeScanned holds the value of the "time_scanned" field.
+	TimeScanned time.Time `json:"time_scanned,omitempty"`
+	// ScorecardVersion holds the value of the "scorecard_version" field.
+	ScorecardVersion string `json:"scorecard_version,omitempty"`
+	// ScorecardCommit holds the value of the "scorecard_commit" field.
+	ScorecardCommit string `json:"scorecard_commit,omitempty"`
+	// Origin holds the value of the "origin" field.
+	Origin string `json:"origin,omitempty"`
+	// Collector holds the value of the "collector" field.
+	Collector string `json:"collector,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CertifyScorecardQuery when eager-loading is set.
 	Edges        CertifyScorecardEdges `json:"edges"`
@@ -31,34 +45,19 @@ type CertifyScorecard struct {
 
 // CertifyScorecardEdges holds the relations/edges for other nodes in the graph.
 type CertifyScorecardEdges struct {
-	// Scorecard holds the value of the scorecard edge.
-	Scorecard *Scorecard `json:"scorecard,omitempty"`
 	// Source holds the value of the source edge.
 	Source *SourceName `json:"source,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]map[string]int
-}
-
-// ScorecardOrErr returns the Scorecard value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e CertifyScorecardEdges) ScorecardOrErr() (*Scorecard, error) {
-	if e.loadedTypes[0] {
-		if e.Scorecard == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: scorecard.Label}
-		}
-		return e.Scorecard, nil
-	}
-	return nil, &NotLoadedError{edge: "scorecard"}
+	totalCount [1]map[string]int
 }
 
 // SourceOrErr returns the Source value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e CertifyScorecardEdges) SourceOrErr() (*SourceName, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		if e.Source == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: sourcename.Label}
@@ -73,7 +72,15 @@ func (*CertifyScorecard) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case certifyscorecard.FieldID, certifyscorecard.FieldSourceID, certifyscorecard.FieldScorecardID:
+		case certifyscorecard.FieldChecks:
+			values[i] = new([]byte)
+		case certifyscorecard.FieldAggregateScore:
+			values[i] = new(sql.NullFloat64)
+		case certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldScorecardCommit, certifyscorecard.FieldOrigin, certifyscorecard.FieldCollector:
+			values[i] = new(sql.NullString)
+		case certifyscorecard.FieldTimeScanned:
+			values[i] = new(sql.NullTime)
+		case certifyscorecard.FieldID, certifyscorecard.FieldSourceID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -102,11 +109,49 @@ func (cs *CertifyScorecard) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				cs.SourceID = *value
 			}
-		case certifyscorecard.FieldScorecardID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field scorecard_id", values[i])
-			} else if value != nil {
-				cs.ScorecardID = *value
+		case certifyscorecard.FieldChecks:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field checks", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &cs.Checks); err != nil {
+					return fmt.Errorf("unmarshal field checks: %w", err)
+				}
+			}
+		case certifyscorecard.FieldAggregateScore:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field aggregate_score", values[i])
+			} else if value.Valid {
+				cs.AggregateScore = value.Float64
+			}
+		case certifyscorecard.FieldTimeScanned:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field time_scanned", values[i])
+			} else if value.Valid {
+				cs.TimeScanned = value.Time
+			}
+		case certifyscorecard.FieldScorecardVersion:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field scorecard_version", values[i])
+			} else if value.Valid {
+				cs.ScorecardVersion = value.String
+			}
+		case certifyscorecard.FieldScorecardCommit:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field scorecard_commit", values[i])
+			} else if value.Valid {
+				cs.ScorecardCommit = value.String
+			}
+		case certifyscorecard.FieldOrigin:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field origin", values[i])
+			} else if value.Valid {
+				cs.Origin = value.String
+			}
+		case certifyscorecard.FieldCollector:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field collector", values[i])
+			} else if value.Valid {
+				cs.Collector = value.String
 			}
 		default:
 			cs.selectValues.Set(columns[i], values[i])
@@ -119,11 +164,6 @@ func (cs *CertifyScorecard) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (cs *CertifyScorecard) Value(name string) (ent.Value, error) {
 	return cs.selectValues.Get(name)
-}
-
-// QueryScorecard queries the "scorecard" edge of the CertifyScorecard entity.
-func (cs *CertifyScorecard) QueryScorecard() *ScorecardQuery {
-	return NewCertifyScorecardClient(cs.config).QueryScorecard(cs)
 }
 
 // QuerySource queries the "source" edge of the CertifyScorecard entity.
@@ -157,8 +197,26 @@ func (cs *CertifyScorecard) String() string {
 	builder.WriteString("source_id=")
 	builder.WriteString(fmt.Sprintf("%v", cs.SourceID))
 	builder.WriteString(", ")
-	builder.WriteString("scorecard_id=")
-	builder.WriteString(fmt.Sprintf("%v", cs.ScorecardID))
+	builder.WriteString("checks=")
+	builder.WriteString(fmt.Sprintf("%v", cs.Checks))
+	builder.WriteString(", ")
+	builder.WriteString("aggregate_score=")
+	builder.WriteString(fmt.Sprintf("%v", cs.AggregateScore))
+	builder.WriteString(", ")
+	builder.WriteString("time_scanned=")
+	builder.WriteString(cs.TimeScanned.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("scorecard_version=")
+	builder.WriteString(cs.ScorecardVersion)
+	builder.WriteString(", ")
+	builder.WriteString("scorecard_commit=")
+	builder.WriteString(cs.ScorecardCommit)
+	builder.WriteString(", ")
+	builder.WriteString("origin=")
+	builder.WriteString(cs.Origin)
+	builder.WriteString(", ")
+	builder.WriteString("collector=")
+	builder.WriteString(cs.Collector)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -3,6 +3,8 @@
 package certifyscorecard
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
@@ -59,9 +61,34 @@ func SourceID(v uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldSourceID, v))
 }
 
-// ScorecardID applies equality check predicate on the "scorecard_id" field. It's identical to ScorecardIDEQ.
-func ScorecardID(v uuid.UUID) predicate.CertifyScorecard {
-	return predicate.CertifyScorecard(sql.FieldEQ(FieldScorecardID, v))
+// AggregateScore applies equality check predicate on the "aggregate_score" field. It's identical to AggregateScoreEQ.
+func AggregateScore(v float64) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldAggregateScore, v))
+}
+
+// TimeScanned applies equality check predicate on the "time_scanned" field. It's identical to TimeScannedEQ.
+func TimeScanned(v time.Time) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldTimeScanned, v))
+}
+
+// ScorecardVersion applies equality check predicate on the "scorecard_version" field. It's identical to ScorecardVersionEQ.
+func ScorecardVersion(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldScorecardVersion, v))
+}
+
+// ScorecardCommit applies equality check predicate on the "scorecard_commit" field. It's identical to ScorecardCommitEQ.
+func ScorecardCommit(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldScorecardCommit, v))
+}
+
+// Origin applies equality check predicate on the "origin" field. It's identical to OriginEQ.
+func Origin(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldOrigin, v))
+}
+
+// Collector applies equality check predicate on the "collector" field. It's identical to CollectorEQ.
+func Collector(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldCollector, v))
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
@@ -84,47 +111,344 @@ func SourceIDNotIn(vs ...uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldNotIn(FieldSourceID, vs...))
 }
 
-// ScorecardIDEQ applies the EQ predicate on the "scorecard_id" field.
-func ScorecardIDEQ(v uuid.UUID) predicate.CertifyScorecard {
-	return predicate.CertifyScorecard(sql.FieldEQ(FieldScorecardID, v))
+// AggregateScoreEQ applies the EQ predicate on the "aggregate_score" field.
+func AggregateScoreEQ(v float64) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldAggregateScore, v))
 }
 
-// ScorecardIDNEQ applies the NEQ predicate on the "scorecard_id" field.
-func ScorecardIDNEQ(v uuid.UUID) predicate.CertifyScorecard {
-	return predicate.CertifyScorecard(sql.FieldNEQ(FieldScorecardID, v))
+// AggregateScoreNEQ applies the NEQ predicate on the "aggregate_score" field.
+func AggregateScoreNEQ(v float64) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNEQ(FieldAggregateScore, v))
 }
 
-// ScorecardIDIn applies the In predicate on the "scorecard_id" field.
-func ScorecardIDIn(vs ...uuid.UUID) predicate.CertifyScorecard {
-	return predicate.CertifyScorecard(sql.FieldIn(FieldScorecardID, vs...))
+// AggregateScoreIn applies the In predicate on the "aggregate_score" field.
+func AggregateScoreIn(vs ...float64) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldIn(FieldAggregateScore, vs...))
 }
 
-// ScorecardIDNotIn applies the NotIn predicate on the "scorecard_id" field.
-func ScorecardIDNotIn(vs ...uuid.UUID) predicate.CertifyScorecard {
-	return predicate.CertifyScorecard(sql.FieldNotIn(FieldScorecardID, vs...))
+// AggregateScoreNotIn applies the NotIn predicate on the "aggregate_score" field.
+func AggregateScoreNotIn(vs ...float64) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNotIn(FieldAggregateScore, vs...))
 }
 
-// HasScorecard applies the HasEdge predicate on the "scorecard" edge.
-func HasScorecard() predicate.CertifyScorecard {
-	return predicate.CertifyScorecard(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ScorecardTable, ScorecardColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
+// AggregateScoreGT applies the GT predicate on the "aggregate_score" field.
+func AggregateScoreGT(v float64) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGT(FieldAggregateScore, v))
 }
 
-// HasScorecardWith applies the HasEdge predicate on the "scorecard" edge with a given conditions (other predicates).
-func HasScorecardWith(preds ...predicate.Scorecard) predicate.CertifyScorecard {
-	return predicate.CertifyScorecard(func(s *sql.Selector) {
-		step := newScorecardStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
+// AggregateScoreGTE applies the GTE predicate on the "aggregate_score" field.
+func AggregateScoreGTE(v float64) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGTE(FieldAggregateScore, v))
+}
+
+// AggregateScoreLT applies the LT predicate on the "aggregate_score" field.
+func AggregateScoreLT(v float64) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLT(FieldAggregateScore, v))
+}
+
+// AggregateScoreLTE applies the LTE predicate on the "aggregate_score" field.
+func AggregateScoreLTE(v float64) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLTE(FieldAggregateScore, v))
+}
+
+// TimeScannedEQ applies the EQ predicate on the "time_scanned" field.
+func TimeScannedEQ(v time.Time) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldTimeScanned, v))
+}
+
+// TimeScannedNEQ applies the NEQ predicate on the "time_scanned" field.
+func TimeScannedNEQ(v time.Time) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNEQ(FieldTimeScanned, v))
+}
+
+// TimeScannedIn applies the In predicate on the "time_scanned" field.
+func TimeScannedIn(vs ...time.Time) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldIn(FieldTimeScanned, vs...))
+}
+
+// TimeScannedNotIn applies the NotIn predicate on the "time_scanned" field.
+func TimeScannedNotIn(vs ...time.Time) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNotIn(FieldTimeScanned, vs...))
+}
+
+// TimeScannedGT applies the GT predicate on the "time_scanned" field.
+func TimeScannedGT(v time.Time) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGT(FieldTimeScanned, v))
+}
+
+// TimeScannedGTE applies the GTE predicate on the "time_scanned" field.
+func TimeScannedGTE(v time.Time) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGTE(FieldTimeScanned, v))
+}
+
+// TimeScannedLT applies the LT predicate on the "time_scanned" field.
+func TimeScannedLT(v time.Time) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLT(FieldTimeScanned, v))
+}
+
+// TimeScannedLTE applies the LTE predicate on the "time_scanned" field.
+func TimeScannedLTE(v time.Time) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLTE(FieldTimeScanned, v))
+}
+
+// ScorecardVersionEQ applies the EQ predicate on the "scorecard_version" field.
+func ScorecardVersionEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionNEQ applies the NEQ predicate on the "scorecard_version" field.
+func ScorecardVersionNEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNEQ(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionIn applies the In predicate on the "scorecard_version" field.
+func ScorecardVersionIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldIn(FieldScorecardVersion, vs...))
+}
+
+// ScorecardVersionNotIn applies the NotIn predicate on the "scorecard_version" field.
+func ScorecardVersionNotIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNotIn(FieldScorecardVersion, vs...))
+}
+
+// ScorecardVersionGT applies the GT predicate on the "scorecard_version" field.
+func ScorecardVersionGT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGT(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionGTE applies the GTE predicate on the "scorecard_version" field.
+func ScorecardVersionGTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGTE(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionLT applies the LT predicate on the "scorecard_version" field.
+func ScorecardVersionLT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLT(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionLTE applies the LTE predicate on the "scorecard_version" field.
+func ScorecardVersionLTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLTE(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionContains applies the Contains predicate on the "scorecard_version" field.
+func ScorecardVersionContains(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContains(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionHasPrefix applies the HasPrefix predicate on the "scorecard_version" field.
+func ScorecardVersionHasPrefix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasPrefix(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionHasSuffix applies the HasSuffix predicate on the "scorecard_version" field.
+func ScorecardVersionHasSuffix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasSuffix(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionEqualFold applies the EqualFold predicate on the "scorecard_version" field.
+func ScorecardVersionEqualFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEqualFold(FieldScorecardVersion, v))
+}
+
+// ScorecardVersionContainsFold applies the ContainsFold predicate on the "scorecard_version" field.
+func ScorecardVersionContainsFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContainsFold(FieldScorecardVersion, v))
+}
+
+// ScorecardCommitEQ applies the EQ predicate on the "scorecard_commit" field.
+func ScorecardCommitEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitNEQ applies the NEQ predicate on the "scorecard_commit" field.
+func ScorecardCommitNEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNEQ(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitIn applies the In predicate on the "scorecard_commit" field.
+func ScorecardCommitIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldIn(FieldScorecardCommit, vs...))
+}
+
+// ScorecardCommitNotIn applies the NotIn predicate on the "scorecard_commit" field.
+func ScorecardCommitNotIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNotIn(FieldScorecardCommit, vs...))
+}
+
+// ScorecardCommitGT applies the GT predicate on the "scorecard_commit" field.
+func ScorecardCommitGT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGT(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitGTE applies the GTE predicate on the "scorecard_commit" field.
+func ScorecardCommitGTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGTE(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitLT applies the LT predicate on the "scorecard_commit" field.
+func ScorecardCommitLT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLT(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitLTE applies the LTE predicate on the "scorecard_commit" field.
+func ScorecardCommitLTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLTE(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitContains applies the Contains predicate on the "scorecard_commit" field.
+func ScorecardCommitContains(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContains(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitHasPrefix applies the HasPrefix predicate on the "scorecard_commit" field.
+func ScorecardCommitHasPrefix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasPrefix(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitHasSuffix applies the HasSuffix predicate on the "scorecard_commit" field.
+func ScorecardCommitHasSuffix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasSuffix(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitEqualFold applies the EqualFold predicate on the "scorecard_commit" field.
+func ScorecardCommitEqualFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEqualFold(FieldScorecardCommit, v))
+}
+
+// ScorecardCommitContainsFold applies the ContainsFold predicate on the "scorecard_commit" field.
+func ScorecardCommitContainsFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContainsFold(FieldScorecardCommit, v))
+}
+
+// OriginEQ applies the EQ predicate on the "origin" field.
+func OriginEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldOrigin, v))
+}
+
+// OriginNEQ applies the NEQ predicate on the "origin" field.
+func OriginNEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNEQ(FieldOrigin, v))
+}
+
+// OriginIn applies the In predicate on the "origin" field.
+func OriginIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldIn(FieldOrigin, vs...))
+}
+
+// OriginNotIn applies the NotIn predicate on the "origin" field.
+func OriginNotIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNotIn(FieldOrigin, vs...))
+}
+
+// OriginGT applies the GT predicate on the "origin" field.
+func OriginGT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGT(FieldOrigin, v))
+}
+
+// OriginGTE applies the GTE predicate on the "origin" field.
+func OriginGTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGTE(FieldOrigin, v))
+}
+
+// OriginLT applies the LT predicate on the "origin" field.
+func OriginLT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLT(FieldOrigin, v))
+}
+
+// OriginLTE applies the LTE predicate on the "origin" field.
+func OriginLTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLTE(FieldOrigin, v))
+}
+
+// OriginContains applies the Contains predicate on the "origin" field.
+func OriginContains(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContains(FieldOrigin, v))
+}
+
+// OriginHasPrefix applies the HasPrefix predicate on the "origin" field.
+func OriginHasPrefix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasPrefix(FieldOrigin, v))
+}
+
+// OriginHasSuffix applies the HasSuffix predicate on the "origin" field.
+func OriginHasSuffix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasSuffix(FieldOrigin, v))
+}
+
+// OriginEqualFold applies the EqualFold predicate on the "origin" field.
+func OriginEqualFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEqualFold(FieldOrigin, v))
+}
+
+// OriginContainsFold applies the ContainsFold predicate on the "origin" field.
+func OriginContainsFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContainsFold(FieldOrigin, v))
+}
+
+// CollectorEQ applies the EQ predicate on the "collector" field.
+func CollectorEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldCollector, v))
+}
+
+// CollectorNEQ applies the NEQ predicate on the "collector" field.
+func CollectorNEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNEQ(FieldCollector, v))
+}
+
+// CollectorIn applies the In predicate on the "collector" field.
+func CollectorIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldIn(FieldCollector, vs...))
+}
+
+// CollectorNotIn applies the NotIn predicate on the "collector" field.
+func CollectorNotIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNotIn(FieldCollector, vs...))
+}
+
+// CollectorGT applies the GT predicate on the "collector" field.
+func CollectorGT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGT(FieldCollector, v))
+}
+
+// CollectorGTE applies the GTE predicate on the "collector" field.
+func CollectorGTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGTE(FieldCollector, v))
+}
+
+// CollectorLT applies the LT predicate on the "collector" field.
+func CollectorLT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLT(FieldCollector, v))
+}
+
+// CollectorLTE applies the LTE predicate on the "collector" field.
+func CollectorLTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLTE(FieldCollector, v))
+}
+
+// CollectorContains applies the Contains predicate on the "collector" field.
+func CollectorContains(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContains(FieldCollector, v))
+}
+
+// CollectorHasPrefix applies the HasPrefix predicate on the "collector" field.
+func CollectorHasPrefix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasPrefix(FieldCollector, v))
+}
+
+// CollectorHasSuffix applies the HasSuffix predicate on the "collector" field.
+func CollectorHasSuffix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasSuffix(FieldCollector, v))
+}
+
+// CollectorEqualFold applies the EqualFold predicate on the "collector" field.
+func CollectorEqualFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEqualFold(FieldCollector, v))
+}
+
+// CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
+func CollectorContainsFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContainsFold(FieldCollector, v))
 }
 
 // HasSource applies the HasEdge predicate on the "source" edge.

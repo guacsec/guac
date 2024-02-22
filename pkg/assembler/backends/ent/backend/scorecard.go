@@ -18,15 +18,14 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
-	"strconv"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -37,48 +36,9 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 		return nil, nil
 	}
 
-	query := b.client.CertifyScorecard.Query()
-	query.Where(
-		certifyscorecard.HasScorecardWith(func(s *sql.Selector) {
-			// optionalPredicate(filter.Checks, scorecard.ChecksContains)(s)
-			optionalPredicate(filter.AggregateScore, scorecard.AggregateScoreEQ)(s)
-			optionalPredicate(filter.TimeScanned, scorecard.TimeScannedEQ)(s)
-			optionalPredicate(filter.ScorecardVersion, scorecard.ScorecardVersionEQ)(s)
-			optionalPredicate(filter.ScorecardCommit, scorecard.ScorecardCommitEqualFold)(s)
-			optionalPredicate(filter.Origin, scorecard.OriginEQ)(s)
-			optionalPredicate(filter.Collector, scorecard.CollectorEQ)(s)
-		}),
-	)
-
-	if filter.Source != nil {
-		query.Where(
-			certifyscorecard.HasSourceWith(
-				optionalPredicate(filter.Source.ID, IDEQ),
-				optionalPredicate(filter.Source.Name, sourcename.NameEQ),
-				optionalPredicate(filter.Source.Commit, sourcename.CommitEqualFold),
-				optionalPredicate(filter.Source.Tag, sourcename.TagContainsFold),
-			),
-		)
-		if filter.Source.Namespace != nil {
-			query.Where(
-				certifyscorecard.HasSourceWith(
-					sourcename.HasNamespaceWith(sourcenamespace.NamespaceEQ(*filter.Source.Namespace)),
-				),
-			)
-		}
-		if filter.Source.Type != nil {
-			query.Where(
-				certifyscorecard.HasSourceWith(
-					sourcename.HasNamespaceWith(sourcenamespace.HasSourceTypeWith(sourcetype.TypeEQ(*filter.Source.Type))),
-				),
-			)
-		}
-	}
-
-	records, err := query.
-		WithScorecard().
-		WithSource(withSourceNameTreeQuery()).
-		Limit(MaxPageSize).
+	records, err := b.client.CertifyScorecard.Query().
+		Where(certifyScorecardQuery(filter)).
+		WithSource(func(q *ent.SourceNameQuery) {}).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -87,31 +47,117 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 	return collect(records, toModelCertifyScorecard), nil
 }
 
+func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.CertifyScorecard {
+	if filter == nil {
+		return NoOpSelector()
+	}
+	predicates := []predicate.CertifyScorecard{
+		optionalPredicate(filter.ID, IDEQ),
+		optionalPredicate(filter.AggregateScore, certifyscorecard.AggregateScoreEQ),
+		optionalPredicate(filter.TimeScanned, certifyscorecard.TimeScannedEQ),
+		optionalPredicate(filter.ScorecardVersion, certifyscorecard.ScorecardVersionEQ),
+		optionalPredicate(filter.ScorecardCommit, certifyscorecard.ScorecardCommitEqualFold),
+		optionalPredicate(filter.Origin, certifyscorecard.OriginEQ),
+		optionalPredicate(filter.Collector, certifyscorecard.CollectorEQ),
+	}
+
+	if filter.Source != nil {
+		predicates = append(predicates,
+			certifyscorecard.HasSourceWith(sourceQuery(filter.Source)),
+		)
+	}
+
+	return certifyscorecard.And(predicates...)
+}
+
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 // IngestScorecard takes a scorecard and a source and creates a certifyScorecard
 func (b *EntBackend) IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error) {
-	cscID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		return upsertScorecard(ctx, ent.TxFromContext(ctx), *source.SourceInput, scorecard)
+	cscID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		return upsertScorecard(ctx, ent.TxFromContext(ctx), source, scorecard)
 	})
 	if err != nil {
 		return "", err
 	}
-	return strconv.Itoa(*cscID), nil
+	return *cscID, nil
 }
 
 func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
-	var modelScorecardIDs []string
-	for i, sc := range scorecards {
-		modelScorecardID, err := b.IngestScorecard(ctx, *sources[i], *sc)
+	funcName := "IngestScorecards"
+	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkScorecard(ctx, client, sources, scorecards)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestScorecards failed with err: %v", err)
+			return nil, err
 		}
-		modelScorecardIDs = append(modelScorecardIDs, modelScorecardID)
+		return slc, nil
+	})
+	if err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
 	}
-	return modelScorecardIDs, nil
+
+	return *ids, nil
 }
 
-func upsertScorecard(ctx context.Context, client *ent.Tx, source model.SourceInputSpec, scorecardInput model.ScorecardInputSpec) (*int, error) {
+func upsertBulkScorecard(ctx context.Context, client *ent.Tx, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		certifyscorecard.FieldSourceID, certifyscorecard.FieldOrigin,
+		certifyscorecard.FieldCollector, certifyscorecard.FieldScorecardCommit,
+		certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldTimeScanned, certifyscorecard.FieldAggregateScore}
+
+	batches := chunk(scorecards, 100)
+
+	index := 0
+	for _, css := range batches {
+		creates := make([]*ent.CertifyScorecardCreate, len(css))
+		for i, cs := range css {
+
+			checks := make([]*model.ScorecardCheck, len(cs.Checks))
+			for i, check := range cs.Checks {
+				checks[i] = &model.ScorecardCheck{
+					Check: check.Check,
+					Score: check.Score,
+				}
+			}
+
+			creates[i] = client.CertifyScorecard.Create().
+				SetChecks(checks).
+				SetAggregateScore(cs.AggregateScore).
+				SetTimeScanned(cs.TimeScanned.UTC()).
+				SetScorecardVersion(cs.ScorecardVersion).
+				SetScorecardCommit(cs.ScorecardCommit).
+				SetOrigin(cs.Origin).
+				SetCollector(cs.Collector)
+
+			if sources[index].SourceNameID == nil {
+				return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+			}
+			sourceID, err := uuid.Parse(*sources[index].SourceNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+			}
+			creates[i].SetSourceID(sourceID)
+
+			index++
+		}
+
+		err := client.CertifyScorecard.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &ids, nil
+}
+
+func upsertScorecard(ctx context.Context, client *ent.Tx, source model.IDorSourceInput, scorecardInput model.ScorecardInputSpec) (*string, error) {
 	checks := make([]*model.ScorecardCheck, len(scorecardInput.Checks))
 	for i, check := range scorecardInput.Checks {
 		checks[i] = &model.ScorecardCheck{
@@ -120,84 +166,44 @@ func upsertScorecard(ctx context.Context, client *ent.Tx, source model.SourceInp
 		}
 	}
 
-	sc, err := client.Scorecard.
-		Create().
+	if source.SourceNameID == nil {
+		return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+	}
+	sourceID, err := uuid.Parse(*source.SourceNameID)
+	if err != nil {
+		return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+	}
+	if _, err := client.CertifyScorecard.Create().
+		SetSourceID(sourceID).
 		SetChecks(checks).
 		SetAggregateScore(scorecardInput.AggregateScore).
-		SetTimeScanned(scorecardInput.TimeScanned).
+		SetTimeScanned(scorecardInput.TimeScanned.UTC()).
 		SetScorecardVersion(scorecardInput.ScorecardVersion).
 		SetScorecardCommit(scorecardInput.ScorecardCommit).
 		SetOrigin(scorecardInput.Origin).
 		SetCollector(scorecardInput.Collector).
 		OnConflict(
-			sql.ConflictColumns(scorecard.FieldOrigin, scorecard.FieldCollector, scorecard.FieldScorecardCommit, scorecard.FieldScorecardVersion, scorecard.FieldAggregateScore),
+			sql.ConflictColumns(certifyscorecard.FieldSourceID, certifyscorecard.FieldOrigin,
+				certifyscorecard.FieldCollector, certifyscorecard.FieldScorecardCommit,
+				certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldTimeScanned, certifyscorecard.FieldAggregateScore),
 		).
 		DoNothing().
-		ID(ctx)
-	if err != nil {
+		ID(ctx); err != nil {
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert Scorecard")
 		}
-		sc, err = client.Scorecard.Query().
-			Where(scorecard.TimeScannedEQ(scorecardInput.TimeScanned),
-				scorecard.ScorecardVersionEQ(scorecardInput.ScorecardVersion),
-				scorecard.ScorecardCommitEQ(scorecardInput.ScorecardCommit)).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get Scorecard ID")
-		}
 	}
-
-	// NOTE: This might be better as a query, but using insert here since the spec is an inputspec
-	var srcID int
-	ids, err := upsertSource(ctx, client, source)
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert Source")
-		}
-		srcID, err = client.SourceName.Query().
-			Where(sourcename.Name(source.Name)).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get Source ID")
-		}
-	} else {
-		srcID, err = strconv.Atoi(ids.SourceNameID)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get Source ID")
-		}
-	}
-	id, err := client.CertifyScorecard.Create().
-		SetScorecardID(sc).
-		SetSourceID(srcID).
-		OnConflict(
-			sql.ConflictColumns(certifyscorecard.FieldScorecardID, certifyscorecard.FieldSourceID),
-		).
-		DoNothing().
-		ID(ctx)
-
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert Scorecard")
-		}
-		id, err = client.Scorecard.Query().
-			Where(scorecard.IDEQ(srcID)).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get Scorecard ID")
-		}
-	}
-	return &id, nil
+	return ptrfrom.String(""), nil
 }
 
 func toModelCertifyScorecard(record *ent.CertifyScorecard) *model.CertifyScorecard {
 	return &model.CertifyScorecard{
-		Source:    toModelSource(backReferenceSourceName(record.Edges.Source)),
-		Scorecard: toModelScorecard(record.Edges.Scorecard),
+		Source:    toModelSource(record.Edges.Source),
+		Scorecard: toModelScorecard(record),
 	}
 }
 
-func toModelScorecard(record *ent.Scorecard) *model.Scorecard {
+func toModelScorecard(record *ent.CertifyScorecard) *model.Scorecard {
 	return &model.Scorecard{
 		Checks:           record.Checks,
 		AggregateScore:   record.AggregateScore,

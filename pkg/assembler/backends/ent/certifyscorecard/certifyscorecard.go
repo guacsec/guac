@@ -3,6 +3,8 @@
 package certifyscorecard
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
@@ -15,21 +17,24 @@ const (
 	FieldID = "id"
 	// FieldSourceID holds the string denoting the source_id field in the database.
 	FieldSourceID = "source_id"
-	// FieldScorecardID holds the string denoting the scorecard_id field in the database.
-	FieldScorecardID = "scorecard_id"
-	// EdgeScorecard holds the string denoting the scorecard edge name in mutations.
-	EdgeScorecard = "scorecard"
+	// FieldChecks holds the string denoting the checks field in the database.
+	FieldChecks = "checks"
+	// FieldAggregateScore holds the string denoting the aggregate_score field in the database.
+	FieldAggregateScore = "aggregate_score"
+	// FieldTimeScanned holds the string denoting the time_scanned field in the database.
+	FieldTimeScanned = "time_scanned"
+	// FieldScorecardVersion holds the string denoting the scorecard_version field in the database.
+	FieldScorecardVersion = "scorecard_version"
+	// FieldScorecardCommit holds the string denoting the scorecard_commit field in the database.
+	FieldScorecardCommit = "scorecard_commit"
+	// FieldOrigin holds the string denoting the origin field in the database.
+	FieldOrigin = "origin"
+	// FieldCollector holds the string denoting the collector field in the database.
+	FieldCollector = "collector"
 	// EdgeSource holds the string denoting the source edge name in mutations.
 	EdgeSource = "source"
 	// Table holds the table name of the certifyscorecard in the database.
 	Table = "certify_scorecards"
-	// ScorecardTable is the table that holds the scorecard relation/edge.
-	ScorecardTable = "certify_scorecards"
-	// ScorecardInverseTable is the table name for the Scorecard entity.
-	// It exists in this package in order to avoid circular dependency with the "scorecard" package.
-	ScorecardInverseTable = "scorecards"
-	// ScorecardColumn is the table column denoting the scorecard relation/edge.
-	ScorecardColumn = "scorecard_id"
 	// SourceTable is the table that holds the source relation/edge.
 	SourceTable = "certify_scorecards"
 	// SourceInverseTable is the table name for the SourceName entity.
@@ -43,7 +48,13 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldSourceID,
-	FieldScorecardID,
+	FieldChecks,
+	FieldAggregateScore,
+	FieldTimeScanned,
+	FieldScorecardVersion,
+	FieldScorecardCommit,
+	FieldOrigin,
+	FieldCollector,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -57,6 +68,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultAggregateScore holds the default value on creation for the "aggregate_score" field.
+	DefaultAggregateScore float64
+	// DefaultTimeScanned holds the default value on creation for the "time_scanned" field.
+	DefaultTimeScanned func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -74,16 +89,34 @@ func BySourceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSourceID, opts...).ToFunc()
 }
 
-// ByScorecardID orders the results by the scorecard_id field.
-func ByScorecardID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldScorecardID, opts...).ToFunc()
+// ByAggregateScore orders the results by the aggregate_score field.
+func ByAggregateScore(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAggregateScore, opts...).ToFunc()
 }
 
-// ByScorecardField orders the results by scorecard field.
-func ByScorecardField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newScorecardStep(), sql.OrderByField(field, opts...))
-	}
+// ByTimeScanned orders the results by the time_scanned field.
+func ByTimeScanned(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTimeScanned, opts...).ToFunc()
+}
+
+// ByScorecardVersion orders the results by the scorecard_version field.
+func ByScorecardVersion(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScorecardVersion, opts...).ToFunc()
+}
+
+// ByScorecardCommit orders the results by the scorecard_commit field.
+func ByScorecardCommit(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScorecardCommit, opts...).ToFunc()
+}
+
+// ByOrigin orders the results by the origin field.
+func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrigin, opts...).ToFunc()
+}
+
+// ByCollector orders the results by the collector field.
+func ByCollector(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCollector, opts...).ToFunc()
 }
 
 // BySourceField orders the results by source field.
@@ -91,13 +124,6 @@ func BySourceField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newSourceStep(), sql.OrderByField(field, opts...))
 	}
-}
-func newScorecardStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ScorecardInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, ScorecardTable, ScorecardColumn),
-	)
 }
 func newSourceStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

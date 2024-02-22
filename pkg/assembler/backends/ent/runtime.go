@@ -26,7 +26,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/schema"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
@@ -70,6 +69,14 @@ func init() {
 	certifylegal.DefaultID = certifylegalDescID.Default.(func() uuid.UUID)
 	certifyscorecardFields := schema.CertifyScorecard{}.Fields()
 	_ = certifyscorecardFields
+	// certifyscorecardDescAggregateScore is the schema descriptor for aggregate_score field.
+	certifyscorecardDescAggregateScore := certifyscorecardFields[3].Descriptor()
+	// certifyscorecard.DefaultAggregateScore holds the default value on creation for the aggregate_score field.
+	certifyscorecard.DefaultAggregateScore = certifyscorecardDescAggregateScore.Default.(float64)
+	// certifyscorecardDescTimeScanned is the schema descriptor for time_scanned field.
+	certifyscorecardDescTimeScanned := certifyscorecardFields[4].Descriptor()
+	// certifyscorecard.DefaultTimeScanned holds the default value on creation for the time_scanned field.
+	certifyscorecard.DefaultTimeScanned = certifyscorecardDescTimeScanned.Default.(func() time.Time)
 	// certifyscorecardDescID is the schema descriptor for id field.
 	certifyscorecardDescID := certifyscorecardFields[0].Descriptor()
 	// certifyscorecard.DefaultID holds the default value on creation for the id field.
@@ -178,20 +185,6 @@ func init() {
 	slsaattestationDescID := slsaattestationFields[0].Descriptor()
 	// slsaattestation.DefaultID holds the default value on creation for the id field.
 	slsaattestation.DefaultID = slsaattestationDescID.Default.(func() uuid.UUID)
-	scorecardFields := schema.Scorecard{}.Fields()
-	_ = scorecardFields
-	// scorecardDescAggregateScore is the schema descriptor for aggregate_score field.
-	scorecardDescAggregateScore := scorecardFields[2].Descriptor()
-	// scorecard.DefaultAggregateScore holds the default value on creation for the aggregate_score field.
-	scorecard.DefaultAggregateScore = scorecardDescAggregateScore.Default.(float64)
-	// scorecardDescTimeScanned is the schema descriptor for time_scanned field.
-	scorecardDescTimeScanned := scorecardFields[3].Descriptor()
-	// scorecard.DefaultTimeScanned holds the default value on creation for the time_scanned field.
-	scorecard.DefaultTimeScanned = scorecardDescTimeScanned.Default.(func() time.Time)
-	// scorecardDescID is the schema descriptor for id field.
-	scorecardDescID := scorecardFields[0].Descriptor()
-	// scorecard.DefaultID holds the default value on creation for the id field.
-	scorecard.DefaultID = scorecardDescID.Default.(func() uuid.UUID)
 	sourcenameFields := schema.SourceName{}.Fields()
 	_ = sourcenameFields
 	// sourcenameDescID is the schema descriptor for id field.

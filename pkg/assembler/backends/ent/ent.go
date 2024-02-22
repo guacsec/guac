@@ -31,7 +31,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
@@ -117,7 +116,6 @@ func checkColumn(table, column string) error {
 			pkgequal.Table:              pkgequal.ValidColumn,
 			pointofcontact.Table:        pointofcontact.ValidColumn,
 			slsaattestation.Table:       slsaattestation.ValidColumn,
-			scorecard.Table:             scorecard.ValidColumn,
 			sourcename.Table:            sourcename.ValidColumn,
 			vulnequal.Table:             vulnequal.ValidColumn,
 			vulnerabilityid.Table:       vulnerabilityid.ValidColumn,

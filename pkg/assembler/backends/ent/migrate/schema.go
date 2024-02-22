@@ -237,8 +237,14 @@ var (
 	// CertifyScorecardsColumns holds the columns for the "certify_scorecards" table.
 	CertifyScorecardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "checks", Type: field.TypeJSON},
+		{Name: "aggregate_score", Type: field.TypeFloat64, Default: 0},
+		{Name: "time_scanned", Type: field.TypeTime},
+		{Name: "scorecard_version", Type: field.TypeString},
+		{Name: "scorecard_commit", Type: field.TypeString},
+		{Name: "origin", Type: field.TypeString},
+		{Name: "collector", Type: field.TypeString},
 		{Name: "source_id", Type: field.TypeUUID},
-		{Name: "scorecard_id", Type: field.TypeUUID},
 	}
 	// CertifyScorecardsTable holds the schema information for the "certify_scorecards" table.
 	CertifyScorecardsTable = &schema.Table{
@@ -248,22 +254,16 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "certify_scorecards_source_names_source",
-				Columns:    []*schema.Column{CertifyScorecardsColumns[1]},
+				Columns:    []*schema.Column{CertifyScorecardsColumns[8]},
 				RefColumns: []*schema.Column{SourceNamesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "certify_scorecards_scorecards_certifications",
-				Columns:    []*schema.Column{CertifyScorecardsColumns[2]},
-				RefColumns: []*schema.Column{ScorecardsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifyscorecard_source_id_scorecard_id",
+				Name:    "certifyscorecard_source_id_origin_collector_scorecard_version_scorecard_commit_aggregate_score",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyScorecardsColumns[1], CertifyScorecardsColumns[2]},
+				Columns: []*schema.Column{CertifyScorecardsColumns[8], CertifyScorecardsColumns[6], CertifyScorecardsColumns[7], CertifyScorecardsColumns[4], CertifyScorecardsColumns[5], CertifyScorecardsColumns[2]},
 			},
 		},
 	}
@@ -905,30 +905,6 @@ var (
 			},
 		},
 	}
-	// ScorecardsColumns holds the columns for the "scorecards" table.
-	ScorecardsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "checks", Type: field.TypeJSON},
-		{Name: "aggregate_score", Type: field.TypeFloat64, Default: 0},
-		{Name: "time_scanned", Type: field.TypeTime},
-		{Name: "scorecard_version", Type: field.TypeString},
-		{Name: "scorecard_commit", Type: field.TypeString},
-		{Name: "origin", Type: field.TypeString},
-		{Name: "collector", Type: field.TypeString},
-	}
-	// ScorecardsTable holds the schema information for the "scorecards" table.
-	ScorecardsTable = &schema.Table{
-		Name:       "scorecards",
-		Columns:    ScorecardsColumns,
-		PrimaryKey: []*schema.Column{ScorecardsColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "scorecard_origin_collector_scorecard_version_scorecard_commit_aggregate_score",
-				Unique:  true,
-				Columns: []*schema.Column{ScorecardsColumns[6], ScorecardsColumns[7], ScorecardsColumns[4], ScorecardsColumns[5], ScorecardsColumns[2]},
-			},
-		},
-	}
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -1303,7 +1279,6 @@ var (
 		PkgEqualsTable,
 		PointOfContactsTable,
 		SlsaAttestationsTable,
-		ScorecardsTable,
 		SourceNamesTable,
 		VulnEqualsTable,
 		VulnerabilityIdsTable,
@@ -1331,7 +1306,6 @@ func init() {
 	CertifyLegalsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	CertifyLegalsTable.ForeignKeys[1].RefTable = SourceNamesTable
 	CertifyScorecardsTable.ForeignKeys[0].RefTable = SourceNamesTable
-	CertifyScorecardsTable.ForeignKeys[1].RefTable = ScorecardsTable
 	CertifyVexesTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	CertifyVexesTable.ForeignKeys[1].RefTable = ArtifactsTable
 	CertifyVexesTable.ForeignKeys[2].RefTable = VulnerabilityIdsTable

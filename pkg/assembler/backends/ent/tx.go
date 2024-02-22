@@ -52,8 +52,6 @@ type Tx struct {
 	PointOfContact *PointOfContactClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
-	// Scorecard is the client for interacting with the Scorecard builders.
-	Scorecard *ScorecardClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// VulnEqual is the client for interacting with the VulnEqual builders.
@@ -213,7 +211,6 @@ func (tx *Tx) init() {
 	tx.PkgEqual = NewPkgEqualClient(tx.config)
 	tx.PointOfContact = NewPointOfContactClient(tx.config)
 	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
-	tx.Scorecard = NewScorecardClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
 	tx.VulnEqual = NewVulnEqualClient(tx.config)
 	tx.VulnerabilityID = NewVulnerabilityIDClient(tx.config)

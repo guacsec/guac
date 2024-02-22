@@ -35,7 +35,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
@@ -88,8 +87,6 @@ type Client struct {
 	PointOfContact *PointOfContactClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
-	// Scorecard is the client for interacting with the Scorecard builders.
-	Scorecard *ScorecardClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
 	// VulnEqual is the client for interacting with the VulnEqual builders.
@@ -129,7 +126,6 @@ func (c *Client) init() {
 	c.PkgEqual = NewPkgEqualClient(c.config)
 	c.PointOfContact = NewPointOfContactClient(c.config)
 	c.SLSAAttestation = NewSLSAAttestationClient(c.config)
-	c.Scorecard = NewScorecardClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
 	c.VulnEqual = NewVulnEqualClient(c.config)
 	c.VulnerabilityID = NewVulnerabilityIDClient(c.config)
@@ -246,7 +242,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PkgEqual:              NewPkgEqualClient(cfg),
 		PointOfContact:        NewPointOfContactClient(cfg),
 		SLSAAttestation:       NewSLSAAttestationClient(cfg),
-		Scorecard:             NewScorecardClient(cfg),
 		SourceName:            NewSourceNameClient(cfg),
 		VulnEqual:             NewVulnEqualClient(cfg),
 		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
@@ -290,7 +285,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PkgEqual:              NewPkgEqualClient(cfg),
 		PointOfContact:        NewPointOfContactClient(cfg),
 		SLSAAttestation:       NewSLSAAttestationClient(cfg),
-		Scorecard:             NewScorecardClient(cfg),
 		SourceName:            NewSourceNameClient(cfg),
 		VulnEqual:             NewVulnEqualClient(cfg),
 		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
@@ -328,7 +322,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasMetadata,
 		c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.License, c.Occurrence,
 		c.PackageName, c.PackageVersion, c.PkgEqual, c.PointOfContact,
-		c.SLSAAttestation, c.Scorecard, c.SourceName, c.VulnEqual, c.VulnerabilityID,
+		c.SLSAAttestation, c.SourceName, c.VulnEqual, c.VulnerabilityID,
 		c.VulnerabilityMetadata,
 	} {
 		n.Use(hooks...)
@@ -343,7 +337,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasMetadata,
 		c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.License, c.Occurrence,
 		c.PackageName, c.PackageVersion, c.PkgEqual, c.PointOfContact,
-		c.SLSAAttestation, c.Scorecard, c.SourceName, c.VulnEqual, c.VulnerabilityID,
+		c.SLSAAttestation, c.SourceName, c.VulnEqual, c.VulnerabilityID,
 		c.VulnerabilityMetadata,
 	} {
 		n.Intercept(interceptors...)
@@ -393,8 +387,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PointOfContact.mutate(ctx, m)
 	case *SLSAAttestationMutation:
 		return c.SLSAAttestation.mutate(ctx, m)
-	case *ScorecardMutation:
-		return c.Scorecard.mutate(ctx, m)
 	case *SourceNameMutation:
 		return c.SourceName.mutate(ctx, m)
 	case *VulnEqualMutation:
@@ -1499,22 +1491,6 @@ func (c *CertifyScorecardClient) GetX(ctx context.Context, id uuid.UUID) *Certif
 		panic(err)
 	}
 	return obj
-}
-
-// QueryScorecard queries the scorecard edge of a CertifyScorecard.
-func (c *CertifyScorecardClient) QueryScorecard(cs *CertifyScorecard) *ScorecardQuery {
-	query := (&ScorecardClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cs.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(certifyscorecard.Table, certifyscorecard.FieldID, id),
-			sqlgraph.To(scorecard.Table, scorecard.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, certifyscorecard.ScorecardTable, certifyscorecard.ScorecardColumn),
-		)
-		fromV = sqlgraph.Neighbors(cs.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // QuerySource queries the source edge of a CertifyScorecard.
@@ -4028,155 +4004,6 @@ func (c *SLSAAttestationClient) mutate(ctx context.Context, m *SLSAAttestationMu
 	}
 }
 
-// ScorecardClient is a client for the Scorecard schema.
-type ScorecardClient struct {
-	config
-}
-
-// NewScorecardClient returns a client for the Scorecard from the given config.
-func NewScorecardClient(c config) *ScorecardClient {
-	return &ScorecardClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `scorecard.Hooks(f(g(h())))`.
-func (c *ScorecardClient) Use(hooks ...Hook) {
-	c.hooks.Scorecard = append(c.hooks.Scorecard, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `scorecard.Intercept(f(g(h())))`.
-func (c *ScorecardClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Scorecard = append(c.inters.Scorecard, interceptors...)
-}
-
-// Create returns a builder for creating a Scorecard entity.
-func (c *ScorecardClient) Create() *ScorecardCreate {
-	mutation := newScorecardMutation(c.config, OpCreate)
-	return &ScorecardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Scorecard entities.
-func (c *ScorecardClient) CreateBulk(builders ...*ScorecardCreate) *ScorecardCreateBulk {
-	return &ScorecardCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *ScorecardClient) MapCreateBulk(slice any, setFunc func(*ScorecardCreate, int)) *ScorecardCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &ScorecardCreateBulk{err: fmt.Errorf("calling to ScorecardClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*ScorecardCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &ScorecardCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Scorecard.
-func (c *ScorecardClient) Update() *ScorecardUpdate {
-	mutation := newScorecardMutation(c.config, OpUpdate)
-	return &ScorecardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ScorecardClient) UpdateOne(s *Scorecard) *ScorecardUpdateOne {
-	mutation := newScorecardMutation(c.config, OpUpdateOne, withScorecard(s))
-	return &ScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ScorecardClient) UpdateOneID(id uuid.UUID) *ScorecardUpdateOne {
-	mutation := newScorecardMutation(c.config, OpUpdateOne, withScorecardID(id))
-	return &ScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Scorecard.
-func (c *ScorecardClient) Delete() *ScorecardDelete {
-	mutation := newScorecardMutation(c.config, OpDelete)
-	return &ScorecardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *ScorecardClient) DeleteOne(s *Scorecard) *ScorecardDeleteOne {
-	return c.DeleteOneID(s.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ScorecardClient) DeleteOneID(id uuid.UUID) *ScorecardDeleteOne {
-	builder := c.Delete().Where(scorecard.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ScorecardDeleteOne{builder}
-}
-
-// Query returns a query builder for Scorecard.
-func (c *ScorecardClient) Query() *ScorecardQuery {
-	return &ScorecardQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeScorecard},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Scorecard entity by its id.
-func (c *ScorecardClient) Get(ctx context.Context, id uuid.UUID) (*Scorecard, error) {
-	return c.Query().Where(scorecard.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ScorecardClient) GetX(ctx context.Context, id uuid.UUID) *Scorecard {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryCertifications queries the certifications edge of a Scorecard.
-func (c *ScorecardClient) QueryCertifications(s *Scorecard) *CertifyScorecardQuery {
-	query := (&CertifyScorecardClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(scorecard.Table, scorecard.FieldID, id),
-			sqlgraph.To(certifyscorecard.Table, certifyscorecard.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, scorecard.CertificationsTable, scorecard.CertificationsColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *ScorecardClient) Hooks() []Hook {
-	return c.hooks.Scorecard
-}
-
-// Interceptors returns the client interceptors.
-func (c *ScorecardClient) Interceptors() []Interceptor {
-	return c.inters.Scorecard
-}
-
-func (c *ScorecardClient) mutate(ctx context.Context, m *ScorecardMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&ScorecardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&ScorecardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&ScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&ScorecardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown Scorecard mutation op: %q", m.Op())
-	}
-}
-
 // SourceNameClient is a client for the SourceName schema.
 type SourceNameClient struct {
 	config
@@ -4795,14 +4622,14 @@ type (
 		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
 		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasMetadata,
 		HasSourceAt, HashEqual, IsVulnerability, License, Occurrence, PackageName,
-		PackageVersion, PkgEqual, PointOfContact, SLSAAttestation, Scorecard,
-		SourceName, VulnEqual, VulnerabilityID, VulnerabilityMetadata []ent.Hook
+		PackageVersion, PkgEqual, PointOfContact, SLSAAttestation, SourceName,
+		VulnEqual, VulnerabilityID, VulnerabilityMetadata []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
 		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasMetadata,
 		HasSourceAt, HashEqual, IsVulnerability, License, Occurrence, PackageName,
-		PackageVersion, PkgEqual, PointOfContact, SLSAAttestation, Scorecard,
-		SourceName, VulnEqual, VulnerabilityID, VulnerabilityMetadata []ent.Interceptor
+		PackageVersion, PkgEqual, PointOfContact, SLSAAttestation, SourceName,
+		VulnEqual, VulnerabilityID, VulnerabilityMetadata []ent.Interceptor
 	}
 )

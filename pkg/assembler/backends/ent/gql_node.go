@@ -28,7 +28,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
@@ -101,9 +100,6 @@ func (n *PointOfContact) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *SLSAAttestation) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
-func (n *Scorecard) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *SourceName) IsNode() {}
@@ -407,18 +403,6 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 		query := c.SLSAAttestation.Query().
 			Where(slsaattestation.ID(id))
 		query, err := query.CollectFields(ctx, "SLSAAttestation")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case scorecard.Table:
-		query := c.Scorecard.Query().
-			Where(scorecard.ID(id))
-		query, err := query.CollectFields(ctx, "Scorecard")
 		if err != nil {
 			return nil, err
 		}
@@ -856,22 +840,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 		query := c.SLSAAttestation.Query().
 			Where(slsaattestation.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "SLSAAttestation")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case scorecard.Table:
-		query := c.Scorecard.Query().
-			Where(scorecard.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "Scorecard")
 		if err != nil {
 			return nil, err
 		}

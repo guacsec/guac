@@ -216,14 +216,6 @@ func (cl *CertifyLegal) DiscoveredLicenses(ctx context.Context) (result []*Licen
 	return result, err
 }
 
-func (cs *CertifyScorecard) Scorecard(ctx context.Context) (*Scorecard, error) {
-	result, err := cs.Edges.ScorecardOrErr()
-	if IsNotLoaded(err) {
-		result, err = cs.QueryScorecard().Only(ctx)
-	}
-	return result, err
-}
-
 func (cs *CertifyScorecard) Source(ctx context.Context) (*SourceName, error) {
 	result, err := cs.Edges.SourceOrErr()
 	if IsNotLoaded(err) {
@@ -584,18 +576,6 @@ func (sa *SLSAAttestation) Subject(ctx context.Context) (*Artifact, error) {
 	result, err := sa.Edges.SubjectOrErr()
 	if IsNotLoaded(err) {
 		result, err = sa.QuerySubject().Only(ctx)
-	}
-	return result, err
-}
-
-func (s *Scorecard) Certifications(ctx context.Context) (result []*CertifyScorecard, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = s.NamedCertifications(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = s.Edges.CertificationsOrErr()
-	}
-	if IsNotLoaded(err) {
-		result, err = s.QueryCertifications().All(ctx)
 	}
 	return result, err
 }

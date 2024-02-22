@@ -249,18 +249,6 @@ func (f SLSAAttestationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SLSAAttestationMutation", m)
 }
 
-// The ScorecardFunc type is an adapter to allow the use of ordinary
-// function as Scorecard mutator.
-type ScorecardFunc func(context.Context, *ent.ScorecardMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ScorecardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.ScorecardMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ScorecardMutation", m)
-}
-
 // The SourceNameFunc type is an adapter to allow the use of ordinary
 // function as SourceName mutator.
 type SourceNameFunc func(context.Context, *ent.SourceNameMutation) (ent.Value, error)
