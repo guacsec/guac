@@ -467,7 +467,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, clie
 			}
 		}
 	default:
-		return nil, fmt.Errorf("Unknown spec: %+T", certifies)
+		return nil, fmt.Errorf("unknown spec: %+T", certifies)
 	}
 
 	return &ids, nil

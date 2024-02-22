@@ -285,7 +285,7 @@ func hashBuiltFrom(slc []string) string {
 	content := bytes.NewBuffer(nil)
 
 	for _, v := range builtFrom {
-		content.WriteString(fmt.Sprintf("%d", v))
+		content.WriteString(v)
 	}
 
 	hash.Write(content.Bytes())

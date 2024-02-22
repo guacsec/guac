@@ -57,16 +57,16 @@ func toPtrSlice[T any](slice []T) []*T {
 	return ptrs
 }
 
-func fromPtrSlice[T any](slice []*T) []T {
-	ptrs := make([]T, len(slice))
-	for i := range slice {
-		if slice[i] == nil {
-			continue
-		}
-		ptrs[i] = *slice[i]
-	}
-	return ptrs
-}
+// func fromPtrSlice[T any](slice []*T) []T {
+// 	ptrs := make([]T, len(slice))
+// 	for i := range slice {
+// 		if slice[i] == nil {
+// 			continue
+// 		}
+// 		ptrs[i] = *slice[i]
+// 	}
+// 	return ptrs
+// }
 
 func toLowerPtr(s *string) *string {
 	if s == nil {

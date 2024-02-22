@@ -15,41 +15,32 @@
 
 package backend
 
-import (
-	"context"
-	"os"
-	"strconv"
+// var concurrent chan struct{}
 
-	"github.com/guacsec/guac/pkg/logging"
-	"golang.org/x/sync/errgroup"
-)
+// const MaxConcurrentBulkIngestionString string = "MAX_CONCURRENT_BULK_INGESTION"
+// const defaultMaxConcurrentBulkIngestion int = 50
 
-var concurrent chan struct{}
+// func init() {
+// 	logger := logging.FromContext(context.Background())
+// 	size := defaultMaxConcurrentBulkIngestion
+// 	maxConcurrentBulkIngestionEnv, found := os.LookupEnv(MaxConcurrentBulkIngestionString)
+// 	if found {
+// 		maxConcurrentBulkIngestion, err := strconv.Atoi(maxConcurrentBulkIngestionEnv)
+// 		if err != nil {
+// 			logger.Warnf("failed to convert %v value %v to integer. Default value %v will be applied", MaxConcurrentBulkIngestionString, maxConcurrentBulkIngestionEnv, defaultMaxConcurrentBulkIngestion)
+// 			size = defaultMaxConcurrentBulkIngestion
+// 		} else {
+// 			size = maxConcurrentBulkIngestion
+// 		}
+// 	}
+// 	concurrent = make(chan struct{}, size)
+// }
 
-const MaxConcurrentBulkIngestionString string = "MAX_CONCURRENT_BULK_INGESTION"
-const defaultMaxConcurrentBulkIngestion int = 50
-
-func init() {
-	logger := logging.FromContext(context.Background())
-	size := defaultMaxConcurrentBulkIngestion
-	maxConcurrentBulkIngestionEnv, found := os.LookupEnv(MaxConcurrentBulkIngestionString)
-	if found {
-		maxConcurrentBulkIngestion, err := strconv.Atoi(maxConcurrentBulkIngestionEnv)
-		if err != nil {
-			logger.Warnf("failed to convert %v value %v to integer. Default value %v will be applied", MaxConcurrentBulkIngestionString, maxConcurrentBulkIngestionEnv, defaultMaxConcurrentBulkIngestion)
-			size = defaultMaxConcurrentBulkIngestion
-		} else {
-			size = maxConcurrentBulkIngestion
-		}
-	}
-	concurrent = make(chan struct{}, size)
-}
-
-func concurrently(eg *errgroup.Group, fn func() error) {
-	eg.Go(func() error {
-		concurrent <- struct{}{}
-		err := fn()
-		<-concurrent
-		return err
-	})
-}
+// func concurrently(eg *errgroup.Group, fn func() error) {
+// 	eg.Go(func() error {
+// 		concurrent <- struct{}{}
+// 		err := fn()
+// 		<-concurrent
+// 		return err
+// 	})
+// }

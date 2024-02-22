@@ -33,7 +33,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -304,7 +303,7 @@ func hashLicenseIDs(licenses []uuid.UUID) string {
 	sort.Slice(licenses, func(i, j int) bool { return licenses[i].String() < licenses[j].String() })
 
 	for _, v := range licenses {
-		content.WriteString(fmt.Sprintf("%d", v.String()))
+		content.WriteString(v.String())
 	}
 
 	hash.Write(content.Bytes())
@@ -381,29 +380,29 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 	return certifylegal.And(predicates...)
 }
 
-func certifyLegalInputQuery(subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, filter model.CertifyLegalInputSpec) predicate.CertifyLegal {
-	var subjectSpec *model.PackageOrSourceSpec
-	if subject.Package != nil {
-		subjectSpec = &model.PackageOrSourceSpec{
-			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-		}
-	} else {
-		subjectSpec = &model.PackageOrSourceSpec{
-			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
-		}
-	}
-	declaredLicenseSpecs := collect(declaredLicenses, helper.ConvertLicenseInputSpecToLicenseSpec)
-	discoveredLicenseSpecs := collect(discoveredLicenses, helper.ConvertLicenseInputSpecToLicenseSpec)
-	return certifyLegalQuery(model.CertifyLegalSpec{
-		Subject:            subjectSpec,
-		DeclaredLicense:    &filter.DeclaredLicense,
-		DeclaredLicenses:   declaredLicenseSpecs,
-		DiscoveredLicense:  &filter.DiscoveredLicense,
-		DiscoveredLicenses: discoveredLicenseSpecs,
-		Attribution:        &filter.Attribution,
-		Justification:      &filter.Justification,
-		TimeScanned:        &filter.TimeScanned,
-		Origin:             &filter.Origin,
-		Collector:          &filter.Collector,
-	})
-}
+// func certifyLegalInputQuery(subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, filter model.CertifyLegalInputSpec) predicate.CertifyLegal {
+// 	var subjectSpec *model.PackageOrSourceSpec
+// 	if subject.Package != nil {
+// 		subjectSpec = &model.PackageOrSourceSpec{
+// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
+// 		}
+// 	} else {
+// 		subjectSpec = &model.PackageOrSourceSpec{
+// 			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
+// 		}
+// 	}
+// 	declaredLicenseSpecs := collect(declaredLicenses, helper.ConvertLicenseInputSpecToLicenseSpec)
+// 	discoveredLicenseSpecs := collect(discoveredLicenses, helper.ConvertLicenseInputSpecToLicenseSpec)
+// 	return certifyLegalQuery(model.CertifyLegalSpec{
+// 		Subject:            subjectSpec,
+// 		DeclaredLicense:    &filter.DeclaredLicense,
+// 		DeclaredLicenses:   declaredLicenseSpecs,
+// 		DiscoveredLicense:  &filter.DiscoveredLicense,
+// 		DiscoveredLicenses: discoveredLicenseSpecs,
+// 		Attribution:        &filter.Attribution,
+// 		Justification:      &filter.Justification,
+// 		TimeScanned:        &filter.TimeScanned,
+// 		Origin:             &filter.Origin,
+// 		Collector:          &filter.Collector,
+// 	})
+// }

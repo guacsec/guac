@@ -155,10 +155,10 @@ func licenseQuery(filter model.LicenseSpec) predicate.License {
 	)
 }
 
-func licenseInputQuery(filter model.LicenseInputSpec) predicate.License {
-	return licenseQuery(model.LicenseSpec{
-		Name:        &filter.Name,
-		Inline:      filter.Inline,
-		ListVersion: filter.ListVersion,
-	})
-}
+// func licenseInputQuery(filter model.LicenseInputSpec) predicate.License {
+// 	return licenseQuery(model.LicenseSpec{
+// 		Name:        &filter.Name,
+// 		Inline:      filter.Inline,
+// 		ListVersion: filter.ListVersion,
+// 	})
+// }

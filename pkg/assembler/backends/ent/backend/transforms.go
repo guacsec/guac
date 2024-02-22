@@ -98,9 +98,9 @@ func collect[T any, R any](items []T, transformer func(T) R) []R {
 	return out
 }
 
-func nodeID(id int) string {
-	return fmt.Sprintf("%d", id)
-}
+// func nodeID(id int) string {
+// 	return fmt.Sprintf("%d", id)
+// }
 
 func stringOrEmpty(s *string) string {
 	return valueOrDefault(s, "")

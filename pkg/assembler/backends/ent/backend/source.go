@@ -376,15 +376,15 @@ func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec
 		SourceNameID:      srcNameID.String()}, nil
 }
 
-func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
-	return sourceQuery(&model.SourceSpec{
-		Commit:    filter.Commit,
-		Tag:       filter.Tag,
-		Name:      &filter.Name,
-		Type:      &filter.Type,
-		Namespace: &filter.Namespace,
-	})
-}
+// func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
+// 	return sourceQuery(&model.SourceSpec{
+// 		Commit:    filter.Commit,
+// 		Tag:       filter.Tag,
+// 		Name:      &filter.Name,
+// 		Type:      &filter.Type,
+// 		Namespace: &filter.Namespace,
+// 	})
+// }
 
 func withSourceNameTreeQuery() func(*ent.SourceNameQuery) {
 	return func(q *ent.SourceNameQuery) {}

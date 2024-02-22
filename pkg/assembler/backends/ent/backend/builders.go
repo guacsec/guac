@@ -56,9 +56,9 @@ func builderQueryPredicate(spec *model.BuilderSpec) predicate.Builder {
 	return builder.And(query...)
 }
 
-func builderInputQueryPredicate(spec model.BuilderInputSpec) predicate.Builder {
-	return builder.URIEqualFold(spec.URI)
-}
+// func builderInputQueryPredicate(spec model.BuilderInputSpec) predicate.Builder {
+// 	return builder.URIEqualFold(spec.URI)
+// }
 
 func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.IDorBuilderInput) (string, error) {
 	funcName := "IngestBuilder"

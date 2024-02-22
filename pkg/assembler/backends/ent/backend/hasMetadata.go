@@ -26,7 +26,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -364,30 +363,30 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 	}
 }
 
-func hasMetadataInputPredicate(subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, filter model.HasMetadataInputSpec) predicate.HasMetadata {
-	var subjectSpec *model.PackageSourceOrArtifactSpec
-	if subject.Package != nil {
-		if pkgMatchType != nil && pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-			subject.Package.PackageInput.Version = nil
-		}
-		subjectSpec = &model.PackageSourceOrArtifactSpec{
-			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-		}
-	} else if subject.Artifact != nil {
-		subjectSpec = &model.PackageSourceOrArtifactSpec{
-			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
-		}
-	} else {
-		subjectSpec = &model.PackageSourceOrArtifactSpec{
-			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
-		}
-	}
-	return hasMetadataPredicate(&model.HasMetadataSpec{
-		Subject:       subjectSpec,
-		Key:           &filter.Key,
-		Value:         &filter.Value,
-		Justification: &filter.Justification,
-		Origin:        &filter.Origin,
-		Collector:     &filter.Collector,
-	})
-}
+// func hasMetadataInputPredicate(subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, filter model.HasMetadataInputSpec) predicate.HasMetadata {
+// 	var subjectSpec *model.PackageSourceOrArtifactSpec
+// 	if subject.Package != nil {
+// 		if pkgMatchType != nil && pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+// 			subject.Package.PackageInput.Version = nil
+// 		}
+// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
+// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
+// 		}
+// 	} else if subject.Artifact != nil {
+// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
+// 			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
+// 		}
+// 	} else {
+// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
+// 			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
+// 		}
+// 	}
+// 	return hasMetadataPredicate(&model.HasMetadataSpec{
+// 		Subject:       subjectSpec,
+// 		Key:           &filter.Key,
+// 		Value:         &filter.Value,
+// 		Justification: &filter.Justification,
+// 		Origin:        &filter.Origin,
+// 		Collector:     &filter.Collector,
+// 	})
+// }

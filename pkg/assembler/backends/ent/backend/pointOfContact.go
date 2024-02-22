@@ -26,7 +26,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -364,31 +363,31 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 	}
 }
 
-func pointOfContactInputPredicate(subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, filter model.PointOfContactInputSpec) predicate.PointOfContact {
-	var subjectSpec *model.PackageSourceOrArtifactSpec
-	if subject.Package != nil {
-		if pkgMatchType != nil && pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-			subject.Package.PackageInput.Version = nil
-		}
-		subjectSpec = &model.PackageSourceOrArtifactSpec{
-			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-		}
-	} else if subject.Artifact != nil {
-		subjectSpec = &model.PackageSourceOrArtifactSpec{
-			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
-		}
-	} else {
-		subjectSpec = &model.PackageSourceOrArtifactSpec{
-			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
-		}
-	}
-	return pointOfContactPredicate(&model.PointOfContactSpec{
-		Subject:       subjectSpec,
-		Email:         &filter.Email,
-		Info:          &filter.Info,
-		Since:         &filter.Since,
-		Justification: &filter.Justification,
-		Origin:        &filter.Origin,
-		Collector:     &filter.Collector,
-	})
-}
+// func pointOfContactInputPredicate(subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, filter model.PointOfContactInputSpec) predicate.PointOfContact {
+// 	var subjectSpec *model.PackageSourceOrArtifactSpec
+// 	if subject.Package != nil {
+// 		if pkgMatchType != nil && pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+// 			subject.Package.PackageInput.Version = nil
+// 		}
+// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
+// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
+// 		}
+// 	} else if subject.Artifact != nil {
+// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
+// 			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
+// 		}
+// 	} else {
+// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
+// 			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
+// 		}
+// 	}
+// 	return pointOfContactPredicate(&model.PointOfContactSpec{
+// 		Subject:       subjectSpec,
+// 		Email:         &filter.Email,
+// 		Info:          &filter.Info,
+// 		Since:         &filter.Since,
+// 		Justification: &filter.Justification,
+// 		Origin:        &filter.Origin,
+// 		Collector:     &filter.Collector,
+// 	})
+// }

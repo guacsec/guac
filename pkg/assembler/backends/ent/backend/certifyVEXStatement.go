@@ -27,7 +27,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -315,29 +314,29 @@ func certifyVexPredicate(filter model.CertifyVEXStatementSpec) predicate.Certify
 	return certifyvex.And(predicates...)
 }
 
-func vexStatementInputPredicate(subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) predicate.CertifyVex {
-	var sub *model.PackageOrArtifactSpec
-	if subject.Package != nil {
-		sub = &model.PackageOrArtifactSpec{
-			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-		}
-	} else {
-		sub = &model.PackageOrArtifactSpec{
-			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
-		}
-	}
-	return certifyVexPredicate(model.CertifyVEXStatementSpec{
-		Subject: sub,
-		Vulnerability: &model.VulnerabilitySpec{
-			Type:            &vulnerability.Type,
-			VulnerabilityID: &vulnerability.VulnerabilityID,
-		},
-		Status:           &vexStatement.Status,
-		VexJustification: &vexStatement.VexJustification,
-		Statement:        &vexStatement.Statement,
-		StatusNotes:      &vexStatement.StatusNotes,
-		KnownSince:       &vexStatement.KnownSince,
-		Origin:           &vexStatement.Origin,
-		Collector:        &vexStatement.Collector,
-	})
-}
+// func vexStatementInputPredicate(subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) predicate.CertifyVex {
+// 	var sub *model.PackageOrArtifactSpec
+// 	if subject.Package != nil {
+// 		sub = &model.PackageOrArtifactSpec{
+// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
+// 		}
+// 	} else {
+// 		sub = &model.PackageOrArtifactSpec{
+// 			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
+// 		}
+// 	}
+// 	return certifyVexPredicate(model.CertifyVEXStatementSpec{
+// 		Subject: sub,
+// 		Vulnerability: &model.VulnerabilitySpec{
+// 			Type:            &vulnerability.Type,
+// 			VulnerabilityID: &vulnerability.VulnerabilityID,
+// 		},
+// 		Status:           &vexStatement.Status,
+// 		VexJustification: &vexStatement.VexJustification,
+// 		Statement:        &vexStatement.Statement,
+// 		StatusNotes:      &vexStatement.StatusNotes,
+// 		KnownSince:       &vexStatement.KnownSince,
+// 		Origin:           &vexStatement.Origin,
+// 		Collector:        &vexStatement.Collector,
+// 	})
+// }
