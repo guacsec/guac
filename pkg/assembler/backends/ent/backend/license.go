@@ -92,12 +92,13 @@ func upsertBulkLicense(ctx context.Context, client *ent.Tx, licenseInputs []*mod
 	for _, licenses := range batches {
 		creates := make([]*ent.LicenseCreate, len(licenses))
 		for i, lic := range licenses {
-			licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](lic.LicenseInput, helpers.LicenseServerKey)), 5)
+			l := lic
+			licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](l.LicenseInput, helpers.LicenseServerKey)), 5)
 			creates[i] = client.License.Create().
 				SetID(licenseID).
-				SetName(lic.LicenseInput.Name).
-				SetInline(stringOrEmpty(lic.LicenseInput.Inline)).
-				SetListVersion(stringOrEmpty(lic.LicenseInput.ListVersion))
+				SetName(l.LicenseInput.Name).
+				SetInline(stringOrEmpty(l.LicenseInput.Inline)).
+				SetListVersion(stringOrEmpty(l.LicenseInput.ListVersion))
 
 			ids = append(ids, licenseID.String())
 		}

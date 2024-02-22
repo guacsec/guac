@@ -45,7 +45,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 
 			var pkgVersionIDs []string
 			for _, pkgVersionID := range collectedIDorPkgInputs {
-				pkgVersionIDs = append(pkgVersionIDs, *pkgVersionID.PackageVersionID)
+				pkgVerID := pkgVersionID
+				pkgVersionIDs = append(pkgVersionIDs, *pkgVerID.PackageVersionID)
 			}
 			packageIDs = append(packageIDs, pkgVersionIDs...)
 
@@ -69,7 +70,8 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			}
 			var artIDs []string
 			for _, artID := range collectedIDorArtInputs {
-				artIDs = append(artIDs, *artID.ArtifactID)
+				aID := artID
+				artIDs = append(artIDs, *aID.ArtifactID)
 			}
 			artifactIDs = append(artifactIDs, artIDs...)
 

@@ -96,10 +96,11 @@ func upsertBulkBuilder(ctx context.Context, client *ent.Tx, buildInputs []*model
 	for _, builders := range batches {
 		creates := make([]*ent.BuilderCreate, len(builders))
 		for i, build := range builders {
-			builderID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(build.BuilderInput.URI), 5)
+			b := build
+			builderID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(b.BuilderInput.URI), 5)
 			creates[i] = client.Builder.Create().
 				SetID(builderID).
-				SetURI(build.BuilderInput.URI)
+				SetURI(b.BuilderInput.URI)
 
 			ids = append(ids, builderID.String())
 		}

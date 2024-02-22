@@ -95,11 +95,12 @@ func upsertBulkArtifact(ctx context.Context, client *ent.Tx, artInputs []*model.
 	for _, artifacts := range batches {
 		creates := make([]*ent.ArtifactCreate, len(artifacts))
 		for i, art := range artifacts {
-			artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.ArtifactInputSpec, string](art.ArtifactInput, helpers.ArtifactServerKey)), 5)
+			artInput := art
+			artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.ArtifactInputSpec, string](artInput.ArtifactInput, helpers.ArtifactServerKey)), 5)
 			creates[i] = client.Artifact.Create().
 				SetID(artifactID).
-				SetAlgorithm(strings.ToLower(art.ArtifactInput.Algorithm)).
-				SetDigest(strings.ToLower(art.ArtifactInput.Digest))
+				SetAlgorithm(strings.ToLower(artInput.ArtifactInput.Algorithm)).
+				SetDigest(strings.ToLower(artInput.ArtifactInput.Digest))
 
 			ids = append(ids, artifactID.String())
 		}

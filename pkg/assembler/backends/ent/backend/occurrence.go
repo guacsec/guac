@@ -105,14 +105,7 @@ func upsertBulkOccurrences(ctx context.Context, client *ent.Tx, subjects model.P
 		creates := make([]*ent.OccurrenceCreate, len(occurs))
 		for i, occur := range occurs {
 
-			isOccurrenceID, err := guacOccurrenceKey(subjects.Packages[index], subjects.Sources[index], *artifacts[index], *occur)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
-			}
-			ids = append(ids, isOccurrenceID.String())
-
 			creates[i] = client.Occurrence.Create().
-				SetID(*isOccurrenceID).
 				SetJustification(occur.Justification).
 				SetOrigin(occur.Origin).
 				SetCollector(occur.Collector)
@@ -128,6 +121,14 @@ func upsertBulkOccurrences(ctx context.Context, client *ent.Tx, subjects model.P
 
 			switch {
 			case len(subjects.Packages) > 0:
+
+				isOccurrenceID, err := guacOccurrenceKey(subjects.Packages[index], nil, *artifacts[index], *occur)
+				if err != nil {
+					return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+				}
+				creates[i].SetID(*isOccurrenceID)
+				ids = append(ids, isOccurrenceID.String())
+
 				if subjects.Packages[index].PackageVersionID == nil {
 					return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 				}
@@ -137,6 +138,14 @@ func upsertBulkOccurrences(ctx context.Context, client *ent.Tx, subjects model.P
 				}
 				creates[i].SetPackageID(pkgVersionID)
 			case len(subjects.Sources) > 0:
+
+				isOccurrenceID, err := guacOccurrenceKey(nil, subjects.Sources[index], *artifacts[index], *occur)
+				if err != nil {
+					return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+				}
+				creates[i].SetID(*isOccurrenceID)
+				ids = append(ids, isOccurrenceID.String())
+
 				if subjects.Sources[index].SourceNameID == nil {
 					return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
 				}

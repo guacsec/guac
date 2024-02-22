@@ -111,7 +111,8 @@ func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgIn
 	}
 
 	for _, pkgIDs := range *ids {
-		collectedPkgIDs = append(collectedPkgIDs, &pkgIDs)
+		p := pkgIDs
+		collectedPkgIDs = append(collectedPkgIDs, &p)
 	}
 
 	return collectedPkgIDs, nil
@@ -142,23 +143,24 @@ func upsertBulkPackage(ctx context.Context, client *ent.Tx, pkgInputs []*model.I
 		pkgVersionCreates := make([]*ent.PackageVersionCreate, len(pkgs))
 
 		for i, pkg := range pkgs {
-			pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg.PackageInput, helpers.PkgServerKey)
+			pkgInput := pkg
+			pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkgInput.PackageInput, helpers.PkgServerKey)
 			pkgNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.NameId), 5)
 			pkgVersionID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.VersionId), 5)
 
 			pkgNameCreates[i] = client.PackageName.Create().
 				SetID(pkgNameID).
-				SetType(pkg.PackageInput.Type).
-				SetNamespace(stringOrEmpty(pkg.PackageInput.Namespace)).
-				SetName(pkg.PackageInput.Name)
+				SetType(pkgInput.PackageInput.Type).
+				SetNamespace(stringOrEmpty(pkgInput.PackageInput.Namespace)).
+				SetName(pkgInput.PackageInput.Name)
 
 			pkgVersionCreates[i] = client.PackageVersion.Create().
 				SetID(pkgVersionID).
 				SetNameID(pkgNameID).
-				SetNillableVersion(pkg.PackageInput.Version).
-				SetSubpath(ptrWithDefault(pkg.PackageInput.Subpath, "")).
-				SetQualifiers(normalizeInputQualifiers(pkg.PackageInput.Qualifiers)).
-				SetHash(versionHashFromInputSpec(*pkg.PackageInput))
+				SetNillableVersion(pkgInput.PackageInput.Version).
+				SetSubpath(ptrWithDefault(pkgInput.PackageInput.Subpath, "")).
+				SetQualifiers(normalizeInputQualifiers(pkgInput.PackageInput.Qualifiers)).
+				SetHash(versionHashFromInputSpec(*pkgInput.PackageInput))
 
 			pkgNameIDs = append(pkgNameIDs, pkgNameID.String())
 			pkgVersionIDs = append(pkgVersionIDs, pkgVersionID.String())

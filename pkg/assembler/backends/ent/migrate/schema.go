@@ -612,25 +612,6 @@ var (
 				Name:    "license_name_inline_list_version",
 				Unique:  true,
 				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[2], LicensesColumns[3]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "inline IS NOT NULL AND list_version IS NOT NULL",
-				},
-			},
-			{
-				Name:    "license_name_list_version",
-				Unique:  true,
-				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[3]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "inline IS NULL AND list_version IS NOT NULL",
-				},
-			},
-			{
-				Name:    "license_name_inline",
-				Unique:  true,
-				Columns: []*schema.Column{LicensesColumns[1], LicensesColumns[2]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "inline IS NOT NULL AND list_version IS NULL",
-				},
 			},
 		},
 	}
@@ -691,7 +672,7 @@ var (
 	// PackageNamesColumns holds the columns for the "package_names" table.
 	PackageNamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "type", Type: field.TypeString, Unique: true},
+		{Name: "type", Type: field.TypeString},
 		{Name: "namespace", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
 	}
@@ -908,7 +889,7 @@ var (
 	// SourceNamesColumns holds the columns for the "source_names" table.
 	SourceNamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "type", Type: field.TypeString, Unique: true},
+		{Name: "type", Type: field.TypeString},
 		{Name: "namespace", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
 		{Name: "commit", Type: field.TypeString, Nullable: true},

@@ -36,7 +36,7 @@ func (PackageName) Fields() []ent.Field {
 			Default(uuid.New).
 			Unique().
 			Immutable(),
-		field.String("type").NotEmpty().Unique().Comment("This node matches a pkg:<type> partial pURL"),
+		field.String("type").NotEmpty().Comment("This node matches a pkg:<type> partial pURL"),
 		field.String("namespace").Comment("In the pURL representation, each PackageNamespace matches the pkg:<type>/<namespace>/ partial pURL"),
 		field.String("name").NotEmpty(),
 	}

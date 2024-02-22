@@ -35,7 +35,7 @@ func (SourceName) Fields() []ent.Field {
 			Default(uuid.New).
 			Unique().
 			Immutable(),
-		field.String("type").Unique(),
+		field.String("type"),
 		field.String("namespace"),
 		field.String("name"),
 		field.String("commit").Optional(),

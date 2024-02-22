@@ -274,7 +274,8 @@ func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.IDorSou
 	}
 
 	for _, srcIDs := range *ids {
-		collectedSrcIDs = append(collectedSrcIDs, &srcIDs)
+		s := srcIDs
+		collectedSrcIDs = append(collectedSrcIDs, &s)
 	}
 
 	return collectedSrcIDs, nil
@@ -299,16 +300,17 @@ func upsertBulkSource(ctx context.Context, client *ent.Tx, srcInputs []*model.ID
 		srcNameCreates := make([]*ent.SourceNameCreate, len(srcs))
 
 		for i, src := range srcs {
-			srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](src.SourceInput, helpers.SrcServerKey)
+			s := src
+			srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](s.SourceInput, helpers.SrcServerKey)
 			srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
 
 			srcNameCreates[i] = client.SourceName.Create().
 				SetID(srcNameID).
-				SetType(src.SourceInput.Type).
-				SetNamespace(src.SourceInput.Namespace).
-				SetName(src.SourceInput.Name).
-				SetTag(stringOrEmpty(src.SourceInput.Tag)).
-				SetCommit(stringOrEmpty(src.SourceInput.Commit))
+				SetType(s.SourceInput.Type).
+				SetNamespace(s.SourceInput.Namespace).
+				SetName(s.SourceInput.Name).
+				SetTag(stringOrEmpty(s.SourceInput.Tag)).
+				SetCommit(stringOrEmpty(s.SourceInput.Commit))
 
 			srcNameIDs = append(srcNameIDs, srcNameID.String())
 		}
