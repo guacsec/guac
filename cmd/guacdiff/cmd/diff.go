@@ -25,11 +25,11 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/dominikbraun/graph"
 	"github.com/dominikbraun/graph/draw"
+	"k8s.io/apimachinery/pkg/util/rand"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 
@@ -38,63 +38,27 @@ type Node struct {
 	Attributes map[string]interface{}
 	color string
 }
-type Graph struct {
-    graph graph.Graph[string, string]        
-    Attributes map[string]interface{}
-	Nodes map[string]*Node
+
+type WrapperGraph struct {
+	g graph.Graph[string, *Node]
+	nodes map[string]*Node 
 }
 
-func (g *Graph) AddGraphNode(node *Node) {
-	g.Nodes[node.ID] = node
-	g.Nodes[node.ID].Attributes = make(map[string]interface{})
-
-	g.graph.AddVertex(node.ID)
-
-	// if err != nil { //check if the err is "node Exists error"
-	// 	fmt.Println("Error adding graph vertex:", err)
-	// 	os.Exit(1)
-	// }
+func nodeHash(n *Node) string {
+	return n.ID
 }
 
-func (g *Graph) NodeExists(ID string) bool {
-	_, ok := g.Nodes[ID]
-	return ok
-}
-
-func (g *Graph) AddGraphEdge(to, from string) {
-	//check if both edges exist first
-	if !g.NodeExists(to) {
-		// fmt.Println("from here1")
-		g.AddGraphNode(&Node{ID: to, color: "black"})
-	}
-
-	if !g.NodeExists(from) {
-		// fmt.Println("from here2")
-		g.AddGraphNode(&Node{ID: from, color: "black"})
-	}
-
-    err := g.graph.AddEdge(to, from)
-	if err != nil { 
-		fmt.Println("Error adding graph edge:", err)
+func setNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interface{}){
+	var (
+		err error
+		node *Node
+	)
+	if node, err = g.Vertex(ID); err !=  nil {
+		fmt.Println("Error setting node attribute", err)
 		os.Exit(1)
 	}
 
-}
-
-func (g *Graph) SetAttribute(key string, value interface{}) {
-    g.Attributes[key] = value
-}
-
-func NewGraph() *Graph {
-    return &Graph{
-        graph:      graph.New(graph.StringHash, graph.Directed()),
-        Attributes: make(map[string]interface{}),
-		Nodes: make(map[string]*Node),
-    }
-}
-
-func (g *Graph) SetNodeAttribute(id, key string, value interface{}){
-	g.Nodes[id].Attributes[key] = value
+	node.Attributes[key] = value
 }
 
 func init() {
@@ -237,10 +201,10 @@ var diffCmd = &cobra.Command{
 	},
 }
 
-func createGraphDotFile(g *Graph){
+func createGraphDotFile(g graph.Graph[string, *Node]){
 	filename := rand.String(10)+".dot"
 	file, _ := os.Create(filename)
-	err := draw.DOT(g.graph, file)
+	err := draw.DOT(g, file)
 	if err!= nil {
 		fmt.Println("Error creating dot file:", err)
 		os.Exit(1)
@@ -248,95 +212,141 @@ func createGraphDotFile(g *Graph){
 	fmt.Println(filename)
 }
 
-func graphCopy(g *Graph) *Graph {
-	gclone := NewGraph()
-
-
-	graphCopy, err := g.graph.Clone()
-	if err!= nil {
-		fmt.Println("Error copying graph:", err)
+func highlightDiff(base, overlay graph.Graph[string, *Node]) graph.Graph[string, *Node] {
+	//create diff graph
+	g, err := base.Clone()
+	if err != nil {
+		fmt.Println("Unable to clone graph:", err)
 		os.Exit(1)
 	}
-	gclone.graph = graphCopy
-
-
-	//copy nodes
-	for _, node := range(g.Nodes){
-		if node, ok := g.Nodes[node.ID]; ok {
-			g.AddGraphNode(node)
-		}
+	overlayNodes,err := overlay.AdjacencyMap()
+	if err != nil {
+		fmt.Println("Unable to get AdjacencyMap:", err)
+		os.Exit(1)
 	}
-
-	return gclone
-}
-
-func highlightDiff(base, overlay *Graph) *Graph {
-	//create diff graph
-	g := graphCopy(base)
-
 	//check nodes and their data
-	for _, node := range(overlay.Nodes){
-		if _, ok := g.Nodes[node.ID]; ok {
-			for key, _ := range node.Attributes {
-				if (overlay.Nodes[node.ID].Attributes[key] != g.Nodes[node.ID].Attributes[key]) {
-					g.AddGraphNode(&Node{ //
-						ID: node.ID,
-						Attributes: node.Attributes,
-						color: "yellow", //change color to yellow
-					}) 
+	for overlayNodeID, _ := range(overlayNodes){
+		if _, err = g.Vertex(overlayNodeID); err == nil {
+			nodeOverlay, _ := overlay.Vertex(overlayNodeID)
+			nodeG, _ := g.Vertex(overlayNodeID)
+			//if nodes are not equal we need to highlight which attribute is different TODO
+			if (len(nodeOverlay.Attributes) != len(nodeG.Attributes)){
+				//change color to yellow
+				break
+			}
+			for key, _ := range nodeOverlay.Attributes {
+				fmt.Println(key,nodeOverlay.Attributes[key], nodeG.Attributes[key])
+				if (nodeOverlay.Attributes[key] != nodeG.Attributes[key]) {
+					//instead of adding a node, just change the color
+					addGraphNode(g,overlayNodeID, "yellow") 
+					break
 				}
 		}
 		}else {
-
-			g.AddGraphNode(&Node{
-				ID: node.ID,
-				Attributes: node.Attributes,
-				color: "red",
-			}) //change color to red
+			addGraphNode(g, overlayNodeID, "red") //change color to red
 		}
 	}	
 
-	//add edges not in diff but from g2
-	edges, err := overlay.graph.Edges()
+	// //add edges not in diff but from g2
+	edges, err := overlay.Edges()
 	if err != nil {
 		fmt.Println("Error getting edges:", err)
 		os.Exit(1)
 	}
 
 	for _, edge := range edges {
-		_, err := g.graph.Edge(edge.Source, edge.Target)
+		_, err := g.Edge(edge.Source, edge.Target)
 		if err != nil { //missing edge, add with red color
-			g.AddGraphEdge(edge.Source, edge.Target) //hmm how to add color?
+			addGraphEdge(g, edge.Source, edge.Target, "red") //hmm how to add color?
 		}
 	}
 	return g
 }
 
-func makeGraph(hasSBOM model.HasSBOMsHasSBOM) *Graph {
+func makeGraph(hasSBOM model.HasSBOMsHasSBOM) graph.Graph[string, *Node] {
 
-	g := NewGraph()
-	g.SetAttribute("Id", hasSBOM.Id)
-	g.SetAttribute("Uri", hasSBOM.Uri)
-	g.SetAttribute("Algorithm", hasSBOM.Algorithm)
-	g.SetAttribute("Digest", hasSBOM.Digest)
-	g.SetAttribute("DownloadLocation", hasSBOM.DownloadLocation)
-	g.SetAttribute("Origin", hasSBOM.Origin)
-	g.SetAttribute("Collector", hasSBOM.Collector)
-	g.SetAttribute("KnownSince", hasSBOM.KnownSince.String())
-	g.SetAttribute("Subject", hasSBOM.Subject)
+	g := graph.New(nodeHash, graph.Directed())
+
+	//create HasSBOM node
+	hasSBOMNode := &Node{ID: "HasSBOM", color: "black", Attributes: make(map[string]interface{}) }
+	g.AddVertex(hasSBOMNode, graph.VertexAttribute("color", "black"))
+	//add metadata
+	setNodeAttribute(g, hasSBOMNode.ID, "Id" , hasSBOM.Id)
+	setNodeAttribute(g, hasSBOMNode.ID, "Algorithm" , hasSBOM.Algorithm)
+	setNodeAttribute(g, hasSBOMNode.ID, "Collector" , hasSBOM.Collector)
+	setNodeAttribute(g, hasSBOMNode.ID, "Digest" , hasSBOM.Digest)
+	setNodeAttribute(g, hasSBOMNode.ID, "DownloadLocation" , hasSBOM.DownloadLocation)
+	setNodeAttribute(g, hasSBOMNode.ID, "KnownSince" , hasSBOM.KnownSince.String())
+	setNodeAttribute(g, hasSBOMNode.ID, "Origin" , hasSBOM.Origin)
+	setNodeAttribute(g, hasSBOMNode.ID, "Uri" , hasSBOM.Uri)
+	//TODO: add subject
+
+	//add included occurrences
+	for _, occurrence := range hasSBOM.IncludedOccurrences {
+		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Subject", occurrence.Subject)
+		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Artifact-Id", occurrence.Artifact.Id)
+		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Artifact-Algorithm", occurrence.Artifact.Algorithm)
+		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Artifact-Digest", occurrence.Artifact.Digest)
+		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Justification", occurrence.Justification)
+		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Origin", occurrence.Origin)
+		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Collector", occurrence.Collector)
+	}	
+
+	//TODO: add included software
+
+	//add included dependencies
 	for _, dependency := range hasSBOM.IncludedDependencies {
 		packageId := dependency.Package.Id
+		addGraphEdge(g, hasSBOMNode.ID ,packageId,"black")
 		includedDepsId := dependency.Id
-		g.AddGraphEdge(packageId, includedDepsId)
+		addGraphEdge(g, packageId, includedDepsId, "black")
+
+		setNodeAttribute(g,  packageId, "Type" , dependency.Package.Type)
+		//TODO:add namespaces
+		setNodeAttribute(g,  includedDepsId, "Justification" , dependency.Justification)
+
 		if dependency.DependencyPackage.Id != "" {
 			dependPkgId := dependency.DependencyPackage.Id
-			g.AddGraphEdge(includedDepsId, dependPkgId)
-			g.SetNodeAttribute(dependPkgId, "namespaces" , dependency.DependencyPackage.Namespaces )//change from abhi's implementation
+			addGraphEdge(g, includedDepsId, dependPkgId, "black")
+			setNodeAttribute(g,  dependPkgId, "Type" , dependency.DependencyPackage.Type)
+			setNodeAttribute(g,  dependPkgId, "DependencyType" , dependency.DependencyPackage.Type)
+			setNodeAttribute(g,  dependPkgId, "VersionRange" , dependency.DependencyPackage.Type)
+			setNodeAttribute(g,  dependPkgId, "Origin" , dependency.DependencyPackage.Type)
+			setNodeAttribute(g,  dependPkgId, "Collector" , dependency.DependencyPackage.Type)
+			//TODO:add namespaces
 		}
-		g.SetNodeAttribute(packageId, "namespaces" , dependency.Package.Namespaces  ) //change from abhi's implementation
-		g.SetNodeAttribute(includedDepsId, "version" , dependency.VersionRange) //change from abhi's implementation
 	}
 	return g
+}
+
+
+func addGraphNode(g graph.Graph[string, *Node],_ID, color string){
+	var err error
+	if _, err = g.Vertex(_ID); err ==  nil {
+		return
+	}
+
+	newNode := &Node{
+		ID: _ID,
+		color: "black", 
+		Attributes: make(map[string]interface{}),
+	}
+
+	err = g.AddVertex(newNode, graph.VertexAttribute("color", color))
+	if err != nil {
+		fmt.Println("Node existing after check:", err)
+	}
+	
+}
+
+func addGraphEdge(g graph.Graph[string, *Node], from, to, color string){
+	addGraphNode(g, from, "black")
+	addGraphNode(g, to, "black")
+	err := g.AddEdge(from, to, graph.EdgeAttribute("color", color)) 
+	if err != nil {
+		fmt.Println("Error adding edge", err)
+		os.Exit(1)
+	}
 }
 
 
