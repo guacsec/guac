@@ -16,9 +16,14 @@
 package metrics
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strconv"
+	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -29,6 +34,8 @@ const (
 	functionDuration = "function_duration_seconds"
 	collectorKey     = "metrics"
 )
+
+var registerOnce sync.Once
 
 type metrics string
 
@@ -41,7 +48,8 @@ type prometheusCollector struct {
 	// counters is a map that holds the CounterVec objects.
 	counters map[string]*prometheus.CounterVec
 	// prefix is a string that holds the prefix for the metrics.
-	name string
+	name     string
+	registry *prometheus.Registerer
 }
 
 // SetGauge sets a gauge metric with a given name, value, and labels.
@@ -83,6 +91,8 @@ func (p *prometheusCollector) MetricsHandler() http.Handler {
 }
 
 // NewPrometheus creates a new prometheusCollector with empty sync.Maps for histograms, gauges, and counters.
+
+// NewPrometheus creates a new prometheusCollector with empty sync.Maps for histograms, gauges, and counters.
 func NewPrometheus(name string) MetricCollector {
 	prefix := fmt.Sprintf("%s_%s_function_duration_seconds", "guac", name)
 	functionDuration := prometheus.NewHistogramVec(
@@ -98,8 +108,22 @@ func NewPrometheus(name string) MetricCollector {
 		gauges:     make(map[string]*prometheus.GaugeVec),
 		counters:   make(map[string]*prometheus.CounterVec),
 		name:       name,
+		registry:   &prometheus.DefaultRegisterer,
 	}
 	p.histograms[prefix] = functionDuration
+	// Register the http_server_request_duration_seconds histogram
+	responseTimeHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: p.name,
+		Name:      "http_server_request_duration_seconds",
+		Help:      "Histogram of response time for handler in seconds",
+		Buckets:   []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+	}, []string{"route", "method", "status_code"})
+
+	p.histograms["http_server_request_duration_seconds"] = responseTimeHistogram
+	registerOnce.Do(func() {
+		(*p.registry).MustRegister(responseTimeHistogram)
+	})
+
 	return p
 }
 
@@ -191,7 +215,7 @@ func (p *prometheusCollector) ObserveHistogram(_ context.Context, name string, v
 	return nil
 }
 
-// UnRegisterCounter unregisters the counter metric with the given name and labels.
+// UnregisterCounter unregisters the counter metric with the given name and labels.
 func (p *prometheusCollector) UnregisterCounter(_ context.Context, name string, labels ...string) error {
 	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.counters[name]; !ok {
@@ -203,7 +227,7 @@ func (p *prometheusCollector) UnregisterCounter(_ context.Context, name string, 
 	return nil
 }
 
-// UnRegisterHistogram unregisters the histogram metric with the given name and labels.
+// UnregisterHistogram unregisters the histogram metric with the given name and labels.
 func (p *prometheusCollector) UnregisterHistogram(_ context.Context, name string, labels ...string) error {
 	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.histograms[name]; !ok {
@@ -215,7 +239,7 @@ func (p *prometheusCollector) UnregisterHistogram(_ context.Context, name string
 	return nil
 }
 
-// UnRegisterGauge unregisters the gauge metric with the given name and labels.
+// UnregisterGauge unregisters the gauge metric with the given name and labels.
 func (p *prometheusCollector) UnregisterGauge(_ context.Context, name string, labels ...string) error {
 	name = fmt.Sprintf("%s_%s", p.name, name)
 	if _, ok := p.gauges[name]; !ok {
@@ -234,4 +258,55 @@ func FromContext(ctx context.Context, name string) MetricCollector {
 		return met
 	}
 	return NewPrometheus(name)
+}
+
+// statusRecorder to record the status code from the ResponseWriter
+type statusRecorder struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rec *statusRecorder) WriteHeader(statusCode int) {
+	rec.statusCode = statusCode
+	rec.ResponseWriter.WriteHeader(statusCode)
+}
+
+// MeasureGraphQLResponseDuration creates a middleware that records the response time and status code
+func (pc *prometheusCollector) MeasureGraphQLResponseDuration(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		// Create a copy of the request body
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		r.Body = io.NopCloser(bytes.NewBuffer(body)) // Replace the request body with a copy
+
+		// Create another copy for JSON unmarshalling
+		bodyCopy := make([]byte, len(body))
+		copy(bodyCopy, body)
+
+		// Parse the operation name from the request body copy
+		var graphqlRequest struct {
+			OperationName string `json:"operationName"`
+		}
+		if err := json.Unmarshal(bodyCopy, &graphqlRequest); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		rec := statusRecorder{w, http.StatusOK}
+
+		next.ServeHTTP(&rec, r)
+
+		duration := time.Since(start)
+		statusCode := strconv.Itoa(rec.statusCode)
+
+		// Use the pre-registered histogram
+		if histogram, ok := pc.histograms["http_server_request_duration_seconds"]; ok {
+			histogram.WithLabelValues(graphqlRequest.OperationName, r.Method, statusCode).Observe(duration.Seconds())
+		}
+	})
 }
