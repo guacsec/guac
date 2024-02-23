@@ -21,6 +21,7 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/cmd/guacone/cmd"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
 	"sort"
 )
 
@@ -92,7 +93,7 @@ func findAllDependents(gqlClient graphql.Client) (map[string]dependencyNode, err
 
 	for _, resp := range sboms.HasSBOM {
 		// Skip entries from "deps.dev" because they are inconsistent.
-		if resp.Origin == "deps.dev" {
+		if resp.Origin == deps_dev.DepsCollector {
 			continue
 		}
 		// Iterate through the included dependencies of each SBOM.
