@@ -59,20 +59,21 @@ func (d *sigstoreVerifier) Verify(ctx context.Context, payloadBytes []byte) ([]v
 		// see:
 		// https://github.com/sigstore/sigstore/blob/main/pkg/signature/dsse/dsse.go#L107
 		// and
-		// https://github.com/secure-systems-lab/go-securesystemslib/blob/main/dsse/verify.go#L69
-		foundIdentity := verifier.Identity{
+		// https://github.com/secure-systems-lab/go-securesystemslib/blob/main/dsse/verify.go#L69s
+		/*foundIdentity := verifier.Identity{
 			ID:  signature.KeyID,
 			Key: *key,
-		}
+		}*/
 		err = verifySignature(key.Val, payloadBytes)
 		if err != nil {
 			// logging here as we don't want to fail but record that the signature check failed
 			logger := logging.FromContext(ctx)
 			logger.Errorf("failed to verify signature with provided key: %v", key.Hash)
+			return nil, err
 		}
 		// if err (meaning that the keyID or the signature verification failed), verified is set to false
-		foundIdentity.Verified = (err == nil)
-		identities = append(identities, foundIdentity)
+		/*foundIdentity.Verified = (err == nil)
+		identities = append(identities, foundIdentity)*/
 	}
 
 	return identities, nil

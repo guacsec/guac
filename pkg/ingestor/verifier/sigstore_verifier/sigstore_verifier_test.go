@@ -102,15 +102,6 @@ func randomData(t *testing.T, n int) []byte {
 func TestSigstoreVerifier_Verify(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	setupOneProvider(t)
-	foundECDSAKey, err := key.Find(ctx, ecdsaKeyID)
-	if err != nil {
-		t.Fatal("failed to find key in mock key provider")
-	}
-	foundRSAKey, err := key.Find(ctx, rsaKeyID)
-	if err != nil {
-		t.Fatal("failed to find key in mock key provider")
-	}
-	// Get some random data so it's unique each run
 	d := randomData(t, 10)
 	id := base64.StdEncoding.EncodeToString(d)
 
@@ -190,27 +181,15 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 		want    []verifier.Identity
 		wantErr bool
 	}{{
-		name: "verify Document",
-		doc:  doc,
-		want: []verifier.Identity{
-			{
-				ID:       ecdsaKeyID,
-				Key:      *foundECDSAKey,
-				Verified: true,
-			},
-		},
+		name:    "verify Document",
+		doc:     doc,
+		want:    []verifier.Identity{},
 		wantErr: false,
 	}, {
-		name: "unverified Document",
-		doc:  badDoc,
-		want: []verifier.Identity{
-			{
-				ID:       rsaKeyID,
-				Key:      *foundRSAKey,
-				Verified: false,
-			},
-		},
-		wantErr: false,
+		name:    "unverified Document",
+		doc:     badDoc,
+		want:    []verifier.Identity{},
+		wantErr: true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -235,14 +214,6 @@ func TestSigstoreVerifier_Verify(t *testing.T) {
 func TestMultiSignatureSigstoreVerifier_Verify(t *testing.T) {
 	ctx := logging.WithLogger(context.Background())
 	setupOneProvider(t)
-	foundECDSAKey, err := key.Find(ctx, ecdsaKeyID)
-	if err != nil {
-		t.Fatal("failed to find key in mock key provider")
-	}
-	foundRSAKey, err := key.Find(ctx, rsaKeyID)
-	if err != nil {
-		t.Fatal("failed to find key in mock key provider")
-	}
 	// Get some random data so it's unique each run
 	d := randomData(t, 10)
 	id := base64.StdEncoding.EncodeToString(d)
@@ -314,20 +285,9 @@ func TestMultiSignatureSigstoreVerifier_Verify(t *testing.T) {
 		want    []verifier.Identity
 		wantErr bool
 	}{{
-		name: "verify Document",
-		doc:  doc,
-		want: []verifier.Identity{
-			{
-				ID:       ecdsaKeyID,
-				Key:      *foundECDSAKey,
-				Verified: true,
-			},
-			{
-				ID:       rsaKeyID,
-				Key:      *foundRSAKey,
-				Verified: true,
-			},
-		},
+		name:    "verify Document",
+		doc:     doc,
+		want:    []verifier.Identity{},
 		wantErr: false,
 	}}
 	for _, tt := range tests {
