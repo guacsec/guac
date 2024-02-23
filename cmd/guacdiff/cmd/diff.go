@@ -25,11 +25,11 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/dominikbraun/graph"
 	"github.com/dominikbraun/graph/draw"
-	"k8s.io/apimachinery/pkg/util/rand"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 
@@ -212,42 +212,63 @@ func createGraphDotFile(g graph.Graph[string, *Node]){
 	fmt.Println(filename)
 }
 
-func highlightDiff(base, overlay graph.Graph[string, *Node]) graph.Graph[string, *Node] {
+func highlightDiff(gOne, gTwo graph.Graph[string, *Node]) graph.Graph[string, *Node] {
 	//create diff graph
-	g, err := base.Clone()
+	var g, overlay graph.Graph[string, *Node]
+	var overlayNodes map[string]map[string]graph.Edge[string]
+	gOneNodes,err := gOne.AdjacencyMap()
+	if err != nil {
+		fmt.Println("Unable to get overlay AdjacencyMap:", err)
+		os.Exit(1)
+	}
+	gTwoNodes, err := gTwo.AdjacencyMap()
+	if err != nil {
+		fmt.Println("Unable to get base AdjacencyMap:", err)
+		os.Exit(1)
+	}
+
+	if len(gOneNodes) < len(gTwoNodes){
+		g, err = gOne.Clone()
+		overlay = gTwo
+		overlayNodes = gTwoNodes
+	}else if len(gOneNodes) > len(gTwoNodes) {
+		g, err = gTwo.Clone()
+		overlay = gOne
+		overlayNodes = gOneNodes
+	}else{
+		g, err = gOne.Clone()
+		overlay = gTwo
+		overlayNodes = gTwoNodes
+	}
+
 	if err != nil {
 		fmt.Println("Unable to clone graph:", err)
 		os.Exit(1)
 	}
-	overlayNodes,err := overlay.AdjacencyMap()
-	if err != nil {
-		fmt.Println("Unable to get AdjacencyMap:", err)
-		os.Exit(1)
-	}
+	
+
 	//check nodes and their data
 	for overlayNodeID, _ := range(overlayNodes){
 		if _, err = g.Vertex(overlayNodeID); err == nil {
 			nodeOverlay, _ := overlay.Vertex(overlayNodeID)
 			nodeG, _ := g.Vertex(overlayNodeID)
-			//if nodes are not equal we need to highlight which attribute is different TODO
+			//TODO: if nodes are not equal we need to highlight which attribute is different 
 			if (len(nodeOverlay.Attributes) != len(nodeG.Attributes)){
-				//change color to yellow
+				//what to do here?
 				break
-			}
+			} 
 			for key, _ := range nodeOverlay.Attributes {
-				fmt.Println(key,nodeOverlay.Attributes[key], nodeG.Attributes[key])
 				if (nodeOverlay.Attributes[key] != nodeG.Attributes[key]) {
-					//instead of adding a node, just change the color
-					addGraphNode(g,overlayNodeID, "yellow") 
+					//instead of adding a node, just change the color, do we need to display the differences?
 					break
 				}
-		}
+			}
 		}else {
 			addGraphNode(g, overlayNodeID, "red") //change color to red
 		}
 	}	
 
-	// //add edges not in diff but from g2
+	//add edges not in diff but from g2
 	edges, err := overlay.Edges()
 	if err != nil {
 		fmt.Println("Error getting edges:", err)
@@ -319,7 +340,6 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM) graph.Graph[string, *Node] {
 	return g
 }
 
-
 func addGraphNode(g graph.Graph[string, *Node],_ID, color string){
 	var err error
 	if _, err = g.Vertex(_ID); err ==  nil {
@@ -336,17 +356,17 @@ func addGraphNode(g graph.Graph[string, *Node],_ID, color string){
 	if err != nil {
 		fmt.Println("Node existing after check:", err)
 	}
-	
 }
 
 func addGraphEdge(g graph.Graph[string, *Node], from, to, color string){
 	addGraphNode(g, from, "black")
 	addGraphNode(g, to, "black")
-	err := g.AddEdge(from, to, graph.EdgeAttribute("color", color)) 
-	if err != nil {
-		fmt.Println("Error adding edge", err)
-		os.Exit(1)
+
+	_, err  := g.Edge(from, to)
+	if err == nil {
+		return
 	}
+	g.AddEdge(from, to, graph.EdgeAttribute("color", color)) 
 }
 
 
