@@ -34,16 +34,10 @@ import (
 
 )
 
-
 type Node struct {
 	ID string
 	Attributes map[string]interface{}
 	color string
-}
-
-type WrapperGraph struct {
-	g graph.Graph[string, *Node]
-	nodes map[string]*Node 
 }
 
 func nodeHash(n *Node) string {
@@ -62,7 +56,6 @@ func setNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interfa
 
 	node.Attributes[key] = value
 }
-
 
 func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl string) (*model.PackagesResponse, error) {
 	pkgInput, err := helpers.PurlToPkg(purl)
@@ -298,7 +291,6 @@ func highlightDiff(gOne, gTwo graph.Graph[string, *Node]) graph.Graph[string, *N
 		os.Exit(1)
 	}
 	
-
 	//check nodes and their data
 	for overlayNodeID, _ := range(overlayNodes){
 		if _, err = g.Vertex(overlayNodeID); err == nil {
