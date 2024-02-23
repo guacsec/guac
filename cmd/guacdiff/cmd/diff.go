@@ -30,6 +30,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/util/rand"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
+
 )
 
 
@@ -61,14 +63,64 @@ func setNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interfa
 	node.Attributes[key] = value
 }
 
-func init() {
-	rootCmd.AddCommand(diffCmd)
-	rootCmd.PersistentFlags().StringSlice("sboms", []string{}, "two sboms to find the diff between")
-	rootCmd.PersistentFlags().StringSlice("slsa", []string{}, "two slsa to find the diff between")
-	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
-	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
-	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
-	rootCmd.PersistentFlags().String("file", "tests/identical.json", "filename to read sbom test cases from")
+
+func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl string) (*model.PackagesResponse, error) {
+	pkgInput, err := helpers.PurlToPkg(purl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse PURL: %v", err)
+	}
+
+	pkgQualifierFilter := []model.PackageQualifierSpec{}
+	for _, qualifier := range pkgInput.Qualifiers {
+		// to prevent https://github.com/golang/go/discussions/56010
+		qualifier := qualifier
+		pkgQualifierFilter = append(pkgQualifierFilter, model.PackageQualifierSpec{
+			Key:   qualifier.Key,
+			Value: &qualifier.Value,
+		})
+	}
+
+	pkgFilter := &model.PkgSpec{
+		Type:       &pkgInput.Type,
+		Namespace:  pkgInput.Namespace,
+		Name:       &pkgInput.Name,
+		Version:    pkgInput.Version,
+		Subpath:    pkgInput.Subpath,
+		Qualifiers: pkgQualifierFilter,
+	}
+	pkgResponse, err := model.Packages(ctx, gqlclient, *pkgFilter)
+	if err != nil {
+		return nil, fmt.Errorf("error querying for package: %v", err)
+	}
+	if len(pkgResponse.Packages) != 1 {
+		return nil, fmt.Errorf("failed to located package based on purl")
+	}
+	return pkgResponse, nil
+}
+
+func findHasSBOMBy(uri, purl string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
+	var foundHasSBOMPkg *model.HasSBOMsResponse
+	var err error
+	if purl != "" {
+		pkgResponse, err := getPkgResponseFromPurl(ctx, gqlclient, purl)
+		if err != nil {
+			fmt.Printf("getPkgResponseFromPurl - error: %v", err)
+			return nil, err
+		}
+		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Subject: &model.PackageOrArtifactSpec{Package: &model.PkgSpec{Id: &pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id}},
+			})
+		if err != nil {
+			fmt.Printf("failed getting hasSBOM with error :%v", err)
+			return nil, err
+		}
+	} else {
+		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Uri: &uri,})
+		if err != nil {
+			fmt.Printf("failed getting hasSBOM  with error: %v", err)
+			return nil, err
+		}
+	}
+	return foundHasSBOMPkg, nil
 }
 
 func verifyFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, purl bool) {
@@ -369,5 +421,12 @@ func addGraphEdge(g graph.Graph[string, *Node], from, to, color string){
 	g.AddEdge(from, to, graph.EdgeAttribute("color", color)) 
 }
 
-
-
+func init() {
+	rootCmd.AddCommand(diffCmd)
+	rootCmd.PersistentFlags().StringSlice("sboms", []string{}, "two sboms to find the diff between")
+	rootCmd.PersistentFlags().StringSlice("slsa", []string{}, "two slsa to find the diff between")
+	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
+	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
+	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
+	rootCmd.PersistentFlags().String("file", "tests/identical.json", "filename to read sbom test cases from")
+}
