@@ -38,7 +38,7 @@ func (HashEqual) Fields() []ent.Field {
 		field.String("origin"),
 		field.String("collector"),
 		field.String("justification"),
-		field.String("artifacts_hash").Comment("An opaque hash of the artifacts that are equal"),
+		field.String("artifacts_hash").Comment("An opaque hash of the artifact IDs that are equal"),
 	}
 }
 

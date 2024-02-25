@@ -44,7 +44,7 @@ func (PkgEqual) Fields() []ent.Field {
 		field.String("origin"),
 		field.String("collector"),
 		field.String("justification"),
-		field.String("packages_hash").Comment("An opaque hash of the packages that are equal"),
+		field.String("packages_hash").Comment("An opaque hash of the package IDs that are equal"),
 	}
 }
 

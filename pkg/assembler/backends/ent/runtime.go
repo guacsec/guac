@@ -18,7 +18,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -117,12 +116,6 @@ func init() {
 	hashequalDescID := hashequalFields[0].Descriptor()
 	// hashequal.DefaultID holds the default value on creation for the id field.
 	hashequal.DefaultID = hashequalDescID.Default.(func() uuid.UUID)
-	isvulnerabilityFields := schema.IsVulnerability{}.Fields()
-	_ = isvulnerabilityFields
-	// isvulnerabilityDescID is the schema descriptor for id field.
-	isvulnerabilityDescID := isvulnerabilityFields[0].Descriptor()
-	// isvulnerability.DefaultID holds the default value on creation for the id field.
-	isvulnerability.DefaultID = isvulnerabilityDescID.Default.(func() uuid.UUID)
 	licenseFields := schema.License{}.Fields()
 	_ = licenseFields
 	// licenseDescName is the schema descriptor for name field.

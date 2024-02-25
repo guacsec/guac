@@ -153,18 +153,6 @@ func (f HashEqualFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.HashEqualMutation", m)
 }
 
-// The IsVulnerabilityFunc type is an adapter to allow the use of ordinary
-// function as IsVulnerability mutator.
-type IsVulnerabilityFunc func(context.Context, *ent.IsVulnerabilityMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f IsVulnerabilityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.IsVulnerabilityMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IsVulnerabilityMutation", m)
-}
-
 // The LicenseFunc type is an adapter to allow the use of ordinary
 // function as License mutator.
 type LicenseFunc func(context.Context, *ent.LicenseMutation) (ent.Value, error)

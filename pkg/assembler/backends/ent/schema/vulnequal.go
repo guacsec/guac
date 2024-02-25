@@ -38,7 +38,7 @@ func (VulnEqual) Fields() []ent.Field {
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
-		field.String("vulnerabilities_hash").Comment("An opaque hash of the vulnerabilities that are equal"),
+		field.String("vulnerabilities_hash").Comment("An opaque hash of the vulnerability IDs that are equal"),
 	}
 }
 

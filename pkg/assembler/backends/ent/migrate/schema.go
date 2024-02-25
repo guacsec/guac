@@ -586,19 +586,6 @@ var (
 			},
 		},
 	}
-	// IsVulnerabilitiesColumns holds the columns for the "is_vulnerabilities" table.
-	IsVulnerabilitiesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "justification", Type: field.TypeString},
-		{Name: "origin", Type: field.TypeString},
-		{Name: "collector", Type: field.TypeString},
-	}
-	// IsVulnerabilitiesTable holds the schema information for the "is_vulnerabilities" table.
-	IsVulnerabilitiesTable = &schema.Table{
-		Name:       "is_vulnerabilities",
-		Columns:    IsVulnerabilitiesColumns,
-		PrimaryKey: []*schema.Column{IsVulnerabilitiesColumns[0]},
-	}
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -938,21 +925,12 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "vulnerability_id", Type: field.TypeString},
 		{Name: "type", Type: field.TypeString},
-		{Name: "is_vulnerability_vulnerabilities", Type: field.TypeUUID, Nullable: true},
 	}
 	// VulnerabilityIdsTable holds the schema information for the "vulnerability_ids" table.
 	VulnerabilityIdsTable = &schema.Table{
 		Name:       "vulnerability_ids",
 		Columns:    VulnerabilityIdsColumns,
 		PrimaryKey: []*schema.Column{VulnerabilityIdsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "vulnerability_ids_is_vulnerabilities_vulnerabilities",
-				Columns:    []*schema.Column{VulnerabilityIdsColumns[3]},
-				RefColumns: []*schema.Column{IsVulnerabilitiesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "vulnerabilityid_vulnerability_id_type",
@@ -1256,7 +1234,6 @@ var (
 		HasMetadataTable,
 		HasSourceAtsTable,
 		HashEqualsTable,
-		IsVulnerabilitiesTable,
 		LicensesTable,
 		OccurrencesTable,
 		PackageNamesTable,
@@ -1319,7 +1296,6 @@ func init() {
 	SlsaAttestationsTable.Annotation = &entsql.Annotation{
 		Table: "slsa_attestations",
 	}
-	VulnerabilityIdsTable.ForeignKeys[0].RefTable = IsVulnerabilitiesTable
 	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable

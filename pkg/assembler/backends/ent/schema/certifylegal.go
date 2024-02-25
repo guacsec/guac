@@ -62,10 +62,12 @@ func (CertifyLegal) Edges() []ent.Edge {
 
 func (CertifyLegal) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("source_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned", "origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
+		index.Fields("source_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned",
+			"origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
 			Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")),
-		index.Fields("package_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned", "origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
+		index.Fields("package_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned",
+			"origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
 			Unique().
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")),
 	}

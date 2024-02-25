@@ -21,7 +21,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -76,9 +75,6 @@ func (n *HasSourceAt) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *HashEqual) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
-func (n *IsVulnerability) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *License) IsNode() {}
@@ -307,18 +303,6 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 		query := c.HashEqual.Query().
 			Where(hashequal.ID(id))
 		query, err := query.CollectFields(ctx, "HashEqual")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case isvulnerability.Table:
-		query := c.IsVulnerability.Query().
-			Where(isvulnerability.ID(id))
-		query, err := query.CollectFields(ctx, "IsVulnerability")
 		if err != nil {
 			return nil, err
 		}
@@ -712,22 +696,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 		query := c.HashEqual.Query().
 			Where(hashequal.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "HashEqual")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case isvulnerability.Table:
-		query := c.IsVulnerability.Query().
-			Where(isvulnerability.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "IsVulnerability")
 		if err != nil {
 			return nil, err
 		}

@@ -23,7 +23,7 @@ type HashEqual struct {
 	Collector string `json:"collector,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
-	// An opaque hash of the artifacts that are equal
+	// An opaque hash of the artifact IDs that are equal
 	ArtifactsHash string `json:"artifacts_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the HashEqualQuery when eager-loading is set.

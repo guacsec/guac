@@ -19,7 +19,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -1687,92 +1686,6 @@ type hashequalPaginateArgs struct {
 
 func newHashEqualPaginateArgs(rv map[string]any) *hashequalPaginateArgs {
 	args := &hashequalPaginateArgs{}
-	if rv == nil {
-		return args
-	}
-	if v := rv[firstField]; v != nil {
-		args.first = v.(*int)
-	}
-	if v := rv[lastField]; v != nil {
-		args.last = v.(*int)
-	}
-	if v := rv[afterField]; v != nil {
-		args.after = v.(*Cursor)
-	}
-	if v := rv[beforeField]; v != nil {
-		args.before = v.(*Cursor)
-	}
-	return args
-}
-
-// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (iv *IsVulnerabilityQuery) CollectFields(ctx context.Context, satisfies ...string) (*IsVulnerabilityQuery, error) {
-	fc := graphql.GetFieldContext(ctx)
-	if fc == nil {
-		return iv, nil
-	}
-	if err := iv.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
-		return nil, err
-	}
-	return iv, nil
-}
-
-func (iv *IsVulnerabilityQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
-	path = append([]string(nil), path...)
-	var (
-		unknownSeen    bool
-		fieldSeen      = make(map[string]struct{}, len(isvulnerability.Columns))
-		selectedFields = []string{isvulnerability.FieldID}
-	)
-	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
-		switch field.Name {
-		case "vulnerabilities":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = (&VulnerabilityIDClient{config: iv.config}).Query()
-			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
-				return err
-			}
-			iv.WithNamedVulnerabilities(alias, func(wq *VulnerabilityIDQuery) {
-				*wq = *query
-			})
-		case "justification":
-			if _, ok := fieldSeen[isvulnerability.FieldJustification]; !ok {
-				selectedFields = append(selectedFields, isvulnerability.FieldJustification)
-				fieldSeen[isvulnerability.FieldJustification] = struct{}{}
-			}
-		case "origin":
-			if _, ok := fieldSeen[isvulnerability.FieldOrigin]; !ok {
-				selectedFields = append(selectedFields, isvulnerability.FieldOrigin)
-				fieldSeen[isvulnerability.FieldOrigin] = struct{}{}
-			}
-		case "collector":
-			if _, ok := fieldSeen[isvulnerability.FieldCollector]; !ok {
-				selectedFields = append(selectedFields, isvulnerability.FieldCollector)
-				fieldSeen[isvulnerability.FieldCollector] = struct{}{}
-			}
-		case "id":
-		case "__typename":
-		default:
-			unknownSeen = true
-		}
-	}
-	if !unknownSeen {
-		iv.Select(selectedFields...)
-	}
-	return nil
-}
-
-type isvulnerabilityPaginateArgs struct {
-	first, last   *int
-	after, before *Cursor
-	opts          []IsVulnerabilityPaginateOption
-}
-
-func newIsVulnerabilityPaginateArgs(rv map[string]any) *isvulnerabilityPaginateArgs {
-	args := &isvulnerabilityPaginateArgs{}
 	if rv == nil {
 		return args
 	}

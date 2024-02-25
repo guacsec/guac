@@ -42,9 +42,6 @@ type HasSourceAt func(*sql.Selector)
 // HashEqual is the predicate function for hashequal builders.
 type HashEqual func(*sql.Selector)
 
-// IsVulnerability is the predicate function for isvulnerability builders.
-type IsVulnerability func(*sql.Selector)
-
 // License is the predicate function for license builders.
 type License func(*sql.Selector)
 

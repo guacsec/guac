@@ -368,18 +368,6 @@ func (he *HashEqual) Artifacts(ctx context.Context) (result []*Artifact, err err
 	return result, err
 }
 
-func (iv *IsVulnerability) Vulnerabilities(ctx context.Context) (result []*VulnerabilityID, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = iv.NamedVulnerabilities(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = iv.Edges.VulnerabilitiesOrErr()
-	}
-	if IsNotLoaded(err) {
-		result, err = iv.QueryVulnerabilities().All(ctx)
-	}
-	return result, err
-}
-
 func (l *License) DeclaredInCertifyLegals(ctx context.Context) (result []*CertifyLegal, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = l.NamedDeclaredInCertifyLegals(graphql.GetFieldContext(ctx).Field.Alias)

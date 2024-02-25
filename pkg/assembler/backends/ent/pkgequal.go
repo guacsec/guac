@@ -23,7 +23,7 @@ type PkgEqual struct {
 	Collector string `json:"collector,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
-	// An opaque hash of the packages that are equal
+	// An opaque hash of the package IDs that are equal
 	PackagesHash string `json:"packages_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PkgEqualQuery when eager-loading is set.

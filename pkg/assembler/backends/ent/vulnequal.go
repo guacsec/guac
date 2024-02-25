@@ -23,7 +23,7 @@ type VulnEqual struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
-	// An opaque hash of the vulnerabilities that are equal
+	// An opaque hash of the vulnerability IDs that are equal
 	VulnerabilitiesHash string `json:"vulnerabilities_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the VulnEqualQuery when eager-loading is set.
