@@ -35,10 +35,10 @@ type PackageVersion struct {
 func (PackageVersion) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("name_id", uuid.New()),
+		field.UUID("name_id", getUUIDv7()),
 		field.String("version").Default(""),
 		field.String("subpath").Default(""),
 		field.JSON("qualifiers", []model.PackageQualifier{}).Optional(),

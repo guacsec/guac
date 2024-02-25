@@ -98,6 +98,30 @@ func (bomc *BillOfMaterialsCreate) SetKnownSince(t time.Time) *BillOfMaterialsCr
 	return bomc
 }
 
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (bomc *BillOfMaterialsCreate) SetIncludedPackagesHash(s string) *BillOfMaterialsCreate {
+	bomc.mutation.SetIncludedPackagesHash(s)
+	return bomc
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (bomc *BillOfMaterialsCreate) SetIncludedArtifactsHash(s string) *BillOfMaterialsCreate {
+	bomc.mutation.SetIncludedArtifactsHash(s)
+	return bomc
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (bomc *BillOfMaterialsCreate) SetIncludedDependenciesHash(s string) *BillOfMaterialsCreate {
+	bomc.mutation.SetIncludedDependenciesHash(s)
+	return bomc
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (bomc *BillOfMaterialsCreate) SetIncludedOccurrencesHash(s string) *BillOfMaterialsCreate {
+	bomc.mutation.SetIncludedOccurrencesHash(s)
+	return bomc
+}
+
 // SetID sets the "id" field.
 func (bomc *BillOfMaterialsCreate) SetID(u uuid.UUID) *BillOfMaterialsCreate {
 	bomc.mutation.SetID(u)
@@ -246,6 +270,18 @@ func (bomc *BillOfMaterialsCreate) check() error {
 	if _, ok := bomc.mutation.KnownSince(); !ok {
 		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "BillOfMaterials.known_since"`)}
 	}
+	if _, ok := bomc.mutation.IncludedPackagesHash(); !ok {
+		return &ValidationError{Name: "included_packages_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_packages_hash"`)}
+	}
+	if _, ok := bomc.mutation.IncludedArtifactsHash(); !ok {
+		return &ValidationError{Name: "included_artifacts_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_artifacts_hash"`)}
+	}
+	if _, ok := bomc.mutation.IncludedDependenciesHash(); !ok {
+		return &ValidationError{Name: "included_dependencies_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_dependencies_hash"`)}
+	}
+	if _, ok := bomc.mutation.IncludedOccurrencesHash(); !ok {
+		return &ValidationError{Name: "included_occurrences_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_occurrences_hash"`)}
+	}
 	return nil
 }
 
@@ -309,6 +345,22 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 	if value, ok := bomc.mutation.KnownSince(); ok {
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
 		_node.KnownSince = value
+	}
+	if value, ok := bomc.mutation.IncludedPackagesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedPackagesHash, field.TypeString, value)
+		_node.IncludedPackagesHash = value
+	}
+	if value, ok := bomc.mutation.IncludedArtifactsHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedArtifactsHash, field.TypeString, value)
+		_node.IncludedArtifactsHash = value
+	}
+	if value, ok := bomc.mutation.IncludedDependenciesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedDependenciesHash, field.TypeString, value)
+		_node.IncludedDependenciesHash = value
+	}
+	if value, ok := bomc.mutation.IncludedOccurrencesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedOccurrencesHash, field.TypeString, value)
+		_node.IncludedOccurrencesHash = value
 	}
 	if nodes := bomc.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -580,6 +632,54 @@ func (u *BillOfMaterialsUpsert) UpdateKnownSince() *BillOfMaterialsUpsert {
 	return u
 }
 
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (u *BillOfMaterialsUpsert) SetIncludedPackagesHash(v string) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldIncludedPackagesHash, v)
+	return u
+}
+
+// UpdateIncludedPackagesHash sets the "included_packages_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateIncludedPackagesHash() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldIncludedPackagesHash)
+	return u
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (u *BillOfMaterialsUpsert) SetIncludedArtifactsHash(v string) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldIncludedArtifactsHash, v)
+	return u
+}
+
+// UpdateIncludedArtifactsHash sets the "included_artifacts_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateIncludedArtifactsHash() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldIncludedArtifactsHash)
+	return u
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (u *BillOfMaterialsUpsert) SetIncludedDependenciesHash(v string) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldIncludedDependenciesHash, v)
+	return u
+}
+
+// UpdateIncludedDependenciesHash sets the "included_dependencies_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateIncludedDependenciesHash() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldIncludedDependenciesHash)
+	return u
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (u *BillOfMaterialsUpsert) SetIncludedOccurrencesHash(v string) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldIncludedOccurrencesHash, v)
+	return u
+}
+
+// UpdateIncludedOccurrencesHash sets the "included_occurrences_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateIncludedOccurrencesHash() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldIncludedOccurrencesHash)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -765,6 +865,62 @@ func (u *BillOfMaterialsUpsertOne) SetKnownSince(v time.Time) *BillOfMaterialsUp
 func (u *BillOfMaterialsUpsertOne) UpdateKnownSince() *BillOfMaterialsUpsertOne {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateKnownSince()
+	})
+}
+
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (u *BillOfMaterialsUpsertOne) SetIncludedPackagesHash(v string) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedPackagesHash(v)
+	})
+}
+
+// UpdateIncludedPackagesHash sets the "included_packages_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateIncludedPackagesHash() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedPackagesHash()
+	})
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (u *BillOfMaterialsUpsertOne) SetIncludedArtifactsHash(v string) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedArtifactsHash(v)
+	})
+}
+
+// UpdateIncludedArtifactsHash sets the "included_artifacts_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateIncludedArtifactsHash() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedArtifactsHash()
+	})
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (u *BillOfMaterialsUpsertOne) SetIncludedDependenciesHash(v string) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedDependenciesHash(v)
+	})
+}
+
+// UpdateIncludedDependenciesHash sets the "included_dependencies_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateIncludedDependenciesHash() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedDependenciesHash()
+	})
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (u *BillOfMaterialsUpsertOne) SetIncludedOccurrencesHash(v string) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedOccurrencesHash(v)
+	})
+}
+
+// UpdateIncludedOccurrencesHash sets the "included_occurrences_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateIncludedOccurrencesHash() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedOccurrencesHash()
 	})
 }
 
@@ -1120,6 +1276,62 @@ func (u *BillOfMaterialsUpsertBulk) SetKnownSince(v time.Time) *BillOfMaterialsU
 func (u *BillOfMaterialsUpsertBulk) UpdateKnownSince() *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateKnownSince()
+	})
+}
+
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (u *BillOfMaterialsUpsertBulk) SetIncludedPackagesHash(v string) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedPackagesHash(v)
+	})
+}
+
+// UpdateIncludedPackagesHash sets the "included_packages_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateIncludedPackagesHash() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedPackagesHash()
+	})
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (u *BillOfMaterialsUpsertBulk) SetIncludedArtifactsHash(v string) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedArtifactsHash(v)
+	})
+}
+
+// UpdateIncludedArtifactsHash sets the "included_artifacts_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateIncludedArtifactsHash() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedArtifactsHash()
+	})
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (u *BillOfMaterialsUpsertBulk) SetIncludedDependenciesHash(v string) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedDependenciesHash(v)
+	})
+}
+
+// UpdateIncludedDependenciesHash sets the "included_dependencies_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateIncludedDependenciesHash() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedDependenciesHash()
+	})
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (u *BillOfMaterialsUpsertBulk) SetIncludedOccurrencesHash(v string) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedOccurrencesHash(v)
+	})
+}
+
+// UpdateIncludedOccurrencesHash sets the "included_occurrences_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateIncludedOccurrencesHash() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedOccurrencesHash()
 	})
 }
 

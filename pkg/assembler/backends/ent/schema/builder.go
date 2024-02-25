@@ -32,7 +32,7 @@ type Builder struct {
 func (Builder) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
 		field.String("uri").Unique().Immutable().Comment("The URI of the builder, used as a unique identifier in the graph query"),

@@ -35,10 +35,10 @@ type CertifyScorecard struct {
 func (CertifyScorecard) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("source_id", uuid.New()),
+		field.UUID("source_id", getUUIDv7()),
 		field.JSON("checks", []*model.ScorecardCheck{}),
 		field.Float("aggregate_score").Default(0).Comment("Overall Scorecard score for the source"),
 		field.Time("time_scanned").Default(time.Now),

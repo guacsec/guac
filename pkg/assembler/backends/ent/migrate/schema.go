@@ -43,6 +43,10 @@ var (
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "known_since", Type: field.TypeTime},
+		{Name: "included_packages_hash", Type: field.TypeString},
+		{Name: "included_artifacts_hash", Type: field.TypeString},
+		{Name: "included_dependencies_hash", Type: field.TypeString},
+		{Name: "included_occurrences_hash", Type: field.TypeString},
 		{Name: "package_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "artifact_id", Type: field.TypeUUID, Nullable: true},
 	}
@@ -54,13 +58,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "bill_of_materials_package_versions_package",
-				Columns:    []*schema.Column{BillOfMaterialsColumns[8]},
+				Columns:    []*schema.Column{BillOfMaterialsColumns[12]},
 				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "bill_of_materials_artifacts_artifact",
-				Columns:    []*schema.Column{BillOfMaterialsColumns[9]},
+				Columns:    []*schema.Column{BillOfMaterialsColumns[13]},
 				RefColumns: []*schema.Column{ArtifactsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -69,7 +73,7 @@ var (
 			{
 				Name:    "sbom_unique_package",
 				Unique:  true,
-				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[8]},
+				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[8], BillOfMaterialsColumns[9], BillOfMaterialsColumns[10], BillOfMaterialsColumns[11], BillOfMaterialsColumns[12]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NOT NULL AND artifact_id IS NULL",
 				},
@@ -77,7 +81,7 @@ var (
 			{
 				Name:    "sbom_unique_artifact",
 				Unique:  true,
-				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[9]},
+				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[8], BillOfMaterialsColumns[9], BillOfMaterialsColumns[10], BillOfMaterialsColumns[11], BillOfMaterialsColumns[13]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NULL AND artifact_id IS NOT NULL",
 				},

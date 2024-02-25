@@ -42,12 +42,12 @@ func (Dependency) Annotations() []schema.Annotation {
 func (Dependency) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("package_id", uuid.New()),
-		field.UUID("dependent_package_name_id", uuid.New()).Optional(),
-		field.UUID("dependent_package_version_id", uuid.New()).Optional(),
+		field.UUID("package_id", getUUIDv7()),
+		field.UUID("dependent_package_name_id", getUUIDv7()).Optional(),
+		field.UUID("dependent_package_version_id", getUUIDv7()).Optional(),
 		field.String("version_range"),
 		field.Enum("dependency_type").Values(model.DependencyTypeDirect.String(), model.DependencyTypeIndirect.String(), model.DependencyTypeUnknown.String()),
 		field.String("justification"),

@@ -149,7 +149,7 @@ func upsertBulkSLSA(ctx context.Context, client *ent.Tx, subjects []*model.IDorA
 			}
 
 			creates[i] = client.SLSAAttestation.Create().
-				SetBuiltFromHash(hashBuiltFrom(sortedBuildFromIDs)).
+				SetBuiltFromHash(hashListOfSortedKeys(sortedBuildFromIDs)).
 				SetSubjectID(subjectArtifactID).
 				SetBuildType(slsa.BuildType).
 				SetBuiltByID(buildID).
@@ -213,7 +213,7 @@ func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.IDorArtifactI
 	}
 
 	if _, err := client.SLSAAttestation.Create().
-		SetBuiltFromHash(hashBuiltFrom(sortedBuildFromIDs)).
+		SetBuiltFromHash(hashListOfSortedKeys(sortedBuildFromIDs)).
 		SetSubjectID(subjectArtifactID).
 		SetBuildType(slsa.BuildType).
 		SetBuiltByID(buildID).
@@ -278,8 +278,9 @@ func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 	}
 }
 
-// hashBuiltFrom is used to create a unique key for all builtFrom artifacts
-func hashBuiltFrom(slc []string) string {
+// hashListOfSortedKeys is used to create a hash of all the keys (i.e. builtFrom artifacts,
+// hasSBOM included packages, included artifacts, included dependencies, included occurrences)
+func hashListOfSortedKeys(slc []string) string {
 	builtFrom := slc
 	hash := sha1.New()
 	content := bytes.NewBuffer(nil)

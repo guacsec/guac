@@ -33,7 +33,7 @@ type PackageName struct {
 func (PackageName) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
 		field.String("type").NotEmpty().Comment("This node matches a pkg:<type> partial pURL"),

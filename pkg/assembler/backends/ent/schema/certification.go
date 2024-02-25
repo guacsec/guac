@@ -33,14 +33,14 @@ type Certification struct {
 func (Certification) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
 		// TODO: (ivanvanderbyl) We can reduce the index size by 3/4 if we use a single type field for the source, package_version, package_name, and artifact.
-		field.UUID("source_id", uuid.New()).Optional().Nillable(),
-		field.UUID("package_version_id", uuid.New()).Optional().Nillable(),
-		field.UUID("package_name_id", uuid.New()).Optional().Nillable(),
-		field.UUID("artifact_id", uuid.New()).Optional().Nillable(),
+		field.UUID("source_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("package_version_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("package_name_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("artifact_id", getUUIDv7()).Optional().Nillable(),
 		field.Enum("type").Values("GOOD", "BAD").Default("GOOD"),
 		field.String("justification"),
 		field.String("origin"),

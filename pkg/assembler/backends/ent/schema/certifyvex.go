@@ -33,12 +33,12 @@ type CertifyVex struct {
 func (CertifyVex) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("package_id", uuid.New()).Optional().Nillable(),
-		field.UUID("artifact_id", uuid.New()).Optional().Nillable(),
-		field.UUID("vulnerability_id", uuid.New()),
+		field.UUID("package_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("artifact_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("vulnerability_id", getUUIDv7()),
 		field.Time("known_since"),
 		field.String("status"),
 		field.String("statement"),

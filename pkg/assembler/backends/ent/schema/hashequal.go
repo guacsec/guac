@@ -32,7 +32,7 @@ type HashEqual struct {
 func (HashEqual) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
 		field.String("origin"),

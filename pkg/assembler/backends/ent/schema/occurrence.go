@@ -39,15 +39,15 @@ type Occurrence struct {
 func (Occurrence) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("artifact_id", uuid.New()).Comment("The artifact in the relationship"),
+		field.UUID("artifact_id", getUUIDv7()).Comment("The artifact in the relationship"),
 		field.String("justification").Comment("Justification for the attested relationship"),
 		field.String("origin").Comment("Document from which this attestation is generated from"),
 		field.String("collector").Comment("GUAC collector for the document"),
-		field.UUID("source_id", uuid.New()).Optional().Nillable(),
-		field.UUID("package_id", uuid.New()).Optional().Nillable(),
+		field.UUID("source_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("package_id", getUUIDv7()).Optional().Nillable(),
 	}
 }
 

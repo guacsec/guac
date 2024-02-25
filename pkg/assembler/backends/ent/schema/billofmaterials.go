@@ -33,11 +33,11 @@ type BillOfMaterials struct {
 func (BillOfMaterials) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("package_id", uuid.New()).Optional().Nillable(),
-		field.UUID("artifact_id", uuid.New()).Optional().Nillable(),
+		field.UUID("package_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("artifact_id", getUUIDv7()).Optional().Nillable(),
 		field.String("uri").Comment("SBOM's URI"),
 		field.String("algorithm").Comment("Digest algorithm"),
 		field.String("digest"),
@@ -45,6 +45,10 @@ func (BillOfMaterials) Fields() []ent.Field {
 		field.String("origin"),
 		field.String("collector").Comment("GUAC collector for the document"),
 		field.Time("known_since"),
+		field.String("included_packages_hash").Comment("An opaque hash of the included packages"),
+		field.String("included_artifacts_hash").Comment("An opaque hash of the included artifacts"),
+		field.String("included_dependencies_hash").Comment("An opaque hash of the included dependencies"),
+		field.String("included_occurrences_hash").Comment("An opaque hash of the included occurrences"),
 	}
 }
 
@@ -63,9 +67,11 @@ func (BillOfMaterials) Edges() []ent.Edge {
 // Indexes of the Material.
 func (BillOfMaterials) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("algorithm", "digest", "uri", "download_location", "known_since").Edges("package").Unique().
+		index.Fields("algorithm", "digest", "uri", "download_location", "known_since", "included_packages_hash",
+			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash").Edges("package").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND artifact_id IS NULL")).StorageKey("sbom_unique_package"),
-		index.Fields("algorithm", "digest", "uri", "download_location", "known_since").Edges("artifact").Unique().
+		index.Fields("algorithm", "digest", "uri", "download_location", "known_since", "included_packages_hash",
+			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash").Edges("artifact").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND artifact_id IS NOT NULL")).StorageKey("sbom_unique_artifact"),
 	}
 }

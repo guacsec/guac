@@ -304,6 +304,26 @@ func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphq
 				selectedFields = append(selectedFields, billofmaterials.FieldKnownSince)
 				fieldSeen[billofmaterials.FieldKnownSince] = struct{}{}
 			}
+		case "includedPackagesHash":
+			if _, ok := fieldSeen[billofmaterials.FieldIncludedPackagesHash]; !ok {
+				selectedFields = append(selectedFields, billofmaterials.FieldIncludedPackagesHash)
+				fieldSeen[billofmaterials.FieldIncludedPackagesHash] = struct{}{}
+			}
+		case "includedArtifactsHash":
+			if _, ok := fieldSeen[billofmaterials.FieldIncludedArtifactsHash]; !ok {
+				selectedFields = append(selectedFields, billofmaterials.FieldIncludedArtifactsHash)
+				fieldSeen[billofmaterials.FieldIncludedArtifactsHash] = struct{}{}
+			}
+		case "includedDependenciesHash":
+			if _, ok := fieldSeen[billofmaterials.FieldIncludedDependenciesHash]; !ok {
+				selectedFields = append(selectedFields, billofmaterials.FieldIncludedDependenciesHash)
+				fieldSeen[billofmaterials.FieldIncludedDependenciesHash] = struct{}{}
+			}
+		case "includedOccurrencesHash":
+			if _, ok := fieldSeen[billofmaterials.FieldIncludedOccurrencesHash]; !ok {
+				selectedFields = append(selectedFields, billofmaterials.FieldIncludedOccurrencesHash)
+				fieldSeen[billofmaterials.FieldIncludedOccurrencesHash] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:

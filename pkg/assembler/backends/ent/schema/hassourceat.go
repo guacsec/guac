@@ -33,12 +33,12 @@ type HasSourceAt struct {
 func (HasSourceAt) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("package_version_id", uuid.New()).Optional().Nillable(),
-		field.UUID("package_name_id", uuid.New()).Optional().Nillable(),
-		field.UUID("source_id", uuid.New()),
+		field.UUID("package_version_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("package_name_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("source_id", getUUIDv7()),
 		field.Time("known_since"),
 		field.String("justification"),
 		field.String("origin"),

@@ -171,6 +171,62 @@ func (bomu *BillOfMaterialsUpdate) SetNillableKnownSince(t *time.Time) *BillOfMa
 	return bomu
 }
 
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (bomu *BillOfMaterialsUpdate) SetIncludedPackagesHash(s string) *BillOfMaterialsUpdate {
+	bomu.mutation.SetIncludedPackagesHash(s)
+	return bomu
+}
+
+// SetNillableIncludedPackagesHash sets the "included_packages_hash" field if the given value is not nil.
+func (bomu *BillOfMaterialsUpdate) SetNillableIncludedPackagesHash(s *string) *BillOfMaterialsUpdate {
+	if s != nil {
+		bomu.SetIncludedPackagesHash(*s)
+	}
+	return bomu
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (bomu *BillOfMaterialsUpdate) SetIncludedArtifactsHash(s string) *BillOfMaterialsUpdate {
+	bomu.mutation.SetIncludedArtifactsHash(s)
+	return bomu
+}
+
+// SetNillableIncludedArtifactsHash sets the "included_artifacts_hash" field if the given value is not nil.
+func (bomu *BillOfMaterialsUpdate) SetNillableIncludedArtifactsHash(s *string) *BillOfMaterialsUpdate {
+	if s != nil {
+		bomu.SetIncludedArtifactsHash(*s)
+	}
+	return bomu
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (bomu *BillOfMaterialsUpdate) SetIncludedDependenciesHash(s string) *BillOfMaterialsUpdate {
+	bomu.mutation.SetIncludedDependenciesHash(s)
+	return bomu
+}
+
+// SetNillableIncludedDependenciesHash sets the "included_dependencies_hash" field if the given value is not nil.
+func (bomu *BillOfMaterialsUpdate) SetNillableIncludedDependenciesHash(s *string) *BillOfMaterialsUpdate {
+	if s != nil {
+		bomu.SetIncludedDependenciesHash(*s)
+	}
+	return bomu
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (bomu *BillOfMaterialsUpdate) SetIncludedOccurrencesHash(s string) *BillOfMaterialsUpdate {
+	bomu.mutation.SetIncludedOccurrencesHash(s)
+	return bomu
+}
+
+// SetNillableIncludedOccurrencesHash sets the "included_occurrences_hash" field if the given value is not nil.
+func (bomu *BillOfMaterialsUpdate) SetNillableIncludedOccurrencesHash(s *string) *BillOfMaterialsUpdate {
+	if s != nil {
+		bomu.SetIncludedOccurrencesHash(*s)
+	}
+	return bomu
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (bomu *BillOfMaterialsUpdate) SetPackage(p *PackageVersion) *BillOfMaterialsUpdate {
 	return bomu.SetPackageID(p.ID)
@@ -398,6 +454,18 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if value, ok := bomu.mutation.KnownSince(); ok {
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
+	}
+	if value, ok := bomu.mutation.IncludedPackagesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedPackagesHash, field.TypeString, value)
+	}
+	if value, ok := bomu.mutation.IncludedArtifactsHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedArtifactsHash, field.TypeString, value)
+	}
+	if value, ok := bomu.mutation.IncludedDependenciesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedDependenciesHash, field.TypeString, value)
+	}
+	if value, ok := bomu.mutation.IncludedOccurrencesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedOccurrencesHash, field.TypeString, value)
 	}
 	if bomu.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -795,6 +863,62 @@ func (bomuo *BillOfMaterialsUpdateOne) SetNillableKnownSince(t *time.Time) *Bill
 	return bomuo
 }
 
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (bomuo *BillOfMaterialsUpdateOne) SetIncludedPackagesHash(s string) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.SetIncludedPackagesHash(s)
+	return bomuo
+}
+
+// SetNillableIncludedPackagesHash sets the "included_packages_hash" field if the given value is not nil.
+func (bomuo *BillOfMaterialsUpdateOne) SetNillableIncludedPackagesHash(s *string) *BillOfMaterialsUpdateOne {
+	if s != nil {
+		bomuo.SetIncludedPackagesHash(*s)
+	}
+	return bomuo
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (bomuo *BillOfMaterialsUpdateOne) SetIncludedArtifactsHash(s string) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.SetIncludedArtifactsHash(s)
+	return bomuo
+}
+
+// SetNillableIncludedArtifactsHash sets the "included_artifacts_hash" field if the given value is not nil.
+func (bomuo *BillOfMaterialsUpdateOne) SetNillableIncludedArtifactsHash(s *string) *BillOfMaterialsUpdateOne {
+	if s != nil {
+		bomuo.SetIncludedArtifactsHash(*s)
+	}
+	return bomuo
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (bomuo *BillOfMaterialsUpdateOne) SetIncludedDependenciesHash(s string) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.SetIncludedDependenciesHash(s)
+	return bomuo
+}
+
+// SetNillableIncludedDependenciesHash sets the "included_dependencies_hash" field if the given value is not nil.
+func (bomuo *BillOfMaterialsUpdateOne) SetNillableIncludedDependenciesHash(s *string) *BillOfMaterialsUpdateOne {
+	if s != nil {
+		bomuo.SetIncludedDependenciesHash(*s)
+	}
+	return bomuo
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (bomuo *BillOfMaterialsUpdateOne) SetIncludedOccurrencesHash(s string) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.SetIncludedOccurrencesHash(s)
+	return bomuo
+}
+
+// SetNillableIncludedOccurrencesHash sets the "included_occurrences_hash" field if the given value is not nil.
+func (bomuo *BillOfMaterialsUpdateOne) SetNillableIncludedOccurrencesHash(s *string) *BillOfMaterialsUpdateOne {
+	if s != nil {
+		bomuo.SetIncludedOccurrencesHash(*s)
+	}
+	return bomuo
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (bomuo *BillOfMaterialsUpdateOne) SetPackage(p *PackageVersion) *BillOfMaterialsUpdateOne {
 	return bomuo.SetPackageID(p.ID)
@@ -1052,6 +1176,18 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 	}
 	if value, ok := bomuo.mutation.KnownSince(); ok {
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
+	}
+	if value, ok := bomuo.mutation.IncludedPackagesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedPackagesHash, field.TypeString, value)
+	}
+	if value, ok := bomuo.mutation.IncludedArtifactsHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedArtifactsHash, field.TypeString, value)
+	}
+	if value, ok := bomuo.mutation.IncludedDependenciesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedDependenciesHash, field.TypeString, value)
+	}
+	if value, ok := bomuo.mutation.IncludedOccurrencesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedOccurrencesHash, field.TypeString, value)
 	}
 	if bomuo.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{

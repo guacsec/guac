@@ -899,6 +899,10 @@ type BillOfMaterialsMutation struct {
 	origin                             *string
 	collector                          *string
 	known_since                        *time.Time
+	included_packages_hash             *string
+	included_artifacts_hash            *string
+	included_dependencies_hash         *string
+	included_occurrences_hash          *string
 	clearedFields                      map[string]struct{}
 	_package                           *uuid.UUID
 	cleared_package                    bool
@@ -1375,6 +1379,150 @@ func (m *BillOfMaterialsMutation) ResetKnownSince() {
 	m.known_since = nil
 }
 
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (m *BillOfMaterialsMutation) SetIncludedPackagesHash(s string) {
+	m.included_packages_hash = &s
+}
+
+// IncludedPackagesHash returns the value of the "included_packages_hash" field in the mutation.
+func (m *BillOfMaterialsMutation) IncludedPackagesHash() (r string, exists bool) {
+	v := m.included_packages_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIncludedPackagesHash returns the old "included_packages_hash" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldIncludedPackagesHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIncludedPackagesHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIncludedPackagesHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIncludedPackagesHash: %w", err)
+	}
+	return oldValue.IncludedPackagesHash, nil
+}
+
+// ResetIncludedPackagesHash resets all changes to the "included_packages_hash" field.
+func (m *BillOfMaterialsMutation) ResetIncludedPackagesHash() {
+	m.included_packages_hash = nil
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (m *BillOfMaterialsMutation) SetIncludedArtifactsHash(s string) {
+	m.included_artifacts_hash = &s
+}
+
+// IncludedArtifactsHash returns the value of the "included_artifacts_hash" field in the mutation.
+func (m *BillOfMaterialsMutation) IncludedArtifactsHash() (r string, exists bool) {
+	v := m.included_artifacts_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIncludedArtifactsHash returns the old "included_artifacts_hash" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldIncludedArtifactsHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIncludedArtifactsHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIncludedArtifactsHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIncludedArtifactsHash: %w", err)
+	}
+	return oldValue.IncludedArtifactsHash, nil
+}
+
+// ResetIncludedArtifactsHash resets all changes to the "included_artifacts_hash" field.
+func (m *BillOfMaterialsMutation) ResetIncludedArtifactsHash() {
+	m.included_artifacts_hash = nil
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (m *BillOfMaterialsMutation) SetIncludedDependenciesHash(s string) {
+	m.included_dependencies_hash = &s
+}
+
+// IncludedDependenciesHash returns the value of the "included_dependencies_hash" field in the mutation.
+func (m *BillOfMaterialsMutation) IncludedDependenciesHash() (r string, exists bool) {
+	v := m.included_dependencies_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIncludedDependenciesHash returns the old "included_dependencies_hash" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldIncludedDependenciesHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIncludedDependenciesHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIncludedDependenciesHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIncludedDependenciesHash: %w", err)
+	}
+	return oldValue.IncludedDependenciesHash, nil
+}
+
+// ResetIncludedDependenciesHash resets all changes to the "included_dependencies_hash" field.
+func (m *BillOfMaterialsMutation) ResetIncludedDependenciesHash() {
+	m.included_dependencies_hash = nil
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (m *BillOfMaterialsMutation) SetIncludedOccurrencesHash(s string) {
+	m.included_occurrences_hash = &s
+}
+
+// IncludedOccurrencesHash returns the value of the "included_occurrences_hash" field in the mutation.
+func (m *BillOfMaterialsMutation) IncludedOccurrencesHash() (r string, exists bool) {
+	v := m.included_occurrences_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIncludedOccurrencesHash returns the old "included_occurrences_hash" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldIncludedOccurrencesHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIncludedOccurrencesHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIncludedOccurrencesHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIncludedOccurrencesHash: %w", err)
+	}
+	return oldValue.IncludedOccurrencesHash, nil
+}
+
+// ResetIncludedOccurrencesHash resets all changes to the "included_occurrences_hash" field.
+func (m *BillOfMaterialsMutation) ResetIncludedOccurrencesHash() {
+	m.included_occurrences_hash = nil
+}
+
 // ClearPackage clears the "package" edge to the PackageVersion entity.
 func (m *BillOfMaterialsMutation) ClearPackage() {
 	m.cleared_package = true
@@ -1679,7 +1827,7 @@ func (m *BillOfMaterialsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BillOfMaterialsMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 13)
 	if m._package != nil {
 		fields = append(fields, billofmaterials.FieldPackageID)
 	}
@@ -1707,6 +1855,18 @@ func (m *BillOfMaterialsMutation) Fields() []string {
 	if m.known_since != nil {
 		fields = append(fields, billofmaterials.FieldKnownSince)
 	}
+	if m.included_packages_hash != nil {
+		fields = append(fields, billofmaterials.FieldIncludedPackagesHash)
+	}
+	if m.included_artifacts_hash != nil {
+		fields = append(fields, billofmaterials.FieldIncludedArtifactsHash)
+	}
+	if m.included_dependencies_hash != nil {
+		fields = append(fields, billofmaterials.FieldIncludedDependenciesHash)
+	}
+	if m.included_occurrences_hash != nil {
+		fields = append(fields, billofmaterials.FieldIncludedOccurrencesHash)
+	}
 	return fields
 }
 
@@ -1733,6 +1893,14 @@ func (m *BillOfMaterialsMutation) Field(name string) (ent.Value, bool) {
 		return m.Collector()
 	case billofmaterials.FieldKnownSince:
 		return m.KnownSince()
+	case billofmaterials.FieldIncludedPackagesHash:
+		return m.IncludedPackagesHash()
+	case billofmaterials.FieldIncludedArtifactsHash:
+		return m.IncludedArtifactsHash()
+	case billofmaterials.FieldIncludedDependenciesHash:
+		return m.IncludedDependenciesHash()
+	case billofmaterials.FieldIncludedOccurrencesHash:
+		return m.IncludedOccurrencesHash()
 	}
 	return nil, false
 }
@@ -1760,6 +1928,14 @@ func (m *BillOfMaterialsMutation) OldField(ctx context.Context, name string) (en
 		return m.OldCollector(ctx)
 	case billofmaterials.FieldKnownSince:
 		return m.OldKnownSince(ctx)
+	case billofmaterials.FieldIncludedPackagesHash:
+		return m.OldIncludedPackagesHash(ctx)
+	case billofmaterials.FieldIncludedArtifactsHash:
+		return m.OldIncludedArtifactsHash(ctx)
+	case billofmaterials.FieldIncludedDependenciesHash:
+		return m.OldIncludedDependenciesHash(ctx)
+	case billofmaterials.FieldIncludedOccurrencesHash:
+		return m.OldIncludedOccurrencesHash(ctx)
 	}
 	return nil, fmt.Errorf("unknown BillOfMaterials field %s", name)
 }
@@ -1831,6 +2007,34 @@ func (m *BillOfMaterialsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetKnownSince(v)
+		return nil
+	case billofmaterials.FieldIncludedPackagesHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIncludedPackagesHash(v)
+		return nil
+	case billofmaterials.FieldIncludedArtifactsHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIncludedArtifactsHash(v)
+		return nil
+	case billofmaterials.FieldIncludedDependenciesHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIncludedDependenciesHash(v)
+		return nil
+	case billofmaterials.FieldIncludedOccurrencesHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIncludedOccurrencesHash(v)
 		return nil
 	}
 	return fmt.Errorf("unknown BillOfMaterials field %s", name)
@@ -1922,6 +2126,18 @@ func (m *BillOfMaterialsMutation) ResetField(name string) error {
 		return nil
 	case billofmaterials.FieldKnownSince:
 		m.ResetKnownSince()
+		return nil
+	case billofmaterials.FieldIncludedPackagesHash:
+		m.ResetIncludedPackagesHash()
+		return nil
+	case billofmaterials.FieldIncludedArtifactsHash:
+		m.ResetIncludedArtifactsHash()
+		return nil
+	case billofmaterials.FieldIncludedDependenciesHash:
+		m.ResetIncludedDependenciesHash()
+		return nil
+	case billofmaterials.FieldIncludedOccurrencesHash:
+		m.ResetIncludedOccurrencesHash()
 		return nil
 	}
 	return fmt.Errorf("unknown BillOfMaterials field %s", name)

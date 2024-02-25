@@ -181,7 +181,7 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 	}
 
 	return &model.IsDependency{
-		ID:                id.String(),
+		ID:                id.ID.String(),
 		Package:           pkg,
 		DependencyPackage: depPkg,
 		VersionRange:      id.VersionRange,

@@ -24,6 +24,14 @@ import (
 	"github.com/google/uuid"
 )
 
+func getUUIDv7() uuid.UUID {
+	uuid, err := uuid.NewV7()
+	if err != nil {
+		panic(err)
+	}
+	return uuid
+}
+
 // Artifact holds the schema definition for the Artifact entity.
 type Artifact struct {
 	ent.Schema
@@ -33,7 +41,7 @@ type Artifact struct {
 func (Artifact) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
 		field.String("algorithm"),

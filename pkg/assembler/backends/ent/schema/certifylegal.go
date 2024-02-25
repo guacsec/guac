@@ -33,11 +33,11 @@ type CertifyLegal struct {
 func (CertifyLegal) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("package_id", uuid.New()).Optional().Nillable(),
-		field.UUID("source_id", uuid.New()).Optional().Nillable(),
+		field.UUID("package_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("source_id", getUUIDv7()).Optional().Nillable(),
 		field.String("declared_license"),
 		field.String("discovered_license"),
 		field.String("attribution"),

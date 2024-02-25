@@ -32,11 +32,11 @@ type CertifyVuln struct {
 func (CertifyVuln) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("vulnerability_id", uuid.New()),
-		field.UUID("package_id", uuid.New()),
+		field.UUID("vulnerability_id", getUUIDv7()),
+		field.UUID("package_id", getUUIDv7()),
 		field.Time("time_scanned"),
 		field.String("db_uri"),
 		field.String("db_version"),

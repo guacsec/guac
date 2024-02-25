@@ -42,12 +42,12 @@ func (SLSAAttestation) Annotations() []schema.Annotation {
 func (SLSAAttestation) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
 		field.String("build_type").Comment("Type of the builder"),
-		field.UUID("built_by_id", uuid.New()).Comment("ID of the builder"),
-		field.UUID("subject_id", uuid.New()).Comment("ID of the subject artifact"),
+		field.UUID("built_by_id", getUUIDv7()).Comment("ID of the builder"),
+		field.UUID("subject_id", getUUIDv7()).Comment("ID of the subject artifact"),
 		field.JSON("slsa_predicate", []*model.SLSAPredicate{}).Optional().Comment("Individual predicates found in the attestation"),
 		field.String("slsa_version").Comment("Version of the SLSA predicate"),
 		field.Time("started_on").Optional().Nillable().Comment("Timestamp of build start time"),

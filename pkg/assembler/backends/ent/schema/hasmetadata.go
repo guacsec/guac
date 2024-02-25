@@ -33,13 +33,13 @@ type HasMetadata struct {
 func (HasMetadata) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
+			Default(getUUIDv7).
 			Unique().
 			Immutable(),
-		field.UUID("source_id", uuid.New()).Optional().Nillable(),
-		field.UUID("package_version_id", uuid.New()).Optional().Nillable(),
-		field.UUID("package_name_id", uuid.New()).Optional().Nillable(),
-		field.UUID("artifact_id", uuid.New()).Optional().Nillable(),
+		field.UUID("source_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("package_version_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("package_name_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("artifact_id", getUUIDv7()).Optional().Nillable(),
 		field.Time("timestamp"),
 		field.String("key"),
 		field.String("value"),
