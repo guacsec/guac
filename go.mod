@@ -302,7 +302,7 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nats-io/nats-server/v2 v2.10.10
-	github.com/nats-io/nats.go v1.32.0
+	github.com/nats-io/nats.go v1.33.1
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/openvex/go-vex v0.2.5
 	github.com/ossf/scorecard/v4 v4.13.1
