@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -30,7 +29,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/util/rand"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
 
 )
 
@@ -55,40 +53,6 @@ func setNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interfa
 	}
 
 	node.Attributes[key] = value
-}
-
-func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl string) (*model.PackagesResponse, error) {
-	pkgInput, err := helpers.PurlToPkg(purl)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse PURL: %v", err)
-	}
-
-	pkgQualifierFilter := []model.PackageQualifierSpec{}
-	for _, qualifier := range pkgInput.Qualifiers {
-		// to prevent https://github.com/golang/go/discussions/56010
-		qualifier := qualifier
-		pkgQualifierFilter = append(pkgQualifierFilter, model.PackageQualifierSpec{
-			Key:   qualifier.Key,
-			Value: &qualifier.Value,
-		})
-	}
-
-	pkgFilter := &model.PkgSpec{
-		Type:       &pkgInput.Type,
-		Namespace:  pkgInput.Namespace,
-		Name:       &pkgInput.Name,
-		Version:    pkgInput.Version,
-		Subpath:    pkgInput.Subpath,
-		Qualifiers: pkgQualifierFilter,
-	}
-	pkgResponse, err := model.Packages(ctx, gqlclient, *pkgFilter)
-	if err != nil {
-		return nil, fmt.Errorf("error querying for package: %v", err)
-	}
-	if len(pkgResponse.Packages) != 1 {
-		return nil, fmt.Errorf("failed to located package based on purl")
-	}
-	return pkgResponse, nil
 }
 
 func findHasSBOMBy(uri, purl string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
@@ -158,82 +122,57 @@ var diffCmd = &cobra.Command{
 	Short: "Get a unified tree diff for two given SBOMS",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		test, _ := cmd.Flags().GetBool("test")
-		testfile, _ := cmd.Flags().GetString("file")
+		slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
+		sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
+		uri, _ := cmd.Flags().GetBool("uri")
+		purl, _ := cmd.Flags().GetBool("purl")
+		verifyFlags(slsas, sboms,  errSlsa, errSbom, uri, purl)
+
+		ctx := logging.WithLogger(context.Background())
+		httpClient := http.Client{}
+		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
+		var hasSBOMResponseOne *model.HasSBOMsResponse
+		var hasSBOMResponseTwo *model.HasSBOMsResponse
 		var err error
-		var (
-			hasSBOMOne model.HasSBOMsHasSBOM
-			hasSBOMTwo model.HasSBOMsHasSBOM
-		)
 
-		if !test {
-			slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
-			sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
-			uri, _ := cmd.Flags().GetBool("uri")
-			purl, _ := cmd.Flags().GetBool("purl")
-			verifyFlags(slsas, sboms,  errSlsa, errSbom, uri, purl)
-
-			ctx := logging.WithLogger(context.Background())
-			httpClient := http.Client{}
-			gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
-			var hasSBOMResponseOne *model.HasSBOMsResponse
-			var hasSBOMResponseTwo *model.HasSBOMsResponse
-
-			if uri {
-				hasSBOMResponseOne, err = findHasSBOMBy(sboms[0],"",  ctx, gqlclient)
-				if err != nil {
-					fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
-					return
-				}
-
-				hasSBOMResponseTwo, err = findHasSBOMBy( sboms[1],"",  ctx, gqlclient)
-				if err != nil {
-					fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
-					return
-				}
-			} else if purl {
-
-				hasSBOMResponseTwo, err = findHasSBOMBy( "", sboms[0],  ctx, gqlclient)
-				if err != nil {
-					fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
-					return
-				}
-				hasSBOMResponseTwo, err = findHasSBOMBy( "", sboms[1], ctx, gqlclient)
-				if err != nil {
-					fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
-					return
-				}
-			}
-			if hasSBOMResponseOne == nil || hasSBOMResponseTwo == nil {
-				fmt.Println("failed to lookup sboms")
-				return
-			}
-			if len(hasSBOMResponseOne.HasSBOM) == 0 || len(hasSBOMResponseTwo.HasSBOM) == 0 {
-				fmt.Println("Failed to lookup sboms, one endpoint may not have sboms")
-				return
-			}
-			if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
-				fmt.Println("Warning: Multiple sboms found for given purl or uri. Using first one")
-			}
-			hasSBOMOne =  hasSBOMResponseOne.HasSBOM[0]
-			hasSBOMTwo =  hasSBOMResponseTwo.HasSBOM[0]
-		}else{
-			jsonData, err := os.ReadFile(testfile)
+		if uri {
+			hasSBOMResponseOne, err = findHasSBOMBy(sboms[0],"",  ctx, gqlclient)
 			if err != nil {
-				fmt.Println("Error reading test:", err)
+				fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
 				return
 			}
 
-			var test SBOMDiffTest
-			err = json.Unmarshal(jsonData, &test)
+			hasSBOMResponseTwo, err = findHasSBOMBy( sboms[1],"",  ctx, gqlclient)
 			if err != nil {
-				fmt.Println("Error:", err)
+				fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
 				return
 			}
-			hasSBOMOne = test.HasSBOMOne
-			hasSBOMTwo = test.HasSBOMTwo
+		} else if purl {
 
+			hasSBOMResponseTwo, err = findHasSBOMBy( "", sboms[0],  ctx, gqlclient)
+			if err != nil {
+				fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
+				return
+			}
+			hasSBOMResponseTwo, err = findHasSBOMBy( "", sboms[1], ctx, gqlclient)
+			if err != nil {
+				fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
+				return
+			}
 		}
+		if hasSBOMResponseOne == nil || hasSBOMResponseTwo == nil {
+			fmt.Println("failed to lookup sboms")
+			return
+		}
+		if len(hasSBOMResponseOne.HasSBOM) == 0 || len(hasSBOMResponseTwo.HasSBOM) == 0 {
+			fmt.Println("Failed to lookup sboms, one endpoint may not have sboms")
+			return
+		}
+		if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
+			fmt.Println("Warning: Multiple sboms found for given purl or uri. Using first one")
+		}
+		hasSBOMOne :=  hasSBOMResponseOne.HasSBOM[0]
+		hasSBOMTwo :=  hasSBOMResponseTwo.HasSBOM[0]
 		//create graphs
 		gOne := makeGraph(hasSBOMOne)
 		gTwo := makeGraph(hasSBOMTwo)
@@ -333,28 +272,27 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM) graph.Graph[string, *Node] {
 	g := graph.New(nodeHash, graph.Directed())
 
 	//create HasSBOM node
-	hasSBOMNode := &Node{ID: "HasSBOM", color: "black", Attributes: make(map[string]interface{}) }
-	g.AddVertex(hasSBOMNode, graph.VertexAttribute("color", "black"))
+	addGraphNode(g, "HasSBOM", "black")
 	//add metadata
-	setNodeAttribute(g, hasSBOMNode.ID, "Id" , hasSBOM.Id)
-	setNodeAttribute(g, hasSBOMNode.ID, "Algorithm" , hasSBOM.Algorithm)
-	setNodeAttribute(g, hasSBOMNode.ID, "Collector" , hasSBOM.Collector)
-	setNodeAttribute(g, hasSBOMNode.ID, "Digest" , hasSBOM.Digest)
-	setNodeAttribute(g, hasSBOMNode.ID, "DownloadLocation" , hasSBOM.DownloadLocation)
-	setNodeAttribute(g, hasSBOMNode.ID, "KnownSince" , hasSBOM.KnownSince.String())
-	setNodeAttribute(g, hasSBOMNode.ID, "Origin" , hasSBOM.Origin)
-	setNodeAttribute(g, hasSBOMNode.ID, "Uri" , hasSBOM.Uri)
+	setNodeAttribute(g, "HasSBOM", "Id" , hasSBOM.Id)
+	setNodeAttribute(g, "HasSBOM", "Algorithm" , hasSBOM.Algorithm)
+	setNodeAttribute(g, "HasSBOM", "Collector" , hasSBOM.Collector)
+	setNodeAttribute(g, "HasSBOM", "Digest" , hasSBOM.Digest)
+	setNodeAttribute(g, "HasSBOM", "DownloadLocation" , hasSBOM.DownloadLocation)
+	setNodeAttribute(g, "HasSBOM", "KnownSince" , hasSBOM.KnownSince.String())
+	setNodeAttribute(g, "HasSBOM", "Origin" , hasSBOM.Origin)
+	setNodeAttribute(g, "HasSBOM", "Uri" , hasSBOM.Uri)
 	//TODO: add subject
 
 	//add included occurrences
 	for _, occurrence := range hasSBOM.IncludedOccurrences {
-		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Subject", occurrence.Subject)
-		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Artifact-Id", occurrence.Artifact.Id)
-		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Artifact-Algorithm", occurrence.Artifact.Algorithm)
-		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Artifact-Digest", occurrence.Artifact.Digest)
-		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Justification", occurrence.Justification)
-		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Origin", occurrence.Origin)
-		setNodeAttribute(g, hasSBOMNode.ID, "InclOccur-"+ occurrence.Id + "-Collector", occurrence.Collector)
+		setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Subject", occurrence.Subject)
+		setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Id", occurrence.Artifact.Id)
+		setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Algorithm", occurrence.Artifact.Algorithm)
+		setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Digest", occurrence.Artifact.Digest)
+		setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Justification", occurrence.Justification)
+		setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Origin", occurrence.Origin)
+		setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Collector", occurrence.Collector)
 	}	
 
 	//TODO: add included software
@@ -362,7 +300,7 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM) graph.Graph[string, *Node] {
 	//add included dependencies
 	for _, dependency := range hasSBOM.IncludedDependencies {
 		packageId := dependency.Package.Id
-		addGraphEdge(g, hasSBOMNode.ID ,packageId,"black")
+		addGraphEdge(g, "HasSBOM" ,packageId,"black")
 		includedDepsId := dependency.Id
 		addGraphEdge(g, packageId, includedDepsId, "black")
 
@@ -392,7 +330,7 @@ func addGraphNode(g graph.Graph[string, *Node],_ID, color string){
 
 	newNode := &Node{
 		ID: _ID,
-		color: "black", 
+		color: color, 
 		Attributes: make(map[string]interface{}),
 	}
 
@@ -419,6 +357,4 @@ func init() {
 	rootCmd.PersistentFlags().StringSlice("slsa", []string{}, "two slsa to find the diff between")
 	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
 	rootCmd.PersistentFlags().Bool("purl", false, "input is a pURL")
-	rootCmd.PersistentFlags().Bool("test", false, "run in test mode")
-	rootCmd.PersistentFlags().String("file", "tests/identical.json", "filename to read sbom test cases from")
 }
