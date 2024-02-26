@@ -7,18 +7,11 @@ Refer to the [GraphQL Guide](https://docs.guac.sh/guac-graphql/) to go through
 a setup.  Optionally, you can also consult [docker compose
 documentation](https://docs.guac.sh/setup/).
 
-## Contributor License Agreement
+## Developer Certificate of Origin
 
-Contributions to this project must be accompanied by a Contributor License
-Agreement (CLA). You (or your employer) retain the copyright to your
-contribution; this simply gives us permission to use and redistribute your
-contributions as part of the project. Head over to
-<https://cla.developers.google.com/> to see your current agreements on file or
-to sign a new one.
-
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.
+We require all commits in a PR to contain a `Signed-off-by` line which can be
+added by using the `-s` flag of `git commit`. This is to enforce
+[a Developer Certificate of Origin (DCO)](https://wiki.linuxfoundation.org/dco).
 
 ## Code Reviews
 
@@ -26,10 +19,6 @@ All submissions, including submissions by project members, require review. We
 use GitHub pull requests for this purpose. Consult
 [GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
 information on using pull requests.
-
-We require all commits in a PR to contain a `Signed-off-by` line which can be
-added by using the `-s` flag of `git commit`. This is to enforce
-[a Developer Certificate of Origin (DCO)](https://wiki.linuxfoundation.org/dco).
 
 We also require two reviewers on every PR as this follows good security
 practices. For reasoning, see
