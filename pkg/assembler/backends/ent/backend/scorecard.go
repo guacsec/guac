@@ -99,7 +99,40 @@ func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDor
 	return *ids, nil
 }
 
-func upsertBulkScorecard(ctx context.Context, client *ent.Tx, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) (*[]string, error) {
+func generateScorecardCreate(tx *ent.Tx, src *model.IDorSourceInput, scorecard *model.ScorecardInputSpec) (*ent.CertifyScorecardCreate, error) {
+
+	checks := make([]*model.ScorecardCheck, len(scorecard.Checks))
+	for i, check := range scorecard.Checks {
+		checks[i] = &model.ScorecardCheck{
+			Check: check.Check,
+			Score: check.Score,
+		}
+	}
+
+	if src.SourceNameID == nil {
+		return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+	}
+	sourceID, err := uuid.Parse(*src.SourceNameID)
+	if err != nil {
+		return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+	}
+
+	certifyCreate := tx.CertifyScorecard.Create()
+
+	certifyCreate.
+		SetSourceID(sourceID).
+		SetChecks(checks).
+		SetAggregateScore(scorecard.AggregateScore).
+		SetTimeScanned(scorecard.TimeScanned.UTC()).
+		SetScorecardVersion(scorecard.ScorecardVersion).
+		SetScorecardCommit(scorecard.ScorecardCommit).
+		SetOrigin(scorecard.Origin).
+		SetCollector(scorecard.Collector)
+
+	return certifyCreate, nil
+}
+
+func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -114,36 +147,15 @@ func upsertBulkScorecard(ctx context.Context, client *ent.Tx, sources []*model.I
 		creates := make([]*ent.CertifyScorecardCreate, len(css))
 		for i, cs := range css {
 			cs := cs
-			checks := make([]*model.ScorecardCheck, len(cs.Checks))
-			for i, check := range cs.Checks {
-				checks[i] = &model.ScorecardCheck{
-					Check: check.Check,
-					Score: check.Score,
-				}
-			}
-
-			creates[i] = client.CertifyScorecard.Create().
-				SetChecks(checks).
-				SetAggregateScore(cs.AggregateScore).
-				SetTimeScanned(cs.TimeScanned.UTC()).
-				SetScorecardVersion(cs.ScorecardVersion).
-				SetScorecardCommit(cs.ScorecardCommit).
-				SetOrigin(cs.Origin).
-				SetCollector(cs.Collector)
-
-			if sources[index].SourceNameID == nil {
-				return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-			}
-			sourceID, err := uuid.Parse(*sources[index].SourceNameID)
+			var err error
+			creates[i], err = generateScorecardCreate(tx, sources[index], cs)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+				return nil, gqlerror.Errorf("generateScorecardCreate :: %s", err)
 			}
-			creates[i].SetSourceID(sourceID)
-
 			index++
 		}
 
-		err := client.CertifyScorecard.CreateBulk(creates...).
+		err := tx.CertifyScorecard.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
@@ -157,31 +169,13 @@ func upsertBulkScorecard(ctx context.Context, client *ent.Tx, sources []*model.I
 	return &ids, nil
 }
 
-func upsertScorecard(ctx context.Context, client *ent.Tx, source model.IDorSourceInput, scorecardInput model.ScorecardInputSpec) (*string, error) {
-	checks := make([]*model.ScorecardCheck, len(scorecardInput.Checks))
-	for i, check := range scorecardInput.Checks {
-		checks[i] = &model.ScorecardCheck{
-			Check: check.Check,
-			Score: check.Score,
-		}
-	}
+func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.IDorSourceInput, scorecardInput model.ScorecardInputSpec) (*string, error) {
 
-	if source.SourceNameID == nil {
-		return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-	}
-	sourceID, err := uuid.Parse(*source.SourceNameID)
+	scorecardCreate, err := generateScorecardCreate(tx, &source, &scorecardInput)
 	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		return nil, gqlerror.Errorf("generateScorecardCreate :: %s", err)
 	}
-	if _, err := client.CertifyScorecard.Create().
-		SetSourceID(sourceID).
-		SetChecks(checks).
-		SetAggregateScore(scorecardInput.AggregateScore).
-		SetTimeScanned(scorecardInput.TimeScanned.UTC()).
-		SetScorecardVersion(scorecardInput.ScorecardVersion).
-		SetScorecardCommit(scorecardInput.ScorecardCommit).
-		SetOrigin(scorecardInput.Origin).
-		SetCollector(scorecardInput.Collector).
+	if _, err := scorecardCreate.
 		OnConflict(
 			sql.ConflictColumns(certifyscorecard.FieldSourceID, certifyscorecard.FieldOrigin,
 				certifyscorecard.FieldCollector, certifyscorecard.FieldScorecardCommit,
