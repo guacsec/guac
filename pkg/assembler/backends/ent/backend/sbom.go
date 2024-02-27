@@ -101,16 +101,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 	funcName := "IngestHasSbom"
 
 	sbomId, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
-		client := ent.TxFromContext(ctx)
-
-		sbomCreate := client.BillOfMaterials.Create().
-			SetURI(spec.URI).
-			SetAlgorithm(strings.ToLower(spec.Algorithm)).
-			SetDigest(strings.ToLower(spec.Digest)).
-			SetDownloadLocation(spec.DownloadLocation).
-			SetOrigin(spec.Origin).
-			SetCollector(spec.Collector).
-			SetKnownSince(spec.KnownSince.UTC())
+		tx := ent.TxFromContext(ctx)
 
 		// If a new column is included in the conflict columns, it must be added to the Indexes() function in the schema
 		conflictColumns := []string{
@@ -127,113 +118,13 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 
 		var conflictWhere *sql.Predicate
 
-		sortedPkgIDs := helper.SortAndRemoveDups(includes.Packages)
-		sortedArtIDs := helper.SortAndRemoveDups(includes.Artifacts)
-		sortedDependencyIDs := helper.SortAndRemoveDups(includes.Dependencies)
-		sortedOccurrenceIDs := helper.SortAndRemoveDups(includes.Occurrences)
-		var sortedPkgHash string
-		var sortedArtHash string
-		var sortedDepHash string
-		var sortedOccurHash string
-
-		if len(sortedPkgIDs) > 0 {
-			for _, pkgID := range sortedPkgIDs {
-				pkgIncludesID, err := uuid.Parse(pkgID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-				}
-				sbomCreate.AddIncludedSoftwarePackageIDs(pkgIncludesID)
-			}
-			sortedPkgHash = hashListOfSortedKeys(sortedPkgIDs)
-			sbomCreate.SetIncludedPackagesHash(sortedPkgHash)
-		} else {
-			sortedPkgHash = hashListOfSortedKeys([]string{""})
-			sbomCreate.SetIncludedPackagesHash(sortedPkgHash)
-		}
-
-		if len(sortedArtIDs) > 0 {
-			for _, artID := range sortedArtIDs {
-				artIncludesID, err := uuid.Parse(artID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-				}
-				sbomCreate.AddIncludedSoftwareArtifactIDs(artIncludesID)
-
-			}
-			sortedArtHash = hashListOfSortedKeys(sortedArtIDs)
-			sbomCreate.SetIncludedArtifactsHash(sortedArtHash)
-		} else {
-			sortedArtHash = hashListOfSortedKeys([]string{""})
-			sbomCreate.SetIncludedArtifactsHash(sortedArtHash)
-		}
-
-		if len(sortedDependencyIDs) > 0 {
-			for _, isDependencyID := range sortedDependencyIDs {
-				isDepIncludesID, err := uuid.Parse(isDependencyID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
-				}
-				sbomCreate.AddIncludedDependencyIDs(isDepIncludesID)
-			}
-			sortedDepHash = hashListOfSortedKeys(sortedDependencyIDs)
-			sbomCreate.SetIncludedDependenciesHash(sortedDepHash)
-		} else {
-			sortedDepHash = hashListOfSortedKeys([]string{""})
-			sbomCreate.SetIncludedDependenciesHash(sortedDepHash)
-		}
-
-		if len(sortedOccurrenceIDs) > 0 {
-			for _, isOccurrenceID := range sortedOccurrenceIDs {
-				isOccurIncludesID, err := uuid.Parse(isOccurrenceID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
-				}
-				sbomCreate.AddIncludedOccurrenceIDs(isOccurIncludesID)
-			}
-			sortedOccurHash = hashListOfSortedKeys(sortedOccurrenceIDs)
-			sbomCreate.SetIncludedOccurrencesHash(sortedOccurHash)
-		} else {
-			sortedOccurHash = hashListOfSortedKeys([]string{""})
-			sbomCreate.SetIncludedOccurrencesHash(sortedOccurHash)
-		}
-
 		if subject.Package != nil {
-			if subject.Package.PackageVersionID == nil {
-				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-			}
-			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-			}
-
-			hasSBOMID, err := guacHasSBOMKey(subject.Package, nil, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, &spec)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
-			}
-			sbomCreate.SetID(*hasSBOMID)
-
-			sbomCreate.SetPackageID(pkgVersionID)
 			conflictColumns = append(conflictColumns, billofmaterials.FieldPackageID)
 			conflictWhere = sql.And(
 				sql.NotNull(billofmaterials.FieldPackageID),
 				sql.IsNull(billofmaterials.FieldArtifactID),
 			)
 		} else if subject.Artifact != nil {
-			if subject.Artifact.ArtifactID == nil {
-				return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-			}
-			artID, err := uuid.Parse(*subject.Artifact.ArtifactID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-			}
-
-			hasSBOMID, err := guacHasSBOMKey(nil, subject.Artifact, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, &spec)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
-			}
-			sbomCreate.SetID(*hasSBOMID)
-
-			sbomCreate.SetArtifactID(artID)
 			conflictColumns = append(conflictColumns, billofmaterials.FieldArtifactID)
 			conflictWhere = sql.And(
 				sql.IsNull(billofmaterials.FieldPackageID),
@@ -243,14 +134,17 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			return nil, Errorf("%v :: %s", funcName, "subject must be either a package or artifact")
 		}
 
-		_, err := sbomCreate.
+		sbomCreate, err := generateSBOMCreate(tx, subject.Package, subject.Artifact, &includes, &spec)
+		if err != nil {
+			return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
+		}
+		if _, err := sbomCreate.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
 			DoNothing().
-			ID(ctx)
-		if err != nil {
+			ID(ctx); err != nil {
 			if err != stdsql.ErrNoRows {
 				return nil, errors.Wrap(err, "IngestHasSbom")
 			}
@@ -281,7 +175,124 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 	return *ids, nil
 }
 
-func upsertBulkHasSBOM(ctx context.Context, client *ent.Tx, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) (*[]string, error) {
+func generateSBOMCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includes *model.HasSBOMIncludesInputSpec, hasSBOM *model.HasSBOMInputSpec) (*ent.BillOfMaterialsCreate, error) {
+
+	sbomCreate := tx.BillOfMaterials.Create().
+		SetURI(hasSBOM.URI).
+		SetAlgorithm(strings.ToLower(hasSBOM.Algorithm)).
+		SetDigest(strings.ToLower(hasSBOM.Digest)).
+		SetDownloadLocation(hasSBOM.DownloadLocation).
+		SetOrigin(hasSBOM.Origin).
+		SetCollector(hasSBOM.Collector).
+		SetKnownSince(hasSBOM.KnownSince.UTC())
+
+	sortedPkgIDs := helper.SortAndRemoveDups(includes.Packages)
+	sortedArtIDs := helper.SortAndRemoveDups(includes.Artifacts)
+	sortedDependencyIDs := helper.SortAndRemoveDups(includes.Dependencies)
+	sortedOccurrenceIDs := helper.SortAndRemoveDups(includes.Occurrences)
+	var sortedPkgHash string
+	var sortedArtHash string
+	var sortedDepHash string
+	var sortedOccurHash string
+
+	if len(sortedPkgIDs) > 0 {
+		for _, pkgID := range sortedPkgIDs {
+			pkgIncludesID, err := uuid.Parse(pkgID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+			sbomCreate.AddIncludedSoftwarePackageIDs(pkgIncludesID)
+		}
+		sortedPkgHash = hashListOfSortedKeys(sortedPkgIDs)
+		sbomCreate.SetIncludedPackagesHash(sortedPkgHash)
+	} else {
+		sortedPkgHash = hashListOfSortedKeys([]string{""})
+		sbomCreate.SetIncludedPackagesHash(sortedPkgHash)
+	}
+
+	if len(sortedArtIDs) > 0 {
+		for _, artID := range sortedArtIDs {
+			artIncludesID, err := uuid.Parse(artID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			}
+			sbomCreate.AddIncludedSoftwareArtifactIDs(artIncludesID)
+		}
+		sortedArtHash = hashListOfSortedKeys(sortedArtIDs)
+		sbomCreate.SetIncludedArtifactsHash(sortedArtHash)
+	} else {
+		sortedArtHash = hashListOfSortedKeys([]string{""})
+		sbomCreate.SetIncludedArtifactsHash(sortedArtHash)
+	}
+
+	if len(sortedDependencyIDs) > 0 {
+		for _, isDependencyID := range sortedDependencyIDs {
+			isDepIncludesID, err := uuid.Parse(isDependencyID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
+			}
+			sbomCreate.AddIncludedDependencyIDs(isDepIncludesID)
+		}
+		sortedDepHash = hashListOfSortedKeys(sortedDependencyIDs)
+		sbomCreate.SetIncludedDependenciesHash(sortedDepHash)
+	} else {
+		sortedDepHash = hashListOfSortedKeys([]string{""})
+		sbomCreate.SetIncludedDependenciesHash(sortedDepHash)
+	}
+
+	if len(sortedOccurrenceIDs) > 0 {
+		for _, isOccurrenceID := range sortedOccurrenceIDs {
+			isOccurIncludesID, err := uuid.Parse(isOccurrenceID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
+			}
+			sbomCreate.AddIncludedOccurrenceIDs(isOccurIncludesID)
+		}
+		sortedOccurHash = hashListOfSortedKeys(sortedOccurrenceIDs)
+		sbomCreate.SetIncludedOccurrencesHash(sortedOccurHash)
+	} else {
+		sortedOccurHash = hashListOfSortedKeys([]string{""})
+		sbomCreate.SetIncludedOccurrencesHash(sortedOccurHash)
+	}
+
+	if pkg != nil {
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		}
+		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		}
+
+		hasSBOMID, err := guacHasSBOMKey(pkg, nil, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hasSBOM)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
+		}
+		sbomCreate.SetID(*hasSBOMID)
+		sbomCreate.SetPackageID(pkgVersionID)
+	} else if art != nil {
+		if art.ArtifactID == nil {
+			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+		}
+		artID, err := uuid.Parse(*art.ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		}
+
+		hasSBOMID, err := guacHasSBOMKey(nil, art, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hasSBOM)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
+		}
+		sbomCreate.SetID(*hasSBOMID)
+		sbomCreate.SetArtifactID(artID)
+	} else {
+		return nil, Errorf("%v :: %s", "generateSBOMCreate", "subject must be either a package or artifact")
+	}
+
+	return sbomCreate, nil
+}
+
+func upsertBulkHasSBOM(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -320,120 +331,22 @@ func upsertBulkHasSBOM(ctx context.Context, client *ent.Tx, subjects model.Packa
 		creates := make([]*ent.BillOfMaterialsCreate, len(hsboms))
 		for i, hsbom := range hsboms {
 			hsbom := hsbom
-			creates[i] = client.BillOfMaterials.Create().
-				SetURI(hsbom.URI).
-				SetAlgorithm(strings.ToLower(hsbom.Algorithm)).
-				SetDigest(strings.ToLower(hsbom.Digest)).
-				SetDownloadLocation(hsbom.DownloadLocation).
-				SetOrigin(hsbom.Origin).
-				SetCollector(hsbom.Collector).
-				SetKnownSince(hsbom.KnownSince.UTC())
-
-			sortedPkgIDs := helper.SortAndRemoveDups(includes[index].Packages)
-			sortedArtIDs := helper.SortAndRemoveDups(includes[index].Artifacts)
-			sortedDependencyIDs := helper.SortAndRemoveDups(includes[index].Dependencies)
-			sortedOccurrenceIDs := helper.SortAndRemoveDups(includes[index].Occurrences)
-			var sortedPkgHash string
-			var sortedArtHash string
-			var sortedDepHash string
-			var sortedOccurHash string
-
-			if len(sortedPkgIDs) > 0 {
-				for _, pkgID := range sortedPkgIDs {
-					pkgIncludesID, err := uuid.Parse(pkgID)
-					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-					}
-					creates[i].AddIncludedSoftwarePackageIDs(pkgIncludesID)
-				}
-				sortedPkgHash = hashListOfSortedKeys(sortedPkgIDs)
-				creates[i].SetIncludedPackagesHash(sortedPkgHash)
-			} else {
-				sortedPkgHash = hashListOfSortedKeys([]string{""})
-				creates[i].SetIncludedPackagesHash(sortedPkgHash)
-			}
-
-			if len(sortedArtIDs) > 0 {
-				for _, artID := range sortedArtIDs {
-					artIncludesID, err := uuid.Parse(artID)
-					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-					}
-					creates[i].AddIncludedSoftwareArtifactIDs(artIncludesID)
-				}
-				sortedArtHash = hashListOfSortedKeys(sortedArtIDs)
-				creates[i].SetIncludedArtifactsHash(sortedArtHash)
-			} else {
-				sortedArtHash = hashListOfSortedKeys([]string{""})
-				creates[i].SetIncludedArtifactsHash(sortedArtHash)
-			}
-
-			if len(sortedDependencyIDs) > 0 {
-				for _, isDependencyID := range sortedDependencyIDs {
-					isDepIncludesID, err := uuid.Parse(isDependencyID)
-					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
-					}
-					creates[i].AddIncludedDependencyIDs(isDepIncludesID)
-				}
-				sortedDepHash = hashListOfSortedKeys(sortedDependencyIDs)
-				creates[i].SetIncludedDependenciesHash(sortedDepHash)
-			} else {
-				sortedDepHash = hashListOfSortedKeys([]string{""})
-				creates[i].SetIncludedDependenciesHash(sortedDepHash)
-			}
-
-			if len(sortedOccurrenceIDs) > 0 {
-				for _, isOccurrenceID := range sortedOccurrenceIDs {
-					isOccurIncludesID, err := uuid.Parse(isOccurrenceID)
-					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
-					}
-					creates[i].AddIncludedOccurrenceIDs(isOccurIncludesID)
-				}
-				sortedOccurHash = hashListOfSortedKeys(sortedOccurrenceIDs)
-				creates[i].SetIncludedOccurrencesHash(sortedOccurHash)
-			} else {
-				sortedOccurHash = hashListOfSortedKeys([]string{""})
-				creates[i].SetIncludedOccurrencesHash(sortedOccurHash)
-			}
-
-			switch {
-			case len(subjects.Packages) > 0:
-				if subjects.Packages[index].PackageVersionID == nil {
-					return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-				}
-				pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
+			var err error
+			if len(subjects.Packages) > 0 {
+				creates[i], err = generateSBOMCreate(tx, subjects.Packages[index], nil, includes[index], hsbom)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+					return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
 				}
-
-				hasSBOMID, err := guacHasSBOMKey(subjects.Packages[index], nil, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hsbom)
+			} else if len(subjects.Artifacts) > 0 {
+				creates[i], err = generateSBOMCreate(tx, nil, subjects.Artifacts[index], includes[index], hsbom)
 				if err != nil {
-					return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
+					return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
 				}
-				creates[i].SetID(*hasSBOMID)
-				creates[i].SetPackageID(pkgVersionID)
-			case len(subjects.Artifacts) > 0:
-				if subjects.Artifacts[index].ArtifactID == nil {
-					return nil, fmt.Errorf("ArtifactID not specified in IDorArtifactInput")
-				}
-				artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-				}
-				hasSBOMID, err := guacHasSBOMKey(nil, subjects.Artifacts[index], sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hsbom)
-				if err != nil {
-					return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
-				}
-				creates[i].SetID(*hasSBOMID)
-				creates[i].SetArtifactID(artID)
 			}
-
 			index++
 		}
 
-		err := client.BillOfMaterials.CreateBulk(creates...).
+		err := tx.BillOfMaterials.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
