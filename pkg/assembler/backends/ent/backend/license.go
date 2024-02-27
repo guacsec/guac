@@ -85,7 +85,7 @@ func getLicenses(ctx context.Context, client *ent.Client, filter model.LicenseSp
 	return results, nil
 }
 
-func upsertBulkLicense(ctx context.Context, client *ent.Tx, licenseInputs []*model.IDorLicenseInput) (*[]string, error) {
+func upsertBulkLicense(ctx context.Context, tx *ent.Tx, licenseInputs []*model.IDorLicenseInput) (*[]string, error) {
 	batches := chunk(licenseInputs, 100)
 	ids := make([]string, 0)
 
@@ -94,16 +94,11 @@ func upsertBulkLicense(ctx context.Context, client *ent.Tx, licenseInputs []*mod
 		for i, lic := range licenses {
 			l := lic
 			licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](l.LicenseInput, helpers.LicenseServerKey)), 5)
-			creates[i] = client.License.Create().
-				SetID(licenseID).
-				SetName(l.LicenseInput.Name).
-				SetInline(stringOrEmpty(l.LicenseInput.Inline)).
-				SetListVersion(stringOrEmpty(l.LicenseInput.ListVersion))
-
+			creates[i] = generateLicenseCreate(tx, &licenseID, l.LicenseInput)
 			ids = append(ids, licenseID.String())
 		}
 
-		err := client.License.CreateBulk(creates...).
+		err := tx.License.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(
 					license.FieldName,
@@ -121,14 +116,18 @@ func upsertBulkLicense(ctx context.Context, client *ent.Tx, licenseInputs []*mod
 	return &ids, nil
 }
 
-func upsertLicense(ctx context.Context, client *ent.Tx, spec model.LicenseInputSpec) (*string, error) {
-	licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](&spec, helpers.LicenseServerKey)), 5)
+func generateLicenseCreate(tx *ent.Tx, licenseID *uuid.UUID, licInput *model.LicenseInputSpec) *ent.LicenseCreate {
+	return tx.License.Create().
+		SetID(*licenseID).
+		SetName(licInput.Name).
+		SetInline(stringOrEmpty(licInput.Inline)).
+		SetListVersion(stringOrEmpty(licInput.ListVersion))
+}
 
-	licenseId, err := client.License.Create().
-		SetID(licenseID).
-		SetName(spec.Name).
-		SetInline(stringOrEmpty(spec.Inline)).
-		SetListVersion(stringOrEmpty(spec.ListVersion)).
+func upsertLicense(ctx context.Context, tx *ent.Tx, spec model.LicenseInputSpec) (*string, error) {
+	licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](&spec, helpers.LicenseServerKey)), 5)
+	insert := generateLicenseCreate(tx, &licenseID, &spec)
+	_, err := insert.
 		OnConflict(
 			sql.ConflictColumns(
 				license.FieldName,
@@ -142,9 +141,8 @@ func upsertLicense(ctx context.Context, client *ent.Tx, spec model.LicenseInputS
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert license node")
 		}
-		licenseId = licenseID
 	}
-	return ptrfrom.String(licenseId.String()), nil
+	return ptrfrom.String(licenseID.String()), nil
 }
 
 func licenseQuery(filter model.LicenseSpec) predicate.License {
