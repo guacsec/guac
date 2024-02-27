@@ -35,10 +35,9 @@ import (
 func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
 
 	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
-		client := ent.TxFromContext(ctx)
-		insert := client.CertifyVuln.Create()
+		tx := ent.TxFromContext(ctx)
 
-		columns := []string{
+		conflictColumns := []string{
 			certifyvuln.FieldPackageID,
 			certifyvuln.FieldVulnerabilityID,
 			certifyvuln.FieldCollector,
@@ -49,36 +48,14 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 			certifyvuln.FieldDbVersion,
 		}
 
-		if vulnerability.VulnerabilityNodeID == nil {
-			return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
-		}
-		vulnID, err := uuid.Parse(*vulnerability.VulnerabilityNodeID)
+		insert, err := generateCertifyVulnCreate(tx, &pkg, &vulnerability, &certifyVuln)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+			return nil, gqlerror.Errorf("generateCertifyVulnCreate :: %s", err)
 		}
-		insert.SetVulnerabilityID(vulnID)
-
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-		}
-
-		insert.
-			SetPackageID(pkgVersionID).
-			SetCollector(certifyVuln.Collector).
-			SetDbURI(certifyVuln.DbURI).
-			SetDbVersion(certifyVuln.DbVersion).
-			SetOrigin(certifyVuln.Origin).
-			SetScannerURI(certifyVuln.ScannerURI).
-			SetScannerVersion(certifyVuln.ScannerVersion).
-			SetTimeScanned(certifyVuln.TimeScanned)
 
 		if _, err := insert.
 			OnConflict(
-				sql.ConflictColumns(columns...),
+				sql.ConflictColumns(conflictColumns...),
 			).
 			Ignore().
 			ID(ctx); err != nil {
@@ -111,7 +88,49 @@ func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorP
 	return *ids, nil
 }
 
-func upsertBulkCertifyVuln(ctx context.Context, client *ent.Tx, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) (*[]string, error) {
+func generateCertifyVulnCreate(tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput) (*ent.CertifyVulnCreate, error) {
+
+	certifyVulnCreate := tx.CertifyVuln.Create()
+
+	// manage vulnerability
+	if vuln == nil {
+		return nil, fmt.Errorf("vulnerability must be specified for vex ingestion")
+	}
+	if vuln.VulnerabilityNodeID == nil {
+		return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
+	}
+	vulnID, err := uuid.Parse(*vuln.VulnerabilityNodeID)
+	if err != nil {
+		return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+	}
+	certifyVulnCreate.SetVulnerabilityID(vulnID)
+
+	// manage package or artifact
+	if pkg == nil {
+		return nil, Errorf("%v :: %s", "generateCertifyVulnCreate", "subject must be package")
+	}
+	if pkg.PackageVersionID == nil {
+		return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+	}
+	pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
+	if err != nil {
+		return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+	}
+	certifyVulnCreate.SetPackageID(pkgVersionID)
+
+	certifyVulnCreate.
+		SetCollector(certifyVuln.Collector).
+		SetDbURI(certifyVuln.DbURI).
+		SetDbVersion(certifyVuln.DbVersion).
+		SetOrigin(certifyVuln.Origin).
+		SetScannerURI(certifyVuln.ScannerURI).
+		SetScannerVersion(certifyVuln.ScannerVersion).
+		SetTimeScanned(certifyVuln.TimeScanned)
+
+	return certifyVulnCreate, nil
+}
+
+func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -131,37 +150,15 @@ func upsertBulkCertifyVuln(ctx context.Context, client *ent.Tx, pkgs []*model.ID
 	for _, vulns := range batches {
 		creates := make([]*ent.CertifyVulnCreate, len(vulns))
 		for i, vuln := range vulns {
-			creates[i] = client.CertifyVuln.Create().
-				SetCollector(vuln.Collector).
-				SetDbURI(vuln.DbURI).
-				SetDbVersion(vuln.DbVersion).
-				SetOrigin(vuln.Origin).
-				SetScannerURI(vuln.ScannerURI).
-				SetScannerVersion(vuln.ScannerVersion).
-				SetTimeScanned(vuln.TimeScanned)
-
-			if pkgs[index].PackageVersionID == nil {
-				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-			}
-			pkgVersionID, err := uuid.Parse(*pkgs[index].PackageVersionID)
+			var err error
+			creates[i], err = generateCertifyVulnCreate(tx, pkgs[index], vulnerabilities[index], vuln)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+				return nil, gqlerror.Errorf("generateCertifyVulnCreate :: %s", err)
 			}
-			creates[i].SetPackageID(pkgVersionID)
-
-			if vulnerabilities[index].VulnerabilityNodeID == nil {
-				return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
-			}
-			vulnID, err := uuid.Parse(*vulnerabilities[index].VulnerabilityNodeID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
-			}
-			creates[i].SetVulnerabilityID(vulnID)
-
 			index++
 		}
 
-		err := client.CertifyVuln.CreateBulk(creates...).
+		err := tx.CertifyVuln.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).

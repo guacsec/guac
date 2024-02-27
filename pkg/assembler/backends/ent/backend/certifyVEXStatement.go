@@ -112,7 +112,7 @@ func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.Pac
 
 func generateVexCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, vuln *model.IDorVulnerabilityInput, vexStatement *model.VexStatementInputSpec) (*ent.CertifyVexCreate, error) {
 
-	CertifyVexCreate := tx.CertifyVex.Create()
+	certifyVexCreate := tx.CertifyVex.Create()
 
 	// manage vulnerability
 	if vuln == nil {
@@ -125,7 +125,7 @@ func generateVexCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtif
 	if err != nil {
 		return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 	}
-	CertifyVexCreate.SetVulnerabilityID(vulnID)
+	certifyVexCreate.SetVulnerabilityID(vulnID)
 
 	// manage package or artifact
 	if pkg != nil {
@@ -136,7 +136,7 @@ func generateVexCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtif
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
-		CertifyVexCreate.SetPackageID(pkgVersionID)
+		certifyVexCreate.SetPackageID(pkgVersionID)
 
 	} else if art != nil {
 		if art.ArtifactID == nil {
@@ -146,13 +146,13 @@ func generateVexCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtif
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
-		CertifyVexCreate.SetArtifactID(artID)
+		certifyVexCreate.SetArtifactID(artID)
 
 	} else {
 		return nil, Errorf("%v :: %s", "generateVexCreate", "subject must be either a package or artifact")
 	}
 
-	CertifyVexCreate.
+	certifyVexCreate.
 		SetKnownSince(vexStatement.KnownSince.UTC()).
 		SetStatus(vexStatement.Status.String()).
 		SetStatement(vexStatement.Statement).
@@ -161,7 +161,7 @@ func generateVexCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtif
 		SetOrigin(vexStatement.Origin).
 		SetCollector(vexStatement.Collector)
 
-	return CertifyVexCreate, nil
+	return certifyVexCreate, nil
 }
 
 func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) (*[]string, error) {
