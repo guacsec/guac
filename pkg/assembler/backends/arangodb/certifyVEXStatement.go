@@ -734,7 +734,7 @@ func (c *arangoClient) certifyVexNeighbors(ctx context.Context, nodeID string, a
 		setVexMatchValues(arangoQueryBuilder, &model.CertifyVEXStatementSpec{ID: &nodeID}, values)
 		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyVex.packageID }")
 
-		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyScorecardNeighbors - package")
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyVexNeighbors - package")
 		if err != nil {
 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}
@@ -746,7 +746,7 @@ func (c *arangoClient) certifyVexNeighbors(ctx context.Context, nodeID string, a
 		setVexMatchValues(arangoQueryBuilder, &model.CertifyVEXStatementSpec{ID: &nodeID}, values)
 		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyVex.artifactID }")
 
-		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyScorecardNeighbors - package")
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyVexNeighbors - artifact")
 		if err != nil {
 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}
@@ -758,7 +758,7 @@ func (c *arangoClient) certifyVexNeighbors(ctx context.Context, nodeID string, a
 		setVexMatchValues(arangoQueryBuilder, &model.CertifyVEXStatementSpec{ID: &nodeID}, values)
 		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  certifyVex.vulnerabilityID }")
 
-		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyScorecardNeighbors - package")
+		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "certifyVexNeighbors - vulnerability")
 		if err != nil {
 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}
