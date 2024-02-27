@@ -117,9 +117,9 @@ func generateScorecardCreate(tx *ent.Tx, src *model.IDorSourceInput, scorecard *
 		return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 	}
 
-	certifyCreate := tx.CertifyScorecard.Create()
+	scorecardCreate := tx.CertifyScorecard.Create()
 
-	certifyCreate.
+	scorecardCreate.
 		SetSourceID(sourceID).
 		SetChecks(checks).
 		SetAggregateScore(scorecard.AggregateScore).
@@ -129,7 +129,7 @@ func generateScorecardCreate(tx *ent.Tx, src *model.IDorSourceInput, scorecard *
 		SetOrigin(scorecard.Origin).
 		SetCollector(scorecard.Collector)
 
-	return certifyCreate, nil
+	return scorecardCreate, nil
 }
 
 func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) (*[]string, error) {

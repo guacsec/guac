@@ -19,7 +19,9 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
+	"sort"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -97,7 +99,7 @@ func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArti
 	return *ids, nil
 }
 
-func upsertBulkSLSA(ctx context.Context, client *ent.Tx, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) (*[]string, error) {
+func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -116,55 +118,15 @@ func upsertBulkSLSA(ctx context.Context, client *ent.Tx, subjects []*model.IDorA
 		creates := make([]*ent.SLSAAttestationCreate, len(css))
 		for i, slsa := range css {
 			slsa := slsa
-			if builtByList[index].BuilderID == nil {
-				return nil, fmt.Errorf("BuilderID not specified in IDorBuilderInput")
-			}
-			buildID, err := uuid.Parse(*builtByList[index].BuilderID)
+			var err error
+			creates[i], err = generateSLSACreate(tx, subjects[index], builtFromList[index], builtByList[index], slsa)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from BuilderID failed with error: %w", err)
+				return nil, gqlerror.Errorf("generateSLSACreate :: %s", err)
 			}
-
-			if subjects[index].ArtifactID == nil {
-				return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-			}
-			subjectArtifactID, err := uuid.Parse(*subjects[index].ArtifactID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-			}
-
-			var builtFromIDs []string
-			for _, bf := range builtFromList[index] {
-				builtFromIDs = append(builtFromIDs, *bf.ArtifactID)
-			}
-
-			sortedBuildFromIDs := helper.SortAndRemoveDups(builtFromIDs)
-
-			var sortedBuildFromUUIDs []uuid.UUID
-			for _, sbfID := range sortedBuildFromIDs {
-				sbfUUID, err := uuid.Parse(sbfID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-				}
-				sortedBuildFromUUIDs = append(sortedBuildFromUUIDs, sbfUUID)
-			}
-
-			creates[i] = client.SLSAAttestation.Create().
-				SetBuiltFromHash(hashListOfSortedKeys(sortedBuildFromIDs)).
-				SetSubjectID(subjectArtifactID).
-				SetBuildType(slsa.BuildType).
-				SetBuiltByID(buildID).
-				SetCollector(slsa.Collector).
-				SetOrigin(slsa.Origin).
-				SetSlsaVersion(slsa.SlsaVersion).
-				SetSlsaPredicate(toSLSAInputPredicate(slsa.SlsaPredicate)).
-				SetNillableStartedOn(slsa.StartedOn).
-				SetNillableFinishedOn(slsa.FinishedOn).
-				AddBuiltFromIDs(sortedBuildFromUUIDs...)
-
 			index++
 		}
 
-		err := client.SLSAAttestation.CreateBulk(creates...).
+		err := tx.SLSAAttestation.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
@@ -178,8 +140,11 @@ func upsertBulkSLSA(ctx context.Context, client *ent.Tx, subjects []*model.IDorA
 	return &ids, nil
 }
 
-func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (*string, error) {
+func generateSLSACreate(tx *ent.Tx, subject *model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*ent.SLSAAttestationCreate, error) {
 
+	if builtBy == nil {
+		return nil, fmt.Errorf("builtBy not specified for SLSA")
+	}
 	if builtBy.BuilderID == nil {
 		return nil, fmt.Errorf("BuilderID not specified in IDorBuilderInput")
 	}
@@ -212,8 +177,18 @@ func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.IDorArtifactI
 		sortedBuildFromUUIDs = append(sortedBuildFromUUIDs, sbfUUID)
 	}
 
-	if _, err := client.SLSAAttestation.Create().
-		SetBuiltFromHash(hashListOfSortedKeys(sortedBuildFromIDs)).
+	builtFromHash := hashListOfSortedKeys(sortedBuildFromIDs)
+
+	slsaCreate := tx.SLSAAttestation.Create()
+
+	slsaID, err := guacSLSAKey(subject, builtFromHash, builtBy, slsa)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create slsa uuid with error: %w", err)
+	}
+
+	slsaCreate.
+		SetID(*slsaID).
+		SetBuiltFromHash(builtFromHash).
 		SetSubjectID(subjectArtifactID).
 		SetBuildType(slsa.BuildType).
 		SetBuiltByID(buildID).
@@ -223,7 +198,19 @@ func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.IDorArtifactI
 		SetSlsaPredicate(toSLSAInputPredicate(slsa.SlsaPredicate)).
 		SetNillableStartedOn(slsa.StartedOn).
 		SetNillableFinishedOn(slsa.FinishedOn).
-		AddBuiltFromIDs(sortedBuildFromUUIDs...).
+		AddBuiltFromIDs(sortedBuildFromUUIDs...)
+
+	return slsaCreate, nil
+}
+
+func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (*string, error) {
+
+	slsaCreate, err := generateSLSACreate(tx, &subject, builtFrom, &builtBy, &slsa)
+	if err != nil {
+		return nil, gqlerror.Errorf("generateSLSACreate :: %s", err)
+	}
+
+	if _, err := slsaCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				slsaattestation.FieldSubjectID,
@@ -291,4 +278,38 @@ func hashListOfSortedKeys(slc []string) string {
 
 	hash.Write(content.Bytes())
 	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
+func canonicalSLSAString(slsa model.SLSAInputSpec) string {
+
+	// To ensure consistency, always sort the checks by key
+	predicateMap := map[string]string{}
+	var keys []string
+	for _, kv := range slsa.SlsaPredicate {
+		predicateMap[kv.Key] = kv.Value
+		keys = append(keys, kv.Key)
+	}
+	sort.Strings(keys)
+	var predicate []string
+	for _, k := range keys {
+		predicate = append(predicate, k, predicateMap[k])
+	}
+
+	hash := sha1.New()
+	content := bytes.NewBuffer(nil)
+
+	for _, v := range predicate {
+		content.WriteString(v)
+	}
+
+	hash.Write(content.Bytes())
+
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", slsa.BuildType, fmt.Sprintf("%x", hash.Sum(nil)), slsa.SlsaVersion, slsa.StartedOn.UTC(), slsa.FinishedOn.UTC(), slsa.Origin, slsa.Collector)
+}
+
+func guacSLSAKey(subject *model.IDorArtifactInput, builtFromHash string, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*uuid.UUID, error) {
+	depIDString := fmt.Sprintf("%s::%s::%s::%s?", *subject.ArtifactID, builtFromHash, *builtBy.BuilderID, canonicalSLSAString(*slsa))
+
+	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
+	return &depID, nil
 }
