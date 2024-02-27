@@ -103,14 +103,7 @@ func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {
 	return hasmetadata.And(predicates...)
 }
 
-func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.HasMetadataInputSpec) (*string, error) {
-	insert := client.HasMetadata.Create().
-		SetKey(spec.Key).
-		SetValue(spec.Value).
-		SetTimestamp(spec.Timestamp.UTC()).
-		SetJustification(spec.Justification).
-		SetOrigin(spec.Origin).
-		SetCollector(spec.Collector)
+func upsertHasMetadata(ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.HasMetadataInputSpec) (*string, error) {
 
 	conflictColumns := []string{
 		hasmetadata.FieldKey,
@@ -123,14 +116,6 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 
 	switch {
 	case subject.Artifact != nil:
-		if subject.Artifact.ArtifactID == nil {
-			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-		}
-		artID, err := uuid.Parse(*subject.Artifact.ArtifactID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-		}
-		insert.SetArtifactID(artID)
 		conflictColumns = append(conflictColumns, hasmetadata.FieldArtifactID)
 		conflictWhere = sql.And(
 			sql.NotNull(hasmetadata.FieldArtifactID),
@@ -141,14 +126,6 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 
 	case subject.Package != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			if subject.Package.PackageVersionID == nil {
-				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-			}
-			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-			}
-			insert.SetPackageVersionID(pkgVersionID)
 			conflictColumns = append(conflictColumns, hasmetadata.FieldPackageVersionID)
 			conflictWhere = sql.And(
 				sql.IsNull(hasmetadata.FieldArtifactID),
@@ -157,14 +134,6 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 				sql.IsNull(hasmetadata.FieldSourceID),
 			)
 		} else {
-			if subject.Package.PackageNameID == nil {
-				return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-			}
-			pkgNameID, err := uuid.Parse(*subject.Package.PackageNameID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
-			}
-			insert.SetAllVersionsID(pkgNameID)
 			conflictColumns = append(conflictColumns, hasmetadata.FieldPackageNameID)
 			conflictWhere = sql.And(
 				sql.IsNull(hasmetadata.FieldArtifactID),
@@ -175,14 +144,6 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 		}
 
 	case subject.Source != nil:
-		if subject.Source.SourceNameID == nil {
-			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-		}
-		sourceID, err := uuid.Parse(*subject.Source.SourceNameID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
-		}
-		insert.SetSourceID(sourceID)
 		conflictColumns = append(conflictColumns, hasmetadata.FieldSourceID)
 		conflictWhere = sql.And(
 			sql.IsNull(hasmetadata.FieldArtifactID),
@@ -192,13 +153,17 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 		)
 	}
 
-	_, err := insert.OnConflict(
+	insert, err := generateHasMetadataCreate(tx, subject.Package, subject.Source, subject.Artifact, pkgMatchType, &spec)
+	if err != nil {
+		return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
+	}
+
+	if _, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
 		DoNothing().
-		ID(ctx)
-	if err != nil {
+		ID(ctx); err != nil {
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert HasMetadata node")
 		}
@@ -207,7 +172,64 @@ func upsertHasMetadata(ctx context.Context, client *ent.Tx, subject model.Packag
 	return ptrfrom.String(""), nil
 }
 
-func upsertBulkHasMetadata(ctx context.Context, client *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) (*[]string, error) {
+func generateHasMetadataCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, pkgMatchType *model.MatchFlags,
+	hm *model.HasMetadataInputSpec) (*ent.HasMetadataCreate, error) {
+
+	hasMetadataCreate := tx.HasMetadata.Create()
+
+	hasMetadataCreate.
+		SetKey(hm.Key).
+		SetValue(hm.Value).
+		SetTimestamp(hm.Timestamp.UTC()).
+		SetJustification(hm.Justification).
+		SetOrigin(hm.Origin).
+		SetCollector(hm.Collector)
+
+	switch {
+	case art != nil:
+		if art.ArtifactID == nil {
+			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+		}
+		artID, err := uuid.Parse(*art.ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		}
+		hasMetadataCreate.SetArtifactID(artID)
+	case pkg != nil:
+		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
+			if pkg.PackageVersionID == nil {
+				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+			}
+			pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+			hasMetadataCreate.SetPackageVersionID(pkgVersionID)
+		} else {
+			if pkg.PackageNameID == nil {
+				return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
+			}
+			pkgNameID, err := uuid.Parse(*pkg.PackageNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+			}
+			hasMetadataCreate.SetAllVersionsID(pkgNameID)
+		}
+
+	case src != nil:
+		if src.SourceNameID == nil {
+			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+		}
+		sourceID, err := uuid.Parse(*src.SourceNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		}
+		hasMetadataCreate.SetSourceID(sourceID)
+	}
+	return hasMetadataCreate, nil
+}
+
+func upsertBulkHasMetadata(ctx context.Context, tx *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -264,62 +286,28 @@ func upsertBulkHasMetadata(ctx context.Context, client *ent.Tx, subjects model.P
 	for _, hms := range batches {
 		creates := make([]*ent.HasMetadataCreate, len(hms))
 		for i, hm := range hms {
-			creates[i] = client.HasMetadata.Create().
-				SetKey(hm.Key).
-				SetValue(hm.Value).
-				SetTimestamp(hm.Timestamp.UTC()).
-				SetJustification(hm.Justification).
-				SetOrigin(hm.Origin).
-				SetCollector(hm.Collector)
-
+			var err error
 			switch {
 			case len(subjects.Artifacts) > 0:
-				if subjects.Artifacts[index].ArtifactID == nil {
-					return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-				}
-				artID, err := uuid.Parse(*subjects.Artifacts[index].ArtifactID)
+				creates[i], err = generateHasMetadataCreate(tx, nil, nil, subjects.Artifacts[index], pkgMatchType, hm)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+					return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 				}
-				creates[i].SetArtifactID(artID)
-
 			case len(subjects.Packages) > 0:
-				if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-					if subjects.Packages[index].PackageVersionID == nil {
-						return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-					}
-					pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
-					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
-					}
-					creates[i].SetPackageVersionID(pkgVersionID)
-
-				} else {
-					if subjects.Packages[index].PackageNameID == nil {
-						return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-					}
-					pkgNameID, err := uuid.Parse(*subjects.Packages[index].PackageNameID)
-					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
-					}
-					creates[i].SetAllVersionsID(pkgNameID)
-
+				creates[i], err = generateHasMetadataCreate(tx, subjects.Packages[index], nil, nil, pkgMatchType, hm)
+				if err != nil {
+					return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 				}
 			case len(subjects.Sources) > 0:
-				if subjects.Sources[index].SourceNameID == nil {
-					return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-				}
-				sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
+				creates[i], err = generateHasMetadataCreate(tx, nil, subjects.Sources[index], nil, pkgMatchType, hm)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+					return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 				}
-				creates[i].SetSourceID(sourceID)
-
 			}
 			index++
 		}
 
-		err := client.HasMetadata.CreateBulk(creates...).
+		err := tx.HasMetadata.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
