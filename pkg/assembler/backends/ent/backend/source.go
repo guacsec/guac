@@ -103,7 +103,7 @@ func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorP
 	return *ids, nil
 }
 
-func upsertBulkHasSourceAts(ctx context.Context, client *ent.Tx, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) (*[]string, error) {
+func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -129,45 +129,17 @@ func upsertBulkHasSourceAts(ctx context.Context, client *ent.Tx, pkgs []*model.I
 	for _, hsas := range batches {
 		creates := make([]*ent.HasSourceAtCreate, len(hsas))
 		for i, hsa := range hsas {
-			creates[i] = client.HasSourceAt.Create().
-				SetCollector(hsa.Collector).
-				SetOrigin(hsa.Origin).
-				SetJustification(hsa.Justification).
-				SetKnownSince(hsa.KnownSince.UTC())
+			hsa := hsa
+			var err error
 
-			if sources[index].SourceNameID == nil {
-				return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-			}
-			sourceID, err := uuid.Parse(*sources[index].SourceNameID)
+			creates[i], err = generateHasSourceAtCreate(tx, pkgs[index], sources[index], *pkgMatchType, hsa)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
-			}
-			creates[i].SetSourceID(sourceID)
-
-			if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-				if pkgs[index].PackageVersionID == nil {
-					return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-				}
-				pkgVersionID, err := uuid.Parse(*pkgs[index].PackageVersionID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
-				}
-				creates[i].SetNillablePackageVersionID(&pkgVersionID)
-
-			} else {
-				if pkgs[index].PackageNameID == nil {
-					return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-				}
-				pkgNameID, err := uuid.Parse(*pkgs[index].PackageNameID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
-				}
-				creates[i].SetNillableAllVersionsID(&pkgNameID)
+				return nil, gqlerror.Errorf("generateHasSourceAtCreate :: %s", err)
 			}
 			index++
 		}
 
-		err := client.HasSourceAt.CreateBulk(creates...).
+		err := tx.HasSourceAt.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
@@ -182,16 +154,56 @@ func upsertBulkHasSourceAts(ctx context.Context, client *ent.Tx, pkgs []*model.I
 	return &ids, nil
 }
 
-func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, spec model.HasSourceAtInputSpec) (*string, error) {
+func generateHasSourceAtCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, pkgMatchType model.MatchFlags, hs *model.HasSourceAtInputSpec) (*ent.HasSourceAtCreate, error) {
 
-	if source.SourceNameID == nil {
+	if src != nil {
+		return nil, fmt.Errorf("source must be specified for hasSourceAt")
+	}
+	if src.SourceNameID == nil {
 		return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
 	}
-	sourceID, err := uuid.Parse(*source.SourceNameID)
+	sourceID, err := uuid.Parse(*src.SourceNameID)
 	if err != nil {
 		return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 	}
 
+	hasSourceAtCreate := tx.HasSourceAt.Create()
+
+	hasSourceAtCreate.
+		SetCollector(hs.Collector).
+		SetOrigin(hs.Origin).
+		SetJustification(hs.Justification).
+		SetKnownSince(hs.KnownSince.UTC()).
+		SetSourceID(sourceID)
+
+	if pkg != nil {
+		return nil, fmt.Errorf("package must be specified for hasSourceAt")
+	}
+	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
+		if pkg.PackageNameID == nil {
+			return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
+		}
+		pkgNameID, err := uuid.Parse(*pkg.PackageNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+		}
+		hasSourceAtCreate.SetNillableAllVersionsID(&pkgNameID)
+
+	} else {
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		}
+		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+		}
+		hasSourceAtCreate.SetNillablePackageVersionID(&pkgVersionID)
+	}
+
+	return hasSourceAtCreate, nil
+}
+
+func upsertHasSourceAt(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, spec model.HasSourceAtInputSpec) (*string, error) {
 	conflictColumns := []string{
 		hassourceat.FieldSourceID,
 		hassourceat.FieldJustification,
@@ -202,37 +214,18 @@ func upsertHasSourceAt(ctx context.Context, client *ent.Tx, pkg model.IDorPkgInp
 	// conflictWhere MUST match the IndexWhere() defined on the index we plan to use for this query
 	var conflictWhere *sql.Predicate
 
-	insert := client.HasSourceAt.Create().
-		SetCollector(spec.Collector).
-		SetOrigin(spec.Origin).
-		SetJustification(spec.Justification).
-		SetKnownSince(spec.KnownSince.UTC()).
-		SetSourceID(sourceID)
-
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		if pkg.PackageNameID == nil {
-			return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-		}
-		pkgNameID, err := uuid.Parse(*pkg.PackageNameID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
-		}
-		insert.SetNillableAllVersionsID(&pkgNameID)
 		conflictColumns = append(conflictColumns, hassourceat.FieldPackageNameID)
 		conflictWhere = sql.And(sql.IsNull(hassourceat.FieldPackageVersionID), sql.NotNull(hassourceat.FieldPackageNameID))
 	} else {
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
-		}
-		insert.SetNillablePackageVersionID(&pkgVersionID)
 		conflictColumns = append(conflictColumns, hassourceat.FieldPackageVersionID)
 		conflictWhere = sql.And(sql.NotNull(hassourceat.FieldPackageVersionID), sql.IsNull(hassourceat.FieldPackageNameID))
 	}
 
+	insert, err := generateHasSourceAtCreate(tx, &pkg, &source, pkgMatchType, &spec)
+	if err != nil {
+		return nil, gqlerror.Errorf("generateHasSourceAtCreate :: %s", err)
+	}
 	id, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
