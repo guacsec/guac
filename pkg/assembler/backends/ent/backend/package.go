@@ -99,7 +99,7 @@ func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgIn
 
 func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
 	pkgVersionID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.PackageIDs, error) {
-		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), *pkg.PackageInput)
+		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), pkg)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to upsert package")
 		}
@@ -112,7 +112,25 @@ func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) 
 	return pkgVersionID, nil
 }
 
-func upsertBulkPackage(ctx context.Context, client *ent.Tx, pkgInputs []*model.IDorPkgInput) (*[]model.PackageIDs, error) {
+func generatePackageNameCreate(tx *ent.Tx, pkgNameID *uuid.UUID, pkgInput *model.IDorPkgInput) *ent.PackageNameCreate {
+	return tx.PackageName.Create().
+		SetID(*pkgNameID).
+		SetType(pkgInput.PackageInput.Type).
+		SetNamespace(stringOrEmpty(pkgInput.PackageInput.Namespace)).
+		SetName(pkgInput.PackageInput.Name)
+}
+
+func generatePackageVersionCreate(tx *ent.Tx, pkgVersionID *uuid.UUID, pkgNameID *uuid.UUID, pkgInput *model.IDorPkgInput) *ent.PackageVersionCreate {
+	return tx.PackageVersion.Create().
+		SetID(*pkgVersionID).
+		SetNameID(*pkgNameID).
+		SetNillableVersion(pkgInput.PackageInput.Version).
+		SetSubpath(ptrWithDefault(pkgInput.PackageInput.Subpath, "")).
+		SetQualifiers(normalizeInputQualifiers(pkgInput.PackageInput.Qualifiers)).
+		SetHash(versionHashFromInputSpec(*pkgInput.PackageInput))
+}
+
+func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorPkgInput) (*[]model.PackageIDs, error) {
 	batches := chunk(pkgInputs, 100)
 	pkgNameIDs := make([]string, 0)
 	pkgVersionIDs := make([]string, 0)
@@ -127,25 +145,14 @@ func upsertBulkPackage(ctx context.Context, client *ent.Tx, pkgInputs []*model.I
 			pkgNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.NameId), 5)
 			pkgVersionID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.VersionId), 5)
 
-			pkgNameCreates[i] = client.PackageName.Create().
-				SetID(pkgNameID).
-				SetType(pkgInput.PackageInput.Type).
-				SetNamespace(stringOrEmpty(pkgInput.PackageInput.Namespace)).
-				SetName(pkgInput.PackageInput.Name)
-
-			pkgVersionCreates[i] = client.PackageVersion.Create().
-				SetID(pkgVersionID).
-				SetNameID(pkgNameID).
-				SetNillableVersion(pkgInput.PackageInput.Version).
-				SetSubpath(ptrWithDefault(pkgInput.PackageInput.Subpath, "")).
-				SetQualifiers(normalizeInputQualifiers(pkgInput.PackageInput.Qualifiers)).
-				SetHash(versionHashFromInputSpec(*pkgInput.PackageInput))
+			pkgNameCreates[i] = generatePackageNameCreate(tx, &pkgNameID, pkgInput)
+			pkgVersionCreates[i] = generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, pkgInput)
 
 			pkgNameIDs = append(pkgNameIDs, pkgNameID.String())
 			pkgVersionIDs = append(pkgVersionIDs, pkgVersionID.String())
 		}
 
-		if err := client.PackageName.CreateBulk(pkgNameCreates...).
+		if err := tx.PackageName.CreateBulk(pkgNameCreates...).
 			OnConflict(
 				sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType),
 			).
@@ -155,7 +162,7 @@ func upsertBulkPackage(ctx context.Context, client *ent.Tx, pkgInputs []*model.I
 			return nil, err
 		}
 
-		if err := client.PackageVersion.CreateBulk(pkgVersionCreates...).
+		if err := tx.PackageVersion.CreateBulk(pkgVersionCreates...).
 			OnConflict(
 				sql.ConflictColumns(
 					packageversion.FieldHash,
@@ -182,16 +189,14 @@ func upsertBulkPackage(ctx context.Context, client *ent.Tx, pkgInputs []*model.I
 
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
-func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
-	pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](&pkg, helpers.PkgServerKey)
+func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
+	pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg.PackageInput, helpers.PkgServerKey)
 	pkgNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.NameId), 5)
 	pkgVersionID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.VersionId), 5)
 
-	nameID, err := client.PackageName.Create().
-		SetID(pkgNameID).
-		SetType(pkg.Type).
-		SetNamespace(valueOrDefault(pkg.Namespace, "")).
-		SetName(pkg.Name).
+	pkgNameCreate := generatePackageNameCreate(tx, &pkgNameID, &pkg)
+
+	nameID, err := pkgNameCreate.
 		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType)).
 		DoNothing().
 		ID(ctx)
@@ -202,13 +207,9 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 		nameID = pkgNameID
 	}
 
-	id, err := client.PackageVersion.Create().
-		SetID(pkgVersionID).
-		SetNameID(nameID).
-		SetNillableVersion(pkg.Version).
-		SetSubpath(ptrWithDefault(pkg.Subpath, "")).
-		SetQualifiers(normalizeInputQualifiers(pkg.Qualifiers)).
-		SetHash(versionHashFromInputSpec(pkg)).
+	pkgVersionCreate := generatePackageVersionCreate(tx, &pkgNameID, &pkgVersionID, &pkg)
+
+	id, err := pkgVersionCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				packageversion.FieldHash,

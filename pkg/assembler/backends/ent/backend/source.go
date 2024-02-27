@@ -283,7 +283,7 @@ func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.IDorSou
 
 func (b *EntBackend) IngestSource(ctx context.Context, source model.IDorSourceInput) (*model.SourceIDs, error) {
 	sourceNameID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.SourceIDs, error) {
-		return upsertSource(ctx, ent.TxFromContext(ctx), *source.SourceInput)
+		return upsertSource(ctx, ent.TxFromContext(ctx), source)
 	})
 	if err != nil {
 		return nil, err
@@ -292,7 +292,7 @@ func (b *EntBackend) IngestSource(ctx context.Context, source model.IDorSourceIn
 	return sourceNameID, nil
 }
 
-func upsertBulkSource(ctx context.Context, client *ent.Tx, srcInputs []*model.IDorSourceInput) (*[]model.SourceIDs, error) {
+func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSourceInput) (*[]model.SourceIDs, error) {
 	batches := chunk(srcInputs, 100)
 	srcNameIDs := make([]string, 0)
 
@@ -304,18 +304,11 @@ func upsertBulkSource(ctx context.Context, client *ent.Tx, srcInputs []*model.ID
 			srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](s.SourceInput, helpers.SrcServerKey)
 			srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
 
-			srcNameCreates[i] = client.SourceName.Create().
-				SetID(srcNameID).
-				SetType(s.SourceInput.Type).
-				SetNamespace(s.SourceInput.Namespace).
-				SetName(s.SourceInput.Name).
-				SetTag(stringOrEmpty(s.SourceInput.Tag)).
-				SetCommit(stringOrEmpty(s.SourceInput.Commit))
-
+			srcNameCreates[i] = generateSourceNameCreate(tx, &srcNameID, s)
 			srcNameIDs = append(srcNameIDs, srcNameID.String())
 		}
 
-		if err := client.SourceName.CreateBulk(srcNameCreates...).
+		if err := tx.SourceName.CreateBulk(srcNameCreates...).
 			OnConflict(
 				sql.ConflictColumns(
 					sourcename.FieldType,
@@ -342,18 +335,21 @@ func upsertBulkSource(ctx context.Context, client *ent.Tx, srcInputs []*model.ID
 	return &collectedSrcIDs, nil
 }
 
-func upsertSource(ctx context.Context, client *ent.Tx, src model.SourceInputSpec) (*model.SourceIDs, error) {
-	srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](&src, helpers.SrcServerKey)
+func generateSourceNameCreate(tx *ent.Tx, srcNameID *uuid.UUID, srcInput *model.IDorSourceInput) *ent.SourceNameCreate {
+	return tx.SourceName.Create().
+		SetID(*srcNameID).
+		SetType(srcInput.SourceInput.Type).
+		SetNamespace(srcInput.SourceInput.Namespace).
+		SetName(srcInput.SourceInput.Name).
+		SetTag(stringOrEmpty(srcInput.SourceInput.Tag)).
+		SetCommit(stringOrEmpty(srcInput.SourceInput.Commit))
+}
+
+func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*model.SourceIDs, error) {
+	srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](src.SourceInput, helpers.SrcServerKey)
 	srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
 
-	create := client.SourceName.Create().
-		SetID(srcNameID).
-		SetType(src.Type).
-		SetNamespace(src.Namespace).
-		SetName(src.Name).
-		SetTag(stringOrEmpty(src.Tag)).
-		SetCommit(stringOrEmpty(src.Commit))
-
+	create := generateSourceNameCreate(tx, &srcNameID, &src)
 	_, err := create.
 		OnConflict(
 			sql.ConflictColumns(
