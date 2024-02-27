@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"crypto/sha256"
 	stdsql "database/sql"
 	"fmt"
 	"sort"
@@ -74,7 +75,7 @@ func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgI
 	return *ids, nil
 }
 
-func upsertBulkPkgEquals(ctx context.Context, client *ent.Tx, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) (*[]string, error) {
+func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -91,33 +92,16 @@ func upsertBulkPkgEquals(ctx context.Context, client *ent.Tx, pkgs []*model.IDor
 		creates := make([]*ent.PkgEqualCreate, len(pes))
 		for i, pe := range pes {
 			pe := pe
-			sortedPkgs := []model.IDorPkgInput{*pkgs[index], *otherPackages[index]}
+			var err error
 
-			sort.SliceStable(sortedPkgs, func(i, j int) bool { return *sortedPkgs[i].PackageVersionID < *sortedPkgs[j].PackageVersionID })
-
-			var sortedPkgIDs []uuid.UUID
-			for _, pkg := range sortedPkgs {
-				if pkg.PackageVersionID == nil {
-					return nil, fmt.Errorf("PackageVersionID not specified in IDorPkgInput")
-				}
-				pkgID, err := uuid.Parse(*pkg.PackageVersionID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
-				}
-				sortedPkgIDs = append(sortedPkgIDs, pkgID)
+			creates[i], err = generatePkgEqualCreate(tx, pkgs[index], otherPackages[index], pe)
+			if err != nil {
+				return nil, gqlerror.Errorf("generatePkgEqualCreate :: %s", err)
 			}
-
-			creates[i] = client.PkgEqual.Create().
-				AddPackageIDs(sortedPkgIDs...).
-				SetPackagesHash(hashPackages(sortedPkgs)).
-				SetCollector(pe.Collector).
-				SetJustification(pe.Justification).
-				SetOrigin(pe.Origin)
-
 			index++
 		}
 
-		err := client.PkgEqual.CreateBulk(creates...).
+		err := tx.PkgEqual.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
@@ -130,9 +114,11 @@ func upsertBulkPkgEquals(ctx context.Context, client *ent.Tx, pkgs []*model.IDor
 	return &ids, nil
 }
 
-func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.IDorPkgInput, pkgB model.IDorPkgInput, spec model.PkgEqualInputSpec) (*string, error) {
+func generatePkgEqualCreate(tx *ent.Tx, pkgA *model.IDorPkgInput, pkgB *model.IDorPkgInput, pkgEqualInput *model.PkgEqualInputSpec) (*ent.PkgEqualCreate, error) {
 
-	sortedPkgs := []model.IDorPkgInput{pkgA, pkgB}
+	pkgEqalCreate := tx.PkgEqual.Create()
+
+	sortedPkgs := []model.IDorPkgInput{*pkgA, *pkgB}
 
 	sort.SliceStable(sortedPkgs, func(i, j int) bool { return *sortedPkgs[i].PackageVersionID < *sortedPkgs[j].PackageVersionID })
 
@@ -148,12 +134,30 @@ func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.IDorPkgI
 		sortedPkgIDs = append(sortedPkgIDs, pkgID)
 	}
 
-	_, err := client.PkgEqual.Create().
+	sortedPkgHash := hashPackages(sortedPkgs)
+	pkgEqualID, err := guacPkgEqualKey(sortedPkgHash, pkgEqualInput)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create pkgEqual uuid with error: %w", err)
+	}
+
+	pkgEqalCreate.
+		SetID(*pkgEqualID).
 		AddPackageIDs(sortedPkgIDs...).
-		SetPackagesHash(hashPackages(sortedPkgs)).
-		SetCollector(spec.Collector).
-		SetJustification(spec.Justification).
-		SetOrigin(spec.Origin).
+		SetPackagesHash(sortedPkgHash).
+		SetCollector(pkgEqualInput.Collector).
+		SetJustification(pkgEqualInput.Justification).
+		SetOrigin(pkgEqualInput.Origin)
+
+	return pkgEqalCreate, nil
+}
+
+func upsertPackageEqual(ctx context.Context, tx *ent.Tx, pkgA model.IDorPkgInput, pkgB model.IDorPkgInput, spec model.PkgEqualInputSpec) (*string, error) {
+
+	pkgEqualCreate, err := generatePkgEqualCreate(tx, &pkgA, &pkgB, &spec)
+	if err != nil {
+		return nil, gqlerror.Errorf("generatePkgEqualCreate :: %s", err)
+	}
+	if _, err := pkgEqualCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				pkgequal.FieldPackagesHash,
@@ -163,8 +167,7 @@ func upsertPackageEqual(ctx context.Context, client *ent.Tx, pkgA model.IDorPkgI
 			),
 		).
 		DoNothing().
-		ID(ctx)
-	if err != nil {
+		ID(ctx); err != nil {
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsertPackageEqual")
 		}
@@ -231,4 +234,19 @@ func hashPackages(slc []model.IDorPkgInput) string {
 
 	hash.Write(content.Bytes())
 	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
+func canonicalPkgEqualString(pe *model.PkgEqualInputSpec) string {
+	return fmt.Sprintf("%s::%s::%s", pe.Justification, pe.Origin, pe.Collector)
+}
+
+// guacPkgEqualKey generates an uuid based on the hash of the inputspec and inputs. pkgEqual ID has to be set for bulk ingestion
+// when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
+// a new ID for pkgEqual node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
+// "Default" func to generate a new UUID
+func guacPkgEqualKey(sortedPkgHash string, peInput *model.PkgEqualInputSpec) (*uuid.UUID, error) {
+	heIDString := fmt.Sprintf("%s::%s?", sortedPkgHash, canonicalPkgEqualString(peInput))
+
+	heID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(heIDString), 5)
+	return &heID, nil
 }
