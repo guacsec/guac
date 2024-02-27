@@ -116,6 +116,13 @@ func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgI
 
 func generatePkgEqualCreate(tx *ent.Tx, pkgA *model.IDorPkgInput, pkgB *model.IDorPkgInput, pkgEqualInput *model.PkgEqualInputSpec) (*ent.PkgEqualCreate, error) {
 
+	if pkgA == nil {
+		return nil, fmt.Errorf("pkgA must be specified for pkgEqual")
+	}
+	if pkgB == nil {
+		return nil, fmt.Errorf("pkgB must be specified for pkgEqual")
+	}
+
 	pkgEqalCreate := tx.PkgEqual.Create()
 
 	sortedPkgs := []model.IDorPkgInput{*pkgA, *pkgB}
@@ -245,8 +252,8 @@ func canonicalPkgEqualString(pe *model.PkgEqualInputSpec) string {
 // a new ID for pkgEqual node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
 // "Default" func to generate a new UUID
 func guacPkgEqualKey(sortedPkgHash string, peInput *model.PkgEqualInputSpec) (*uuid.UUID, error) {
-	heIDString := fmt.Sprintf("%s::%s?", sortedPkgHash, canonicalPkgEqualString(peInput))
+	peIDString := fmt.Sprintf("%s::%s?", sortedPkgHash, canonicalPkgEqualString(peInput))
 
-	heID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(heIDString), 5)
-	return &heID, nil
+	peID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(peIDString), 5)
+	return &peID, nil
 }

@@ -307,6 +307,10 @@ func canonicalSLSAString(slsa model.SLSAInputSpec) string {
 	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", slsa.BuildType, fmt.Sprintf("%x", hash.Sum(nil)), slsa.SlsaVersion, slsa.StartedOn.UTC(), slsa.FinishedOn.UTC(), slsa.Origin, slsa.Collector)
 }
 
+// guacSLSAKey generates an uuid based on the hash of the inputspec and inputs. slsa ID has to be set for bulk ingestion
+// when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
+// a new ID for slsa node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
+// "Default" func to generate a new UUID
 func guacSLSAKey(subject *model.IDorArtifactInput, builtFromHash string, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*uuid.UUID, error) {
 	depIDString := fmt.Sprintf("%s::%s::%s::%s?", *subject.ArtifactID, builtFromHash, *builtBy.BuilderID, canonicalSLSAString(*slsa))
 

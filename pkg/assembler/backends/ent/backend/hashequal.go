@@ -105,7 +105,7 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 		for i, he := range hes {
 			he := he
 			var err error
-			creates[i], err = generateHashEqualCreate(tx, he, artifacts[index], otherArtifacts[index])
+			creates[i], err = generateHashEqualCreate(tx, artifacts[index], otherArtifacts[index], he)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateHashEqualCreate :: %s", err)
 			}
@@ -125,7 +125,15 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 	return &ids, nil
 }
 
-func generateHashEqualCreate(tx *ent.Tx, he *model.HashEqualInputSpec, artifactA *model.IDorArtifactInput, artifactB *model.IDorArtifactInput) (*ent.HashEqualCreate, error) {
+func generateHashEqualCreate(tx *ent.Tx, artifactA *model.IDorArtifactInput, artifactB *model.IDorArtifactInput, he *model.HashEqualInputSpec) (*ent.HashEqualCreate, error) {
+
+	if artifactA == nil {
+		return nil, fmt.Errorf("artifactA must be specified for hashEqual")
+	}
+	if artifactB == nil {
+		return nil, fmt.Errorf("artifactB must be specified for hashEqual")
+	}
+
 	sortedArtifacts := []model.IDorArtifactInput{*artifactA, *artifactB}
 
 	sort.SliceStable(sortedArtifacts, func(i, j int) bool { return *sortedArtifacts[i].ArtifactID < *sortedArtifacts[j].ArtifactID })
@@ -162,7 +170,7 @@ func generateHashEqualCreate(tx *ent.Tx, he *model.HashEqualInputSpec, artifactA
 
 func upsertHashEqual(ctx context.Context, tx *ent.Tx, artifactA model.IDorArtifactInput, artifactB model.IDorArtifactInput, spec model.HashEqualInputSpec) (*string, error) {
 
-	hashEqualCreate, err := generateHashEqualCreate(tx, &spec, &artifactA, &artifactB)
+	hashEqualCreate, err := generateHashEqualCreate(tx, &artifactA, &artifactB, &spec)
 	if err != nil {
 		return nil, gqlerror.Errorf("generateHashEqualCreate :: %s", err)
 	}

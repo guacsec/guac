@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"crypto/sha256"
 	stdsql "database/sql"
 	"fmt"
 	"sort"
@@ -99,7 +100,7 @@ func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.ID
 	return *id, nil
 }
 
-func upsertBulkVulnEquals(ctx context.Context, client *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) (*[]string, error) {
+func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -116,33 +117,16 @@ func upsertBulkVulnEquals(ctx context.Context, client *ent.Tx, vulnerabilities [
 		creates := make([]*ent.VulnEqualCreate, len(ves))
 		for i, ve := range ves {
 			ve := ve
-			sortedVulns := []model.IDorVulnerabilityInput{*vulnerabilities[index], *otherVulnerabilities[index]}
+			var err error
 
-			sort.SliceStable(sortedVulns, func(i, j int) bool { return *sortedVulns[i].VulnerabilityNodeID < *sortedVulns[j].VulnerabilityNodeID })
-
-			var sortedVulnIDs []uuid.UUID
-			for _, vuln := range sortedVulns {
-				if vuln.VulnerabilityNodeID == nil {
-					return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
-				}
-				vulnID, err := uuid.Parse(*vuln.VulnerabilityNodeID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
-				}
-				sortedVulnIDs = append(sortedVulnIDs, vulnID)
+			creates[i], err = generateVulnEqualCreate(tx, vulnerabilities[index], otherVulnerabilities[index], ve)
+			if err != nil {
+				return nil, gqlerror.Errorf("generateVulnEqualCreate :: %s", err)
 			}
-
-			creates[i] = client.VulnEqual.Create().
-				AddVulnerabilityIDIDs(sortedVulnIDs...).
-				SetVulnerabilitiesHash(hashVulnerabilities(sortedVulns)).
-				SetCollector(ve.Collector).
-				SetJustification(ve.Justification).
-				SetOrigin(ve.Origin)
-
 			index++
 		}
 
-		err := client.VulnEqual.CreateBulk(creates...).
+		err := tx.VulnEqual.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
@@ -155,9 +139,16 @@ func upsertBulkVulnEquals(ctx context.Context, client *ent.Tx, vulnerabilities [
 	return &ids, nil
 }
 
-func upsertVulnEquals(ctx context.Context, client *ent.Tx, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqualInput model.VulnEqualInputSpec) (*string, error) {
+func generateVulnEqualCreate(tx *ent.Tx, vulnerability *model.IDorVulnerabilityInput, otherVulnerability *model.IDorVulnerabilityInput, ve *model.VulnEqualInputSpec) (*ent.VulnEqualCreate, error) {
 
-	sortedVulns := []model.IDorVulnerabilityInput{vulnerability, otherVulnerability}
+	if vulnerability == nil {
+		return nil, fmt.Errorf("vulnerability must be specified for vulnEqual")
+	}
+	if otherVulnerability == nil {
+		return nil, fmt.Errorf("otherVulnerability must be specified for vulnEqual")
+	}
+
+	sortedVulns := []model.IDorVulnerabilityInput{*vulnerability, *otherVulnerability}
 
 	sort.SliceStable(sortedVulns, func(i, j int) bool { return *sortedVulns[i].VulnerabilityNodeID < *sortedVulns[j].VulnerabilityNodeID })
 
@@ -173,12 +164,32 @@ func upsertVulnEquals(ctx context.Context, client *ent.Tx, vulnerability model.I
 		sortedVulnIDs = append(sortedVulnIDs, vulnID)
 	}
 
-	_, err := client.VulnEqual.Create().
+	sortedVulnerabilitiesHash := hashVulnerabilities(sortedVulns)
+
+	vulnEqualID, err := guacVulnEqualKey(sortedVulnerabilitiesHash, ve)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vulnEqual uuid with error: %w", err)
+	}
+
+	vulnEqualCreate := tx.VulnEqual.Create().
+		SetID(*vulnEqualID).
 		AddVulnerabilityIDIDs(sortedVulnIDs...).
-		SetVulnerabilitiesHash(hashVulnerabilities(sortedVulns)).
-		SetCollector(vulnEqualInput.Collector).
-		SetJustification(vulnEqualInput.Justification).
-		SetOrigin(vulnEqualInput.Origin).
+		SetVulnerabilitiesHash(sortedVulnerabilitiesHash).
+		SetCollector(ve.Collector).
+		SetJustification(ve.Justification).
+		SetOrigin(ve.Origin)
+
+	return vulnEqualCreate, nil
+}
+
+func upsertVulnEquals(ctx context.Context, tx *ent.Tx, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqualInput model.VulnEqualInputSpec) (*string, error) {
+
+	vulnEqualCreate, err := generateVulnEqualCreate(tx, &vulnerability, &otherVulnerability, &vulnEqualInput)
+	if err != nil {
+		return nil, gqlerror.Errorf("generatePkgEqualCreate :: %s", err)
+	}
+
+	if _, err := vulnEqualCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				vulnequal.FieldVulnerabilitiesHash,
@@ -188,8 +199,7 @@ func upsertVulnEquals(ctx context.Context, client *ent.Tx, vulnerability model.I
 			),
 		).
 		DoNothing().
-		ID(ctx)
-	if err != nil {
+		ID(ctx); err != nil {
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsertVulnEquals")
 		}
@@ -228,4 +238,19 @@ func toModelVulnerabilityFromVulnerabilityID(vulnID *ent.VulnerabilityID) *model
 		Type:             vulnID.Type,
 		VulnerabilityIDs: []*model.VulnerabilityID{toModelVulnerabilityID(vulnID)},
 	}
+}
+
+func canonicalVulnEqualString(ve *model.VulnEqualInputSpec) string {
+	return fmt.Sprintf("%s::%s::%s", ve.Justification, ve.Origin, ve.Collector)
+}
+
+// guacVulnEqualKey generates an uuid based on the hash of the inputspec and inputs. vulnEqual ID has to be set for bulk ingestion
+// when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
+// a new ID for vulnEqual node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
+// "Default" func to generate a new UUID
+func guacVulnEqualKey(sortedVulnHash string, veInput *model.VulnEqualInputSpec) (*uuid.UUID, error) {
+	veIDString := fmt.Sprintf("%s::%s?", sortedVulnHash, canonicalVulnEqualString(veInput))
+
+	veID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(veIDString), 5)
+	return &veID, nil
 }
