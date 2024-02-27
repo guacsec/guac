@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
 	"sort"
 
@@ -86,7 +87,7 @@ func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.ID
 	return *ids, nil
 }
 
-func upsertBulkHashEqual(ctx context.Context, client *ent.Tx, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) (*[]string, error) {
+func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -102,34 +103,15 @@ func upsertBulkHashEqual(ctx context.Context, client *ent.Tx, artifacts []*model
 	for _, hes := range batches {
 		creates := make([]*ent.HashEqualCreate, len(hes))
 		for i, he := range hes {
-
-			sortedArtifacts := []model.IDorArtifactInput{*artifacts[index], *otherArtifacts[index]}
-
-			sort.SliceStable(sortedArtifacts, func(i, j int) bool { return *sortedArtifacts[i].ArtifactID < *sortedArtifacts[j].ArtifactID })
-
-			var sortedArtIDs []uuid.UUID
-			for _, art := range sortedArtifacts {
-				if art.ArtifactID == nil {
-					return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-				}
-				artID, err := uuid.Parse(*art.ArtifactID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-				}
-				sortedArtIDs = append(sortedArtIDs, artID)
+			var err error
+			creates[i], err = generateHashEqualCreate(tx, he, artifacts[index], otherArtifacts[index])
+			if err != nil {
+				return nil, gqlerror.Errorf("generateHashEqualCreate :: %s", err)
 			}
-
-			creates[i] = client.HashEqual.Create().
-				AddArtifactIDs(sortedArtIDs...).
-				SetArtifactsHash(hashArtifacts(sortedArtifacts)).
-				SetJustification(he.Justification).
-				SetOrigin(he.Origin).
-				SetCollector(he.Collector)
-
 			index++
 		}
 
-		err := client.HashEqual.CreateBulk(creates...).
+		err := tx.HashEqual.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
@@ -142,9 +124,8 @@ func upsertBulkHashEqual(ctx context.Context, client *ent.Tx, artifacts []*model
 	return &ids, nil
 }
 
-func upsertHashEqual(ctx context.Context, client *ent.Tx, artifactA model.IDorArtifactInput, artifactB model.IDorArtifactInput, spec model.HashEqualInputSpec) (*string, error) {
-
-	sortedArtifacts := []model.IDorArtifactInput{artifactA, artifactB}
+func generateHashEqualCreate(tx *ent.Tx, he *model.HashEqualInputSpec, artifactA *model.IDorArtifactInput, artifactB *model.IDorArtifactInput) (*ent.HashEqualCreate, error) {
+	sortedArtifacts := []model.IDorArtifactInput{*artifactA, *artifactB}
 
 	sort.SliceStable(sortedArtifacts, func(i, j int) bool { return *sortedArtifacts[i].ArtifactID < *sortedArtifacts[j].ArtifactID })
 
@@ -160,12 +141,32 @@ func upsertHashEqual(ctx context.Context, client *ent.Tx, artifactA model.IDorAr
 		sortedArtIDs = append(sortedArtIDs, artID)
 	}
 
-	if _, err := client.HashEqual.Create().
+	sortedArtifactHash := hashArtifacts(sortedArtifacts)
+
+	hashEqualID, err := guacHashEqualKey(sortedArtifactHash, he)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create hashEqual uuid with error: %w", err)
+	}
+
+	hashEqualCreate := tx.HashEqual.Create().
+		SetID(*hashEqualID).
 		AddArtifactIDs(sortedArtIDs...).
-		SetArtifactsHash(hashArtifacts(sortedArtifacts)).
-		SetJustification(spec.Justification).
-		SetOrigin(spec.Origin).
-		SetCollector(spec.Collector).
+		SetArtifactsHash(sortedArtifactHash).
+		SetJustification(he.Justification).
+		SetOrigin(he.Origin).
+		SetCollector(he.Collector)
+
+	return hashEqualCreate, nil
+}
+
+func upsertHashEqual(ctx context.Context, tx *ent.Tx, artifactA model.IDorArtifactInput, artifactB model.IDorArtifactInput, spec model.HashEqualInputSpec) (*string, error) {
+
+	hashEqualCreate, err := generateHashEqualCreate(tx, &spec, &artifactA, &artifactB)
+	if err != nil {
+		return nil, gqlerror.Errorf("generateHashEqualCreate :: %s", err)
+	}
+
+	if _, err := hashEqualCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				hashequal.FieldArtifactsHash,
@@ -205,4 +206,19 @@ func toModelHashEqual(record *ent.HashEqual) *model.HashEqual {
 		Collector:     record.Collector,
 		Origin:        record.Origin,
 	}
+}
+
+func canonicalHashEqualString(he *model.HashEqualInputSpec) string {
+	return fmt.Sprintf("%s::%s::%s", he.Justification, he.Origin, he.Collector)
+}
+
+// guacHashEqualKey generates an uuid based on the hash of the inputspec and inputs. hashEqual ID has to be set for bulk ingestion
+// when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
+// a new ID for hashEqual node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
+// "Default" func to generate a new UUID
+func guacHashEqualKey(sortedArtHash string, heInput *model.HashEqualInputSpec) (*uuid.UUID, error) {
+	heIDString := fmt.Sprintf("%s::%s?", sortedArtHash, canonicalHashEqualString(heInput))
+
+	heID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(heIDString), 5)
+	return &heID, nil
 }

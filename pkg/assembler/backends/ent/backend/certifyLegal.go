@@ -16,13 +16,10 @@
 package backend
 
 import (
-	"bytes"
 	"context"
-	"crypto/sha1"
 	"crypto/sha256"
 	stdsql "database/sql"
 	"fmt"
-	"sort"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -62,8 +59,8 @@ func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalS
 func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 	funcName := "IngestCertifyLegals"
 	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
-		client := ent.TxFromContext(ctx)
-		slc, err := upsertBulkCertifyLegal(ctx, client, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
+		tx := ent.TxFromContext(ctx)
+		slc, err := upsertBulkCertifyLegal(ctx, tx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
 		if err != nil {
 			return nil, err
 		}
@@ -80,16 +77,6 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
-		client := tx.Client()
-
-		certifyLegalCreate := client.CertifyLegal.Create().
-			SetDeclaredLicense(spec.DeclaredLicense).
-			SetDiscoveredLicense(spec.DiscoveredLicense).
-			SetAttribution(spec.Attribution).
-			SetJustification(spec.Justification).
-			SetTimeScanned(spec.TimeScanned).
-			SetOrigin(spec.Origin).
-			SetCollector(spec.Collector)
 
 		certifyLegalConflictColumns := []string{
 			certifylegal.FieldDeclaredLicense,
@@ -102,75 +89,37 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 			certifylegal.FieldDeclaredLicensesHash,
 			certifylegal.FieldDiscoveredLicensesHash,
 		}
-
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
-			if subject.Package.PackageVersionID == nil {
-				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-			}
-			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-			}
-			certifyLegalCreate.SetPackageID(pkgVersionID)
 			certifyLegalConflictColumns = append(certifyLegalConflictColumns, certifylegal.FieldPackageID)
 			conflictWhere = sql.And(
 				sql.NotNull(certifylegal.FieldPackageID),
 				sql.IsNull(certifylegal.FieldSourceID),
 			)
 		} else if subject.Source != nil {
-			if subject.Source.SourceNameID == nil {
-				return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-			}
-			sourceID, err := uuid.Parse(*subject.Source.SourceNameID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
-			}
-			certifyLegalCreate.SetSourceID(sourceID)
 			certifyLegalConflictColumns = append(certifyLegalConflictColumns, certifylegal.FieldSourceID)
 			conflictWhere = sql.And(
 				sql.IsNull(certifylegal.FieldPackageID),
 				sql.NotNull(certifylegal.FieldSourceID),
 			)
+		} else {
+			return nil, gqlerror.Errorf("%v :: %s", "IngestCertifyLegal", "subject must be either a package or source")
 		}
 
-		declaredLicenseIDs := make([]uuid.UUID, len(declaredLicenses))
-		for i := range declaredLicenses {
-			if declaredLicenses[i].LicenseID == nil {
-				return nil, fmt.Errorf("LicenseID not specified in declaredLicenses")
-			}
-			licenseID, err := uuid.Parse(*declaredLicenses[i].LicenseID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from LicenseID failed with error: %w", err)
-			}
-			declaredLicenseIDs[i] = licenseID
+		certifyLegalCreate, err := generateCertifyLegalCreate(tx, spec, subject.Package, subject.Source, declaredLicenses, discoveredLicenses)
+		if err != nil {
+			return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 		}
-		certifyLegalCreate.SetDeclaredLicensesHash(hashLicenseIDs(declaredLicenseIDs))
-		certifyLegalCreate.AddDeclaredLicenseIDs(declaredLicenseIDs...)
 
-		discoveredLicenseIDs := make([]uuid.UUID, len(discoveredLicenses))
-		for i := range discoveredLicenses {
-			if discoveredLicenses[i].LicenseID == nil {
-				return nil, fmt.Errorf("LicenseID not specified in discoveredLicenses")
-			}
-			licenseID, err := uuid.Parse(*discoveredLicenses[i].LicenseID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from LicenseID failed with error: %w", err)
-			}
-			discoveredLicenseIDs[i] = licenseID
-		}
-		certifyLegalCreate.SetDiscoveredLicensesHash(hashLicenseIDs(discoveredLicenseIDs))
-		certifyLegalCreate.AddDiscoveredLicenseIDs(discoveredLicenseIDs...)
-
-		_, err := certifyLegalCreate.
+		if _, err := certifyLegalCreate.
 			OnConflict(
 				sql.ConflictColumns(certifyLegalConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
 			DoNothing().
-			ID(ctx)
-		if err != nil {
+			ID(ctx); err != nil {
+
 			if err != stdsql.ErrNoRows {
 				return nil, errors.Wrap(err, "upsert certify legal node")
 			}
@@ -185,7 +134,96 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 	return *recordID, nil
 }
 
-func upsertBulkCertifyLegal(ctx context.Context, client *ent.Tx, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) (*[]string, error) {
+func generateCertifyLegalCreate(tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg *model.IDorPkgInput, src *model.IDorSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput) (*ent.CertifyLegalCreate, error) {
+	certifyLegalCreate := tx.CertifyLegal.Create().
+		SetDeclaredLicense(cl.DeclaredLicense).
+		SetDiscoveredLicense(cl.DiscoveredLicense).
+		SetAttribution(cl.Attribution).
+		SetJustification(cl.Justification).
+		SetTimeScanned(cl.TimeScanned.UTC()).
+		SetOrigin(cl.Origin).
+		SetCollector(cl.Collector)
+
+	var sortedDeclaredLicenseHash string
+	var sortedDiscoveredLicenseHash string
+
+	if len(declaredLicenses) > 0 {
+		var declaredLicenseIDs []string
+		for _, decLic := range declaredLicenses {
+			if decLic.LicenseID == nil {
+				return nil, fmt.Errorf("licenseID not specified in discoveredLicenses")
+			}
+			declaredLicenseIDs = append(declaredLicenseIDs, *decLic.LicenseID)
+		}
+		sortedDeclaredLicenseIDs := helper.SortAndRemoveDups(declaredLicenseIDs)
+
+		for _, declaredLicID := range sortedDeclaredLicenseIDs {
+			declaredLicUUID, err := uuid.Parse(declaredLicID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from licenseID failed with error: %w", err)
+			}
+			certifyLegalCreate.AddDeclaredLicenseIDs(declaredLicUUID)
+		}
+		sortedDeclaredLicenseHash = hashListOfSortedKeys(sortedDeclaredLicenseIDs)
+		certifyLegalCreate.SetDeclaredLicensesHash(sortedDeclaredLicenseHash)
+	} else {
+		sortedDeclaredLicenseHash = hashListOfSortedKeys([]string{""})
+		certifyLegalCreate.SetDeclaredLicensesHash(sortedDeclaredLicenseHash)
+	}
+
+	if len(discoveredLicenses) > 0 {
+		var discoveredLicenseIDs []string
+		for _, disLic := range discoveredLicenses {
+			if disLic.LicenseID == nil {
+				return nil, fmt.Errorf("licenseID not specified in discoveredLicenses")
+			}
+			discoveredLicenseIDs = append(discoveredLicenseIDs, *disLic.LicenseID)
+		}
+		sortedDiscoveredLicenseIDs := helper.SortAndRemoveDups(discoveredLicenseIDs)
+
+		for _, discoveredLicID := range sortedDiscoveredLicenseIDs {
+			discoveredLicUUID, err := uuid.Parse(discoveredLicID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from licenseID failed with error: %w", err)
+			}
+			certifyLegalCreate.AddDiscoveredLicenseIDs(discoveredLicUUID)
+		}
+		sortedDiscoveredLicenseHash = hashListOfSortedKeys(sortedDiscoveredLicenseIDs)
+		certifyLegalCreate.SetDiscoveredLicensesHash(sortedDiscoveredLicenseHash)
+	} else {
+		sortedDiscoveredLicenseHash = hashListOfSortedKeys([]string{""})
+		certifyLegalCreate.SetDiscoveredLicensesHash(sortedDiscoveredLicenseHash)
+	}
+
+	certifyLegalID, err := guacCertifyLegalKey(pkg, src, sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
+	}
+	certifyLegalCreate.SetID(*certifyLegalID)
+
+	if pkg != nil {
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		}
+		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		}
+		certifyLegalCreate.SetPackageID(pkgVersionID)
+	} else if src != nil {
+		if src.SourceNameID == nil {
+			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+		}
+		sourceID, err := uuid.Parse(*src.SourceNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		}
+		certifyLegalCreate.SetSourceID(sourceID)
+	}
+	return certifyLegalCreate, nil
+}
+
+func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	certifyLegalConflictColumns := []string{
@@ -214,6 +252,8 @@ func upsertBulkCertifyLegal(ctx context.Context, client *ent.Tx, subjects model.
 			sql.IsNull(certifylegal.FieldPackageID),
 			sql.NotNull(certifylegal.FieldSourceID),
 		)
+	} else {
+		return nil, gqlerror.Errorf("%v :: %s", "upsertBulkCertifyLegal", "subject must be either a package or source")
 	}
 
 	batches := chunk(certifyLegals, 100)
@@ -222,100 +262,25 @@ func upsertBulkCertifyLegal(ctx context.Context, client *ent.Tx, subjects model.
 	for _, cls := range batches {
 		creates := make([]*ent.CertifyLegalCreate, len(cls))
 		for i, cl := range cls {
-			creates[i] = client.CertifyLegal.Create().
-				SetDeclaredLicense(cl.DeclaredLicense).
-				SetDiscoveredLicense(cl.DiscoveredLicense).
-				SetAttribution(cl.Attribution).
-				SetJustification(cl.Justification).
-				SetTimeScanned(cl.TimeScanned).
-				SetOrigin(cl.Origin).
-				SetCollector(cl.Collector)
-
-			var sortedDeclaredLicenseHash string
-			var sortedDiscoveredLicenseHash string
-
-			if len(declaredLicensesList[index]) > 0 {
-				var declaredLicenseIDs []string
-				for i := range discoveredLicensesList[index] {
-					if discoveredLicensesList[index][i].LicenseID == nil {
-						return nil, fmt.Errorf("LicenseID not specified in discoveredLicenses")
-					}
-					declaredLicenseIDs = append(declaredLicenseIDs, *declaredLicensesList[index][i].LicenseID)
-				}
-				sortedDeclaredLicenseIDs := helper.SortAndRemoveDups(declaredLicenseIDs)
-
-				for _, declaredLicID := range sortedDeclaredLicenseIDs {
-					declaredLicUUID, err := uuid.Parse(declaredLicID)
-					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-					}
-					creates[i].AddDeclaredLicenseIDs(declaredLicUUID)
-				}
-				sortedDeclaredLicenseHash = hashListOfSortedKeys(sortedDeclaredLicenseIDs)
-				creates[i].SetDeclaredLicensesHash(sortedDeclaredLicenseHash)
-			} else {
-				sortedDeclaredLicenseHash = hashListOfSortedKeys([]string{""})
-				creates[i].SetDeclaredLicensesHash(sortedDeclaredLicenseHash)
-			}
-
-			if len(discoveredLicensesList[index]) > 0 {
-				var discoveredLicenseIDs []string
-				for i := range discoveredLicensesList[index] {
-					if discoveredLicensesList[index][i].LicenseID == nil {
-						return nil, fmt.Errorf("LicenseID not specified in discoveredLicenses")
-					}
-					discoveredLicenseIDs = append(discoveredLicenseIDs, *discoveredLicensesList[index][i].LicenseID)
-				}
-				sortedDiscoveredLicenseIDs := helper.SortAndRemoveDups(discoveredLicenseIDs)
-
-				for _, discoveredLicID := range sortedDiscoveredLicenseIDs {
-					discoveredLicUUID, err := uuid.Parse(discoveredLicID)
-					if err != nil {
-						return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-					}
-					creates[i].AddDiscoveredLicenseIDs(discoveredLicUUID)
-				}
-				sortedDiscoveredLicenseHash = hashListOfSortedKeys(sortedDiscoveredLicenseIDs)
-				creates[i].SetDiscoveredLicensesHash(sortedDiscoveredLicenseHash)
-			} else {
-				sortedDiscoveredLicenseHash = hashListOfSortedKeys([]string{""})
-				creates[i].SetDiscoveredLicensesHash(sortedDiscoveredLicenseHash)
-			}
-
+			var err error
 			if len(subjects.Packages) > 0 {
-				if subjects.Packages[index].PackageVersionID == nil {
-					return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-				}
-				pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
+				creates[i], err = generateCertifyLegalCreate(tx, cl, subjects.Packages[index], nil, declaredLicensesList[index], discoveredLicensesList[index])
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+					return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 				}
-				certifyLegalID, err := guacCertifyLegalKey(subjects.Packages[index], nil, sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
-				if err != nil {
-					return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
-				}
-				creates[i].SetID(*certifyLegalID)
-				creates[i].SetPackageID(pkgVersionID)
-			} else if len(subjects.Sources) > 0 {
-				if subjects.Sources[index].SourceNameID == nil {
-					return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-				}
-				sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
-				}
-				certifyLegalID, err := guacCertifyLegalKey(nil, subjects.Sources[index], sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
-				if err != nil {
-					return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
-				}
-				creates[i].SetID(*certifyLegalID)
-				creates[i].SetSourceID(sourceID)
-			}
 
+			} else if len(subjects.Sources) > 0 {
+				creates[i], err = generateCertifyLegalCreate(tx, cl, nil, subjects.Sources[index], declaredLicensesList[index], discoveredLicensesList[index])
+				if err != nil {
+					return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
+				}
+			} else {
+				return nil, gqlerror.Errorf("%v :: %s", "upsertBulkCertifyLegal", "subject must be either a package or source")
+			}
 			index++
 		}
 
-		err := client.CertifyLegal.CreateBulk(creates...).
+		err := tx.CertifyLegal.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(certifyLegalConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
@@ -328,21 +293,6 @@ func upsertBulkCertifyLegal(ctx context.Context, client *ent.Tx, subjects model.
 	}
 
 	return &ids, nil
-}
-
-// hashLicenses is used to create a unique key for the M2M edge between CertifyLegal <-M2M-> License
-func hashLicenseIDs(licenses []uuid.UUID) string {
-	hash := sha1.New()
-	content := bytes.NewBuffer(nil)
-
-	sort.Slice(licenses, func(i, j int) bool { return licenses[i].String() < licenses[j].String() })
-
-	for _, v := range licenses {
-		content.WriteString(v.String())
-	}
-
-	hash.Write(content.Bytes())
-	return fmt.Sprintf("%x", hash.Sum(nil))
 }
 
 func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
@@ -439,10 +389,10 @@ func guacCertifyLegalKey(pkg *model.IDorPkgInput, src *model.IDorSourceInput, de
 		return nil, gqlerror.Errorf("%v :: %s", "guacCertifyLegalKey", "subject must be either a package or source")
 	}
 
-	depIDString := fmt.Sprintf("%s::%s::%s::%s?", subjectID, declaredLicenseHash, discoveredLicenseHash, canonicalCertifyLegalString(clInput))
+	clIDString := fmt.Sprintf("%s::%s::%s::%s?", subjectID, declaredLicenseHash, discoveredLicenseHash, canonicalCertifyLegalString(clInput))
 
-	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
-	return &depID, nil
+	clID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(clIDString), 5)
+	return &clID, nil
 }
 
 // func certifyLegalInputQuery(subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, filter model.CertifyLegalInputSpec) predicate.CertifyLegal {

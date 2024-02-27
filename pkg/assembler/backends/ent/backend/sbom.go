@@ -473,8 +473,8 @@ func guacHasSBOMKey(pkg *model.IDorPkgInput, art *model.IDorArtifactInput, inclu
 	} else {
 		return nil, gqlerror.Errorf("%v :: %s", "guacHasSBOMKey", "subject must be either a package or artifact")
 	}
-	depIDString := fmt.Sprintf("%s::%s::%s::%s::%s::%s?", subjectID, includedPkgHash, includedArtHash, includedDepHash, includedOccurHash, canonicalHasSBOMString(hasSBOM))
+	hsIDString := fmt.Sprintf("%s::%s::%s::%s::%s::%s?", subjectID, includedPkgHash, includedArtHash, includedDepHash, includedOccurHash, canonicalHasSBOMString(hasSBOM))
 
-	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
-	return &depID, nil
+	hsID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(hsIDString), 5)
+	return &hsID, nil
 }
