@@ -127,7 +127,7 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) pre
 	return vulnerabilitymetadata.And(predicates...)
 }
 
-func upsertBulkVulnerabilityMetadata(ctx context.Context, client *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) (*[]string, error) {
+func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
@@ -146,25 +146,16 @@ func upsertBulkVulnerabilityMetadata(ctx context.Context, client *ent.Tx, vulner
 		creates := make([]*ent.VulnerabilityMetadataCreate, len(vml))
 		for i, vm := range vml {
 			vm := vm
-			creates[i] = client.VulnerabilityMetadata.Create().
-				SetScoreType(vulnerabilitymetadata.ScoreType(vm.ScoreType)).
-				SetScoreValue(vm.ScoreValue).
-				SetTimestamp(vm.Timestamp.UTC()).
-				SetOrigin(vm.Origin).
-				SetCollector(vm.Collector)
+			var err error
 
-			if vulnerabilities[index].VulnerabilityNodeID == nil {
-				return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
-			}
-			vulnID, err := uuid.Parse(*vulnerabilities[index].VulnerabilityNodeID)
+			creates[i], err = generateVulnMetadataCreate(tx, vulnerabilities[index], vm)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+				return nil, gqlerror.Errorf("generateVulnEqualCreate :: %s", err)
 			}
-			creates[i].SetVulnerabilityIDID(vulnID)
 			index++
 		}
 
-		err := client.VulnerabilityMetadata.CreateBulk(creates...).
+		err := tx.VulnerabilityMetadata.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
@@ -178,7 +169,11 @@ func upsertBulkVulnerabilityMetadata(ctx context.Context, client *ent.Tx, vulner
 	return &ids, nil
 }
 
-func upsertVulnerabilityMetadata(ctx context.Context, client *ent.Tx, vulnerability model.IDorVulnerabilityInput, spec model.VulnerabilityMetadataInputSpec) (*string, error) {
+func generateVulnMetadataCreate(tx *ent.Tx, vulnerability *model.IDorVulnerabilityInput, scorecard *model.VulnerabilityMetadataInputSpec) (*ent.VulnerabilityMetadataCreate, error) {
+
+	if vulnerability == nil {
+		return nil, fmt.Errorf("vulnerability must be specified for vulnMetadata")
+	}
 	if vulnerability.VulnerabilityNodeID == nil {
 		return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
 	}
@@ -187,14 +182,20 @@ func upsertVulnerabilityMetadata(ctx context.Context, client *ent.Tx, vulnerabil
 		return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 	}
 
-	insert := client.VulnerabilityMetadata.Create().
-		SetVulnerabilityIDID(vulnID).
-		SetScoreType(vulnerabilitymetadata.ScoreType(spec.ScoreType)).
-		SetScoreValue(spec.ScoreValue).
-		SetTimestamp(spec.Timestamp.UTC()).
-		SetOrigin(spec.Origin).
-		SetCollector(spec.Collector)
+	vulnMetadataCreate := tx.VulnerabilityMetadata.Create()
 
+	vulnMetadataCreate.
+		SetVulnerabilityIDID(vulnID).
+		SetScoreType(vulnerabilitymetadata.ScoreType(scorecard.ScoreType)).
+		SetScoreValue(scorecard.ScoreValue).
+		SetTimestamp(scorecard.Timestamp.UTC()).
+		SetOrigin(scorecard.Origin).
+		SetCollector(scorecard.Collector)
+
+	return vulnMetadataCreate, nil
+}
+
+func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability model.IDorVulnerabilityInput, spec model.VulnerabilityMetadataInputSpec) (*string, error) {
 	conflictColumns := []string{
 		vulnerabilitymetadata.FieldVulnerabilityIDID,
 		vulnerabilitymetadata.FieldScoreType,
@@ -204,6 +205,11 @@ func upsertVulnerabilityMetadata(ctx context.Context, client *ent.Tx, vulnerabil
 		vulnerabilitymetadata.FieldCollector,
 	}
 
+	insert, err := generateVulnMetadataCreate(tx, &vulnerability, &spec)
+	if err != nil {
+		return nil, gqlerror.Errorf("generateVulnMetadataCreate :: %s", err)
+
+	}
 	if _, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 	).
