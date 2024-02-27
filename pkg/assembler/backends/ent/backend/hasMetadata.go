@@ -286,6 +286,7 @@ func upsertBulkHasMetadata(ctx context.Context, tx *ent.Tx, subjects model.Packa
 	for _, hms := range batches {
 		creates := make([]*ent.HasMetadataCreate, len(hms))
 		for i, hm := range hms {
+			hm := hm
 			var err error
 			switch {
 			case len(subjects.Artifacts) > 0:

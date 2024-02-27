@@ -145,7 +145,7 @@ func upsertBulkVulnerabilityMetadata(ctx context.Context, client *ent.Tx, vulner
 	for _, vml := range batches {
 		creates := make([]*ent.VulnerabilityMetadataCreate, len(vml))
 		for i, vm := range vml {
-
+			vm := vm
 			creates[i] = client.VulnerabilityMetadata.Create().
 				SetScoreType(vulnerabilitymetadata.ScoreType(vm.ScoreType)).
 				SetScoreValue(vm.ScoreValue).

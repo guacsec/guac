@@ -200,6 +200,7 @@ func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArti
 	for _, vexs := range batches {
 		creates := make([]*ent.CertifyVexCreate, len(vexs))
 		for i, vex := range vexs {
+			vex := vex
 			var err error
 			if len(subjects.Packages) > 0 {
 				creates[i], err = generateVexCreate(tx, subjects.Packages[index], nil, vulnerabilities[index], vex)

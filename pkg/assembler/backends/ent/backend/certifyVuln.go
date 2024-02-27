@@ -150,6 +150,7 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 	for _, vulns := range batches {
 		creates := make([]*ent.CertifyVulnCreate, len(vulns))
 		for i, vuln := range vulns {
+			vuln := vuln
 			var err error
 			creates[i], err = generateCertifyVulnCreate(tx, pkgs[index], vulnerabilities[index], vuln)
 			if err != nil {

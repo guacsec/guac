@@ -71,7 +71,7 @@ func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.Packa
 	return *ids, nil
 }
 
-func upsertBulkOccurrences(ctx context.Context, client *ent.Tx, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) (*[]string, error) {
+func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
 	occurrenceConflictColumns := []string{
@@ -96,6 +96,8 @@ func upsertBulkOccurrences(ctx context.Context, client *ent.Tx, subjects model.P
 			sql.IsNull(occurrence.FieldPackageID),
 			sql.NotNull(occurrence.FieldSourceID),
 		)
+	default:
+		return nil, gqlerror.Errorf("%v :: %s", "upsertBulkOccurrences", "subject must be either a package or source")
 	}
 
 	batches := chunk(occurrences, 100)
@@ -104,61 +106,38 @@ func upsertBulkOccurrences(ctx context.Context, client *ent.Tx, subjects model.P
 	for _, occurs := range batches {
 		creates := make([]*ent.OccurrenceCreate, len(occurs))
 		for i, occur := range occurs {
-
-			creates[i] = client.Occurrence.Create().
-				SetJustification(occur.Justification).
-				SetOrigin(occur.Origin).
-				SetCollector(occur.Collector)
-
-			if artifacts[index].ArtifactID == nil {
-				return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-			}
-			artID, err := uuid.Parse(*artifacts[index].ArtifactID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-			}
-			creates[i].SetArtifactID(artID)
-
+			occur := occur
 			switch {
 			case len(subjects.Packages) > 0:
-
+				var err error
 				isOccurrenceID, err := guacOccurrenceKey(subjects.Packages[index], nil, *artifacts[index], *occur)
 				if err != nil {
 					return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
 				}
-				creates[i].SetID(*isOccurrenceID)
+				creates[i], err = generateOccurrenceCreate(tx, isOccurrenceID, subjects.Packages[index], nil, artifacts[index], occur)
+				if err != nil {
+					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
+				}
 				ids = append(ids, isOccurrenceID.String())
 
-				if subjects.Packages[index].PackageVersionID == nil {
-					return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-				}
-				pkgVersionID, err := uuid.Parse(*subjects.Packages[index].PackageVersionID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
-				}
-				creates[i].SetPackageID(pkgVersionID)
 			case len(subjects.Sources) > 0:
-
+				var err error
 				isOccurrenceID, err := guacOccurrenceKey(nil, subjects.Sources[index], *artifacts[index], *occur)
 				if err != nil {
 					return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
 				}
-				creates[i].SetID(*isOccurrenceID)
-				ids = append(ids, isOccurrenceID.String())
-
-				if subjects.Sources[index].SourceNameID == nil {
-					return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-				}
-				sourceID, err := uuid.Parse(*subjects.Sources[index].SourceNameID)
+				creates[i], err = generateOccurrenceCreate(tx, isOccurrenceID, nil, subjects.Sources[index], artifacts[index], occur)
 				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 				}
-				creates[i].SetSourceID(sourceID)
+				ids = append(ids, isOccurrenceID.String())
+			default:
+				return nil, gqlerror.Errorf("%v :: %s", "upsertBulkOccurrences", "subject must be either a package or source")
 			}
 			index++
 		}
 
-		err := client.Occurrence.CreateBulk(creates...).
+		err := tx.Occurrence.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
@@ -173,6 +152,54 @@ func upsertBulkOccurrences(ctx context.Context, client *ent.Tx, subjects model.P
 	return &ids, nil
 }
 
+func generateOccurrenceCreate(tx *ent.Tx, isOccurrenceID *uuid.UUID, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, occur *model.IsOccurrenceInputSpec) (*ent.OccurrenceCreate, error) {
+
+	occurrenceCreate := tx.Occurrence.Create()
+
+	if art == nil {
+		return nil, fmt.Errorf("artifact must be specified for isOccurrence")
+
+	}
+	if art.ArtifactID == nil {
+		return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+	}
+	artID, err := uuid.Parse(*art.ArtifactID)
+	if err != nil {
+		return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+	}
+
+	occurrenceCreate.
+		SetID(*isOccurrenceID).
+		SetArtifactID(artID).
+		SetJustification(occur.Justification).
+		SetOrigin(occur.Origin).
+		SetCollector(occur.Collector)
+
+	if pkg != nil {
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		}
+		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		}
+		occurrenceCreate.SetPackageID(pkgVersionID)
+	} else if src != nil {
+		if src.SourceNameID == nil {
+			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+		}
+		sourceID, err := uuid.Parse(*src.SourceNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		}
+		occurrenceCreate.SetSourceID(sourceID)
+	} else {
+		return nil, gqlerror.Errorf("%v :: %s", "generateOccurrenceCreate", "subject must be either a package or source")
+	}
+
+	return occurrenceCreate, nil
+}
+
 func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	subject model.PackageOrSourceInput,
 	art model.IDorArtifactInput,
@@ -182,28 +209,6 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 
 	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
-		client := tx.Client()
-		var err error
-
-		if art.ArtifactID == nil {
-			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-		}
-		artID, err := uuid.Parse(*art.ArtifactID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-		}
-
-		isOccurrenceID, err := guacOccurrenceKey(subject.Package, subject.Source, art, spec)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
-		}
-
-		occurrenceCreate := client.Occurrence.Create().
-			SetID(*isOccurrenceID).
-			SetArtifactID(artID).
-			SetJustification(spec.Justification).
-			SetOrigin(spec.Origin).
-			SetCollector(spec.Collector)
 
 		occurrenceConflictColumns := []string{
 			occurrence.FieldArtifactID,
@@ -215,28 +220,12 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
-			if subject.Package.PackageVersionID == nil {
-				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-			}
-			pkgVersionID, err := uuid.Parse(*subject.Package.PackageVersionID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-			}
-			occurrenceCreate.SetPackageID(pkgVersionID)
 			occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldPackageID)
 			conflictWhere = sql.And(
 				sql.NotNull(occurrence.FieldPackageID),
 				sql.IsNull(occurrence.FieldSourceID),
 			)
 		} else if subject.Source != nil {
-			if subject.Source.SourceNameID == nil {
-				return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-			}
-			sourceID, err := uuid.Parse(*subject.Source.SourceNameID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
-			}
-			occurrenceCreate.SetSourceID(sourceID)
 			occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldSourceID)
 			conflictWhere = sql.And(
 				sql.IsNull(occurrence.FieldPackageID),
@@ -246,12 +235,22 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			return nil, gqlerror.Errorf("%v :: %s", funcName, "subject must be either a package or source")
 		}
 
-		if _, err := occurrenceCreate.
+		isOccurrenceID, err := guacOccurrenceKey(subject.Package, subject.Source, art, spec)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+		}
+
+		insert, err := generateOccurrenceCreate(tx, isOccurrenceID, subject.Package, subject.Source, &art, &spec)
+		if err != nil {
+			return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
+		}
+
+		if _, err := insert.
 			OnConflict(
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			UpdateNewValues().
+			DoNothing().
 			ID(ctx); err != nil {
 			return nil, err
 		}

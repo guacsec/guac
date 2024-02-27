@@ -159,6 +159,7 @@ func upsertBulkPointOfContact(ctx context.Context, client *ent.Tx, subjects mode
 	for _, pocs := range batches {
 		creates := make([]*ent.PointOfContactCreate, len(pocs))
 		for i, poc := range pocs {
+			poc := poc
 			creates[i] = client.PointOfContact.Create().
 				SetEmail(poc.Email).
 				SetInfo(poc.Info).

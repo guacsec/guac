@@ -115,7 +115,7 @@ func upsertBulkSLSA(ctx context.Context, client *ent.Tx, subjects []*model.IDorA
 	for _, css := range batches {
 		creates := make([]*ent.SLSAAttestationCreate, len(css))
 		for i, slsa := range css {
-
+			slsa := slsa
 			if builtByList[index].BuilderID == nil {
 				return nil, fmt.Errorf("BuilderID not specified in IDorBuilderInput")
 			}

@@ -319,7 +319,7 @@ func upsertBulkHasSBOM(ctx context.Context, client *ent.Tx, subjects model.Packa
 	for _, hsboms := range batches {
 		creates := make([]*ent.BillOfMaterialsCreate, len(hsboms))
 		for i, hsbom := range hsboms {
-
+			hsbom := hsbom
 			creates[i] = client.BillOfMaterials.Create().
 				SetURI(hsbom.URI).
 				SetAlgorithm(strings.ToLower(hsbom.Algorithm)).

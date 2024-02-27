@@ -113,7 +113,7 @@ func upsertBulkScorecard(ctx context.Context, client *ent.Tx, sources []*model.I
 	for _, css := range batches {
 		creates := make([]*ent.CertifyScorecardCreate, len(css))
 		for i, cs := range css {
-
+			cs := cs
 			checks := make([]*model.ScorecardCheck, len(cs.Checks))
 			for i, check := range cs.Checks {
 				checks[i] = &model.ScorecardCheck{

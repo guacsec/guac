@@ -90,7 +90,7 @@ func upsertBulkPkgEquals(ctx context.Context, client *ent.Tx, pkgs []*model.IDor
 	for _, pes := range batches {
 		creates := make([]*ent.PkgEqualCreate, len(pes))
 		for i, pe := range pes {
-
+			pe := pe
 			sortedPkgs := []model.IDorPkgInput{*pkgs[index], *otherPackages[index]}
 
 			sort.SliceStable(sortedPkgs, func(i, j int) bool { return *sortedPkgs[i].PackageVersionID < *sortedPkgs[j].PackageVersionID })

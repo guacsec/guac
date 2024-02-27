@@ -262,6 +262,7 @@ func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.Pack
 	for _, cls := range batches {
 		creates := make([]*ent.CertifyLegalCreate, len(cls))
 		for i, cl := range cls {
+			cl := cl
 			var err error
 			if len(subjects.Packages) > 0 {
 				creates[i], err = generateCertifyLegalCreate(tx, cl, subjects.Packages[index], nil, declaredLicensesList[index], discoveredLicensesList[index])

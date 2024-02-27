@@ -103,6 +103,7 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 	for _, deps := range batches {
 		creates := make([]*ent.DependencyCreate, len(deps))
 		for i, dep := range deps {
+			dep := dep
 			var err error
 			isDependencyID, err := guacDependencyKey(*pkgs[index], *depPkgs[index], depPkgMatchType, *dep)
 			if err != nil {

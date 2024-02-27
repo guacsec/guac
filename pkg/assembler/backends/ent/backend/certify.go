@@ -358,6 +358,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 		for _, certifyBads := range batches {
 			creates := make([]*ent.CertificationCreate, len(certifyBads))
 			for i, cb := range certifyBads {
+				cb := cb
 				var err error
 				switch {
 				case len(subjects.Artifacts) > 0:

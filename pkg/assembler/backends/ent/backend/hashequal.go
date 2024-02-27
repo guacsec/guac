@@ -103,6 +103,7 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 	for _, hes := range batches {
 		creates := make([]*ent.HashEqualCreate, len(hes))
 		for i, he := range hes {
+			he := he
 			var err error
 			creates[i], err = generateHashEqualCreate(tx, he, artifacts[index], otherArtifacts[index])
 			if err != nil {

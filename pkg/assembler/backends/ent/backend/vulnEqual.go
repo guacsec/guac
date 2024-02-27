@@ -115,7 +115,7 @@ func upsertBulkVulnEquals(ctx context.Context, client *ent.Tx, vulnerabilities [
 	for _, ves := range batches {
 		creates := make([]*ent.VulnEqualCreate, len(ves))
 		for i, ve := range ves {
-
+			ve := ve
 			sortedVulns := []model.IDorVulnerabilityInput{*vulnerabilities[index], *otherVulnerabilities[index]}
 
 			sort.SliceStable(sortedVulns, func(i, j int) bool { return *sortedVulns[i].VulnerabilityNodeID < *sortedVulns[j].VulnerabilityNodeID })
