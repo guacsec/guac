@@ -88,7 +88,7 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifact
 	return *id, nil
 }
 
-func upsertBulkArtifact(ctx context.Context, client *ent.Tx, artInputs []*model.IDorArtifactInput) (*[]string, error) {
+func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDorArtifactInput) (*[]string, error) {
 	batches := chunk(artInputs, 100)
 	ids := make([]string, 0)
 
@@ -97,15 +97,12 @@ func upsertBulkArtifact(ctx context.Context, client *ent.Tx, artInputs []*model.
 		for i, art := range artifacts {
 			artInput := art
 			artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.ArtifactInputSpec, string](artInput.ArtifactInput, helpers.ArtifactServerKey)), 5)
-			creates[i] = client.Artifact.Create().
-				SetID(artifactID).
-				SetAlgorithm(strings.ToLower(artInput.ArtifactInput.Algorithm)).
-				SetDigest(strings.ToLower(artInput.ArtifactInput.Digest))
+			creates[i] = generateArtifactCreate(tx, &artifactID, artInput)
 
 			ids = append(ids, artifactID.String())
 		}
 
-		err := client.Artifact.CreateBulk(creates...).
+		err := tx.Artifact.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(artifact.FieldDigest),
 			).
@@ -119,12 +116,17 @@ func upsertBulkArtifact(ctx context.Context, client *ent.Tx, artInputs []*model.
 	return &ids, nil
 }
 
-func upsertArtifact(ctx context.Context, client *ent.Tx, art *model.IDorArtifactInput) (*string, error) {
-	artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.ArtifactInputSpec, string](art.ArtifactInput, helpers.ArtifactServerKey)), 5)
-	id, err := client.Artifact.Create().
-		SetID(artifactID).
+func generateArtifactCreate(tx *ent.Tx, artifactID *uuid.UUID, art *model.IDorArtifactInput) *ent.ArtifactCreate {
+	return tx.Artifact.Create().
+		SetID(*artifactID).
 		SetAlgorithm(strings.ToLower(art.ArtifactInput.Algorithm)).
-		SetDigest(strings.ToLower(art.ArtifactInput.Digest)).
+		SetDigest(strings.ToLower(art.ArtifactInput.Digest))
+}
+
+func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInput) (*string, error) {
+	artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.ArtifactInputSpec, string](art.ArtifactInput, helpers.ArtifactServerKey)), 5)
+	insert := generateArtifactCreate(tx, &artifactID, art)
+	id, err := insert.
 		OnConflict(
 			sql.ConflictColumns(artifact.FieldDigest),
 		).

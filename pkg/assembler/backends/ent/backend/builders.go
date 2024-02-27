@@ -89,7 +89,7 @@ func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorB
 	return *ids, nil
 }
 
-func upsertBulkBuilder(ctx context.Context, client *ent.Tx, buildInputs []*model.IDorBuilderInput) (*[]string, error) {
+func upsertBulkBuilder(ctx context.Context, tx *ent.Tx, buildInputs []*model.IDorBuilderInput) (*[]string, error) {
 	batches := chunk(buildInputs, 100)
 	ids := make([]string, 0)
 
@@ -98,14 +98,12 @@ func upsertBulkBuilder(ctx context.Context, client *ent.Tx, buildInputs []*model
 		for i, build := range builders {
 			b := build
 			builderID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(b.BuilderInput.URI), 5)
-			creates[i] = client.Builder.Create().
-				SetID(builderID).
-				SetURI(b.BuilderInput.URI)
+			creates[i] = generateBuilderCreate(tx, &builderID, b.BuilderInput)
 
 			ids = append(ids, builderID.String())
 		}
 
-		err := client.Builder.CreateBulk(creates...).
+		err := tx.Builder.CreateBulk(creates...).
 			OnConflict(
 				sql.ConflictColumns(builder.FieldURI),
 			).
@@ -119,13 +117,20 @@ func upsertBulkBuilder(ctx context.Context, client *ent.Tx, buildInputs []*model
 	return &ids, nil
 }
 
-func upsertBuilder(ctx context.Context, client *ent.Tx, spec *model.BuilderInputSpec) (*string, error) {
+func generateBuilderCreate(tx *ent.Tx, builderID *uuid.UUID, build *model.BuilderInputSpec) *ent.BuilderCreate {
+	return tx.Builder.Create().
+		SetID(*builderID).
+		SetURI(build.URI)
+}
+
+func upsertBuilder(ctx context.Context, tx *ent.Tx, spec *model.BuilderInputSpec) (*string, error) {
 	builderID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(spec.URI), 5)
-	id, err := client.Builder.Create().
-		SetID(builderID).
-		SetURI(spec.URI).OnConflict(
-		sql.ConflictColumns(builder.FieldURI),
-	).
+	insert := generateBuilderCreate(tx, &builderID, spec)
+
+	id, err := insert.
+		OnConflict(
+			sql.ConflictColumns(builder.FieldURI),
+		).
 		DoNothing().
 		ID(ctx)
 	if err != nil {
