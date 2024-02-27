@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"crypto/sha256"
 	stdsql "database/sql"
 	"fmt"
 	"sort"
@@ -33,6 +34,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -217,17 +219,68 @@ func upsertBulkCertifyLegal(ctx context.Context, client *ent.Tx, subjects model.
 	batches := chunk(certifyLegals, 100)
 
 	index := 0
-	for _, cbs := range batches {
-		creates := make([]*ent.CertifyLegalCreate, len(cbs))
-		for i, cb := range cbs {
+	for _, cls := range batches {
+		creates := make([]*ent.CertifyLegalCreate, len(cls))
+		for i, cl := range cls {
 			creates[i] = client.CertifyLegal.Create().
-				SetDeclaredLicense(cb.DeclaredLicense).
-				SetDiscoveredLicense(cb.DiscoveredLicense).
-				SetAttribution(cb.Attribution).
-				SetJustification(cb.Justification).
-				SetTimeScanned(cb.TimeScanned).
-				SetOrigin(cb.Origin).
-				SetCollector(cb.Collector)
+				SetDeclaredLicense(cl.DeclaredLicense).
+				SetDiscoveredLicense(cl.DiscoveredLicense).
+				SetAttribution(cl.Attribution).
+				SetJustification(cl.Justification).
+				SetTimeScanned(cl.TimeScanned).
+				SetOrigin(cl.Origin).
+				SetCollector(cl.Collector)
+
+			var sortedDeclaredLicenseHash string
+			var sortedDiscoveredLicenseHash string
+
+			if len(declaredLicensesList[index]) > 0 {
+				var declaredLicenseIDs []string
+				for i := range discoveredLicensesList[index] {
+					if discoveredLicensesList[index][i].LicenseID == nil {
+						return nil, fmt.Errorf("LicenseID not specified in discoveredLicenses")
+					}
+					declaredLicenseIDs = append(declaredLicenseIDs, *declaredLicensesList[index][i].LicenseID)
+				}
+				sortedDeclaredLicenseIDs := helper.SortAndRemoveDups(declaredLicenseIDs)
+
+				for _, declaredLicID := range sortedDeclaredLicenseIDs {
+					declaredLicUUID, err := uuid.Parse(declaredLicID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+					}
+					creates[i].AddDeclaredLicenseIDs(declaredLicUUID)
+				}
+				sortedDeclaredLicenseHash = hashListOfSortedKeys(sortedDeclaredLicenseIDs)
+				creates[i].SetDeclaredLicensesHash(sortedDeclaredLicenseHash)
+			} else {
+				sortedDeclaredLicenseHash = hashListOfSortedKeys([]string{""})
+				creates[i].SetDeclaredLicensesHash(sortedDeclaredLicenseHash)
+			}
+
+			if len(discoveredLicensesList[index]) > 0 {
+				var discoveredLicenseIDs []string
+				for i := range discoveredLicensesList[index] {
+					if discoveredLicensesList[index][i].LicenseID == nil {
+						return nil, fmt.Errorf("LicenseID not specified in discoveredLicenses")
+					}
+					discoveredLicenseIDs = append(discoveredLicenseIDs, *discoveredLicensesList[index][i].LicenseID)
+				}
+				sortedDiscoveredLicenseIDs := helper.SortAndRemoveDups(discoveredLicenseIDs)
+
+				for _, discoveredLicID := range sortedDiscoveredLicenseIDs {
+					discoveredLicUUID, err := uuid.Parse(discoveredLicID)
+					if err != nil {
+						return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+					}
+					creates[i].AddDiscoveredLicenseIDs(discoveredLicUUID)
+				}
+				sortedDiscoveredLicenseHash = hashListOfSortedKeys(sortedDiscoveredLicenseIDs)
+				creates[i].SetDiscoveredLicensesHash(sortedDiscoveredLicenseHash)
+			} else {
+				sortedDiscoveredLicenseHash = hashListOfSortedKeys([]string{""})
+				creates[i].SetDiscoveredLicensesHash(sortedDiscoveredLicenseHash)
+			}
 
 			if len(subjects.Packages) > 0 {
 				if subjects.Packages[index].PackageVersionID == nil {
@@ -237,6 +290,11 @@ func upsertBulkCertifyLegal(ctx context.Context, client *ent.Tx, subjects model.
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 				}
+				certifyLegalID, err := guacCertifyLegalKey(subjects.Packages[index], nil, sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
+				if err != nil {
+					return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
+				}
+				creates[i].SetID(*certifyLegalID)
 				creates[i].SetPackageID(pkgVersionID)
 			} else if len(subjects.Sources) > 0 {
 				if subjects.Sources[index].SourceNameID == nil {
@@ -246,36 +304,13 @@ func upsertBulkCertifyLegal(ctx context.Context, client *ent.Tx, subjects model.
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 				}
+				certifyLegalID, err := guacCertifyLegalKey(nil, subjects.Sources[index], sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
+				if err != nil {
+					return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
+				}
+				creates[i].SetID(*certifyLegalID)
 				creates[i].SetSourceID(sourceID)
 			}
-
-			declaredLicenseIDs := make([]uuid.UUID, len(declaredLicensesList[index]))
-			for i := range declaredLicensesList[index] {
-				if declaredLicensesList[index][i].LicenseID == nil {
-					return nil, fmt.Errorf("LicenseID not specified in declaredLicenses")
-				}
-				licenseID, err := uuid.Parse(*declaredLicensesList[index][i].LicenseID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from LicenseID failed with error: %w", err)
-				}
-				declaredLicenseIDs[i] = licenseID
-			}
-			creates[i].SetDeclaredLicensesHash(hashLicenseIDs(declaredLicenseIDs))
-			creates[i].AddDeclaredLicenseIDs(declaredLicenseIDs...)
-
-			discoveredLicenseIDs := make([]uuid.UUID, len(discoveredLicensesList[index]))
-			for i := range discoveredLicensesList[index] {
-				if discoveredLicensesList[index][i].LicenseID == nil {
-					return nil, fmt.Errorf("LicenseID not specified in discoveredLicenses")
-				}
-				licenseID, err := uuid.Parse(*discoveredLicensesList[index][i].LicenseID)
-				if err != nil {
-					return nil, fmt.Errorf("uuid conversion from LicenseID failed with error: %w", err)
-				}
-				discoveredLicenseIDs[i] = licenseID
-			}
-			creates[i].SetDiscoveredLicensesHash(hashLicenseIDs(discoveredLicenseIDs))
-			creates[i].AddDiscoveredLicenseIDs(discoveredLicenseIDs...)
 
 			index++
 		}
@@ -378,6 +413,36 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 	}
 
 	return certifylegal.And(predicates...)
+}
+
+func canonicalCertifyLegalString(cl *model.CertifyLegalInputSpec) string {
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", cl.DeclaredLicense, cl.DiscoveredLicense, cl.Attribution, cl.Justification, cl.TimeScanned.UTC(), cl.Origin, cl.Collector)
+}
+
+// guacCertifyLegalKey generates an uuid based on the hash of the inputspec and inputs. certifyLegal ID has to be set for bulk ingestion
+// when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
+// a new ID for certifyLegal node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
+// "Default" func to generate a new UUID
+func guacCertifyLegalKey(pkg *model.IDorPkgInput, src *model.IDorSourceInput, declaredLicenseHash, discoveredLicenseHash string, clInput *model.CertifyLegalInputSpec) (*uuid.UUID, error) {
+	var subjectID string
+	if pkg != nil {
+		if pkg.PackageVersionID == nil {
+			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		}
+		subjectID = *pkg.PackageVersionID
+	} else if src != nil {
+		if src.SourceNameID == nil {
+			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
+		}
+		subjectID = *src.SourceNameID
+	} else {
+		return nil, gqlerror.Errorf("%v :: %s", "guacCertifyLegalKey", "subject must be either a package or source")
+	}
+
+	depIDString := fmt.Sprintf("%s::%s::%s::%s?", subjectID, declaredLicenseHash, discoveredLicenseHash, canonicalCertifyLegalString(clInput))
+
+	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
+	return &depID, nil
 }
 
 // func certifyLegalInputQuery(subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, filter model.CertifyLegalInputSpec) predicate.CertifyLegal {

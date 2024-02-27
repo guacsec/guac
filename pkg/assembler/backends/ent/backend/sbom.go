@@ -449,10 +449,11 @@ func upsertBulkHasSBOM(ctx context.Context, client *ent.Tx, subjects model.Packa
 }
 
 func canonicalHasSBOMString(hasSBOM *model.HasSBOMInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", hasSBOM.URI, hasSBOM.Algorithm, hasSBOM.Digest, hasSBOM.DownloadLocation, hasSBOM.Origin, hasSBOM.Collector, hasSBOM.KnownSince)
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", hasSBOM.URI, hasSBOM.Algorithm, hasSBOM.Digest, hasSBOM.DownloadLocation, hasSBOM.Origin, hasSBOM.Collector, hasSBOM.KnownSince.UTC())
 }
 
-// guacHasSBOMKey generates an uuid based on the hash of the inputspec and inputs. hasSBOM ID has to be set for bulk ingestion when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
+// guacHasSBOMKey generates an uuid based on the hash of the inputspec and inputs. hasSBOM ID has to be set for bulk ingestion
+// when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
 // a new ID for hasSBOM node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
 // "Default" func to generate a new UUID
 func guacHasSBOMKey(pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includedPkgHash, includedArtHash, includedDepHash, includedOccurHash string,
@@ -470,7 +471,7 @@ func guacHasSBOMKey(pkg *model.IDorPkgInput, art *model.IDorArtifactInput, inclu
 		}
 		subjectID = *art.ArtifactID
 	} else {
-		return nil, gqlerror.Errorf("%v :: %s", "guacHasSBOMKey", "subject must be either a package or source")
+		return nil, gqlerror.Errorf("%v :: %s", "guacHasSBOMKey", "subject must be either a package or artifact")
 	}
 	depIDString := fmt.Sprintf("%s::%s::%s::%s::%s::%s?", subjectID, includedPkgHash, includedArtHash, includedDepHash, includedOccurHash, canonicalHasSBOMString(hasSBOM))
 
