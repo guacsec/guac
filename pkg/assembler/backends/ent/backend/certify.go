@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -217,18 +216,17 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.
 		return nil, fmt.Errorf("unknown spec: %+T", v)
 	}
 
-	if _, err := insert.OnConflict(
+	if id, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert certify legal node")
-		}
-	}
 
-	return ptrfrom.String(""), nil
+		return nil, errors.Wrap(err, "upsert certify legal node")
+	} else {
+		return ptrfrom.String(id.String()), nil
+	}
 }
 
 func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, pkgMatchType *model.MatchFlags,
@@ -305,7 +303,6 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 			}
 			certifyCreate.SetAllVersionsID(pkgNameID)
 		}
-
 	case src != nil:
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
@@ -413,10 +410,10 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 					sql.ConflictColumns(conflictColumns...),
 					sql.ConflictWhere(conflictWhere),
 				).
-				DoNothing().
+				Ignore().
 				Exec(ctx)
 			if err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "bulk upsert certifyBad node")
 			}
 		}
 	case []*model.CertifyGoodInputSpec:
@@ -452,10 +449,10 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 					sql.ConflictColumns(conflictColumns...),
 					sql.ConflictWhere(conflictWhere),
 				).
-				DoNothing().
+				Ignore().
 				Exec(ctx)
 			if err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "bulk upsert certifyGood node")
 			}
 		}
 	default:

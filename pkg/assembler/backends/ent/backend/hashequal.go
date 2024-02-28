@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -116,10 +117,10 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert hashEqual node")
 		}
 	}
 	return &ids, nil
@@ -191,7 +192,7 @@ func upsertHashEqual(ctx context.Context, tx *ent.Tx, artifactA model.IDorArtifa
 		return nil, gqlerror.Errorf("generateHashEqualCreate :: %s", err)
 	}
 
-	if _, err := hashEqualCreate.
+	if id, err := hashEqualCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				hashequal.FieldArtifactsHash,
@@ -200,13 +201,13 @@ func upsertHashEqual(ctx context.Context, tx *ent.Tx, artifactA model.IDorArtifa
 				hashequal.FieldJustification,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 
-		return nil, err
+		return nil, errors.Wrap(err, "upsert hashEqual statement node")
+	} else {
+		return ptrfrom.String(id.String()), nil
 	}
-
-	return ptrfrom.String(""), nil
 }
 
 // hashArtifacts is used to create a unique key for the M2M edge between HashEquals <-M2M-> artifacts

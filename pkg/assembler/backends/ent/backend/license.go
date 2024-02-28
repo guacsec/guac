@@ -18,7 +18,6 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
-	stdsql "database/sql"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -106,10 +105,10 @@ func upsertBulkLicense(ctx context.Context, tx *ent.Tx, licenseInputs []*model.I
 					license.FieldListVersion,
 				),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert license node")
 		}
 	}
 
@@ -135,12 +134,10 @@ func upsertLicense(ctx context.Context, tx *ent.Tx, spec model.LicenseInputSpec)
 				license.FieldListVersion,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx)
 	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert license node")
-		}
+		return nil, errors.Wrap(err, "upsert license node")
 	}
 	return ptrfrom.String(licenseID.String()), nil
 }

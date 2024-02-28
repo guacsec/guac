@@ -20,7 +20,6 @@ import (
 	"context"
 	"crypto/sha1"
 	"crypto/sha256"
-	stdsql "database/sql"
 	"fmt"
 	"sort"
 
@@ -130,10 +129,10 @@ func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*mo
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert vulnEqual node")
 		}
 	}
 	return &ids, nil
@@ -215,7 +214,7 @@ func upsertVulnEquals(ctx context.Context, tx *ent.Tx, vulnerability model.IDorV
 		return nil, gqlerror.Errorf("generatePkgEqualCreate :: %s", err)
 	}
 
-	if _, err := vulnEqualCreate.
+	if id, err := vulnEqualCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				vulnequal.FieldVulnerabilitiesHash,
@@ -224,14 +223,13 @@ func upsertVulnEquals(ctx context.Context, tx *ent.Tx, vulnerability model.IDorV
 				vulnequal.FieldJustification,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsertVulnEquals")
-		}
-	}
 
-	return ptrfrom.String(""), nil
+		return nil, errors.Wrap(err, "upsert vulnEqual node")
+	} else {
+		return ptrfrom.String(id.String()), nil
+	}
 }
 
 // hashPackages is used to create a unique key for the M2M edge between PkgEquals <-M2M-> PackageVersions

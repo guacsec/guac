@@ -20,7 +20,6 @@ import (
 	"context"
 	"crypto/sha1"
 	"crypto/sha256"
-	stdsql "database/sql"
 	"fmt"
 	"sort"
 
@@ -157,10 +156,10 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 			OnConflict(
 				sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx); err != nil {
 
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert pkgName node")
 		}
 
 		if err := tx.PackageVersion.CreateBulk(pkgVersionCreates...).
@@ -170,10 +169,10 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 					packageversion.FieldNameID,
 				),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx); err != nil {
 
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert pkgVersion node")
 		}
 	}
 	var collectedPkgIDs []model.PackageIDs
@@ -199,13 +198,10 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 
 	nameID, err := pkgNameCreate.
 		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType)).
-		DoNothing().
+		Ignore().
 		ID(ctx)
 	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert package name")
-		}
-		nameID = pkgNameID
+		return nil, errors.Wrap(err, "upsert package name")
 	}
 
 	pkgVersionCreate := generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, &pkg)
@@ -217,13 +213,10 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 				packageversion.FieldNameID,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx)
 	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert package version")
-		}
-		id = pkgVersionID
+		return nil, errors.Wrap(err, "upsert package version")
 	}
 
 	return &model.PackageIDs{

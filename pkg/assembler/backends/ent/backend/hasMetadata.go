@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -158,18 +157,17 @@ func upsertHasMetadata(ctx context.Context, tx *ent.Tx, subject model.PackageSou
 		return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 	}
 
-	if _, err := insert.OnConflict(
+	if id, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert HasMetadata node")
-		}
-	}
+		return nil, errors.Wrap(err, "upsert HasMetadata node")
 
-	return ptrfrom.String(""), nil
+	} else {
+		return ptrfrom.String(id.String()), nil
+	}
 }
 
 func generateHasMetadataCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, pkgMatchType *model.MatchFlags,
@@ -340,10 +338,10 @@ func upsertBulkHasMetadata(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert hasMetadata node")
 		}
 	}
 

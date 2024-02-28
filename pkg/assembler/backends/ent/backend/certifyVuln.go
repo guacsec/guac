@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -53,16 +54,16 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 			return nil, gqlerror.Errorf("generateCertifyVulnCreate :: %s", err)
 		}
 
-		if _, err := insert.
+		if id, err := insert.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
 			Ignore().
 			ID(ctx); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "upsert certify Vuln statement node")
+		} else {
+			return ptrfrom.String(id.String()), nil
 		}
-
-		return ptrfrom.String(""), nil
 	})
 	if err != nil {
 		return "", err
@@ -182,10 +183,10 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert certifyVuln node")
 		}
 	}
 

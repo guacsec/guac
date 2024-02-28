@@ -18,7 +18,6 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
-	stdsql "database/sql"
 	"fmt"
 	"strings"
 
@@ -138,18 +137,17 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		if err != nil {
 			return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
 		}
-		if _, err := sbomCreate.
+		if id, err := sbomCreate.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			ID(ctx); err != nil {
-			if err != stdsql.ErrNoRows {
-				return nil, errors.Wrap(err, "IngestHasSbom")
-			}
+			return nil, errors.Wrap(err, "upsert hasSBOM node")
+		} else {
+			return ptrfrom.String(id.String()), nil
 		}
-		return ptrfrom.String(""), nil
 	})
 	if err != nil {
 		return "", Errorf("%v :: %s", funcName, err)
@@ -270,7 +268,7 @@ func generateSBOMCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput
 			}
 			pkgVersionID = pv.ID
 		}
-		hasSBOMID, err := guacHasSBOMKey(pkg, nil, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hasSBOM)
+		hasSBOMID, err := guacHasSBOMKey(ptrfrom.String(pkgVersionID.String()), nil, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hasSBOM)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
 		}
@@ -291,7 +289,7 @@ func generateSBOMCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput
 			}
 			artID = foundArt.ID
 		}
-		hasSBOMID, err := guacHasSBOMKey(nil, art, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hasSBOM)
+		hasSBOMID, err := guacHasSBOMKey(nil, ptrfrom.String(artID.String()), sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hasSBOM)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
 		}
@@ -363,10 +361,10 @@ func upsertBulkHasSBOM(ctx context.Context, tx *ent.Tx, subjects model.PackageOr
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert hasSBOM node")
 		}
 	}
 
@@ -381,20 +379,14 @@ func canonicalHasSBOMString(hasSBOM *model.HasSBOMInputSpec) string {
 // when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
 // a new ID for hasSBOM node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
 // "Default" func to generate a new UUID
-func guacHasSBOMKey(pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includedPkgHash, includedArtHash, includedDepHash, includedOccurHash string,
+func guacHasSBOMKey(pkgVersionID *string, artID *string, includedPkgHash, includedArtHash, includedDepHash, includedOccurHash string,
 	hasSBOM *model.HasSBOMInputSpec) (*uuid.UUID, error) {
 
 	var subjectID string
-	if pkg != nil {
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		subjectID = *pkg.PackageVersionID
-	} else if art != nil {
-		if art.ArtifactID == nil {
-			return nil, fmt.Errorf("ArtifactID not specified in IDorArtifactInput")
-		}
-		subjectID = *art.ArtifactID
+	if pkgVersionID != nil {
+		subjectID = *pkgVersionID
+	} else if artID != nil {
+		subjectID = *artID
 	} else {
 		return nil, gqlerror.Errorf("%v :: %s", "guacHasSBOMKey", "subject must be either a package or artifact")
 	}

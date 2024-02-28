@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -159,10 +158,10 @@ func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabil
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert VulnerabilityMetadata node")
 		}
 	}
 
@@ -222,17 +221,15 @@ func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability 
 		return nil, gqlerror.Errorf("generateVulnMetadataCreate :: %s", err)
 
 	}
-	if _, err := insert.OnConflict(
+	if id, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 	).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert VulnerabilityMetadata node")
-		}
+		return nil, errors.Wrap(err, "upsert VulnerabilityMetadata node")
+	} else {
+		return ptrfrom.String(id.String()), nil
 	}
-
-	return ptrfrom.String(""), nil
 }
 
 func toModelVulnerabilityMetadata(v *ent.VulnerabilityMetadata) *model.VulnerabilityMetadata {

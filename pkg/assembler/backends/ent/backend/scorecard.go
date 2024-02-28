@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -166,10 +165,10 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert scorecard node")
 		}
 	}
 
@@ -182,19 +181,19 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.IDorSourceInp
 	if err != nil {
 		return nil, gqlerror.Errorf("generateScorecardCreate :: %s", err)
 	}
-	if _, err := scorecardCreate.
+	if id, err := scorecardCreate.
 		OnConflict(
 			sql.ConflictColumns(certifyscorecard.FieldSourceID, certifyscorecard.FieldOrigin,
 				certifyscorecard.FieldCollector, certifyscorecard.FieldScorecardCommit,
 				certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldTimeScanned, certifyscorecard.FieldAggregateScore),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert Scorecard")
-		}
+		return nil, errors.Wrap(err, "upsert Scorecard")
+
+	} else {
+		return ptrfrom.String(id.String()), nil
 	}
-	return ptrfrom.String(""), nil
 }
 
 func toModelCertifyScorecard(record *ent.CertifyScorecard) *model.CertifyScorecard {

@@ -18,7 +18,6 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
-	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -112,20 +111,18 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 			return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 		}
 
-		if _, err := certifyLegalCreate.
+		if id, err := certifyLegalCreate.
 			OnConflict(
 				sql.ConflictColumns(certifyLegalConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			ID(ctx); err != nil {
 
-			if err != stdsql.ErrNoRows {
-				return nil, errors.Wrap(err, "upsert certify legal node")
-			}
+			return nil, errors.Wrap(err, "upsert certify legal node")
+		} else {
+			return ptrfrom.String(id.String()), nil
 		}
-
-		return ptrfrom.String(""), nil
 	})
 	if err != nil {
 		return "", gqlerror.Errorf("IngestCertifyLegal :: %s", err)
@@ -205,31 +202,50 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		certifyLegalCreate.SetDiscoveredLicensesHash(sortedDiscoveredLicenseHash)
 	}
 
-	certifyLegalID, err := guacCertifyLegalKey(pkg, src, sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
-	}
-	certifyLegalCreate.SetID(*certifyLegalID)
-
 	if pkg != nil {
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		var pkgVersionID uuid.UUID
+		if pkg.PackageVersionID != nil {
+			var err error
+			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+		} else {
+			pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+			if err != nil {
+				return nil, fmt.Errorf("getPkgVersion :: %w", err)
+			}
+			pkgVersionID = pv.ID
 		}
 		certifyLegalCreate.SetPackageID(pkgVersionID)
-	} else if src != nil {
-		if src.SourceNameID == nil {
-			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-		}
-		sourceID, err := uuid.Parse(*src.SourceNameID)
+		certifyLegalID, err := guacCertifyLegalKey(ptrfrom.String(pkgVersionID.String()), nil, sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+			return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
+		}
+		certifyLegalCreate.SetID(*certifyLegalID)
+	} else if src != nil {
+		var sourceID uuid.UUID
+		if src.SourceNameID != nil {
+			var err error
+			sourceID, err = uuid.Parse(*src.SourceNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+			}
+		} else {
+			srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
+			if err != nil {
+				return nil, err
+			}
+			sourceID = srcID
 		}
 		certifyLegalCreate.SetSourceID(sourceID)
+		certifyLegalID, err := guacCertifyLegalKey(nil, ptrfrom.String(sourceID.String()), sortedDeclaredLicenseHash, sortedDiscoveredLicenseHash, cl)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create certifyLegal uuid with error: %w", err)
+		}
+		certifyLegalCreate.SetID(*certifyLegalID)
 	}
+
 	return certifyLegalCreate, nil
 }
 
@@ -296,10 +312,10 @@ func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.Pack
 				sql.ConflictColumns(certifyLegalConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert certifyLegal node")
 		}
 	}
 
@@ -384,18 +400,12 @@ func canonicalCertifyLegalString(cl *model.CertifyLegalInputSpec) string {
 // when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
 // a new ID for certifyLegal node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
 // "Default" func to generate a new UUID
-func guacCertifyLegalKey(pkg *model.IDorPkgInput, src *model.IDorSourceInput, declaredLicenseHash, discoveredLicenseHash string, clInput *model.CertifyLegalInputSpec) (*uuid.UUID, error) {
+func guacCertifyLegalKey(pkgVersionID *string, srcNameID *string, declaredLicenseHash, discoveredLicenseHash string, clInput *model.CertifyLegalInputSpec) (*uuid.UUID, error) {
 	var subjectID string
-	if pkg != nil {
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		subjectID = *pkg.PackageVersionID
-	} else if src != nil {
-		if src.SourceNameID == nil {
-			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-		}
-		subjectID = *src.SourceNameID
+	if pkgVersionID != nil {
+		subjectID = *pkgVersionID
+	} else if srcNameID != nil {
+		subjectID = *srcNameID
 	} else {
 		return nil, gqlerror.Errorf("%v :: %s", "guacCertifyLegalKey", "subject must be either a package or source")
 	}

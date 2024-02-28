@@ -18,7 +18,6 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
-	stdsql "database/sql"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
@@ -106,10 +105,10 @@ func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDor
 			OnConflict(
 				sql.ConflictColumns(artifact.FieldDigest),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert artifact node")
 		}
 	}
 
@@ -130,13 +129,10 @@ func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInpu
 		OnConflict(
 			sql.ConflictColumns(artifact.FieldDigest),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx)
 	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert artifact")
-		}
-		id = artifactID
+		return nil, errors.Wrap(err, "upsert artifact")
 	}
 	return ptrfrom.String(id.String()), nil
 }

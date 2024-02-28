@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -110,11 +111,8 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 			switch {
 			case len(subjects.Packages) > 0:
 				var err error
-				isOccurrenceID, err := guacOccurrenceKey(subjects.Packages[index], nil, *artifacts[index], *occur)
-				if err != nil {
-					return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
-				}
-				creates[i], err = generateOccurrenceCreate(ctx, tx, isOccurrenceID, subjects.Packages[index], nil, artifacts[index], occur)
+				var isOccurrenceID *uuid.UUID
+				creates[i], isOccurrenceID, err = generateOccurrenceCreate(ctx, tx, subjects.Packages[index], nil, artifacts[index], occur)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 				}
@@ -122,11 +120,8 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 
 			case len(subjects.Sources) > 0:
 				var err error
-				isOccurrenceID, err := guacOccurrenceKey(nil, subjects.Sources[index], *artifacts[index], *occur)
-				if err != nil {
-					return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
-				}
-				creates[i], err = generateOccurrenceCreate(ctx, tx, isOccurrenceID, nil, subjects.Sources[index], artifacts[index], occur)
+				var isOccurrenceID *uuid.UUID
+				creates[i], isOccurrenceID, err = generateOccurrenceCreate(ctx, tx, nil, subjects.Sources[index], artifacts[index], occur)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 				}
@@ -142,82 +137,96 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert Occurrence node")
 		}
 	}
 
 	return &ids, nil
 }
 
-func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, isOccurrenceID *uuid.UUID, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, occur *model.IsOccurrenceInputSpec) (*ent.OccurrenceCreate, error) {
+func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, occur *model.IsOccurrenceInputSpec) (*ent.OccurrenceCreate, *uuid.UUID, error) {
 
 	occurrenceCreate := tx.Occurrence.Create()
 
 	if art == nil {
-		return nil, fmt.Errorf("artifact must be specified for isOccurrence")
+		return nil, nil, fmt.Errorf("artifact must be specified for isOccurrence")
 	}
 	var artID uuid.UUID
 	if art.ArtifactID != nil {
 		var err error
 		artID, err = uuid.Parse(*art.ArtifactID)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			return nil, nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
 	} else {
 		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*art.ArtifactInput)).Only(ctx)
 		if err != nil {
-			return nil, err
+			return nil, nil, fmt.Errorf("failed to query for artifact")
 		}
 		artID = foundArt.ID
 	}
 
 	occurrenceCreate.
-		SetID(*isOccurrenceID).
 		SetArtifactID(artID).
 		SetJustification(occur.Justification).
 		SetOrigin(occur.Origin).
 		SetCollector(occur.Collector)
 
+	var isOccurrenceID *uuid.UUID
 	if pkg != nil {
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
 			var err error
 			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+				return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
 		} else {
 			pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
 			if err != nil {
-				return nil, fmt.Errorf("getPkgVersion :: %w", err)
+				return nil, nil, fmt.Errorf("getPkgVersion :: %w", err)
 			}
 			pkgVersionID = pv.ID
 		}
 		occurrenceCreate.SetPackageID(pkgVersionID)
+
+		var err error
+		isOccurrenceID, err = guacOccurrenceKey(ptrfrom.String(pkgVersionID.String()), nil, ptrfrom.String(artID.String()), *occur)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create occurrence uuid with error: %w", err)
+		}
+		occurrenceCreate.SetID(*isOccurrenceID)
 	} else if src != nil {
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
 			sourceID, err = uuid.Parse(*src.SourceNameID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+				return nil, nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
 		} else {
 			srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			sourceID = srcID
 		}
 		occurrenceCreate.SetSourceID(sourceID)
+
+		var err error
+		isOccurrenceID, err := guacOccurrenceKey(nil, ptrfrom.String(sourceID.String()), ptrfrom.String(artID.String()), *occur)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create occurrence uuid with error: %w", err)
+		}
+		occurrenceCreate.SetID(*isOccurrenceID)
 	} else {
-		return nil, gqlerror.Errorf("%v :: %s", "generateOccurrenceCreate", "subject must be either a package or source")
+		return nil, nil, gqlerror.Errorf("%v :: %s", "generateOccurrenceCreate", "subject must be either a package or source")
 	}
 
-	return occurrenceCreate, nil
+	return occurrenceCreate, isOccurrenceID, nil
 }
 
 func (b *EntBackend) IngestOccurrence(ctx context.Context,
@@ -255,27 +264,22 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			return nil, gqlerror.Errorf("%v :: %s", funcName, "subject must be either a package or source")
 		}
 
-		isOccurrenceID, err := guacOccurrenceKey(subject.Package, subject.Source, art, spec)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
-		}
-
-		insert, err := generateOccurrenceCreate(ctx, tx, isOccurrenceID, subject.Package, subject.Source, &art, &spec)
+		insert, _, err := generateOccurrenceCreate(ctx, tx, subject.Package, subject.Source, &art, &spec)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 		}
 
-		if _, err := insert.
+		if id, err := insert.
 			OnConflict(
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			ID(ctx); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "upsert isOccurrence node")
+		} else {
+			return ptrfrom.String(id.String()), nil
 		}
-
-		return ptrfrom.String(isOccurrenceID.String()), nil
 	})
 	if err != nil {
 		return "", gqlerror.Errorf("%v :: %s", funcName, err)
@@ -330,23 +334,21 @@ func canonicalOccurrenceString(occur model.IsOccurrenceInputSpec) string {
 	return fmt.Sprintf("%s::%s::%s", occur.Justification, occur.Origin, occur.Collector)
 }
 
-func guacOccurrenceKey(pkg *model.IDorPkgInput, src *model.IDorSourceInput, art model.IDorArtifactInput, occur model.IsOccurrenceInputSpec) (*uuid.UUID, error) {
+func guacOccurrenceKey(pkgVersionID *string, srcNameID *string, artID *string, occur model.IsOccurrenceInputSpec) (*uuid.UUID, error) {
 	var subjectID string
-	if pkg != nil {
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		subjectID = *pkg.PackageVersionID
-	} else if src != nil {
-		if src.SourceNameID == nil {
-			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-		}
-		subjectID = *src.SourceNameID
+	if pkgVersionID != nil {
+		subjectID = *pkgVersionID
+	} else if srcNameID != nil {
+		subjectID = *srcNameID
 	} else {
 		return nil, gqlerror.Errorf("%v :: %s", "guacOccurrenceKey", "subject must be either a package or source")
 	}
 
-	occurIDString := fmt.Sprintf("%s::%s::%s?", subjectID, *art.ArtifactID, canonicalOccurrenceString(occur))
+	if artID == nil {
+		return nil, gqlerror.Errorf("%v :: %s", "guacOccurrenceKey", "artifact must be specified")
+	}
+
+	occurIDString := fmt.Sprintf("%s::%s::%s?", subjectID, *artID, canonicalOccurrenceString(occur))
 
 	occurID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(occurIDString), 5)
 	return &occurID, nil

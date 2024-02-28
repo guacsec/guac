@@ -18,7 +18,6 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
-	stdsql "database/sql"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -107,10 +106,10 @@ func upsertBulkBuilder(ctx context.Context, tx *ent.Tx, buildInputs []*model.IDo
 			OnConflict(
 				sql.ConflictColumns(builder.FieldURI),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert builder node")
 		}
 	}
 
@@ -131,13 +130,10 @@ func upsertBuilder(ctx context.Context, tx *ent.Tx, spec *model.BuilderInputSpec
 		OnConflict(
 			sql.ConflictColumns(builder.FieldURI),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx)
 	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert builder")
-		}
-		id = builderID
+		return nil, errors.Wrap(err, "upsert builder")
 	}
 
 	return ptrfrom.String(id.String()), nil

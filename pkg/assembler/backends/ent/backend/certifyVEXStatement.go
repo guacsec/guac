@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -27,6 +26,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -71,19 +71,19 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 			return nil, gqlerror.Errorf("generateVexCreate :: %s", err)
 		}
 
-		if _, err := insert.
+		if id, err := insert.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			ID(ctx); err != nil {
 
-			if err != stdsql.ErrNoRows {
-				return nil, errors.Wrap(err, "upsert certify vex statement node")
-			}
+			return nil, errors.Wrap(err, "upsert certify vex statement node")
+
+		} else {
+			return ptrfrom.String(id.String()), nil
 		}
-		return ptrfrom.String(""), nil
 	})
 
 	if err != nil {
@@ -247,10 +247,10 @@ func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArti
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert certifyVex node")
 		}
 	}
 
@@ -337,29 +337,29 @@ func certifyVexPredicate(filter model.CertifyVEXStatementSpec) predicate.Certify
 	return certifyvex.And(predicates...)
 }
 
-// func vexStatementInputPredicate(subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) predicate.CertifyVex {
-// 	var sub *model.PackageOrArtifactSpec
-// 	if subject.Package != nil {
-// 		sub = &model.PackageOrArtifactSpec{
-// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-// 		}
-// 	} else {
-// 		sub = &model.PackageOrArtifactSpec{
-// 			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
-// 		}
-// 	}
-// 	return certifyVexPredicate(model.CertifyVEXStatementSpec{
-// 		Subject: sub,
-// 		Vulnerability: &model.VulnerabilitySpec{
-// 			Type:            &vulnerability.Type,
-// 			VulnerabilityID: &vulnerability.VulnerabilityID,
-// 		},
-// 		Status:           &vexStatement.Status,
-// 		VexJustification: &vexStatement.VexJustification,
-// 		Statement:        &vexStatement.Statement,
-// 		StatusNotes:      &vexStatement.StatusNotes,
-// 		KnownSince:       &vexStatement.KnownSince,
-// 		Origin:           &vexStatement.Origin,
-// 		Collector:        &vexStatement.Collector,
-// 	})
-// }
+func vexStatementInputPredicate(subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) predicate.CertifyVex {
+	var sub *model.PackageOrArtifactSpec
+	if subject.Package != nil {
+		sub = &model.PackageOrArtifactSpec{
+			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
+		}
+	} else {
+		sub = &model.PackageOrArtifactSpec{
+			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
+		}
+	}
+	return certifyVexPredicate(model.CertifyVEXStatementSpec{
+		Subject: sub,
+		Vulnerability: &model.VulnerabilitySpec{
+			Type:            &vulnerability.Type,
+			VulnerabilityID: &vulnerability.VulnerabilityID,
+		},
+		Status:           &vexStatement.Status,
+		VexJustification: &vexStatement.VexJustification,
+		Statement:        &vexStatement.Statement,
+		StatusNotes:      &vexStatement.StatusNotes,
+		KnownSince:       &vexStatement.KnownSince,
+		Origin:           &vexStatement.Origin,
+		Collector:        &vexStatement.Collector,
+	})
+}

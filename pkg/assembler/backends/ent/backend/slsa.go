@@ -32,6 +32,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -131,10 +132,10 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert slsa node")
 		}
 	}
 
@@ -221,7 +222,7 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		slsaCreate.SetBuiltFromHash(builtFromHash)
 	}
 
-	slsaID, err := guacSLSAKey(subject, builtFromHash, builtBy, slsa)
+	slsaID, err := guacSLSAKey(ptrfrom.String(subjectArtifactID.String()), builtFromHash, builtBy, slsa)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create slsa uuid with error: %w", err)
 	}
@@ -238,7 +239,7 @@ func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput
 		return nil, gqlerror.Errorf("generateSLSACreate :: %s", err)
 	}
 
-	if _, err := slsaCreate.
+	if id, err := slsaCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				slsaattestation.FieldSubjectID,
@@ -250,13 +251,13 @@ func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput
 				slsaattestation.FieldBuiltFromHash,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 
-		return nil, err
+		return nil, errors.Wrap(err, "upsert slsa node")
+	} else {
+		return ptrfrom.String(id.String()), nil
 	}
-
-	return ptrfrom.String(""), nil
 }
 
 func toSLSAInputPredicate(rows []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
@@ -352,8 +353,8 @@ func canonicalSLSAString(slsa model.SLSAInputSpec) string {
 // when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
 // a new ID for slsa node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
 // "Default" func to generate a new UUID
-func guacSLSAKey(subject *model.IDorArtifactInput, builtFromHash string, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*uuid.UUID, error) {
-	depIDString := fmt.Sprintf("%s::%s::%s::%s?", *subject.ArtifactID, builtFromHash, *builtBy.BuilderID, canonicalSLSAString(*slsa))
+func guacSLSAKey(subjectID *string, builtFromHash string, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*uuid.UUID, error) {
+	depIDString := fmt.Sprintf("%s::%s::%s::%s?", *subjectID, builtFromHash, *builtBy.BuilderID, canonicalSLSAString(*slsa))
 
 	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
 	return &depID, nil

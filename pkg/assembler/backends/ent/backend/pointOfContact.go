@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -187,10 +186,10 @@ func upsertBulkPointOfContact(ctx context.Context, tx *ent.Tx, subjects model.Pa
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert PointOfContact node")
 		}
 	}
 
@@ -335,19 +334,18 @@ func upsertPointOfContact(ctx context.Context, tx *ent.Tx, subject model.Package
 	if err != nil {
 		return nil, gqlerror.Errorf("generatePointOfContactCreate :: %s", err)
 	}
-	if _, err := insert.OnConflict(
+	if id, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert PointOfContact node")
-		}
-	}
+		return nil, errors.Wrap(err, "upsert PointOfContact node")
 
-	return ptrfrom.String(""), nil
+	} else {
+		return ptrfrom.String(id.String()), nil
+	}
 }
 
 func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {

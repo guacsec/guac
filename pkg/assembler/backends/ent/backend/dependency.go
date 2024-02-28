@@ -105,16 +105,13 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 		for i, dep := range deps {
 			dep := dep
 			var err error
-			isDependencyID, err := guacDependencyKey(*pkgs[index], *depPkgs[index], depPkgMatchType, *dep)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
-			}
-			ids = append(ids, isDependencyID.String())
-
-			creates[i], err = generateDependencyCreate(ctx, tx, isDependencyID, pkgs[index], depPkgs[index], depPkgMatchType, dep)
+			var isDependencyID *uuid.UUID
+			creates[i], isDependencyID, err = generateDependencyCreate(ctx, tx, pkgs[index], depPkgs[index], depPkgMatchType, dep)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 			}
+			ids = append(ids, isDependencyID.String())
+
 			index++
 		}
 
@@ -123,25 +120,25 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert dependency node")
 		}
 	}
 
 	return &ids, nil
 }
 
-func generateDependencyCreate(ctx context.Context, tx *ent.Tx, isDependencyID *uuid.UUID, pkg *model.IDorPkgInput, depPkg *model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep *model.IsDependencyInputSpec) (*ent.DependencyCreate, error) {
+func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, depPkg *model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep *model.IsDependencyInputSpec) (*ent.DependencyCreate, *uuid.UUID, error) {
 
 	dependencyCreate := tx.Dependency.Create()
 
 	if pkg == nil {
-		return nil, Errorf("%v :: %s", "generateDependencyCreate", "package cannot be nil")
+		return nil, nil, Errorf("%v :: %s", "generateDependencyCreate", "package cannot be nil")
 	}
 	if depPkg == nil {
-		return nil, Errorf("%v :: %s", "generateDependencyCreate", "dependency package cannot be nil")
+		return nil, nil, Errorf("%v :: %s", "generateDependencyCreate", "dependency package cannot be nil")
 	}
 
 	var pkgVersionID uuid.UUID
@@ -149,18 +146,17 @@ func generateDependencyCreate(ctx context.Context, tx *ent.Tx, isDependencyID *u
 		var err error
 		pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
 		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
 	} else {
 		pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
 		if err != nil {
-			return nil, fmt.Errorf("getPkgVersion :: %w", err)
+			return nil, nil, fmt.Errorf("getPkgVersion :: %w", err)
 		}
 		pkgVersionID = pv.ID
 	}
 
 	dependencyCreate.
-		SetID(*isDependencyID).
 		SetPackageID(pkgVersionID).
 		SetVersionRange(dep.VersionRange).
 		SetDependencyType(dependencyTypeToEnum(dep.DependencyType)).
@@ -168,41 +164,56 @@ func generateDependencyCreate(ctx context.Context, tx *ent.Tx, isDependencyID *u
 		SetOrigin(dep.Origin).
 		SetCollector(dep.Collector)
 
+	var isDependencyID *uuid.UUID
 	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 		var depPkgNameID uuid.UUID
 		if depPkg.PackageNameID != nil {
 			var err error
 			depPkgNameID, err = uuid.Parse(*depPkg.PackageNameID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+				return nil, nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 			}
 		} else {
 			pn, err := getPkgName(ctx, tx.Client(), *depPkg.PackageInput)
 			if err != nil {
-				return nil, err
+				return nil, nil, fmt.Errorf("failed to query for pkgName")
 			}
 			depPkgNameID = pn.ID
 		}
 		dependencyCreate.SetDependentPackageNameID(depPkgNameID)
+
+		var err error
+		isDependencyID, err = guacDependencyKey(ptrfrom.String(pkgVersionID.String()), ptrfrom.String(depPkgNameID.String()), nil, depPkgMatchType, *dep)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+		}
+		dependencyCreate.SetID(*isDependencyID)
 	} else {
 		var depPkgVersionID uuid.UUID
 		if depPkg.PackageVersionID != nil {
 			var err error
 			depPkgVersionID, err = uuid.Parse(*depPkg.PackageVersionID)
 			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+				return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
 		} else {
 			pv, err := getPkgVersion(ctx, tx.Client(), *depPkg.PackageInput)
 			if err != nil {
-				return nil, fmt.Errorf("getPkgVersion :: %w", err)
+				return nil, nil, fmt.Errorf("getPkgVersion :: %w", err)
 			}
 			depPkgVersionID = pv.ID
 		}
 		dependencyCreate.SetDependentPackageVersionID(depPkgVersionID)
+
+		var err error
+		isDependencyID, err = guacDependencyKey(ptrfrom.String(pkgVersionID.String()), nil, ptrfrom.String(depPkgVersionID.String()), depPkgMatchType, *dep)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
+		}
+		dependencyCreate.SetID(*isDependencyID)
 	}
 
-	return dependencyCreate, nil
+	return dependencyCreate, isDependencyID, nil
 }
 
 func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
@@ -236,26 +247,22 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 			)
 		}
 
-		isDependencyID, err := guacDependencyKey(pkg, depPkg, depPkgMatchType, dep)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
-		}
-
-		insert, err := generateDependencyCreate(ctx, tx, isDependencyID, &pkg, &depPkg, depPkgMatchType, &dep)
+		insert, _, err := generateDependencyCreate(ctx, tx, &pkg, &depPkg, depPkgMatchType, &dep)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 		}
 
-		if _, err := insert.
+		if id, err := insert.
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
 			Ignore().
 			ID(ctx); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "upsert isDependency statement node")
+		} else {
+			return ptrfrom.String(id.String()), nil
 		}
-		return ptrfrom.String(isDependencyID.String()), nil
 	})
 	if err != nil {
 		return "", errors.Wrap(err, funcName)
@@ -314,21 +321,26 @@ func canonicalDependencyString(dep model.IsDependencyInputSpec) string {
 	return fmt.Sprintf("%s::%s::%s::%s::%s", dep.VersionRange, dep.DependencyType.String(), dep.Justification, dep.Origin, dep.Collector)
 }
 
-func guacDependencyKey(pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (*uuid.UUID, error) {
+func guacDependencyKey(pkgVersionID *string, depPkgNameID *string, depPkgVersionID *string, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (*uuid.UUID, error) {
 	var depPkgID string
+
 	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		if depPkg.PackageNameID == nil {
+		if depPkgNameID == nil {
 			return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
 		}
-		depPkgID = *depPkg.PackageNameID
+		depPkgID = *depPkgNameID
 	} else {
-		if depPkg.PackageVersionID == nil {
+		if depPkgVersionID == nil {
 			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
 		}
-		depPkgID = *depPkg.PackageVersionID
+		depPkgID = *depPkgVersionID
 	}
 
-	depIDString := fmt.Sprintf("%s::%s::%s?", *pkg.PackageVersionID, depPkgID, canonicalDependencyString(dep))
+	if pkgVersionID == nil {
+		return nil, fmt.Errorf("need to specify package ID for isDependency")
+	}
+
+	depIDString := fmt.Sprintf("%s::%s::%s?", *pkgVersionID, depPkgID, canonicalDependencyString(dep))
 
 	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
 	return &depID, nil

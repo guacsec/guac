@@ -20,7 +20,6 @@ import (
 	"context"
 	"crypto/sha1"
 	"crypto/sha256"
-	stdsql "database/sql"
 	"fmt"
 	"sort"
 
@@ -105,10 +104,10 @@ func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgI
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert pkgEquals node")
 		}
 	}
 	return &ids, nil
@@ -180,7 +179,7 @@ func upsertPackageEqual(ctx context.Context, tx *ent.Tx, pkgA model.IDorPkgInput
 	if err != nil {
 		return nil, gqlerror.Errorf("generatePkgEqualCreate :: %s", err)
 	}
-	if _, err := pkgEqualCreate.
+	if id, err := pkgEqualCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				pkgequal.FieldPackagesHash,
@@ -189,14 +188,12 @@ func upsertPackageEqual(ctx context.Context, tx *ent.Tx, pkgA model.IDorPkgInput
 				pkgequal.FieldJustification,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsertPackageEqual")
-		}
+		return nil, errors.Wrap(err, "upsert pkgEqual node")
+	} else {
+		return ptrfrom.String(id.String()), nil
 	}
-
-	return ptrfrom.String(""), nil
 }
 
 func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {

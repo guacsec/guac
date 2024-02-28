@@ -18,7 +18,6 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
-	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -144,10 +143,10 @@ func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert hasSourceAt node")
 		}
 	}
 
@@ -250,10 +249,10 @@ func upsertHasSourceAt(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput, 
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		DoNothing().
+		Ignore().
 		ID(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "upsert hasSourceAt node")
 	}
 
 	return ptrfrom.String(id.String()), nil
@@ -331,10 +330,10 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 					sourcename.FieldCommit,
 				),
 			).
-			DoNothing().
+			Ignore().
 			Exec(ctx); err != nil {
 
-			return nil, err
+			return nil, errors.Wrap(err, "bulk upsert source name node")
 		}
 	}
 	var collectedSrcIDs []model.SourceIDs
@@ -373,12 +372,10 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 				sourcename.FieldCommit,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx)
 	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert source name")
-		}
+		return nil, errors.Wrap(err, "upsert source name")
 	}
 
 	return &model.SourceIDs{
