@@ -148,7 +148,7 @@ func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabil
 			vm := vm
 			var err error
 
-			creates[i], err = generateVulnMetadataCreate(tx, vulnerabilities[index], vm)
+			creates[i], err = generateVulnMetadataCreate(ctx, tx, vulnerabilities[index], vm)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateVulnEqualCreate :: %s", err)
 			}
@@ -169,28 +169,40 @@ func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabil
 	return &ids, nil
 }
 
-func generateVulnMetadataCreate(tx *ent.Tx, vulnerability *model.IDorVulnerabilityInput, scorecard *model.VulnerabilityMetadataInputSpec) (*ent.VulnerabilityMetadataCreate, error) {
+func generateVulnMetadataCreate(ctx context.Context, tx *ent.Tx, vuln *model.IDorVulnerabilityInput, metadata *model.VulnerabilityMetadataInputSpec) (*ent.VulnerabilityMetadataCreate, error) {
 
-	if vulnerability == nil {
+	if vuln == nil {
 		return nil, fmt.Errorf("vulnerability must be specified for vulnMetadata")
 	}
-	if vulnerability.VulnerabilityNodeID == nil {
-		return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
-	}
-	vulnID, err := uuid.Parse(*vulnerability.VulnerabilityNodeID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+	var vulnID uuid.UUID
+	if vuln.VulnerabilityNodeID != nil {
+		var err error
+		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+		}
+	} else {
+		foundVulnID, err := tx.VulnerabilityID.Query().
+			Where(
+				vulnerabilityid.VulnerabilityIDEqualFold(vuln.VulnerabilityInput.VulnerabilityID),
+				vulnerabilityid.TypeEqualFold(vuln.VulnerabilityInput.Type),
+			).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
+		}
+		vulnID = foundVulnID
 	}
 
 	vulnMetadataCreate := tx.VulnerabilityMetadata.Create()
 
 	vulnMetadataCreate.
 		SetVulnerabilityIDID(vulnID).
-		SetScoreType(vulnerabilitymetadata.ScoreType(scorecard.ScoreType)).
-		SetScoreValue(scorecard.ScoreValue).
-		SetTimestamp(scorecard.Timestamp.UTC()).
-		SetOrigin(scorecard.Origin).
-		SetCollector(scorecard.Collector)
+		SetScoreType(vulnerabilitymetadata.ScoreType(metadata.ScoreType)).
+		SetScoreValue(metadata.ScoreValue).
+		SetTimestamp(metadata.Timestamp.UTC()).
+		SetOrigin(metadata.Origin).
+		SetCollector(metadata.Collector)
 
 	return vulnMetadataCreate, nil
 }
@@ -205,7 +217,7 @@ func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability 
 		vulnerabilitymetadata.FieldCollector,
 	}
 
-	insert, err := generateVulnMetadataCreate(tx, &vulnerability, &spec)
+	insert, err := generateVulnMetadataCreate(ctx, tx, &vulnerability, &spec)
 	if err != nil {
 		return nil, gqlerror.Errorf("generateVulnMetadataCreate :: %s", err)
 

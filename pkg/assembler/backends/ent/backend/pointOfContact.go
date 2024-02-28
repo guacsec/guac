@@ -164,17 +164,17 @@ func upsertBulkPointOfContact(ctx context.Context, tx *ent.Tx, subjects model.Pa
 
 			switch {
 			case len(subjects.Artifacts) > 0:
-				creates[i], err = generatePointOfContactCreate(tx, nil, nil, subjects.Artifacts[index], pkgMatchType, poc)
+				creates[i], err = generatePointOfContactCreate(ctx, tx, nil, nil, subjects.Artifacts[index], pkgMatchType, poc)
 				if err != nil {
 					return nil, gqlerror.Errorf("generatePointOfContactCreate :: %s", err)
 				}
 			case len(subjects.Packages) > 0:
-				creates[i], err = generatePointOfContactCreate(tx, subjects.Packages[index], nil, nil, pkgMatchType, poc)
+				creates[i], err = generatePointOfContactCreate(ctx, tx, subjects.Packages[index], nil, nil, pkgMatchType, poc)
 				if err != nil {
 					return nil, gqlerror.Errorf("generatePointOfContactCreate :: %s", err)
 				}
 			case len(subjects.Sources) > 0:
-				creates[i], err = generatePointOfContactCreate(tx, nil, subjects.Sources[index], nil, pkgMatchType, poc)
+				creates[i], err = generatePointOfContactCreate(ctx, tx, nil, subjects.Sources[index], nil, pkgMatchType, poc)
 				if err != nil {
 					return nil, gqlerror.Errorf("generatePointOfContactCreate :: %s", err)
 				}
@@ -197,7 +197,7 @@ func upsertBulkPointOfContact(ctx context.Context, tx *ent.Tx, subjects model.Pa
 	return &ids, nil
 }
 
-func generatePointOfContactCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, pkgMatchType *model.MatchFlags,
+func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, pkgMatchType *model.MatchFlags,
 	poc *model.PointOfContactInputSpec) (*ent.PointOfContactCreate, error) {
 
 	pocCreate := tx.PointOfContact.Create()
@@ -212,42 +212,69 @@ func generatePointOfContactCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *mode
 
 	switch {
 	case art != nil:
-		if art.ArtifactID == nil {
-			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-		}
-		artID, err := uuid.Parse(*art.ArtifactID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		var artID uuid.UUID
+		if art.ArtifactID != nil {
+			var err error
+			artID, err = uuid.Parse(*art.ArtifactID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			}
+		} else {
+			foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*art.ArtifactInput)).Only(ctx)
+			if err != nil {
+				return nil, err
+			}
+			artID = foundArt.ID
 		}
 		pocCreate.SetArtifactID(artID)
 	case pkg != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			if pkg.PackageVersionID == nil {
-				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-			}
-			pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			var pkgVersionID uuid.UUID
+			if pkg.PackageVersionID != nil {
+				var err error
+				pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+				}
+			} else {
+				pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+				if err != nil {
+					return nil, fmt.Errorf("getPkgVersion :: %w", err)
+				}
+				pkgVersionID = pv.ID
 			}
 			pocCreate.SetPackageVersionID(pkgVersionID)
 		} else {
-			if pkg.PackageNameID == nil {
-				return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-			}
-			pkgNameID, err := uuid.Parse(*pkg.PackageNameID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+			var pkgNameID uuid.UUID
+			if pkg.PackageNameID != nil {
+				var err error
+				pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+				}
+			} else {
+				pn, err := getPkgName(ctx, tx.Client(), *pkg.PackageInput)
+				if err != nil {
+					return nil, err
+				}
+				pkgNameID = pn.ID
 			}
 			pocCreate.SetAllVersionsID(pkgNameID)
 		}
-
 	case src != nil:
-		if src.SourceNameID == nil {
-			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-		}
-		sourceID, err := uuid.Parse(*src.SourceNameID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		var sourceID uuid.UUID
+		if src.SourceNameID != nil {
+			var err error
+			sourceID, err = uuid.Parse(*src.SourceNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+			}
+		} else {
+			srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
+			if err != nil {
+				return nil, err
+			}
+			sourceID = srcID
 		}
 		pocCreate.SetSourceID(sourceID)
 	}
@@ -304,7 +331,7 @@ func upsertPointOfContact(ctx context.Context, tx *ent.Tx, subject model.Package
 		)
 	}
 
-	insert, err := generatePointOfContactCreate(tx, subject.Package, subject.Source, subject.Artifact, pkgMatchType, &spec)
+	insert, err := generatePointOfContactCreate(ctx, tx, subject.Package, subject.Source, subject.Artifact, pkgMatchType, &spec)
 	if err != nil {
 		return nil, gqlerror.Errorf("generatePointOfContactCreate :: %s", err)
 	}

@@ -99,7 +99,7 @@ func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDor
 	return *ids, nil
 }
 
-func generateScorecardCreate(tx *ent.Tx, src *model.IDorSourceInput, scorecard *model.ScorecardInputSpec) (*ent.CertifyScorecardCreate, error) {
+func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSourceInput, scorecard *model.ScorecardInputSpec) (*ent.CertifyScorecardCreate, error) {
 
 	checks := make([]*model.ScorecardCheck, len(scorecard.Checks))
 	for i, check := range scorecard.Checks {
@@ -109,12 +109,19 @@ func generateScorecardCreate(tx *ent.Tx, src *model.IDorSourceInput, scorecard *
 		}
 	}
 
-	if src.SourceNameID == nil {
-		return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-	}
-	sourceID, err := uuid.Parse(*src.SourceNameID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+	var sourceID uuid.UUID
+	if src.SourceNameID != nil {
+		var err error
+		sourceID, err = uuid.Parse(*src.SourceNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		}
+	} else {
+		srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
+		if err != nil {
+			return nil, err
+		}
+		sourceID = srcID
 	}
 
 	scorecardCreate := tx.CertifyScorecard.Create()
@@ -148,7 +155,7 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 		for i, cs := range css {
 			cs := cs
 			var err error
-			creates[i], err = generateScorecardCreate(tx, sources[index], cs)
+			creates[i], err = generateScorecardCreate(ctx, tx, sources[index], cs)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateScorecardCreate :: %s", err)
 			}
@@ -171,7 +178,7 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 
 func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.IDorSourceInput, scorecardInput model.ScorecardInputSpec) (*string, error) {
 
-	scorecardCreate, err := generateScorecardCreate(tx, &source, &scorecardInput)
+	scorecardCreate, err := generateScorecardCreate(ctx, tx, &source, &scorecardInput)
 	if err != nil {
 		return nil, gqlerror.Errorf("generateScorecardCreate :: %s", err)
 	}

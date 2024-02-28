@@ -204,12 +204,12 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.
 	var err error
 	switch v := any(spec).(type) {
 	case model.CertifyBadInputSpec:
-		insert, err = generateCertifyCreate(tx, subject.Package, subject.Source, subject.Artifact, pkgMatchType, &v, nil)
+		insert, err = generateCertifyCreate(ctx, tx, subject.Package, subject.Source, subject.Artifact, pkgMatchType, &v, nil)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 		}
 	case model.CertifyGoodInputSpec:
-		insert, err = generateCertifyCreate(tx, subject.Package, subject.Source, subject.Artifact, pkgMatchType, nil, &v)
+		insert, err = generateCertifyCreate(ctx, tx, subject.Package, subject.Source, subject.Artifact, pkgMatchType, nil, &v)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 		}
@@ -231,7 +231,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.
 	return ptrfrom.String(""), nil
 }
 
-func generateCertifyCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, pkgMatchType *model.MatchFlags,
+func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, pkgMatchType *model.MatchFlags,
 	cb *model.CertifyBadInputSpec, cg *model.CertifyGoodInputSpec) (*ent.CertificationCreate, error) {
 
 	certifyCreate := tx.Certification.Create()
@@ -256,42 +256,70 @@ func generateCertifyCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorS
 
 	switch {
 	case art != nil:
-		if art.ArtifactID == nil {
-			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-		}
-		artID, err := uuid.Parse(*art.ArtifactID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		var artID uuid.UUID
+		if art.ArtifactID != nil {
+			var err error
+			artID, err = uuid.Parse(*art.ArtifactID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			}
+		} else {
+			foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*art.ArtifactInput)).Only(ctx)
+			if err != nil {
+				return nil, err
+			}
+			artID = foundArt.ID
 		}
 		certifyCreate.SetArtifactID(artID)
 	case pkg != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			if pkg.PackageVersionID == nil {
-				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-			}
-			pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			var pkgVersionID uuid.UUID
+			if pkg.PackageVersionID != nil {
+				var err error
+				pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+				}
+			} else {
+				pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+				if err != nil {
+					return nil, fmt.Errorf("getPkgVersion :: %w", err)
+				}
+				pkgVersionID = pv.ID
 			}
 			certifyCreate.SetPackageVersionID(pkgVersionID)
 		} else {
-			if pkg.PackageNameID == nil {
-				return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-			}
-			pkgNameID, err := uuid.Parse(*pkg.PackageNameID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+			var pkgNameID uuid.UUID
+			if pkg.PackageNameID != nil {
+				var err error
+				pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+				}
+			} else {
+				pn, err := getPkgName(ctx, tx.Client(), *pkg.PackageInput)
+				if err != nil {
+					return nil, err
+				}
+				pkgNameID = pn.ID
 			}
 			certifyCreate.SetAllVersionsID(pkgNameID)
 		}
 
 	case src != nil:
-		if src.SourceNameID == nil {
-			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-		}
-		sourceID, err := uuid.Parse(*src.SourceNameID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		var sourceID uuid.UUID
+		if src.SourceNameID != nil {
+			var err error
+			sourceID, err = uuid.Parse(*src.SourceNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+			}
+		} else {
+			srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
+			if err != nil {
+				return nil, err
+			}
+			sourceID = srcID
 		}
 		certifyCreate.SetSourceID(sourceID)
 	}
@@ -362,17 +390,17 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 				var err error
 				switch {
 				case len(subjects.Artifacts) > 0:
-					creates[i], err = generateCertifyCreate(tx, nil, nil, subjects.Artifacts[index], pkgMatchType, cb, nil)
+					creates[i], err = generateCertifyCreate(ctx, tx, nil, nil, subjects.Artifacts[index], pkgMatchType, cb, nil)
 					if err != nil {
 						return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 					}
 				case len(subjects.Packages) > 0:
-					creates[i], err = generateCertifyCreate(tx, subjects.Packages[index], nil, nil, pkgMatchType, cb, nil)
+					creates[i], err = generateCertifyCreate(ctx, tx, subjects.Packages[index], nil, nil, pkgMatchType, cb, nil)
 					if err != nil {
 						return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 					}
 				case len(subjects.Sources) > 0:
-					creates[i], err = generateCertifyCreate(tx, nil, subjects.Sources[index], nil, pkgMatchType, cb, nil)
+					creates[i], err = generateCertifyCreate(ctx, tx, nil, subjects.Sources[index], nil, pkgMatchType, cb, nil)
 					if err != nil {
 						return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 					}
@@ -401,17 +429,17 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 				var err error
 				switch {
 				case len(subjects.Artifacts) > 0:
-					creates[i], err = generateCertifyCreate(tx, nil, nil, subjects.Artifacts[index], pkgMatchType, nil, cg)
+					creates[i], err = generateCertifyCreate(ctx, tx, nil, nil, subjects.Artifacts[index], pkgMatchType, nil, cg)
 					if err != nil {
 						return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 					}
 				case len(subjects.Packages) > 0:
-					creates[i], err = generateCertifyCreate(tx, subjects.Packages[index], nil, nil, pkgMatchType, nil, cg)
+					creates[i], err = generateCertifyCreate(ctx, tx, subjects.Packages[index], nil, nil, pkgMatchType, nil, cg)
 					if err != nil {
 						return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 					}
 				case len(subjects.Sources) > 0:
-					creates[i], err = generateCertifyCreate(tx, nil, subjects.Sources[index], nil, pkgMatchType, nil, cg)
+					creates[i], err = generateCertifyCreate(ctx, tx, nil, subjects.Sources[index], nil, pkgMatchType, nil, cg)
 					if err != nil {
 						return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 					}

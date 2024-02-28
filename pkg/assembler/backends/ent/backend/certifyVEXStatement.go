@@ -66,7 +66,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 			return nil, Errorf("%v :: %s", funcName, "subject must be either a package or artifact")
 		}
 
-		insert, err := generateVexCreate(tx, subject.Package, subject.Artifact, &vulnerability, &vexStatement)
+		insert, err := generateVexCreate(ctx, tx, subject.Package, subject.Artifact, &vulnerability, &vexStatement)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateVexCreate :: %s", err)
 		}
@@ -110,7 +110,7 @@ func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.Pac
 	return *ids, nil
 }
 
-func generateVexCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, vuln *model.IDorVulnerabilityInput, vexStatement *model.VexStatementInputSpec) (*ent.CertifyVexCreate, error) {
+func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, vuln *model.IDorVulnerabilityInput, vexStatement *model.VexStatementInputSpec) (*ent.CertifyVexCreate, error) {
 
 	certifyVexCreate := tx.CertifyVex.Create()
 
@@ -118,36 +118,62 @@ func generateVexCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtif
 	if vuln == nil {
 		return nil, fmt.Errorf("vulnerability must be specified for vex ingestion")
 	}
-	if vuln.VulnerabilityNodeID == nil {
-		return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
-	}
-	vulnID, err := uuid.Parse(*vuln.VulnerabilityNodeID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+
+	var vulnID uuid.UUID
+	if vuln.VulnerabilityNodeID != nil {
+		var err error
+		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+		}
+	} else {
+		foundVulnID, err := tx.VulnerabilityID.Query().
+			Where(
+				vulnerabilityid.VulnerabilityIDEqualFold(vuln.VulnerabilityInput.VulnerabilityID),
+				vulnerabilityid.TypeEqualFold(vuln.VulnerabilityInput.Type),
+			).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
+		}
+		vulnID = foundVulnID
 	}
 	certifyVexCreate.SetVulnerabilityID(vulnID)
 
 	// manage package or artifact
 	if pkg != nil {
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		var pkgVersionID uuid.UUID
+		if pkg.PackageVersionID != nil {
+			var err error
+			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+		} else {
+			pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+			if err != nil {
+				return nil, fmt.Errorf("getPkgVersion :: %w", err)
+			}
+			pkgVersionID = pv.ID
 		}
 		certifyVexCreate.SetPackageID(pkgVersionID)
 
 	} else if art != nil {
-		if art.ArtifactID == nil {
-			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-		}
-		artID, err := uuid.Parse(*art.ArtifactID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		var artID uuid.UUID
+		if art.ArtifactID != nil {
+			var err error
+			artID, err = uuid.Parse(*art.ArtifactID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			}
+		} else {
+			foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*art.ArtifactInput)).Only(ctx)
+			if err != nil {
+				return nil, err
+			}
+			artID = foundArt.ID
 		}
 		certifyVexCreate.SetArtifactID(artID)
-
 	} else {
 		return nil, Errorf("%v :: %s", "generateVexCreate", "subject must be either a package or artifact")
 	}
@@ -203,12 +229,12 @@ func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArti
 			vex := vex
 			var err error
 			if len(subjects.Packages) > 0 {
-				creates[i], err = generateVexCreate(tx, subjects.Packages[index], nil, vulnerabilities[index], vex)
+				creates[i], err = generateVexCreate(ctx, tx, subjects.Packages[index], nil, vulnerabilities[index], vex)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateVexCreate :: %s", err)
 				}
 			} else if len(subjects.Artifacts) > 0 {
-				creates[i], err = generateVexCreate(tx, nil, subjects.Artifacts[index], vulnerabilities[index], vex)
+				creates[i], err = generateVexCreate(ctx, tx, nil, subjects.Artifacts[index], vulnerabilities[index], vex)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateVexCreate :: %s", err)
 				}

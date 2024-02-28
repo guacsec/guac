@@ -107,7 +107,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 			return nil, gqlerror.Errorf("%v :: %s", "IngestCertifyLegal", "subject must be either a package or source")
 		}
 
-		certifyLegalCreate, err := generateCertifyLegalCreate(tx, spec, subject.Package, subject.Source, declaredLicenses, discoveredLicenses)
+		certifyLegalCreate, err := generateCertifyLegalCreate(ctx, tx, spec, subject.Package, subject.Source, declaredLicenses, discoveredLicenses)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 		}
@@ -134,7 +134,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 	return *recordID, nil
 }
 
-func generateCertifyLegalCreate(tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg *model.IDorPkgInput, src *model.IDorSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput) (*ent.CertifyLegalCreate, error) {
+func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg *model.IDorPkgInput, src *model.IDorSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput) (*ent.CertifyLegalCreate, error) {
 	certifyLegalCreate := tx.CertifyLegal.Create().
 		SetDeclaredLicense(cl.DeclaredLicense).
 		SetDiscoveredLicense(cl.DiscoveredLicense).
@@ -150,10 +150,15 @@ func generateCertifyLegalCreate(tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg
 	if len(declaredLicenses) > 0 {
 		var declaredLicenseIDs []string
 		for _, decLic := range declaredLicenses {
-			if decLic.LicenseID == nil {
-				return nil, fmt.Errorf("licenseID not specified in discoveredLicenses")
+			if decLic.LicenseID != nil {
+				declaredLicenseIDs = append(declaredLicenseIDs, *decLic.LicenseID)
+			} else {
+				licenseID, err := getLicenseID(ctx, tx.Client(), *decLic.LicenseInput)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to get license ID")
+				}
+				declaredLicenseIDs = append(declaredLicenseIDs, licenseID.String())
 			}
-			declaredLicenseIDs = append(declaredLicenseIDs, *decLic.LicenseID)
 		}
 		sortedDeclaredLicenseIDs := helper.SortAndRemoveDups(declaredLicenseIDs)
 
@@ -174,10 +179,15 @@ func generateCertifyLegalCreate(tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg
 	if len(discoveredLicenses) > 0 {
 		var discoveredLicenseIDs []string
 		for _, disLic := range discoveredLicenses {
-			if disLic.LicenseID == nil {
-				return nil, fmt.Errorf("licenseID not specified in discoveredLicenses")
+			if disLic.LicenseID != nil {
+				discoveredLicenseIDs = append(discoveredLicenseIDs, *disLic.LicenseID)
+			} else {
+				licenseID, err := getLicenseID(ctx, tx.Client(), *disLic.LicenseInput)
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to get license ID")
+				}
+				discoveredLicenseIDs = append(discoveredLicenseIDs, licenseID.String())
 			}
-			discoveredLicenseIDs = append(discoveredLicenseIDs, *disLic.LicenseID)
 		}
 		sortedDiscoveredLicenseIDs := helper.SortAndRemoveDups(discoveredLicenseIDs)
 
@@ -265,13 +275,13 @@ func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.Pack
 			cl := cl
 			var err error
 			if len(subjects.Packages) > 0 {
-				creates[i], err = generateCertifyLegalCreate(tx, cl, subjects.Packages[index], nil, declaredLicensesList[index], discoveredLicensesList[index])
+				creates[i], err = generateCertifyLegalCreate(ctx, tx, cl, subjects.Packages[index], nil, declaredLicensesList[index], discoveredLicensesList[index])
 				if err != nil {
 					return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 				}
 
 			} else if len(subjects.Sources) > 0 {
-				creates[i], err = generateCertifyLegalCreate(tx, cl, nil, subjects.Sources[index], declaredLicensesList[index], discoveredLicensesList[index])
+				creates[i], err = generateCertifyLegalCreate(ctx, tx, cl, nil, subjects.Sources[index], declaredLicensesList[index], discoveredLicensesList[index])
 				if err != nil {
 					return nil, gqlerror.Errorf("generateCertifyLegalCreate :: %s", err)
 				}

@@ -30,6 +30,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/pkg/errors"
@@ -294,26 +295,26 @@ func normalizeInputQualifiers(inputs []*model.PackageQualifierInputSpec) []model
 //	return results
 //}
 
-// func packageVersionInputQuery(spec model.PkgInputSpec) predicate.PackageVersion {
-// 	return packageVersionQuery(helper.ConvertPkgInputSpecToPkgSpec(&spec))
+func packageVersionInputQuery(spec model.PkgInputSpec) predicate.PackageVersion {
+	return packageVersionQuery(helper.ConvertPkgInputSpecToPkgSpec(&spec))
 
-// 	// rv := []predicate.PackageVersion{
-// 	// 	packageversion.VersionEQ(stringOrEmpty(spec.Version)),
-// 	// 	packageversion.SubpathEQ(stringOrEmpty(spec.Subpath)),
-// 	// 	packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(spec.Qualifiers)),
-// 	// 	packageversion.HasNameWith(
-// 	// 		packagename.NameEQ(spec.Name),
-// 	// 		packagename.HasNamespaceWith(
-// 	// 			packagenamespace.Namespace(stringOrEmpty(spec.Namespace)),
-// 	// 			packagenamespace.HasPackageWith(
-// 	// 				packagetype.TypeEQ(spec.Type),
-// 	// 			),
-// 	// 		),
-// 	// 	),
-// 	// }
+	// rv := []predicate.PackageVersion{
+	// 	packageversion.VersionEQ(stringOrEmpty(spec.Version)),
+	// 	packageversion.SubpathEQ(stringOrEmpty(spec.Subpath)),
+	// 	packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(spec.Qualifiers)),
+	// 	packageversion.HasNameWith(
+	// 		packagename.NameEQ(spec.Name),
+	// 		packagename.HasNamespaceWith(
+	// 			packagenamespace.Namespace(stringOrEmpty(spec.Namespace)),
+	// 			packagenamespace.HasPackageWith(
+	// 				packagetype.TypeEQ(spec.Type),
+	// 			),
+	// 		),
+	// 	),
+	// }
 
-// 	// return packageversion.And(rv...)
-// }
+	// return packageversion.And(rv...)
+}
 
 //func isPackageVersionQuery(filter *model.PkgSpec) bool {
 //	if filter == nil {
@@ -343,15 +344,15 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 	return packageversion.And(rv...)
 }
 
-// func packageNameInputQuery(spec model.PkgInputSpec) predicate.PackageName {
-// 	rv := []predicate.PackageName{
-// 		packagename.NameEQ(spec.Name),
-// 		packagename.Namespace(stringOrEmpty(spec.Namespace)),
-// 		packagename.Type(spec.Type),
-// 	}
+func packageNameInputQuery(spec model.PkgInputSpec) predicate.PackageName {
+	rv := []predicate.PackageName{
+		packagename.NameEQ(spec.Name),
+		packagename.Namespace(stringOrEmpty(spec.Namespace)),
+		packagename.Type(spec.Type),
+	}
 
-// 	return packagename.And(rv...)
-// }
+	return packagename.And(rv...)
+}
 
 func packageNameQuery(spec *model.PkgSpec) predicate.PackageName {
 	if spec == nil {
@@ -411,31 +412,31 @@ func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageName {
 	return nil
 }
 
-// // Each "noun" node will need a "get" for any time an ingest happens on a
-// // "verb" node that points to it. All but Package and Source are simple. For
-// // Package, some verbs link to Name and some to Version, or some both. For
-// // Source, we will want a SourceName.
-// //
-// // It is tempting to try to make generic helpers function that are used in both
-// // this usecase and also in querying, but I find that gets too complicated to
-// // understand easily.
-// //
-// // These queries need to be fast, all the fields are present in an "InputSpec"
-// // and should allow using the db index.
+// Each "noun" node will need a "get" for any time an ingest happens on a
+// "verb" node that points to it. All but Package and Source are simple. For
+// Package, some verbs link to Name and some to Version, or some both. For
+// Source, we will want a SourceName.
+//
+// It is tempting to try to make generic helpers function that are used in both
+// this usecase and also in querying, but I find that gets too complicated to
+// understand easily.
+//
+// These queries need to be fast, all the fields are present in an "InputSpec"
+// and should allow using the db index.
 
-// func getPkgName(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpec) (*ent.PackageName, error) {
-// 	return client.PackageName.Query().Where(packageNameInputQuery(pkgin)).Only(ctx)
-// }
+func getPkgName(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpec) (*ent.PackageName, error) {
+	return client.PackageName.Query().Where(packageNameInputQuery(pkgin)).Only(ctx)
+}
 
-// func getPkgVersion(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpec) (*ent.PackageVersion, error) {
-// 	return client.PackageVersion.Query().Where(packageVersionInputQuery(pkgin)).Only(ctx)
-// 	// return client.PackageType.Query().
-// 	// 	Where(packagetype.Type(pkgin.Type)).
-// 	// 	QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
-// 	// 	QueryNames().Where(packagename.NameEQ(pkgin.Name)).
-// 	// 	QueryVersions().
-// 	// 	Where(
-// 	// 		packageVersionInputQuery(pkgin),
-// 	// 	).
-// 	// 	Only(ctx)
-// }
+func getPkgVersion(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpec) (*ent.PackageVersion, error) {
+	return client.PackageVersion.Query().Where(packageVersionInputQuery(pkgin)).Only(ctx)
+	// return client.PackageType.Query().
+	// 	Where(packagetype.Type(pkgin.Type)).
+	// 	QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
+	// 	QueryNames().Where(packagename.NameEQ(pkgin.Name)).
+	// 	QueryVersions().
+	// 	Where(
+	// 		packageVersionInputQuery(pkgin),
+	// 	).
+	// 	Only(ctx)
+}

@@ -94,7 +94,7 @@ func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgI
 			pe := pe
 			var err error
 
-			creates[i], err = generatePkgEqualCreate(tx, pkgs[index], otherPackages[index], pe)
+			creates[i], err = generatePkgEqualCreate(ctx, tx, pkgs[index], otherPackages[index], pe)
 			if err != nil {
 				return nil, gqlerror.Errorf("generatePkgEqualCreate :: %s", err)
 			}
@@ -114,13 +114,29 @@ func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgI
 	return &ids, nil
 }
 
-func generatePkgEqualCreate(tx *ent.Tx, pkgA *model.IDorPkgInput, pkgB *model.IDorPkgInput, pkgEqualInput *model.PkgEqualInputSpec) (*ent.PkgEqualCreate, error) {
+func generatePkgEqualCreate(ctx context.Context, tx *ent.Tx, pkgA *model.IDorPkgInput, pkgB *model.IDorPkgInput, pkgEqualInput *model.PkgEqualInputSpec) (*ent.PkgEqualCreate, error) {
 
 	if pkgA == nil {
 		return nil, fmt.Errorf("pkgA must be specified for pkgEqual")
 	}
 	if pkgB == nil {
 		return nil, fmt.Errorf("pkgB must be specified for pkgEqual")
+	}
+
+	if pkgA.PackageVersionID == nil {
+		pv, err := getPkgVersion(ctx, tx.Client(), *pkgA.PackageInput)
+		if err != nil {
+			return nil, fmt.Errorf("getPkgVersion :: %w", err)
+		}
+		pkgA.PackageVersionID = ptrfrom.String(pv.ID.String())
+	}
+
+	if pkgB.PackageVersionID == nil {
+		pv, err := getPkgVersion(ctx, tx.Client(), *pkgB.PackageInput)
+		if err != nil {
+			return nil, fmt.Errorf("getPkgVersion :: %w", err)
+		}
+		pkgB.PackageVersionID = ptrfrom.String(pv.ID.String())
 	}
 
 	pkgEqalCreate := tx.PkgEqual.Create()
@@ -160,7 +176,7 @@ func generatePkgEqualCreate(tx *ent.Tx, pkgA *model.IDorPkgInput, pkgB *model.ID
 
 func upsertPackageEqual(ctx context.Context, tx *ent.Tx, pkgA model.IDorPkgInput, pkgB model.IDorPkgInput, spec model.PkgEqualInputSpec) (*string, error) {
 
-	pkgEqualCreate, err := generatePkgEqualCreate(tx, &pkgA, &pkgB, &spec)
+	pkgEqualCreate, err := generatePkgEqualCreate(ctx, tx, &pkgA, &pkgB, &spec)
 	if err != nil {
 		return nil, gqlerror.Errorf("generatePkgEqualCreate :: %s", err)
 	}

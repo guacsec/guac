@@ -48,7 +48,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 			certifyvuln.FieldDbVersion,
 		}
 
-		insert, err := generateCertifyVulnCreate(tx, &pkg, &vulnerability, &certifyVuln)
+		insert, err := generateCertifyVulnCreate(ctx, tx, &pkg, &vulnerability, &certifyVuln)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateCertifyVulnCreate :: %s", err)
 		}
@@ -88,7 +88,7 @@ func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorP
 	return *ids, nil
 }
 
-func generateCertifyVulnCreate(tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput) (*ent.CertifyVulnCreate, error) {
+func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput) (*ent.CertifyVulnCreate, error) {
 
 	certifyVulnCreate := tx.CertifyVuln.Create()
 
@@ -96,12 +96,24 @@ func generateCertifyVulnCreate(tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.
 	if vuln == nil {
 		return nil, fmt.Errorf("vulnerability must be specified for vex ingestion")
 	}
-	if vuln.VulnerabilityNodeID == nil {
-		return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
-	}
-	vulnID, err := uuid.Parse(*vuln.VulnerabilityNodeID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+	var vulnID uuid.UUID
+	if vuln.VulnerabilityNodeID != nil {
+		var err error
+		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+		}
+	} else {
+		foundVulnID, err := tx.VulnerabilityID.Query().
+			Where(
+				vulnerabilityid.VulnerabilityIDEqualFold(vuln.VulnerabilityInput.VulnerabilityID),
+				vulnerabilityid.TypeEqualFold(vuln.VulnerabilityInput.Type),
+			).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
+		}
+		vulnID = foundVulnID
 	}
 	certifyVulnCreate.SetVulnerabilityID(vulnID)
 
@@ -109,12 +121,19 @@ func generateCertifyVulnCreate(tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.
 	if pkg == nil {
 		return nil, Errorf("%v :: %s", "generateCertifyVulnCreate", "subject must be package")
 	}
-	if pkg.PackageVersionID == nil {
-		return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-	}
-	pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+	var pkgVersionID uuid.UUID
+	if pkg.PackageVersionID != nil {
+		var err error
+		pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		}
+	} else {
+		pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+		if err != nil {
+			return nil, fmt.Errorf("getPkgVersion :: %w", err)
+		}
+		pkgVersionID = pv.ID
 	}
 	certifyVulnCreate.SetPackageID(pkgVersionID)
 
@@ -152,7 +171,7 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 		for i, vuln := range vulns {
 			vuln := vuln
 			var err error
-			creates[i], err = generateCertifyVulnCreate(tx, pkgs[index], vulnerabilities[index], vuln)
+			creates[i], err = generateCertifyVulnCreate(ctx, tx, pkgs[index], vulnerabilities[index], vuln)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateCertifyVulnCreate :: %s", err)
 			}

@@ -45,12 +45,12 @@ func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 	return collect(artifacts, toModelArtifact), nil
 }
 
-// func artifactQueryInputPredicates(spec model.ArtifactInputSpec) predicate.Artifact {
-// 	return artifact.And(
-// 		artifact.AlgorithmEqualFold(strings.ToLower(spec.Algorithm)),
-// 		artifact.DigestEqualFold(strings.ToLower(spec.Digest)),
-// 	)
-// }
+func artifactQueryInputPredicates(spec model.ArtifactInputSpec) predicate.Artifact {
+	return artifact.And(
+		artifact.AlgorithmEqualFold(strings.ToLower(spec.Algorithm)),
+		artifact.DigestEqualFold(strings.ToLower(spec.Digest)),
+	)
+}
 
 func artifactQueryPredicates(spec *model.ArtifactSpec) predicate.Artifact {
 	return artifact.And(

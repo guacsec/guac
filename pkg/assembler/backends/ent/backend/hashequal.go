@@ -105,7 +105,7 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 		for i, he := range hes {
 			he := he
 			var err error
-			creates[i], err = generateHashEqualCreate(tx, artifacts[index], otherArtifacts[index], he)
+			creates[i], err = generateHashEqualCreate(ctx, tx, artifacts[index], otherArtifacts[index], he)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateHashEqualCreate :: %s", err)
 			}
@@ -125,13 +125,29 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 	return &ids, nil
 }
 
-func generateHashEqualCreate(tx *ent.Tx, artifactA *model.IDorArtifactInput, artifactB *model.IDorArtifactInput, he *model.HashEqualInputSpec) (*ent.HashEqualCreate, error) {
+func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.IDorArtifactInput, artifactB *model.IDorArtifactInput, he *model.HashEqualInputSpec) (*ent.HashEqualCreate, error) {
 
 	if artifactA == nil {
 		return nil, fmt.Errorf("artifactA must be specified for hashEqual")
 	}
 	if artifactB == nil {
 		return nil, fmt.Errorf("artifactB must be specified for hashEqual")
+	}
+
+	if artifactA.ArtifactID == nil {
+		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*artifactA.ArtifactInput)).Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		artifactA.ArtifactID = ptrfrom.String(foundArt.ID.String())
+	}
+
+	if artifactB.ArtifactID == nil {
+		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*artifactB.ArtifactInput)).Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		artifactB.ArtifactID = ptrfrom.String(foundArt.ID.String())
 	}
 
 	sortedArtifacts := []model.IDorArtifactInput{*artifactA, *artifactB}
@@ -170,7 +186,7 @@ func generateHashEqualCreate(tx *ent.Tx, artifactA *model.IDorArtifactInput, art
 
 func upsertHashEqual(ctx context.Context, tx *ent.Tx, artifactA model.IDorArtifactInput, artifactB model.IDorArtifactInput, spec model.HashEqualInputSpec) (*string, error) {
 
-	hashEqualCreate, err := generateHashEqualCreate(tx, &artifactA, &artifactB, &spec)
+	hashEqualCreate, err := generateHashEqualCreate(ctx, tx, &artifactA, &artifactB, &spec)
 	if err != nil {
 		return nil, gqlerror.Errorf("generateHashEqualCreate :: %s", err)
 	}

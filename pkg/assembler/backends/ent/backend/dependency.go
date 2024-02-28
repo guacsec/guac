@@ -111,7 +111,7 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 			}
 			ids = append(ids, isDependencyID.String())
 
-			creates[i], err = generateDependencyCreate(tx, isDependencyID, pkgs[index], depPkgs[index], depPkgMatchType, dep)
+			creates[i], err = generateDependencyCreate(ctx, tx, isDependencyID, pkgs[index], depPkgs[index], depPkgMatchType, dep)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 			}
@@ -133,7 +133,7 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 	return &ids, nil
 }
 
-func generateDependencyCreate(tx *ent.Tx, isDependencyID *uuid.UUID, pkg *model.IDorPkgInput, depPkg *model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep *model.IsDependencyInputSpec) (*ent.DependencyCreate, error) {
+func generateDependencyCreate(ctx context.Context, tx *ent.Tx, isDependencyID *uuid.UUID, pkg *model.IDorPkgInput, depPkg *model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep *model.IsDependencyInputSpec) (*ent.DependencyCreate, error) {
 
 	dependencyCreate := tx.Dependency.Create()
 
@@ -144,12 +144,19 @@ func generateDependencyCreate(tx *ent.Tx, isDependencyID *uuid.UUID, pkg *model.
 		return nil, Errorf("%v :: %s", "generateDependencyCreate", "dependency package cannot be nil")
 	}
 
-	if pkg.PackageVersionID == nil {
-		return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-	}
-	pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+	var pkgVersionID uuid.UUID
+	if pkg.PackageVersionID != nil {
+		var err error
+		pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		}
+	} else {
+		pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+		if err != nil {
+			return nil, fmt.Errorf("getPkgVersion :: %w", err)
+		}
+		pkgVersionID = pv.ID
 	}
 
 	dependencyCreate.
@@ -162,21 +169,35 @@ func generateDependencyCreate(tx *ent.Tx, isDependencyID *uuid.UUID, pkg *model.
 		SetCollector(dep.Collector)
 
 	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		if depPkg.PackageNameID == nil {
-			return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-		}
-		depPkgNameID, err := uuid.Parse(*depPkg.PackageNameID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+		var depPkgNameID uuid.UUID
+		if depPkg.PackageNameID != nil {
+			var err error
+			depPkgNameID, err = uuid.Parse(*depPkg.PackageNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+			}
+		} else {
+			pn, err := getPkgName(ctx, tx.Client(), *depPkg.PackageInput)
+			if err != nil {
+				return nil, err
+			}
+			depPkgNameID = pn.ID
 		}
 		dependencyCreate.SetDependentPackageNameID(depPkgNameID)
 	} else {
-		if depPkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		depPkgVersionID, err := uuid.Parse(*depPkg.PackageVersionID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		var depPkgVersionID uuid.UUID
+		if depPkg.PackageVersionID != nil {
+			var err error
+			depPkgVersionID, err = uuid.Parse(*depPkg.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+		} else {
+			pv, err := getPkgVersion(ctx, tx.Client(), *depPkg.PackageInput)
+			if err != nil {
+				return nil, fmt.Errorf("getPkgVersion :: %w", err)
+			}
+			depPkgVersionID = pv.ID
 		}
 		dependencyCreate.SetDependentPackageVersionID(depPkgVersionID)
 	}
@@ -220,7 +241,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 			return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
 		}
 
-		insert, err := generateDependencyCreate(tx, isDependencyID, &pkg, &depPkg, depPkgMatchType, &dep)
+		insert, err := generateDependencyCreate(ctx, tx, isDependencyID, &pkg, &depPkg, depPkgMatchType, &dep)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 		}

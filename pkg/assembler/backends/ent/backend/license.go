@@ -154,10 +154,14 @@ func licenseQuery(filter model.LicenseSpec) predicate.License {
 	)
 }
 
-// func licenseInputQuery(filter model.LicenseInputSpec) predicate.License {
-// 	return licenseQuery(model.LicenseSpec{
-// 		Name:        &filter.Name,
-// 		Inline:      filter.Inline,
-// 		ListVersion: filter.ListVersion,
-// 	})
-// }
+func licenseInputQuery(filter model.LicenseInputSpec) predicate.License {
+	return licenseQuery(model.LicenseSpec{
+		Name:        &filter.Name,
+		Inline:      filter.Inline,
+		ListVersion: filter.ListVersion,
+	})
+}
+
+func getLicenseID(ctx context.Context, client *ent.Client, license model.LicenseInputSpec) (uuid.UUID, error) {
+	return client.License.Query().Where(licenseInputQuery(license)).OnlyID(ctx)
+}

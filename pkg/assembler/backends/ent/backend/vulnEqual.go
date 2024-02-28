@@ -119,7 +119,7 @@ func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*mo
 			ve := ve
 			var err error
 
-			creates[i], err = generateVulnEqualCreate(tx, vulnerabilities[index], otherVulnerabilities[index], ve)
+			creates[i], err = generateVulnEqualCreate(ctx, tx, vulnerabilities[index], otherVulnerabilities[index], ve)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateVulnEqualCreate :: %s", err)
 			}
@@ -139,13 +139,39 @@ func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*mo
 	return &ids, nil
 }
 
-func generateVulnEqualCreate(tx *ent.Tx, vulnerability *model.IDorVulnerabilityInput, otherVulnerability *model.IDorVulnerabilityInput, ve *model.VulnEqualInputSpec) (*ent.VulnEqualCreate, error) {
+func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *model.IDorVulnerabilityInput, otherVulnerability *model.IDorVulnerabilityInput, ve *model.VulnEqualInputSpec) (*ent.VulnEqualCreate, error) {
 
 	if vulnerability == nil {
 		return nil, fmt.Errorf("vulnerability must be specified for vulnEqual")
 	}
 	if otherVulnerability == nil {
 		return nil, fmt.Errorf("otherVulnerability must be specified for vulnEqual")
+	}
+
+	if vulnerability.VulnerabilityNodeID == nil {
+		foundVulnID, err := tx.VulnerabilityID.Query().
+			Where(
+				vulnerabilityid.VulnerabilityIDEqualFold(vulnerability.VulnerabilityInput.VulnerabilityID),
+				vulnerabilityid.TypeEqualFold(vulnerability.VulnerabilityInput.Type),
+			).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
+		}
+		vulnerability.VulnerabilityNodeID = ptrfrom.String(foundVulnID.String())
+	}
+
+	if otherVulnerability.VulnerabilityNodeID == nil {
+		foundVulnID, err := tx.VulnerabilityID.Query().
+			Where(
+				vulnerabilityid.VulnerabilityIDEqualFold(otherVulnerability.VulnerabilityInput.VulnerabilityID),
+				vulnerabilityid.TypeEqualFold(otherVulnerability.VulnerabilityInput.Type),
+			).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
+		}
+		otherVulnerability.VulnerabilityNodeID = ptrfrom.String(foundVulnID.String())
 	}
 
 	sortedVulns := []model.IDorVulnerabilityInput{*vulnerability, *otherVulnerability}
@@ -184,7 +210,7 @@ func generateVulnEqualCreate(tx *ent.Tx, vulnerability *model.IDorVulnerabilityI
 
 func upsertVulnEquals(ctx context.Context, tx *ent.Tx, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqualInput model.VulnEqualInputSpec) (*string, error) {
 
-	vulnEqualCreate, err := generateVulnEqualCreate(tx, &vulnerability, &otherVulnerability, &vulnEqualInput)
+	vulnEqualCreate, err := generateVulnEqualCreate(ctx, tx, &vulnerability, &otherVulnerability, &vulnEqualInput)
 	if err != nil {
 		return nil, gqlerror.Errorf("generatePkgEqualCreate :: %s", err)
 	}

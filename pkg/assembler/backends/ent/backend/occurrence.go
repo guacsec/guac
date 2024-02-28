@@ -114,7 +114,7 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				if err != nil {
 					return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
 				}
-				creates[i], err = generateOccurrenceCreate(tx, isOccurrenceID, subjects.Packages[index], nil, artifacts[index], occur)
+				creates[i], err = generateOccurrenceCreate(ctx, tx, isOccurrenceID, subjects.Packages[index], nil, artifacts[index], occur)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 				}
@@ -126,7 +126,7 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				if err != nil {
 					return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
 				}
-				creates[i], err = generateOccurrenceCreate(tx, isOccurrenceID, nil, subjects.Sources[index], artifacts[index], occur)
+				creates[i], err = generateOccurrenceCreate(ctx, tx, isOccurrenceID, nil, subjects.Sources[index], artifacts[index], occur)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 				}
@@ -152,20 +152,26 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 	return &ids, nil
 }
 
-func generateOccurrenceCreate(tx *ent.Tx, isOccurrenceID *uuid.UUID, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, occur *model.IsOccurrenceInputSpec) (*ent.OccurrenceCreate, error) {
+func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, isOccurrenceID *uuid.UUID, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, occur *model.IsOccurrenceInputSpec) (*ent.OccurrenceCreate, error) {
 
 	occurrenceCreate := tx.Occurrence.Create()
 
 	if art == nil {
 		return nil, fmt.Errorf("artifact must be specified for isOccurrence")
-
 	}
-	if art.ArtifactID == nil {
-		return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-	}
-	artID, err := uuid.Parse(*art.ArtifactID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+	var artID uuid.UUID
+	if art.ArtifactID != nil {
+		var err error
+		artID, err = uuid.Parse(*art.ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		}
+	} else {
+		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*art.ArtifactInput)).Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		artID = foundArt.ID
 	}
 
 	occurrenceCreate.
@@ -176,21 +182,35 @@ func generateOccurrenceCreate(tx *ent.Tx, isOccurrenceID *uuid.UUID, pkg *model.
 		SetCollector(occur.Collector)
 
 	if pkg != nil {
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		var pkgVersionID uuid.UUID
+		if pkg.PackageVersionID != nil {
+			var err error
+			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+		} else {
+			pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+			if err != nil {
+				return nil, fmt.Errorf("getPkgVersion :: %w", err)
+			}
+			pkgVersionID = pv.ID
 		}
 		occurrenceCreate.SetPackageID(pkgVersionID)
 	} else if src != nil {
-		if src.SourceNameID == nil {
-			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-		}
-		sourceID, err := uuid.Parse(*src.SourceNameID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		var sourceID uuid.UUID
+		if src.SourceNameID != nil {
+			var err error
+			sourceID, err = uuid.Parse(*src.SourceNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+			}
+		} else {
+			srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
+			if err != nil {
+				return nil, err
+			}
+			sourceID = srcID
 		}
 		occurrenceCreate.SetSourceID(sourceID)
 	} else {
@@ -240,7 +260,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			return nil, fmt.Errorf("failed to create isDependency uuid with error: %w", err)
 		}
 
-		insert, err := generateOccurrenceCreate(tx, isOccurrenceID, subject.Package, subject.Source, &art, &spec)
+		insert, err := generateOccurrenceCreate(ctx, tx, isOccurrenceID, subject.Package, subject.Source, &art, &spec)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 		}

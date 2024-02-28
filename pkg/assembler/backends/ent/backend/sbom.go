@@ -134,7 +134,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			return nil, Errorf("%v :: %s", funcName, "subject must be either a package or artifact")
 		}
 
-		sbomCreate, err := generateSBOMCreate(tx, subject.Package, subject.Artifact, &includes, &spec)
+		sbomCreate, err := generateSBOMCreate(ctx, tx, subject.Package, subject.Artifact, &includes, &spec)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
 		}
@@ -175,7 +175,7 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 	return *ids, nil
 }
 
-func generateSBOMCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includes *model.HasSBOMIncludesInputSpec, hasSBOM *model.HasSBOMInputSpec) (*ent.BillOfMaterialsCreate, error) {
+func generateSBOMCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includes *model.HasSBOMIncludesInputSpec, hasSBOM *model.HasSBOMInputSpec) (*ent.BillOfMaterialsCreate, error) {
 
 	sbomCreate := tx.BillOfMaterials.Create().
 		SetURI(hasSBOM.URI).
@@ -256,14 +256,20 @@ func generateSBOMCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArti
 	}
 
 	if pkg != nil {
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
+		var pkgVersionID uuid.UUID
+		if pkg.PackageVersionID != nil {
+			var err error
+			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+		} else {
+			pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+			if err != nil {
+				return nil, fmt.Errorf("getPkgVersion :: %w", err)
+			}
+			pkgVersionID = pv.ID
 		}
-		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-		}
-
 		hasSBOMID, err := guacHasSBOMKey(pkg, nil, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hasSBOM)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
@@ -271,14 +277,20 @@ func generateSBOMCreate(tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArti
 		sbomCreate.SetID(*hasSBOMID)
 		sbomCreate.SetPackageID(pkgVersionID)
 	} else if art != nil {
-		if art.ArtifactID == nil {
-			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
+		var artID uuid.UUID
+		if art.ArtifactID != nil {
+			var err error
+			artID, err = uuid.Parse(*art.ArtifactID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			}
+		} else {
+			foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*art.ArtifactInput)).Only(ctx)
+			if err != nil {
+				return nil, err
+			}
+			artID = foundArt.ID
 		}
-		artID, err := uuid.Parse(*art.ArtifactID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-		}
-
 		hasSBOMID, err := guacHasSBOMKey(nil, art, sortedPkgHash, sortedArtHash, sortedDepHash, sortedOccurHash, hasSBOM)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
@@ -333,12 +345,12 @@ func upsertBulkHasSBOM(ctx context.Context, tx *ent.Tx, subjects model.PackageOr
 			hsbom := hsbom
 			var err error
 			if len(subjects.Packages) > 0 {
-				creates[i], err = generateSBOMCreate(tx, subjects.Packages[index], nil, includes[index], hsbom)
+				creates[i], err = generateSBOMCreate(ctx, tx, subjects.Packages[index], nil, includes[index], hsbom)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
 				}
 			} else if len(subjects.Artifacts) > 0 {
-				creates[i], err = generateSBOMCreate(tx, nil, subjects.Artifacts[index], includes[index], hsbom)
+				creates[i], err = generateSBOMCreate(ctx, tx, nil, subjects.Artifacts[index], includes[index], hsbom)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
 				}

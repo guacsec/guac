@@ -153,7 +153,7 @@ func upsertHasMetadata(ctx context.Context, tx *ent.Tx, subject model.PackageSou
 		)
 	}
 
-	insert, err := generateHasMetadataCreate(tx, subject.Package, subject.Source, subject.Artifact, pkgMatchType, &spec)
+	insert, err := generateHasMetadataCreate(ctx, tx, subject.Package, subject.Source, subject.Artifact, pkgMatchType, &spec)
 	if err != nil {
 		return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
 	}
@@ -172,7 +172,7 @@ func upsertHasMetadata(ctx context.Context, tx *ent.Tx, subject model.PackageSou
 	return ptrfrom.String(""), nil
 }
 
-func generateHasMetadataCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, pkgMatchType *model.MatchFlags,
+func generateHasMetadataCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, pkgMatchType *model.MatchFlags,
 	hm *model.HasMetadataInputSpec) (*ent.HasMetadataCreate, error) {
 
 	hasMetadataCreate := tx.HasMetadata.Create()
@@ -187,42 +187,69 @@ func generateHasMetadataCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *model.I
 
 	switch {
 	case art != nil:
-		if art.ArtifactID == nil {
-			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
-		}
-		artID, err := uuid.Parse(*art.ArtifactID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		var artID uuid.UUID
+		if art.ArtifactID != nil {
+			var err error
+			artID, err = uuid.Parse(*art.ArtifactID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			}
+		} else {
+			foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*art.ArtifactInput)).Only(ctx)
+			if err != nil {
+				return nil, err
+			}
+			artID = foundArt.ID
 		}
 		hasMetadataCreate.SetArtifactID(artID)
 	case pkg != nil:
 		if pkgMatchType.Pkg == model.PkgMatchTypeSpecificVersion {
-			if pkg.PackageVersionID == nil {
-				return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-			}
-			pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			var pkgVersionID uuid.UUID
+			if pkg.PackageVersionID != nil {
+				var err error
+				pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+				}
+			} else {
+				pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+				if err != nil {
+					return nil, fmt.Errorf("getPkgVersion :: %w", err)
+				}
+				pkgVersionID = pv.ID
 			}
 			hasMetadataCreate.SetPackageVersionID(pkgVersionID)
 		} else {
-			if pkg.PackageNameID == nil {
-				return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-			}
-			pkgNameID, err := uuid.Parse(*pkg.PackageNameID)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+			var pkgNameID uuid.UUID
+			if pkg.PackageNameID != nil {
+				var err error
+				pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+				}
+			} else {
+				pn, err := getPkgName(ctx, tx.Client(), *pkg.PackageInput)
+				if err != nil {
+					return nil, err
+				}
+				pkgNameID = pn.ID
 			}
 			hasMetadataCreate.SetAllVersionsID(pkgNameID)
 		}
-
 	case src != nil:
-		if src.SourceNameID == nil {
-			return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-		}
-		sourceID, err := uuid.Parse(*src.SourceNameID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		var sourceID uuid.UUID
+		if src.SourceNameID != nil {
+			var err error
+			sourceID, err = uuid.Parse(*src.SourceNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+			}
+		} else {
+			srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
+			if err != nil {
+				return nil, err
+			}
+			sourceID = srcID
 		}
 		hasMetadataCreate.SetSourceID(sourceID)
 	}
@@ -290,17 +317,17 @@ func upsertBulkHasMetadata(ctx context.Context, tx *ent.Tx, subjects model.Packa
 			var err error
 			switch {
 			case len(subjects.Artifacts) > 0:
-				creates[i], err = generateHasMetadataCreate(tx, nil, nil, subjects.Artifacts[index], pkgMatchType, hm)
+				creates[i], err = generateHasMetadataCreate(ctx, tx, nil, nil, subjects.Artifacts[index], pkgMatchType, hm)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 				}
 			case len(subjects.Packages) > 0:
-				creates[i], err = generateHasMetadataCreate(tx, subjects.Packages[index], nil, nil, pkgMatchType, hm)
+				creates[i], err = generateHasMetadataCreate(ctx, tx, subjects.Packages[index], nil, nil, pkgMatchType, hm)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 				}
 			case len(subjects.Sources) > 0:
-				creates[i], err = generateHasMetadataCreate(tx, nil, subjects.Sources[index], nil, pkgMatchType, hm)
+				creates[i], err = generateHasMetadataCreate(ctx, tx, nil, subjects.Sources[index], nil, pkgMatchType, hm)
 				if err != nil {
 					return nil, gqlerror.Errorf("generateCertifyCreate :: %s", err)
 				}

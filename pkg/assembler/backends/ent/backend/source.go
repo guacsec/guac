@@ -132,7 +132,7 @@ func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 			hsa := hsa
 			var err error
 
-			creates[i], err = generateHasSourceAtCreate(tx, pkgs[index], sources[index], *pkgMatchType, hsa)
+			creates[i], err = generateHasSourceAtCreate(ctx, tx, pkgs[index], sources[index], *pkgMatchType, hsa)
 			if err != nil {
 				return nil, gqlerror.Errorf("generateHasSourceAtCreate :: %s", err)
 			}
@@ -154,17 +154,24 @@ func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 	return &ids, nil
 }
 
-func generateHasSourceAtCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, pkgMatchType model.MatchFlags, hs *model.HasSourceAtInputSpec) (*ent.HasSourceAtCreate, error) {
+func generateHasSourceAtCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, pkgMatchType model.MatchFlags, hs *model.HasSourceAtInputSpec) (*ent.HasSourceAtCreate, error) {
 
 	if src != nil {
 		return nil, fmt.Errorf("source must be specified for hasSourceAt")
 	}
-	if src.SourceNameID == nil {
-		return nil, fmt.Errorf("source ID not specified in IDorSourceInput")
-	}
-	sourceID, err := uuid.Parse(*src.SourceNameID)
-	if err != nil {
-		return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+	var sourceID uuid.UUID
+	if src.SourceNameID != nil {
+		var err error
+		sourceID, err = uuid.Parse(*src.SourceNameID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+		}
+	} else {
+		srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
+		if err != nil {
+			return nil, err
+		}
+		sourceID = srcID
 	}
 
 	hasSourceAtCreate := tx.HasSourceAt.Create()
@@ -180,22 +187,35 @@ func generateHasSourceAtCreate(tx *ent.Tx, pkg *model.IDorPkgInput, src *model.I
 		return nil, fmt.Errorf("package must be specified for hasSourceAt")
 	}
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-		if pkg.PackageNameID == nil {
-			return nil, fmt.Errorf("packageName ID not specified in IDorPkgInput")
-		}
-		pkgNameID, err := uuid.Parse(*pkg.PackageNameID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+		var pkgNameID uuid.UUID
+		if pkg.PackageNameID != nil {
+			var err error
+			pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
+			}
+		} else {
+			pn, err := getPkgName(ctx, tx.Client(), *pkg.PackageInput)
+			if err != nil {
+				return nil, err
+			}
+			pkgNameID = pn.ID
 		}
 		hasSourceAtCreate.SetNillableAllVersionsID(&pkgNameID)
-
 	} else {
-		if pkg.PackageVersionID == nil {
-			return nil, fmt.Errorf("packageVersion ID not specified in IDorPkgInput")
-		}
-		pkgVersionID, err := uuid.Parse(*pkg.PackageVersionID)
-		if err != nil {
-			return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
+		var pkgVersionID uuid.UUID
+		if pkg.PackageVersionID != nil {
+			var err error
+			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+		} else {
+			pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+			if err != nil {
+				return nil, fmt.Errorf("getPkgVersion :: %w", err)
+			}
+			pkgVersionID = pv.ID
 		}
 		hasSourceAtCreate.SetNillablePackageVersionID(&pkgVersionID)
 	}
@@ -222,7 +242,7 @@ func upsertHasSourceAt(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput, 
 		conflictWhere = sql.And(sql.NotNull(hassourceat.FieldPackageVersionID), sql.IsNull(hassourceat.FieldPackageNameID))
 	}
 
-	insert, err := generateHasSourceAtCreate(tx, &pkg, &source, pkgMatchType, &spec)
+	insert, err := generateHasSourceAtCreate(ctx, tx, &pkg, &source, pkgMatchType, &spec)
 	if err != nil {
 		return nil, gqlerror.Errorf("generateHasSourceAtCreate :: %s", err)
 	}
@@ -367,15 +387,15 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 		SourceNameID:      srcNameID.String()}, nil
 }
 
-// func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
-// 	return sourceQuery(&model.SourceSpec{
-// 		Commit:    filter.Commit,
-// 		Tag:       filter.Tag,
-// 		Name:      &filter.Name,
-// 		Type:      &filter.Type,
-// 		Namespace: &filter.Namespace,
-// 	})
-// }
+func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
+	return sourceQuery(&model.SourceSpec{
+		Commit:    filter.Commit,
+		Tag:       filter.Tag,
+		Name:      &filter.Name,
+		Type:      &filter.Type,
+		Namespace: &filter.Namespace,
+	})
+}
 
 func withSourceNameTreeQuery() func(*ent.SourceNameQuery) {
 	return func(q *ent.SourceNameQuery) {}
@@ -445,4 +465,8 @@ func toModelSource(s *ent.SourceName) *model.Source {
 			Names:     []*model.SourceName{sourceName},
 		}},
 	}
+}
+
+func getSourceNameID(ctx context.Context, client *ent.Client, s model.SourceInputSpec) (uuid.UUID, error) {
+	return client.SourceName.Query().Where(sourceInputQuery(s)).OnlyID(ctx)
 }
