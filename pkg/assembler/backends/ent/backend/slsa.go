@@ -22,6 +22,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"sort"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -331,7 +332,20 @@ func canonicalSLSAString(slsa model.SLSAInputSpec) string {
 
 	hash.Write(content.Bytes())
 
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", slsa.BuildType, fmt.Sprintf("%x", hash.Sum(nil)), slsa.SlsaVersion, slsa.StartedOn.UTC(), slsa.FinishedOn.UTC(), slsa.Origin, slsa.Collector)
+	var startedOn time.Time
+	var finishedOn time.Time
+	if slsa.StartedOn != nil {
+		startedOn = slsa.StartedOn.UTC()
+	} else {
+		startedOn = time.Unix(0, 0).UTC()
+	}
+	if slsa.FinishedOn != nil {
+		finishedOn = slsa.FinishedOn.UTC()
+	} else {
+		finishedOn = time.Unix(0, 0).UTC()
+	}
+
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", slsa.BuildType, fmt.Sprintf("%x", hash.Sum(nil)), slsa.SlsaVersion, startedOn, finishedOn, slsa.Origin, slsa.Collector)
 }
 
 // guacSLSAKey generates an uuid based on the hash of the inputspec and inputs. slsa ID has to be set for bulk ingestion

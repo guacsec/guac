@@ -208,7 +208,7 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 		nameID = pkgNameID
 	}
 
-	pkgVersionCreate := generatePackageVersionCreate(tx, &pkgNameID, &pkgVersionID, &pkg)
+	pkgVersionCreate := generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, &pkg)
 
 	id, err := pkgVersionCreate.
 		OnConflict(
