@@ -265,9 +265,9 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifyscorecard_source_id_origin_collector_scorecard_version_scorecard_commit_aggregate_score",
+				Name:    "certifyscorecard_source_id_origin_collector_scorecard_version_scorecard_commit_aggregate_score_time_scanned",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyScorecardsColumns[8], CertifyScorecardsColumns[6], CertifyScorecardsColumns[7], CertifyScorecardsColumns[4], CertifyScorecardsColumns[5], CertifyScorecardsColumns[2]},
+				Columns: []*schema.Column{CertifyScorecardsColumns[8], CertifyScorecardsColumns[6], CertifyScorecardsColumns[7], CertifyScorecardsColumns[4], CertifyScorecardsColumns[5], CertifyScorecardsColumns[2], CertifyScorecardsColumns[3]},
 			},
 		},
 	}
@@ -363,9 +363,9 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifyvuln_db_uri_db_version_scanner_uri_scanner_version_origin_collector_vulnerability_id_package_id",
+				Name:    "certifyvuln_db_uri_db_version_scanner_uri_scanner_version_origin_collector_time_scanned_vulnerability_id_package_id",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyVulnsColumns[2], CertifyVulnsColumns[3], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[7], CertifyVulnsColumns[8], CertifyVulnsColumns[9]},
+				Columns: []*schema.Column{CertifyVulnsColumns[2], CertifyVulnsColumns[3], CertifyVulnsColumns[4], CertifyVulnsColumns[5], CertifyVulnsColumns[6], CertifyVulnsColumns[7], CertifyVulnsColumns[1], CertifyVulnsColumns[8], CertifyVulnsColumns[9]},
 			},
 		},
 	}

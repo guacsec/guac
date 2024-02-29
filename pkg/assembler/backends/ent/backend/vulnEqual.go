@@ -129,7 +129,7 @@ func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*mo
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert vulnEqual node")
@@ -223,7 +223,7 @@ func upsertVulnEquals(ctx context.Context, tx *ent.Tx, vulnerability model.IDorV
 				vulnequal.FieldJustification,
 			),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx); err != nil {
 
 		return nil, errors.Wrap(err, "upsert vulnEqual node")

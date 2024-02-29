@@ -105,7 +105,7 @@ func upsertBulkLicense(ctx context.Context, tx *ent.Tx, licenseInputs []*model.I
 					license.FieldListVersion,
 				),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert license node")
@@ -134,7 +134,7 @@ func upsertLicense(ctx context.Context, tx *ent.Tx, spec model.LicenseInputSpec)
 				license.FieldListVersion,
 			),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "upsert license node")

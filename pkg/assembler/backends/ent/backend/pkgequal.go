@@ -104,7 +104,7 @@ func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgI
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert pkgEquals node")
@@ -188,7 +188,7 @@ func upsertPackageEqual(ctx context.Context, tx *ent.Tx, pkgA model.IDorPkgInput
 				pkgequal.FieldJustification,
 			),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx); err != nil {
 		return nil, errors.Wrap(err, "upsert pkgEqual node")
 	} else {

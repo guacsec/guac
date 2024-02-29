@@ -105,7 +105,7 @@ func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDor
 			OnConflict(
 				sql.ConflictColumns(artifact.FieldDigest),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert artifact node")
@@ -129,7 +129,7 @@ func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInpu
 		OnConflict(
 			sql.ConflictColumns(artifact.FieldDigest),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "upsert artifact")

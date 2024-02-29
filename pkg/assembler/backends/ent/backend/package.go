@@ -156,7 +156,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 			OnConflict(
 				sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx); err != nil {
 
 			return nil, errors.Wrap(err, "bulk upsert pkgName node")
@@ -169,7 +169,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 					packageversion.FieldNameID,
 				),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx); err != nil {
 
 			return nil, errors.Wrap(err, "bulk upsert pkgVersion node")
@@ -198,7 +198,7 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 
 	nameID, err := pkgNameCreate.
 		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType)).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "upsert package name")
@@ -213,7 +213,7 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 				packageversion.FieldNameID,
 			),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "upsert package version")

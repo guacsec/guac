@@ -57,6 +57,6 @@ func (CertifyScorecard) Edges() []ent.Edge {
 }
 func (CertifyScorecard) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("source_id", "origin", "collector", "scorecard_version", "scorecard_commit", "aggregate_score").Unique(),
+		index.Fields("source_id", "origin", "collector", "scorecard_version", "scorecard_commit", "aggregate_score", "time_scanned").Unique(),
 	}
 }

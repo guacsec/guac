@@ -76,7 +76,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			ID(ctx); err != nil {
 
 			return nil, errors.Wrap(err, "upsert certify vex statement node")
@@ -247,7 +247,7 @@ func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArti
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert certifyVex node")

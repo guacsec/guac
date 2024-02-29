@@ -142,7 +142,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			ID(ctx); err != nil {
 			return nil, errors.Wrap(err, "upsert hasSBOM node")
 		} else {
@@ -361,7 +361,7 @@ func upsertBulkHasSBOM(ctx context.Context, tx *ent.Tx, subjects model.PackageOr
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert hasSBOM node")

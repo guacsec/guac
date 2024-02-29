@@ -58,6 +58,6 @@ func (CertifyVuln) Edges() []ent.Edge {
 // Indexes of the Vulnerability.
 func (CertifyVuln) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("db_uri", "db_version", "scanner_uri", "scanner_version", "origin", "collector").Edges("vulnerability", "package").Unique(),
+		index.Fields("db_uri", "db_version", "scanner_uri", "scanner_version", "origin", "collector", "time_scanned").Edges("vulnerability", "package").Unique(),
 	}
 }

@@ -132,7 +132,7 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert slsa node")
@@ -183,7 +183,7 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 	} else {
 		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*subject.ArtifactInput)).Only(ctx)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to query for artifact")
 		}
 		subjectArtifactID = foundArt.ID
 	}
@@ -222,7 +222,7 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		slsaCreate.SetBuiltFromHash(builtFromHash)
 	}
 
-	slsaID, err := guacSLSAKey(ptrfrom.String(subjectArtifactID.String()), builtFromHash, builtBy, slsa)
+	slsaID, err := guacSLSAKey(ptrfrom.String(subjectArtifactID.String()), builtFromHash, ptrfrom.String(buildID.String()), slsa)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create slsa uuid with error: %w", err)
 	}
@@ -251,7 +251,7 @@ func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput
 				slsaattestation.FieldBuiltFromHash,
 			),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx); err != nil {
 
 		return nil, errors.Wrap(err, "upsert slsa node")
@@ -353,8 +353,8 @@ func canonicalSLSAString(slsa model.SLSAInputSpec) string {
 // when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
 // a new ID for slsa node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
 // "Default" func to generate a new UUID
-func guacSLSAKey(subjectID *string, builtFromHash string, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*uuid.UUID, error) {
-	depIDString := fmt.Sprintf("%s::%s::%s::%s?", *subjectID, builtFromHash, *builtBy.BuilderID, canonicalSLSAString(*slsa))
+func guacSLSAKey(subjectID *string, builtFromHash string, builderID *string, slsa *model.SLSAInputSpec) (*uuid.UUID, error) {
+	depIDString := fmt.Sprintf("%s::%s::%s::%s?", *subjectID, builtFromHash, *builderID, canonicalSLSAString(*slsa))
 
 	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
 	return &depID, nil

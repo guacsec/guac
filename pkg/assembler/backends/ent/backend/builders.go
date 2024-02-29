@@ -106,7 +106,7 @@ func upsertBulkBuilder(ctx context.Context, tx *ent.Tx, buildInputs []*model.IDo
 			OnConflict(
 				sql.ConflictColumns(builder.FieldURI),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert builder node")
@@ -130,7 +130,7 @@ func upsertBuilder(ctx context.Context, tx *ent.Tx, spec *model.BuilderInputSpec
 		OnConflict(
 			sql.ConflictColumns(builder.FieldURI),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "upsert builder")

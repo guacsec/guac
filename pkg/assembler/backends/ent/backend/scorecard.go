@@ -165,7 +165,7 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert scorecard node")
@@ -187,7 +187,7 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.IDorSourceInp
 				certifyscorecard.FieldCollector, certifyscorecard.FieldScorecardCommit,
 				certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldTimeScanned, certifyscorecard.FieldAggregateScore),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx); err != nil {
 		return nil, errors.Wrap(err, "upsert Scorecard")
 

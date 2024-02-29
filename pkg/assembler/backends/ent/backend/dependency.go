@@ -120,7 +120,7 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert dependency node")
@@ -257,7 +257,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			ID(ctx); err != nil {
 			return nil, errors.Wrap(err, "upsert isDependency statement node")
 		} else {

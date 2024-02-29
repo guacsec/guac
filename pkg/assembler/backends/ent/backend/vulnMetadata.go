@@ -158,7 +158,7 @@ func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabil
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert VulnerabilityMetadata node")
@@ -224,7 +224,7 @@ func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability 
 	if id, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 	).
-		Ignore().
+		DoNothing().
 		ID(ctx); err != nil {
 		return nil, errors.Wrap(err, "upsert VulnerabilityMetadata node")
 	} else {

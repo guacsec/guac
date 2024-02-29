@@ -137,7 +137,7 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert Occurrence node")
@@ -217,7 +217,7 @@ func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 		occurrenceCreate.SetSourceID(sourceID)
 
 		var err error
-		isOccurrenceID, err := guacOccurrenceKey(nil, ptrfrom.String(sourceID.String()), ptrfrom.String(artID.String()), *occur)
+		isOccurrenceID, err = guacOccurrenceKey(nil, ptrfrom.String(sourceID.String()), ptrfrom.String(artID.String()), *occur)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to create occurrence uuid with error: %w", err)
 		}
@@ -274,7 +274,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			ID(ctx); err != nil {
 			return nil, errors.Wrap(err, "upsert isOccurrence node")
 		} else {

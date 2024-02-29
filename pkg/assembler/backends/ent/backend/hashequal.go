@@ -117,7 +117,7 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert hashEqual node")
@@ -201,7 +201,7 @@ func upsertHashEqual(ctx context.Context, tx *ent.Tx, artifactA model.IDorArtifa
 				hashequal.FieldJustification,
 			),
 		).
-		Ignore().
+		DoNothing().
 		ID(ctx); err != nil {
 
 		return nil, errors.Wrap(err, "upsert hashEqual statement node")

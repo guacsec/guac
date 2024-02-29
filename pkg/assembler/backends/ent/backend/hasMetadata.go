@@ -161,7 +161,7 @@ func upsertHasMetadata(ctx context.Context, tx *ent.Tx, subject model.PackageSou
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		Ignore().
+		DoNothing().
 		ID(ctx); err != nil {
 		return nil, errors.Wrap(err, "upsert HasMetadata node")
 
@@ -338,7 +338,7 @@ func upsertBulkHasMetadata(ctx context.Context, tx *ent.Tx, subjects model.Packa
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert hasMetadata node")

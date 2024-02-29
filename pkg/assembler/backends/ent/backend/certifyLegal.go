@@ -116,7 +116,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 				sql.ConflictColumns(certifyLegalConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			ID(ctx); err != nil {
 
 			return nil, errors.Wrap(err, "upsert certify legal node")
@@ -312,7 +312,7 @@ func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.Pack
 				sql.ConflictColumns(certifyLegalConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			Ignore().
+			DoNothing().
 			Exec(ctx)
 		if err != nil {
 			return nil, errors.Wrap(err, "bulk upsert certifyLegal node")
