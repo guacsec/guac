@@ -16,8 +16,12 @@
 package backend
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha1"
 	"fmt"
+	"sort"
+	"strconv"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -108,6 +112,8 @@ func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSou
 		}
 	}
 
+	sort.Slice(checks, func(i, j int) bool { return checks[i].Check < checks[j].Check })
+
 	var sourceID uuid.UUID
 	if src.SourceNameID != nil {
 		var err error
@@ -128,6 +134,7 @@ func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSou
 	scorecardCreate.
 		SetSourceID(sourceID).
 		SetChecks(checks).
+		SetChecksHash(hashSortedScorecardChecks(checks)).
 		SetAggregateScore(scorecard.AggregateScore).
 		SetTimeScanned(scorecard.TimeScanned.UTC()).
 		SetScorecardVersion(scorecard.ScorecardVersion).
@@ -142,9 +149,14 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
-		certifyscorecard.FieldSourceID, certifyscorecard.FieldOrigin,
-		certifyscorecard.FieldCollector, certifyscorecard.FieldScorecardCommit,
-		certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldTimeScanned, certifyscorecard.FieldAggregateScore}
+		certifyscorecard.FieldSourceID,
+		certifyscorecard.FieldOrigin,
+		certifyscorecard.FieldCollector,
+		certifyscorecard.FieldScorecardCommit,
+		certifyscorecard.FieldScorecardVersion,
+		certifyscorecard.FieldTimeScanned,
+		certifyscorecard.FieldAggregateScore,
+		certifyscorecard.FieldChecksHash}
 
 	batches := chunk(scorecards, 100)
 
@@ -183,9 +195,15 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.IDorSourceInp
 	}
 	if id, err := scorecardCreate.
 		OnConflict(
-			sql.ConflictColumns(certifyscorecard.FieldSourceID, certifyscorecard.FieldOrigin,
-				certifyscorecard.FieldCollector, certifyscorecard.FieldScorecardCommit,
-				certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldTimeScanned, certifyscorecard.FieldAggregateScore),
+			sql.ConflictColumns(
+				certifyscorecard.FieldSourceID,
+				certifyscorecard.FieldOrigin,
+				certifyscorecard.FieldCollector,
+				certifyscorecard.FieldScorecardCommit,
+				certifyscorecard.FieldScorecardVersion,
+				certifyscorecard.FieldTimeScanned,
+				certifyscorecard.FieldAggregateScore,
+				certifyscorecard.FieldChecksHash),
 		).
 		Ignore().
 		ID(ctx); err != nil {
@@ -194,6 +212,20 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.IDorSourceInp
 	} else {
 		return ptrfrom.String(id.String()), nil
 	}
+}
+
+func hashSortedScorecardChecks(checks []*model.ScorecardCheck) string {
+	hash := sha1.New()
+
+	checksBuffer := bytes.NewBuffer(nil)
+
+	for _, c := range checks {
+		checksBuffer.WriteString(c.Check)
+		checksBuffer.WriteString(strconv.Itoa(c.Score))
+	}
+
+	hash.Write(checksBuffer.Bytes())
+	return fmt.Sprintf("%x", hash.Sum(nil))
 }
 
 func toModelCertifyScorecard(record *ent.CertifyScorecard) *model.CertifyScorecard {

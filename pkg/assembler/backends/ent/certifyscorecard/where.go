@@ -91,6 +91,11 @@ func Collector(v string) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldCollector, v))
 }
 
+// ChecksHash applies equality check predicate on the "checks_hash" field. It's identical to ChecksHashEQ.
+func ChecksHash(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldChecksHash, v))
+}
+
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
 func SourceIDEQ(v uuid.UUID) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldSourceID, v))
@@ -449,6 +454,71 @@ func CollectorEqualFold(v string) predicate.CertifyScorecard {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// ChecksHashEQ applies the EQ predicate on the "checks_hash" field.
+func ChecksHashEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldChecksHash, v))
+}
+
+// ChecksHashNEQ applies the NEQ predicate on the "checks_hash" field.
+func ChecksHashNEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNEQ(FieldChecksHash, v))
+}
+
+// ChecksHashIn applies the In predicate on the "checks_hash" field.
+func ChecksHashIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldIn(FieldChecksHash, vs...))
+}
+
+// ChecksHashNotIn applies the NotIn predicate on the "checks_hash" field.
+func ChecksHashNotIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNotIn(FieldChecksHash, vs...))
+}
+
+// ChecksHashGT applies the GT predicate on the "checks_hash" field.
+func ChecksHashGT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGT(FieldChecksHash, v))
+}
+
+// ChecksHashGTE applies the GTE predicate on the "checks_hash" field.
+func ChecksHashGTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGTE(FieldChecksHash, v))
+}
+
+// ChecksHashLT applies the LT predicate on the "checks_hash" field.
+func ChecksHashLT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLT(FieldChecksHash, v))
+}
+
+// ChecksHashLTE applies the LTE predicate on the "checks_hash" field.
+func ChecksHashLTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLTE(FieldChecksHash, v))
+}
+
+// ChecksHashContains applies the Contains predicate on the "checks_hash" field.
+func ChecksHashContains(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContains(FieldChecksHash, v))
+}
+
+// ChecksHashHasPrefix applies the HasPrefix predicate on the "checks_hash" field.
+func ChecksHashHasPrefix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasPrefix(FieldChecksHash, v))
+}
+
+// ChecksHashHasSuffix applies the HasSuffix predicate on the "checks_hash" field.
+func ChecksHashHasSuffix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasSuffix(FieldChecksHash, v))
+}
+
+// ChecksHashEqualFold applies the EqualFold predicate on the "checks_hash" field.
+func ChecksHashEqualFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEqualFold(FieldChecksHash, v))
+}
+
+// ChecksHashContainsFold applies the ContainsFold predicate on the "checks_hash" field.
+func ChecksHashContainsFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContainsFold(FieldChecksHash, v))
 }
 
 // HasSource applies the HasEdge predicate on the "source" edge.

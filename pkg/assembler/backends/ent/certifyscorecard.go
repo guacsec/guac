@@ -37,6 +37,8 @@ type CertifyScorecard struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// A SHA1 of the checks fields after sorting keys, used to ensure uniqueness of scorecard records.
+	ChecksHash string `json:"checks_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CertifyScorecardQuery when eager-loading is set.
 	Edges        CertifyScorecardEdges `json:"edges"`
@@ -76,7 +78,7 @@ func (*CertifyScorecard) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case certifyscorecard.FieldAggregateScore:
 			values[i] = new(sql.NullFloat64)
-		case certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldScorecardCommit, certifyscorecard.FieldOrigin, certifyscorecard.FieldCollector:
+		case certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldScorecardCommit, certifyscorecard.FieldOrigin, certifyscorecard.FieldCollector, certifyscorecard.FieldChecksHash:
 			values[i] = new(sql.NullString)
 		case certifyscorecard.FieldTimeScanned:
 			values[i] = new(sql.NullTime)
@@ -153,6 +155,12 @@ func (cs *CertifyScorecard) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				cs.Collector = value.String
 			}
+		case certifyscorecard.FieldChecksHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field checks_hash", values[i])
+			} else if value.Valid {
+				cs.ChecksHash = value.String
+			}
 		default:
 			cs.selectValues.Set(columns[i], values[i])
 		}
@@ -217,6 +225,9 @@ func (cs *CertifyScorecard) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(cs.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("checks_hash=")
+	builder.WriteString(cs.ChecksHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

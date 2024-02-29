@@ -149,6 +149,20 @@ func (csu *CertifyScorecardUpdate) SetNillableCollector(s *string) *CertifyScore
 	return csu
 }
 
+// SetChecksHash sets the "checks_hash" field.
+func (csu *CertifyScorecardUpdate) SetChecksHash(s string) *CertifyScorecardUpdate {
+	csu.mutation.SetChecksHash(s)
+	return csu
+}
+
+// SetNillableChecksHash sets the "checks_hash" field if the given value is not nil.
+func (csu *CertifyScorecardUpdate) SetNillableChecksHash(s *string) *CertifyScorecardUpdate {
+	if s != nil {
+		csu.SetChecksHash(*s)
+	}
+	return csu
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (csu *CertifyScorecardUpdate) SetSource(s *SourceName) *CertifyScorecardUpdate {
 	return csu.SetSourceID(s.ID)
@@ -240,6 +254,9 @@ func (csu *CertifyScorecardUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if value, ok := csu.mutation.Collector(); ok {
 		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := csu.mutation.ChecksHash(); ok {
+		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)
 	}
 	if csu.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -407,6 +424,20 @@ func (csuo *CertifyScorecardUpdateOne) SetNillableCollector(s *string) *CertifyS
 	return csuo
 }
 
+// SetChecksHash sets the "checks_hash" field.
+func (csuo *CertifyScorecardUpdateOne) SetChecksHash(s string) *CertifyScorecardUpdateOne {
+	csuo.mutation.SetChecksHash(s)
+	return csuo
+}
+
+// SetNillableChecksHash sets the "checks_hash" field if the given value is not nil.
+func (csuo *CertifyScorecardUpdateOne) SetNillableChecksHash(s *string) *CertifyScorecardUpdateOne {
+	if s != nil {
+		csuo.SetChecksHash(*s)
+	}
+	return csuo
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (csuo *CertifyScorecardUpdateOne) SetSource(s *SourceName) *CertifyScorecardUpdateOne {
 	return csuo.SetSourceID(s.ID)
@@ -528,6 +559,9 @@ func (csuo *CertifyScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Cert
 	}
 	if value, ok := csuo.mutation.Collector(); ok {
 		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := csuo.mutation.ChecksHash(); ok {
+		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)
 	}
 	if csuo.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{

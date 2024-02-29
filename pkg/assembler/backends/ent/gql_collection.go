@@ -838,6 +838,11 @@ func (cs *CertifyScorecardQuery) collectField(ctx context.Context, opCtx *graphq
 				selectedFields = append(selectedFields, certifyscorecard.FieldCollector)
 				fieldSeen[certifyscorecard.FieldCollector] = struct{}{}
 			}
+		case "checksHash":
+			if _, ok := fieldSeen[certifyscorecard.FieldChecksHash]; !ok {
+				selectedFields = append(selectedFields, certifyscorecard.FieldChecksHash)
+				fieldSeen[certifyscorecard.FieldChecksHash] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:

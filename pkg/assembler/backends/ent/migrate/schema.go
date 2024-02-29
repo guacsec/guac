@@ -248,6 +248,7 @@ var (
 		{Name: "scorecard_commit", Type: field.TypeString},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
+		{Name: "checks_hash", Type: field.TypeString},
 		{Name: "source_id", Type: field.TypeUUID},
 	}
 	// CertifyScorecardsTable holds the schema information for the "certify_scorecards" table.
@@ -258,16 +259,16 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "certify_scorecards_source_names_source",
-				Columns:    []*schema.Column{CertifyScorecardsColumns[8]},
+				Columns:    []*schema.Column{CertifyScorecardsColumns[9]},
 				RefColumns: []*schema.Column{SourceNamesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifyscorecard_source_id_origin_collector_scorecard_version_scorecard_commit_aggregate_score_time_scanned",
+				Name:    "certifyscorecard_source_id_origin_collector_scorecard_version_scorecard_commit_aggregate_score_time_scanned_checks_hash",
 				Unique:  true,
-				Columns: []*schema.Column{CertifyScorecardsColumns[8], CertifyScorecardsColumns[6], CertifyScorecardsColumns[7], CertifyScorecardsColumns[4], CertifyScorecardsColumns[5], CertifyScorecardsColumns[2], CertifyScorecardsColumns[3]},
+				Columns: []*schema.Column{CertifyScorecardsColumns[9], CertifyScorecardsColumns[6], CertifyScorecardsColumns[7], CertifyScorecardsColumns[4], CertifyScorecardsColumns[5], CertifyScorecardsColumns[2], CertifyScorecardsColumns[3], CertifyScorecardsColumns[8]},
 			},
 		},
 	}

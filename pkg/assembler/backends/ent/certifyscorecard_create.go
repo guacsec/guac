@@ -90,6 +90,12 @@ func (csc *CertifyScorecardCreate) SetCollector(s string) *CertifyScorecardCreat
 	return csc
 }
 
+// SetChecksHash sets the "checks_hash" field.
+func (csc *CertifyScorecardCreate) SetChecksHash(s string) *CertifyScorecardCreate {
+	csc.mutation.SetChecksHash(s)
+	return csc
+}
+
 // SetID sets the "id" field.
 func (csc *CertifyScorecardCreate) SetID(u uuid.UUID) *CertifyScorecardCreate {
 	csc.mutation.SetID(u)
@@ -184,6 +190,9 @@ func (csc *CertifyScorecardCreate) check() error {
 	if _, ok := csc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyScorecard.collector"`)}
 	}
+	if _, ok := csc.mutation.ChecksHash(); !ok {
+		return &ValidationError{Name: "checks_hash", err: errors.New(`ent: missing required field "CertifyScorecard.checks_hash"`)}
+	}
 	if _, ok := csc.mutation.SourceID(); !ok {
 		return &ValidationError{Name: "source", err: errors.New(`ent: missing required edge "CertifyScorecard.source"`)}
 	}
@@ -250,6 +259,10 @@ func (csc *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.Cr
 	if value, ok := csc.mutation.Collector(); ok {
 		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := csc.mutation.ChecksHash(); ok {
+		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)
+		_node.ChecksHash = value
 	}
 	if nodes := csc.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -422,6 +435,18 @@ func (u *CertifyScorecardUpsert) UpdateCollector() *CertifyScorecardUpsert {
 	return u
 }
 
+// SetChecksHash sets the "checks_hash" field.
+func (u *CertifyScorecardUpsert) SetChecksHash(v string) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldChecksHash, v)
+	return u
+}
+
+// UpdateChecksHash sets the "checks_hash" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateChecksHash() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldChecksHash)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -586,6 +611,20 @@ func (u *CertifyScorecardUpsertOne) SetCollector(v string) *CertifyScorecardUpse
 func (u *CertifyScorecardUpsertOne) UpdateCollector() *CertifyScorecardUpsertOne {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetChecksHash sets the "checks_hash" field.
+func (u *CertifyScorecardUpsertOne) SetChecksHash(v string) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetChecksHash(v)
+	})
+}
+
+// UpdateChecksHash sets the "checks_hash" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateChecksHash() *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateChecksHash()
 	})
 }
 
@@ -920,6 +959,20 @@ func (u *CertifyScorecardUpsertBulk) SetCollector(v string) *CertifyScorecardUps
 func (u *CertifyScorecardUpsertBulk) UpdateCollector() *CertifyScorecardUpsertBulk {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetChecksHash sets the "checks_hash" field.
+func (u *CertifyScorecardUpsertBulk) SetChecksHash(v string) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetChecksHash(v)
+	})
+}
+
+// UpdateChecksHash sets the "checks_hash" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateChecksHash() *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateChecksHash()
 	})
 }
 

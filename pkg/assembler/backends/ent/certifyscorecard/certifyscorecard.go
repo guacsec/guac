@@ -31,6 +31,8 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldChecksHash holds the string denoting the checks_hash field in the database.
+	FieldChecksHash = "checks_hash"
 	// EdgeSource holds the string denoting the source edge name in mutations.
 	EdgeSource = "source"
 	// Table holds the table name of the certifyscorecard in the database.
@@ -55,6 +57,7 @@ var Columns = []string{
 	FieldScorecardCommit,
 	FieldOrigin,
 	FieldCollector,
+	FieldChecksHash,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -117,6 +120,11 @@ func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 // ByCollector orders the results by the collector field.
 func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
+}
+
+// ByChecksHash orders the results by the checks_hash field.
+func ByChecksHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChecksHash, opts...).ToFunc()
 }
 
 // BySourceField orders the results by source field.

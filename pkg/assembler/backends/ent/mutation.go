@@ -5008,6 +5008,7 @@ type CertifyScorecardMutation struct {
 	scorecard_commit   *string
 	origin             *string
 	collector          *string
+	checks_hash        *string
 	clearedFields      map[string]struct{}
 	source             *uuid.UUID
 	clearedsource      bool
@@ -5443,6 +5444,42 @@ func (m *CertifyScorecardMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetChecksHash sets the "checks_hash" field.
+func (m *CertifyScorecardMutation) SetChecksHash(s string) {
+	m.checks_hash = &s
+}
+
+// ChecksHash returns the value of the "checks_hash" field in the mutation.
+func (m *CertifyScorecardMutation) ChecksHash() (r string, exists bool) {
+	v := m.checks_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChecksHash returns the old "checks_hash" field's value of the CertifyScorecard entity.
+// If the CertifyScorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyScorecardMutation) OldChecksHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChecksHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChecksHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChecksHash: %w", err)
+	}
+	return oldValue.ChecksHash, nil
+}
+
+// ResetChecksHash resets all changes to the "checks_hash" field.
+func (m *CertifyScorecardMutation) ResetChecksHash() {
+	m.checks_hash = nil
+}
+
 // ClearSource clears the "source" edge to the SourceName entity.
 func (m *CertifyScorecardMutation) ClearSource() {
 	m.clearedsource = true
@@ -5504,7 +5541,7 @@ func (m *CertifyScorecardMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertifyScorecardMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.source != nil {
 		fields = append(fields, certifyscorecard.FieldSourceID)
 	}
@@ -5528,6 +5565,9 @@ func (m *CertifyScorecardMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, certifyscorecard.FieldCollector)
+	}
+	if m.checks_hash != nil {
+		fields = append(fields, certifyscorecard.FieldChecksHash)
 	}
 	return fields
 }
@@ -5553,6 +5593,8 @@ func (m *CertifyScorecardMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case certifyscorecard.FieldCollector:
 		return m.Collector()
+	case certifyscorecard.FieldChecksHash:
+		return m.ChecksHash()
 	}
 	return nil, false
 }
@@ -5578,6 +5620,8 @@ func (m *CertifyScorecardMutation) OldField(ctx context.Context, name string) (e
 		return m.OldOrigin(ctx)
 	case certifyscorecard.FieldCollector:
 		return m.OldCollector(ctx)
+	case certifyscorecard.FieldChecksHash:
+		return m.OldChecksHash(ctx)
 	}
 	return nil, fmt.Errorf("unknown CertifyScorecard field %s", name)
 }
@@ -5642,6 +5686,13 @@ func (m *CertifyScorecardMutation) SetField(name string, value ent.Value) error 
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case certifyscorecard.FieldChecksHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChecksHash(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CertifyScorecard field %s", name)
@@ -5730,6 +5781,9 @@ func (m *CertifyScorecardMutation) ResetField(name string) error {
 		return nil
 	case certifyscorecard.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case certifyscorecard.FieldChecksHash:
+		m.ResetChecksHash()
 		return nil
 	}
 	return fmt.Errorf("unknown CertifyScorecard field %s", name)
