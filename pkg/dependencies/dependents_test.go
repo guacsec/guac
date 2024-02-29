@@ -20,11 +20,13 @@ package dependencies
 import (
 	"context"
 	"fmt"
-	"github.com/Khan/genqlient/graphql"
-	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"net/http"
 	"testing"
 	"time"
+
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+
+	"github.com/Khan/genqlient/graphql"
 )
 
 type testPkgInputSpec struct {
@@ -324,15 +326,15 @@ func check(t *testing.T, wantErr bool, want map[string]int) {
 	httpClient := http.Client{}
 	gqlClient := graphql.NewClient(endpoint, &httpClient)
 
-	got, err := findAllDependents(gqlClient)
+	got, err := findDependentsOfDependencies(gqlClient)
 	if (err != nil) != wantErr {
-		t.Errorf("findAllDependents() error = %v, wantErr %v", err, wantErr)
+		t.Errorf("findDependentsOfDependencies() error = %v, wantErr %v", err, wantErr)
 		return
 	}
 
 	for k, v := range want {
 		if v != len(got[k].dependents) {
-			t.Errorf("findAllDependents() for node %v, got %v dependencies, want %v dependencies", k, len(got[k].dependents), v)
+			t.Errorf("findDependentsOfDependencies() for node %v, got %v dependencies, want %v dependencies", k, len(got[k].dependents), v)
 		}
 	}
 }

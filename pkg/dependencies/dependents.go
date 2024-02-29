@@ -18,11 +18,13 @@ package dependencies
 import (
 	"context"
 	"fmt"
-	"github.com/Khan/genqlient/graphql"
-	"github.com/guacsec/guac/cmd/guacone/cmd"
+	"sort"
+
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/handler/collector/deps_dev"
-	"sort"
+	"github.com/guacsec/guac/pkg/misc/depversion"
+
+	"github.com/Khan/genqlient/graphql"
 )
 
 type dependencyNode struct {
@@ -34,24 +36,17 @@ type PackageName struct {
 	DependentCount int
 }
 
-type Dependencies interface {
-	GetSortedDependents() ([]PackageName, error)
-}
-
-type dependencies struct {
-	ctx       context.Context
-	gqlClient graphql.Client
-}
-
-func New(ctx context.Context, gqlClient graphql.Client) Dependencies {
-	return &dependencies{
-		gqlClient: gqlClient,
-		ctx:       ctx,
-	}
-}
-
-func (deps *dependencies) GetSortedDependents() ([]PackageName, error) {
-	packages, err := findAllDependents(deps.gqlClient)
+// GetDependenciesBySortedDependentCnt retrieves all dependents for each package and returns a sorted list of
+// PackageName, where each PackageName contains the name of the package and the number of its dependents.
+// The list is sorted in descending order based on the DependentCount, so packages with the most dependents come first.
+// This function leverages the findDependentsOfDependencies function to construct a map of all packages and their dependents,
+// then processes this map to create a slice of PackageName, which is then sorted.
+//
+// Returns:
+// - A slice of PackageName, sorted by DependentCount in descending order.
+// - An error
+func GetDependenciesBySortedDependentCnt(ctx context.Context, gqlClient graphql.Client) ([]PackageName, error) {
+	packages, err := findDependentsOfDependencies(ctx, gqlClient)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dependents: %v", err)
@@ -69,12 +64,19 @@ func (deps *dependencies) GetSortedDependents() ([]PackageName, error) {
 	return packagesArr, nil
 }
 
-// findAllDependents queries a GraphQL endpoint to find all dependencies and constructs a map of dependencyNode.
-func findAllDependents(gqlClient graphql.Client) (map[string]dependencyNode, error) {
-	ctx := context.Background()
-
+// findDependentsOfDependencies queries the GraphQL endpoint to retrieve all SBOMs and constructs
+// a map of dependencyNode, where each node represents a package and its dependents. This function is designed to
+// identify and map out the relationships between packages based on the SBOM data. It filters out inconsistent data
+// from "deps.dev" and handles packages with and without specific version IDs. The function employs a breadth-first search
+// (BFS) algorithm to traverse the dependency graph and populate the map with packages and their respective dependents.
+//
+// Returns:
+//   - A map where the key is a string representing the package name, and the value is a dependencyNode containing
+//     the dependents of the package.
+//   - An error
+func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client) (map[string]dependencyNode, error) {
 	// Initialize a map to hold package names mapped to their dependency nodes. This will be the returned map
-	packages := map[string]dependencyNode{}
+	packages := make(map[string]dependencyNode)
 
 	// Initialize maps to hold dependency and dependent edges.
 	// dependentEdges maps a package ID to the IDs of packages that depend on it (DepPkg to Pkg).
@@ -107,7 +109,7 @@ func findAllDependents(gqlClient graphql.Client) (map[string]dependencyNode, err
 			pkgId := dependency.Package.Namespaces[0].Names[0].Versions[0].Id
 
 			if len(dependency.DependencyPackage.Namespaces[0].Names[0].Versions) == 0 {
-				findMatchingDepPkgVersionIDs, err := cmd.FindDepPkgVersionIDs(ctx, gqlClient, dependency.DependencyPackage.Type,
+				findMatchingDepPkgVersionIDs, err := findDepPkgVersionIDs(ctx, gqlClient, dependency.DependencyPackage.Type,
 					dependency.DependencyPackage.Namespaces[0].Namespace,
 					dependency.DependencyPackage.Namespaces[0].Names[0].Name, dependency.VersionRange)
 				if err != nil {
@@ -131,7 +133,7 @@ func findAllDependents(gqlClient graphql.Client) (map[string]dependencyNode, err
 				// First we need to find all the packages that have pkgName as a dependency
 
 				// Initialize a visited map and a queue for BFS to find all packages that have pkgName as a dependency.
-				visited := map[string]bool{}
+				visited := make(map[string]bool)
 				queue := []string{depPkgId}
 
 				// Perform BFS to mark visited nodes.
@@ -171,7 +173,7 @@ func findAllDependents(gqlClient graphql.Client) (map[string]dependencyNode, err
 						for depPkgNodeId := range visited {
 							depPkgNode := idToName[depPkgNodeId]
 							if _, ok := packages[depPkgNode]; !ok {
-								packages[depPkgNode] = dependencyNode{dependents: map[string]bool{}}
+								packages[depPkgNode] = dependencyNode{dependents: make(map[string]bool)}
 							}
 
 							// Mark the node as a dependent.
@@ -191,4 +193,45 @@ func findAllDependents(gqlClient graphql.Client) (map[string]dependencyNode, err
 	}
 
 	return packages, nil
+}
+
+// findDepPkgVersionIDs queries for packages matching the specified filters (type, namespace, name) and version range.
+// It returns a slice of version IDs that match the given version range criteria.
+// This function returns:
+// - A slice of matching dependent package version IDs.
+// - An error
+func findDepPkgVersionIDs(ctx context.Context, gqlclient graphql.Client, depPkgType string, depPkgNameSpace string, depPkgName string, versionRange string) ([]string, error) {
+	var matchingDepPkgVersionIDs []string
+
+	depPkgFilter := &model.PkgSpec{
+		Type:      &depPkgType,
+		Namespace: &depPkgNameSpace,
+		Name:      &depPkgName,
+	}
+
+	depPkgResponse, err := model.Packages(ctx, gqlclient, *depPkgFilter)
+	if err != nil {
+		return nil, fmt.Errorf("error querying for dependent package: %w", err)
+	}
+
+	depPkgVersionsMap := make(map[string]string)
+	var depPkgVersions []string
+	for _, depPkgVersion := range depPkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+		depPkgVersions = append(depPkgVersions, depPkgVersion.Version)
+		depPkgVersionsMap[depPkgVersion.Version] = depPkgVersion.Id
+	}
+
+	matchingDepPkgVersions, err := depversion.WhichVersionMatches(depPkgVersions, versionRange)
+	if err != nil {
+		// TODO(jeffmendoza): depversion is not handling all/new possible
+		// version ranges from deps.dev. Continue here to report possible
+		// vulns even if some paths cannot be followed.
+		matchingDepPkgVersions = nil
+		//return nil, nil, fmt.Errorf("error determining dependent version matches: %w", err)
+	}
+
+	for matchingDepPkgVersion := range matchingDepPkgVersions {
+		matchingDepPkgVersionIDs = append(matchingDepPkgVersionIDs, depPkgVersionsMap[matchingDepPkgVersion])
+	}
+	return matchingDepPkgVersionIDs, nil
 }

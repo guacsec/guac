@@ -22,8 +22,8 @@ type Error struct {
 
 // PackageName defines model for PackageName.
 type PackageName struct {
-	DependentCount *int    `json:"DependentCount,omitempty"`
-	Name           *string `json:"Name,omitempty"`
+	DependentCount int    `json:"DependentCount"`
+	Name           string `json:"Name"`
 }
 
 // Purl defines model for Purl.

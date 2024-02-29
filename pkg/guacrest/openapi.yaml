@@ -140,6 +140,9 @@ components:
           type: string
     PackageName:
       type: object
+      required:
+        - Name
+        - DependentCount
       properties:
         Name:
           type: string
