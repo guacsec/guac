@@ -13,6 +13,10 @@ const (
 	Label = "vuln_equal"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldVulnID holds the string denoting the vuln_id field in the database.
+	FieldVulnID = "vuln_id"
+	// FieldEqualVulnID holds the string denoting the equal_vuln_id field in the database.
+	FieldEqualVulnID = "equal_vuln_id"
 	// FieldJustification holds the string denoting the justification field in the database.
 	FieldJustification = "justification"
 	// FieldOrigin holds the string denoting the origin field in the database.
@@ -21,31 +25,38 @@ const (
 	FieldCollector = "collector"
 	// FieldVulnerabilitiesHash holds the string denoting the vulnerabilities_hash field in the database.
 	FieldVulnerabilitiesHash = "vulnerabilities_hash"
-	// EdgeVulnerabilityIds holds the string denoting the vulnerability_ids edge name in mutations.
-	EdgeVulnerabilityIds = "vulnerability_ids"
+	// EdgeVulnerabilityA holds the string denoting the vulnerability_a edge name in mutations.
+	EdgeVulnerabilityA = "vulnerability_a"
+	// EdgeVulnerabilityB holds the string denoting the vulnerability_b edge name in mutations.
+	EdgeVulnerabilityB = "vulnerability_b"
 	// Table holds the table name of the vulnequal in the database.
 	Table = "vuln_equals"
-	// VulnerabilityIdsTable is the table that holds the vulnerability_ids relation/edge. The primary key declared below.
-	VulnerabilityIdsTable = "vuln_equal_vulnerability_ids"
-	// VulnerabilityIdsInverseTable is the table name for the VulnerabilityID entity.
+	// VulnerabilityATable is the table that holds the vulnerability_a relation/edge.
+	VulnerabilityATable = "vuln_equals"
+	// VulnerabilityAInverseTable is the table name for the VulnerabilityID entity.
 	// It exists in this package in order to avoid circular dependency with the "vulnerabilityid" package.
-	VulnerabilityIdsInverseTable = "vulnerability_ids"
+	VulnerabilityAInverseTable = "vulnerability_ids"
+	// VulnerabilityAColumn is the table column denoting the vulnerability_a relation/edge.
+	VulnerabilityAColumn = "vuln_id"
+	// VulnerabilityBTable is the table that holds the vulnerability_b relation/edge.
+	VulnerabilityBTable = "vuln_equals"
+	// VulnerabilityBInverseTable is the table name for the VulnerabilityID entity.
+	// It exists in this package in order to avoid circular dependency with the "vulnerabilityid" package.
+	VulnerabilityBInverseTable = "vulnerability_ids"
+	// VulnerabilityBColumn is the table column denoting the vulnerability_b relation/edge.
+	VulnerabilityBColumn = "equal_vuln_id"
 )
 
 // Columns holds all SQL columns for vulnequal fields.
 var Columns = []string{
 	FieldID,
+	FieldVulnID,
+	FieldEqualVulnID,
 	FieldJustification,
 	FieldOrigin,
 	FieldCollector,
 	FieldVulnerabilitiesHash,
 }
-
-var (
-	// VulnerabilityIdsPrimaryKey and VulnerabilityIdsColumn2 are the table columns denoting the
-	// primary key for the vulnerability_ids relation (M2M).
-	VulnerabilityIdsPrimaryKey = []string{"vuln_equal_id", "vulnerability_id_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -70,6 +81,16 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByVulnID orders the results by the vuln_id field.
+func ByVulnID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVulnID, opts...).ToFunc()
+}
+
+// ByEqualVulnID orders the results by the equal_vuln_id field.
+func ByEqualVulnID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEqualVulnID, opts...).ToFunc()
+}
+
 // ByJustification orders the results by the justification field.
 func ByJustification(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldJustification, opts...).ToFunc()
@@ -90,23 +111,30 @@ func ByVulnerabilitiesHash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVulnerabilitiesHash, opts...).ToFunc()
 }
 
-// ByVulnerabilityIdsCount orders the results by vulnerability_ids count.
-func ByVulnerabilityIdsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByVulnerabilityAField orders the results by vulnerability_a field.
+func ByVulnerabilityAField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newVulnerabilityIdsStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newVulnerabilityAStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByVulnerabilityIds orders the results by vulnerability_ids terms.
-func ByVulnerabilityIds(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByVulnerabilityBField orders the results by vulnerability_b field.
+func ByVulnerabilityBField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newVulnerabilityIdsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newVulnerabilityBStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newVulnerabilityIdsStep() *sqlgraph.Step {
+func newVulnerabilityAStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(VulnerabilityIdsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, VulnerabilityIdsTable, VulnerabilityIdsPrimaryKey...),
+		sqlgraph.To(VulnerabilityAInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, VulnerabilityATable, VulnerabilityAColumn),
+	)
+}
+func newVulnerabilityBStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VulnerabilityBInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, VulnerabilityBTable, VulnerabilityBColumn),
 	)
 }

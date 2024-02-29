@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -20,14 +19,14 @@ import (
 // VulnEqualQuery is the builder for querying VulnEqual entities.
 type VulnEqualQuery struct {
 	config
-	ctx                       *QueryContext
-	order                     []vulnequal.OrderOption
-	inters                    []Interceptor
-	predicates                []predicate.VulnEqual
-	withVulnerabilityIds      *VulnerabilityIDQuery
-	modifiers                 []func(*sql.Selector)
-	loadTotal                 []func(context.Context, []*VulnEqual) error
-	withNamedVulnerabilityIds map[string]*VulnerabilityIDQuery
+	ctx                *QueryContext
+	order              []vulnequal.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.VulnEqual
+	withVulnerabilityA *VulnerabilityIDQuery
+	withVulnerabilityB *VulnerabilityIDQuery
+	modifiers          []func(*sql.Selector)
+	loadTotal          []func(context.Context, []*VulnEqual) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,8 +63,8 @@ func (veq *VulnEqualQuery) Order(o ...vulnequal.OrderOption) *VulnEqualQuery {
 	return veq
 }
 
-// QueryVulnerabilityIds chains the current query on the "vulnerability_ids" edge.
-func (veq *VulnEqualQuery) QueryVulnerabilityIds() *VulnerabilityIDQuery {
+// QueryVulnerabilityA chains the current query on the "vulnerability_a" edge.
+func (veq *VulnEqualQuery) QueryVulnerabilityA() *VulnerabilityIDQuery {
 	query := (&VulnerabilityIDClient{config: veq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := veq.prepareQuery(ctx); err != nil {
@@ -78,7 +77,29 @@ func (veq *VulnEqualQuery) QueryVulnerabilityIds() *VulnerabilityIDQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnequal.Table, vulnequal.FieldID, selector),
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, vulnequal.VulnerabilityIdsTable, vulnequal.VulnerabilityIdsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityATable, vulnequal.VulnerabilityAColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(veq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVulnerabilityB chains the current query on the "vulnerability_b" edge.
+func (veq *VulnEqualQuery) QueryVulnerabilityB() *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: veq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := veq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := veq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vulnequal.Table, vulnequal.FieldID, selector),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityBTable, vulnequal.VulnerabilityBColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(veq.driver.Dialect(), step)
 		return fromU, nil
@@ -273,26 +294,38 @@ func (veq *VulnEqualQuery) Clone() *VulnEqualQuery {
 		return nil
 	}
 	return &VulnEqualQuery{
-		config:               veq.config,
-		ctx:                  veq.ctx.Clone(),
-		order:                append([]vulnequal.OrderOption{}, veq.order...),
-		inters:               append([]Interceptor{}, veq.inters...),
-		predicates:           append([]predicate.VulnEqual{}, veq.predicates...),
-		withVulnerabilityIds: veq.withVulnerabilityIds.Clone(),
+		config:             veq.config,
+		ctx:                veq.ctx.Clone(),
+		order:              append([]vulnequal.OrderOption{}, veq.order...),
+		inters:             append([]Interceptor{}, veq.inters...),
+		predicates:         append([]predicate.VulnEqual{}, veq.predicates...),
+		withVulnerabilityA: veq.withVulnerabilityA.Clone(),
+		withVulnerabilityB: veq.withVulnerabilityB.Clone(),
 		// clone intermediate query.
 		sql:  veq.sql.Clone(),
 		path: veq.path,
 	}
 }
 
-// WithVulnerabilityIds tells the query-builder to eager-load the nodes that are connected to
-// the "vulnerability_ids" edge. The optional arguments are used to configure the query builder of the edge.
-func (veq *VulnEqualQuery) WithVulnerabilityIds(opts ...func(*VulnerabilityIDQuery)) *VulnEqualQuery {
+// WithVulnerabilityA tells the query-builder to eager-load the nodes that are connected to
+// the "vulnerability_a" edge. The optional arguments are used to configure the query builder of the edge.
+func (veq *VulnEqualQuery) WithVulnerabilityA(opts ...func(*VulnerabilityIDQuery)) *VulnEqualQuery {
 	query := (&VulnerabilityIDClient{config: veq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	veq.withVulnerabilityIds = query
+	veq.withVulnerabilityA = query
+	return veq
+}
+
+// WithVulnerabilityB tells the query-builder to eager-load the nodes that are connected to
+// the "vulnerability_b" edge. The optional arguments are used to configure the query builder of the edge.
+func (veq *VulnEqualQuery) WithVulnerabilityB(opts ...func(*VulnerabilityIDQuery)) *VulnEqualQuery {
+	query := (&VulnerabilityIDClient{config: veq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	veq.withVulnerabilityB = query
 	return veq
 }
 
@@ -302,12 +335,12 @@ func (veq *VulnEqualQuery) WithVulnerabilityIds(opts ...func(*VulnerabilityIDQue
 // Example:
 //
 //	var v []struct {
-//		Justification string `json:"justification,omitempty"`
+//		VulnID uuid.UUID `json:"vuln_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.VulnEqual.Query().
-//		GroupBy(vulnequal.FieldJustification).
+//		GroupBy(vulnequal.FieldVulnID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (veq *VulnEqualQuery) GroupBy(field string, fields ...string) *VulnEqualGroupBy {
@@ -325,11 +358,11 @@ func (veq *VulnEqualQuery) GroupBy(field string, fields ...string) *VulnEqualGro
 // Example:
 //
 //	var v []struct {
-//		Justification string `json:"justification,omitempty"`
+//		VulnID uuid.UUID `json:"vuln_id,omitempty"`
 //	}
 //
 //	client.VulnEqual.Query().
-//		Select(vulnequal.FieldJustification).
+//		Select(vulnequal.FieldVulnID).
 //		Scan(ctx, &v)
 func (veq *VulnEqualQuery) Select(fields ...string) *VulnEqualSelect {
 	veq.ctx.Fields = append(veq.ctx.Fields, fields...)
@@ -374,8 +407,9 @@ func (veq *VulnEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*V
 	var (
 		nodes       = []*VulnEqual{}
 		_spec       = veq.querySpec()
-		loadedTypes = [1]bool{
-			veq.withVulnerabilityIds != nil,
+		loadedTypes = [2]bool{
+			veq.withVulnerabilityA != nil,
+			veq.withVulnerabilityB != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -399,17 +433,15 @@ func (veq *VulnEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*V
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := veq.withVulnerabilityIds; query != nil {
-		if err := veq.loadVulnerabilityIds(ctx, query, nodes,
-			func(n *VulnEqual) { n.Edges.VulnerabilityIds = []*VulnerabilityID{} },
-			func(n *VulnEqual, e *VulnerabilityID) { n.Edges.VulnerabilityIds = append(n.Edges.VulnerabilityIds, e) }); err != nil {
+	if query := veq.withVulnerabilityA; query != nil {
+		if err := veq.loadVulnerabilityA(ctx, query, nodes, nil,
+			func(n *VulnEqual, e *VulnerabilityID) { n.Edges.VulnerabilityA = e }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range veq.withNamedVulnerabilityIds {
-		if err := veq.loadVulnerabilityIds(ctx, query, nodes,
-			func(n *VulnEqual) { n.appendNamedVulnerabilityIds(name) },
-			func(n *VulnEqual, e *VulnerabilityID) { n.appendNamedVulnerabilityIds(name, e) }); err != nil {
+	if query := veq.withVulnerabilityB; query != nil {
+		if err := veq.loadVulnerabilityB(ctx, query, nodes, nil,
+			func(n *VulnEqual, e *VulnerabilityID) { n.Edges.VulnerabilityB = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -421,63 +453,60 @@ func (veq *VulnEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*V
 	return nodes, nil
 }
 
-func (veq *VulnEqualQuery) loadVulnerabilityIds(ctx context.Context, query *VulnerabilityIDQuery, nodes []*VulnEqual, init func(*VulnEqual), assign func(*VulnEqual, *VulnerabilityID)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[uuid.UUID]*VulnEqual)
-	nids := make(map[uuid.UUID]map[*VulnEqual]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+func (veq *VulnEqualQuery) loadVulnerabilityA(ctx context.Context, query *VulnerabilityIDQuery, nodes []*VulnEqual, init func(*VulnEqual), assign func(*VulnEqual, *VulnerabilityID)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*VulnEqual)
+	for i := range nodes {
+		fk := nodes[i].VulnID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(vulnequal.VulnerabilityIdsTable)
-		s.Join(joinT).On(s.C(vulnerabilityid.FieldID), joinT.C(vulnequal.VulnerabilityIdsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(vulnequal.VulnerabilityIdsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(vulnequal.VulnerabilityIdsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(uuid.UUID)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := *values[0].(*uuid.UUID)
-				inValue := *values[1].(*uuid.UUID)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*VulnEqual]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*VulnerabilityID](ctx, query, qr, query.inters)
+	query.Where(vulnerabilityid.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "vulnerability_ids" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "vuln_id" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (veq *VulnEqualQuery) loadVulnerabilityB(ctx context.Context, query *VulnerabilityIDQuery, nodes []*VulnEqual, init func(*VulnEqual), assign func(*VulnEqual, *VulnerabilityID)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*VulnEqual)
+	for i := range nodes {
+		fk := nodes[i].EqualVulnID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(vulnerabilityid.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "equal_vuln_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil
@@ -510,6 +539,12 @@ func (veq *VulnEqualQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != vulnequal.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if veq.withVulnerabilityA != nil {
+			_spec.Node.AddColumnOnce(vulnequal.FieldVulnID)
+		}
+		if veq.withVulnerabilityB != nil {
+			_spec.Node.AddColumnOnce(vulnequal.FieldEqualVulnID)
 		}
 	}
 	if ps := veq.predicates; len(ps) > 0 {
@@ -565,20 +600,6 @@ func (veq *VulnEqualQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
-}
-
-// WithNamedVulnerabilityIds tells the query-builder to eager-load the nodes that are connected to the "vulnerability_ids"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (veq *VulnEqualQuery) WithNamedVulnerabilityIds(name string, opts ...func(*VulnerabilityIDQuery)) *VulnEqualQuery {
-	query := (&VulnerabilityIDClient{config: veq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	if veq.withNamedVulnerabilityIds == nil {
-		veq.withNamedVulnerabilityIds = make(map[string]*VulnerabilityIDQuery)
-	}
-	veq.withNamedVulnerabilityIds[name] = query
-	return veq
 }
 
 // VulnEqualGroupBy is the group-by builder for VulnEqual entities.

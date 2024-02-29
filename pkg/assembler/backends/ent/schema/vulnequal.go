@@ -35,6 +35,8 @@ func (VulnEqual) Fields() []ent.Field {
 			Default(getUUIDv7).
 			Unique().
 			Immutable(),
+		field.UUID("vuln_id", getUUIDv7()),
+		field.UUID("equal_vuln_id", getUUIDv7()),
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
@@ -45,13 +47,14 @@ func (VulnEqual) Fields() []ent.Field {
 // Edges of the VulnEqual.
 func (VulnEqual) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("vulnerability_ids", VulnerabilityID.Type).Required(),
+		edge.To("vulnerability_a", VulnerabilityID.Type).Required().Field("vuln_id").Unique(),
+		edge.To("vulnerability_b", VulnerabilityID.Type).Required().Field("equal_vuln_id").Unique(),
 	}
 }
 
 // Indexes of the VulnEqual.
 func (VulnEqual) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("vulnerabilities_hash", "justification", "origin", "collector").Unique(),
+		index.Fields("vuln_id", "equal_vuln_id", "vulnerabilities_hash", "justification", "origin", "collector").Unique(),
 	}
 }

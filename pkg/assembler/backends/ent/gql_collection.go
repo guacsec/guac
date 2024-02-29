@@ -2704,7 +2704,7 @@ func (ve *VulnEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
-		case "vulnerabilityIds":
+		case "vulnerabilityA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -2713,9 +2713,35 @@ func (ve *VulnEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			ve.WithNamedVulnerabilityIds(alias, func(wq *VulnerabilityIDQuery) {
-				*wq = *query
-			})
+			ve.withVulnerabilityA = query
+			if _, ok := fieldSeen[vulnequal.FieldVulnID]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldVulnID)
+				fieldSeen[vulnequal.FieldVulnID] = struct{}{}
+			}
+		case "vulnerabilityB":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&VulnerabilityIDClient{config: ve.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			ve.withVulnerabilityB = query
+			if _, ok := fieldSeen[vulnequal.FieldEqualVulnID]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldEqualVulnID)
+				fieldSeen[vulnequal.FieldEqualVulnID] = struct{}{}
+			}
+		case "vulnID":
+			if _, ok := fieldSeen[vulnequal.FieldVulnID]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldVulnID)
+				fieldSeen[vulnequal.FieldVulnID] = struct{}{}
+			}
+		case "equalVulnID":
+			if _, ok := fieldSeen[vulnequal.FieldEqualVulnID]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldEqualVulnID)
+				fieldSeen[vulnequal.FieldEqualVulnID] = struct{}{}
+			}
 		case "justification":
 			if _, ok := fieldSeen[vulnequal.FieldJustification]; !ok {
 				selectedFields = append(selectedFields, vulnequal.FieldJustification)
@@ -2795,7 +2821,7 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
-		case "vulnEquals":
+		case "vulnEqualVulnA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -2804,7 +2830,19 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			vi.WithNamedVulnEquals(alias, func(wq *VulnEqualQuery) {
+			vi.WithNamedVulnEqualVulnA(alias, func(wq *VulnEqualQuery) {
+				*wq = *query
+			})
+		case "vulnEqualVulnB":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&VulnEqualClient{config: vi.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			vi.WithNamedVulnEqualVulnB(alias, func(wq *VulnEqualQuery) {
 				*wq = *query
 			})
 		case "vulnerabilityMetadata":

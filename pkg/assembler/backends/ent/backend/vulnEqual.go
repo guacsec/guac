@@ -37,12 +37,14 @@ import (
 
 func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 
+	if len(filter.Vulnerabilities) > 2 {
+		return nil, fmt.Errorf("too many vulnerability specified in vuln equal filter")
+	}
+
 	query := b.client.VulnEqual.Query().
 		Where(vulnEqualQuery(filter)).
-		WithVulnerabilityIds(func(query *ent.VulnerabilityIDQuery) {
-			query.Order(vulnerabilityid.ByID())
-		})
-
+		WithVulnerabilityA(func(query *ent.VulnerabilityIDQuery) {}).
+		WithVulnerabilityB(func(query *ent.VulnerabilityIDQuery) {})
 	results, err := query.Limit(MaxPageSize).All(ctx)
 	if err != nil {
 		return nil, err
@@ -61,17 +63,44 @@ func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
 		optionalPredicate(filter.Origin, vulnequal.OriginEQ),
 		optionalPredicate(filter.Collector, vulnequal.CollectorEQ),
 	}
-	for _, vulnID := range filter.Vulnerabilities {
-		where = append(where, vulnequal.HasVulnerabilityIdsWith(optionalPredicate(vulnID.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold)))
-		where = append(where, vulnequal.HasVulnerabilityIdsWith(optionalPredicate(vulnID.Type, vulnerabilityid.TypeEqualFold)))
-		if vulnID.NoVuln != nil {
-			if *vulnID.NoVuln {
-				where = append(where, vulnequal.HasVulnerabilityIdsWith(vulnerabilityid.TypeEqualFold(NoVuln)))
+
+	if len(filter.Vulnerabilities) == 1 {
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold)),
+			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold))))
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
+			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold))))
+		if filter.Vulnerabilities[0].NoVuln != nil {
+			if *filter.Vulnerabilities[0].NoVuln {
+				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeEqualFold(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeEqualFold(NoVuln))))
 			} else {
-				where = append(where, vulnequal.HasVulnerabilityIdsWith(vulnerabilityid.TypeNEQ(NoVuln)))
+				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeNEQ(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeNEQ(NoVuln))))
+			}
+		}
+	} else if len(filter.Vulnerabilities) == 2 {
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
+			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold))))
+
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[1].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[1].Type, vulnerabilityid.TypeEqualFold)),
+			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[1].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[1].Type, vulnerabilityid.TypeEqualFold))))
+
+		if filter.Vulnerabilities[0].NoVuln != nil {
+			if *filter.Vulnerabilities[0].NoVuln {
+				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeEqualFold(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeEqualFold(NoVuln))))
+			} else {
+				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeNEQ(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeNEQ(NoVuln))))
+			}
+
+		}
+
+		if filter.Vulnerabilities[1].NoVuln != nil {
+			if *filter.Vulnerabilities[1].NoVuln {
+				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeEqualFold(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeEqualFold(NoVuln))))
+			} else {
+				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeNEQ(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeNEQ(NoVuln))))
 			}
 		}
 	}
+
 	return vulnequal.And(where...)
 }
 
@@ -110,6 +139,8 @@ func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*mo
 
 	conflictColumns := []string{
 		vulnequal.FieldVulnerabilitiesHash,
+		vulnequal.FieldVulnID,
+		vulnequal.FieldEqualVulnID,
 		vulnequal.FieldOrigin,
 		vulnequal.FieldCollector,
 		vulnequal.FieldJustification,
@@ -188,6 +219,7 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 
 	sort.SliceStable(sortedVulns, func(i, j int) bool { return *sortedVulns[i].VulnerabilityNodeID < *sortedVulns[j].VulnerabilityNodeID })
 
+	var sortedVulnUUIDs []uuid.UUID
 	for _, vuln := range sortedVulns {
 		if vuln.VulnerabilityNodeID == nil {
 			return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
@@ -196,8 +228,11 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
-		vulnEqualCreate.AddVulnerabilityIDIDs(vulnID)
+		sortedVulnUUIDs = append(sortedVulnUUIDs, vulnID)
 	}
+
+	vulnEqualCreate.SetVulnerabilityAID(sortedVulnUUIDs[0])
+	vulnEqualCreate.SetVulnerabilityBID(sortedVulnUUIDs[1])
 
 	sortedVulnerabilitiesHash := hashVulnerabilities(sortedVulns)
 
@@ -223,6 +258,8 @@ func upsertVulnEquals(ctx context.Context, tx *ent.Tx, vulnerability model.IDorV
 		OnConflict(
 			sql.ConflictColumns(
 				vulnequal.FieldVulnerabilitiesHash,
+				vulnequal.FieldVulnID,
+				vulnequal.FieldEqualVulnID,
 				vulnequal.FieldOrigin,
 				vulnequal.FieldCollector,
 				vulnequal.FieldJustification,
@@ -252,9 +289,12 @@ func hashVulnerabilities(slc []model.IDorVulnerabilityInput) string {
 }
 
 func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
+
+	vulnerabilities := []*ent.VulnerabilityID{record.Edges.VulnerabilityA, record.Edges.VulnerabilityB}
+
 	return &model.VulnEqual{
 		ID:              record.ID.String(),
-		Vulnerabilities: collect(record.Edges.VulnerabilityIds, toModelVulnerabilityFromVulnerabilityID),
+		Vulnerabilities: collect(vulnerabilities, toModelVulnerabilityFromVulnerabilityID),
 		Justification:   record.Justification,
 		Origin:          record.Origin,
 		Collector:       record.Collector,

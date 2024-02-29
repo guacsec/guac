@@ -907,17 +907,33 @@ var (
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "vulnerabilities_hash", Type: field.TypeString},
+		{Name: "vuln_id", Type: field.TypeUUID},
+		{Name: "equal_vuln_id", Type: field.TypeUUID},
 	}
 	// VulnEqualsTable holds the schema information for the "vuln_equals" table.
 	VulnEqualsTable = &schema.Table{
 		Name:       "vuln_equals",
 		Columns:    VulnEqualsColumns,
 		PrimaryKey: []*schema.Column{VulnEqualsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vuln_equals_vulnerability_ids_vulnerability_a",
+				Columns:    []*schema.Column{VulnEqualsColumns[5]},
+				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "vuln_equals_vulnerability_ids_vulnerability_b",
+				Columns:    []*schema.Column{VulnEqualsColumns[6]},
+				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "vulnequal_vulnerabilities_hash_justification_origin_collector",
+				Name:    "vulnequal_vuln_id_equal_vuln_id_vulnerabilities_hash_justification_origin_collector",
 				Unique:  true,
-				Columns: []*schema.Column{VulnEqualsColumns[4], VulnEqualsColumns[1], VulnEqualsColumns[2], VulnEqualsColumns[3]},
+				Columns: []*schema.Column{VulnEqualsColumns[5], VulnEqualsColumns[6], VulnEqualsColumns[4], VulnEqualsColumns[1], VulnEqualsColumns[2], VulnEqualsColumns[3]},
 			},
 		},
 	}
@@ -1196,31 +1212,6 @@ var (
 			},
 		},
 	}
-	// VulnEqualVulnerabilityIdsColumns holds the columns for the "vuln_equal_vulnerability_ids" table.
-	VulnEqualVulnerabilityIdsColumns = []*schema.Column{
-		{Name: "vuln_equal_id", Type: field.TypeUUID},
-		{Name: "vulnerability_id_id", Type: field.TypeUUID},
-	}
-	// VulnEqualVulnerabilityIdsTable holds the schema information for the "vuln_equal_vulnerability_ids" table.
-	VulnEqualVulnerabilityIdsTable = &schema.Table{
-		Name:       "vuln_equal_vulnerability_ids",
-		Columns:    VulnEqualVulnerabilityIdsColumns,
-		PrimaryKey: []*schema.Column{VulnEqualVulnerabilityIdsColumns[0], VulnEqualVulnerabilityIdsColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "vuln_equal_vulnerability_ids_vuln_equal_id",
-				Columns:    []*schema.Column{VulnEqualVulnerabilityIdsColumns[0]},
-				RefColumns: []*schema.Column{VulnEqualsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "vuln_equal_vulnerability_ids_vulnerability_id_id",
-				Columns:    []*schema.Column{VulnEqualVulnerabilityIdsColumns[1]},
-				RefColumns: []*schema.Column{VulnerabilityIdsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArtifactsTable,
@@ -1255,7 +1246,6 @@ var (
 		HashEqualArtifactsTable,
 		PkgEqualPackagesTable,
 		SlsaAttestationBuiltFromTable,
-		VulnEqualVulnerabilityIdsTable,
 	}
 )
 
@@ -1297,6 +1287,8 @@ func init() {
 	SlsaAttestationsTable.Annotation = &entsql.Annotation{
 		Table: "slsa_attestations",
 	}
+	VulnEqualsTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
+	VulnEqualsTable.ForeignKeys[1].RefTable = VulnerabilityIdsTable
 	VulnerabilityMetadataTable.ForeignKeys[0].RefTable = VulnerabilityIdsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[0].RefTable = BillOfMaterialsTable
 	BillOfMaterialsIncludedSoftwarePackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable
@@ -1316,6 +1308,4 @@ func init() {
 	PkgEqualPackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
-	VulnEqualVulnerabilityIdsTable.ForeignKeys[0].RefTable = VulnEqualsTable
-	VulnEqualVulnerabilityIdsTable.ForeignKeys[1].RefTable = VulnerabilityIdsTable
 }

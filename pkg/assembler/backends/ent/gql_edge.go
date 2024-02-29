@@ -580,26 +580,42 @@ func (sn *SourceName) Occurrences(ctx context.Context) (result []*Occurrence, er
 	return result, err
 }
 
-func (ve *VulnEqual) VulnerabilityIds(ctx context.Context) (result []*VulnerabilityID, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = ve.NamedVulnerabilityIds(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = ve.Edges.VulnerabilityIdsOrErr()
-	}
+func (ve *VulnEqual) VulnerabilityA(ctx context.Context) (*VulnerabilityID, error) {
+	result, err := ve.Edges.VulnerabilityAOrErr()
 	if IsNotLoaded(err) {
-		result, err = ve.QueryVulnerabilityIds().All(ctx)
+		result, err = ve.QueryVulnerabilityA().Only(ctx)
 	}
 	return result, err
 }
 
-func (vi *VulnerabilityID) VulnEquals(ctx context.Context) (result []*VulnEqual, err error) {
+func (ve *VulnEqual) VulnerabilityB(ctx context.Context) (*VulnerabilityID, error) {
+	result, err := ve.Edges.VulnerabilityBOrErr()
+	if IsNotLoaded(err) {
+		result, err = ve.QueryVulnerabilityB().Only(ctx)
+	}
+	return result, err
+}
+
+func (vi *VulnerabilityID) VulnEqualVulnA(ctx context.Context) (result []*VulnEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = vi.NamedVulnEquals(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = vi.NamedVulnEqualVulnA(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = vi.Edges.VulnEqualsOrErr()
+		result, err = vi.Edges.VulnEqualVulnAOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = vi.QueryVulnEquals().All(ctx)
+		result, err = vi.QueryVulnEqualVulnA().All(ctx)
+	}
+	return result, err
+}
+
+func (vi *VulnerabilityID) VulnEqualVulnB(ctx context.Context) (result []*VulnEqual, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = vi.NamedVulnEqualVulnB(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = vi.Edges.VulnEqualVulnBOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = vi.QueryVulnEqualVulnB().All(ctx)
 	}
 	return result, err
 }

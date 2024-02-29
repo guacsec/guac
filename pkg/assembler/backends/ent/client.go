@@ -4102,15 +4102,31 @@ func (c *VulnEqualClient) GetX(ctx context.Context, id uuid.UUID) *VulnEqual {
 	return obj
 }
 
-// QueryVulnerabilityIds queries the vulnerability_ids edge of a VulnEqual.
-func (c *VulnEqualClient) QueryVulnerabilityIds(ve *VulnEqual) *VulnerabilityIDQuery {
+// QueryVulnerabilityA queries the vulnerability_a edge of a VulnEqual.
+func (c *VulnEqualClient) QueryVulnerabilityA(ve *VulnEqual) *VulnerabilityIDQuery {
 	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ve.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnequal.Table, vulnequal.FieldID, id),
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, vulnequal.VulnerabilityIdsTable, vulnequal.VulnerabilityIdsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityATable, vulnequal.VulnerabilityAColumn),
+		)
+		fromV = sqlgraph.Neighbors(ve.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVulnerabilityB queries the vulnerability_b edge of a VulnEqual.
+func (c *VulnEqualClient) QueryVulnerabilityB(ve *VulnEqual) *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ve.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vulnequal.Table, vulnequal.FieldID, id),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityBTable, vulnequal.VulnerabilityBColumn),
 		)
 		fromV = sqlgraph.Neighbors(ve.driver.Dialect(), step)
 		return fromV, nil
@@ -4251,15 +4267,31 @@ func (c *VulnerabilityIDClient) GetX(ctx context.Context, id uuid.UUID) *Vulnera
 	return obj
 }
 
-// QueryVulnEquals queries the vuln_equals edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryVulnEquals(vi *VulnerabilityID) *VulnEqualQuery {
+// QueryVulnEqualVulnA queries the vuln_equal_vuln_a edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryVulnEqualVulnA(vi *VulnerabilityID) *VulnEqualQuery {
 	query := (&VulnEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := vi.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(vulnequal.Table, vulnequal.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, vulnerabilityid.VulnEqualsTable, vulnerabilityid.VulnEqualsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VulnEqualVulnATable, vulnerabilityid.VulnEqualVulnAColumn),
+		)
+		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVulnEqualVulnB queries the vuln_equal_vuln_b edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryVulnEqualVulnB(vi *VulnerabilityID) *VulnEqualQuery {
+	query := (&VulnEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := vi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
+			sqlgraph.To(vulnequal.Table, vulnequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VulnEqualVulnBTable, vulnerabilityid.VulnEqualVulnBColumn),
 		)
 		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
 		return fromV, nil

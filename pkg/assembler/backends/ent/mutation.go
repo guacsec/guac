@@ -17752,20 +17752,21 @@ func (m *SourceNameMutation) ResetEdge(name string) error {
 // VulnEqualMutation represents an operation that mutates the VulnEqual nodes in the graph.
 type VulnEqualMutation struct {
 	config
-	op                       Op
-	typ                      string
-	id                       *uuid.UUID
-	justification            *string
-	origin                   *string
-	collector                *string
-	vulnerabilities_hash     *string
-	clearedFields            map[string]struct{}
-	vulnerability_ids        map[uuid.UUID]struct{}
-	removedvulnerability_ids map[uuid.UUID]struct{}
-	clearedvulnerability_ids bool
-	done                     bool
-	oldValue                 func(context.Context) (*VulnEqual, error)
-	predicates               []predicate.VulnEqual
+	op                     Op
+	typ                    string
+	id                     *uuid.UUID
+	justification          *string
+	origin                 *string
+	collector              *string
+	vulnerabilities_hash   *string
+	clearedFields          map[string]struct{}
+	vulnerability_a        *uuid.UUID
+	clearedvulnerability_a bool
+	vulnerability_b        *uuid.UUID
+	clearedvulnerability_b bool
+	done                   bool
+	oldValue               func(context.Context) (*VulnEqual, error)
+	predicates             []predicate.VulnEqual
 }
 
 var _ ent.Mutation = (*VulnEqualMutation)(nil)
@@ -17870,6 +17871,78 @@ func (m *VulnEqualMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetVulnID sets the "vuln_id" field.
+func (m *VulnEqualMutation) SetVulnID(u uuid.UUID) {
+	m.vulnerability_a = &u
+}
+
+// VulnID returns the value of the "vuln_id" field in the mutation.
+func (m *VulnEqualMutation) VulnID() (r uuid.UUID, exists bool) {
+	v := m.vulnerability_a
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVulnID returns the old "vuln_id" field's value of the VulnEqual entity.
+// If the VulnEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VulnEqualMutation) OldVulnID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVulnID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVulnID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVulnID: %w", err)
+	}
+	return oldValue.VulnID, nil
+}
+
+// ResetVulnID resets all changes to the "vuln_id" field.
+func (m *VulnEqualMutation) ResetVulnID() {
+	m.vulnerability_a = nil
+}
+
+// SetEqualVulnID sets the "equal_vuln_id" field.
+func (m *VulnEqualMutation) SetEqualVulnID(u uuid.UUID) {
+	m.vulnerability_b = &u
+}
+
+// EqualVulnID returns the value of the "equal_vuln_id" field in the mutation.
+func (m *VulnEqualMutation) EqualVulnID() (r uuid.UUID, exists bool) {
+	v := m.vulnerability_b
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEqualVulnID returns the old "equal_vuln_id" field's value of the VulnEqual entity.
+// If the VulnEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VulnEqualMutation) OldEqualVulnID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEqualVulnID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEqualVulnID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEqualVulnID: %w", err)
+	}
+	return oldValue.EqualVulnID, nil
+}
+
+// ResetEqualVulnID resets all changes to the "equal_vuln_id" field.
+func (m *VulnEqualMutation) ResetEqualVulnID() {
+	m.vulnerability_b = nil
 }
 
 // SetJustification sets the "justification" field.
@@ -18016,58 +18089,84 @@ func (m *VulnEqualMutation) ResetVulnerabilitiesHash() {
 	m.vulnerabilities_hash = nil
 }
 
-// AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by ids.
-func (m *VulnEqualMutation) AddVulnerabilityIDIDs(ids ...uuid.UUID) {
-	if m.vulnerability_ids == nil {
-		m.vulnerability_ids = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.vulnerability_ids[ids[i]] = struct{}{}
-	}
+// SetVulnerabilityAID sets the "vulnerability_a" edge to the VulnerabilityID entity by id.
+func (m *VulnEqualMutation) SetVulnerabilityAID(id uuid.UUID) {
+	m.vulnerability_a = &id
 }
 
-// ClearVulnerabilityIds clears the "vulnerability_ids" edge to the VulnerabilityID entity.
-func (m *VulnEqualMutation) ClearVulnerabilityIds() {
-	m.clearedvulnerability_ids = true
+// ClearVulnerabilityA clears the "vulnerability_a" edge to the VulnerabilityID entity.
+func (m *VulnEqualMutation) ClearVulnerabilityA() {
+	m.clearedvulnerability_a = true
+	m.clearedFields[vulnequal.FieldVulnID] = struct{}{}
 }
 
-// VulnerabilityIdsCleared reports if the "vulnerability_ids" edge to the VulnerabilityID entity was cleared.
-func (m *VulnEqualMutation) VulnerabilityIdsCleared() bool {
-	return m.clearedvulnerability_ids
+// VulnerabilityACleared reports if the "vulnerability_a" edge to the VulnerabilityID entity was cleared.
+func (m *VulnEqualMutation) VulnerabilityACleared() bool {
+	return m.clearedvulnerability_a
 }
 
-// RemoveVulnerabilityIDIDs removes the "vulnerability_ids" edge to the VulnerabilityID entity by IDs.
-func (m *VulnEqualMutation) RemoveVulnerabilityIDIDs(ids ...uuid.UUID) {
-	if m.removedvulnerability_ids == nil {
-		m.removedvulnerability_ids = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.vulnerability_ids, ids[i])
-		m.removedvulnerability_ids[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedVulnerabilityIds returns the removed IDs of the "vulnerability_ids" edge to the VulnerabilityID entity.
-func (m *VulnEqualMutation) RemovedVulnerabilityIdsIDs() (ids []uuid.UUID) {
-	for id := range m.removedvulnerability_ids {
-		ids = append(ids, id)
+// VulnerabilityAID returns the "vulnerability_a" edge ID in the mutation.
+func (m *VulnEqualMutation) VulnerabilityAID() (id uuid.UUID, exists bool) {
+	if m.vulnerability_a != nil {
+		return *m.vulnerability_a, true
 	}
 	return
 }
 
-// VulnerabilityIdsIDs returns the "vulnerability_ids" edge IDs in the mutation.
-func (m *VulnEqualMutation) VulnerabilityIdsIDs() (ids []uuid.UUID) {
-	for id := range m.vulnerability_ids {
-		ids = append(ids, id)
+// VulnerabilityAIDs returns the "vulnerability_a" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// VulnerabilityAID instead. It exists only for internal usage by the builders.
+func (m *VulnEqualMutation) VulnerabilityAIDs() (ids []uuid.UUID) {
+	if id := m.vulnerability_a; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetVulnerabilityIds resets all changes to the "vulnerability_ids" edge.
-func (m *VulnEqualMutation) ResetVulnerabilityIds() {
-	m.vulnerability_ids = nil
-	m.clearedvulnerability_ids = false
-	m.removedvulnerability_ids = nil
+// ResetVulnerabilityA resets all changes to the "vulnerability_a" edge.
+func (m *VulnEqualMutation) ResetVulnerabilityA() {
+	m.vulnerability_a = nil
+	m.clearedvulnerability_a = false
+}
+
+// SetVulnerabilityBID sets the "vulnerability_b" edge to the VulnerabilityID entity by id.
+func (m *VulnEqualMutation) SetVulnerabilityBID(id uuid.UUID) {
+	m.vulnerability_b = &id
+}
+
+// ClearVulnerabilityB clears the "vulnerability_b" edge to the VulnerabilityID entity.
+func (m *VulnEqualMutation) ClearVulnerabilityB() {
+	m.clearedvulnerability_b = true
+	m.clearedFields[vulnequal.FieldEqualVulnID] = struct{}{}
+}
+
+// VulnerabilityBCleared reports if the "vulnerability_b" edge to the VulnerabilityID entity was cleared.
+func (m *VulnEqualMutation) VulnerabilityBCleared() bool {
+	return m.clearedvulnerability_b
+}
+
+// VulnerabilityBID returns the "vulnerability_b" edge ID in the mutation.
+func (m *VulnEqualMutation) VulnerabilityBID() (id uuid.UUID, exists bool) {
+	if m.vulnerability_b != nil {
+		return *m.vulnerability_b, true
+	}
+	return
+}
+
+// VulnerabilityBIDs returns the "vulnerability_b" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// VulnerabilityBID instead. It exists only for internal usage by the builders.
+func (m *VulnEqualMutation) VulnerabilityBIDs() (ids []uuid.UUID) {
+	if id := m.vulnerability_b; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetVulnerabilityB resets all changes to the "vulnerability_b" edge.
+func (m *VulnEqualMutation) ResetVulnerabilityB() {
+	m.vulnerability_b = nil
+	m.clearedvulnerability_b = false
 }
 
 // Where appends a list predicates to the VulnEqualMutation builder.
@@ -18104,7 +18203,13 @@ func (m *VulnEqualMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VulnEqualMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
+	if m.vulnerability_a != nil {
+		fields = append(fields, vulnequal.FieldVulnID)
+	}
+	if m.vulnerability_b != nil {
+		fields = append(fields, vulnequal.FieldEqualVulnID)
+	}
 	if m.justification != nil {
 		fields = append(fields, vulnequal.FieldJustification)
 	}
@@ -18125,6 +18230,10 @@ func (m *VulnEqualMutation) Fields() []string {
 // schema.
 func (m *VulnEqualMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case vulnequal.FieldVulnID:
+		return m.VulnID()
+	case vulnequal.FieldEqualVulnID:
+		return m.EqualVulnID()
 	case vulnequal.FieldJustification:
 		return m.Justification()
 	case vulnequal.FieldOrigin:
@@ -18142,6 +18251,10 @@ func (m *VulnEqualMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *VulnEqualMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case vulnequal.FieldVulnID:
+		return m.OldVulnID(ctx)
+	case vulnequal.FieldEqualVulnID:
+		return m.OldEqualVulnID(ctx)
 	case vulnequal.FieldJustification:
 		return m.OldJustification(ctx)
 	case vulnequal.FieldOrigin:
@@ -18159,6 +18272,20 @@ func (m *VulnEqualMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *VulnEqualMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case vulnequal.FieldVulnID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVulnID(v)
+		return nil
+	case vulnequal.FieldEqualVulnID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEqualVulnID(v)
+		return nil
 	case vulnequal.FieldJustification:
 		v, ok := value.(string)
 		if !ok {
@@ -18236,6 +18363,12 @@ func (m *VulnEqualMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *VulnEqualMutation) ResetField(name string) error {
 	switch name {
+	case vulnequal.FieldVulnID:
+		m.ResetVulnID()
+		return nil
+	case vulnequal.FieldEqualVulnID:
+		m.ResetEqualVulnID()
+		return nil
 	case vulnequal.FieldJustification:
 		m.ResetJustification()
 		return nil
@@ -18254,9 +18387,12 @@ func (m *VulnEqualMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *VulnEqualMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.vulnerability_ids != nil {
-		edges = append(edges, vulnequal.EdgeVulnerabilityIds)
+	edges := make([]string, 0, 2)
+	if m.vulnerability_a != nil {
+		edges = append(edges, vulnequal.EdgeVulnerabilityA)
+	}
+	if m.vulnerability_b != nil {
+		edges = append(edges, vulnequal.EdgeVulnerabilityB)
 	}
 	return edges
 }
@@ -18265,44 +18401,38 @@ func (m *VulnEqualMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *VulnEqualMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case vulnequal.EdgeVulnerabilityIds:
-		ids := make([]ent.Value, 0, len(m.vulnerability_ids))
-		for id := range m.vulnerability_ids {
-			ids = append(ids, id)
+	case vulnequal.EdgeVulnerabilityA:
+		if id := m.vulnerability_a; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
+	case vulnequal.EdgeVulnerabilityB:
+		if id := m.vulnerability_b; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *VulnEqualMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedvulnerability_ids != nil {
-		edges = append(edges, vulnequal.EdgeVulnerabilityIds)
-	}
+	edges := make([]string, 0, 2)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *VulnEqualMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case vulnequal.EdgeVulnerabilityIds:
-		ids := make([]ent.Value, 0, len(m.removedvulnerability_ids))
-		for id := range m.removedvulnerability_ids {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *VulnEqualMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedvulnerability_ids {
-		edges = append(edges, vulnequal.EdgeVulnerabilityIds)
+	edges := make([]string, 0, 2)
+	if m.clearedvulnerability_a {
+		edges = append(edges, vulnequal.EdgeVulnerabilityA)
+	}
+	if m.clearedvulnerability_b {
+		edges = append(edges, vulnequal.EdgeVulnerabilityB)
 	}
 	return edges
 }
@@ -18311,8 +18441,10 @@ func (m *VulnEqualMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *VulnEqualMutation) EdgeCleared(name string) bool {
 	switch name {
-	case vulnequal.EdgeVulnerabilityIds:
-		return m.clearedvulnerability_ids
+	case vulnequal.EdgeVulnerabilityA:
+		return m.clearedvulnerability_a
+	case vulnequal.EdgeVulnerabilityB:
+		return m.clearedvulnerability_b
 	}
 	return false
 }
@@ -18321,6 +18453,12 @@ func (m *VulnEqualMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *VulnEqualMutation) ClearEdge(name string) error {
 	switch name {
+	case vulnequal.EdgeVulnerabilityA:
+		m.ClearVulnerabilityA()
+		return nil
+	case vulnequal.EdgeVulnerabilityB:
+		m.ClearVulnerabilityB()
+		return nil
 	}
 	return fmt.Errorf("unknown VulnEqual unique edge %s", name)
 }
@@ -18329,8 +18467,11 @@ func (m *VulnEqualMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *VulnEqualMutation) ResetEdge(name string) error {
 	switch name {
-	case vulnequal.EdgeVulnerabilityIds:
-		m.ResetVulnerabilityIds()
+	case vulnequal.EdgeVulnerabilityA:
+		m.ResetVulnerabilityA()
+		return nil
+	case vulnequal.EdgeVulnerabilityB:
+		m.ResetVulnerabilityB()
 		return nil
 	}
 	return fmt.Errorf("unknown VulnEqual edge %s", name)
@@ -18345,9 +18486,12 @@ type VulnerabilityIDMutation struct {
 	vulnerability_id              *string
 	_type                         *string
 	clearedFields                 map[string]struct{}
-	vuln_equals                   map[uuid.UUID]struct{}
-	removedvuln_equals            map[uuid.UUID]struct{}
-	clearedvuln_equals            bool
+	vuln_equal_vuln_a             map[uuid.UUID]struct{}
+	removedvuln_equal_vuln_a      map[uuid.UUID]struct{}
+	clearedvuln_equal_vuln_a      bool
+	vuln_equal_vuln_b             map[uuid.UUID]struct{}
+	removedvuln_equal_vuln_b      map[uuid.UUID]struct{}
+	clearedvuln_equal_vuln_b      bool
 	vulnerability_metadata        map[uuid.UUID]struct{}
 	removedvulnerability_metadata map[uuid.UUID]struct{}
 	clearedvulnerability_metadata bool
@@ -18532,58 +18676,112 @@ func (m *VulnerabilityIDMutation) ResetType() {
 	m._type = nil
 }
 
-// AddVulnEqualIDs adds the "vuln_equals" edge to the VulnEqual entity by ids.
-func (m *VulnerabilityIDMutation) AddVulnEqualIDs(ids ...uuid.UUID) {
-	if m.vuln_equals == nil {
-		m.vuln_equals = make(map[uuid.UUID]struct{})
+// AddVulnEqualVulnAIDs adds the "vuln_equal_vuln_a" edge to the VulnEqual entity by ids.
+func (m *VulnerabilityIDMutation) AddVulnEqualVulnAIDs(ids ...uuid.UUID) {
+	if m.vuln_equal_vuln_a == nil {
+		m.vuln_equal_vuln_a = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.vuln_equals[ids[i]] = struct{}{}
+		m.vuln_equal_vuln_a[ids[i]] = struct{}{}
 	}
 }
 
-// ClearVulnEquals clears the "vuln_equals" edge to the VulnEqual entity.
-func (m *VulnerabilityIDMutation) ClearVulnEquals() {
-	m.clearedvuln_equals = true
+// ClearVulnEqualVulnA clears the "vuln_equal_vuln_a" edge to the VulnEqual entity.
+func (m *VulnerabilityIDMutation) ClearVulnEqualVulnA() {
+	m.clearedvuln_equal_vuln_a = true
 }
 
-// VulnEqualsCleared reports if the "vuln_equals" edge to the VulnEqual entity was cleared.
-func (m *VulnerabilityIDMutation) VulnEqualsCleared() bool {
-	return m.clearedvuln_equals
+// VulnEqualVulnACleared reports if the "vuln_equal_vuln_a" edge to the VulnEqual entity was cleared.
+func (m *VulnerabilityIDMutation) VulnEqualVulnACleared() bool {
+	return m.clearedvuln_equal_vuln_a
 }
 
-// RemoveVulnEqualIDs removes the "vuln_equals" edge to the VulnEqual entity by IDs.
-func (m *VulnerabilityIDMutation) RemoveVulnEqualIDs(ids ...uuid.UUID) {
-	if m.removedvuln_equals == nil {
-		m.removedvuln_equals = make(map[uuid.UUID]struct{})
+// RemoveVulnEqualVulnAIDs removes the "vuln_equal_vuln_a" edge to the VulnEqual entity by IDs.
+func (m *VulnerabilityIDMutation) RemoveVulnEqualVulnAIDs(ids ...uuid.UUID) {
+	if m.removedvuln_equal_vuln_a == nil {
+		m.removedvuln_equal_vuln_a = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.vuln_equals, ids[i])
-		m.removedvuln_equals[ids[i]] = struct{}{}
+		delete(m.vuln_equal_vuln_a, ids[i])
+		m.removedvuln_equal_vuln_a[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedVulnEquals returns the removed IDs of the "vuln_equals" edge to the VulnEqual entity.
-func (m *VulnerabilityIDMutation) RemovedVulnEqualsIDs() (ids []uuid.UUID) {
-	for id := range m.removedvuln_equals {
+// RemovedVulnEqualVulnA returns the removed IDs of the "vuln_equal_vuln_a" edge to the VulnEqual entity.
+func (m *VulnerabilityIDMutation) RemovedVulnEqualVulnAIDs() (ids []uuid.UUID) {
+	for id := range m.removedvuln_equal_vuln_a {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// VulnEqualsIDs returns the "vuln_equals" edge IDs in the mutation.
-func (m *VulnerabilityIDMutation) VulnEqualsIDs() (ids []uuid.UUID) {
-	for id := range m.vuln_equals {
+// VulnEqualVulnAIDs returns the "vuln_equal_vuln_a" edge IDs in the mutation.
+func (m *VulnerabilityIDMutation) VulnEqualVulnAIDs() (ids []uuid.UUID) {
+	for id := range m.vuln_equal_vuln_a {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetVulnEquals resets all changes to the "vuln_equals" edge.
-func (m *VulnerabilityIDMutation) ResetVulnEquals() {
-	m.vuln_equals = nil
-	m.clearedvuln_equals = false
-	m.removedvuln_equals = nil
+// ResetVulnEqualVulnA resets all changes to the "vuln_equal_vuln_a" edge.
+func (m *VulnerabilityIDMutation) ResetVulnEqualVulnA() {
+	m.vuln_equal_vuln_a = nil
+	m.clearedvuln_equal_vuln_a = false
+	m.removedvuln_equal_vuln_a = nil
+}
+
+// AddVulnEqualVulnBIDs adds the "vuln_equal_vuln_b" edge to the VulnEqual entity by ids.
+func (m *VulnerabilityIDMutation) AddVulnEqualVulnBIDs(ids ...uuid.UUID) {
+	if m.vuln_equal_vuln_b == nil {
+		m.vuln_equal_vuln_b = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.vuln_equal_vuln_b[ids[i]] = struct{}{}
+	}
+}
+
+// ClearVulnEqualVulnB clears the "vuln_equal_vuln_b" edge to the VulnEqual entity.
+func (m *VulnerabilityIDMutation) ClearVulnEqualVulnB() {
+	m.clearedvuln_equal_vuln_b = true
+}
+
+// VulnEqualVulnBCleared reports if the "vuln_equal_vuln_b" edge to the VulnEqual entity was cleared.
+func (m *VulnerabilityIDMutation) VulnEqualVulnBCleared() bool {
+	return m.clearedvuln_equal_vuln_b
+}
+
+// RemoveVulnEqualVulnBIDs removes the "vuln_equal_vuln_b" edge to the VulnEqual entity by IDs.
+func (m *VulnerabilityIDMutation) RemoveVulnEqualVulnBIDs(ids ...uuid.UUID) {
+	if m.removedvuln_equal_vuln_b == nil {
+		m.removedvuln_equal_vuln_b = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.vuln_equal_vuln_b, ids[i])
+		m.removedvuln_equal_vuln_b[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedVulnEqualVulnB returns the removed IDs of the "vuln_equal_vuln_b" edge to the VulnEqual entity.
+func (m *VulnerabilityIDMutation) RemovedVulnEqualVulnBIDs() (ids []uuid.UUID) {
+	for id := range m.removedvuln_equal_vuln_b {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// VulnEqualVulnBIDs returns the "vuln_equal_vuln_b" edge IDs in the mutation.
+func (m *VulnerabilityIDMutation) VulnEqualVulnBIDs() (ids []uuid.UUID) {
+	for id := range m.vuln_equal_vuln_b {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetVulnEqualVulnB resets all changes to the "vuln_equal_vuln_b" edge.
+func (m *VulnerabilityIDMutation) ResetVulnEqualVulnB() {
+	m.vuln_equal_vuln_b = nil
+	m.clearedvuln_equal_vuln_b = false
+	m.removedvuln_equal_vuln_b = nil
 }
 
 // AddVulnerabilityMetadatumIDs adds the "vulnerability_metadata" edge to the VulnerabilityMetadata entity by ids.
@@ -18790,9 +18988,12 @@ func (m *VulnerabilityIDMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *VulnerabilityIDMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.vuln_equals != nil {
-		edges = append(edges, vulnerabilityid.EdgeVulnEquals)
+	edges := make([]string, 0, 3)
+	if m.vuln_equal_vuln_a != nil {
+		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnA)
+	}
+	if m.vuln_equal_vuln_b != nil {
+		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnB)
 	}
 	if m.vulnerability_metadata != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnerabilityMetadata)
@@ -18804,9 +19005,15 @@ func (m *VulnerabilityIDMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *VulnerabilityIDMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case vulnerabilityid.EdgeVulnEquals:
-		ids := make([]ent.Value, 0, len(m.vuln_equals))
-		for id := range m.vuln_equals {
+	case vulnerabilityid.EdgeVulnEqualVulnA:
+		ids := make([]ent.Value, 0, len(m.vuln_equal_vuln_a))
+		for id := range m.vuln_equal_vuln_a {
+			ids = append(ids, id)
+		}
+		return ids
+	case vulnerabilityid.EdgeVulnEqualVulnB:
+		ids := make([]ent.Value, 0, len(m.vuln_equal_vuln_b))
+		for id := range m.vuln_equal_vuln_b {
 			ids = append(ids, id)
 		}
 		return ids
@@ -18822,9 +19029,12 @@ func (m *VulnerabilityIDMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *VulnerabilityIDMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedvuln_equals != nil {
-		edges = append(edges, vulnerabilityid.EdgeVulnEquals)
+	edges := make([]string, 0, 3)
+	if m.removedvuln_equal_vuln_a != nil {
+		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnA)
+	}
+	if m.removedvuln_equal_vuln_b != nil {
+		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnB)
 	}
 	if m.removedvulnerability_metadata != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnerabilityMetadata)
@@ -18836,9 +19046,15 @@ func (m *VulnerabilityIDMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *VulnerabilityIDMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case vulnerabilityid.EdgeVulnEquals:
-		ids := make([]ent.Value, 0, len(m.removedvuln_equals))
-		for id := range m.removedvuln_equals {
+	case vulnerabilityid.EdgeVulnEqualVulnA:
+		ids := make([]ent.Value, 0, len(m.removedvuln_equal_vuln_a))
+		for id := range m.removedvuln_equal_vuln_a {
+			ids = append(ids, id)
+		}
+		return ids
+	case vulnerabilityid.EdgeVulnEqualVulnB:
+		ids := make([]ent.Value, 0, len(m.removedvuln_equal_vuln_b))
+		for id := range m.removedvuln_equal_vuln_b {
 			ids = append(ids, id)
 		}
 		return ids
@@ -18854,9 +19070,12 @@ func (m *VulnerabilityIDMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *VulnerabilityIDMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedvuln_equals {
-		edges = append(edges, vulnerabilityid.EdgeVulnEquals)
+	edges := make([]string, 0, 3)
+	if m.clearedvuln_equal_vuln_a {
+		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnA)
+	}
+	if m.clearedvuln_equal_vuln_b {
+		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnB)
 	}
 	if m.clearedvulnerability_metadata {
 		edges = append(edges, vulnerabilityid.EdgeVulnerabilityMetadata)
@@ -18868,8 +19087,10 @@ func (m *VulnerabilityIDMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *VulnerabilityIDMutation) EdgeCleared(name string) bool {
 	switch name {
-	case vulnerabilityid.EdgeVulnEquals:
-		return m.clearedvuln_equals
+	case vulnerabilityid.EdgeVulnEqualVulnA:
+		return m.clearedvuln_equal_vuln_a
+	case vulnerabilityid.EdgeVulnEqualVulnB:
+		return m.clearedvuln_equal_vuln_b
 	case vulnerabilityid.EdgeVulnerabilityMetadata:
 		return m.clearedvulnerability_metadata
 	}
@@ -18888,8 +19109,11 @@ func (m *VulnerabilityIDMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *VulnerabilityIDMutation) ResetEdge(name string) error {
 	switch name {
-	case vulnerabilityid.EdgeVulnEquals:
-		m.ResetVulnEquals()
+	case vulnerabilityid.EdgeVulnEqualVulnA:
+		m.ResetVulnEqualVulnA()
+		return nil
+	case vulnerabilityid.EdgeVulnEqualVulnB:
+		m.ResetVulnEqualVulnB()
 		return nil
 	case vulnerabilityid.EdgeVulnerabilityMetadata:
 		m.ResetVulnerabilityMetadata()

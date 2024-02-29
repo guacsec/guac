@@ -54,6 +54,16 @@ func IDLTE(id uuid.UUID) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldLTE(FieldID, id))
 }
 
+// VulnID applies equality check predicate on the "vuln_id" field. It's identical to VulnIDEQ.
+func VulnID(v uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEQ(FieldVulnID, v))
+}
+
+// EqualVulnID applies equality check predicate on the "equal_vuln_id" field. It's identical to EqualVulnIDEQ.
+func EqualVulnID(v uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEQ(FieldEqualVulnID, v))
+}
+
 // Justification applies equality check predicate on the "justification" field. It's identical to JustificationEQ.
 func Justification(v string) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldEQ(FieldJustification, v))
@@ -72,6 +82,46 @@ func Collector(v string) predicate.VulnEqual {
 // VulnerabilitiesHash applies equality check predicate on the "vulnerabilities_hash" field. It's identical to VulnerabilitiesHashEQ.
 func VulnerabilitiesHash(v string) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldEQ(FieldVulnerabilitiesHash, v))
+}
+
+// VulnIDEQ applies the EQ predicate on the "vuln_id" field.
+func VulnIDEQ(v uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEQ(FieldVulnID, v))
+}
+
+// VulnIDNEQ applies the NEQ predicate on the "vuln_id" field.
+func VulnIDNEQ(v uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldNEQ(FieldVulnID, v))
+}
+
+// VulnIDIn applies the In predicate on the "vuln_id" field.
+func VulnIDIn(vs ...uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldIn(FieldVulnID, vs...))
+}
+
+// VulnIDNotIn applies the NotIn predicate on the "vuln_id" field.
+func VulnIDNotIn(vs ...uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldNotIn(FieldVulnID, vs...))
+}
+
+// EqualVulnIDEQ applies the EQ predicate on the "equal_vuln_id" field.
+func EqualVulnIDEQ(v uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEQ(FieldEqualVulnID, v))
+}
+
+// EqualVulnIDNEQ applies the NEQ predicate on the "equal_vuln_id" field.
+func EqualVulnIDNEQ(v uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldNEQ(FieldEqualVulnID, v))
+}
+
+// EqualVulnIDIn applies the In predicate on the "equal_vuln_id" field.
+func EqualVulnIDIn(vs ...uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldIn(FieldEqualVulnID, vs...))
+}
+
+// EqualVulnIDNotIn applies the NotIn predicate on the "equal_vuln_id" field.
+func EqualVulnIDNotIn(vs ...uuid.UUID) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldNotIn(FieldEqualVulnID, vs...))
 }
 
 // JustificationEQ applies the EQ predicate on the "justification" field.
@@ -334,21 +384,44 @@ func VulnerabilitiesHashContainsFold(v string) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldContainsFold(FieldVulnerabilitiesHash, v))
 }
 
-// HasVulnerabilityIds applies the HasEdge predicate on the "vulnerability_ids" edge.
-func HasVulnerabilityIds() predicate.VulnEqual {
+// HasVulnerabilityA applies the HasEdge predicate on the "vulnerability_a" edge.
+func HasVulnerabilityA() predicate.VulnEqual {
 	return predicate.VulnEqual(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, VulnerabilityIdsTable, VulnerabilityIdsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, VulnerabilityATable, VulnerabilityAColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasVulnerabilityIdsWith applies the HasEdge predicate on the "vulnerability_ids" edge with a given conditions (other predicates).
-func HasVulnerabilityIdsWith(preds ...predicate.VulnerabilityID) predicate.VulnEqual {
+// HasVulnerabilityAWith applies the HasEdge predicate on the "vulnerability_a" edge with a given conditions (other predicates).
+func HasVulnerabilityAWith(preds ...predicate.VulnerabilityID) predicate.VulnEqual {
 	return predicate.VulnEqual(func(s *sql.Selector) {
-		step := newVulnerabilityIdsStep()
+		step := newVulnerabilityAStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVulnerabilityB applies the HasEdge predicate on the "vulnerability_b" edge.
+func HasVulnerabilityB() predicate.VulnEqual {
+	return predicate.VulnEqual(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, VulnerabilityBTable, VulnerabilityBColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVulnerabilityBWith applies the HasEdge predicate on the "vulnerability_b" edge with a given conditions (other predicates).
+func HasVulnerabilityBWith(preds ...predicate.VulnerabilityID) predicate.VulnEqual {
+	return predicate.VulnEqual(func(s *sql.Selector) {
+		step := newVulnerabilityBStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

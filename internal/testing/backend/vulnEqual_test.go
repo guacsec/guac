@@ -767,6 +767,49 @@ func TestIngestVulnEquals(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name:   "Query on ghsa and osv",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1, testdata.O2, testdata.G2},
+			Calls: []call{
+				{
+					Vulns:      []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O2}},
+					OtherVulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.G2}},
+					Ins: []*model.VulnEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							Justification: "test justification",
+						},
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				Vulnerabilities: []*model.VulnerabilitySpec{
+					{
+						VulnerabilityID: ptrfrom.String("GHSA-xrw3-wqph-3fxg"),
+					},
+					{
+						VulnerabilityID: ptrfrom.String("cve-2022-26499"),
+					},
+				},
+			},
+			ExpVulnEqual: []*model.VulnEqual{
+				{
+					Vulnerabilities: []*model.Vulnerability{
+						{
+							Type:             "ghsa",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.G2out},
+						},
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O2out},
+						},
+					},
+					Justification: "test justification",
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {

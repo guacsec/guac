@@ -24,6 +24,18 @@ type VulnEqualCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetVulnID sets the "vuln_id" field.
+func (vec *VulnEqualCreate) SetVulnID(u uuid.UUID) *VulnEqualCreate {
+	vec.mutation.SetVulnID(u)
+	return vec
+}
+
+// SetEqualVulnID sets the "equal_vuln_id" field.
+func (vec *VulnEqualCreate) SetEqualVulnID(u uuid.UUID) *VulnEqualCreate {
+	vec.mutation.SetEqualVulnID(u)
+	return vec
+}
+
 // SetJustification sets the "justification" field.
 func (vec *VulnEqualCreate) SetJustification(s string) *VulnEqualCreate {
 	vec.mutation.SetJustification(s)
@@ -62,19 +74,26 @@ func (vec *VulnEqualCreate) SetNillableID(u *uuid.UUID) *VulnEqualCreate {
 	return vec
 }
 
-// AddVulnerabilityIDIDs adds the "vulnerability_ids" edge to the VulnerabilityID entity by IDs.
-func (vec *VulnEqualCreate) AddVulnerabilityIDIDs(ids ...uuid.UUID) *VulnEqualCreate {
-	vec.mutation.AddVulnerabilityIDIDs(ids...)
+// SetVulnerabilityAID sets the "vulnerability_a" edge to the VulnerabilityID entity by ID.
+func (vec *VulnEqualCreate) SetVulnerabilityAID(id uuid.UUID) *VulnEqualCreate {
+	vec.mutation.SetVulnerabilityAID(id)
 	return vec
 }
 
-// AddVulnerabilityIds adds the "vulnerability_ids" edges to the VulnerabilityID entity.
-func (vec *VulnEqualCreate) AddVulnerabilityIds(v ...*VulnerabilityID) *VulnEqualCreate {
-	ids := make([]uuid.UUID, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return vec.AddVulnerabilityIDIDs(ids...)
+// SetVulnerabilityA sets the "vulnerability_a" edge to the VulnerabilityID entity.
+func (vec *VulnEqualCreate) SetVulnerabilityA(v *VulnerabilityID) *VulnEqualCreate {
+	return vec.SetVulnerabilityAID(v.ID)
+}
+
+// SetVulnerabilityBID sets the "vulnerability_b" edge to the VulnerabilityID entity by ID.
+func (vec *VulnEqualCreate) SetVulnerabilityBID(id uuid.UUID) *VulnEqualCreate {
+	vec.mutation.SetVulnerabilityBID(id)
+	return vec
+}
+
+// SetVulnerabilityB sets the "vulnerability_b" edge to the VulnerabilityID entity.
+func (vec *VulnEqualCreate) SetVulnerabilityB(v *VulnerabilityID) *VulnEqualCreate {
+	return vec.SetVulnerabilityBID(v.ID)
 }
 
 // Mutation returns the VulnEqualMutation object of the builder.
@@ -120,6 +139,12 @@ func (vec *VulnEqualCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (vec *VulnEqualCreate) check() error {
+	if _, ok := vec.mutation.VulnID(); !ok {
+		return &ValidationError{Name: "vuln_id", err: errors.New(`ent: missing required field "VulnEqual.vuln_id"`)}
+	}
+	if _, ok := vec.mutation.EqualVulnID(); !ok {
+		return &ValidationError{Name: "equal_vuln_id", err: errors.New(`ent: missing required field "VulnEqual.equal_vuln_id"`)}
+	}
 	if _, ok := vec.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "VulnEqual.justification"`)}
 	}
@@ -132,8 +157,11 @@ func (vec *VulnEqualCreate) check() error {
 	if _, ok := vec.mutation.VulnerabilitiesHash(); !ok {
 		return &ValidationError{Name: "vulnerabilities_hash", err: errors.New(`ent: missing required field "VulnEqual.vulnerabilities_hash"`)}
 	}
-	if len(vec.mutation.VulnerabilityIdsIDs()) == 0 {
-		return &ValidationError{Name: "vulnerability_ids", err: errors.New(`ent: missing required edge "VulnEqual.vulnerability_ids"`)}
+	if _, ok := vec.mutation.VulnerabilityAID(); !ok {
+		return &ValidationError{Name: "vulnerability_a", err: errors.New(`ent: missing required edge "VulnEqual.vulnerability_a"`)}
+	}
+	if _, ok := vec.mutation.VulnerabilityBID(); !ok {
+		return &ValidationError{Name: "vulnerability_b", err: errors.New(`ent: missing required edge "VulnEqual.vulnerability_b"`)}
 	}
 	return nil
 }
@@ -187,12 +215,12 @@ func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)
 		_node.VulnerabilitiesHash = value
 	}
-	if nodes := vec.mutation.VulnerabilityIdsIDs(); len(nodes) > 0 {
+	if nodes := vec.mutation.VulnerabilityAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   vulnequal.VulnerabilityIdsTable,
-			Columns: vulnequal.VulnerabilityIdsPrimaryKey,
+			Table:   vulnequal.VulnerabilityATable,
+			Columns: []string{vulnequal.VulnerabilityAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
@@ -201,6 +229,24 @@ func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.VulnID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := vec.mutation.VulnerabilityBIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   vulnequal.VulnerabilityBTable,
+			Columns: []string{vulnequal.VulnerabilityBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.EqualVulnID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -210,7 +256,7 @@ func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.VulnEqual.Create().
-//		SetJustification(v).
+//		SetVulnID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -219,7 +265,7 @@ func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.VulnEqualUpsert) {
-//			SetJustification(v+v).
+//			SetVulnID(v+v).
 //		}).
 //		Exec(ctx)
 func (vec *VulnEqualCreate) OnConflict(opts ...sql.ConflictOption) *VulnEqualUpsertOne {
@@ -254,6 +300,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetVulnID sets the "vuln_id" field.
+func (u *VulnEqualUpsert) SetVulnID(v uuid.UUID) *VulnEqualUpsert {
+	u.Set(vulnequal.FieldVulnID, v)
+	return u
+}
+
+// UpdateVulnID sets the "vuln_id" field to the value that was provided on create.
+func (u *VulnEqualUpsert) UpdateVulnID() *VulnEqualUpsert {
+	u.SetExcluded(vulnequal.FieldVulnID)
+	return u
+}
+
+// SetEqualVulnID sets the "equal_vuln_id" field.
+func (u *VulnEqualUpsert) SetEqualVulnID(v uuid.UUID) *VulnEqualUpsert {
+	u.Set(vulnequal.FieldEqualVulnID, v)
+	return u
+}
+
+// UpdateEqualVulnID sets the "equal_vuln_id" field to the value that was provided on create.
+func (u *VulnEqualUpsert) UpdateEqualVulnID() *VulnEqualUpsert {
+	u.SetExcluded(vulnequal.FieldEqualVulnID)
+	return u
+}
 
 // SetJustification sets the "justification" field.
 func (u *VulnEqualUpsert) SetJustification(v string) *VulnEqualUpsert {
@@ -349,6 +419,34 @@ func (u *VulnEqualUpsertOne) Update(set func(*VulnEqualUpsert)) *VulnEqualUpsert
 		set(&VulnEqualUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetVulnID sets the "vuln_id" field.
+func (u *VulnEqualUpsertOne) SetVulnID(v uuid.UUID) *VulnEqualUpsertOne {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.SetVulnID(v)
+	})
+}
+
+// UpdateVulnID sets the "vuln_id" field to the value that was provided on create.
+func (u *VulnEqualUpsertOne) UpdateVulnID() *VulnEqualUpsertOne {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.UpdateVulnID()
+	})
+}
+
+// SetEqualVulnID sets the "equal_vuln_id" field.
+func (u *VulnEqualUpsertOne) SetEqualVulnID(v uuid.UUID) *VulnEqualUpsertOne {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.SetEqualVulnID(v)
+	})
+}
+
+// UpdateEqualVulnID sets the "equal_vuln_id" field to the value that was provided on create.
+func (u *VulnEqualUpsertOne) UpdateEqualVulnID() *VulnEqualUpsertOne {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.UpdateEqualVulnID()
+	})
 }
 
 // SetJustification sets the "justification" field.
@@ -543,7 +641,7 @@ func (vecb *VulnEqualCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.VulnEqualUpsert) {
-//			SetJustification(v+v).
+//			SetVulnID(v+v).
 //		}).
 //		Exec(ctx)
 func (vecb *VulnEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *VulnEqualUpsertBulk {
@@ -620,6 +718,34 @@ func (u *VulnEqualUpsertBulk) Update(set func(*VulnEqualUpsert)) *VulnEqualUpser
 		set(&VulnEqualUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetVulnID sets the "vuln_id" field.
+func (u *VulnEqualUpsertBulk) SetVulnID(v uuid.UUID) *VulnEqualUpsertBulk {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.SetVulnID(v)
+	})
+}
+
+// UpdateVulnID sets the "vuln_id" field to the value that was provided on create.
+func (u *VulnEqualUpsertBulk) UpdateVulnID() *VulnEqualUpsertBulk {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.UpdateVulnID()
+	})
+}
+
+// SetEqualVulnID sets the "equal_vuln_id" field.
+func (u *VulnEqualUpsertBulk) SetEqualVulnID(v uuid.UUID) *VulnEqualUpsertBulk {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.SetEqualVulnID(v)
+	})
+}
+
+// UpdateEqualVulnID sets the "equal_vuln_id" field to the value that was provided on create.
+func (u *VulnEqualUpsertBulk) UpdateEqualVulnID() *VulnEqualUpsertBulk {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.UpdateEqualVulnID()
+	})
 }
 
 // SetJustification sets the "justification" field.
