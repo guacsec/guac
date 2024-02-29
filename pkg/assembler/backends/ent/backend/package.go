@@ -65,7 +65,14 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	)
 
 	// TODO: Fix preloads
-	query.WithVersions(func(q *ent.PackageVersionQuery) {})
+	query.WithVersions(func(q *ent.PackageVersionQuery) {
+		q.Where(
+			optionalPredicate(pkgSpec.ID, IDEQ),
+			optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
+			optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
+			packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
+		)
+	})
 
 	pkgs, err := query.All(ctx)
 	if err != nil {
