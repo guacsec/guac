@@ -263,7 +263,6 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.Certif
 	records, err := query.
 		Where(certifyVexPredicate(*spec)).
 		WithVulnerability(func(q *ent.VulnerabilityIDQuery) {
-
 		}).
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
