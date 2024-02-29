@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/dominikbraun/graph"
@@ -90,7 +89,7 @@ func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl 
 	return pkgResponse, nil
 }
 
-func findHasSBOMBy(uri, purl string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
+func findHasSBOMBy(filter model.HasSBOMSpec, uri, purl string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
 	var foundHasSBOMPkg *model.HasSBOMsResponse
 	var err error
 	if purl != "" {
@@ -102,13 +101,19 @@ func findHasSBOMBy(uri, purl string, ctx context.Context, gqlclient graphql.Clie
 		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Subject: &model.PackageOrArtifactSpec{Package: &model.PkgSpec{Id: &pkgResponse.Packages[0].Namespaces[0].Names[0].Versions[0].Id}},
 			})
 		if err != nil {
-			fmt.Printf("failed getting hasSBOM with error :%v", err)
+			fmt.Printf("(purl)failed getting hasSBOM with error :%v", err)
 			return nil, err
 		}
-	} else {
+	} else if uri != ""{
 		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, model.HasSBOMSpec{Uri: &uri,})
 		if err != nil {
-			fmt.Printf("failed getting hasSBOM  with error: %v", err)
+			fmt.Printf("(uri)failed getting hasSBOM  with error: %v", err)
+			return nil, err
+		}
+	}else {
+		foundHasSBOMPkg, err = model.HasSBOMs(ctx, gqlclient, filter)
+		if err != nil {
+			fmt.Printf("(filter)failed getting hasSBOM  with error: %v", err)
 			return nil, err
 		}
 	}
@@ -116,6 +121,7 @@ func findHasSBOMBy(uri, purl string, ctx context.Context, gqlclient graphql.Clie
 }
 
 func verifyFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, purl bool) {
+
 	if (errSlsa != nil && errSbom != nil) || (len(slsas) ==0  && len(sboms) == 0 ){
 		fmt.Println("Must specify slsa or sboms")
 		os.Exit(0)
@@ -167,6 +173,20 @@ var diffCmd = &cobra.Command{
 		inclDeps, _ := cmd.Flags().GetBool("inclDeps")
 		inclOccur, _ := cmd.Flags().GetBool("inclOccur")
 		namespaces, _ := cmd.Flags().GetBool("namespaces")
+		list, _ := cmd.Flags().GetBool("list")
+
+		if list {
+			//print all ingested SBOMS here in tabular format
+			if len(args) > 0 {
+				fmt.Println("No arguments expected, but got", len(args))
+				return
+			}
+			//get all ingested SBOMs
+
+			//print all ingested SBOMs
+
+			return 
+		}
 		if namespaces {
 			fmt.Println("Diff namespaces To be implemented, skipping...")
 		}
@@ -178,6 +198,7 @@ var diffCmd = &cobra.Command{
 			inclOccur = true
 		}
 
+
 		verifyFlags(slsas, sboms,  errSlsa, errSbom, uri, purl)
 
 		ctx := logging.WithLogger(context.Background())
@@ -188,25 +209,25 @@ var diffCmd = &cobra.Command{
 		var err error
 
 		if uri {
-			hasSBOMResponseOne, err = findHasSBOMBy(sboms[0],"",  ctx, gqlclient)
+			hasSBOMResponseOne, err = findHasSBOMBy(model.HasSBOMSpec{} ,sboms[0],"",  ctx, gqlclient)
 			if err != nil {
 				fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
 				return
 			}
 
-			hasSBOMResponseTwo, err = findHasSBOMBy( sboms[1],"",  ctx, gqlclient)
+			hasSBOMResponseTwo, err = findHasSBOMBy(model.HasSBOMSpec{},  sboms[1],"",  ctx, gqlclient)
 			if err != nil {
 				fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
 				return
 			}
 		} else if purl {
 
-			hasSBOMResponseTwo, err = findHasSBOMBy( "", sboms[0],  ctx, gqlclient)
+			hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[0],  ctx, gqlclient)
 			if err != nil {
 				fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
 				return
 			}
-			hasSBOMResponseTwo, err = findHasSBOMBy( "", sboms[1], ctx, gqlclient)
+			hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[1], ctx, gqlclient)
 			if err != nil {
 				fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
 				return
@@ -232,7 +253,7 @@ var diffCmd = &cobra.Command{
 		//diff
 		diffGraph := highlightDiff(gOne, gTwo)
 
-		//create the dot file
+		//create the dot filegit
 		createGraphDotFile(diffGraph)
 	},
 }
@@ -355,9 +376,12 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 	
 	if inclSoft {
 		//add included software
-		for index, software := range hasSBOM.IncludedSoftware {
-			setNodeAttribute(g, "HasSBOM", "InclSoft-"+ strconv.Itoa(index +1), *software.GetTypename())
+		inclSoftMap :=  make(map[string]bool)
+
+		for _, software := range hasSBOM.IncludedSoftware {
+			inclSoftMap[*software.GetTypename()]= true
 		}
+		setNodeAttribute(g, "HasSBOM", "InclSoft", inclSoftMap)
 	}
 
 	
@@ -434,4 +458,5 @@ func init() {
 	rootCmd.PersistentFlags().Bool("inclDeps", false, "Compare Included Dependencies")
 	rootCmd.PersistentFlags().Bool("inclOccur", false, "Compare Included Occurrences")
 	rootCmd.PersistentFlags().Bool("namespaces", false, "Compare Package Namespaces")
+	rootCmd.PersistentFlags().Bool("list", false, "List Similar SBOMs given a filter(TODO: @abhi all available filters here)")
 }
