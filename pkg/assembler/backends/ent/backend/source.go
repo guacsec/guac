@@ -156,7 +156,7 @@ func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 
 func generateHasSourceAtCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, pkgMatchType model.MatchFlags, hs *model.HasSourceAtInputSpec) (*ent.HasSourceAtCreate, error) {
 
-	if src != nil {
+	if src == nil {
 		return nil, fmt.Errorf("source must be specified for hasSourceAt")
 	}
 	var sourceID uuid.UUID
@@ -183,7 +183,7 @@ func generateHasSourceAtCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		SetKnownSince(hs.KnownSince.UTC()).
 		SetSourceID(sourceID)
 
-	if pkg != nil {
+	if pkg == nil {
 		return nil, fmt.Errorf("package must be specified for hasSourceAt")
 	}
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {

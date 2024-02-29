@@ -249,7 +249,7 @@ func hashPackages(slc []model.IDorPkgInput) string {
 	content := bytes.NewBuffer(nil)
 
 	for _, v := range pkgs {
-		content.WriteString(fmt.Sprintf("%d", v.PackageVersionID))
+		content.WriteString(*v.PackageVersionID)
 	}
 
 	hash.Write(content.Bytes())

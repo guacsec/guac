@@ -37,7 +37,25 @@ import (
 
 func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 
-	var where = []predicate.VulnEqual{
+	query := b.client.VulnEqual.Query().
+		Where(vulnEqualQuery(filter)).
+		WithVulnerabilityIds(func(query *ent.VulnerabilityIDQuery) {
+			query.Order(vulnerabilityid.ByID())
+		})
+
+	results, err := query.Limit(MaxPageSize).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return collect(results, toModelVulnEqual), nil
+}
+
+func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
+	if filter == nil {
+		return NoOpSelector()
+	}
+	where := []predicate.VulnEqual{
 		optionalPredicate(filter.ID, IDEQ),
 		optionalPredicate(filter.Justification, vulnequal.JustificationEQ),
 		optionalPredicate(filter.Origin, vulnequal.OriginEQ),
@@ -54,19 +72,7 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 			}
 		}
 	}
-
-	query := b.client.VulnEqual.Query().
-		Where(where...).
-		WithVulnerabilityIds(func(query *ent.VulnerabilityIDQuery) {
-			query.Order(vulnerabilityid.ByID())
-		})
-
-	results, err := query.Limit(MaxPageSize).All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return collect(results, toModelVulnEqual), nil
+	return vulnequal.And(where...)
 }
 
 func (b *EntBackend) IngestVulnEquals(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) ([]string, error) {
@@ -147,6 +153,11 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		return nil, fmt.Errorf("otherVulnerability must be specified for vulnEqual")
 	}
 
+	vulnEqualCreate := tx.VulnEqual.Create().
+		SetCollector(ve.Collector).
+		SetJustification(ve.Justification).
+		SetOrigin(ve.Origin)
+
 	if vulnerability.VulnerabilityNodeID == nil {
 		foundVulnID, err := tx.VulnerabilityID.Query().
 			Where(
@@ -177,7 +188,6 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 
 	sort.SliceStable(sortedVulns, func(i, j int) bool { return *sortedVulns[i].VulnerabilityNodeID < *sortedVulns[j].VulnerabilityNodeID })
 
-	var sortedVulnIDs []uuid.UUID
 	for _, vuln := range sortedVulns {
 		if vuln.VulnerabilityNodeID == nil {
 			return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
@@ -186,23 +196,18 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
-		sortedVulnIDs = append(sortedVulnIDs, vulnID)
+		vulnEqualCreate.AddVulnerabilityIDIDs(vulnID)
 	}
 
 	sortedVulnerabilitiesHash := hashVulnerabilities(sortedVulns)
+
+	vulnEqualCreate.SetVulnerabilitiesHash(sortedVulnerabilitiesHash)
 
 	vulnEqualID, err := guacVulnEqualKey(sortedVulnerabilitiesHash, ve)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create vulnEqual uuid with error: %w", err)
 	}
-
-	vulnEqualCreate := tx.VulnEqual.Create().
-		SetID(*vulnEqualID).
-		AddVulnerabilityIDIDs(sortedVulnIDs...).
-		SetVulnerabilitiesHash(sortedVulnerabilitiesHash).
-		SetCollector(ve.Collector).
-		SetJustification(ve.Justification).
-		SetOrigin(ve.Origin)
+	vulnEqualCreate.SetID(*vulnEqualID)
 
 	return vulnEqualCreate, nil
 }
@@ -239,7 +244,7 @@ func hashVulnerabilities(slc []model.IDorVulnerabilityInput) string {
 	content := bytes.NewBuffer(nil)
 
 	for _, v := range vulns {
-		content.WriteString(fmt.Sprintf("%d", v.VulnerabilityNodeID))
+		content.WriteString(*v.VulnerabilityNodeID)
 	}
 
 	hash.Write(content.Bytes())

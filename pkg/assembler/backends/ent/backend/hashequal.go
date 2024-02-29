@@ -217,7 +217,7 @@ func hashArtifacts(slc []model.IDorArtifactInput) string {
 	content := bytes.NewBuffer(nil)
 
 	for _, v := range arts {
-		content.WriteString(fmt.Sprintf("%d", v.ArtifactID))
+		content.WriteString(*v.ArtifactID)
 	}
 
 	hash.Write(content.Bytes())
