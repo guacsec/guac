@@ -257,7 +257,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			ID(ctx); err != nil {
 			return nil, errors.Wrap(err, "upsert isDependency statement node")
 		} else {

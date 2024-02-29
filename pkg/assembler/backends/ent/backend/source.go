@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
+	stdsql "database/sql"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -249,7 +250,7 @@ func upsertHasSourceAt(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput, 
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		DoNothing().
+		Ignore().
 		ID(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "upsert hasSourceAt node")
@@ -362,7 +363,7 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 	srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
 
 	create := generateSourceNameCreate(tx, &srcNameID, &src)
-	_, err := create.
+	err := create.
 		OnConflict(
 			sql.ConflictColumns(
 				sourcename.FieldType,
@@ -373,9 +374,11 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 			),
 		).
 		DoNothing().
-		ID(ctx)
+		Exec(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "upsert source name")
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert source name")
+		}
 	}
 
 	return &model.SourceIDs{

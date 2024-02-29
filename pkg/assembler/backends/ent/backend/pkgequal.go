@@ -188,7 +188,7 @@ func upsertPackageEqual(ctx context.Context, tx *ent.Tx, pkgA model.IDorPkgInput
 				pkgequal.FieldJustification,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 		return nil, errors.Wrap(err, "upsert pkgEqual node")
 	} else {

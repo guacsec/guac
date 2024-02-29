@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
+	stdsql "database/sql"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -126,7 +127,7 @@ func generateLicenseCreate(tx *ent.Tx, licenseID *uuid.UUID, licInput *model.Lic
 func upsertLicense(ctx context.Context, tx *ent.Tx, spec model.LicenseInputSpec) (*string, error) {
 	licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](&spec, helpers.LicenseServerKey)), 5)
 	insert := generateLicenseCreate(tx, &licenseID, &spec)
-	_, err := insert.
+	err := insert.
 		OnConflict(
 			sql.ConflictColumns(
 				license.FieldName,
@@ -135,9 +136,11 @@ func upsertLicense(ctx context.Context, tx *ent.Tx, spec model.LicenseInputSpec)
 			),
 		).
 		DoNothing().
-		ID(ctx)
+		Exec(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "upsert license node")
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert license node")
+		}
 	}
 	return ptrfrom.String(licenseID.String()), nil
 }

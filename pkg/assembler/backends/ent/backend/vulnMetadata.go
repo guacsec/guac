@@ -224,7 +224,7 @@ func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability 
 	if id, err := insert.OnConflict(
 		sql.ConflictColumns(conflictColumns...),
 	).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 		return nil, errors.Wrap(err, "upsert VulnerabilityMetadata node")
 	} else {

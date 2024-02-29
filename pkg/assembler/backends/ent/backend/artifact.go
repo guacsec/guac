@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
+	stdsql "database/sql"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
@@ -125,14 +126,16 @@ func generateArtifactCreate(tx *ent.Tx, artifactID *uuid.UUID, art *model.IDorAr
 func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInput) (*string, error) {
 	artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.ArtifactInputSpec, string](art.ArtifactInput, helpers.ArtifactServerKey)), 5)
 	insert := generateArtifactCreate(tx, &artifactID, art)
-	id, err := insert.
+	err := insert.
 		OnConflict(
 			sql.ConflictColumns(artifact.FieldDigest),
 		).
 		DoNothing().
-		ID(ctx)
+		Exec(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "upsert artifact")
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert artifact")
+		}
 	}
-	return ptrfrom.String(id.String()), nil
+	return ptrfrom.String(artifactID.String()), nil
 }

@@ -59,7 +59,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 			OnConflict(
 				sql.ConflictColumns(conflictColumns...),
 			).
-			DoNothing().
+			Ignore().
 			ID(ctx); err != nil {
 			return nil, errors.Wrap(err, "upsert certify Vuln statement node")
 		} else {

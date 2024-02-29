@@ -161,7 +161,7 @@ func upsertHasMetadata(ctx context.Context, tx *ent.Tx, subject model.PackageSou
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 		return nil, errors.Wrap(err, "upsert HasMetadata node")
 

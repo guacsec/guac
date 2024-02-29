@@ -241,11 +241,21 @@ func toIncludedSoftware(pkgs []*ent.PackageVersion, artifacts []*ent.Artifact) [
 }
 
 func toModelLicense(license *ent.License) *model.License {
+
+	var dbInLine *string
+	if license.Inline != "" {
+		dbInLine = ptrfrom.String(license.Inline)
+	}
+	var dbListVersion *string
+	if license.ListVersion != "" {
+		dbListVersion = ptrfrom.String(license.ListVersion)
+	}
+
 	return &model.License{
 		ID:          license.ID.String(),
 		Name:        license.Name,
-		Inline:      ptrfrom.String(license.Inline),
-		ListVersion: ptrfrom.String(license.ListVersion),
+		Inline:      dbInLine,
+		ListVersion: dbListVersion,
 	}
 }
 

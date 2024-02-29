@@ -187,7 +187,7 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.IDorSourceInp
 				certifyscorecard.FieldCollector, certifyscorecard.FieldScorecardCommit,
 				certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldTimeScanned, certifyscorecard.FieldAggregateScore),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 		return nil, errors.Wrap(err, "upsert Scorecard")
 

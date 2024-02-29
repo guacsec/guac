@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	"crypto/sha256"
+	stdsql "database/sql"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -126,15 +127,17 @@ func upsertBuilder(ctx context.Context, tx *ent.Tx, spec *model.BuilderInputSpec
 	builderID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(spec.URI), 5)
 	insert := generateBuilderCreate(tx, &builderID, spec)
 
-	id, err := insert.
+	err := insert.
 		OnConflict(
 			sql.ConflictColumns(builder.FieldURI),
 		).
 		DoNothing().
-		ID(ctx)
+		Exec(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "upsert builder")
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert builder")
+		}
 	}
 
-	return ptrfrom.String(id.String()), nil
+	return ptrfrom.String(builderID.String()), nil
 }

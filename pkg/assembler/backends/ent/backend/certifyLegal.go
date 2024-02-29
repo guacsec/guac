@@ -116,7 +116,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 				sql.ConflictColumns(certifyLegalConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			ID(ctx); err != nil {
 
 			return nil, errors.Wrap(err, "upsert certify legal node")

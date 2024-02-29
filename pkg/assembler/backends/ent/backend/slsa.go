@@ -251,7 +251,7 @@ func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput
 				slsaattestation.FieldBuiltFromHash,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 
 		return nil, errors.Wrap(err, "upsert slsa node")

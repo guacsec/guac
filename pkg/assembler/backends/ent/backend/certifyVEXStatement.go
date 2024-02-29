@@ -76,7 +76,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 				sql.ConflictColumns(conflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			ID(ctx); err != nil {
 
 			return nil, errors.Wrap(err, "upsert certify vex statement node")

@@ -274,7 +274,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			DoNothing().
+			Ignore().
 			ID(ctx); err != nil {
 			return nil, errors.Wrap(err, "upsert isOccurrence node")
 		} else {

@@ -201,7 +201,7 @@ func upsertHashEqual(ctx context.Context, tx *ent.Tx, artifactA model.IDorArtifa
 				hashequal.FieldJustification,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 
 		return nil, errors.Wrap(err, "upsert hashEqual statement node")

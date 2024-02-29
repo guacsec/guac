@@ -220,7 +220,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.
 		sql.ConflictColumns(conflictColumns...),
 		sql.ConflictWhere(conflictWhere),
 	).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 
 		return nil, errors.Wrap(err, "upsert certify legal node")

@@ -223,7 +223,7 @@ func upsertVulnEquals(ctx context.Context, tx *ent.Tx, vulnerability model.IDorV
 				vulnequal.FieldJustification,
 			),
 		).
-		DoNothing().
+		Ignore().
 		ID(ctx); err != nil {
 
 		return nil, errors.Wrap(err, "upsert vulnEqual node")

@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/sha1"
 	"crypto/sha256"
+	stdsql "database/sql"
 	"fmt"
 	"sort"
 
@@ -196,17 +197,19 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 
 	pkgNameCreate := generatePackageNameCreate(tx, &pkgNameID, &pkg)
 
-	nameID, err := pkgNameCreate.
+	err := pkgNameCreate.
 		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType)).
 		DoNothing().
-		ID(ctx)
+		Exec(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "upsert package name")
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert package name")
+		}
 	}
 
 	pkgVersionCreate := generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, &pkg)
 
-	id, err := pkgVersionCreate.
+	if err := pkgVersionCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				packageversion.FieldHash,
@@ -214,16 +217,17 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 			),
 		).
 		DoNothing().
-		ID(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "upsert package version")
+		Exec(ctx); err != nil {
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert package version")
+		}
 	}
 
 	return &model.PackageIDs{
 		PackageTypeID:      fmt.Sprintf("%s:%s", pkgTypeString, pkgNameID.String()),
 		PackageNamespaceID: fmt.Sprintf("%s:%s", pkgNamespaceString, pkgNameID.String()),
-		PackageNameID:      nameID.String(),
-		PackageVersionID:   id.String()}, nil
+		PackageNameID:      pkgNameID.String(),
+		PackageVersionID:   pkgVersionID.String()}, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {
