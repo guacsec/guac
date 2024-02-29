@@ -29,6 +29,34 @@ func (heu *HashEqualUpdate) Where(ps ...predicate.HashEqual) *HashEqualUpdate {
 	return heu
 }
 
+// SetArtID sets the "art_id" field.
+func (heu *HashEqualUpdate) SetArtID(u uuid.UUID) *HashEqualUpdate {
+	heu.mutation.SetArtID(u)
+	return heu
+}
+
+// SetNillableArtID sets the "art_id" field if the given value is not nil.
+func (heu *HashEqualUpdate) SetNillableArtID(u *uuid.UUID) *HashEqualUpdate {
+	if u != nil {
+		heu.SetArtID(*u)
+	}
+	return heu
+}
+
+// SetEqualArtID sets the "equal_art_id" field.
+func (heu *HashEqualUpdate) SetEqualArtID(u uuid.UUID) *HashEqualUpdate {
+	heu.mutation.SetEqualArtID(u)
+	return heu
+}
+
+// SetNillableEqualArtID sets the "equal_art_id" field if the given value is not nil.
+func (heu *HashEqualUpdate) SetNillableEqualArtID(u *uuid.UUID) *HashEqualUpdate {
+	if u != nil {
+		heu.SetEqualArtID(*u)
+	}
+	return heu
+}
+
 // SetOrigin sets the "origin" field.
 func (heu *HashEqualUpdate) SetOrigin(s string) *HashEqualUpdate {
 	heu.mutation.SetOrigin(s)
@@ -85,19 +113,26 @@ func (heu *HashEqualUpdate) SetNillableArtifactsHash(s *string) *HashEqualUpdate
 	return heu
 }
 
-// AddArtifactIDs adds the "artifacts" edge to the Artifact entity by IDs.
-func (heu *HashEqualUpdate) AddArtifactIDs(ids ...uuid.UUID) *HashEqualUpdate {
-	heu.mutation.AddArtifactIDs(ids...)
+// SetArtifactAID sets the "artifact_a" edge to the Artifact entity by ID.
+func (heu *HashEqualUpdate) SetArtifactAID(id uuid.UUID) *HashEqualUpdate {
+	heu.mutation.SetArtifactAID(id)
 	return heu
 }
 
-// AddArtifacts adds the "artifacts" edges to the Artifact entity.
-func (heu *HashEqualUpdate) AddArtifacts(a ...*Artifact) *HashEqualUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return heu.AddArtifactIDs(ids...)
+// SetArtifactA sets the "artifact_a" edge to the Artifact entity.
+func (heu *HashEqualUpdate) SetArtifactA(a *Artifact) *HashEqualUpdate {
+	return heu.SetArtifactAID(a.ID)
+}
+
+// SetArtifactBID sets the "artifact_b" edge to the Artifact entity by ID.
+func (heu *HashEqualUpdate) SetArtifactBID(id uuid.UUID) *HashEqualUpdate {
+	heu.mutation.SetArtifactBID(id)
+	return heu
+}
+
+// SetArtifactB sets the "artifact_b" edge to the Artifact entity.
+func (heu *HashEqualUpdate) SetArtifactB(a *Artifact) *HashEqualUpdate {
+	return heu.SetArtifactBID(a.ID)
 }
 
 // Mutation returns the HashEqualMutation object of the builder.
@@ -105,25 +140,16 @@ func (heu *HashEqualUpdate) Mutation() *HashEqualMutation {
 	return heu.mutation
 }
 
-// ClearArtifacts clears all "artifacts" edges to the Artifact entity.
-func (heu *HashEqualUpdate) ClearArtifacts() *HashEqualUpdate {
-	heu.mutation.ClearArtifacts()
+// ClearArtifactA clears the "artifact_a" edge to the Artifact entity.
+func (heu *HashEqualUpdate) ClearArtifactA() *HashEqualUpdate {
+	heu.mutation.ClearArtifactA()
 	return heu
 }
 
-// RemoveArtifactIDs removes the "artifacts" edge to Artifact entities by IDs.
-func (heu *HashEqualUpdate) RemoveArtifactIDs(ids ...uuid.UUID) *HashEqualUpdate {
-	heu.mutation.RemoveArtifactIDs(ids...)
+// ClearArtifactB clears the "artifact_b" edge to the Artifact entity.
+func (heu *HashEqualUpdate) ClearArtifactB() *HashEqualUpdate {
+	heu.mutation.ClearArtifactB()
 	return heu
-}
-
-// RemoveArtifacts removes "artifacts" edges to Artifact entities.
-func (heu *HashEqualUpdate) RemoveArtifacts(a ...*Artifact) *HashEqualUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return heu.RemoveArtifactIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -153,7 +179,21 @@ func (heu *HashEqualUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (heu *HashEqualUpdate) check() error {
+	if _, ok := heu.mutation.ArtifactAID(); heu.mutation.ArtifactACleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_a"`)
+	}
+	if _, ok := heu.mutation.ArtifactBID(); heu.mutation.ArtifactBCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_b"`)
+	}
+	return nil
+}
+
 func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := heu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
 	if ps := heu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -174,12 +214,12 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := heu.mutation.ArtifactsHash(); ok {
 		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
 	}
-	if heu.mutation.ArtifactsCleared() {
+	if heu.mutation.ArtifactACleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   hashequal.ArtifactsTable,
-			Columns: hashequal.ArtifactsPrimaryKey,
+			Table:   hashequal.ArtifactATable,
+			Columns: []string{hashequal.ArtifactAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
@@ -187,12 +227,12 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := heu.mutation.RemovedArtifactsIDs(); len(nodes) > 0 && !heu.mutation.ArtifactsCleared() {
+	if nodes := heu.mutation.ArtifactAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   hashequal.ArtifactsTable,
-			Columns: hashequal.ArtifactsPrimaryKey,
+			Table:   hashequal.ArtifactATable,
+			Columns: []string{hashequal.ArtifactAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
@@ -201,14 +241,27 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if heu.mutation.ArtifactBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   hashequal.ArtifactBTable,
+			Columns: []string{hashequal.ArtifactBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
+			},
+		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := heu.mutation.ArtifactsIDs(); len(nodes) > 0 {
+	if nodes := heu.mutation.ArtifactBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   hashequal.ArtifactsTable,
-			Columns: hashequal.ArtifactsPrimaryKey,
+			Table:   hashequal.ArtifactBTable,
+			Columns: []string{hashequal.ArtifactBColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
@@ -237,6 +290,34 @@ type HashEqualUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *HashEqualMutation
+}
+
+// SetArtID sets the "art_id" field.
+func (heuo *HashEqualUpdateOne) SetArtID(u uuid.UUID) *HashEqualUpdateOne {
+	heuo.mutation.SetArtID(u)
+	return heuo
+}
+
+// SetNillableArtID sets the "art_id" field if the given value is not nil.
+func (heuo *HashEqualUpdateOne) SetNillableArtID(u *uuid.UUID) *HashEqualUpdateOne {
+	if u != nil {
+		heuo.SetArtID(*u)
+	}
+	return heuo
+}
+
+// SetEqualArtID sets the "equal_art_id" field.
+func (heuo *HashEqualUpdateOne) SetEqualArtID(u uuid.UUID) *HashEqualUpdateOne {
+	heuo.mutation.SetEqualArtID(u)
+	return heuo
+}
+
+// SetNillableEqualArtID sets the "equal_art_id" field if the given value is not nil.
+func (heuo *HashEqualUpdateOne) SetNillableEqualArtID(u *uuid.UUID) *HashEqualUpdateOne {
+	if u != nil {
+		heuo.SetEqualArtID(*u)
+	}
+	return heuo
 }
 
 // SetOrigin sets the "origin" field.
@@ -295,19 +376,26 @@ func (heuo *HashEqualUpdateOne) SetNillableArtifactsHash(s *string) *HashEqualUp
 	return heuo
 }
 
-// AddArtifactIDs adds the "artifacts" edge to the Artifact entity by IDs.
-func (heuo *HashEqualUpdateOne) AddArtifactIDs(ids ...uuid.UUID) *HashEqualUpdateOne {
-	heuo.mutation.AddArtifactIDs(ids...)
+// SetArtifactAID sets the "artifact_a" edge to the Artifact entity by ID.
+func (heuo *HashEqualUpdateOne) SetArtifactAID(id uuid.UUID) *HashEqualUpdateOne {
+	heuo.mutation.SetArtifactAID(id)
 	return heuo
 }
 
-// AddArtifacts adds the "artifacts" edges to the Artifact entity.
-func (heuo *HashEqualUpdateOne) AddArtifacts(a ...*Artifact) *HashEqualUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return heuo.AddArtifactIDs(ids...)
+// SetArtifactA sets the "artifact_a" edge to the Artifact entity.
+func (heuo *HashEqualUpdateOne) SetArtifactA(a *Artifact) *HashEqualUpdateOne {
+	return heuo.SetArtifactAID(a.ID)
+}
+
+// SetArtifactBID sets the "artifact_b" edge to the Artifact entity by ID.
+func (heuo *HashEqualUpdateOne) SetArtifactBID(id uuid.UUID) *HashEqualUpdateOne {
+	heuo.mutation.SetArtifactBID(id)
+	return heuo
+}
+
+// SetArtifactB sets the "artifact_b" edge to the Artifact entity.
+func (heuo *HashEqualUpdateOne) SetArtifactB(a *Artifact) *HashEqualUpdateOne {
+	return heuo.SetArtifactBID(a.ID)
 }
 
 // Mutation returns the HashEqualMutation object of the builder.
@@ -315,25 +403,16 @@ func (heuo *HashEqualUpdateOne) Mutation() *HashEqualMutation {
 	return heuo.mutation
 }
 
-// ClearArtifacts clears all "artifacts" edges to the Artifact entity.
-func (heuo *HashEqualUpdateOne) ClearArtifacts() *HashEqualUpdateOne {
-	heuo.mutation.ClearArtifacts()
+// ClearArtifactA clears the "artifact_a" edge to the Artifact entity.
+func (heuo *HashEqualUpdateOne) ClearArtifactA() *HashEqualUpdateOne {
+	heuo.mutation.ClearArtifactA()
 	return heuo
 }
 
-// RemoveArtifactIDs removes the "artifacts" edge to Artifact entities by IDs.
-func (heuo *HashEqualUpdateOne) RemoveArtifactIDs(ids ...uuid.UUID) *HashEqualUpdateOne {
-	heuo.mutation.RemoveArtifactIDs(ids...)
+// ClearArtifactB clears the "artifact_b" edge to the Artifact entity.
+func (heuo *HashEqualUpdateOne) ClearArtifactB() *HashEqualUpdateOne {
+	heuo.mutation.ClearArtifactB()
 	return heuo
-}
-
-// RemoveArtifacts removes "artifacts" edges to Artifact entities.
-func (heuo *HashEqualUpdateOne) RemoveArtifacts(a ...*Artifact) *HashEqualUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return heuo.RemoveArtifactIDs(ids...)
 }
 
 // Where appends a list predicates to the HashEqualUpdate builder.
@@ -376,7 +455,21 @@ func (heuo *HashEqualUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (heuo *HashEqualUpdateOne) check() error {
+	if _, ok := heuo.mutation.ArtifactAID(); heuo.mutation.ArtifactACleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_a"`)
+	}
+	if _, ok := heuo.mutation.ArtifactBID(); heuo.mutation.ArtifactBCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "HashEqual.artifact_b"`)
+	}
+	return nil
+}
+
 func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, err error) {
+	if err := heuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(hashequal.Table, hashequal.Columns, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
 	id, ok := heuo.mutation.ID()
 	if !ok {
@@ -414,12 +507,12 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 	if value, ok := heuo.mutation.ArtifactsHash(); ok {
 		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
 	}
-	if heuo.mutation.ArtifactsCleared() {
+	if heuo.mutation.ArtifactACleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   hashequal.ArtifactsTable,
-			Columns: hashequal.ArtifactsPrimaryKey,
+			Table:   hashequal.ArtifactATable,
+			Columns: []string{hashequal.ArtifactAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
@@ -427,12 +520,12 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := heuo.mutation.RemovedArtifactsIDs(); len(nodes) > 0 && !heuo.mutation.ArtifactsCleared() {
+	if nodes := heuo.mutation.ArtifactAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   hashequal.ArtifactsTable,
-			Columns: hashequal.ArtifactsPrimaryKey,
+			Table:   hashequal.ArtifactATable,
+			Columns: []string{hashequal.ArtifactAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
@@ -441,14 +534,27 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if heuo.mutation.ArtifactBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   hashequal.ArtifactBTable,
+			Columns: []string{hashequal.ArtifactBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
+			},
+		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := heuo.mutation.ArtifactsIDs(); len(nodes) > 0 {
+	if nodes := heuo.mutation.ArtifactBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   hashequal.ArtifactsTable,
-			Columns: hashequal.ArtifactsPrimaryKey,
+			Table:   hashequal.ArtifactBTable,
+			Columns: []string{hashequal.ArtifactBColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),

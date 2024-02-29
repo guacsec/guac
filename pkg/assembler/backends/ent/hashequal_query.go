@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -20,14 +19,14 @@ import (
 // HashEqualQuery is the builder for querying HashEqual entities.
 type HashEqualQuery struct {
 	config
-	ctx                *QueryContext
-	order              []hashequal.OrderOption
-	inters             []Interceptor
-	predicates         []predicate.HashEqual
-	withArtifacts      *ArtifactQuery
-	modifiers          []func(*sql.Selector)
-	loadTotal          []func(context.Context, []*HashEqual) error
-	withNamedArtifacts map[string]*ArtifactQuery
+	ctx           *QueryContext
+	order         []hashequal.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.HashEqual
+	withArtifactA *ArtifactQuery
+	withArtifactB *ArtifactQuery
+	modifiers     []func(*sql.Selector)
+	loadTotal     []func(context.Context, []*HashEqual) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,8 +63,8 @@ func (heq *HashEqualQuery) Order(o ...hashequal.OrderOption) *HashEqualQuery {
 	return heq
 }
 
-// QueryArtifacts chains the current query on the "artifacts" edge.
-func (heq *HashEqualQuery) QueryArtifacts() *ArtifactQuery {
+// QueryArtifactA chains the current query on the "artifact_a" edge.
+func (heq *HashEqualQuery) QueryArtifactA() *ArtifactQuery {
 	query := (&ArtifactClient{config: heq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := heq.prepareQuery(ctx); err != nil {
@@ -78,7 +77,29 @@ func (heq *HashEqualQuery) QueryArtifacts() *ArtifactQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hashequal.Table, hashequal.FieldID, selector),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, hashequal.ArtifactsTable, hashequal.ArtifactsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, hashequal.ArtifactATable, hashequal.ArtifactAColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(heq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryArtifactB chains the current query on the "artifact_b" edge.
+func (heq *HashEqualQuery) QueryArtifactB() *ArtifactQuery {
+	query := (&ArtifactClient{config: heq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := heq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := heq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(hashequal.Table, hashequal.FieldID, selector),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, hashequal.ArtifactBTable, hashequal.ArtifactBColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(heq.driver.Dialect(), step)
 		return fromU, nil
@@ -278,21 +299,33 @@ func (heq *HashEqualQuery) Clone() *HashEqualQuery {
 		order:         append([]hashequal.OrderOption{}, heq.order...),
 		inters:        append([]Interceptor{}, heq.inters...),
 		predicates:    append([]predicate.HashEqual{}, heq.predicates...),
-		withArtifacts: heq.withArtifacts.Clone(),
+		withArtifactA: heq.withArtifactA.Clone(),
+		withArtifactB: heq.withArtifactB.Clone(),
 		// clone intermediate query.
 		sql:  heq.sql.Clone(),
 		path: heq.path,
 	}
 }
 
-// WithArtifacts tells the query-builder to eager-load the nodes that are connected to
-// the "artifacts" edge. The optional arguments are used to configure the query builder of the edge.
-func (heq *HashEqualQuery) WithArtifacts(opts ...func(*ArtifactQuery)) *HashEqualQuery {
+// WithArtifactA tells the query-builder to eager-load the nodes that are connected to
+// the "artifact_a" edge. The optional arguments are used to configure the query builder of the edge.
+func (heq *HashEqualQuery) WithArtifactA(opts ...func(*ArtifactQuery)) *HashEqualQuery {
 	query := (&ArtifactClient{config: heq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	heq.withArtifacts = query
+	heq.withArtifactA = query
+	return heq
+}
+
+// WithArtifactB tells the query-builder to eager-load the nodes that are connected to
+// the "artifact_b" edge. The optional arguments are used to configure the query builder of the edge.
+func (heq *HashEqualQuery) WithArtifactB(opts ...func(*ArtifactQuery)) *HashEqualQuery {
+	query := (&ArtifactClient{config: heq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	heq.withArtifactB = query
 	return heq
 }
 
@@ -302,12 +335,12 @@ func (heq *HashEqualQuery) WithArtifacts(opts ...func(*ArtifactQuery)) *HashEqua
 // Example:
 //
 //	var v []struct {
-//		Origin string `json:"origin,omitempty"`
+//		ArtID uuid.UUID `json:"art_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.HashEqual.Query().
-//		GroupBy(hashequal.FieldOrigin).
+//		GroupBy(hashequal.FieldArtID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (heq *HashEqualQuery) GroupBy(field string, fields ...string) *HashEqualGroupBy {
@@ -325,11 +358,11 @@ func (heq *HashEqualQuery) GroupBy(field string, fields ...string) *HashEqualGro
 // Example:
 //
 //	var v []struct {
-//		Origin string `json:"origin,omitempty"`
+//		ArtID uuid.UUID `json:"art_id,omitempty"`
 //	}
 //
 //	client.HashEqual.Query().
-//		Select(hashequal.FieldOrigin).
+//		Select(hashequal.FieldArtID).
 //		Scan(ctx, &v)
 func (heq *HashEqualQuery) Select(fields ...string) *HashEqualSelect {
 	heq.ctx.Fields = append(heq.ctx.Fields, fields...)
@@ -374,8 +407,9 @@ func (heq *HashEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*H
 	var (
 		nodes       = []*HashEqual{}
 		_spec       = heq.querySpec()
-		loadedTypes = [1]bool{
-			heq.withArtifacts != nil,
+		loadedTypes = [2]bool{
+			heq.withArtifactA != nil,
+			heq.withArtifactB != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -399,17 +433,15 @@ func (heq *HashEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*H
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := heq.withArtifacts; query != nil {
-		if err := heq.loadArtifacts(ctx, query, nodes,
-			func(n *HashEqual) { n.Edges.Artifacts = []*Artifact{} },
-			func(n *HashEqual, e *Artifact) { n.Edges.Artifacts = append(n.Edges.Artifacts, e) }); err != nil {
+	if query := heq.withArtifactA; query != nil {
+		if err := heq.loadArtifactA(ctx, query, nodes, nil,
+			func(n *HashEqual, e *Artifact) { n.Edges.ArtifactA = e }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range heq.withNamedArtifacts {
-		if err := heq.loadArtifacts(ctx, query, nodes,
-			func(n *HashEqual) { n.appendNamedArtifacts(name) },
-			func(n *HashEqual, e *Artifact) { n.appendNamedArtifacts(name, e) }); err != nil {
+	if query := heq.withArtifactB; query != nil {
+		if err := heq.loadArtifactB(ctx, query, nodes, nil,
+			func(n *HashEqual, e *Artifact) { n.Edges.ArtifactB = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -421,63 +453,60 @@ func (heq *HashEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*H
 	return nodes, nil
 }
 
-func (heq *HashEqualQuery) loadArtifacts(ctx context.Context, query *ArtifactQuery, nodes []*HashEqual, init func(*HashEqual), assign func(*HashEqual, *Artifact)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[uuid.UUID]*HashEqual)
-	nids := make(map[uuid.UUID]map[*HashEqual]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+func (heq *HashEqualQuery) loadArtifactA(ctx context.Context, query *ArtifactQuery, nodes []*HashEqual, init func(*HashEqual), assign func(*HashEqual, *Artifact)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*HashEqual)
+	for i := range nodes {
+		fk := nodes[i].ArtID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(hashequal.ArtifactsTable)
-		s.Join(joinT).On(s.C(artifact.FieldID), joinT.C(hashequal.ArtifactsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(hashequal.ArtifactsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(hashequal.ArtifactsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(uuid.UUID)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := *values[0].(*uuid.UUID)
-				inValue := *values[1].(*uuid.UUID)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*HashEqual]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Artifact](ctx, query, qr, query.inters)
+	query.Where(artifact.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "artifacts" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "art_id" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (heq *HashEqualQuery) loadArtifactB(ctx context.Context, query *ArtifactQuery, nodes []*HashEqual, init func(*HashEqual), assign func(*HashEqual, *Artifact)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*HashEqual)
+	for i := range nodes {
+		fk := nodes[i].EqualArtID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(artifact.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "equal_art_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil
@@ -510,6 +539,12 @@ func (heq *HashEqualQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != hashequal.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if heq.withArtifactA != nil {
+			_spec.Node.AddColumnOnce(hashequal.FieldArtID)
+		}
+		if heq.withArtifactB != nil {
+			_spec.Node.AddColumnOnce(hashequal.FieldEqualArtID)
 		}
 	}
 	if ps := heq.predicates; len(ps) > 0 {
@@ -565,20 +600,6 @@ func (heq *HashEqualQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
-}
-
-// WithNamedArtifacts tells the query-builder to eager-load the nodes that are connected to the "artifacts"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (heq *HashEqualQuery) WithNamedArtifacts(name string, opts ...func(*ArtifactQuery)) *HashEqualQuery {
-	query := (&ArtifactClient{config: heq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	if heq.withNamedArtifacts == nil {
-		heq.withNamedArtifacts = make(map[string]*ArtifactQuery)
-	}
-	heq.withNamedArtifacts[name] = query
-	return heq
 }
 
 // HashEqualGroupBy is the group-by builder for HashEqual entities.

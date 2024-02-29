@@ -44,14 +44,26 @@ func (a *Artifact) Attestations(ctx context.Context) (result []*SLSAAttestation,
 	return result, err
 }
 
-func (a *Artifact) Same(ctx context.Context) (result []*HashEqual, err error) {
+func (a *Artifact) HashEqualArtA(ctx context.Context) (result []*HashEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = a.NamedSame(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = a.NamedHashEqualArtA(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = a.Edges.SameOrErr()
+		result, err = a.Edges.HashEqualArtAOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = a.QuerySame().All(ctx)
+		result, err = a.QueryHashEqualArtA().All(ctx)
+	}
+	return result, err
+}
+
+func (a *Artifact) HashEqualArtB(ctx context.Context) (result []*HashEqual, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = a.NamedHashEqualArtB(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = a.Edges.HashEqualArtBOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = a.QueryHashEqualArtB().All(ctx)
 	}
 	return result, err
 }
@@ -356,14 +368,18 @@ func (hsa *HasSourceAt) Source(ctx context.Context) (*SourceName, error) {
 	return result, err
 }
 
-func (he *HashEqual) Artifacts(ctx context.Context) (result []*Artifact, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = he.NamedArtifacts(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = he.Edges.ArtifactsOrErr()
-	}
+func (he *HashEqual) ArtifactA(ctx context.Context) (*Artifact, error) {
+	result, err := he.Edges.ArtifactAOrErr()
 	if IsNotLoaded(err) {
-		result, err = he.QueryArtifacts().All(ctx)
+		result, err = he.QueryArtifactA().Only(ctx)
+	}
+	return result, err
+}
+
+func (he *HashEqual) ArtifactB(ctx context.Context) (*Artifact, error) {
+	result, err := he.Edges.ArtifactBOrErr()
+	if IsNotLoaded(err) {
+		result, err = he.QueryArtifactB().Only(ctx)
 	}
 	return result, err
 }
@@ -472,18 +488,6 @@ func (pv *PackageVersion) Sbom(ctx context.Context) (result []*BillOfMaterials, 
 	return result, err
 }
 
-func (pv *PackageVersion) EqualPackages(ctx context.Context) (result []*PkgEqual, err error) {
-	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedEqualPackages(graphql.GetFieldContext(ctx).Field.Alias)
-	} else {
-		result, err = pv.Edges.EqualPackagesOrErr()
-	}
-	if IsNotLoaded(err) {
-		result, err = pv.QueryEqualPackages().All(ctx)
-	}
-	return result, err
-}
-
 func (pv *PackageVersion) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = pv.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
@@ -496,14 +500,42 @@ func (pv *PackageVersion) IncludedInSboms(ctx context.Context) (result []*BillOf
 	return result, err
 }
 
-func (pe *PkgEqual) Packages(ctx context.Context) (result []*PackageVersion, err error) {
+func (pv *PackageVersion) PkgEqualPkgA(ctx context.Context) (result []*PkgEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pe.NamedPackages(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = pv.NamedPkgEqualPkgA(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pe.Edges.PackagesOrErr()
+		result, err = pv.Edges.PkgEqualPkgAOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pe.QueryPackages().All(ctx)
+		result, err = pv.QueryPkgEqualPkgA().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) PkgEqualPkgB(ctx context.Context) (result []*PkgEqual, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedPkgEqualPkgB(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.PkgEqualPkgBOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryPkgEqualPkgB().All(ctx)
+	}
+	return result, err
+}
+
+func (pe *PkgEqual) PackageA(ctx context.Context) (*PackageVersion, error) {
+	result, err := pe.Edges.PackageAOrErr()
+	if IsNotLoaded(err) {
+		result, err = pe.QueryPackageA().Only(ctx)
+	}
+	return result, err
+}
+
+func (pe *PkgEqual) PackageB(ctx context.Context) (*PackageVersion, error) {
+	result, err := pe.Edges.PackageBOrErr()
+	if IsNotLoaded(err) {
+		result, err = pe.QueryPackageB().Only(ctx)
 	}
 	return result, err
 }

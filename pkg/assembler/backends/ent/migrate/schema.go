@@ -573,17 +573,33 @@ var (
 		{Name: "collector", Type: field.TypeString},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "artifacts_hash", Type: field.TypeString},
+		{Name: "art_id", Type: field.TypeUUID},
+		{Name: "equal_art_id", Type: field.TypeUUID},
 	}
 	// HashEqualsTable holds the schema information for the "hash_equals" table.
 	HashEqualsTable = &schema.Table{
 		Name:       "hash_equals",
 		Columns:    HashEqualsColumns,
 		PrimaryKey: []*schema.Column{HashEqualsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "hash_equals_artifacts_artifact_a",
+				Columns:    []*schema.Column{HashEqualsColumns[5]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "hash_equals_artifacts_artifact_b",
+				Columns:    []*schema.Column{HashEqualsColumns[6]},
+				RefColumns: []*schema.Column{ArtifactsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "hashequal_artifacts_hash_origin_justification_collector",
+				Name:    "hashequal_art_id_equal_art_id_artifacts_hash_origin_justification_collector",
 				Unique:  true,
-				Columns: []*schema.Column{HashEqualsColumns[4], HashEqualsColumns[1], HashEqualsColumns[3], HashEqualsColumns[2]},
+				Columns: []*schema.Column{HashEqualsColumns[5], HashEqualsColumns[6], HashEqualsColumns[4], HashEqualsColumns[1], HashEqualsColumns[3], HashEqualsColumns[2]},
 			},
 		},
 	}
@@ -733,17 +749,33 @@ var (
 		{Name: "collector", Type: field.TypeString},
 		{Name: "justification", Type: field.TypeString},
 		{Name: "packages_hash", Type: field.TypeString},
+		{Name: "pkg_id", Type: field.TypeUUID},
+		{Name: "equal_pkg_id", Type: field.TypeUUID},
 	}
 	// PkgEqualsTable holds the schema information for the "pkg_equals" table.
 	PkgEqualsTable = &schema.Table{
 		Name:       "pkg_equals",
 		Columns:    PkgEqualsColumns,
 		PrimaryKey: []*schema.Column{PkgEqualsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "pkg_equals_package_versions_package_a",
+				Columns:    []*schema.Column{PkgEqualsColumns[5]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "pkg_equals_package_versions_package_b",
+				Columns:    []*schema.Column{PkgEqualsColumns[6]},
+				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "pkgequal_packages_hash_origin_justification_collector",
+				Name:    "pkgequal_pkg_id_equal_pkg_id_packages_hash_origin_justification_collector",
 				Unique:  true,
-				Columns: []*schema.Column{PkgEqualsColumns[4], PkgEqualsColumns[1], PkgEqualsColumns[3], PkgEqualsColumns[2]},
+				Columns: []*schema.Column{PkgEqualsColumns[5], PkgEqualsColumns[6], PkgEqualsColumns[4], PkgEqualsColumns[1], PkgEqualsColumns[3], PkgEqualsColumns[2]},
 			},
 		},
 	}
@@ -1137,56 +1169,6 @@ var (
 			},
 		},
 	}
-	// HashEqualArtifactsColumns holds the columns for the "hash_equal_artifacts" table.
-	HashEqualArtifactsColumns = []*schema.Column{
-		{Name: "hash_equal_id", Type: field.TypeUUID},
-		{Name: "artifact_id", Type: field.TypeUUID},
-	}
-	// HashEqualArtifactsTable holds the schema information for the "hash_equal_artifacts" table.
-	HashEqualArtifactsTable = &schema.Table{
-		Name:       "hash_equal_artifacts",
-		Columns:    HashEqualArtifactsColumns,
-		PrimaryKey: []*schema.Column{HashEqualArtifactsColumns[0], HashEqualArtifactsColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "hash_equal_artifacts_hash_equal_id",
-				Columns:    []*schema.Column{HashEqualArtifactsColumns[0]},
-				RefColumns: []*schema.Column{HashEqualsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "hash_equal_artifacts_artifact_id",
-				Columns:    []*schema.Column{HashEqualArtifactsColumns[1]},
-				RefColumns: []*schema.Column{ArtifactsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// PkgEqualPackagesColumns holds the columns for the "pkg_equal_packages" table.
-	PkgEqualPackagesColumns = []*schema.Column{
-		{Name: "pkg_equal_id", Type: field.TypeUUID},
-		{Name: "package_version_id", Type: field.TypeUUID},
-	}
-	// PkgEqualPackagesTable holds the schema information for the "pkg_equal_packages" table.
-	PkgEqualPackagesTable = &schema.Table{
-		Name:       "pkg_equal_packages",
-		Columns:    PkgEqualPackagesColumns,
-		PrimaryKey: []*schema.Column{PkgEqualPackagesColumns[0], PkgEqualPackagesColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "pkg_equal_packages_pkg_equal_id",
-				Columns:    []*schema.Column{PkgEqualPackagesColumns[0]},
-				RefColumns: []*schema.Column{PkgEqualsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "pkg_equal_packages_package_version_id",
-				Columns:    []*schema.Column{PkgEqualPackagesColumns[1]},
-				RefColumns: []*schema.Column{PackageVersionsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// SlsaAttestationBuiltFromColumns holds the columns for the "slsa_attestation_built_from" table.
 	SlsaAttestationBuiltFromColumns = []*schema.Column{
 		{Name: "slsa_attestation_id", Type: field.TypeUUID},
@@ -1243,8 +1225,6 @@ var (
 		BillOfMaterialsIncludedOccurrencesTable,
 		CertifyLegalDeclaredLicensesTable,
 		CertifyLegalDiscoveredLicensesTable,
-		HashEqualArtifactsTable,
-		PkgEqualPackagesTable,
 		SlsaAttestationBuiltFromTable,
 	}
 )
@@ -1274,10 +1254,14 @@ func init() {
 	HasSourceAtsTable.ForeignKeys[0].RefTable = PackageVersionsTable
 	HasSourceAtsTable.ForeignKeys[1].RefTable = PackageNamesTable
 	HasSourceAtsTable.ForeignKeys[2].RefTable = SourceNamesTable
+	HashEqualsTable.ForeignKeys[0].RefTable = ArtifactsTable
+	HashEqualsTable.ForeignKeys[1].RefTable = ArtifactsTable
 	OccurrencesTable.ForeignKeys[0].RefTable = ArtifactsTable
 	OccurrencesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	OccurrencesTable.ForeignKeys[2].RefTable = SourceNamesTable
 	PackageVersionsTable.ForeignKeys[0].RefTable = PackageNamesTable
+	PkgEqualsTable.ForeignKeys[0].RefTable = PackageVersionsTable
+	PkgEqualsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	PointOfContactsTable.ForeignKeys[0].RefTable = SourceNamesTable
 	PointOfContactsTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	PointOfContactsTable.ForeignKeys[2].RefTable = PackageNamesTable
@@ -1302,10 +1286,6 @@ func init() {
 	CertifyLegalDeclaredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[0].RefTable = CertifyLegalsTable
 	CertifyLegalDiscoveredLicensesTable.ForeignKeys[1].RefTable = LicensesTable
-	HashEqualArtifactsTable.ForeignKeys[0].RefTable = HashEqualsTable
-	HashEqualArtifactsTable.ForeignKeys[1].RefTable = ArtifactsTable
-	PkgEqualPackagesTable.ForeignKeys[0].RefTable = PkgEqualsTable
-	PkgEqualPackagesTable.ForeignKeys[1].RefTable = PackageVersionsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[0].RefTable = SlsaAttestationsTable
 	SlsaAttestationBuiltFromTable.ForeignKeys[1].RefTable = ArtifactsTable
 }

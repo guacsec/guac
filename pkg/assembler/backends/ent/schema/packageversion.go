@@ -54,9 +54,10 @@ func (PackageVersion) Edges() []ent.Edge {
 		edge.From("sbom", BillOfMaterials.Type).Ref("package"),
 
 		// edge.To("equal_packages", PackageVersion.Type).Through("equals", PkgEqual.Type),
-		edge.From("equal_packages", PkgEqual.Type).Ref("packages"),
 		// edge.From("pkg_equal_dependant", PkgEqual.Type).Ref("dependant_package"),
 		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_software_packages"),
+		edge.From("pkg_equal_pkg_a", PkgEqual.Type).Ref("package_a"),
+		edge.From("pkg_equal_pkg_b", PkgEqual.Type).Ref("package_b"),
 	}
 }
 

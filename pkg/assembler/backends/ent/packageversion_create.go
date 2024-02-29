@@ -123,21 +123,6 @@ func (pvc *PackageVersionCreate) AddSbom(b ...*BillOfMaterials) *PackageVersionC
 	return pvc.AddSbomIDs(ids...)
 }
 
-// AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by IDs.
-func (pvc *PackageVersionCreate) AddEqualPackageIDs(ids ...uuid.UUID) *PackageVersionCreate {
-	pvc.mutation.AddEqualPackageIDs(ids...)
-	return pvc
-}
-
-// AddEqualPackages adds the "equal_packages" edges to the PkgEqual entity.
-func (pvc *PackageVersionCreate) AddEqualPackages(p ...*PkgEqual) *PackageVersionCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pvc.AddEqualPackageIDs(ids...)
-}
-
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
 func (pvc *PackageVersionCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionCreate {
 	pvc.mutation.AddIncludedInSbomIDs(ids...)
@@ -151,6 +136,36 @@ func (pvc *PackageVersionCreate) AddIncludedInSboms(b ...*BillOfMaterials) *Pack
 		ids[i] = b[i].ID
 	}
 	return pvc.AddIncludedInSbomIDs(ids...)
+}
+
+// AddPkgEqualPkgAIDs adds the "pkg_equal_pkg_a" edge to the PkgEqual entity by IDs.
+func (pvc *PackageVersionCreate) AddPkgEqualPkgAIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddPkgEqualPkgAIDs(ids...)
+	return pvc
+}
+
+// AddPkgEqualPkgA adds the "pkg_equal_pkg_a" edges to the PkgEqual entity.
+func (pvc *PackageVersionCreate) AddPkgEqualPkgA(p ...*PkgEqual) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvc.AddPkgEqualPkgAIDs(ids...)
+}
+
+// AddPkgEqualPkgBIDs adds the "pkg_equal_pkg_b" edge to the PkgEqual entity by IDs.
+func (pvc *PackageVersionCreate) AddPkgEqualPkgBIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddPkgEqualPkgBIDs(ids...)
+	return pvc
+}
+
+// AddPkgEqualPkgB adds the "pkg_equal_pkg_b" edges to the PkgEqual entity.
+func (pvc *PackageVersionCreate) AddPkgEqualPkgB(p ...*PkgEqual) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvc.AddPkgEqualPkgBIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -320,12 +335,28 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.EqualPackagesIDs(); len(nodes) > 0 {
+	if nodes := pvc.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   packageversion.EqualPackagesTable,
-			Columns: packageversion.EqualPackagesPrimaryKey,
+			Table:   packageversion.IncludedInSbomsTable,
+			Columns: packageversion.IncludedInSbomsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.PkgEqualPkgAIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgATable,
+			Columns: []string{packageversion.PkgEqualPkgAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
@@ -336,15 +367,15 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pvc.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
+	if nodes := pvc.mutation.PkgEqualPkgBIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   packageversion.IncludedInSbomsTable,
-			Columns: packageversion.IncludedInSbomsPrimaryKey,
+			Table:   packageversion.PkgEqualPkgBTable,
+			Columns: []string{packageversion.PkgEqualPkgBColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

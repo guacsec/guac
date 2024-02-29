@@ -263,21 +263,44 @@ func HasAttestationsWith(preds ...predicate.SLSAAttestation) predicate.Artifact 
 	})
 }
 
-// HasSame applies the HasEdge predicate on the "same" edge.
-func HasSame() predicate.Artifact {
+// HasHashEqualArtA applies the HasEdge predicate on the "hash_equal_art_a" edge.
+func HasHashEqualArtA() predicate.Artifact {
 	return predicate.Artifact(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, SameTable, SamePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, HashEqualArtATable, HashEqualArtAColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSameWith applies the HasEdge predicate on the "same" edge with a given conditions (other predicates).
-func HasSameWith(preds ...predicate.HashEqual) predicate.Artifact {
+// HasHashEqualArtAWith applies the HasEdge predicate on the "hash_equal_art_a" edge with a given conditions (other predicates).
+func HasHashEqualArtAWith(preds ...predicate.HashEqual) predicate.Artifact {
 	return predicate.Artifact(func(s *sql.Selector) {
-		step := newSameStep()
+		step := newHashEqualArtAStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasHashEqualArtB applies the HasEdge predicate on the "hash_equal_art_b" edge.
+func HasHashEqualArtB() predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, HashEqualArtBTable, HashEqualArtBColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasHashEqualArtBWith applies the HasEdge predicate on the "hash_equal_art_b" edge with a given conditions (other predicates).
+func HasHashEqualArtBWith(preds ...predicate.HashEqual) predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := newHashEqualArtBStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

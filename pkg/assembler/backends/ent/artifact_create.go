@@ -98,19 +98,34 @@ func (ac *ArtifactCreate) AddAttestations(s ...*SLSAAttestation) *ArtifactCreate
 	return ac.AddAttestationIDs(ids...)
 }
 
-// AddSameIDs adds the "same" edge to the HashEqual entity by IDs.
-func (ac *ArtifactCreate) AddSameIDs(ids ...uuid.UUID) *ArtifactCreate {
-	ac.mutation.AddSameIDs(ids...)
+// AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
+func (ac *ArtifactCreate) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactCreate {
+	ac.mutation.AddHashEqualArtAIDs(ids...)
 	return ac
 }
 
-// AddSame adds the "same" edges to the HashEqual entity.
-func (ac *ArtifactCreate) AddSame(h ...*HashEqual) *ArtifactCreate {
+// AddHashEqualArtA adds the "hash_equal_art_a" edges to the HashEqual entity.
+func (ac *ArtifactCreate) AddHashEqualArtA(h ...*HashEqual) *ArtifactCreate {
 	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
-	return ac.AddSameIDs(ids...)
+	return ac.AddHashEqualArtAIDs(ids...)
+}
+
+// AddHashEqualArtBIDs adds the "hash_equal_art_b" edge to the HashEqual entity by IDs.
+func (ac *ArtifactCreate) AddHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactCreate {
+	ac.mutation.AddHashEqualArtBIDs(ids...)
+	return ac
+}
+
+// AddHashEqualArtB adds the "hash_equal_art_b" edges to the HashEqual entity.
+func (ac *ArtifactCreate) AddHashEqualArtB(h ...*HashEqual) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return ac.AddHashEqualArtBIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
@@ -269,12 +284,28 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.SameIDs(); len(nodes) > 0 {
+	if nodes := ac.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   artifact.SameTable,
-			Columns: artifact.SamePrimaryKey,
+			Table:   artifact.HashEqualArtATable,
+			Columns: []string{artifact.HashEqualArtAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.HashEqualArtBIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.HashEqualArtBTable,
+			Columns: []string{artifact.HashEqualArtBColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),

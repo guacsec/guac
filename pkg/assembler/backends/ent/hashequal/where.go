@@ -54,6 +54,16 @@ func IDLTE(id uuid.UUID) predicate.HashEqual {
 	return predicate.HashEqual(sql.FieldLTE(FieldID, id))
 }
 
+// ArtID applies equality check predicate on the "art_id" field. It's identical to ArtIDEQ.
+func ArtID(v uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldEQ(FieldArtID, v))
+}
+
+// EqualArtID applies equality check predicate on the "equal_art_id" field. It's identical to EqualArtIDEQ.
+func EqualArtID(v uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldEQ(FieldEqualArtID, v))
+}
+
 // Origin applies equality check predicate on the "origin" field. It's identical to OriginEQ.
 func Origin(v string) predicate.HashEqual {
 	return predicate.HashEqual(sql.FieldEQ(FieldOrigin, v))
@@ -72,6 +82,46 @@ func Justification(v string) predicate.HashEqual {
 // ArtifactsHash applies equality check predicate on the "artifacts_hash" field. It's identical to ArtifactsHashEQ.
 func ArtifactsHash(v string) predicate.HashEqual {
 	return predicate.HashEqual(sql.FieldEQ(FieldArtifactsHash, v))
+}
+
+// ArtIDEQ applies the EQ predicate on the "art_id" field.
+func ArtIDEQ(v uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldEQ(FieldArtID, v))
+}
+
+// ArtIDNEQ applies the NEQ predicate on the "art_id" field.
+func ArtIDNEQ(v uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldNEQ(FieldArtID, v))
+}
+
+// ArtIDIn applies the In predicate on the "art_id" field.
+func ArtIDIn(vs ...uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldIn(FieldArtID, vs...))
+}
+
+// ArtIDNotIn applies the NotIn predicate on the "art_id" field.
+func ArtIDNotIn(vs ...uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldNotIn(FieldArtID, vs...))
+}
+
+// EqualArtIDEQ applies the EQ predicate on the "equal_art_id" field.
+func EqualArtIDEQ(v uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldEQ(FieldEqualArtID, v))
+}
+
+// EqualArtIDNEQ applies the NEQ predicate on the "equal_art_id" field.
+func EqualArtIDNEQ(v uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldNEQ(FieldEqualArtID, v))
+}
+
+// EqualArtIDIn applies the In predicate on the "equal_art_id" field.
+func EqualArtIDIn(vs ...uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldIn(FieldEqualArtID, vs...))
+}
+
+// EqualArtIDNotIn applies the NotIn predicate on the "equal_art_id" field.
+func EqualArtIDNotIn(vs ...uuid.UUID) predicate.HashEqual {
+	return predicate.HashEqual(sql.FieldNotIn(FieldEqualArtID, vs...))
 }
 
 // OriginEQ applies the EQ predicate on the "origin" field.
@@ -334,21 +384,44 @@ func ArtifactsHashContainsFold(v string) predicate.HashEqual {
 	return predicate.HashEqual(sql.FieldContainsFold(FieldArtifactsHash, v))
 }
 
-// HasArtifacts applies the HasEdge predicate on the "artifacts" edge.
-func HasArtifacts() predicate.HashEqual {
+// HasArtifactA applies the HasEdge predicate on the "artifact_a" edge.
+func HasArtifactA() predicate.HashEqual {
 	return predicate.HashEqual(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, ArtifactsTable, ArtifactsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, ArtifactATable, ArtifactAColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasArtifactsWith applies the HasEdge predicate on the "artifacts" edge with a given conditions (other predicates).
-func HasArtifactsWith(preds ...predicate.Artifact) predicate.HashEqual {
+// HasArtifactAWith applies the HasEdge predicate on the "artifact_a" edge with a given conditions (other predicates).
+func HasArtifactAWith(preds ...predicate.Artifact) predicate.HashEqual {
 	return predicate.HashEqual(func(s *sql.Selector) {
-		step := newArtifactsStep()
+		step := newArtifactAStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasArtifactB applies the HasEdge predicate on the "artifact_b" edge.
+func HasArtifactB() predicate.HashEqual {
+	return predicate.HashEqual(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, ArtifactBTable, ArtifactBColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasArtifactBWith applies the HasEdge predicate on the "artifact_b" edge with a given conditions (other predicates).
+func HasArtifactBWith(preds ...predicate.Artifact) predicate.HashEqual {
+	return predicate.HashEqual(func(s *sql.Selector) {
+		step := newArtifactBStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -143,21 +143,6 @@ func (pvu *PackageVersionUpdate) AddSbom(b ...*BillOfMaterials) *PackageVersionU
 	return pvu.AddSbomIDs(ids...)
 }
 
-// AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by IDs.
-func (pvu *PackageVersionUpdate) AddEqualPackageIDs(ids ...uuid.UUID) *PackageVersionUpdate {
-	pvu.mutation.AddEqualPackageIDs(ids...)
-	return pvu
-}
-
-// AddEqualPackages adds the "equal_packages" edges to the PkgEqual entity.
-func (pvu *PackageVersionUpdate) AddEqualPackages(p ...*PkgEqual) *PackageVersionUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pvu.AddEqualPackageIDs(ids...)
-}
-
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
 func (pvu *PackageVersionUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.AddIncludedInSbomIDs(ids...)
@@ -171,6 +156,36 @@ func (pvu *PackageVersionUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *Pack
 		ids[i] = b[i].ID
 	}
 	return pvu.AddIncludedInSbomIDs(ids...)
+}
+
+// AddPkgEqualPkgAIDs adds the "pkg_equal_pkg_a" edge to the PkgEqual entity by IDs.
+func (pvu *PackageVersionUpdate) AddPkgEqualPkgAIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddPkgEqualPkgAIDs(ids...)
+	return pvu
+}
+
+// AddPkgEqualPkgA adds the "pkg_equal_pkg_a" edges to the PkgEqual entity.
+func (pvu *PackageVersionUpdate) AddPkgEqualPkgA(p ...*PkgEqual) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.AddPkgEqualPkgAIDs(ids...)
+}
+
+// AddPkgEqualPkgBIDs adds the "pkg_equal_pkg_b" edge to the PkgEqual entity by IDs.
+func (pvu *PackageVersionUpdate) AddPkgEqualPkgBIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddPkgEqualPkgBIDs(ids...)
+	return pvu
+}
+
+// AddPkgEqualPkgB adds the "pkg_equal_pkg_b" edges to the PkgEqual entity.
+func (pvu *PackageVersionUpdate) AddPkgEqualPkgB(p ...*PkgEqual) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.AddPkgEqualPkgBIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -226,27 +241,6 @@ func (pvu *PackageVersionUpdate) RemoveSbom(b ...*BillOfMaterials) *PackageVersi
 	return pvu.RemoveSbomIDs(ids...)
 }
 
-// ClearEqualPackages clears all "equal_packages" edges to the PkgEqual entity.
-func (pvu *PackageVersionUpdate) ClearEqualPackages() *PackageVersionUpdate {
-	pvu.mutation.ClearEqualPackages()
-	return pvu
-}
-
-// RemoveEqualPackageIDs removes the "equal_packages" edge to PkgEqual entities by IDs.
-func (pvu *PackageVersionUpdate) RemoveEqualPackageIDs(ids ...uuid.UUID) *PackageVersionUpdate {
-	pvu.mutation.RemoveEqualPackageIDs(ids...)
-	return pvu
-}
-
-// RemoveEqualPackages removes "equal_packages" edges to PkgEqual entities.
-func (pvu *PackageVersionUpdate) RemoveEqualPackages(p ...*PkgEqual) *PackageVersionUpdate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pvu.RemoveEqualPackageIDs(ids...)
-}
-
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
 func (pvu *PackageVersionUpdate) ClearIncludedInSboms() *PackageVersionUpdate {
 	pvu.mutation.ClearIncludedInSboms()
@@ -266,6 +260,48 @@ func (pvu *PackageVersionUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *P
 		ids[i] = b[i].ID
 	}
 	return pvu.RemoveIncludedInSbomIDs(ids...)
+}
+
+// ClearPkgEqualPkgA clears all "pkg_equal_pkg_a" edges to the PkgEqual entity.
+func (pvu *PackageVersionUpdate) ClearPkgEqualPkgA() *PackageVersionUpdate {
+	pvu.mutation.ClearPkgEqualPkgA()
+	return pvu
+}
+
+// RemovePkgEqualPkgAIDs removes the "pkg_equal_pkg_a" edge to PkgEqual entities by IDs.
+func (pvu *PackageVersionUpdate) RemovePkgEqualPkgAIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemovePkgEqualPkgAIDs(ids...)
+	return pvu
+}
+
+// RemovePkgEqualPkgA removes "pkg_equal_pkg_a" edges to PkgEqual entities.
+func (pvu *PackageVersionUpdate) RemovePkgEqualPkgA(p ...*PkgEqual) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.RemovePkgEqualPkgAIDs(ids...)
+}
+
+// ClearPkgEqualPkgB clears all "pkg_equal_pkg_b" edges to the PkgEqual entity.
+func (pvu *PackageVersionUpdate) ClearPkgEqualPkgB() *PackageVersionUpdate {
+	pvu.mutation.ClearPkgEqualPkgB()
+	return pvu
+}
+
+// RemovePkgEqualPkgBIDs removes the "pkg_equal_pkg_b" edge to PkgEqual entities by IDs.
+func (pvu *PackageVersionUpdate) RemovePkgEqualPkgBIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemovePkgEqualPkgBIDs(ids...)
+	return pvu
+}
+
+// RemovePkgEqualPkgB removes "pkg_equal_pkg_b" edges to PkgEqual entities.
+func (pvu *PackageVersionUpdate) RemovePkgEqualPkgB(p ...*PkgEqual) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.RemovePkgEqualPkgBIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -454,51 +490,6 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pvu.mutation.EqualPackagesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   packageversion.EqualPackagesTable,
-			Columns: packageversion.EqualPackagesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pvu.mutation.RemovedEqualPackagesIDs(); len(nodes) > 0 && !pvu.mutation.EqualPackagesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   packageversion.EqualPackagesTable,
-			Columns: packageversion.EqualPackagesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pvu.mutation.EqualPackagesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   packageversion.EqualPackagesTable,
-			Columns: packageversion.EqualPackagesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if pvu.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -537,6 +528,96 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.PkgEqualPkgACleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgATable,
+			Columns: []string{packageversion.PkgEqualPkgAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedPkgEqualPkgAIDs(); len(nodes) > 0 && !pvu.mutation.PkgEqualPkgACleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgATable,
+			Columns: []string{packageversion.PkgEqualPkgAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.PkgEqualPkgAIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgATable,
+			Columns: []string{packageversion.PkgEqualPkgAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.PkgEqualPkgBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgBTable,
+			Columns: []string{packageversion.PkgEqualPkgBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedPkgEqualPkgBIDs(); len(nodes) > 0 && !pvu.mutation.PkgEqualPkgBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgBTable,
+			Columns: []string{packageversion.PkgEqualPkgBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.PkgEqualPkgBIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgBTable,
+			Columns: []string{packageversion.PkgEqualPkgBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -673,21 +754,6 @@ func (pvuo *PackageVersionUpdateOne) AddSbom(b ...*BillOfMaterials) *PackageVers
 	return pvuo.AddSbomIDs(ids...)
 }
 
-// AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by IDs.
-func (pvuo *PackageVersionUpdateOne) AddEqualPackageIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
-	pvuo.mutation.AddEqualPackageIDs(ids...)
-	return pvuo
-}
-
-// AddEqualPackages adds the "equal_packages" edges to the PkgEqual entity.
-func (pvuo *PackageVersionUpdateOne) AddEqualPackages(p ...*PkgEqual) *PackageVersionUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pvuo.AddEqualPackageIDs(ids...)
-}
-
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
 func (pvuo *PackageVersionUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.AddIncludedInSbomIDs(ids...)
@@ -701,6 +767,36 @@ func (pvuo *PackageVersionUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *
 		ids[i] = b[i].ID
 	}
 	return pvuo.AddIncludedInSbomIDs(ids...)
+}
+
+// AddPkgEqualPkgAIDs adds the "pkg_equal_pkg_a" edge to the PkgEqual entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddPkgEqualPkgAIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddPkgEqualPkgAIDs(ids...)
+	return pvuo
+}
+
+// AddPkgEqualPkgA adds the "pkg_equal_pkg_a" edges to the PkgEqual entity.
+func (pvuo *PackageVersionUpdateOne) AddPkgEqualPkgA(p ...*PkgEqual) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.AddPkgEqualPkgAIDs(ids...)
+}
+
+// AddPkgEqualPkgBIDs adds the "pkg_equal_pkg_b" edge to the PkgEqual entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddPkgEqualPkgBIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddPkgEqualPkgBIDs(ids...)
+	return pvuo
+}
+
+// AddPkgEqualPkgB adds the "pkg_equal_pkg_b" edges to the PkgEqual entity.
+func (pvuo *PackageVersionUpdateOne) AddPkgEqualPkgB(p ...*PkgEqual) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.AddPkgEqualPkgBIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -756,27 +852,6 @@ func (pvuo *PackageVersionUpdateOne) RemoveSbom(b ...*BillOfMaterials) *PackageV
 	return pvuo.RemoveSbomIDs(ids...)
 }
 
-// ClearEqualPackages clears all "equal_packages" edges to the PkgEqual entity.
-func (pvuo *PackageVersionUpdateOne) ClearEqualPackages() *PackageVersionUpdateOne {
-	pvuo.mutation.ClearEqualPackages()
-	return pvuo
-}
-
-// RemoveEqualPackageIDs removes the "equal_packages" edge to PkgEqual entities by IDs.
-func (pvuo *PackageVersionUpdateOne) RemoveEqualPackageIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
-	pvuo.mutation.RemoveEqualPackageIDs(ids...)
-	return pvuo
-}
-
-// RemoveEqualPackages removes "equal_packages" edges to PkgEqual entities.
-func (pvuo *PackageVersionUpdateOne) RemoveEqualPackages(p ...*PkgEqual) *PackageVersionUpdateOne {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pvuo.RemoveEqualPackageIDs(ids...)
-}
-
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
 func (pvuo *PackageVersionUpdateOne) ClearIncludedInSboms() *PackageVersionUpdateOne {
 	pvuo.mutation.ClearIncludedInSboms()
@@ -796,6 +871,48 @@ func (pvuo *PackageVersionUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials
 		ids[i] = b[i].ID
 	}
 	return pvuo.RemoveIncludedInSbomIDs(ids...)
+}
+
+// ClearPkgEqualPkgA clears all "pkg_equal_pkg_a" edges to the PkgEqual entity.
+func (pvuo *PackageVersionUpdateOne) ClearPkgEqualPkgA() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearPkgEqualPkgA()
+	return pvuo
+}
+
+// RemovePkgEqualPkgAIDs removes the "pkg_equal_pkg_a" edge to PkgEqual entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemovePkgEqualPkgAIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemovePkgEqualPkgAIDs(ids...)
+	return pvuo
+}
+
+// RemovePkgEqualPkgA removes "pkg_equal_pkg_a" edges to PkgEqual entities.
+func (pvuo *PackageVersionUpdateOne) RemovePkgEqualPkgA(p ...*PkgEqual) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.RemovePkgEqualPkgAIDs(ids...)
+}
+
+// ClearPkgEqualPkgB clears all "pkg_equal_pkg_b" edges to the PkgEqual entity.
+func (pvuo *PackageVersionUpdateOne) ClearPkgEqualPkgB() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearPkgEqualPkgB()
+	return pvuo
+}
+
+// RemovePkgEqualPkgBIDs removes the "pkg_equal_pkg_b" edge to PkgEqual entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemovePkgEqualPkgBIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemovePkgEqualPkgBIDs(ids...)
+	return pvuo
+}
+
+// RemovePkgEqualPkgB removes "pkg_equal_pkg_b" edges to PkgEqual entities.
+func (pvuo *PackageVersionUpdateOne) RemovePkgEqualPkgB(p ...*PkgEqual) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.RemovePkgEqualPkgBIDs(ids...)
 }
 
 // Where appends a list predicates to the PackageVersionUpdate builder.
@@ -1014,51 +1131,6 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pvuo.mutation.EqualPackagesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   packageversion.EqualPackagesTable,
-			Columns: packageversion.EqualPackagesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pvuo.mutation.RemovedEqualPackagesIDs(); len(nodes) > 0 && !pvuo.mutation.EqualPackagesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   packageversion.EqualPackagesTable,
-			Columns: packageversion.EqualPackagesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pvuo.mutation.EqualPackagesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   packageversion.EqualPackagesTable,
-			Columns: packageversion.EqualPackagesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if pvuo.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -1097,6 +1169,96 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.PkgEqualPkgACleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgATable,
+			Columns: []string{packageversion.PkgEqualPkgAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedPkgEqualPkgAIDs(); len(nodes) > 0 && !pvuo.mutation.PkgEqualPkgACleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgATable,
+			Columns: []string{packageversion.PkgEqualPkgAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.PkgEqualPkgAIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgATable,
+			Columns: []string{packageversion.PkgEqualPkgAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.PkgEqualPkgBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgBTable,
+			Columns: []string{packageversion.PkgEqualPkgBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedPkgEqualPkgBIDs(); len(nodes) > 0 && !pvuo.mutation.PkgEqualPkgBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgBTable,
+			Columns: []string{packageversion.PkgEqualPkgBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.PkgEqualPkgBIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgBTable,
+			Columns: []string{packageversion.PkgEqualPkgBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

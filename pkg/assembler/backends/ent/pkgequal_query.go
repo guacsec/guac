@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -20,14 +19,14 @@ import (
 // PkgEqualQuery is the builder for querying PkgEqual entities.
 type PkgEqualQuery struct {
 	config
-	ctx               *QueryContext
-	order             []pkgequal.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.PkgEqual
-	withPackages      *PackageVersionQuery
-	modifiers         []func(*sql.Selector)
-	loadTotal         []func(context.Context, []*PkgEqual) error
-	withNamedPackages map[string]*PackageVersionQuery
+	ctx          *QueryContext
+	order        []pkgequal.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.PkgEqual
+	withPackageA *PackageVersionQuery
+	withPackageB *PackageVersionQuery
+	modifiers    []func(*sql.Selector)
+	loadTotal    []func(context.Context, []*PkgEqual) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,8 +63,8 @@ func (peq *PkgEqualQuery) Order(o ...pkgequal.OrderOption) *PkgEqualQuery {
 	return peq
 }
 
-// QueryPackages chains the current query on the "packages" edge.
-func (peq *PkgEqualQuery) QueryPackages() *PackageVersionQuery {
+// QueryPackageA chains the current query on the "package_a" edge.
+func (peq *PkgEqualQuery) QueryPackageA() *PackageVersionQuery {
 	query := (&PackageVersionClient{config: peq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := peq.prepareQuery(ctx); err != nil {
@@ -78,7 +77,29 @@ func (peq *PkgEqualQuery) QueryPackages() *PackageVersionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, selector),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, pkgequal.PackagesTable, pkgequal.PackagesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageATable, pkgequal.PackageAColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(peq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPackageB chains the current query on the "package_b" edge.
+func (peq *PkgEqualQuery) QueryPackageB() *PackageVersionQuery {
+	query := (&PackageVersionClient{config: peq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := peq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := peq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, selector),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageBTable, pkgequal.PackageBColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(peq.driver.Dialect(), step)
 		return fromU, nil
@@ -278,21 +299,33 @@ func (peq *PkgEqualQuery) Clone() *PkgEqualQuery {
 		order:        append([]pkgequal.OrderOption{}, peq.order...),
 		inters:       append([]Interceptor{}, peq.inters...),
 		predicates:   append([]predicate.PkgEqual{}, peq.predicates...),
-		withPackages: peq.withPackages.Clone(),
+		withPackageA: peq.withPackageA.Clone(),
+		withPackageB: peq.withPackageB.Clone(),
 		// clone intermediate query.
 		sql:  peq.sql.Clone(),
 		path: peq.path,
 	}
 }
 
-// WithPackages tells the query-builder to eager-load the nodes that are connected to
-// the "packages" edge. The optional arguments are used to configure the query builder of the edge.
-func (peq *PkgEqualQuery) WithPackages(opts ...func(*PackageVersionQuery)) *PkgEqualQuery {
+// WithPackageA tells the query-builder to eager-load the nodes that are connected to
+// the "package_a" edge. The optional arguments are used to configure the query builder of the edge.
+func (peq *PkgEqualQuery) WithPackageA(opts ...func(*PackageVersionQuery)) *PkgEqualQuery {
 	query := (&PackageVersionClient{config: peq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	peq.withPackages = query
+	peq.withPackageA = query
+	return peq
+}
+
+// WithPackageB tells the query-builder to eager-load the nodes that are connected to
+// the "package_b" edge. The optional arguments are used to configure the query builder of the edge.
+func (peq *PkgEqualQuery) WithPackageB(opts ...func(*PackageVersionQuery)) *PkgEqualQuery {
+	query := (&PackageVersionClient{config: peq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	peq.withPackageB = query
 	return peq
 }
 
@@ -302,12 +335,12 @@ func (peq *PkgEqualQuery) WithPackages(opts ...func(*PackageVersionQuery)) *PkgE
 // Example:
 //
 //	var v []struct {
-//		Origin string `json:"origin,omitempty"`
+//		PkgID uuid.UUID `json:"pkg_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.PkgEqual.Query().
-//		GroupBy(pkgequal.FieldOrigin).
+//		GroupBy(pkgequal.FieldPkgID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (peq *PkgEqualQuery) GroupBy(field string, fields ...string) *PkgEqualGroupBy {
@@ -325,11 +358,11 @@ func (peq *PkgEqualQuery) GroupBy(field string, fields ...string) *PkgEqualGroup
 // Example:
 //
 //	var v []struct {
-//		Origin string `json:"origin,omitempty"`
+//		PkgID uuid.UUID `json:"pkg_id,omitempty"`
 //	}
 //
 //	client.PkgEqual.Query().
-//		Select(pkgequal.FieldOrigin).
+//		Select(pkgequal.FieldPkgID).
 //		Scan(ctx, &v)
 func (peq *PkgEqualQuery) Select(fields ...string) *PkgEqualSelect {
 	peq.ctx.Fields = append(peq.ctx.Fields, fields...)
@@ -374,8 +407,9 @@ func (peq *PkgEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pk
 	var (
 		nodes       = []*PkgEqual{}
 		_spec       = peq.querySpec()
-		loadedTypes = [1]bool{
-			peq.withPackages != nil,
+		loadedTypes = [2]bool{
+			peq.withPackageA != nil,
+			peq.withPackageB != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -399,17 +433,15 @@ func (peq *PkgEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pk
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := peq.withPackages; query != nil {
-		if err := peq.loadPackages(ctx, query, nodes,
-			func(n *PkgEqual) { n.Edges.Packages = []*PackageVersion{} },
-			func(n *PkgEqual, e *PackageVersion) { n.Edges.Packages = append(n.Edges.Packages, e) }); err != nil {
+	if query := peq.withPackageA; query != nil {
+		if err := peq.loadPackageA(ctx, query, nodes, nil,
+			func(n *PkgEqual, e *PackageVersion) { n.Edges.PackageA = e }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range peq.withNamedPackages {
-		if err := peq.loadPackages(ctx, query, nodes,
-			func(n *PkgEqual) { n.appendNamedPackages(name) },
-			func(n *PkgEqual, e *PackageVersion) { n.appendNamedPackages(name, e) }); err != nil {
+	if query := peq.withPackageB; query != nil {
+		if err := peq.loadPackageB(ctx, query, nodes, nil,
+			func(n *PkgEqual, e *PackageVersion) { n.Edges.PackageB = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -421,63 +453,60 @@ func (peq *PkgEqualQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pk
 	return nodes, nil
 }
 
-func (peq *PkgEqualQuery) loadPackages(ctx context.Context, query *PackageVersionQuery, nodes []*PkgEqual, init func(*PkgEqual), assign func(*PkgEqual, *PackageVersion)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[uuid.UUID]*PkgEqual)
-	nids := make(map[uuid.UUID]map[*PkgEqual]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+func (peq *PkgEqualQuery) loadPackageA(ctx context.Context, query *PackageVersionQuery, nodes []*PkgEqual, init func(*PkgEqual), assign func(*PkgEqual, *PackageVersion)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PkgEqual)
+	for i := range nodes {
+		fk := nodes[i].PkgID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(pkgequal.PackagesTable)
-		s.Join(joinT).On(s.C(packageversion.FieldID), joinT.C(pkgequal.PackagesPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(pkgequal.PackagesPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(pkgequal.PackagesPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(uuid.UUID)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := *values[0].(*uuid.UUID)
-				inValue := *values[1].(*uuid.UUID)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*PkgEqual]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*PackageVersion](ctx, query, qr, query.inters)
+	query.Where(packageversion.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "packages" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "pkg_id" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (peq *PkgEqualQuery) loadPackageB(ctx context.Context, query *PackageVersionQuery, nodes []*PkgEqual, init func(*PkgEqual), assign func(*PkgEqual, *PackageVersion)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PkgEqual)
+	for i := range nodes {
+		fk := nodes[i].EqualPkgID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(packageversion.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "equal_pkg_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil
@@ -510,6 +539,12 @@ func (peq *PkgEqualQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != pkgequal.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if peq.withPackageA != nil {
+			_spec.Node.AddColumnOnce(pkgequal.FieldPkgID)
+		}
+		if peq.withPackageB != nil {
+			_spec.Node.AddColumnOnce(pkgequal.FieldEqualPkgID)
 		}
 	}
 	if ps := peq.predicates; len(ps) > 0 {
@@ -565,20 +600,6 @@ func (peq *PkgEqualQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
-}
-
-// WithNamedPackages tells the query-builder to eager-load the nodes that are connected to the "packages"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (peq *PkgEqualQuery) WithNamedPackages(name string, opts ...func(*PackageVersionQuery)) *PkgEqualQuery {
-	query := (&PackageVersionClient{config: peq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	if peq.withNamedPackages == nil {
-		peq.withNamedPackages = make(map[string]*PackageVersionQuery)
-	}
-	peq.withNamedPackages[name] = query
-	return peq
 }
 
 // PkgEqualGroupBy is the group-by builder for PkgEqual entities.

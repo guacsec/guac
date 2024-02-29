@@ -65,10 +65,9 @@ func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
 	}
 
 	if len(filter.Vulnerabilities) == 1 {
-		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold)),
-			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold))))
-		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
-			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold))))
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
+			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold))))
+
 		if filter.Vulnerabilities[0].NoVuln != nil {
 			if *filter.Vulnerabilities[0].NoVuln {
 				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeEqualFold(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeEqualFold(NoVuln))))

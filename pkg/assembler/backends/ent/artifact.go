@@ -35,20 +35,23 @@ type ArtifactEdges struct {
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
 	// Attestations holds the value of the attestations edge.
 	Attestations []*SLSAAttestation `json:"attestations,omitempty"`
-	// Same holds the value of the same edge.
-	Same []*HashEqual `json:"same,omitempty"`
+	// HashEqualArtA holds the value of the hash_equal_art_a edge.
+	HashEqualArtA []*HashEqual `json:"hash_equal_art_a,omitempty"`
+	// HashEqualArtB holds the value of the hash_equal_art_b edge.
+	HashEqualArtB []*HashEqual `json:"hash_equal_art_b,omitempty"`
 	// IncludedInSboms holds the value of the included_in_sboms edge.
 	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 	// totalCount holds the count of the edges above.
-	totalCount [5]map[string]int
+	totalCount [6]map[string]int
 
 	namedOccurrences     map[string][]*Occurrence
 	namedSbom            map[string][]*BillOfMaterials
 	namedAttestations    map[string][]*SLSAAttestation
-	namedSame            map[string][]*HashEqual
+	namedHashEqualArtA   map[string][]*HashEqual
+	namedHashEqualArtB   map[string][]*HashEqual
 	namedIncludedInSboms map[string][]*BillOfMaterials
 }
 
@@ -79,19 +82,28 @@ func (e ArtifactEdges) AttestationsOrErr() ([]*SLSAAttestation, error) {
 	return nil, &NotLoadedError{edge: "attestations"}
 }
 
-// SameOrErr returns the Same value or an error if the edge
+// HashEqualArtAOrErr returns the HashEqualArtA value or an error if the edge
 // was not loaded in eager-loading.
-func (e ArtifactEdges) SameOrErr() ([]*HashEqual, error) {
+func (e ArtifactEdges) HashEqualArtAOrErr() ([]*HashEqual, error) {
 	if e.loadedTypes[3] {
-		return e.Same, nil
+		return e.HashEqualArtA, nil
 	}
-	return nil, &NotLoadedError{edge: "same"}
+	return nil, &NotLoadedError{edge: "hash_equal_art_a"}
+}
+
+// HashEqualArtBOrErr returns the HashEqualArtB value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) HashEqualArtBOrErr() ([]*HashEqual, error) {
+	if e.loadedTypes[4] {
+		return e.HashEqualArtB, nil
+	}
+	return nil, &NotLoadedError{edge: "hash_equal_art_b"}
 }
 
 // IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.IncludedInSboms, nil
 	}
 	return nil, &NotLoadedError{edge: "included_in_sboms"}
@@ -167,9 +179,14 @@ func (a *Artifact) QueryAttestations() *SLSAAttestationQuery {
 	return NewArtifactClient(a.config).QueryAttestations(a)
 }
 
-// QuerySame queries the "same" edge of the Artifact entity.
-func (a *Artifact) QuerySame() *HashEqualQuery {
-	return NewArtifactClient(a.config).QuerySame(a)
+// QueryHashEqualArtA queries the "hash_equal_art_a" edge of the Artifact entity.
+func (a *Artifact) QueryHashEqualArtA() *HashEqualQuery {
+	return NewArtifactClient(a.config).QueryHashEqualArtA(a)
+}
+
+// QueryHashEqualArtB queries the "hash_equal_art_b" edge of the Artifact entity.
+func (a *Artifact) QueryHashEqualArtB() *HashEqualQuery {
+	return NewArtifactClient(a.config).QueryHashEqualArtB(a)
 }
 
 // QueryIncludedInSboms queries the "included_in_sboms" edge of the Artifact entity.
@@ -281,27 +298,51 @@ func (a *Artifact) appendNamedAttestations(name string, edges ...*SLSAAttestatio
 	}
 }
 
-// NamedSame returns the Same named value or an error if the edge was not
+// NamedHashEqualArtA returns the HashEqualArtA named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (a *Artifact) NamedSame(name string) ([]*HashEqual, error) {
-	if a.Edges.namedSame == nil {
+func (a *Artifact) NamedHashEqualArtA(name string) ([]*HashEqual, error) {
+	if a.Edges.namedHashEqualArtA == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := a.Edges.namedSame[name]
+	nodes, ok := a.Edges.namedHashEqualArtA[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (a *Artifact) appendNamedSame(name string, edges ...*HashEqual) {
-	if a.Edges.namedSame == nil {
-		a.Edges.namedSame = make(map[string][]*HashEqual)
+func (a *Artifact) appendNamedHashEqualArtA(name string, edges ...*HashEqual) {
+	if a.Edges.namedHashEqualArtA == nil {
+		a.Edges.namedHashEqualArtA = make(map[string][]*HashEqual)
 	}
 	if len(edges) == 0 {
-		a.Edges.namedSame[name] = []*HashEqual{}
+		a.Edges.namedHashEqualArtA[name] = []*HashEqual{}
 	} else {
-		a.Edges.namedSame[name] = append(a.Edges.namedSame[name], edges...)
+		a.Edges.namedHashEqualArtA[name] = append(a.Edges.namedHashEqualArtA[name], edges...)
+	}
+}
+
+// NamedHashEqualArtB returns the HashEqualArtB named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedHashEqualArtB(name string) ([]*HashEqual, error) {
+	if a.Edges.namedHashEqualArtB == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedHashEqualArtB[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedHashEqualArtB(name string, edges ...*HashEqual) {
+	if a.Edges.namedHashEqualArtB == nil {
+		a.Edges.namedHashEqualArtB = make(map[string][]*HashEqual)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedHashEqualArtB[name] = []*HashEqual{}
+	} else {
+		a.Edges.namedHashEqualArtB[name] = append(a.Edges.namedHashEqualArtB[name], edges...)
 	}
 }
 

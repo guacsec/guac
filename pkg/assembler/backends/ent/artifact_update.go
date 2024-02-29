@@ -105,19 +105,34 @@ func (au *ArtifactUpdate) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdate
 	return au.AddAttestationIDs(ids...)
 }
 
-// AddSameIDs adds the "same" edge to the HashEqual entity by IDs.
-func (au *ArtifactUpdate) AddSameIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.AddSameIDs(ids...)
+// AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
+func (au *ArtifactUpdate) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.AddHashEqualArtAIDs(ids...)
 	return au
 }
 
-// AddSame adds the "same" edges to the HashEqual entity.
-func (au *ArtifactUpdate) AddSame(h ...*HashEqual) *ArtifactUpdate {
+// AddHashEqualArtA adds the "hash_equal_art_a" edges to the HashEqual entity.
+func (au *ArtifactUpdate) AddHashEqualArtA(h ...*HashEqual) *ArtifactUpdate {
 	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
-	return au.AddSameIDs(ids...)
+	return au.AddHashEqualArtAIDs(ids...)
+}
+
+// AddHashEqualArtBIDs adds the "hash_equal_art_b" edge to the HashEqual entity by IDs.
+func (au *ArtifactUpdate) AddHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.AddHashEqualArtBIDs(ids...)
+	return au
+}
+
+// AddHashEqualArtB adds the "hash_equal_art_b" edges to the HashEqual entity.
+func (au *ArtifactUpdate) AddHashEqualArtB(h ...*HashEqual) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return au.AddHashEqualArtBIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
@@ -203,25 +218,46 @@ func (au *ArtifactUpdate) RemoveAttestations(s ...*SLSAAttestation) *ArtifactUpd
 	return au.RemoveAttestationIDs(ids...)
 }
 
-// ClearSame clears all "same" edges to the HashEqual entity.
-func (au *ArtifactUpdate) ClearSame() *ArtifactUpdate {
-	au.mutation.ClearSame()
+// ClearHashEqualArtA clears all "hash_equal_art_a" edges to the HashEqual entity.
+func (au *ArtifactUpdate) ClearHashEqualArtA() *ArtifactUpdate {
+	au.mutation.ClearHashEqualArtA()
 	return au
 }
 
-// RemoveSameIDs removes the "same" edge to HashEqual entities by IDs.
-func (au *ArtifactUpdate) RemoveSameIDs(ids ...uuid.UUID) *ArtifactUpdate {
-	au.mutation.RemoveSameIDs(ids...)
+// RemoveHashEqualArtAIDs removes the "hash_equal_art_a" edge to HashEqual entities by IDs.
+func (au *ArtifactUpdate) RemoveHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.RemoveHashEqualArtAIDs(ids...)
 	return au
 }
 
-// RemoveSame removes "same" edges to HashEqual entities.
-func (au *ArtifactUpdate) RemoveSame(h ...*HashEqual) *ArtifactUpdate {
+// RemoveHashEqualArtA removes "hash_equal_art_a" edges to HashEqual entities.
+func (au *ArtifactUpdate) RemoveHashEqualArtA(h ...*HashEqual) *ArtifactUpdate {
 	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
-	return au.RemoveSameIDs(ids...)
+	return au.RemoveHashEqualArtAIDs(ids...)
+}
+
+// ClearHashEqualArtB clears all "hash_equal_art_b" edges to the HashEqual entity.
+func (au *ArtifactUpdate) ClearHashEqualArtB() *ArtifactUpdate {
+	au.mutation.ClearHashEqualArtB()
+	return au
+}
+
+// RemoveHashEqualArtBIDs removes the "hash_equal_art_b" edge to HashEqual entities by IDs.
+func (au *ArtifactUpdate) RemoveHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.RemoveHashEqualArtBIDs(ids...)
+	return au
+}
+
+// RemoveHashEqualArtB removes "hash_equal_art_b" edges to HashEqual entities.
+func (au *ArtifactUpdate) RemoveHashEqualArtB(h ...*HashEqual) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return au.RemoveHashEqualArtBIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
@@ -422,12 +458,12 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.SameCleared() {
+	if au.mutation.HashEqualArtACleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   artifact.SameTable,
-			Columns: artifact.SamePrimaryKey,
+			Table:   artifact.HashEqualArtATable,
+			Columns: []string{artifact.HashEqualArtAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
@@ -435,12 +471,12 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedSameIDs(); len(nodes) > 0 && !au.mutation.SameCleared() {
+	if nodes := au.mutation.RemovedHashEqualArtAIDs(); len(nodes) > 0 && !au.mutation.HashEqualArtACleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   artifact.SameTable,
-			Columns: artifact.SamePrimaryKey,
+			Table:   artifact.HashEqualArtATable,
+			Columns: []string{artifact.HashEqualArtAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
@@ -451,12 +487,57 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.SameIDs(); len(nodes) > 0 {
+	if nodes := au.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   artifact.SameTable,
-			Columns: artifact.SamePrimaryKey,
+			Table:   artifact.HashEqualArtATable,
+			Columns: []string{artifact.HashEqualArtAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if au.mutation.HashEqualArtBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.HashEqualArtBTable,
+			Columns: []string{artifact.HashEqualArtBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedHashEqualArtBIDs(); len(nodes) > 0 && !au.mutation.HashEqualArtBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.HashEqualArtBTable,
+			Columns: []string{artifact.HashEqualArtBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.HashEqualArtBIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.HashEqualArtBTable,
+			Columns: []string{artifact.HashEqualArtBColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
@@ -605,19 +686,34 @@ func (auo *ArtifactUpdateOne) AddAttestations(s ...*SLSAAttestation) *ArtifactUp
 	return auo.AddAttestationIDs(ids...)
 }
 
-// AddSameIDs adds the "same" edge to the HashEqual entity by IDs.
-func (auo *ArtifactUpdateOne) AddSameIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.AddSameIDs(ids...)
+// AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
+func (auo *ArtifactUpdateOne) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.AddHashEqualArtAIDs(ids...)
 	return auo
 }
 
-// AddSame adds the "same" edges to the HashEqual entity.
-func (auo *ArtifactUpdateOne) AddSame(h ...*HashEqual) *ArtifactUpdateOne {
+// AddHashEqualArtA adds the "hash_equal_art_a" edges to the HashEqual entity.
+func (auo *ArtifactUpdateOne) AddHashEqualArtA(h ...*HashEqual) *ArtifactUpdateOne {
 	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
-	return auo.AddSameIDs(ids...)
+	return auo.AddHashEqualArtAIDs(ids...)
+}
+
+// AddHashEqualArtBIDs adds the "hash_equal_art_b" edge to the HashEqual entity by IDs.
+func (auo *ArtifactUpdateOne) AddHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.AddHashEqualArtBIDs(ids...)
+	return auo
+}
+
+// AddHashEqualArtB adds the "hash_equal_art_b" edges to the HashEqual entity.
+func (auo *ArtifactUpdateOne) AddHashEqualArtB(h ...*HashEqual) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return auo.AddHashEqualArtBIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
@@ -703,25 +799,46 @@ func (auo *ArtifactUpdateOne) RemoveAttestations(s ...*SLSAAttestation) *Artifac
 	return auo.RemoveAttestationIDs(ids...)
 }
 
-// ClearSame clears all "same" edges to the HashEqual entity.
-func (auo *ArtifactUpdateOne) ClearSame() *ArtifactUpdateOne {
-	auo.mutation.ClearSame()
+// ClearHashEqualArtA clears all "hash_equal_art_a" edges to the HashEqual entity.
+func (auo *ArtifactUpdateOne) ClearHashEqualArtA() *ArtifactUpdateOne {
+	auo.mutation.ClearHashEqualArtA()
 	return auo
 }
 
-// RemoveSameIDs removes the "same" edge to HashEqual entities by IDs.
-func (auo *ArtifactUpdateOne) RemoveSameIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
-	auo.mutation.RemoveSameIDs(ids...)
+// RemoveHashEqualArtAIDs removes the "hash_equal_art_a" edge to HashEqual entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.RemoveHashEqualArtAIDs(ids...)
 	return auo
 }
 
-// RemoveSame removes "same" edges to HashEqual entities.
-func (auo *ArtifactUpdateOne) RemoveSame(h ...*HashEqual) *ArtifactUpdateOne {
+// RemoveHashEqualArtA removes "hash_equal_art_a" edges to HashEqual entities.
+func (auo *ArtifactUpdateOne) RemoveHashEqualArtA(h ...*HashEqual) *ArtifactUpdateOne {
 	ids := make([]uuid.UUID, len(h))
 	for i := range h {
 		ids[i] = h[i].ID
 	}
-	return auo.RemoveSameIDs(ids...)
+	return auo.RemoveHashEqualArtAIDs(ids...)
+}
+
+// ClearHashEqualArtB clears all "hash_equal_art_b" edges to the HashEqual entity.
+func (auo *ArtifactUpdateOne) ClearHashEqualArtB() *ArtifactUpdateOne {
+	auo.mutation.ClearHashEqualArtB()
+	return auo
+}
+
+// RemoveHashEqualArtBIDs removes the "hash_equal_art_b" edge to HashEqual entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveHashEqualArtBIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.RemoveHashEqualArtBIDs(ids...)
+	return auo
+}
+
+// RemoveHashEqualArtB removes "hash_equal_art_b" edges to HashEqual entities.
+func (auo *ArtifactUpdateOne) RemoveHashEqualArtB(h ...*HashEqual) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return auo.RemoveHashEqualArtBIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
@@ -952,12 +1069,12 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.SameCleared() {
+	if auo.mutation.HashEqualArtACleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   artifact.SameTable,
-			Columns: artifact.SamePrimaryKey,
+			Table:   artifact.HashEqualArtATable,
+			Columns: []string{artifact.HashEqualArtAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
@@ -965,12 +1082,12 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedSameIDs(); len(nodes) > 0 && !auo.mutation.SameCleared() {
+	if nodes := auo.mutation.RemovedHashEqualArtAIDs(); len(nodes) > 0 && !auo.mutation.HashEqualArtACleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   artifact.SameTable,
-			Columns: artifact.SamePrimaryKey,
+			Table:   artifact.HashEqualArtATable,
+			Columns: []string{artifact.HashEqualArtAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
@@ -981,12 +1098,57 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.SameIDs(); len(nodes) > 0 {
+	if nodes := auo.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   artifact.SameTable,
-			Columns: artifact.SamePrimaryKey,
+			Table:   artifact.HashEqualArtATable,
+			Columns: []string{artifact.HashEqualArtAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.HashEqualArtBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.HashEqualArtBTable,
+			Columns: []string{artifact.HashEqualArtBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedHashEqualArtBIDs(); len(nodes) > 0 && !auo.mutation.HashEqualArtBCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.HashEqualArtBTable,
+			Columns: []string{artifact.HashEqualArtBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.HashEqualArtBIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.HashEqualArtBTable,
+			Columns: []string{artifact.HashEqualArtBColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),

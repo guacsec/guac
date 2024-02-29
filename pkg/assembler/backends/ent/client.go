@@ -546,15 +546,31 @@ func (c *ArtifactClient) QueryAttestations(a *Artifact) *SLSAAttestationQuery {
 	return query
 }
 
-// QuerySame queries the same edge of a Artifact.
-func (c *ArtifactClient) QuerySame(a *Artifact) *HashEqualQuery {
+// QueryHashEqualArtA queries the hash_equal_art_a edge of a Artifact.
+func (c *ArtifactClient) QueryHashEqualArtA(a *Artifact) *HashEqualQuery {
 	query := (&HashEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(hashequal.Table, hashequal.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, artifact.SameTable, artifact.SamePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtATable, artifact.HashEqualArtAColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryHashEqualArtB queries the hash_equal_art_b edge of a Artifact.
+func (c *ArtifactClient) QueryHashEqualArtB(a *Artifact) *HashEqualQuery {
+	query := (&HashEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, id),
+			sqlgraph.To(hashequal.Table, hashequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtBTable, artifact.HashEqualArtBColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -2553,15 +2569,31 @@ func (c *HashEqualClient) GetX(ctx context.Context, id uuid.UUID) *HashEqual {
 	return obj
 }
 
-// QueryArtifacts queries the artifacts edge of a HashEqual.
-func (c *HashEqualClient) QueryArtifacts(he *HashEqual) *ArtifactQuery {
+// QueryArtifactA queries the artifact_a edge of a HashEqual.
+func (c *HashEqualClient) QueryArtifactA(he *HashEqual) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := he.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hashequal.Table, hashequal.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, hashequal.ArtifactsTable, hashequal.ArtifactsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, hashequal.ArtifactATable, hashequal.ArtifactAColumn),
+		)
+		fromV = sqlgraph.Neighbors(he.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryArtifactB queries the artifact_b edge of a HashEqual.
+func (c *HashEqualClient) QueryArtifactB(he *HashEqual) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := he.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(hashequal.Table, hashequal.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, hashequal.ArtifactBTable, hashequal.ArtifactBColumn),
 		)
 		fromV = sqlgraph.Neighbors(he.driver.Dialect(), step)
 		return fromV, nil
@@ -3261,22 +3293,6 @@ func (c *PackageVersionClient) QuerySbom(pv *PackageVersion) *BillOfMaterialsQue
 	return query
 }
 
-// QueryEqualPackages queries the equal_packages edge of a PackageVersion.
-func (c *PackageVersionClient) QueryEqualPackages(pv *PackageVersion) *PkgEqualQuery {
-	query := (&PkgEqualClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
-			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.EqualPackagesTable, packageversion.EqualPackagesPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryIncludedInSboms queries the included_in_sboms edge of a PackageVersion.
 func (c *PackageVersionClient) QueryIncludedInSboms(pv *PackageVersion) *BillOfMaterialsQuery {
 	query := (&BillOfMaterialsClient{config: c.config}).Query()
@@ -3286,6 +3302,38 @@ func (c *PackageVersionClient) QueryIncludedInSboms(pv *PackageVersion) *BillOfM
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.IncludedInSbomsTable, packageversion.IncludedInSbomsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPkgEqualPkgA queries the pkg_equal_pkg_a edge of a PackageVersion.
+func (c *PackageVersionClient) QueryPkgEqualPkgA(pv *PackageVersion) *PkgEqualQuery {
+	query := (&PkgEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PkgEqualPkgATable, packageversion.PkgEqualPkgAColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPkgEqualPkgB queries the pkg_equal_pkg_b edge of a PackageVersion.
+func (c *PackageVersionClient) QueryPkgEqualPkgB(pv *PackageVersion) *PkgEqualQuery {
+	query := (&PkgEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PkgEqualPkgBTable, packageversion.PkgEqualPkgBColumn),
 		)
 		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
 		return fromV, nil
@@ -3426,15 +3474,31 @@ func (c *PkgEqualClient) GetX(ctx context.Context, id uuid.UUID) *PkgEqual {
 	return obj
 }
 
-// QueryPackages queries the packages edge of a PkgEqual.
-func (c *PkgEqualClient) QueryPackages(pe *PkgEqual) *PackageVersionQuery {
+// QueryPackageA queries the package_a edge of a PkgEqual.
+func (c *PkgEqualClient) QueryPackageA(pe *PkgEqual) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pe.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, pkgequal.PackagesTable, pkgequal.PackagesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageATable, pkgequal.PackageAColumn),
+		)
+		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPackageB queries the package_b edge of a PkgEqual.
+func (c *PkgEqualClient) QueryPackageB(pe *PkgEqual) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageBTable, pkgequal.PackageBColumn),
 		)
 		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
 		return fromV, nil

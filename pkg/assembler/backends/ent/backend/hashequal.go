@@ -28,6 +28,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -38,25 +39,41 @@ func (b *EntBackend) HashEqual(ctx context.Context, spec *model.HashEqualSpec) (
 		return nil, nil
 	}
 
-	query := b.client.HashEqual.Query().Where(
-		optionalPredicate(spec.ID, IDEQ),
-		optionalPredicate(spec.Origin, hashequal.OriginEQ),
-		optionalPredicate(spec.Collector, hashequal.CollectorEQ),
-		optionalPredicate(spec.Justification, hashequal.JustificationEQ),
-	)
-
-	for _, art := range spec.Artifacts {
-		query.Where(hashequal.HasArtifactsWith(artifactQueryPredicates(art)))
+	if len(spec.Artifacts) > 2 {
+		return nil, fmt.Errorf("too many artifacts specified in hash equal filter")
 	}
 
-	records, err := query.
-		WithArtifacts().
+	records, err := b.client.HashEqual.Query().
+		Where(hashEqualQueryPredicates(spec)).
+		WithArtifactA().
+		WithArtifactB().
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return collect(records, toModelHashEqual), nil
+}
+
+func hashEqualQueryPredicates(spec *model.HashEqualSpec) predicate.HashEqual {
+	if spec == nil {
+		return NoOpSelector()
+	}
+	predicates := []predicate.HashEqual{
+		optionalPredicate(spec.ID, IDEQ),
+		optionalPredicate(spec.Origin, hashequal.OriginEQ),
+		optionalPredicate(spec.Collector, hashequal.CollectorEQ),
+		optionalPredicate(spec.Justification, hashequal.JustificationEQ),
+	}
+
+	if len(spec.Artifacts) == 1 {
+		predicates = append(predicates, hashequal.Or(hashequal.HasArtifactAWith(artifactQueryPredicates(spec.Artifacts[0])), hashequal.HasArtifactBWith(artifactQueryPredicates(spec.Artifacts[0]))))
+	} else if len(spec.Artifacts) == 2 {
+		predicates = append(predicates, hashequal.Or(hashequal.HasArtifactAWith(artifactQueryPredicates(spec.Artifacts[0])), hashequal.HasArtifactBWith(artifactQueryPredicates(spec.Artifacts[0]))))
+		predicates = append(predicates, hashequal.Or(hashequal.HasArtifactAWith(artifactQueryPredicates(spec.Artifacts[1])), hashequal.HasArtifactBWith(artifactQueryPredicates(spec.Artifacts[1]))))
+	}
+
+	return hashequal.And(predicates...)
 }
 
 func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.IDorArtifactInput, equalArtifact model.IDorArtifactInput, spec model.HashEqualInputSpec) (string, error) {
@@ -92,6 +109,8 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
+		hashequal.FieldArtID,
+		hashequal.FieldEqualArtID,
 		hashequal.FieldArtifactsHash,
 		hashequal.FieldOrigin,
 		hashequal.FieldCollector,
@@ -135,6 +154,11 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		return nil, fmt.Errorf("artifactB must be specified for hashEqual")
 	}
 
+	hashEqualCreate := tx.HashEqual.Create().
+		SetJustification(he.Justification).
+		SetOrigin(he.Origin).
+		SetCollector(he.Collector)
+
 	if artifactA.ArtifactID == nil {
 		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*artifactA.ArtifactInput)).Only(ctx)
 		if err != nil {
@@ -167,20 +191,17 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		sortedArtIDs = append(sortedArtIDs, artID)
 	}
 
+	hashEqualCreate.SetArtifactAID(sortedArtIDs[0])
+	hashEqualCreate.SetArtifactBID(sortedArtIDs[1])
+
 	sortedArtifactHash := hashArtifacts(sortedArtifacts)
+	hashEqualCreate.SetArtifactsHash(sortedArtifactHash)
 
 	hashEqualID, err := guacHashEqualKey(sortedArtifactHash, he)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create hashEqual uuid with error: %w", err)
 	}
-
-	hashEqualCreate := tx.HashEqual.Create().
-		SetID(*hashEqualID).
-		AddArtifactIDs(sortedArtIDs...).
-		SetArtifactsHash(sortedArtifactHash).
-		SetJustification(he.Justification).
-		SetOrigin(he.Origin).
-		SetCollector(he.Collector)
+	hashEqualCreate.SetID(*hashEqualID)
 
 	return hashEqualCreate, nil
 }
@@ -195,6 +216,8 @@ func upsertHashEqual(ctx context.Context, tx *ent.Tx, artifactA model.IDorArtifa
 	if id, err := hashEqualCreate.
 		OnConflict(
 			sql.ConflictColumns(
+				hashequal.FieldArtID,
+				hashequal.FieldEqualArtID,
 				hashequal.FieldArtifactsHash,
 				hashequal.FieldOrigin,
 				hashequal.FieldCollector,
@@ -225,9 +248,12 @@ func hashArtifacts(slc []model.IDorArtifactInput) string {
 }
 
 func toModelHashEqual(record *ent.HashEqual) *model.HashEqual {
+
+	artifacts := []*ent.Artifact{record.Edges.ArtifactA, record.Edges.ArtifactB}
+
 	return &model.HashEqual{
 		ID:            record.ID.String(),
-		Artifacts:     collect(record.Edges.Artifacts, toModelArtifact),
+		Artifacts:     collect(artifacts, toModelArtifact),
 		Justification: record.Justification,
 		Collector:     record.Collector,
 		Origin:        record.Origin,

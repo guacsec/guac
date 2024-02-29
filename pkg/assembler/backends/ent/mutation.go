@@ -91,9 +91,12 @@ type ArtifactMutation struct {
 	attestations             map[uuid.UUID]struct{}
 	removedattestations      map[uuid.UUID]struct{}
 	clearedattestations      bool
-	same                     map[uuid.UUID]struct{}
-	removedsame              map[uuid.UUID]struct{}
-	clearedsame              bool
+	hash_equal_art_a         map[uuid.UUID]struct{}
+	removedhash_equal_art_a  map[uuid.UUID]struct{}
+	clearedhash_equal_art_a  bool
+	hash_equal_art_b         map[uuid.UUID]struct{}
+	removedhash_equal_art_b  map[uuid.UUID]struct{}
+	clearedhash_equal_art_b  bool
 	included_in_sboms        map[uuid.UUID]struct{}
 	removedincluded_in_sboms map[uuid.UUID]struct{}
 	clearedincluded_in_sboms bool
@@ -440,58 +443,112 @@ func (m *ArtifactMutation) ResetAttestations() {
 	m.removedattestations = nil
 }
 
-// AddSameIDs adds the "same" edge to the HashEqual entity by ids.
-func (m *ArtifactMutation) AddSameIDs(ids ...uuid.UUID) {
-	if m.same == nil {
-		m.same = make(map[uuid.UUID]struct{})
+// AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by ids.
+func (m *ArtifactMutation) AddHashEqualArtAIDs(ids ...uuid.UUID) {
+	if m.hash_equal_art_a == nil {
+		m.hash_equal_art_a = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.same[ids[i]] = struct{}{}
+		m.hash_equal_art_a[ids[i]] = struct{}{}
 	}
 }
 
-// ClearSame clears the "same" edge to the HashEqual entity.
-func (m *ArtifactMutation) ClearSame() {
-	m.clearedsame = true
+// ClearHashEqualArtA clears the "hash_equal_art_a" edge to the HashEqual entity.
+func (m *ArtifactMutation) ClearHashEqualArtA() {
+	m.clearedhash_equal_art_a = true
 }
 
-// SameCleared reports if the "same" edge to the HashEqual entity was cleared.
-func (m *ArtifactMutation) SameCleared() bool {
-	return m.clearedsame
+// HashEqualArtACleared reports if the "hash_equal_art_a" edge to the HashEqual entity was cleared.
+func (m *ArtifactMutation) HashEqualArtACleared() bool {
+	return m.clearedhash_equal_art_a
 }
 
-// RemoveSameIDs removes the "same" edge to the HashEqual entity by IDs.
-func (m *ArtifactMutation) RemoveSameIDs(ids ...uuid.UUID) {
-	if m.removedsame == nil {
-		m.removedsame = make(map[uuid.UUID]struct{})
+// RemoveHashEqualArtAIDs removes the "hash_equal_art_a" edge to the HashEqual entity by IDs.
+func (m *ArtifactMutation) RemoveHashEqualArtAIDs(ids ...uuid.UUID) {
+	if m.removedhash_equal_art_a == nil {
+		m.removedhash_equal_art_a = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.same, ids[i])
-		m.removedsame[ids[i]] = struct{}{}
+		delete(m.hash_equal_art_a, ids[i])
+		m.removedhash_equal_art_a[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedSame returns the removed IDs of the "same" edge to the HashEqual entity.
-func (m *ArtifactMutation) RemovedSameIDs() (ids []uuid.UUID) {
-	for id := range m.removedsame {
+// RemovedHashEqualArtA returns the removed IDs of the "hash_equal_art_a" edge to the HashEqual entity.
+func (m *ArtifactMutation) RemovedHashEqualArtAIDs() (ids []uuid.UUID) {
+	for id := range m.removedhash_equal_art_a {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// SameIDs returns the "same" edge IDs in the mutation.
-func (m *ArtifactMutation) SameIDs() (ids []uuid.UUID) {
-	for id := range m.same {
+// HashEqualArtAIDs returns the "hash_equal_art_a" edge IDs in the mutation.
+func (m *ArtifactMutation) HashEqualArtAIDs() (ids []uuid.UUID) {
+	for id := range m.hash_equal_art_a {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetSame resets all changes to the "same" edge.
-func (m *ArtifactMutation) ResetSame() {
-	m.same = nil
-	m.clearedsame = false
-	m.removedsame = nil
+// ResetHashEqualArtA resets all changes to the "hash_equal_art_a" edge.
+func (m *ArtifactMutation) ResetHashEqualArtA() {
+	m.hash_equal_art_a = nil
+	m.clearedhash_equal_art_a = false
+	m.removedhash_equal_art_a = nil
+}
+
+// AddHashEqualArtBIDs adds the "hash_equal_art_b" edge to the HashEqual entity by ids.
+func (m *ArtifactMutation) AddHashEqualArtBIDs(ids ...uuid.UUID) {
+	if m.hash_equal_art_b == nil {
+		m.hash_equal_art_b = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.hash_equal_art_b[ids[i]] = struct{}{}
+	}
+}
+
+// ClearHashEqualArtB clears the "hash_equal_art_b" edge to the HashEqual entity.
+func (m *ArtifactMutation) ClearHashEqualArtB() {
+	m.clearedhash_equal_art_b = true
+}
+
+// HashEqualArtBCleared reports if the "hash_equal_art_b" edge to the HashEqual entity was cleared.
+func (m *ArtifactMutation) HashEqualArtBCleared() bool {
+	return m.clearedhash_equal_art_b
+}
+
+// RemoveHashEqualArtBIDs removes the "hash_equal_art_b" edge to the HashEqual entity by IDs.
+func (m *ArtifactMutation) RemoveHashEqualArtBIDs(ids ...uuid.UUID) {
+	if m.removedhash_equal_art_b == nil {
+		m.removedhash_equal_art_b = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.hash_equal_art_b, ids[i])
+		m.removedhash_equal_art_b[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedHashEqualArtB returns the removed IDs of the "hash_equal_art_b" edge to the HashEqual entity.
+func (m *ArtifactMutation) RemovedHashEqualArtBIDs() (ids []uuid.UUID) {
+	for id := range m.removedhash_equal_art_b {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// HashEqualArtBIDs returns the "hash_equal_art_b" edge IDs in the mutation.
+func (m *ArtifactMutation) HashEqualArtBIDs() (ids []uuid.UUID) {
+	for id := range m.hash_equal_art_b {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetHashEqualArtB resets all changes to the "hash_equal_art_b" edge.
+func (m *ArtifactMutation) ResetHashEqualArtB() {
+	m.hash_equal_art_b = nil
+	m.clearedhash_equal_art_b = false
+	m.removedhash_equal_art_b = nil
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
@@ -698,7 +755,7 @@ func (m *ArtifactMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ArtifactMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.occurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -708,8 +765,11 @@ func (m *ArtifactMutation) AddedEdges() []string {
 	if m.attestations != nil {
 		edges = append(edges, artifact.EdgeAttestations)
 	}
-	if m.same != nil {
-		edges = append(edges, artifact.EdgeSame)
+	if m.hash_equal_art_a != nil {
+		edges = append(edges, artifact.EdgeHashEqualArtA)
+	}
+	if m.hash_equal_art_b != nil {
+		edges = append(edges, artifact.EdgeHashEqualArtB)
 	}
 	if m.included_in_sboms != nil {
 		edges = append(edges, artifact.EdgeIncludedInSboms)
@@ -739,9 +799,15 @@ func (m *ArtifactMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case artifact.EdgeSame:
-		ids := make([]ent.Value, 0, len(m.same))
-		for id := range m.same {
+	case artifact.EdgeHashEqualArtA:
+		ids := make([]ent.Value, 0, len(m.hash_equal_art_a))
+		for id := range m.hash_equal_art_a {
+			ids = append(ids, id)
+		}
+		return ids
+	case artifact.EdgeHashEqualArtB:
+		ids := make([]ent.Value, 0, len(m.hash_equal_art_b))
+		for id := range m.hash_equal_art_b {
 			ids = append(ids, id)
 		}
 		return ids
@@ -757,7 +823,7 @@ func (m *ArtifactMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ArtifactMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.removedoccurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -767,8 +833,11 @@ func (m *ArtifactMutation) RemovedEdges() []string {
 	if m.removedattestations != nil {
 		edges = append(edges, artifact.EdgeAttestations)
 	}
-	if m.removedsame != nil {
-		edges = append(edges, artifact.EdgeSame)
+	if m.removedhash_equal_art_a != nil {
+		edges = append(edges, artifact.EdgeHashEqualArtA)
+	}
+	if m.removedhash_equal_art_b != nil {
+		edges = append(edges, artifact.EdgeHashEqualArtB)
 	}
 	if m.removedincluded_in_sboms != nil {
 		edges = append(edges, artifact.EdgeIncludedInSboms)
@@ -798,9 +867,15 @@ func (m *ArtifactMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case artifact.EdgeSame:
-		ids := make([]ent.Value, 0, len(m.removedsame))
-		for id := range m.removedsame {
+	case artifact.EdgeHashEqualArtA:
+		ids := make([]ent.Value, 0, len(m.removedhash_equal_art_a))
+		for id := range m.removedhash_equal_art_a {
+			ids = append(ids, id)
+		}
+		return ids
+	case artifact.EdgeHashEqualArtB:
+		ids := make([]ent.Value, 0, len(m.removedhash_equal_art_b))
+		for id := range m.removedhash_equal_art_b {
 			ids = append(ids, id)
 		}
 		return ids
@@ -816,7 +891,7 @@ func (m *ArtifactMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ArtifactMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.clearedoccurrences {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -826,8 +901,11 @@ func (m *ArtifactMutation) ClearedEdges() []string {
 	if m.clearedattestations {
 		edges = append(edges, artifact.EdgeAttestations)
 	}
-	if m.clearedsame {
-		edges = append(edges, artifact.EdgeSame)
+	if m.clearedhash_equal_art_a {
+		edges = append(edges, artifact.EdgeHashEqualArtA)
+	}
+	if m.clearedhash_equal_art_b {
+		edges = append(edges, artifact.EdgeHashEqualArtB)
 	}
 	if m.clearedincluded_in_sboms {
 		edges = append(edges, artifact.EdgeIncludedInSboms)
@@ -845,8 +923,10 @@ func (m *ArtifactMutation) EdgeCleared(name string) bool {
 		return m.clearedsbom
 	case artifact.EdgeAttestations:
 		return m.clearedattestations
-	case artifact.EdgeSame:
-		return m.clearedsame
+	case artifact.EdgeHashEqualArtA:
+		return m.clearedhash_equal_art_a
+	case artifact.EdgeHashEqualArtB:
+		return m.clearedhash_equal_art_b
 	case artifact.EdgeIncludedInSboms:
 		return m.clearedincluded_in_sboms
 	}
@@ -874,8 +954,11 @@ func (m *ArtifactMutation) ResetEdge(name string) error {
 	case artifact.EdgeAttestations:
 		m.ResetAttestations()
 		return nil
-	case artifact.EdgeSame:
-		m.ResetSame()
+	case artifact.EdgeHashEqualArtA:
+		m.ResetHashEqualArtA()
+		return nil
+	case artifact.EdgeHashEqualArtB:
+		m.ResetHashEqualArtB()
 		return nil
 	case artifact.EdgeIncludedInSboms:
 		m.ResetIncludedInSboms()
@@ -10675,20 +10758,21 @@ func (m *HasSourceAtMutation) ResetEdge(name string) error {
 // HashEqualMutation represents an operation that mutates the HashEqual nodes in the graph.
 type HashEqualMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *uuid.UUID
-	origin           *string
-	collector        *string
-	justification    *string
-	artifacts_hash   *string
-	clearedFields    map[string]struct{}
-	artifacts        map[uuid.UUID]struct{}
-	removedartifacts map[uuid.UUID]struct{}
-	clearedartifacts bool
-	done             bool
-	oldValue         func(context.Context) (*HashEqual, error)
-	predicates       []predicate.HashEqual
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	origin            *string
+	collector         *string
+	justification     *string
+	artifacts_hash    *string
+	clearedFields     map[string]struct{}
+	artifact_a        *uuid.UUID
+	clearedartifact_a bool
+	artifact_b        *uuid.UUID
+	clearedartifact_b bool
+	done              bool
+	oldValue          func(context.Context) (*HashEqual, error)
+	predicates        []predicate.HashEqual
 }
 
 var _ ent.Mutation = (*HashEqualMutation)(nil)
@@ -10793,6 +10877,78 @@ func (m *HashEqualMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetArtID sets the "art_id" field.
+func (m *HashEqualMutation) SetArtID(u uuid.UUID) {
+	m.artifact_a = &u
+}
+
+// ArtID returns the value of the "art_id" field in the mutation.
+func (m *HashEqualMutation) ArtID() (r uuid.UUID, exists bool) {
+	v := m.artifact_a
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldArtID returns the old "art_id" field's value of the HashEqual entity.
+// If the HashEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HashEqualMutation) OldArtID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldArtID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldArtID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldArtID: %w", err)
+	}
+	return oldValue.ArtID, nil
+}
+
+// ResetArtID resets all changes to the "art_id" field.
+func (m *HashEqualMutation) ResetArtID() {
+	m.artifact_a = nil
+}
+
+// SetEqualArtID sets the "equal_art_id" field.
+func (m *HashEqualMutation) SetEqualArtID(u uuid.UUID) {
+	m.artifact_b = &u
+}
+
+// EqualArtID returns the value of the "equal_art_id" field in the mutation.
+func (m *HashEqualMutation) EqualArtID() (r uuid.UUID, exists bool) {
+	v := m.artifact_b
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEqualArtID returns the old "equal_art_id" field's value of the HashEqual entity.
+// If the HashEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HashEqualMutation) OldEqualArtID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEqualArtID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEqualArtID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEqualArtID: %w", err)
+	}
+	return oldValue.EqualArtID, nil
+}
+
+// ResetEqualArtID resets all changes to the "equal_art_id" field.
+func (m *HashEqualMutation) ResetEqualArtID() {
+	m.artifact_b = nil
 }
 
 // SetOrigin sets the "origin" field.
@@ -10939,58 +11095,84 @@ func (m *HashEqualMutation) ResetArtifactsHash() {
 	m.artifacts_hash = nil
 }
 
-// AddArtifactIDs adds the "artifacts" edge to the Artifact entity by ids.
-func (m *HashEqualMutation) AddArtifactIDs(ids ...uuid.UUID) {
-	if m.artifacts == nil {
-		m.artifacts = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.artifacts[ids[i]] = struct{}{}
-	}
+// SetArtifactAID sets the "artifact_a" edge to the Artifact entity by id.
+func (m *HashEqualMutation) SetArtifactAID(id uuid.UUID) {
+	m.artifact_a = &id
 }
 
-// ClearArtifacts clears the "artifacts" edge to the Artifact entity.
-func (m *HashEqualMutation) ClearArtifacts() {
-	m.clearedartifacts = true
+// ClearArtifactA clears the "artifact_a" edge to the Artifact entity.
+func (m *HashEqualMutation) ClearArtifactA() {
+	m.clearedartifact_a = true
+	m.clearedFields[hashequal.FieldArtID] = struct{}{}
 }
 
-// ArtifactsCleared reports if the "artifacts" edge to the Artifact entity was cleared.
-func (m *HashEqualMutation) ArtifactsCleared() bool {
-	return m.clearedartifacts
+// ArtifactACleared reports if the "artifact_a" edge to the Artifact entity was cleared.
+func (m *HashEqualMutation) ArtifactACleared() bool {
+	return m.clearedartifact_a
 }
 
-// RemoveArtifactIDs removes the "artifacts" edge to the Artifact entity by IDs.
-func (m *HashEqualMutation) RemoveArtifactIDs(ids ...uuid.UUID) {
-	if m.removedartifacts == nil {
-		m.removedartifacts = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.artifacts, ids[i])
-		m.removedartifacts[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedArtifacts returns the removed IDs of the "artifacts" edge to the Artifact entity.
-func (m *HashEqualMutation) RemovedArtifactsIDs() (ids []uuid.UUID) {
-	for id := range m.removedartifacts {
-		ids = append(ids, id)
+// ArtifactAID returns the "artifact_a" edge ID in the mutation.
+func (m *HashEqualMutation) ArtifactAID() (id uuid.UUID, exists bool) {
+	if m.artifact_a != nil {
+		return *m.artifact_a, true
 	}
 	return
 }
 
-// ArtifactsIDs returns the "artifacts" edge IDs in the mutation.
-func (m *HashEqualMutation) ArtifactsIDs() (ids []uuid.UUID) {
-	for id := range m.artifacts {
-		ids = append(ids, id)
+// ArtifactAIDs returns the "artifact_a" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ArtifactAID instead. It exists only for internal usage by the builders.
+func (m *HashEqualMutation) ArtifactAIDs() (ids []uuid.UUID) {
+	if id := m.artifact_a; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetArtifacts resets all changes to the "artifacts" edge.
-func (m *HashEqualMutation) ResetArtifacts() {
-	m.artifacts = nil
-	m.clearedartifacts = false
-	m.removedartifacts = nil
+// ResetArtifactA resets all changes to the "artifact_a" edge.
+func (m *HashEqualMutation) ResetArtifactA() {
+	m.artifact_a = nil
+	m.clearedartifact_a = false
+}
+
+// SetArtifactBID sets the "artifact_b" edge to the Artifact entity by id.
+func (m *HashEqualMutation) SetArtifactBID(id uuid.UUID) {
+	m.artifact_b = &id
+}
+
+// ClearArtifactB clears the "artifact_b" edge to the Artifact entity.
+func (m *HashEqualMutation) ClearArtifactB() {
+	m.clearedartifact_b = true
+	m.clearedFields[hashequal.FieldEqualArtID] = struct{}{}
+}
+
+// ArtifactBCleared reports if the "artifact_b" edge to the Artifact entity was cleared.
+func (m *HashEqualMutation) ArtifactBCleared() bool {
+	return m.clearedartifact_b
+}
+
+// ArtifactBID returns the "artifact_b" edge ID in the mutation.
+func (m *HashEqualMutation) ArtifactBID() (id uuid.UUID, exists bool) {
+	if m.artifact_b != nil {
+		return *m.artifact_b, true
+	}
+	return
+}
+
+// ArtifactBIDs returns the "artifact_b" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ArtifactBID instead. It exists only for internal usage by the builders.
+func (m *HashEqualMutation) ArtifactBIDs() (ids []uuid.UUID) {
+	if id := m.artifact_b; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetArtifactB resets all changes to the "artifact_b" edge.
+func (m *HashEqualMutation) ResetArtifactB() {
+	m.artifact_b = nil
+	m.clearedartifact_b = false
 }
 
 // Where appends a list predicates to the HashEqualMutation builder.
@@ -11027,7 +11209,13 @@ func (m *HashEqualMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *HashEqualMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
+	if m.artifact_a != nil {
+		fields = append(fields, hashequal.FieldArtID)
+	}
+	if m.artifact_b != nil {
+		fields = append(fields, hashequal.FieldEqualArtID)
+	}
 	if m.origin != nil {
 		fields = append(fields, hashequal.FieldOrigin)
 	}
@@ -11048,6 +11236,10 @@ func (m *HashEqualMutation) Fields() []string {
 // schema.
 func (m *HashEqualMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case hashequal.FieldArtID:
+		return m.ArtID()
+	case hashequal.FieldEqualArtID:
+		return m.EqualArtID()
 	case hashequal.FieldOrigin:
 		return m.Origin()
 	case hashequal.FieldCollector:
@@ -11065,6 +11257,10 @@ func (m *HashEqualMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *HashEqualMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case hashequal.FieldArtID:
+		return m.OldArtID(ctx)
+	case hashequal.FieldEqualArtID:
+		return m.OldEqualArtID(ctx)
 	case hashequal.FieldOrigin:
 		return m.OldOrigin(ctx)
 	case hashequal.FieldCollector:
@@ -11082,6 +11278,20 @@ func (m *HashEqualMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *HashEqualMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case hashequal.FieldArtID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetArtID(v)
+		return nil
+	case hashequal.FieldEqualArtID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEqualArtID(v)
+		return nil
 	case hashequal.FieldOrigin:
 		v, ok := value.(string)
 		if !ok {
@@ -11159,6 +11369,12 @@ func (m *HashEqualMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *HashEqualMutation) ResetField(name string) error {
 	switch name {
+	case hashequal.FieldArtID:
+		m.ResetArtID()
+		return nil
+	case hashequal.FieldEqualArtID:
+		m.ResetEqualArtID()
+		return nil
 	case hashequal.FieldOrigin:
 		m.ResetOrigin()
 		return nil
@@ -11177,9 +11393,12 @@ func (m *HashEqualMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *HashEqualMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.artifacts != nil {
-		edges = append(edges, hashequal.EdgeArtifacts)
+	edges := make([]string, 0, 2)
+	if m.artifact_a != nil {
+		edges = append(edges, hashequal.EdgeArtifactA)
+	}
+	if m.artifact_b != nil {
+		edges = append(edges, hashequal.EdgeArtifactB)
 	}
 	return edges
 }
@@ -11188,44 +11407,38 @@ func (m *HashEqualMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *HashEqualMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case hashequal.EdgeArtifacts:
-		ids := make([]ent.Value, 0, len(m.artifacts))
-		for id := range m.artifacts {
-			ids = append(ids, id)
+	case hashequal.EdgeArtifactA:
+		if id := m.artifact_a; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
+	case hashequal.EdgeArtifactB:
+		if id := m.artifact_b; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *HashEqualMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedartifacts != nil {
-		edges = append(edges, hashequal.EdgeArtifacts)
-	}
+	edges := make([]string, 0, 2)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *HashEqualMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case hashequal.EdgeArtifacts:
-		ids := make([]ent.Value, 0, len(m.removedartifacts))
-		for id := range m.removedartifacts {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *HashEqualMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedartifacts {
-		edges = append(edges, hashequal.EdgeArtifacts)
+	edges := make([]string, 0, 2)
+	if m.clearedartifact_a {
+		edges = append(edges, hashequal.EdgeArtifactA)
+	}
+	if m.clearedartifact_b {
+		edges = append(edges, hashequal.EdgeArtifactB)
 	}
 	return edges
 }
@@ -11234,8 +11447,10 @@ func (m *HashEqualMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *HashEqualMutation) EdgeCleared(name string) bool {
 	switch name {
-	case hashequal.EdgeArtifacts:
-		return m.clearedartifacts
+	case hashequal.EdgeArtifactA:
+		return m.clearedartifact_a
+	case hashequal.EdgeArtifactB:
+		return m.clearedartifact_b
 	}
 	return false
 }
@@ -11244,6 +11459,12 @@ func (m *HashEqualMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *HashEqualMutation) ClearEdge(name string) error {
 	switch name {
+	case hashequal.EdgeArtifactA:
+		m.ClearArtifactA()
+		return nil
+	case hashequal.EdgeArtifactB:
+		m.ClearArtifactB()
+		return nil
 	}
 	return fmt.Errorf("unknown HashEqual unique edge %s", name)
 }
@@ -11252,8 +11473,11 @@ func (m *HashEqualMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *HashEqualMutation) ResetEdge(name string) error {
 	switch name {
-	case hashequal.EdgeArtifacts:
-		m.ResetArtifacts()
+	case hashequal.EdgeArtifactA:
+		m.ResetArtifactA()
+		return nil
+	case hashequal.EdgeArtifactB:
+		m.ResetArtifactB()
 		return nil
 	}
 	return fmt.Errorf("unknown HashEqual edge %s", name)
@@ -13343,12 +13567,15 @@ type PackageVersionMutation struct {
 	sbom                     map[uuid.UUID]struct{}
 	removedsbom              map[uuid.UUID]struct{}
 	clearedsbom              bool
-	equal_packages           map[uuid.UUID]struct{}
-	removedequal_packages    map[uuid.UUID]struct{}
-	clearedequal_packages    bool
 	included_in_sboms        map[uuid.UUID]struct{}
 	removedincluded_in_sboms map[uuid.UUID]struct{}
 	clearedincluded_in_sboms bool
+	pkg_equal_pkg_a          map[uuid.UUID]struct{}
+	removedpkg_equal_pkg_a   map[uuid.UUID]struct{}
+	clearedpkg_equal_pkg_a   bool
+	pkg_equal_pkg_b          map[uuid.UUID]struct{}
+	removedpkg_equal_pkg_b   map[uuid.UUID]struct{}
+	clearedpkg_equal_pkg_b   bool
 	done                     bool
 	oldValue                 func(context.Context) (*PackageVersion, error)
 	predicates               []predicate.PackageVersion
@@ -13802,60 +14029,6 @@ func (m *PackageVersionMutation) ResetSbom() {
 	m.removedsbom = nil
 }
 
-// AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by ids.
-func (m *PackageVersionMutation) AddEqualPackageIDs(ids ...uuid.UUID) {
-	if m.equal_packages == nil {
-		m.equal_packages = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.equal_packages[ids[i]] = struct{}{}
-	}
-}
-
-// ClearEqualPackages clears the "equal_packages" edge to the PkgEqual entity.
-func (m *PackageVersionMutation) ClearEqualPackages() {
-	m.clearedequal_packages = true
-}
-
-// EqualPackagesCleared reports if the "equal_packages" edge to the PkgEqual entity was cleared.
-func (m *PackageVersionMutation) EqualPackagesCleared() bool {
-	return m.clearedequal_packages
-}
-
-// RemoveEqualPackageIDs removes the "equal_packages" edge to the PkgEqual entity by IDs.
-func (m *PackageVersionMutation) RemoveEqualPackageIDs(ids ...uuid.UUID) {
-	if m.removedequal_packages == nil {
-		m.removedequal_packages = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.equal_packages, ids[i])
-		m.removedequal_packages[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedEqualPackages returns the removed IDs of the "equal_packages" edge to the PkgEqual entity.
-func (m *PackageVersionMutation) RemovedEqualPackagesIDs() (ids []uuid.UUID) {
-	for id := range m.removedequal_packages {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// EqualPackagesIDs returns the "equal_packages" edge IDs in the mutation.
-func (m *PackageVersionMutation) EqualPackagesIDs() (ids []uuid.UUID) {
-	for id := range m.equal_packages {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetEqualPackages resets all changes to the "equal_packages" edge.
-func (m *PackageVersionMutation) ResetEqualPackages() {
-	m.equal_packages = nil
-	m.clearedequal_packages = false
-	m.removedequal_packages = nil
-}
-
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
 func (m *PackageVersionMutation) AddIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.included_in_sboms == nil {
@@ -13908,6 +14081,114 @@ func (m *PackageVersionMutation) ResetIncludedInSboms() {
 	m.included_in_sboms = nil
 	m.clearedincluded_in_sboms = false
 	m.removedincluded_in_sboms = nil
+}
+
+// AddPkgEqualPkgAIDs adds the "pkg_equal_pkg_a" edge to the PkgEqual entity by ids.
+func (m *PackageVersionMutation) AddPkgEqualPkgAIDs(ids ...uuid.UUID) {
+	if m.pkg_equal_pkg_a == nil {
+		m.pkg_equal_pkg_a = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.pkg_equal_pkg_a[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPkgEqualPkgA clears the "pkg_equal_pkg_a" edge to the PkgEqual entity.
+func (m *PackageVersionMutation) ClearPkgEqualPkgA() {
+	m.clearedpkg_equal_pkg_a = true
+}
+
+// PkgEqualPkgACleared reports if the "pkg_equal_pkg_a" edge to the PkgEqual entity was cleared.
+func (m *PackageVersionMutation) PkgEqualPkgACleared() bool {
+	return m.clearedpkg_equal_pkg_a
+}
+
+// RemovePkgEqualPkgAIDs removes the "pkg_equal_pkg_a" edge to the PkgEqual entity by IDs.
+func (m *PackageVersionMutation) RemovePkgEqualPkgAIDs(ids ...uuid.UUID) {
+	if m.removedpkg_equal_pkg_a == nil {
+		m.removedpkg_equal_pkg_a = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.pkg_equal_pkg_a, ids[i])
+		m.removedpkg_equal_pkg_a[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPkgEqualPkgA returns the removed IDs of the "pkg_equal_pkg_a" edge to the PkgEqual entity.
+func (m *PackageVersionMutation) RemovedPkgEqualPkgAIDs() (ids []uuid.UUID) {
+	for id := range m.removedpkg_equal_pkg_a {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PkgEqualPkgAIDs returns the "pkg_equal_pkg_a" edge IDs in the mutation.
+func (m *PackageVersionMutation) PkgEqualPkgAIDs() (ids []uuid.UUID) {
+	for id := range m.pkg_equal_pkg_a {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPkgEqualPkgA resets all changes to the "pkg_equal_pkg_a" edge.
+func (m *PackageVersionMutation) ResetPkgEqualPkgA() {
+	m.pkg_equal_pkg_a = nil
+	m.clearedpkg_equal_pkg_a = false
+	m.removedpkg_equal_pkg_a = nil
+}
+
+// AddPkgEqualPkgBIDs adds the "pkg_equal_pkg_b" edge to the PkgEqual entity by ids.
+func (m *PackageVersionMutation) AddPkgEqualPkgBIDs(ids ...uuid.UUID) {
+	if m.pkg_equal_pkg_b == nil {
+		m.pkg_equal_pkg_b = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.pkg_equal_pkg_b[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPkgEqualPkgB clears the "pkg_equal_pkg_b" edge to the PkgEqual entity.
+func (m *PackageVersionMutation) ClearPkgEqualPkgB() {
+	m.clearedpkg_equal_pkg_b = true
+}
+
+// PkgEqualPkgBCleared reports if the "pkg_equal_pkg_b" edge to the PkgEqual entity was cleared.
+func (m *PackageVersionMutation) PkgEqualPkgBCleared() bool {
+	return m.clearedpkg_equal_pkg_b
+}
+
+// RemovePkgEqualPkgBIDs removes the "pkg_equal_pkg_b" edge to the PkgEqual entity by IDs.
+func (m *PackageVersionMutation) RemovePkgEqualPkgBIDs(ids ...uuid.UUID) {
+	if m.removedpkg_equal_pkg_b == nil {
+		m.removedpkg_equal_pkg_b = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.pkg_equal_pkg_b, ids[i])
+		m.removedpkg_equal_pkg_b[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPkgEqualPkgB returns the removed IDs of the "pkg_equal_pkg_b" edge to the PkgEqual entity.
+func (m *PackageVersionMutation) RemovedPkgEqualPkgBIDs() (ids []uuid.UUID) {
+	for id := range m.removedpkg_equal_pkg_b {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PkgEqualPkgBIDs returns the "pkg_equal_pkg_b" edge IDs in the mutation.
+func (m *PackageVersionMutation) PkgEqualPkgBIDs() (ids []uuid.UUID) {
+	for id := range m.pkg_equal_pkg_b {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPkgEqualPkgB resets all changes to the "pkg_equal_pkg_b" edge.
+func (m *PackageVersionMutation) ResetPkgEqualPkgB() {
+	m.pkg_equal_pkg_b = nil
+	m.clearedpkg_equal_pkg_b = false
+	m.removedpkg_equal_pkg_b = nil
 }
 
 // Where appends a list predicates to the PackageVersionMutation builder.
@@ -14120,7 +14401,7 @@ func (m *PackageVersionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PackageVersionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.name != nil {
 		edges = append(edges, packageversion.EdgeName)
 	}
@@ -14130,11 +14411,14 @@ func (m *PackageVersionMutation) AddedEdges() []string {
 	if m.sbom != nil {
 		edges = append(edges, packageversion.EdgeSbom)
 	}
-	if m.equal_packages != nil {
-		edges = append(edges, packageversion.EdgeEqualPackages)
-	}
 	if m.included_in_sboms != nil {
 		edges = append(edges, packageversion.EdgeIncludedInSboms)
+	}
+	if m.pkg_equal_pkg_a != nil {
+		edges = append(edges, packageversion.EdgePkgEqualPkgA)
+	}
+	if m.pkg_equal_pkg_b != nil {
+		edges = append(edges, packageversion.EdgePkgEqualPkgB)
 	}
 	return edges
 }
@@ -14159,15 +14443,21 @@ func (m *PackageVersionMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case packageversion.EdgeEqualPackages:
-		ids := make([]ent.Value, 0, len(m.equal_packages))
-		for id := range m.equal_packages {
-			ids = append(ids, id)
-		}
-		return ids
 	case packageversion.EdgeIncludedInSboms:
 		ids := make([]ent.Value, 0, len(m.included_in_sboms))
 		for id := range m.included_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
+	case packageversion.EdgePkgEqualPkgA:
+		ids := make([]ent.Value, 0, len(m.pkg_equal_pkg_a))
+		for id := range m.pkg_equal_pkg_a {
+			ids = append(ids, id)
+		}
+		return ids
+	case packageversion.EdgePkgEqualPkgB:
+		ids := make([]ent.Value, 0, len(m.pkg_equal_pkg_b))
+		for id := range m.pkg_equal_pkg_b {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14177,18 +14467,21 @@ func (m *PackageVersionMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PackageVersionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.removedoccurrences != nil {
 		edges = append(edges, packageversion.EdgeOccurrences)
 	}
 	if m.removedsbom != nil {
 		edges = append(edges, packageversion.EdgeSbom)
 	}
-	if m.removedequal_packages != nil {
-		edges = append(edges, packageversion.EdgeEqualPackages)
-	}
 	if m.removedincluded_in_sboms != nil {
 		edges = append(edges, packageversion.EdgeIncludedInSboms)
+	}
+	if m.removedpkg_equal_pkg_a != nil {
+		edges = append(edges, packageversion.EdgePkgEqualPkgA)
+	}
+	if m.removedpkg_equal_pkg_b != nil {
+		edges = append(edges, packageversion.EdgePkgEqualPkgB)
 	}
 	return edges
 }
@@ -14209,15 +14502,21 @@ func (m *PackageVersionMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case packageversion.EdgeEqualPackages:
-		ids := make([]ent.Value, 0, len(m.removedequal_packages))
-		for id := range m.removedequal_packages {
-			ids = append(ids, id)
-		}
-		return ids
 	case packageversion.EdgeIncludedInSboms:
 		ids := make([]ent.Value, 0, len(m.removedincluded_in_sboms))
 		for id := range m.removedincluded_in_sboms {
+			ids = append(ids, id)
+		}
+		return ids
+	case packageversion.EdgePkgEqualPkgA:
+		ids := make([]ent.Value, 0, len(m.removedpkg_equal_pkg_a))
+		for id := range m.removedpkg_equal_pkg_a {
+			ids = append(ids, id)
+		}
+		return ids
+	case packageversion.EdgePkgEqualPkgB:
+		ids := make([]ent.Value, 0, len(m.removedpkg_equal_pkg_b))
+		for id := range m.removedpkg_equal_pkg_b {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14227,7 +14526,7 @@ func (m *PackageVersionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PackageVersionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.clearedname {
 		edges = append(edges, packageversion.EdgeName)
 	}
@@ -14237,11 +14536,14 @@ func (m *PackageVersionMutation) ClearedEdges() []string {
 	if m.clearedsbom {
 		edges = append(edges, packageversion.EdgeSbom)
 	}
-	if m.clearedequal_packages {
-		edges = append(edges, packageversion.EdgeEqualPackages)
-	}
 	if m.clearedincluded_in_sboms {
 		edges = append(edges, packageversion.EdgeIncludedInSboms)
+	}
+	if m.clearedpkg_equal_pkg_a {
+		edges = append(edges, packageversion.EdgePkgEqualPkgA)
+	}
+	if m.clearedpkg_equal_pkg_b {
+		edges = append(edges, packageversion.EdgePkgEqualPkgB)
 	}
 	return edges
 }
@@ -14256,10 +14558,12 @@ func (m *PackageVersionMutation) EdgeCleared(name string) bool {
 		return m.clearedoccurrences
 	case packageversion.EdgeSbom:
 		return m.clearedsbom
-	case packageversion.EdgeEqualPackages:
-		return m.clearedequal_packages
 	case packageversion.EdgeIncludedInSboms:
 		return m.clearedincluded_in_sboms
+	case packageversion.EdgePkgEqualPkgA:
+		return m.clearedpkg_equal_pkg_a
+	case packageversion.EdgePkgEqualPkgB:
+		return m.clearedpkg_equal_pkg_b
 	}
 	return false
 }
@@ -14288,11 +14592,14 @@ func (m *PackageVersionMutation) ResetEdge(name string) error {
 	case packageversion.EdgeSbom:
 		m.ResetSbom()
 		return nil
-	case packageversion.EdgeEqualPackages:
-		m.ResetEqualPackages()
-		return nil
 	case packageversion.EdgeIncludedInSboms:
 		m.ResetIncludedInSboms()
+		return nil
+	case packageversion.EdgePkgEqualPkgA:
+		m.ResetPkgEqualPkgA()
+		return nil
+	case packageversion.EdgePkgEqualPkgB:
+		m.ResetPkgEqualPkgB()
 		return nil
 	}
 	return fmt.Errorf("unknown PackageVersion edge %s", name)
@@ -14301,20 +14608,21 @@ func (m *PackageVersionMutation) ResetEdge(name string) error {
 // PkgEqualMutation represents an operation that mutates the PkgEqual nodes in the graph.
 type PkgEqualMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *uuid.UUID
-	origin          *string
-	collector       *string
-	justification   *string
-	packages_hash   *string
-	clearedFields   map[string]struct{}
-	packages        map[uuid.UUID]struct{}
-	removedpackages map[uuid.UUID]struct{}
-	clearedpackages bool
-	done            bool
-	oldValue        func(context.Context) (*PkgEqual, error)
-	predicates      []predicate.PkgEqual
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	origin           *string
+	collector        *string
+	justification    *string
+	packages_hash    *string
+	clearedFields    map[string]struct{}
+	package_a        *uuid.UUID
+	clearedpackage_a bool
+	package_b        *uuid.UUID
+	clearedpackage_b bool
+	done             bool
+	oldValue         func(context.Context) (*PkgEqual, error)
+	predicates       []predicate.PkgEqual
 }
 
 var _ ent.Mutation = (*PkgEqualMutation)(nil)
@@ -14419,6 +14727,78 @@ func (m *PkgEqualMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetPkgID sets the "pkg_id" field.
+func (m *PkgEqualMutation) SetPkgID(u uuid.UUID) {
+	m.package_a = &u
+}
+
+// PkgID returns the value of the "pkg_id" field in the mutation.
+func (m *PkgEqualMutation) PkgID() (r uuid.UUID, exists bool) {
+	v := m.package_a
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPkgID returns the old "pkg_id" field's value of the PkgEqual entity.
+// If the PkgEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PkgEqualMutation) OldPkgID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPkgID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPkgID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPkgID: %w", err)
+	}
+	return oldValue.PkgID, nil
+}
+
+// ResetPkgID resets all changes to the "pkg_id" field.
+func (m *PkgEqualMutation) ResetPkgID() {
+	m.package_a = nil
+}
+
+// SetEqualPkgID sets the "equal_pkg_id" field.
+func (m *PkgEqualMutation) SetEqualPkgID(u uuid.UUID) {
+	m.package_b = &u
+}
+
+// EqualPkgID returns the value of the "equal_pkg_id" field in the mutation.
+func (m *PkgEqualMutation) EqualPkgID() (r uuid.UUID, exists bool) {
+	v := m.package_b
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEqualPkgID returns the old "equal_pkg_id" field's value of the PkgEqual entity.
+// If the PkgEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PkgEqualMutation) OldEqualPkgID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEqualPkgID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEqualPkgID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEqualPkgID: %w", err)
+	}
+	return oldValue.EqualPkgID, nil
+}
+
+// ResetEqualPkgID resets all changes to the "equal_pkg_id" field.
+func (m *PkgEqualMutation) ResetEqualPkgID() {
+	m.package_b = nil
 }
 
 // SetOrigin sets the "origin" field.
@@ -14565,58 +14945,84 @@ func (m *PkgEqualMutation) ResetPackagesHash() {
 	m.packages_hash = nil
 }
 
-// AddPackageIDs adds the "packages" edge to the PackageVersion entity by ids.
-func (m *PkgEqualMutation) AddPackageIDs(ids ...uuid.UUID) {
-	if m.packages == nil {
-		m.packages = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.packages[ids[i]] = struct{}{}
-	}
+// SetPackageAID sets the "package_a" edge to the PackageVersion entity by id.
+func (m *PkgEqualMutation) SetPackageAID(id uuid.UUID) {
+	m.package_a = &id
 }
 
-// ClearPackages clears the "packages" edge to the PackageVersion entity.
-func (m *PkgEqualMutation) ClearPackages() {
-	m.clearedpackages = true
+// ClearPackageA clears the "package_a" edge to the PackageVersion entity.
+func (m *PkgEqualMutation) ClearPackageA() {
+	m.clearedpackage_a = true
+	m.clearedFields[pkgequal.FieldPkgID] = struct{}{}
 }
 
-// PackagesCleared reports if the "packages" edge to the PackageVersion entity was cleared.
-func (m *PkgEqualMutation) PackagesCleared() bool {
-	return m.clearedpackages
+// PackageACleared reports if the "package_a" edge to the PackageVersion entity was cleared.
+func (m *PkgEqualMutation) PackageACleared() bool {
+	return m.clearedpackage_a
 }
 
-// RemovePackageIDs removes the "packages" edge to the PackageVersion entity by IDs.
-func (m *PkgEqualMutation) RemovePackageIDs(ids ...uuid.UUID) {
-	if m.removedpackages == nil {
-		m.removedpackages = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.packages, ids[i])
-		m.removedpackages[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPackages returns the removed IDs of the "packages" edge to the PackageVersion entity.
-func (m *PkgEqualMutation) RemovedPackagesIDs() (ids []uuid.UUID) {
-	for id := range m.removedpackages {
-		ids = append(ids, id)
+// PackageAID returns the "package_a" edge ID in the mutation.
+func (m *PkgEqualMutation) PackageAID() (id uuid.UUID, exists bool) {
+	if m.package_a != nil {
+		return *m.package_a, true
 	}
 	return
 }
 
-// PackagesIDs returns the "packages" edge IDs in the mutation.
-func (m *PkgEqualMutation) PackagesIDs() (ids []uuid.UUID) {
-	for id := range m.packages {
-		ids = append(ids, id)
+// PackageAIDs returns the "package_a" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageAID instead. It exists only for internal usage by the builders.
+func (m *PkgEqualMutation) PackageAIDs() (ids []uuid.UUID) {
+	if id := m.package_a; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetPackages resets all changes to the "packages" edge.
-func (m *PkgEqualMutation) ResetPackages() {
-	m.packages = nil
-	m.clearedpackages = false
-	m.removedpackages = nil
+// ResetPackageA resets all changes to the "package_a" edge.
+func (m *PkgEqualMutation) ResetPackageA() {
+	m.package_a = nil
+	m.clearedpackage_a = false
+}
+
+// SetPackageBID sets the "package_b" edge to the PackageVersion entity by id.
+func (m *PkgEqualMutation) SetPackageBID(id uuid.UUID) {
+	m.package_b = &id
+}
+
+// ClearPackageB clears the "package_b" edge to the PackageVersion entity.
+func (m *PkgEqualMutation) ClearPackageB() {
+	m.clearedpackage_b = true
+	m.clearedFields[pkgequal.FieldEqualPkgID] = struct{}{}
+}
+
+// PackageBCleared reports if the "package_b" edge to the PackageVersion entity was cleared.
+func (m *PkgEqualMutation) PackageBCleared() bool {
+	return m.clearedpackage_b
+}
+
+// PackageBID returns the "package_b" edge ID in the mutation.
+func (m *PkgEqualMutation) PackageBID() (id uuid.UUID, exists bool) {
+	if m.package_b != nil {
+		return *m.package_b, true
+	}
+	return
+}
+
+// PackageBIDs returns the "package_b" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PackageBID instead. It exists only for internal usage by the builders.
+func (m *PkgEqualMutation) PackageBIDs() (ids []uuid.UUID) {
+	if id := m.package_b; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPackageB resets all changes to the "package_b" edge.
+func (m *PkgEqualMutation) ResetPackageB() {
+	m.package_b = nil
+	m.clearedpackage_b = false
 }
 
 // Where appends a list predicates to the PkgEqualMutation builder.
@@ -14653,7 +15059,13 @@ func (m *PkgEqualMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PkgEqualMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
+	if m.package_a != nil {
+		fields = append(fields, pkgequal.FieldPkgID)
+	}
+	if m.package_b != nil {
+		fields = append(fields, pkgequal.FieldEqualPkgID)
+	}
 	if m.origin != nil {
 		fields = append(fields, pkgequal.FieldOrigin)
 	}
@@ -14674,6 +15086,10 @@ func (m *PkgEqualMutation) Fields() []string {
 // schema.
 func (m *PkgEqualMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case pkgequal.FieldPkgID:
+		return m.PkgID()
+	case pkgequal.FieldEqualPkgID:
+		return m.EqualPkgID()
 	case pkgequal.FieldOrigin:
 		return m.Origin()
 	case pkgequal.FieldCollector:
@@ -14691,6 +15107,10 @@ func (m *PkgEqualMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PkgEqualMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case pkgequal.FieldPkgID:
+		return m.OldPkgID(ctx)
+	case pkgequal.FieldEqualPkgID:
+		return m.OldEqualPkgID(ctx)
 	case pkgequal.FieldOrigin:
 		return m.OldOrigin(ctx)
 	case pkgequal.FieldCollector:
@@ -14708,6 +15128,20 @@ func (m *PkgEqualMutation) OldField(ctx context.Context, name string) (ent.Value
 // type.
 func (m *PkgEqualMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case pkgequal.FieldPkgID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPkgID(v)
+		return nil
+	case pkgequal.FieldEqualPkgID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEqualPkgID(v)
+		return nil
 	case pkgequal.FieldOrigin:
 		v, ok := value.(string)
 		if !ok {
@@ -14785,6 +15219,12 @@ func (m *PkgEqualMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PkgEqualMutation) ResetField(name string) error {
 	switch name {
+	case pkgequal.FieldPkgID:
+		m.ResetPkgID()
+		return nil
+	case pkgequal.FieldEqualPkgID:
+		m.ResetEqualPkgID()
+		return nil
 	case pkgequal.FieldOrigin:
 		m.ResetOrigin()
 		return nil
@@ -14803,9 +15243,12 @@ func (m *PkgEqualMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PkgEqualMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.packages != nil {
-		edges = append(edges, pkgequal.EdgePackages)
+	edges := make([]string, 0, 2)
+	if m.package_a != nil {
+		edges = append(edges, pkgequal.EdgePackageA)
+	}
+	if m.package_b != nil {
+		edges = append(edges, pkgequal.EdgePackageB)
 	}
 	return edges
 }
@@ -14814,44 +15257,38 @@ func (m *PkgEqualMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *PkgEqualMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case pkgequal.EdgePackages:
-		ids := make([]ent.Value, 0, len(m.packages))
-		for id := range m.packages {
-			ids = append(ids, id)
+	case pkgequal.EdgePackageA:
+		if id := m.package_a; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
+	case pkgequal.EdgePackageB:
+		if id := m.package_b; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PkgEqualMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedpackages != nil {
-		edges = append(edges, pkgequal.EdgePackages)
-	}
+	edges := make([]string, 0, 2)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PkgEqualMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case pkgequal.EdgePackages:
-		ids := make([]ent.Value, 0, len(m.removedpackages))
-		for id := range m.removedpackages {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PkgEqualMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedpackages {
-		edges = append(edges, pkgequal.EdgePackages)
+	edges := make([]string, 0, 2)
+	if m.clearedpackage_a {
+		edges = append(edges, pkgequal.EdgePackageA)
+	}
+	if m.clearedpackage_b {
+		edges = append(edges, pkgequal.EdgePackageB)
 	}
 	return edges
 }
@@ -14860,8 +15297,10 @@ func (m *PkgEqualMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *PkgEqualMutation) EdgeCleared(name string) bool {
 	switch name {
-	case pkgequal.EdgePackages:
-		return m.clearedpackages
+	case pkgequal.EdgePackageA:
+		return m.clearedpackage_a
+	case pkgequal.EdgePackageB:
+		return m.clearedpackage_b
 	}
 	return false
 }
@@ -14870,6 +15309,12 @@ func (m *PkgEqualMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PkgEqualMutation) ClearEdge(name string) error {
 	switch name {
+	case pkgequal.EdgePackageA:
+		m.ClearPackageA()
+		return nil
+	case pkgequal.EdgePackageB:
+		m.ClearPackageB()
+		return nil
 	}
 	return fmt.Errorf("unknown PkgEqual unique edge %s", name)
 }
@@ -14878,8 +15323,11 @@ func (m *PkgEqualMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PkgEqualMutation) ResetEdge(name string) error {
 	switch name {
-	case pkgequal.EdgePackages:
-		m.ResetPackages()
+	case pkgequal.EdgePackageA:
+		m.ResetPackageA()
+		return nil
+	case pkgequal.EdgePackageB:
+		m.ResetPackageB()
 		return nil
 	}
 	return fmt.Errorf("unknown PkgEqual edge %s", name)

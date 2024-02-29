@@ -89,7 +89,7 @@ func (a *ArtifactQuery) collectField(ctx context.Context, opCtx *graphql.Operati
 			a.WithNamedAttestations(alias, func(wq *SLSAAttestationQuery) {
 				*wq = *query
 			})
-		case "same":
+		case "hashEqualArtA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -98,7 +98,19 @@ func (a *ArtifactQuery) collectField(ctx context.Context, opCtx *graphql.Operati
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			a.WithNamedSame(alias, func(wq *HashEqualQuery) {
+			a.WithNamedHashEqualArtA(alias, func(wq *HashEqualQuery) {
+				*wq = *query
+			})
+		case "hashEqualArtB":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HashEqualClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.WithNamedHashEqualArtB(alias, func(wq *HashEqualQuery) {
 				*wq = *query
 			})
 		case "includedInSboms":
@@ -1639,7 +1651,7 @@ func (he *HashEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
-		case "artifacts":
+		case "artifactA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -1648,9 +1660,35 @@ func (he *HashEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			he.WithNamedArtifacts(alias, func(wq *ArtifactQuery) {
-				*wq = *query
-			})
+			he.withArtifactA = query
+			if _, ok := fieldSeen[hashequal.FieldArtID]; !ok {
+				selectedFields = append(selectedFields, hashequal.FieldArtID)
+				fieldSeen[hashequal.FieldArtID] = struct{}{}
+			}
+		case "artifactB":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&ArtifactClient{config: he.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			he.withArtifactB = query
+			if _, ok := fieldSeen[hashequal.FieldEqualArtID]; !ok {
+				selectedFields = append(selectedFields, hashequal.FieldEqualArtID)
+				fieldSeen[hashequal.FieldEqualArtID] = struct{}{}
+			}
+		case "artID":
+			if _, ok := fieldSeen[hashequal.FieldArtID]; !ok {
+				selectedFields = append(selectedFields, hashequal.FieldArtID)
+				fieldSeen[hashequal.FieldArtID] = struct{}{}
+			}
+		case "equalArtID":
+			if _, ok := fieldSeen[hashequal.FieldEqualArtID]; !ok {
+				selectedFields = append(selectedFields, hashequal.FieldEqualArtID)
+				fieldSeen[hashequal.FieldEqualArtID] = struct{}{}
+			}
 		case "origin":
 			if _, ok := fieldSeen[hashequal.FieldOrigin]; !ok {
 				selectedFields = append(selectedFields, hashequal.FieldOrigin)
@@ -2095,18 +2133,6 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 			pv.WithNamedSbom(alias, func(wq *BillOfMaterialsQuery) {
 				*wq = *query
 			})
-		case "equalPackages":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = (&PkgEqualClient{config: pv.config}).Query()
-			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
-				return err
-			}
-			pv.WithNamedEqualPackages(alias, func(wq *PkgEqualQuery) {
-				*wq = *query
-			})
 		case "includedInSboms":
 			var (
 				alias = field.Alias
@@ -2117,6 +2143,30 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 				return err
 			}
 			pv.WithNamedIncludedInSboms(alias, func(wq *BillOfMaterialsQuery) {
+				*wq = *query
+			})
+		case "pkgEqualPkgA":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PkgEqualClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedPkgEqualPkgA(alias, func(wq *PkgEqualQuery) {
+				*wq = *query
+			})
+		case "pkgEqualPkgB":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PkgEqualClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedPkgEqualPkgB(alias, func(wq *PkgEqualQuery) {
 				*wq = *query
 			})
 		case "nameID":
@@ -2203,7 +2253,7 @@ func (pe *PkgEqualQuery) collectField(ctx context.Context, opCtx *graphql.Operat
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
-		case "packages":
+		case "packageA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -2212,9 +2262,35 @@ func (pe *PkgEqualQuery) collectField(ctx context.Context, opCtx *graphql.Operat
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			pe.WithNamedPackages(alias, func(wq *PackageVersionQuery) {
-				*wq = *query
-			})
+			pe.withPackageA = query
+			if _, ok := fieldSeen[pkgequal.FieldPkgID]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldPkgID)
+				fieldSeen[pkgequal.FieldPkgID] = struct{}{}
+			}
+		case "packageB":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PackageVersionClient{config: pe.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pe.withPackageB = query
+			if _, ok := fieldSeen[pkgequal.FieldEqualPkgID]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldEqualPkgID)
+				fieldSeen[pkgequal.FieldEqualPkgID] = struct{}{}
+			}
+		case "pkgID":
+			if _, ok := fieldSeen[pkgequal.FieldPkgID]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldPkgID)
+				fieldSeen[pkgequal.FieldPkgID] = struct{}{}
+			}
+		case "equalPkgID":
+			if _, ok := fieldSeen[pkgequal.FieldEqualPkgID]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldEqualPkgID)
+				fieldSeen[pkgequal.FieldEqualPkgID] = struct{}{}
+			}
 		case "origin":
 			if _, ok := fieldSeen[pkgequal.FieldOrigin]; !ok {
 				selectedFields = append(selectedFields, pkgequal.FieldOrigin)

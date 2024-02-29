@@ -29,10 +29,12 @@ const (
 	EdgeOccurrences = "occurrences"
 	// EdgeSbom holds the string denoting the sbom edge name in mutations.
 	EdgeSbom = "sbom"
-	// EdgeEqualPackages holds the string denoting the equal_packages edge name in mutations.
-	EdgeEqualPackages = "equal_packages"
 	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
 	EdgeIncludedInSboms = "included_in_sboms"
+	// EdgePkgEqualPkgA holds the string denoting the pkg_equal_pkg_a edge name in mutations.
+	EdgePkgEqualPkgA = "pkg_equal_pkg_a"
+	// EdgePkgEqualPkgB holds the string denoting the pkg_equal_pkg_b edge name in mutations.
+	EdgePkgEqualPkgB = "pkg_equal_pkg_b"
 	// Table holds the table name of the packageversion in the database.
 	Table = "package_versions"
 	// NameTable is the table that holds the name relation/edge.
@@ -56,16 +58,25 @@ const (
 	SbomInverseTable = "bill_of_materials"
 	// SbomColumn is the table column denoting the sbom relation/edge.
 	SbomColumn = "package_id"
-	// EqualPackagesTable is the table that holds the equal_packages relation/edge. The primary key declared below.
-	EqualPackagesTable = "pkg_equal_packages"
-	// EqualPackagesInverseTable is the table name for the PkgEqual entity.
-	// It exists in this package in order to avoid circular dependency with the "pkgequal" package.
-	EqualPackagesInverseTable = "pkg_equals"
 	// IncludedInSbomsTable is the table that holds the included_in_sboms relation/edge. The primary key declared below.
 	IncludedInSbomsTable = "bill_of_materials_included_software_packages"
 	// IncludedInSbomsInverseTable is the table name for the BillOfMaterials entity.
 	// It exists in this package in order to avoid circular dependency with the "billofmaterials" package.
 	IncludedInSbomsInverseTable = "bill_of_materials"
+	// PkgEqualPkgATable is the table that holds the pkg_equal_pkg_a relation/edge.
+	PkgEqualPkgATable = "pkg_equals"
+	// PkgEqualPkgAInverseTable is the table name for the PkgEqual entity.
+	// It exists in this package in order to avoid circular dependency with the "pkgequal" package.
+	PkgEqualPkgAInverseTable = "pkg_equals"
+	// PkgEqualPkgAColumn is the table column denoting the pkg_equal_pkg_a relation/edge.
+	PkgEqualPkgAColumn = "pkg_id"
+	// PkgEqualPkgBTable is the table that holds the pkg_equal_pkg_b relation/edge.
+	PkgEqualPkgBTable = "pkg_equals"
+	// PkgEqualPkgBInverseTable is the table name for the PkgEqual entity.
+	// It exists in this package in order to avoid circular dependency with the "pkgequal" package.
+	PkgEqualPkgBInverseTable = "pkg_equals"
+	// PkgEqualPkgBColumn is the table column denoting the pkg_equal_pkg_b relation/edge.
+	PkgEqualPkgBColumn = "equal_pkg_id"
 )
 
 // Columns holds all SQL columns for packageversion fields.
@@ -79,9 +90,6 @@ var Columns = []string{
 }
 
 var (
-	// EqualPackagesPrimaryKey and EqualPackagesColumn2 are the table columns denoting the
-	// primary key for the equal_packages relation (M2M).
-	EqualPackagesPrimaryKey = []string{"pkg_equal_id", "package_version_id"}
 	// IncludedInSbomsPrimaryKey and IncludedInSbomsColumn2 are the table columns denoting the
 	// primary key for the included_in_sboms relation (M2M).
 	IncludedInSbomsPrimaryKey = []string{"bill_of_materials_id", "package_version_id"}
@@ -169,20 +177,6 @@ func BySbom(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByEqualPackagesCount orders the results by equal_packages count.
-func ByEqualPackagesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newEqualPackagesStep(), opts...)
-	}
-}
-
-// ByEqualPackages orders the results by equal_packages terms.
-func ByEqualPackages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newEqualPackagesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByIncludedInSbomsCount orders the results by included_in_sboms count.
 func ByIncludedInSbomsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -194,6 +188,34 @@ func ByIncludedInSbomsCount(opts ...sql.OrderTermOption) OrderOption {
 func ByIncludedInSboms(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newIncludedInSbomsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPkgEqualPkgACount orders the results by pkg_equal_pkg_a count.
+func ByPkgEqualPkgACount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPkgEqualPkgAStep(), opts...)
+	}
+}
+
+// ByPkgEqualPkgA orders the results by pkg_equal_pkg_a terms.
+func ByPkgEqualPkgA(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPkgEqualPkgAStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPkgEqualPkgBCount orders the results by pkg_equal_pkg_b count.
+func ByPkgEqualPkgBCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPkgEqualPkgBStep(), opts...)
+	}
+}
+
+// ByPkgEqualPkgB orders the results by pkg_equal_pkg_b terms.
+func ByPkgEqualPkgB(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPkgEqualPkgBStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newNameStep() *sqlgraph.Step {
@@ -217,17 +239,24 @@ func newSbomStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, true, SbomTable, SbomColumn),
 	)
 }
-func newEqualPackagesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(EqualPackagesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, EqualPackagesTable, EqualPackagesPrimaryKey...),
-	)
-}
 func newIncludedInSbomsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(IncludedInSbomsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, IncludedInSbomsTable, IncludedInSbomsPrimaryKey...),
+	)
+}
+func newPkgEqualPkgAStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PkgEqualPkgAInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, PkgEqualPkgATable, PkgEqualPkgAColumn),
+	)
+}
+func newPkgEqualPkgBStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PkgEqualPkgBInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, PkgEqualPkgBTable, PkgEqualPkgBColumn),
 	)
 }

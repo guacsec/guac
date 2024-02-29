@@ -35,9 +35,15 @@ import (
 )
 
 func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
+
+	if len(spec.Packages) > 2 {
+		return nil, fmt.Errorf("too many packages specified in pkg equal filter")
+	}
+
 	records, err := b.client.PkgEqual.Query().
 		Where(pkgEqualQueryPredicates(spec)).
-		WithPackages(withPackageVersionTree()).
+		WithPackageA(withPackageVersionTree()).
+		WithPackageB(withPackageVersionTree()).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -78,6 +84,8 @@ func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgI
 	ids := make([]string, 0)
 
 	conflictColumns := []string{
+		pkgequal.FieldPkgID,
+		pkgequal.FieldEqualPkgID,
 		pkgequal.FieldPackagesHash,
 		pkgequal.FieldOrigin,
 		pkgequal.FieldCollector,
@@ -122,6 +130,11 @@ func generatePkgEqualCreate(ctx context.Context, tx *ent.Tx, pkgA *model.IDorPkg
 		return nil, fmt.Errorf("pkgB must be specified for pkgEqual")
 	}
 
+	pkgEqalCreate := tx.PkgEqual.Create().
+		SetCollector(pkgEqualInput.Collector).
+		SetJustification(pkgEqualInput.Justification).
+		SetOrigin(pkgEqualInput.Origin)
+
 	if pkgA.PackageVersionID == nil {
 		pv, err := getPkgVersion(ctx, tx.Client(), *pkgA.PackageInput)
 		if err != nil {
@@ -137,8 +150,6 @@ func generatePkgEqualCreate(ctx context.Context, tx *ent.Tx, pkgA *model.IDorPkg
 		}
 		pkgB.PackageVersionID = ptrfrom.String(pv.ID.String())
 	}
-
-	pkgEqalCreate := tx.PkgEqual.Create()
 
 	sortedPkgs := []model.IDorPkgInput{*pkgA, *pkgB}
 
@@ -156,19 +167,18 @@ func generatePkgEqualCreate(ctx context.Context, tx *ent.Tx, pkgA *model.IDorPkg
 		sortedPkgIDs = append(sortedPkgIDs, pkgID)
 	}
 
+	pkgEqalCreate.SetPackageAID(sortedPkgIDs[0])
+	pkgEqalCreate.SetEqualPkgID(sortedPkgIDs[1])
+
 	sortedPkgHash := hashPackages(sortedPkgs)
+
+	pkgEqalCreate.SetPackagesHash(sortedPkgHash)
+
 	pkgEqualID, err := guacPkgEqualKey(sortedPkgHash, pkgEqualInput)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create pkgEqual uuid with error: %w", err)
 	}
-
-	pkgEqalCreate.
-		SetID(*pkgEqualID).
-		AddPackageIDs(sortedPkgIDs...).
-		SetPackagesHash(sortedPkgHash).
-		SetCollector(pkgEqualInput.Collector).
-		SetJustification(pkgEqualInput.Justification).
-		SetOrigin(pkgEqualInput.Origin)
+	pkgEqalCreate.SetID(*pkgEqualID)
 
 	return pkgEqalCreate, nil
 }
@@ -182,6 +192,8 @@ func upsertPackageEqual(ctx context.Context, tx *ent.Tx, pkgA model.IDorPkgInput
 	if id, err := pkgEqualCreate.
 		OnConflict(
 			sql.ConflictColumns(
+				pkgequal.FieldPkgID,
+				pkgequal.FieldEqualPkgID,
 				pkgequal.FieldPackagesHash,
 				pkgequal.FieldOrigin,
 				pkgequal.FieldCollector,
@@ -207,8 +219,11 @@ func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {
 		optionalPredicate(spec.Justification, pkgequal.JustificationEQ),
 	}
 
-	for _, pkg := range spec.Packages {
-		predicates = append(predicates, pkgequal.HasPackagesWith(packageVersionQuery(pkg)))
+	if len(spec.Packages) == 1 {
+		predicates = append(predicates, pkgequal.Or(pkgequal.HasPackageAWith(packageVersionQuery(spec.Packages[0])), pkgequal.HasPackageBWith(packageVersionQuery(spec.Packages[0]))))
+	} else if len(spec.Packages) == 2 {
+		predicates = append(predicates, pkgequal.Or(pkgequal.HasPackageAWith(packageVersionQuery(spec.Packages[0])), pkgequal.HasPackageBWith(packageVersionQuery(spec.Packages[0]))))
+		predicates = append(predicates, pkgequal.Or(pkgequal.HasPackageAWith(packageVersionQuery(spec.Packages[1])), pkgequal.HasPackageBWith(packageVersionQuery(spec.Packages[1]))))
 	}
 
 	return pkgequal.And(predicates...)
@@ -223,7 +238,8 @@ func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {
 //}
 
 func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
-	packages := collect(record.Edges.Packages, backReferencePackageVersion)
+	equalPkgs := []*ent.PackageVersion{record.Edges.PackageA, record.Edges.PackageB}
+	packages := collect(equalPkgs, backReferencePackageVersion)
 
 	// packages := []*ent.PackageVersion{
 	// 	record.Edges.Package,

@@ -44,20 +44,23 @@ type PackageVersionEdges struct {
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// Sbom holds the value of the sbom edge.
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
-	// EqualPackages holds the value of the equal_packages edge.
-	EqualPackages []*PkgEqual `json:"equal_packages,omitempty"`
 	// IncludedInSboms holds the value of the included_in_sboms edge.
 	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
+	// PkgEqualPkgA holds the value of the pkg_equal_pkg_a edge.
+	PkgEqualPkgA []*PkgEqual `json:"pkg_equal_pkg_a,omitempty"`
+	// PkgEqualPkgB holds the value of the pkg_equal_pkg_b edge.
+	PkgEqualPkgB []*PkgEqual `json:"pkg_equal_pkg_b,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 	// totalCount holds the count of the edges above.
-	totalCount [5]map[string]int
+	totalCount [6]map[string]int
 
 	namedOccurrences     map[string][]*Occurrence
 	namedSbom            map[string][]*BillOfMaterials
-	namedEqualPackages   map[string][]*PkgEqual
 	namedIncludedInSboms map[string][]*BillOfMaterials
+	namedPkgEqualPkgA    map[string][]*PkgEqual
+	namedPkgEqualPkgB    map[string][]*PkgEqual
 }
 
 // NameOrErr returns the Name value or an error if the edge
@@ -91,22 +94,31 @@ func (e PackageVersionEdges) SbomOrErr() ([]*BillOfMaterials, error) {
 	return nil, &NotLoadedError{edge: "sbom"}
 }
 
-// EqualPackagesOrErr returns the EqualPackages value or an error if the edge
-// was not loaded in eager-loading.
-func (e PackageVersionEdges) EqualPackagesOrErr() ([]*PkgEqual, error) {
-	if e.loadedTypes[3] {
-		return e.EqualPackages, nil
-	}
-	return nil, &NotLoadedError{edge: "equal_packages"}
-}
-
 // IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
 // was not loaded in eager-loading.
 func (e PackageVersionEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[3] {
 		return e.IncludedInSboms, nil
 	}
 	return nil, &NotLoadedError{edge: "included_in_sboms"}
+}
+
+// PkgEqualPkgAOrErr returns the PkgEqualPkgA value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) PkgEqualPkgAOrErr() ([]*PkgEqual, error) {
+	if e.loadedTypes[4] {
+		return e.PkgEqualPkgA, nil
+	}
+	return nil, &NotLoadedError{edge: "pkg_equal_pkg_a"}
+}
+
+// PkgEqualPkgBOrErr returns the PkgEqualPkgB value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) PkgEqualPkgBOrErr() ([]*PkgEqual, error) {
+	if e.loadedTypes[5] {
+		return e.PkgEqualPkgB, nil
+	}
+	return nil, &NotLoadedError{edge: "pkg_equal_pkg_b"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -201,14 +213,19 @@ func (pv *PackageVersion) QuerySbom() *BillOfMaterialsQuery {
 	return NewPackageVersionClient(pv.config).QuerySbom(pv)
 }
 
-// QueryEqualPackages queries the "equal_packages" edge of the PackageVersion entity.
-func (pv *PackageVersion) QueryEqualPackages() *PkgEqualQuery {
-	return NewPackageVersionClient(pv.config).QueryEqualPackages(pv)
-}
-
 // QueryIncludedInSboms queries the "included_in_sboms" edge of the PackageVersion entity.
 func (pv *PackageVersion) QueryIncludedInSboms() *BillOfMaterialsQuery {
 	return NewPackageVersionClient(pv.config).QueryIncludedInSboms(pv)
+}
+
+// QueryPkgEqualPkgA queries the "pkg_equal_pkg_a" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryPkgEqualPkgA() *PkgEqualQuery {
+	return NewPackageVersionClient(pv.config).QueryPkgEqualPkgA(pv)
+}
+
+// QueryPkgEqualPkgB queries the "pkg_equal_pkg_b" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryPkgEqualPkgB() *PkgEqualQuery {
+	return NewPackageVersionClient(pv.config).QueryPkgEqualPkgB(pv)
 }
 
 // Update returns a builder for updating this PackageVersion.
@@ -300,30 +317,6 @@ func (pv *PackageVersion) appendNamedSbom(name string, edges ...*BillOfMaterials
 	}
 }
 
-// NamedEqualPackages returns the EqualPackages named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (pv *PackageVersion) NamedEqualPackages(name string) ([]*PkgEqual, error) {
-	if pv.Edges.namedEqualPackages == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := pv.Edges.namedEqualPackages[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (pv *PackageVersion) appendNamedEqualPackages(name string, edges ...*PkgEqual) {
-	if pv.Edges.namedEqualPackages == nil {
-		pv.Edges.namedEqualPackages = make(map[string][]*PkgEqual)
-	}
-	if len(edges) == 0 {
-		pv.Edges.namedEqualPackages[name] = []*PkgEqual{}
-	} else {
-		pv.Edges.namedEqualPackages[name] = append(pv.Edges.namedEqualPackages[name], edges...)
-	}
-}
-
 // NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (pv *PackageVersion) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
@@ -345,6 +338,54 @@ func (pv *PackageVersion) appendNamedIncludedInSboms(name string, edges ...*Bill
 		pv.Edges.namedIncludedInSboms[name] = []*BillOfMaterials{}
 	} else {
 		pv.Edges.namedIncludedInSboms[name] = append(pv.Edges.namedIncludedInSboms[name], edges...)
+	}
+}
+
+// NamedPkgEqualPkgA returns the PkgEqualPkgA named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedPkgEqualPkgA(name string) ([]*PkgEqual, error) {
+	if pv.Edges.namedPkgEqualPkgA == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedPkgEqualPkgA[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedPkgEqualPkgA(name string, edges ...*PkgEqual) {
+	if pv.Edges.namedPkgEqualPkgA == nil {
+		pv.Edges.namedPkgEqualPkgA = make(map[string][]*PkgEqual)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedPkgEqualPkgA[name] = []*PkgEqual{}
+	} else {
+		pv.Edges.namedPkgEqualPkgA[name] = append(pv.Edges.namedPkgEqualPkgA[name], edges...)
+	}
+}
+
+// NamedPkgEqualPkgB returns the PkgEqualPkgB named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedPkgEqualPkgB(name string) ([]*PkgEqual, error) {
+	if pv.Edges.namedPkgEqualPkgB == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedPkgEqualPkgB[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedPkgEqualPkgB(name string, edges ...*PkgEqual) {
+	if pv.Edges.namedPkgEqualPkgB == nil {
+		pv.Edges.namedPkgEqualPkgB = make(map[string][]*PkgEqual)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedPkgEqualPkgB[name] = []*PkgEqual{}
+	} else {
+		pv.Edges.namedPkgEqualPkgB[name] = append(pv.Edges.namedPkgEqualPkgB[name], edges...)
 	}
 }
 
