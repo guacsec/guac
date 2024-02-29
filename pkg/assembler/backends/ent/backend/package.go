@@ -47,31 +47,25 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	query := b.client.PackageName.Query().Limit(MaxPageSize)
+	query := b.client.PackageVersion.Query().Limit(MaxPageSize)
 
 	// TODO: Fix preloads
 	//paths, isGQL := getPreloads(ctx)
 
 	query.Where(
-		optionalPredicate(pkgSpec.Type, packagename.TypeEQ),
-		optionalPredicate(pkgSpec.Namespace, packagename.NamespaceEQ),
-		optionalPredicate(pkgSpec.Name, packagename.NameEQ),
-		packagename.HasVersionsWith(
-			optionalPredicate(pkgSpec.ID, IDEQ),
-			optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
-			optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
-			packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
+		optionalPredicate(pkgSpec.ID, IDEQ),
+		optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
+		optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
+		packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
+		packageversion.HasNameWith(
+			optionalPredicate(pkgSpec.Type, packagename.TypeEQ),
+			optionalPredicate(pkgSpec.Namespace, packagename.NamespaceEQ),
+			optionalPredicate(pkgSpec.Name, packagename.NameEQ),
 		),
 	)
 
 	// TODO: Fix preloads
-	query.WithVersions(func(q *ent.PackageVersionQuery) {
-		q.Where(
-			optionalPredicate(pkgSpec.ID, IDEQ),
-			optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
-			optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
-			packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
-		)
+	query.WithName(func(q *ent.PackageNameQuery) {
 	})
 
 	pkgs, err := query.All(ctx)
@@ -79,7 +73,12 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		return nil, err
 	}
 
-	return collect(pkgs, toModelPackage), nil
+	var pkgNames []*ent.PackageName
+	for _, collectedPkgVersion := range pkgs {
+		pkgNames = append(pkgNames, backReferencePackageVersion(collectedPkgVersion))
+	}
+
+	return collect(pkgNames, toModelPackage), nil
 }
 
 func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error) {
