@@ -27,6 +27,7 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -158,6 +159,24 @@ func verifyFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, purl bool)
 	}
 }
 
+func printSBOMs(sboms []model.HasSBOMsHasSBOM) {
+
+	// Create a new table
+	table := tablewriter.NewWriter(os.Stdout)
+
+	// Define the table headers
+	table.SetHeader([]string{"ID", "Uri", "Algorithm", "Digest", "Download Location", "Origin", "Collector", "known Since"})
+
+	for _, sbom := range sboms {
+		table.Append([]string{sbom.Id, sbom.Uri, sbom.Algorithm, sbom.Digest, sbom.DownloadLocation, sbom.Origin, sbom.Collector, sbom.KnownSince.String()})
+	}
+
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAutoWrapText(true)
+
+	table.Render()
+}
+
 var diffCmd = &cobra.Command{
 	Use:   "diff",
 	Short: "Get a unified tree diff for two given SBOMS",
@@ -174,19 +193,87 @@ var diffCmd = &cobra.Command{
 		inclOccur, _ := cmd.Flags().GetBool("inclOccur")
 		namespaces, _ := cmd.Flags().GetBool("namespaces")
 		list, _ := cmd.Flags().GetBool("list")
+		ctx := logging.WithLogger(context.Background())
+		httpClient := http.Client{}
+		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
+
+		var (
+			listIdAddr *string
+			listUriAddr *string
+			listAlgorithmAddr *string
+			listCollectorAddr *string
+			listOriginAddr *string
+			listDigestAddr *string
+			listDownloadLocationAddr *string
+		)
 
 		if list {
-			//print all ingested SBOMS here in tabular format
-			if len(args) > 0 {
-				fmt.Println("No arguments expected, but got", len(args))
-				return
+			if rootCmd.PersistentFlags().Changed("ID"){
+				listID, _ := cmd.Flags().GetString("ID")
+				listIdAddr = &listID
 			}
+
+			if rootCmd.PersistentFlags().Changed("Algorithm"){
+				listAlgorithm, _ := cmd.Flags().GetString("Algorithm")
+				listAlgorithmAddr = &listAlgorithm
+			}
+
+			if rootCmd.PersistentFlags().Changed("Digest"){
+				listDigest, _ := cmd.Flags().GetString("Digest")
+				listDigestAddr = &listDigest	
+			}
+
+			if rootCmd.PersistentFlags().Changed("Downloc"){
+				listDownloc, _ := cmd.Flags().GetString("Downloc")
+				listDownloadLocationAddr = &listDownloc
+			}
+
+			if rootCmd.PersistentFlags().Changed("Origin"){
+				listOrigin, _ := cmd.Flags().GetString("Origin")
+				listOriginAddr = &listOrigin
+				
+			}
+
+			if rootCmd.PersistentFlags().Changed("URI"){
+				listURI, _ := cmd.Flags().GetString("URI")
+				listUriAddr = &listURI
+				
+			}
+
+			if rootCmd.PersistentFlags().Changed("Collector"){
+				listCollector, _ := cmd.Flags().GetString("Collector")
+				listCollectorAddr = &listCollector
+				
+			}
+		
+			//This might not output anything as graphql would consider "" as a valid entry @abhi
+			filter := model.HasSBOMSpec{
+				Id: listIdAddr,
+				Uri: listUriAddr,
+				Algorithm: listAlgorithmAddr,
+				Collector: listCollectorAddr,
+				Origin: listOriginAddr,
+				Digest: listDigestAddr,
+				DownloadLocation: listDownloadLocationAddr,
+			}
+
 			//get all ingested SBOMs
 
-			//print all ingested SBOMs
+			hasSBOMResponse, err := findHasSBOMBy( filter ,"", "",  ctx, gqlclient)
+			if err != nil {
+				fmt.Println("failed to lookup sbom: %v", err)
+				os.Exit(1)
+			}
+			if len(hasSBOMResponse.HasSBOM) == 0 {
+				fmt.Println("No SBOMs found with given filter")
+				return
+			}
 
+			//print all ingested SBOMs
+			printSBOMs(hasSBOMResponse.HasSBOM)
 			return 
 		}
+
 		if namespaces {
 			fmt.Println("Diff namespaces To be implemented, skipping...")
 		}
@@ -200,10 +287,6 @@ var diffCmd = &cobra.Command{
 
 
 		verifyFlags(slsas, sboms,  errSlsa, errSbom, uri, purl)
-
-		ctx := logging.WithLogger(context.Background())
-		httpClient := http.Client{}
-		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
 		var hasSBOMResponseOne *model.HasSBOMsResponse
 		var hasSBOMResponseTwo *model.HasSBOMsResponse
 		var err error
@@ -257,6 +340,7 @@ var diffCmd = &cobra.Command{
 		createGraphDotFile(diffGraph)
 	},
 }
+
 
 func createGraphDotFile(g graph.Graph[string, *Node]){
 	filename := rand.String(10)+".dot"
@@ -458,5 +542,13 @@ func init() {
 	rootCmd.PersistentFlags().Bool("inclDeps", false, "Compare Included Dependencies")
 	rootCmd.PersistentFlags().Bool("inclOccur", false, "Compare Included Occurrences")
 	rootCmd.PersistentFlags().Bool("namespaces", false, "Compare Package Namespaces")
-	rootCmd.PersistentFlags().Bool("list", false, "List Similar SBOMs given a filter(TODO: @abhi all available filters here)")
+
+	rootCmd.PersistentFlags().Bool("list", false, "List Similar SBOMs given a filter(ID(string), Algorithm(string), Digest(string), DownloadLocation(string), Origin(string), Uri(string), Collector(string))")
+	rootCmd.PersistentFlags().String("ID", "", "--list --ID <ID Filter>")
+	rootCmd.PersistentFlags().String("Algorithm", "", "--list --Algorithm <Algorithm Filter>")
+	rootCmd.PersistentFlags().String("Digest", "", "--list --Digest<Digest Filter>")
+	rootCmd.PersistentFlags().String("Downloc", "", "--list --DownLoc <DownloadLocation Filter>")
+	rootCmd.PersistentFlags().String("Origin", "", "--list --Origin <Origin Filter>")
+	rootCmd.PersistentFlags().String("URI", "", "--list --URI <URI Filter>")
+	rootCmd.PersistentFlags().String("Collector", "", "--list --Collector <Collector Filter>")
 }
