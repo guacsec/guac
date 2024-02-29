@@ -915,7 +915,7 @@ var (
 		Indexes: []*schema.Index{
 			{
 				Name:    "vulnequal_vulnerabilities_hash_justification_origin_collector",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{VulnEqualsColumns[4], VulnEqualsColumns[1], VulnEqualsColumns[2], VulnEqualsColumns[3]},
 			},
 		},

@@ -52,6 +52,6 @@ func (VulnEqual) Edges() []ent.Edge {
 // Indexes of the VulnEqual.
 func (VulnEqual) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("vulnerabilities_hash", "justification", "origin", "collector"),
+		index.Fields("vulnerabilities_hash", "justification", "origin", "collector").Unique(),
 	}
 }
