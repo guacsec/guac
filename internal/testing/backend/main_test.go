@@ -93,9 +93,7 @@ var skipMatrix = map[string]map[string]bool{
 	"TestVEXBulkIngest": {redis: true},
 	// ent: query by id fails, Query_greater_than_-_no_score_value fails
 	"TestIngestVulnMetadata": {ent: true},
-	// weird bug where its returning package from an older test. Need to investigate
-	"TestCertifyBad":   {ent: true},
-	"TestFindSoftware": {ent: true, redis: true, arango: true},
+	"TestFindSoftware":       {ent: true, redis: true, arango: true},
 }
 
 type backend interface {

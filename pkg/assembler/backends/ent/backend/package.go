@@ -365,7 +365,7 @@ func packageNameQuery(spec *model.PkgSpec) predicate.PackageName {
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.Name, packagename.NameEQ),
 		optionalPredicate(spec.Namespace, packagename.NamespaceEQ),
-		optionalPredicate(spec.Namespace, packagename.TypeEQ),
+		optionalPredicate(spec.Type, packagename.TypeEQ),
 	}
 
 	return packagename.And(query...)
