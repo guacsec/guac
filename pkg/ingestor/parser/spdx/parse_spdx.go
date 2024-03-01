@@ -330,10 +330,14 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 	}
 
+	lv := s.spdxDoc.CreationInfo.LicenseListVersion
+	if lv == "" {
+		lv = "UNKNOWN"
+	}
 	for id, cls := range s.packageLegals {
 		for _, cl := range cls {
-			dec := common.ParseLicenses(cl.DeclaredLicense, s.spdxDoc.CreationInfo.LicenseListVersion)
-			dis := common.ParseLicenses(cl.DiscoveredLicense, s.spdxDoc.CreationInfo.LicenseListVersion)
+			dec := common.ParseLicenses(cl.DeclaredLicense, lv)
+			dis := common.ParseLicenses(cl.DiscoveredLicense, lv)
 			for i := range dec {
 				o, n := fixLicense(ctx, &dec[i], s.spdxDoc.OtherLicenses)
 				if o != "" {
