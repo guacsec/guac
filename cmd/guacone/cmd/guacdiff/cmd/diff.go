@@ -33,6 +33,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 
+const PRINT_MAX = 20
+
+type HighlightedDiff struct {
+	MissingLinks [][]string
+	MissingNodes []string
+	MetadataMismatch []string
+}
+
 type Node struct {
 	ID string
 	Attributes map[string]interface{}
@@ -43,7 +51,7 @@ func nodeHash(n *Node) string {
 	return n.ID
 }
 
-func truncateNewline(original string, length int) string {
+func truncate(original string, length int) string {
     if len(original) > 20 {
         return original[:length]
     } else {
@@ -128,7 +136,41 @@ func findHasSBOMBy(filter model.HasSBOMSpec, uri, purl string, ctx context.Conte
 	return foundHasSBOMPkg, nil
 }
 
-func verifyFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, purl bool) {
+func verifyDiffFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, purl bool) {
+	if rootCmd.PersistentFlags().Changed("ID"){
+		fmt.Println("ID cannot be specified without --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("Algorithm"){
+		fmt.Println("Algorithm cannot be specified without --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("Digest"){
+		fmt.Println("Digest cannot be specified without --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("Downloc"){
+		fmt.Println("Downloc cannot be specified without --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("Origin"){
+		fmt.Println("Origin cannot be specified without --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("URI"){
+		fmt.Println("URI cannot be specified without --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("Collector"){
+		fmt.Println("Collector cannot be specified without --list")
+		os.Exit(0)
+	}
 
 	if (errSlsa != nil && errSbom != nil) || (len(slsas) ==0  && len(sboms) == 0 ){
 		fmt.Println("Must specify slsa or sboms")
@@ -166,19 +208,25 @@ func verifyFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, purl bool)
 	}
 }
 
-func printSBOMs(sboms []model.HasSBOMsHasSBOM) {
+func printSBOMs(sboms []model.HasSBOMsHasSBOM, all bool, maxprint int) {
 
 	table := tablewriter.NewWriter(os.Stdout)
 
 	table.SetHeader([]string{"ID", "Uri", "Algorithm", "Digest", "Download Location", "Origin", "Collector", "known Since"})
 
-	for _, sbom := range sboms {
-		table.Append([]string{truncateNewline(sbom.Id,20), truncateNewline(sbom.Uri,20), truncateNewline(sbom.Algorithm,20), truncateNewline(sbom.Digest,20), truncateNewline(sbom.DownloadLocation,20), truncateNewline(sbom.Origin,20), truncateNewline(sbom.Collector,20), truncateNewline(sbom.KnownSince.String(),20)})
+	for i, sbom := range sboms {
+		if (!all && i+1 == maxprint){
+			break
+		}
+		table.Append([]string{truncate(sbom.Id,20), truncate(sbom.Uri,20), truncate(sbom.Algorithm,20), truncate(sbom.Digest,20), truncate(sbom.DownloadLocation,20), truncate(sbom.Origin,20), truncate(sbom.Collector,20), truncate(sbom.KnownSince.String(),20)})
 	}
 
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 
 	table.Render()
+	if (!all && len(sboms) > maxprint){
+		fmt.Println("Run with --all to see all sboms")
+	}
 }
 
 var diffCmd = &cobra.Command{
@@ -186,163 +234,288 @@ var diffCmd = &cobra.Command{
 	Short: "Get a unified tree diff for two given SBOMS",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
-		sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
-		uri, _ := cmd.Flags().GetBool("uri")
-		purl, _ := cmd.Flags().GetBool("purl")
-
-		metadata, _ := cmd.Flags().GetBool("metadata")
-		inclSoft, _ := cmd.Flags().GetBool("inclSoft")
-		inclDeps, _ := cmd.Flags().GetBool("inclDeps")
-		inclOccur, _ := cmd.Flags().GetBool("inclOccur")
-		namespaces, _ := cmd.Flags().GetBool("namespaces")
-		list, _ := cmd.Flags().GetBool("list")
 		ctx := logging.WithLogger(context.Background())
 		httpClient := http.Client{}
 		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
 
-		var (
-			listIdAddr *string
-			listUriAddr *string
-			listAlgorithmAddr *string
-			listCollectorAddr *string
-			listOriginAddr *string
-			listDigestAddr *string
-			listDownloadLocationAddr *string
-		)
+		showDiffList( cmd, ctx , gqlclient)
 
-		if list {
-			if rootCmd.PersistentFlags().Changed("ID"){
-				listID, _ := cmd.Flags().GetString("ID")
-				listIdAddr = &listID
-			}
-
-			if rootCmd.PersistentFlags().Changed("Algorithm"){
-				listAlgorithm, _ := cmd.Flags().GetString("Algorithm")
-				listAlgorithmAddr = &listAlgorithm
-			}
-
-			if rootCmd.PersistentFlags().Changed("Digest"){
-				listDigest, _ := cmd.Flags().GetString("Digest")
-				listDigestAddr = &listDigest	
-			}
-
-			if rootCmd.PersistentFlags().Changed("Downloc"){
-				listDownloc, _ := cmd.Flags().GetString("Downloc")
-				listDownloadLocationAddr = &listDownloc
-			}
-
-			if rootCmd.PersistentFlags().Changed("Origin"){
-				listOrigin, _ := cmd.Flags().GetString("Origin")
-				listOriginAddr = &listOrigin
-				
-			}
-
-			if rootCmd.PersistentFlags().Changed("URI"){
-				listURI, _ := cmd.Flags().GetString("URI")
-				listUriAddr = &listURI
-				
-			}
-
-			if rootCmd.PersistentFlags().Changed("Collector"){
-				listCollector, _ := cmd.Flags().GetString("Collector")
-				listCollectorAddr = &listCollector
-			}
-		
-			//This might not output anything as graphql would consider "" as a valid entry @abhi
-			filter := model.HasSBOMSpec{
-				Id: listIdAddr,
-				Uri: listUriAddr,
-				Algorithm: listAlgorithmAddr,
-				Collector: listCollectorAddr,
-				Origin: listOriginAddr,
-				Digest: listDigestAddr,
-				DownloadLocation: listDownloadLocationAddr,
-			}
-
-			//get all ingested SBOMs
-
-			hasSBOMResponse, err := findHasSBOMBy( filter ,"", "",  ctx, gqlclient)
-			if err != nil {
-				fmt.Println("failed to lookup sbom: %v", err)
-				os.Exit(1)
-			}
-			if len(hasSBOMResponse.HasSBOM) == 0 {
-				fmt.Println("No SBOMs found with given filter")
-				return
-			}
-
-			//print all ingested SBOMs
-			printSBOMs(hasSBOMResponse.HasSBOM)
-			return 
-		}
-
-		if namespaces {
-			fmt.Println("Diff namespaces To be implemented, skipping...")
-		}
-
-		if (!metadata  && !inclSoft && !inclDeps && !inclOccur) {
-			metadata = true
-			inclSoft = true
-			inclDeps = true
-			inclOccur = true
-		}
-
-
-		verifyFlags(slsas, sboms,  errSlsa, errSbom, uri, purl)
-		var hasSBOMResponseOne *model.HasSBOMsResponse
-		var hasSBOMResponseTwo *model.HasSBOMsResponse
-		var err error
-
-		if uri {
-			hasSBOMResponseOne, err = findHasSBOMBy(model.HasSBOMSpec{} ,sboms[0],"",  ctx, gqlclient)
-			if err != nil {
-				fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
-				return
-			}
-
-			hasSBOMResponseTwo, err = findHasSBOMBy(model.HasSBOMSpec{},  sboms[1],"",  ctx, gqlclient)
-			if err != nil {
-				fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
-				return
-			}
-		} else if purl {
-
-			hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[0],  ctx, gqlclient)
-			if err != nil {
-				fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
-				return
-			}
-			hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[1], ctx, gqlclient)
-			if err != nil {
-				fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
-				return
-			}
-		}
-		if hasSBOMResponseOne == nil || hasSBOMResponseTwo == nil {
-			fmt.Println("failed to lookup sboms")
-			return
-		}
-		if len(hasSBOMResponseOne.HasSBOM) == 0 || len(hasSBOMResponseTwo.HasSBOM) == 0 {
-			fmt.Println("Failed to lookup sboms, one endpoint may not have sboms")
-			return
-		}
-		if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
-			fmt.Println("Warning: Multiple sboms found for given purl or uri. Using first one")
-		}
-		hasSBOMOne :=  hasSBOMResponseOne.HasSBOM[0]
-		hasSBOMTwo :=  hasSBOMResponseTwo.HasSBOM[0]
 		//create graphs
-		gOne := makeGraph(hasSBOMOne, metadata, inclSoft, inclDeps, inclOccur, namespaces)
-		gTwo := makeGraph(hasSBOMTwo, metadata, inclSoft, inclDeps, inclOccur, namespaces)
+		graphs := hasSBOMToGraph(cmd, ctx, gqlclient)
 
 		//diff
-		diffGraph := highlightDiff(gOne, gTwo)
+		diffGraph, diffList := highlightDiff(graphs[0], graphs[1])
 
-		//create the dot filegit
-		createGraphDotFile(diffGraph)
+
+		
+		dot, _ := cmd.Flags().GetBool("dot")
+		if dot {
+			//create the dot file
+			createGraphDotFile(diffGraph)
+		} else {
+			//print to stdout
+			all, _ := cmd.Flags().GetBool("all")
+			maxprint, _ := cmd.Flags().GetInt("maxprint")
+			printHighlightedDiff(diffList, all, maxprint)
+		}
 	},
 }
+func max(nums []int) int {
+	if len(nums) == 0 {
+		panic("max: no numbers provided")
+	}
+	max := nums[0]
+	for _, num := range nums[1:] {
+		if num > max {
+			max = num
+		}
+	}
+	return max
+}
+func printHighlightedDiff(diffList HighlightedDiff, all bool, maxprint int){
+
+	table := tablewriter.NewWriter(os.Stdout)
+
+	table.SetHeader([]string{"Missing Nodes", "Missing Links", "Metadata mismatch"})
+	max := max([]int{len(diffList.MissingNodes), len(diffList.MissingLinks), len(diffList.MetadataMismatch)})
+	
+	for  i:=0 ; i < max;i++ {
+		var appendList	[]string
+		if (!all && i+1 == maxprint){
+			break
+		}
+		if (i < len(diffList.MissingNodes)){
+			appendList = append(appendList, diffList.MissingNodes[i])
+		}else {
+			appendList = append(appendList, "")
+		}
+		if (i < len(diffList.MissingLinks)){
+			appendList = append(appendList, diffList.MissingLinks[i][0] + "---"+ diffList.MissingLinks[i][1] )
+		}else{
+			appendList = append(appendList, "")
+		}
+
+		if (i < len(diffList.MetadataMismatch)){
+			appendList = append(appendList, diffList.MetadataMismatch[i])
+		}else{
+			appendList = append(appendList, "")
+		}
+		
+		table.Append(appendList)
+	}
+
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+
+	table.Render()
+	if (!all && max > maxprint){
+		fmt.Println("Run with --all to see all sboms")
+	}
+
+}
+
+func verifyDiffListExtraFlags(){
+	if rootCmd.PersistentFlags().Changed("slsa") {
+		fmt.Println("Cannot specify --slsa with --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("sboms") {
+		fmt.Println("Cannot specify --sboms with --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("uri") {
+		fmt.Println("Cannot specify --uri with --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("purl") {
+		fmt.Println("Cannot specify --purl with --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("metadata") {
+		fmt.Println("Cannot specify --metadata with --list")
+		os.Exit(0)
+	}
+	if rootCmd.PersistentFlags().Changed("inclSoft") {
+		fmt.Println("Cannot specify --inclSoft with --list")
+		os.Exit(0)
+	}
+
+	if rootCmd.PersistentFlags().Changed("inclDeps") {
+		fmt.Println("Cannot specify --inclDeps with --list")
+		os.Exit(0)
+	}
+	if rootCmd.PersistentFlags().Changed("inclOccur") {
+		fmt.Println("Cannot specify --inclOccur with --list")
+		os.Exit(0)
+	}
+	if rootCmd.PersistentFlags().Changed("namespaces") {
+		fmt.Println("Cannot specify --namespaces with --list")
+		os.Exit(0)
+	}
+
+}
+
+func showDiffList(cmd *cobra.Command, ctx context.Context, gqlclient graphql.Client){
+
+	list, _ := rootCmd.PersistentFlags().GetBool("list")
+	if !list {
+		return
+	}
+	verifyDiffListExtraFlags()
+	var (
+		listIdAddr *string
+		listUriAddr *string
+		listAlgorithmAddr *string
+		listCollectorAddr *string
+		listOriginAddr *string
+		listDigestAddr *string
+		listDownloadLocationAddr *string
+	)
+	
+	if rootCmd.PersistentFlags().Changed("ID"){
+		listID, _ := cmd.Flags().GetString("ID")
+		listIdAddr = &listID
+	}
+
+	if rootCmd.PersistentFlags().Changed("Algorithm"){
+		listAlgorithm, _ := cmd.Flags().GetString("Algorithm")
+		listAlgorithmAddr = &listAlgorithm
+	}
+
+	if rootCmd.PersistentFlags().Changed("Digest"){
+		listDigest, _ := cmd.Flags().GetString("Digest")
+		listDigestAddr = &listDigest	
+	}
+
+	if rootCmd.PersistentFlags().Changed("Downloc"){
+		listDownloc, _ := cmd.Flags().GetString("Downloc")
+		listDownloadLocationAddr = &listDownloc
+	}
+
+	if rootCmd.PersistentFlags().Changed("Origin"){
+		listOrigin, _ := cmd.Flags().GetString("Origin")
+		listOriginAddr = &listOrigin
+	}
+
+	if rootCmd.PersistentFlags().Changed("URI"){
+		listURI, _ := cmd.Flags().GetString("URI")
+		listUriAddr = &listURI
+	}
+
+	if rootCmd.PersistentFlags().Changed("Collector"){
+		listCollector, _ := cmd.Flags().GetString("Collector")
+		listCollectorAddr = &listCollector
+	}
+
+	//This might not output anything as graphql would consider "" as a valid entry @abhi
+	filter := model.HasSBOMSpec{
+		Id: listIdAddr,
+		Uri: listUriAddr,
+		Algorithm: listAlgorithmAddr,
+		Collector: listCollectorAddr,
+		Origin: listOriginAddr,
+		Digest: listDigestAddr,
+		DownloadLocation: listDownloadLocationAddr,
+	}
+
+	//get all ingested SBOMs
+	hasSBOMResponse, err := findHasSBOMBy( filter ,"", "",  ctx, gqlclient)
+	if err != nil {
+		fmt.Println("failed to lookup sbom: %v", err)
+		os.Exit(1)
+	}
+	if len(hasSBOMResponse.HasSBOM) == 0 {
+		fmt.Println("No SBOMs found with given filter")
+		return
+	}
+
+	//print all ingested SBOMs
+	all, _ := cmd.Flags().GetBool("all")
+	maxprint, _ := cmd.Flags().GetInt("maxprint")
+	printSBOMs(hasSBOMResponse.HasSBOM, all, maxprint)
+	os.Exit(0)
+}
+
+
+func hasSBOMToGraph(cmd *cobra.Command, ctx context.Context, gqlclient graphql.Client) ( []graph.Graph[string, *Node]){
+	slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
+	sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
+	uri, _ := cmd.Flags().GetBool("uri")
+	purl, _ := cmd.Flags().GetBool("purl")
+
+	metadata, _ := cmd.Flags().GetBool("metadata")
+	inclSoft, _ := cmd.Flags().GetBool("inclSoft")
+	inclDeps, _ := cmd.Flags().GetBool("inclDeps")
+	inclOccur, _ := cmd.Flags().GetBool("inclOccur")
+	namespaces, _ := cmd.Flags().GetBool("namespaces")
+	if namespaces {
+		fmt.Println("Diff namespaces To be implemented, skipping...")
+	}
+
+	if (!metadata  && !inclSoft && !inclDeps && !inclOccur) {
+		metadata = true
+		inclSoft = true
+		inclDeps = true
+		inclOccur = true
+	}
+
+
+	verifyDiffFlags(slsas, sboms,  errSlsa, errSbom, uri, purl)
+	var hasSBOMResponseOne *model.HasSBOMsResponse
+	var hasSBOMResponseTwo *model.HasSBOMsResponse
+	var err error
+
+	if uri {
+		hasSBOMResponseOne, err = findHasSBOMBy(model.HasSBOMSpec{} ,sboms[0],"",  ctx, gqlclient)
+		if err != nil {
+			fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
+			os.Exit(1)
+		}
+
+		hasSBOMResponseTwo, err = findHasSBOMBy(model.HasSBOMSpec{},  sboms[1],"",  ctx, gqlclient)
+		if err != nil {
+			fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
+			os.Exit(1)
+		}
+	} else if purl {
+		hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[0],  ctx, gqlclient)
+		if err != nil {
+			fmt.Println("failed to lookup sbom: %s %v", sboms[0], err)
+			os.Exit(1)
+		}
+		hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[1], ctx, gqlclient)
+		if err != nil {
+			fmt.Println("failed to lookup sbom: %s %v", sboms[1], err)
+			os.Exit(1)
+		}
+	}
+	if hasSBOMResponseOne == nil || hasSBOMResponseTwo == nil {
+		fmt.Println("failed to lookup sboms")
+		os.Exit(1)
+	}
+	if len(hasSBOMResponseOne.HasSBOM) == 0 || len(hasSBOMResponseTwo.HasSBOM) == 0 {
+		fmt.Println("Failed to lookup sboms, one endpoint may not have sboms")
+		os.Exit(1)
+	}
+	if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
+		fmt.Println("Warning: Multiple sboms found for given purl or uri. Using first one")
+	}
+	hasSBOMOne :=  hasSBOMResponseOne.HasSBOM[0]
+	hasSBOMTwo :=  hasSBOMResponseTwo.HasSBOM[0]
+	//create graphs
+	gOne := makeGraph(hasSBOMOne, metadata, inclSoft, inclDeps, inclOccur, namespaces)
+	gTwo := makeGraph(hasSBOMTwo, metadata, inclSoft, inclDeps, inclOccur, namespaces)
+
+	return []graph.Graph[string, *Node] {
+		gOne,
+		gTwo,
+	}
+
+}
+
 
 
 func createGraphDotFile(g graph.Graph[string, *Node]){
@@ -356,7 +529,8 @@ func createGraphDotFile(g graph.Graph[string, *Node]){
 	fmt.Println(filename)
 }
 
-func highlightDiff(gOne, gTwo graph.Graph[string, *Node]) graph.Graph[string, *Node] {
+func highlightDiff(gOne, gTwo graph.Graph[string, *Node]) (graph.Graph[string, *Node], HighlightedDiff ) {
+	var diffList HighlightedDiff
 	//create diff graph
 	var g, overlay graph.Graph[string, *Node]
 	var overlayNodes map[string]map[string]graph.Edge[string]
@@ -403,11 +577,19 @@ func highlightDiff(gOne, gTwo graph.Graph[string, *Node]) graph.Graph[string, *N
 			for key, _ := range nodeOverlay.Attributes {
 				if (nodeOverlay.Attributes[key] != nodeG.Attributes[key]) {
 					//instead of adding a node, just change the color, do we need to display the differences?
+					if key != "InclSoft"{
+						overlay, ok1 := nodeOverlay.Attributes[key].(string) 
+						g, ok2 := nodeG.Attributes[key].(string) 
+						if ok1 && ok2 {
+							diffList.MetadataMismatch = append(diffList.MetadataMismatch, key + "->" + g + "<->" + overlay)
+						}
+					}
 					break
 				}
 			}
 		}else {
 			addGraphNode(g, overlayNodeID, "red") //change color to red
+			diffList.MissingNodes = append(diffList.MissingNodes, overlayNodeID)
 		}
 	}	
 
@@ -422,9 +604,10 @@ func highlightDiff(gOne, gTwo graph.Graph[string, *Node]) graph.Graph[string, *N
 		_, err := g.Edge(edge.Source, edge.Target)
 		if err != nil { //missing edge, add with red color
 			addGraphEdge(g, edge.Source, edge.Target, "red") //hmm how to add color?
+			diffList.MissingLinks = append(diffList.MissingLinks, []string{edge.Source, edge.Target})
 		}
 	}
-	return g
+	return g, diffList
 }
 
 func makeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, inclOccur, namespaces bool) graph.Graph[string, *Node] {
@@ -482,7 +665,7 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
 			setNodeAttribute(g,  packageId, "Type" , dependency.Package.Type)
 			
-			if namespaces{
+			if namespaces {
 				//add namespaces
 			}
 			setNodeAttribute(g,  includedDepsId, "Justification" , dependency.Justification)
@@ -496,7 +679,7 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 				setNodeAttribute(g,  dependPkgId, "Origin" , dependency.DependencyPackage.Type)
 				setNodeAttribute(g,  dependPkgId, "Collector" , dependency.DependencyPackage.Type)
 				
-				if namespaces{
+				if namespaces {
 					//add namespaces
 				}
 			}
@@ -535,7 +718,7 @@ func addGraphEdge(g graph.Graph[string, *Node], from, to, color string){
 }
 
 func init() {
-	rootCmd.AddCommand(diffCmd)
+
 	rootCmd.PersistentFlags().StringSlice("sboms", []string{}, "two sboms to find the diff between")
 	rootCmd.PersistentFlags().StringSlice("slsa", []string{}, "two slsa to find the diff between")
 	rootCmd.PersistentFlags().Bool("uri", false, "input is a URI")
@@ -545,6 +728,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("inclDeps", false, "Compare Included Dependencies")
 	rootCmd.PersistentFlags().Bool("inclOccur", false, "Compare Included Occurrences")
 	rootCmd.PersistentFlags().Bool("namespaces", false, "Compare Package Namespaces")
+	rootCmd.PersistentFlags().Bool("dot", false, "create diff dot file")
 
 	rootCmd.PersistentFlags().Bool("list", false, "List Similar SBOMs given a filter(ID(string), Algorithm(string), Digest(string), DownloadLocation(string), Origin(string), Uri(string), Collector(string))")
 	rootCmd.PersistentFlags().String("ID", "", "--list --ID <ID Filter>")
@@ -554,4 +738,8 @@ func init() {
 	rootCmd.PersistentFlags().String("Origin", "", "--list --Origin <Origin Filter>")
 	rootCmd.PersistentFlags().String("URI", "", "--list --URI <URI Filter>")
 	rootCmd.PersistentFlags().String("Collector", "", "--list --Collector <Collector Filter>")
+	rootCmd.PersistentFlags().Bool("all", false, "--all, lists all sboms matching filter criteria")
+	rootCmd.PersistentFlags().Int("maxprint", PRINT_MAX, "max number of similar sboms to print")
+	rootCmd.AddCommand(diffCmd)
+
 }
