@@ -210,11 +210,10 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 				optionalPredicate(pkg.Version, packageversion.VersionEQ),
 				optionalPredicate(pkg.Subpath, packageversion.SubpathEQ),
 				packageversion.QualifiersMatch(pkg.Qualifiers, ptrWithDefault(pkg.MatchOnlyEmptyQualifiers, false)),
-
 				packageversion.HasNameWith(
-					optionalPredicate(pkg.Name, packagename.Name),
-					optionalPredicate(pkg.Namespace, packagename.Namespace),
-					optionalPredicate(pkg.Type, packagename.Type),
+					optionalPredicate(pkg.Name, packagename.NameEQ),
+					optionalPredicate(pkg.Namespace, packagename.NamespaceEQ),
+					optionalPredicate(pkg.Type, packagename.TypeEQ),
 				),
 			)
 		}),

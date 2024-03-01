@@ -338,9 +338,9 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 		optionalPredicate(filter.Subpath, packageversion.SubpathEQ),
 		packageversion.QualifiersMatch(filter.Qualifiers, ptrWithDefault(filter.MatchOnlyEmptyQualifiers, false)),
 		packageversion.HasNameWith(
-			optionalPredicate(filter.Name, packagename.Name),
-			optionalPredicate(filter.Namespace, packagename.Namespace),
-			optionalPredicate(filter.Type, packagename.Type),
+			optionalPredicate(filter.Name, packagename.NameEQ),
+			optionalPredicate(filter.Namespace, packagename.NamespaceEQ),
+			optionalPredicate(filter.Type, packagename.TypeEQ),
 		),
 	}
 
@@ -363,9 +363,9 @@ func packageNameQuery(spec *model.PkgSpec) predicate.PackageName {
 	}
 	query := []predicate.PackageName{
 		optionalPredicate(spec.ID, IDEQ),
-		optionalPredicate(spec.Name, packagename.Name),
-		optionalPredicate(spec.Namespace, packagename.Namespace),
-		optionalPredicate(spec.Namespace, packagename.Type),
+		optionalPredicate(spec.Name, packagename.NameEQ),
+		optionalPredicate(spec.Namespace, packagename.NamespaceEQ),
+		optionalPredicate(spec.Namespace, packagename.TypeEQ),
 	}
 
 	return packagename.And(query...)

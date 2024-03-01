@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package backend_test
 
 import (
@@ -378,8 +380,8 @@ func TestOccurrence(t *testing.T) {
 			Query: &model.IsOccurrenceSpec{
 				ID: ptrfrom.String("12345"),
 			},
-			ExpOcc: nil,
-			//ExpQueryErr: true,
+			ExpOcc:      nil,
+			ExpQueryErr: true,
 		},
 		{
 			Name:  "Query on ID",

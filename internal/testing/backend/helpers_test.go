@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package backend_test
 
 import (
@@ -81,13 +83,31 @@ func depTypeCmp(a, b model.DependencyType) bool {
 }
 
 func certifyVexLess(e1, e2 *model.CertifyVEXStatement) bool {
-	if e1.Vulnerability.VulnerabilityIDs[0].VulnerabilityID != e2.Vulnerability.VulnerabilityIDs[0].VulnerabilityID {
-		return e1.Vulnerability.VulnerabilityIDs[0].VulnerabilityID < e2.Vulnerability.VulnerabilityIDs[0].VulnerabilityID
-	}
+
 	if e1.VexJustification != e2.VexJustification {
 		return e1.VexJustification < e2.VexJustification
 	}
-	return false
+
+	ap, oka := e1.Subject.(*model.Package)
+	bp, okb := e2.Subject.(*model.Package)
+	if oka && !okb {
+		return false
+	}
+	if okb && !oka {
+		return true
+	}
+	if oka && okb {
+		return cmpPkg(ap, bp) < 0
+	}
+
+	if e1.Vulnerability.VulnerabilityIDs[0].VulnerabilityID != e2.Vulnerability.VulnerabilityIDs[0].VulnerabilityID {
+		return e1.Vulnerability.VulnerabilityIDs[0].VulnerabilityID < e2.Vulnerability.VulnerabilityIDs[0].VulnerabilityID
+	}
+
+	aa := e1.Subject.(*model.Artifact)
+	ba := e2.Subject.(*model.Artifact)
+	return cmpArt(aa, ba) < 0
+
 }
 
 func vulnerabilityLess(e1, e2 *model.Vulnerability) bool {
