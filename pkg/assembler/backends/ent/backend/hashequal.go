@@ -77,12 +77,12 @@ func hashEqualQueryPredicates(spec *model.HashEqualSpec) predicate.HashEqual {
 }
 
 func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.IDorArtifactInput, equalArtifact model.IDorArtifactInput, spec model.HashEqualInputSpec) (string, error) {
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	record, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 		return upsertHashEqual(ctx, tx, artifact, equalArtifact, spec)
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
 	return *record, nil
@@ -90,7 +90,7 @@ func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.IDorArt
 
 func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
 	funcName := "IngestHashEquals"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkHashEqual(ctx, client, artifacts, otherArtifacts, hashEquals)
 		if err != nil {
@@ -98,8 +98,8 @@ func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.ID
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

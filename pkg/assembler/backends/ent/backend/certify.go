@@ -57,11 +57,11 @@ func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 }
 
 func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (string, error) {
-	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	certRecord, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
 	//TODO optimize for only returning ID
@@ -70,7 +70,7 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 
 func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
 	funcName := "IngestCertifyBads"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkCertification(ctx, client, subjects, pkgMatchType, certifyBads)
 		if err != nil {
@@ -78,19 +78,19 @@ func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.Packa
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil
 }
 
 func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (string, error) {
-	certRecord, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	certRecord, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
 	//TODO optimize for only returning ID
@@ -99,7 +99,7 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 
 func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
 	funcName := "IngestCertifyGoods"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkCertification(ctx, client, subjects, pkgMatchType, certifyGoods)
 		if err != nil {
@@ -107,8 +107,8 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

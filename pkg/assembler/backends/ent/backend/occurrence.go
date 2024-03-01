@@ -57,7 +57,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 
 func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
 	funcName := "IngestOccurrences"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkOccurrences(ctx, client, subjects, artifacts, occurrences)
 		if err != nil {
@@ -65,8 +65,8 @@ func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.Packa
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil
@@ -236,7 +236,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 ) (string, error) {
 	funcName := "IngestOccurrence"
 
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
 		occurrenceConflictColumns := []string{
@@ -281,8 +281,8 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			return ptrfrom.String(id.String()), nil
 		}
 	})
-	if err != nil {
-		return "", gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return "", gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *recordID, nil

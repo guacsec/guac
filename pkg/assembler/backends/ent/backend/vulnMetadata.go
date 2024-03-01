@@ -47,11 +47,11 @@ func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 }
 
 func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertVulnerabilityMetadata(ctx, ent.TxFromContext(ctx), vulnerability, vulnerabilityMetadata)
 	})
-	if err != nil {
-		return "", fmt.Errorf("failed to execute IngestVulnerabilityMetadata :: %s", err)
+	if txErr != nil {
+		return "", fmt.Errorf("failed to execute IngestVulnerabilityMetadata :: %s", txErr)
 	}
 
 	return *recordID, nil
@@ -59,7 +59,7 @@ func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerabil
 
 func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
 	funcName := "IngestBulkVulnerabilityMetadata"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkVulnerabilityMetadata(ctx, client, vulnerabilities, vulnerabilityMetadataList)
 		if err != nil {
@@ -67,8 +67,8 @@ func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulner
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

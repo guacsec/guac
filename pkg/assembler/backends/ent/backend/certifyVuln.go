@@ -35,7 +35,7 @@ import (
 
 func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
 
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	record, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
 		conflictColumns := []string{
@@ -66,8 +66,8 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 			return ptrfrom.String(id.String()), nil
 		}
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
 	return *record, nil
@@ -75,7 +75,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 
 func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
 	funcName := "IngestCertifyVulns"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkCertifyVuln(ctx, client, pkgs, vulnerabilities, certifyVulns)
 		if err != nil {
@@ -83,8 +83,8 @@ func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorP
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

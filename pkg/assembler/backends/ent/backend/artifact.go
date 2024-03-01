@@ -62,7 +62,7 @@ func artifactQueryPredicates(spec *model.ArtifactSpec) predicate.Artifact {
 
 func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.IDorArtifactInput) ([]string, error) {
 	funcName := "IngestArtifacts"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkArtifact(ctx, client, artifacts)
 		if err != nil {
@@ -70,20 +70,20 @@ func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.IDo
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil
 }
 
 func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifactInput) (string, error) {
-	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	id, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
 		return upsertArtifact(ctx, client, art)
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 	return *id, nil
 }

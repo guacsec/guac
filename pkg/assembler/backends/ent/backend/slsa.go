@@ -74,11 +74,11 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 }
 
 func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (string, error) {
-	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	id, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertSLSA(ctx, ent.TxFromContext(ctx), subject, builtFrom, builtBy, slsa)
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
 	return *id, nil
@@ -86,7 +86,7 @@ func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactI
 
 func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) ([]string, error) {
 	funcName := "IngestSLSAs"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkSLSA(ctx, client, subjects, builtFromList, builtByList, slsaList)
 		if err != nil {
@@ -94,8 +94,8 @@ func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArti
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

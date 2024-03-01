@@ -76,11 +76,11 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 }
 
 func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, hasSourceAt model.HasSourceAtInputSpec) (string, error) {
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	record, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertHasSourceAt(ctx, ent.TxFromContext(ctx), pkg, pkgMatchType, source, hasSourceAt)
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
 	return *record, nil
@@ -88,7 +88,7 @@ func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInp
 
 func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
 	funcName := "IngestHasSourceAts"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkHasSourceAts(ctx, client, pkgs, pkgMatchType, sources, hasSourceAts)
 		if err != nil {
@@ -96,8 +96,8 @@ func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorP
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil
@@ -274,7 +274,7 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.IDorSourceInput) ([]*model.SourceIDs, error) {
 	funcName := "IngestSources"
 	var collectedSrcIDs []*model.SourceIDs
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]model.SourceIDs, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]model.SourceIDs, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkSource(ctx, client, sources)
 		if err != nil {
@@ -282,8 +282,8 @@ func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.IDorSou
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	for _, srcIDs := range *ids {
@@ -295,11 +295,11 @@ func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.IDorSou
 }
 
 func (b *EntBackend) IngestSource(ctx context.Context, source model.IDorSourceInput) (*model.SourceIDs, error) {
-	sourceNameID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.SourceIDs, error) {
+	sourceNameID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*model.SourceIDs, error) {
 		return upsertSource(ctx, ent.TxFromContext(ctx), source)
 	})
-	if err != nil {
-		return nil, err
+	if txErr != nil {
+		return nil, txErr
 	}
 
 	return sourceNameID, nil

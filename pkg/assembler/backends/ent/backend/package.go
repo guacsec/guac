@@ -84,7 +84,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error) {
 	funcName := "IngestPackages"
 	var collectedPkgIDs []*model.PackageIDs
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]model.PackageIDs, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]model.PackageIDs, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkPackage(ctx, client, pkgs)
 		if err != nil {
@@ -92,8 +92,8 @@ func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgIn
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	for _, pkgIDs := range *ids {
@@ -105,15 +105,15 @@ func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgIn
 }
 
 func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
-	pkgVersionID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.PackageIDs, error) {
+	pkgVersionID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*model.PackageIDs, error) {
 		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), pkg)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to upsert package")
 		}
 		return p, nil
 	})
-	if err != nil {
-		return nil, err
+	if txErr != nil {
+		return nil, txErr
 	}
 
 	return pkgVersionID, nil

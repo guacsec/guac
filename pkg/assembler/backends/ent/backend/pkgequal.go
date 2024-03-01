@@ -53,11 +53,11 @@ func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]
 }
 
 func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error) {
-	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	id, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertPackageEqual(ctx, ent.TxFromContext(ctx), pkg, depPkg, pkgEqual)
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
 	return *id, nil
@@ -65,7 +65,7 @@ func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput,
 
 func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
 	funcName := "IngestPkgEquals"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkPkgEquals(ctx, client, pkgs, otherPackages, pkgEquals)
 		if err != nil {
@@ -73,8 +73,8 @@ func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgI
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

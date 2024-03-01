@@ -34,7 +34,7 @@ import (
 
 func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error) {
 	funcName := "IngestLicenses"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkLicense(ctx, client, licenses)
 		if err != nil {
@@ -42,15 +42,15 @@ func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.IDorL
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil
 }
 
 func (b *EntBackend) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	record, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
 		licenseID, err := upsertLicense(ctx, client, *license.LicenseInput)
 		if err != nil {
@@ -59,8 +59,8 @@ func (b *EntBackend) IngestLicense(ctx context.Context, license *model.IDorLicen
 
 		return licenseID, nil
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
 	return *record, nil

@@ -62,19 +62,19 @@ func builderInputQueryPredicate(spec model.BuilderInputSpec) predicate.Builder {
 
 func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.IDorBuilderInput) (string, error) {
 	funcName := "IngestBuilder"
-	id, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	id, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
 		return upsertBuilder(ctx, client, build.BuilderInput)
 	})
-	if err != nil {
-		return "", errors.Wrap(err, funcName)
+	if txErr != nil {
+		return "", errors.Wrap(txErr, funcName)
 	}
 	return *id, nil
 }
 
 func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorBuilderInput) ([]string, error) {
 	funcName := "IngestBuilders"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkBuilder(ctx, client, builders)
 		if err != nil {
@@ -82,8 +82,8 @@ func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorB
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

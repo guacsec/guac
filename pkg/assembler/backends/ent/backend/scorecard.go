@@ -76,18 +76,18 @@ func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.Certify
 // Mutations for evidence trees (read-write queries, assume software trees ingested)
 // IngestScorecard takes a scorecard and a source and creates a certifyScorecard
 func (b *EntBackend) IngestScorecard(ctx context.Context, source model.IDorSourceInput, scorecard model.ScorecardInputSpec) (string, error) {
-	cscID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	cscID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertScorecard(ctx, ent.TxFromContext(ctx), source, scorecard)
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 	return *cscID, nil
 }
 
 func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
 	funcName := "IngestScorecards"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkScorecard(ctx, client, sources, scorecards)
 		if err != nil {
@@ -95,8 +95,8 @@ func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDor
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

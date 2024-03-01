@@ -48,11 +48,11 @@ func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 }
 
 func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertHasMetadata(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, hasMetadata)
 	})
-	if err != nil {
-		return "", fmt.Errorf("failed to execute IngestHasMetadata :: %s", err)
+	if txErr != nil {
+		return "", fmt.Errorf("failed to execute IngestHasMetadata :: %s", txErr)
 	}
 
 	return *recordID, nil
@@ -60,7 +60,7 @@ func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.Packag
 
 func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
 	funcName := "IngestBulkHasMetadata"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkHasMetadata(ctx, client, subjects, pkgMatchType, hasMetadataList)
 		if err != nil {
@@ -68,8 +68,8 @@ func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

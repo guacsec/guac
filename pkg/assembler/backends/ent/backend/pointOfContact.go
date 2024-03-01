@@ -48,11 +48,11 @@ func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfCo
 }
 
 func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertPointOfContact(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, pointOfContact)
 	})
-	if err != nil {
-		return "", fmt.Errorf("failed to execute IngestPointOfContact :: %s", err)
+	if txErr != nil {
+		return "", fmt.Errorf("failed to execute IngestPointOfContact :: %s", txErr)
 	}
 
 	return *recordID, nil
@@ -60,7 +60,7 @@ func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.Pac
 
 func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) ([]string, error) {
 	funcName := "IngestPointOfContacts"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkPointOfContact(ctx, client, subjects, pkgMatchType, pointOfContactList)
 		if err != nil {
@@ -68,8 +68,8 @@ func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.P
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil

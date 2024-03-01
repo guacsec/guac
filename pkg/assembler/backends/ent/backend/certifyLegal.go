@@ -57,7 +57,7 @@ func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalS
 
 func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
 	funcName := "IngestCertifyLegals"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		tx := ent.TxFromContext(ctx)
 		slc, err := upsertBulkCertifyLegal(ctx, tx, subjects, declaredLicensesList, discoveredLicensesList, certifyLegals)
 		if err != nil {
@@ -65,8 +65,8 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil
@@ -74,7 +74,7 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 
 func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, spec *model.CertifyLegalInputSpec) (string, error) {
 
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
 		certifyLegalConflictColumns := []string{
@@ -124,8 +124,8 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 			return ptrfrom.String(id.String()), nil
 		}
 	})
-	if err != nil {
-		return "", gqlerror.Errorf("IngestCertifyLegal :: %s", err)
+	if txErr != nil {
+		return "", gqlerror.Errorf("IngestCertifyLegal :: %s", txErr)
 	}
 
 	return *recordID, nil

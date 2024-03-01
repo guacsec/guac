@@ -54,7 +54,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 
 func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
 	funcName := "IngestDependencies"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkDependencies(ctx, client, pkgs, depPkgs, depPkgMatchType, dependencies)
 		if err != nil {
@@ -62,8 +62,8 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorP
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil
@@ -219,7 +219,7 @@ func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (string, error) {
 	funcName := "IngestDependency"
 
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
 		conflictColumns := []string{
@@ -264,8 +264,8 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 			return ptrfrom.String(id.String()), nil
 		}
 	})
-	if err != nil {
-		return "", errors.Wrap(err, funcName)
+	if txErr != nil {
+		return "", errors.Wrap(txErr, funcName)
 	}
 
 	return *recordID, nil

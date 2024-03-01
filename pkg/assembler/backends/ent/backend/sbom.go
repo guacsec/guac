@@ -99,7 +99,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
 	funcName := "IngestHasSbom"
 
-	sbomId, err := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+	sbomId, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
 		// If a new column is included in the conflict columns, it must be added to the Indexes() function in the schema
@@ -149,8 +149,8 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 			return ptrfrom.String(id.String()), nil
 		}
 	})
-	if err != nil {
-		return "", Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return "", Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *sbomId, nil
@@ -158,7 +158,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 
 func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
 	funcName := "IngestHasSBOMs"
-	ids, err := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
 		client := ent.TxFromContext(ctx)
 		slc, err := upsertBulkHasSBOM(ctx, client, subjects, hasSBOMs, includes)
 		if err != nil {
@@ -166,8 +166,8 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 		}
 		return slc, nil
 	})
-	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
 	return *ids, nil
