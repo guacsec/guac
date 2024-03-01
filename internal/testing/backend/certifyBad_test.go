@@ -19,7 +19,6 @@ package backend_test
 
 import (
 	"context"
-	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -811,9 +810,6 @@ func TestCertifyBad(t *testing.T) {
 						ID: ptrfrom.String(cbID),
 					}
 				}
-			}
-			if test.Name == "Query Packages" {
-				fmt.Print("here")
 			}
 			got, err := b.CertifyBad(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
