@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -342,6 +341,6 @@ func guacDependencyKey(pkgVersionID *string, depPkgNameID *string, depPkgVersion
 
 	depIDString := fmt.Sprintf("%s::%s::%s?", *pkgVersionID, depPkgID, canonicalDependencyString(dep))
 
-	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
+	depID := generateUUIDKey([]byte(depIDString))
 	return &depID, nil
 }

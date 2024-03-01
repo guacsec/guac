@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -350,6 +349,6 @@ func guacOccurrenceKey(pkgVersionID *string, srcNameID *string, artID *string, o
 
 	occurIDString := fmt.Sprintf("%s::%s::%s?", subjectID, *artID, canonicalOccurrenceString(occur))
 
-	occurID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(occurIDString), 5)
+	occurID := generateUUIDKey([]byte(occurIDString))
 	return &occurID, nil
 }

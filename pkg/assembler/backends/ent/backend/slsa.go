@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
-	"crypto/sha256"
 	"fmt"
 	"sort"
 	"time"
@@ -356,6 +355,6 @@ func canonicalSLSAString(slsa model.SLSAInputSpec) string {
 func guacSLSAKey(subjectID *string, builtFromHash string, builderID *string, slsa *model.SLSAInputSpec) (*uuid.UUID, error) {
 	depIDString := fmt.Sprintf("%s::%s::%s::%s?", *subjectID, builtFromHash, *builderID, canonicalSLSAString(*slsa))
 
-	depID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(depIDString), 5)
+	depID := generateUUIDKey([]byte(depIDString))
 	return &depID, nil
 }

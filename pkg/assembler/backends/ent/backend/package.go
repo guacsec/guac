@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
-	"crypto/sha256"
 	stdsql "database/sql"
 	"fmt"
 	"sort"
@@ -149,8 +148,8 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 		for i, pkg := range pkgs {
 			pkgInput := pkg
 			pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkgInput.PackageInput, helpers.PkgServerKey)
-			pkgNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.NameId), 5)
-			pkgVersionID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.VersionId), 5)
+			pkgNameID := generateUUIDKey([]byte(pkgIDs.NameId))
+			pkgVersionID := generateUUIDKey([]byte(pkgIDs.VersionId))
 
 			pkgNameCreates[i] = generatePackageNameCreate(tx, &pkgNameID, pkgInput)
 			pkgVersionCreates[i] = generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, pkgInput)
@@ -198,8 +197,8 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 // It is used in multiple places, so we extract it to a function.
 func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
 	pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg.PackageInput, helpers.PkgServerKey)
-	pkgNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.NameId), 5)
-	pkgVersionID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(pkgIDs.VersionId), 5)
+	pkgNameID := generateUUIDKey([]byte(pkgIDs.NameId))
+	pkgVersionID := generateUUIDKey([]byte(pkgIDs.VersionId))
 
 	pkgNameCreate := generatePackageNameCreate(tx, &pkgNameID, &pkg)
 

@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
-	"crypto/sha256"
 	"fmt"
 	"sort"
 
@@ -319,6 +318,6 @@ func canonicalVulnEqualString(ve *model.VulnEqualInputSpec) string {
 func guacVulnEqualKey(sortedVulnHash string, veInput *model.VulnEqualInputSpec) (*uuid.UUID, error) {
 	veIDString := fmt.Sprintf("%s::%s?", sortedVulnHash, canonicalVulnEqualString(veInput))
 
-	veID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(veIDString), 5)
+	veID := generateUUIDKey([]byte(veIDString))
 	return &veID, nil
 }

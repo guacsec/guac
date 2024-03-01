@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"strings"
 
@@ -392,6 +391,6 @@ func guacHasSBOMKey(pkgVersionID *string, artID *string, includedPkgHash, includ
 	}
 	hsIDString := fmt.Sprintf("%s::%s::%s::%s::%s::%s?", subjectID, includedPkgHash, includedArtHash, includedDepHash, includedOccurHash, canonicalHasSBOMString(hasSBOM))
 
-	hsID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(hsIDString), 5)
+	hsID := generateUUIDKey([]byte(hsIDString))
 	return &hsID, nil
 }

@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"crypto/sha256"
 	stdsql "database/sql"
 	"strings"
 
@@ -96,7 +95,7 @@ func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDor
 		creates := make([]*ent.ArtifactCreate, len(artifacts))
 		for i, art := range artifacts {
 			artInput := art
-			artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.ArtifactInputSpec, string](artInput.ArtifactInput, helpers.ArtifactServerKey)), 5)
+			artifactID := generateUUIDKey([]byte(helpers.GetKey[*model.ArtifactInputSpec, string](artInput.ArtifactInput, helpers.ArtifactServerKey)))
 			creates[i] = generateArtifactCreate(tx, &artifactID, artInput)
 
 			ids = append(ids, artifactID.String())
@@ -124,7 +123,7 @@ func generateArtifactCreate(tx *ent.Tx, artifactID *uuid.UUID, art *model.IDorAr
 }
 
 func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInput) (*string, error) {
-	artifactID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.ArtifactInputSpec, string](art.ArtifactInput, helpers.ArtifactServerKey)), 5)
+	artifactID := generateUUIDKey([]byte(helpers.GetKey[*model.ArtifactInputSpec, string](art.ArtifactInput, helpers.ArtifactServerKey)))
 	insert := generateArtifactCreate(tx, &artifactID, art)
 	err := insert.
 		OnConflict(

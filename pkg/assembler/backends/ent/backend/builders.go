@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"crypto/sha256"
 	stdsql "database/sql"
 
 	"entgo.io/ent/dialect/sql"
@@ -97,7 +96,7 @@ func upsertBulkBuilder(ctx context.Context, tx *ent.Tx, buildInputs []*model.IDo
 		creates := make([]*ent.BuilderCreate, len(builders))
 		for i, build := range builders {
 			b := build
-			builderID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(b.BuilderInput.URI), 5)
+			builderID := generateUUIDKey([]byte(b.BuilderInput.URI))
 			creates[i] = generateBuilderCreate(tx, &builderID, b.BuilderInput)
 
 			ids = append(ids, builderID.String())
@@ -124,7 +123,7 @@ func generateBuilderCreate(tx *ent.Tx, builderID *uuid.UUID, build *model.Builde
 }
 
 func upsertBuilder(ctx context.Context, tx *ent.Tx, spec *model.BuilderInputSpec) (*string, error) {
-	builderID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(spec.URI), 5)
+	builderID := generateUUIDKey([]byte(spec.URI))
 	insert := generateBuilderCreate(tx, &builderID, spec)
 
 	err := insert.

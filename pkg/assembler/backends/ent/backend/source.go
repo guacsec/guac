@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"crypto/sha256"
 	stdsql "database/sql"
 	"fmt"
 
@@ -315,7 +314,7 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 		for i, src := range srcs {
 			s := src
 			srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](s.SourceInput, helpers.SrcServerKey)
-			srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
+			srcNameID := generateUUIDKey([]byte(srcIDs.NameId))
 
 			srcNameCreates[i] = generateSourceNameCreate(tx, &srcNameID, s)
 			srcNameIDs = append(srcNameIDs, srcNameID.String())
@@ -360,7 +359,7 @@ func generateSourceNameCreate(tx *ent.Tx, srcNameID *uuid.UUID, srcInput *model.
 
 func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*model.SourceIDs, error) {
 	srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](src.SourceInput, helpers.SrcServerKey)
-	srcNameID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(srcIDs.NameId), 5)
+	srcNameID := generateUUIDKey([]byte(srcIDs.NameId))
 
 	create := generateSourceNameCreate(tx, &srcNameID, &src)
 	err := create.

@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"crypto/sha256"
 	stdsql "database/sql"
 
 	"entgo.io/ent/dialect/sql"
@@ -93,7 +92,7 @@ func upsertBulkLicense(ctx context.Context, tx *ent.Tx, licenseInputs []*model.I
 		creates := make([]*ent.LicenseCreate, len(licenses))
 		for i, lic := range licenses {
 			l := lic
-			licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](l.LicenseInput, helpers.LicenseServerKey)), 5)
+			licenseID := generateUUIDKey([]byte(helpers.GetKey[*model.LicenseInputSpec, string](l.LicenseInput, helpers.LicenseServerKey)))
 			creates[i] = generateLicenseCreate(tx, &licenseID, l.LicenseInput)
 			ids = append(ids, licenseID.String())
 		}
@@ -125,7 +124,7 @@ func generateLicenseCreate(tx *ent.Tx, licenseID *uuid.UUID, licInput *model.Lic
 }
 
 func upsertLicense(ctx context.Context, tx *ent.Tx, spec model.LicenseInputSpec) (*string, error) {
-	licenseID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(helpers.GetKey[*model.LicenseInputSpec, string](&spec, helpers.LicenseServerKey)), 5)
+	licenseID := generateUUIDKey([]byte(helpers.GetKey[*model.LicenseInputSpec, string](&spec, helpers.LicenseServerKey)))
 	insert := generateLicenseCreate(tx, &licenseID, &spec)
 	err := insert.
 		OnConflict(

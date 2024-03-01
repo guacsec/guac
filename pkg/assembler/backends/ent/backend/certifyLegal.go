@@ -17,7 +17,6 @@ package backend
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -412,7 +411,7 @@ func guacCertifyLegalKey(pkgVersionID *string, srcNameID *string, declaredLicens
 
 	clIDString := fmt.Sprintf("%s::%s::%s::%s?", subjectID, declaredLicenseHash, discoveredLicenseHash, canonicalCertifyLegalString(clInput))
 
-	clID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(clIDString), 5)
+	clID := generateUUIDKey([]byte(clIDString))
 	return &clID, nil
 }
 

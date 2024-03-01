@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
-	"crypto/sha256"
 	"fmt"
 	"sort"
 
@@ -271,6 +270,6 @@ func canonicalHashEqualString(he *model.HashEqualInputSpec) string {
 func guacHashEqualKey(sortedArtHash string, heInput *model.HashEqualInputSpec) (*uuid.UUID, error) {
 	heIDString := fmt.Sprintf("%s::%s?", sortedArtHash, canonicalHashEqualString(heInput))
 
-	heID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(heIDString), 5)
+	heID := generateUUIDKey([]byte(heIDString))
 	return &heID, nil
 }

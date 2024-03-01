@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
-	"crypto/sha256"
 	"fmt"
 	"sort"
 
@@ -283,6 +282,6 @@ func canonicalPkgEqualString(pe *model.PkgEqualInputSpec) string {
 func guacPkgEqualKey(sortedPkgHash string, peInput *model.PkgEqualInputSpec) (*uuid.UUID, error) {
 	peIDString := fmt.Sprintf("%s::%s?", sortedPkgHash, canonicalPkgEqualString(peInput))
 
-	peID := uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, []byte(peIDString), 5)
+	peID := generateUUIDKey([]byte(peIDString))
 	return &peID, nil
 }
