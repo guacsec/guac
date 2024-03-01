@@ -17,10 +17,10 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // License holds the schema definition for the License entity.
@@ -31,9 +31,13 @@ type License struct {
 // Fields of the License.
 func (License) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(getUUIDv7).
+			Unique().
+			Immutable(),
 		field.String("name").NotEmpty(),
-		field.String("inline").Optional().Nillable(),
-		field.String("list_version").Optional().Nillable(),
+		field.String("inline").Optional(),
+		field.String("list_version").Optional(),
 	}
 }
 
@@ -48,8 +52,8 @@ func (License) Edges() []ent.Edge {
 // Indexes of the License.
 func (License) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("name", "inline", "list_version").Unique().Annotations(entsql.IndexWhere("inline IS NOT NULL AND list_version IS NOT NULL")),
-		index.Fields("name", "list_version").Unique().Annotations(entsql.IndexWhere("inline IS NULL AND list_version IS NOT NULL")),
-		index.Fields("name", "inline").Unique().Annotations(entsql.IndexWhere("inline IS NOT NULL AND list_version IS NULL")),
+		index.Fields("name", "inline", "list_version").Unique(),
+		// index.Fields("name", "list_version").Unique().Annotations(entsql.IndexWhere("inline IS NULL AND list_version IS NOT NULL")),
+		// index.Fields("name", "inline").Unique().Annotations(entsql.IndexWhere("inline IS NOT NULL AND list_version IS NULL")),
 	}
 }

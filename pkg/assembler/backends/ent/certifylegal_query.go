@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -181,8 +182,8 @@ func (clq *CertifyLegalQuery) FirstX(ctx context.Context) *CertifyLegal {
 
 // FirstID returns the first CertifyLegal ID from the query.
 // Returns a *NotFoundError when no CertifyLegal ID was found.
-func (clq *CertifyLegalQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (clq *CertifyLegalQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = clq.Limit(1).IDs(setContextOp(ctx, clq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -194,7 +195,7 @@ func (clq *CertifyLegalQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (clq *CertifyLegalQuery) FirstIDX(ctx context.Context) int {
+func (clq *CertifyLegalQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := clq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -232,8 +233,8 @@ func (clq *CertifyLegalQuery) OnlyX(ctx context.Context) *CertifyLegal {
 // OnlyID is like Only, but returns the only CertifyLegal ID in the query.
 // Returns a *NotSingularError when more than one CertifyLegal ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (clq *CertifyLegalQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (clq *CertifyLegalQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = clq.Limit(2).IDs(setContextOp(ctx, clq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -249,7 +250,7 @@ func (clq *CertifyLegalQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (clq *CertifyLegalQuery) OnlyIDX(ctx context.Context) int {
+func (clq *CertifyLegalQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := clq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -277,7 +278,7 @@ func (clq *CertifyLegalQuery) AllX(ctx context.Context) []*CertifyLegal {
 }
 
 // IDs executes the query and returns a list of CertifyLegal IDs.
-func (clq *CertifyLegalQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (clq *CertifyLegalQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if clq.ctx.Unique == nil && clq.path != nil {
 		clq.Unique(true)
 	}
@@ -289,7 +290,7 @@ func (clq *CertifyLegalQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (clq *CertifyLegalQuery) IDsX(ctx context.Context) []int {
+func (clq *CertifyLegalQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := clq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -409,7 +410,7 @@ func (clq *CertifyLegalQuery) WithDiscoveredLicenses(opts ...func(*LicenseQuery)
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -432,7 +433,7 @@ func (clq *CertifyLegalQuery) GroupBy(field string, fields ...string) *CertifyLe
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //	}
 //
 //	client.CertifyLegal.Query().
@@ -558,8 +559,8 @@ func (clq *CertifyLegalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 }
 
 func (clq *CertifyLegalQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*CertifyLegal, init func(*CertifyLegal), assign func(*CertifyLegal, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*CertifyLegal)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*CertifyLegal)
 	for i := range nodes {
 		if nodes[i].PackageID == nil {
 			continue
@@ -590,8 +591,8 @@ func (clq *CertifyLegalQuery) loadPackage(ctx context.Context, query *PackageVer
 	return nil
 }
 func (clq *CertifyLegalQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*CertifyLegal, init func(*CertifyLegal), assign func(*CertifyLegal, *SourceName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*CertifyLegal)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*CertifyLegal)
 	for i := range nodes {
 		if nodes[i].SourceID == nil {
 			continue
@@ -623,8 +624,8 @@ func (clq *CertifyLegalQuery) loadSource(ctx context.Context, query *SourceNameQ
 }
 func (clq *CertifyLegalQuery) loadDeclaredLicenses(ctx context.Context, query *LicenseQuery, nodes []*CertifyLegal, init func(*CertifyLegal), assign func(*CertifyLegal, *License)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*CertifyLegal)
-	nids := make(map[int]map[*CertifyLegal]struct{})
+	byID := make(map[uuid.UUID]*CertifyLegal)
+	nids := make(map[uuid.UUID]map[*CertifyLegal]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -653,11 +654,11 @@ func (clq *CertifyLegalQuery) loadDeclaredLicenses(ctx context.Context, query *L
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*CertifyLegal]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -684,8 +685,8 @@ func (clq *CertifyLegalQuery) loadDeclaredLicenses(ctx context.Context, query *L
 }
 func (clq *CertifyLegalQuery) loadDiscoveredLicenses(ctx context.Context, query *LicenseQuery, nodes []*CertifyLegal, init func(*CertifyLegal), assign func(*CertifyLegal, *License)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*CertifyLegal)
-	nids := make(map[int]map[*CertifyLegal]struct{})
+	byID := make(map[uuid.UUID]*CertifyLegal)
+	nids := make(map[uuid.UUID]map[*CertifyLegal]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -714,11 +715,11 @@ func (clq *CertifyLegalQuery) loadDiscoveredLicenses(ctx context.Context, query 
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*CertifyLegal]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -757,7 +758,7 @@ func (clq *CertifyLegalQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (clq *CertifyLegalQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(certifylegal.Table, certifylegal.Columns, sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(certifylegal.Table, certifylegal.Columns, sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID))
 	_spec.From = clq.sql
 	if unique := clq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

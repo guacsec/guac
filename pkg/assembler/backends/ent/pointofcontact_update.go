@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -33,15 +34,15 @@ func (pocu *PointOfContactUpdate) Where(ps ...predicate.PointOfContact) *PointOf
 }
 
 // SetSourceID sets the "source_id" field.
-func (pocu *PointOfContactUpdate) SetSourceID(i int) *PointOfContactUpdate {
-	pocu.mutation.SetSourceID(i)
+func (pocu *PointOfContactUpdate) SetSourceID(u uuid.UUID) *PointOfContactUpdate {
+	pocu.mutation.SetSourceID(u)
 	return pocu
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableSourceID(i *int) *PointOfContactUpdate {
-	if i != nil {
-		pocu.SetSourceID(*i)
+func (pocu *PointOfContactUpdate) SetNillableSourceID(u *uuid.UUID) *PointOfContactUpdate {
+	if u != nil {
+		pocu.SetSourceID(*u)
 	}
 	return pocu
 }
@@ -53,15 +54,15 @@ func (pocu *PointOfContactUpdate) ClearSourceID() *PointOfContactUpdate {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (pocu *PointOfContactUpdate) SetPackageVersionID(i int) *PointOfContactUpdate {
-	pocu.mutation.SetPackageVersionID(i)
+func (pocu *PointOfContactUpdate) SetPackageVersionID(u uuid.UUID) *PointOfContactUpdate {
+	pocu.mutation.SetPackageVersionID(u)
 	return pocu
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillablePackageVersionID(i *int) *PointOfContactUpdate {
-	if i != nil {
-		pocu.SetPackageVersionID(*i)
+func (pocu *PointOfContactUpdate) SetNillablePackageVersionID(u *uuid.UUID) *PointOfContactUpdate {
+	if u != nil {
+		pocu.SetPackageVersionID(*u)
 	}
 	return pocu
 }
@@ -73,15 +74,15 @@ func (pocu *PointOfContactUpdate) ClearPackageVersionID() *PointOfContactUpdate 
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (pocu *PointOfContactUpdate) SetPackageNameID(i int) *PointOfContactUpdate {
-	pocu.mutation.SetPackageNameID(i)
+func (pocu *PointOfContactUpdate) SetPackageNameID(u uuid.UUID) *PointOfContactUpdate {
+	pocu.mutation.SetPackageNameID(u)
 	return pocu
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillablePackageNameID(i *int) *PointOfContactUpdate {
-	if i != nil {
-		pocu.SetPackageNameID(*i)
+func (pocu *PointOfContactUpdate) SetNillablePackageNameID(u *uuid.UUID) *PointOfContactUpdate {
+	if u != nil {
+		pocu.SetPackageNameID(*u)
 	}
 	return pocu
 }
@@ -93,15 +94,15 @@ func (pocu *PointOfContactUpdate) ClearPackageNameID() *PointOfContactUpdate {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (pocu *PointOfContactUpdate) SetArtifactID(i int) *PointOfContactUpdate {
-	pocu.mutation.SetArtifactID(i)
+func (pocu *PointOfContactUpdate) SetArtifactID(u uuid.UUID) *PointOfContactUpdate {
+	pocu.mutation.SetArtifactID(u)
 	return pocu
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableArtifactID(i *int) *PointOfContactUpdate {
-	if i != nil {
-		pocu.SetArtifactID(*i)
+func (pocu *PointOfContactUpdate) SetNillableArtifactID(u *uuid.UUID) *PointOfContactUpdate {
+	if u != nil {
+		pocu.SetArtifactID(*u)
 	}
 	return pocu
 }
@@ -207,13 +208,13 @@ func (pocu *PointOfContactUpdate) SetPackageVersion(p *PackageVersion) *PointOfC
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (pocu *PointOfContactUpdate) SetAllVersionsID(id int) *PointOfContactUpdate {
+func (pocu *PointOfContactUpdate) SetAllVersionsID(id uuid.UUID) *PointOfContactUpdate {
 	pocu.mutation.SetAllVersionsID(id)
 	return pocu
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (pocu *PointOfContactUpdate) SetNillableAllVersionsID(id *int) *PointOfContactUpdate {
+func (pocu *PointOfContactUpdate) SetNillableAllVersionsID(id *uuid.UUID) *PointOfContactUpdate {
 	if id != nil {
 		pocu = pocu.SetAllVersionsID(*id)
 	}
@@ -287,7 +288,7 @@ func (pocu *PointOfContactUpdate) ExecX(ctx context.Context) {
 }
 
 func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(pointofcontact.Table, pointofcontact.Columns, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(pointofcontact.Table, pointofcontact.Columns, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
 	if ps := pocu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -321,7 +322,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{pointofcontact.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -334,7 +335,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{pointofcontact.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -350,7 +351,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{pointofcontact.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -363,7 +364,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{pointofcontact.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -379,7 +380,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{pointofcontact.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -392,7 +393,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{pointofcontact.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -408,7 +409,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{pointofcontact.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -421,7 +422,7 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 			Columns: []string{pointofcontact.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -450,15 +451,15 @@ type PointOfContactUpdateOne struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (pocuo *PointOfContactUpdateOne) SetSourceID(i int) *PointOfContactUpdateOne {
-	pocuo.mutation.SetSourceID(i)
+func (pocuo *PointOfContactUpdateOne) SetSourceID(u uuid.UUID) *PointOfContactUpdateOne {
+	pocuo.mutation.SetSourceID(u)
 	return pocuo
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableSourceID(i *int) *PointOfContactUpdateOne {
-	if i != nil {
-		pocuo.SetSourceID(*i)
+func (pocuo *PointOfContactUpdateOne) SetNillableSourceID(u *uuid.UUID) *PointOfContactUpdateOne {
+	if u != nil {
+		pocuo.SetSourceID(*u)
 	}
 	return pocuo
 }
@@ -470,15 +471,15 @@ func (pocuo *PointOfContactUpdateOne) ClearSourceID() *PointOfContactUpdateOne {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (pocuo *PointOfContactUpdateOne) SetPackageVersionID(i int) *PointOfContactUpdateOne {
-	pocuo.mutation.SetPackageVersionID(i)
+func (pocuo *PointOfContactUpdateOne) SetPackageVersionID(u uuid.UUID) *PointOfContactUpdateOne {
+	pocuo.mutation.SetPackageVersionID(u)
 	return pocuo
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillablePackageVersionID(i *int) *PointOfContactUpdateOne {
-	if i != nil {
-		pocuo.SetPackageVersionID(*i)
+func (pocuo *PointOfContactUpdateOne) SetNillablePackageVersionID(u *uuid.UUID) *PointOfContactUpdateOne {
+	if u != nil {
+		pocuo.SetPackageVersionID(*u)
 	}
 	return pocuo
 }
@@ -490,15 +491,15 @@ func (pocuo *PointOfContactUpdateOne) ClearPackageVersionID() *PointOfContactUpd
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (pocuo *PointOfContactUpdateOne) SetPackageNameID(i int) *PointOfContactUpdateOne {
-	pocuo.mutation.SetPackageNameID(i)
+func (pocuo *PointOfContactUpdateOne) SetPackageNameID(u uuid.UUID) *PointOfContactUpdateOne {
+	pocuo.mutation.SetPackageNameID(u)
 	return pocuo
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillablePackageNameID(i *int) *PointOfContactUpdateOne {
-	if i != nil {
-		pocuo.SetPackageNameID(*i)
+func (pocuo *PointOfContactUpdateOne) SetNillablePackageNameID(u *uuid.UUID) *PointOfContactUpdateOne {
+	if u != nil {
+		pocuo.SetPackageNameID(*u)
 	}
 	return pocuo
 }
@@ -510,15 +511,15 @@ func (pocuo *PointOfContactUpdateOne) ClearPackageNameID() *PointOfContactUpdate
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (pocuo *PointOfContactUpdateOne) SetArtifactID(i int) *PointOfContactUpdateOne {
-	pocuo.mutation.SetArtifactID(i)
+func (pocuo *PointOfContactUpdateOne) SetArtifactID(u uuid.UUID) *PointOfContactUpdateOne {
+	pocuo.mutation.SetArtifactID(u)
 	return pocuo
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableArtifactID(i *int) *PointOfContactUpdateOne {
-	if i != nil {
-		pocuo.SetArtifactID(*i)
+func (pocuo *PointOfContactUpdateOne) SetNillableArtifactID(u *uuid.UUID) *PointOfContactUpdateOne {
+	if u != nil {
+		pocuo.SetArtifactID(*u)
 	}
 	return pocuo
 }
@@ -624,13 +625,13 @@ func (pocuo *PointOfContactUpdateOne) SetPackageVersion(p *PackageVersion) *Poin
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (pocuo *PointOfContactUpdateOne) SetAllVersionsID(id int) *PointOfContactUpdateOne {
+func (pocuo *PointOfContactUpdateOne) SetAllVersionsID(id uuid.UUID) *PointOfContactUpdateOne {
 	pocuo.mutation.SetAllVersionsID(id)
 	return pocuo
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (pocuo *PointOfContactUpdateOne) SetNillableAllVersionsID(id *int) *PointOfContactUpdateOne {
+func (pocuo *PointOfContactUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *PointOfContactUpdateOne {
 	if id != nil {
 		pocuo = pocuo.SetAllVersionsID(*id)
 	}
@@ -717,7 +718,7 @@ func (pocuo *PointOfContactUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *PointOfContact, err error) {
-	_spec := sqlgraph.NewUpdateSpec(pointofcontact.Table, pointofcontact.Columns, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(pointofcontact.Table, pointofcontact.Columns, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
 	id, ok := pocuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "PointOfContact.id" for update`)}
@@ -768,7 +769,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 			Columns: []string{pointofcontact.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -781,7 +782,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 			Columns: []string{pointofcontact.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -797,7 +798,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 			Columns: []string{pointofcontact.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -810,7 +811,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 			Columns: []string{pointofcontact.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -826,7 +827,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 			Columns: []string{pointofcontact.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -839,7 +840,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 			Columns: []string{pointofcontact.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -855,7 +856,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 			Columns: []string{pointofcontact.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -868,7 +869,7 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 			Columns: []string{pointofcontact.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

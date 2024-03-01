@@ -40,7 +40,7 @@ func (ped *PkgEqualDelete) ExecX(ctx context.Context) int {
 }
 
 func (ped *PkgEqualDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(pkgequal.Table, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(pkgequal.Table, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID))
 	if ps := ped.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

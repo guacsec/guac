@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
@@ -27,29 +29,29 @@ type BillOfMaterialsCreate struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (bomc *BillOfMaterialsCreate) SetPackageID(i int) *BillOfMaterialsCreate {
-	bomc.mutation.SetPackageID(i)
+func (bomc *BillOfMaterialsCreate) SetPackageID(u uuid.UUID) *BillOfMaterialsCreate {
+	bomc.mutation.SetPackageID(u)
 	return bomc
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (bomc *BillOfMaterialsCreate) SetNillablePackageID(i *int) *BillOfMaterialsCreate {
-	if i != nil {
-		bomc.SetPackageID(*i)
+func (bomc *BillOfMaterialsCreate) SetNillablePackageID(u *uuid.UUID) *BillOfMaterialsCreate {
+	if u != nil {
+		bomc.SetPackageID(*u)
 	}
 	return bomc
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (bomc *BillOfMaterialsCreate) SetArtifactID(i int) *BillOfMaterialsCreate {
-	bomc.mutation.SetArtifactID(i)
+func (bomc *BillOfMaterialsCreate) SetArtifactID(u uuid.UUID) *BillOfMaterialsCreate {
+	bomc.mutation.SetArtifactID(u)
 	return bomc
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (bomc *BillOfMaterialsCreate) SetNillableArtifactID(i *int) *BillOfMaterialsCreate {
-	if i != nil {
-		bomc.SetArtifactID(*i)
+func (bomc *BillOfMaterialsCreate) SetNillableArtifactID(u *uuid.UUID) *BillOfMaterialsCreate {
+	if u != nil {
+		bomc.SetArtifactID(*u)
 	}
 	return bomc
 }
@@ -96,6 +98,44 @@ func (bomc *BillOfMaterialsCreate) SetKnownSince(t time.Time) *BillOfMaterialsCr
 	return bomc
 }
 
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (bomc *BillOfMaterialsCreate) SetIncludedPackagesHash(s string) *BillOfMaterialsCreate {
+	bomc.mutation.SetIncludedPackagesHash(s)
+	return bomc
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (bomc *BillOfMaterialsCreate) SetIncludedArtifactsHash(s string) *BillOfMaterialsCreate {
+	bomc.mutation.SetIncludedArtifactsHash(s)
+	return bomc
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (bomc *BillOfMaterialsCreate) SetIncludedDependenciesHash(s string) *BillOfMaterialsCreate {
+	bomc.mutation.SetIncludedDependenciesHash(s)
+	return bomc
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (bomc *BillOfMaterialsCreate) SetIncludedOccurrencesHash(s string) *BillOfMaterialsCreate {
+	bomc.mutation.SetIncludedOccurrencesHash(s)
+	return bomc
+}
+
+// SetID sets the "id" field.
+func (bomc *BillOfMaterialsCreate) SetID(u uuid.UUID) *BillOfMaterialsCreate {
+	bomc.mutation.SetID(u)
+	return bomc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (bomc *BillOfMaterialsCreate) SetNillableID(u *uuid.UUID) *BillOfMaterialsCreate {
+	if u != nil {
+		bomc.SetID(*u)
+	}
+	return bomc
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (bomc *BillOfMaterialsCreate) SetPackage(p *PackageVersion) *BillOfMaterialsCreate {
 	return bomc.SetPackageID(p.ID)
@@ -107,14 +147,14 @@ func (bomc *BillOfMaterialsCreate) SetArtifact(a *Artifact) *BillOfMaterialsCrea
 }
 
 // AddIncludedSoftwarePackageIDs adds the "included_software_packages" edge to the PackageVersion entity by IDs.
-func (bomc *BillOfMaterialsCreate) AddIncludedSoftwarePackageIDs(ids ...int) *BillOfMaterialsCreate {
+func (bomc *BillOfMaterialsCreate) AddIncludedSoftwarePackageIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
 	bomc.mutation.AddIncludedSoftwarePackageIDs(ids...)
 	return bomc
 }
 
 // AddIncludedSoftwarePackages adds the "included_software_packages" edges to the PackageVersion entity.
 func (bomc *BillOfMaterialsCreate) AddIncludedSoftwarePackages(p ...*PackageVersion) *BillOfMaterialsCreate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -122,14 +162,14 @@ func (bomc *BillOfMaterialsCreate) AddIncludedSoftwarePackages(p ...*PackageVers
 }
 
 // AddIncludedSoftwareArtifactIDs adds the "included_software_artifacts" edge to the Artifact entity by IDs.
-func (bomc *BillOfMaterialsCreate) AddIncludedSoftwareArtifactIDs(ids ...int) *BillOfMaterialsCreate {
+func (bomc *BillOfMaterialsCreate) AddIncludedSoftwareArtifactIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
 	bomc.mutation.AddIncludedSoftwareArtifactIDs(ids...)
 	return bomc
 }
 
 // AddIncludedSoftwareArtifacts adds the "included_software_artifacts" edges to the Artifact entity.
 func (bomc *BillOfMaterialsCreate) AddIncludedSoftwareArtifacts(a ...*Artifact) *BillOfMaterialsCreate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -137,14 +177,14 @@ func (bomc *BillOfMaterialsCreate) AddIncludedSoftwareArtifacts(a ...*Artifact) 
 }
 
 // AddIncludedDependencyIDs adds the "included_dependencies" edge to the Dependency entity by IDs.
-func (bomc *BillOfMaterialsCreate) AddIncludedDependencyIDs(ids ...int) *BillOfMaterialsCreate {
+func (bomc *BillOfMaterialsCreate) AddIncludedDependencyIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
 	bomc.mutation.AddIncludedDependencyIDs(ids...)
 	return bomc
 }
 
 // AddIncludedDependencies adds the "included_dependencies" edges to the Dependency entity.
 func (bomc *BillOfMaterialsCreate) AddIncludedDependencies(d ...*Dependency) *BillOfMaterialsCreate {
-	ids := make([]int, len(d))
+	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
@@ -152,14 +192,14 @@ func (bomc *BillOfMaterialsCreate) AddIncludedDependencies(d ...*Dependency) *Bi
 }
 
 // AddIncludedOccurrenceIDs adds the "included_occurrences" edge to the Occurrence entity by IDs.
-func (bomc *BillOfMaterialsCreate) AddIncludedOccurrenceIDs(ids ...int) *BillOfMaterialsCreate {
+func (bomc *BillOfMaterialsCreate) AddIncludedOccurrenceIDs(ids ...uuid.UUID) *BillOfMaterialsCreate {
 	bomc.mutation.AddIncludedOccurrenceIDs(ids...)
 	return bomc
 }
 
 // AddIncludedOccurrences adds the "included_occurrences" edges to the Occurrence entity.
 func (bomc *BillOfMaterialsCreate) AddIncludedOccurrences(o ...*Occurrence) *BillOfMaterialsCreate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -173,6 +213,7 @@ func (bomc *BillOfMaterialsCreate) Mutation() *BillOfMaterialsMutation {
 
 // Save creates the BillOfMaterials in the database.
 func (bomc *BillOfMaterialsCreate) Save(ctx context.Context) (*BillOfMaterials, error) {
+	bomc.defaults()
 	return withHooks(ctx, bomc.sqlSave, bomc.mutation, bomc.hooks)
 }
 
@@ -195,6 +236,14 @@ func (bomc *BillOfMaterialsCreate) Exec(ctx context.Context) error {
 func (bomc *BillOfMaterialsCreate) ExecX(ctx context.Context) {
 	if err := bomc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (bomc *BillOfMaterialsCreate) defaults() {
+	if _, ok := bomc.mutation.ID(); !ok {
+		v := billofmaterials.DefaultID()
+		bomc.mutation.SetID(v)
 	}
 }
 
@@ -221,6 +270,18 @@ func (bomc *BillOfMaterialsCreate) check() error {
 	if _, ok := bomc.mutation.KnownSince(); !ok {
 		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "BillOfMaterials.known_since"`)}
 	}
+	if _, ok := bomc.mutation.IncludedPackagesHash(); !ok {
+		return &ValidationError{Name: "included_packages_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_packages_hash"`)}
+	}
+	if _, ok := bomc.mutation.IncludedArtifactsHash(); !ok {
+		return &ValidationError{Name: "included_artifacts_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_artifacts_hash"`)}
+	}
+	if _, ok := bomc.mutation.IncludedDependenciesHash(); !ok {
+		return &ValidationError{Name: "included_dependencies_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_dependencies_hash"`)}
+	}
+	if _, ok := bomc.mutation.IncludedOccurrencesHash(); !ok {
+		return &ValidationError{Name: "included_occurrences_hash", err: errors.New(`ent: missing required field "BillOfMaterials.included_occurrences_hash"`)}
+	}
 	return nil
 }
 
@@ -235,8 +296,13 @@ func (bomc *BillOfMaterialsCreate) sqlSave(ctx context.Context) (*BillOfMaterial
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	bomc.mutation.id = &_node.ID
 	bomc.mutation.done = true
 	return _node, nil
@@ -245,9 +311,13 @@ func (bomc *BillOfMaterialsCreate) sqlSave(ctx context.Context) (*BillOfMaterial
 func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.CreateSpec) {
 	var (
 		_node = &BillOfMaterials{config: bomc.config}
-		_spec = sqlgraph.NewCreateSpec(billofmaterials.Table, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(billofmaterials.Table, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = bomc.conflict
+	if id, ok := bomc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := bomc.mutation.URI(); ok {
 		_spec.SetField(billofmaterials.FieldURI, field.TypeString, value)
 		_node.URI = value
@@ -276,6 +346,22 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
 		_node.KnownSince = value
 	}
+	if value, ok := bomc.mutation.IncludedPackagesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedPackagesHash, field.TypeString, value)
+		_node.IncludedPackagesHash = value
+	}
+	if value, ok := bomc.mutation.IncludedArtifactsHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedArtifactsHash, field.TypeString, value)
+		_node.IncludedArtifactsHash = value
+	}
+	if value, ok := bomc.mutation.IncludedDependenciesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedDependenciesHash, field.TypeString, value)
+		_node.IncludedDependenciesHash = value
+	}
+	if value, ok := bomc.mutation.IncludedOccurrencesHash(); ok {
+		_spec.SetField(billofmaterials.FieldIncludedOccurrencesHash, field.TypeString, value)
+		_node.IncludedOccurrencesHash = value
+	}
 	if nodes := bomc.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -284,7 +370,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 			Columns: []string{billofmaterials.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -301,7 +387,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 			Columns: []string{billofmaterials.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -318,7 +404,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 			Columns: billofmaterials.IncludedSoftwarePackagesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -334,7 +420,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 			Columns: billofmaterials.IncludedSoftwareArtifactsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -350,7 +436,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 			Columns: billofmaterials.IncludedDependenciesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -366,7 +452,7 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 			Columns: billofmaterials.IncludedOccurrencesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -427,7 +513,7 @@ type (
 )
 
 // SetPackageID sets the "package_id" field.
-func (u *BillOfMaterialsUpsert) SetPackageID(v int) *BillOfMaterialsUpsert {
+func (u *BillOfMaterialsUpsert) SetPackageID(v uuid.UUID) *BillOfMaterialsUpsert {
 	u.Set(billofmaterials.FieldPackageID, v)
 	return u
 }
@@ -445,7 +531,7 @@ func (u *BillOfMaterialsUpsert) ClearPackageID() *BillOfMaterialsUpsert {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *BillOfMaterialsUpsert) SetArtifactID(v int) *BillOfMaterialsUpsert {
+func (u *BillOfMaterialsUpsert) SetArtifactID(v uuid.UUID) *BillOfMaterialsUpsert {
 	u.Set(billofmaterials.FieldArtifactID, v)
 	return u
 }
@@ -546,16 +632,72 @@ func (u *BillOfMaterialsUpsert) UpdateKnownSince() *BillOfMaterialsUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (u *BillOfMaterialsUpsert) SetIncludedPackagesHash(v string) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldIncludedPackagesHash, v)
+	return u
+}
+
+// UpdateIncludedPackagesHash sets the "included_packages_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateIncludedPackagesHash() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldIncludedPackagesHash)
+	return u
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (u *BillOfMaterialsUpsert) SetIncludedArtifactsHash(v string) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldIncludedArtifactsHash, v)
+	return u
+}
+
+// UpdateIncludedArtifactsHash sets the "included_artifacts_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateIncludedArtifactsHash() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldIncludedArtifactsHash)
+	return u
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (u *BillOfMaterialsUpsert) SetIncludedDependenciesHash(v string) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldIncludedDependenciesHash, v)
+	return u
+}
+
+// UpdateIncludedDependenciesHash sets the "included_dependencies_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateIncludedDependenciesHash() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldIncludedDependenciesHash)
+	return u
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (u *BillOfMaterialsUpsert) SetIncludedOccurrencesHash(v string) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldIncludedOccurrencesHash, v)
+	return u
+}
+
+// UpdateIncludedOccurrencesHash sets the "included_occurrences_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateIncludedOccurrencesHash() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldIncludedOccurrencesHash)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.BillOfMaterials.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(billofmaterials.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *BillOfMaterialsUpsertOne) UpdateNewValues() *BillOfMaterialsUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(billofmaterials.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -587,7 +729,7 @@ func (u *BillOfMaterialsUpsertOne) Update(set func(*BillOfMaterialsUpsert)) *Bil
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *BillOfMaterialsUpsertOne) SetPackageID(v int) *BillOfMaterialsUpsertOne {
+func (u *BillOfMaterialsUpsertOne) SetPackageID(v uuid.UUID) *BillOfMaterialsUpsertOne {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.SetPackageID(v)
 	})
@@ -608,7 +750,7 @@ func (u *BillOfMaterialsUpsertOne) ClearPackageID() *BillOfMaterialsUpsertOne {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *BillOfMaterialsUpsertOne) SetArtifactID(v int) *BillOfMaterialsUpsertOne {
+func (u *BillOfMaterialsUpsertOne) SetArtifactID(v uuid.UUID) *BillOfMaterialsUpsertOne {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.SetArtifactID(v)
 	})
@@ -726,6 +868,62 @@ func (u *BillOfMaterialsUpsertOne) UpdateKnownSince() *BillOfMaterialsUpsertOne 
 	})
 }
 
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (u *BillOfMaterialsUpsertOne) SetIncludedPackagesHash(v string) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedPackagesHash(v)
+	})
+}
+
+// UpdateIncludedPackagesHash sets the "included_packages_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateIncludedPackagesHash() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedPackagesHash()
+	})
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (u *BillOfMaterialsUpsertOne) SetIncludedArtifactsHash(v string) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedArtifactsHash(v)
+	})
+}
+
+// UpdateIncludedArtifactsHash sets the "included_artifacts_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateIncludedArtifactsHash() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedArtifactsHash()
+	})
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (u *BillOfMaterialsUpsertOne) SetIncludedDependenciesHash(v string) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedDependenciesHash(v)
+	})
+}
+
+// UpdateIncludedDependenciesHash sets the "included_dependencies_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateIncludedDependenciesHash() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedDependenciesHash()
+	})
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (u *BillOfMaterialsUpsertOne) SetIncludedOccurrencesHash(v string) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedOccurrencesHash(v)
+	})
+}
+
+// UpdateIncludedOccurrencesHash sets the "included_occurrences_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateIncludedOccurrencesHash() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedOccurrencesHash()
+	})
+}
+
 // Exec executes the query.
 func (u *BillOfMaterialsUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -742,7 +940,12 @@ func (u *BillOfMaterialsUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *BillOfMaterialsUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *BillOfMaterialsUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: BillOfMaterialsUpsertOne.ID is not supported by MySQL driver. Use BillOfMaterialsUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -751,7 +954,7 @@ func (u *BillOfMaterialsUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *BillOfMaterialsUpsertOne) IDX(ctx context.Context) int {
+func (u *BillOfMaterialsUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -778,6 +981,7 @@ func (bomcb *BillOfMaterialsCreateBulk) Save(ctx context.Context) ([]*BillOfMate
 	for i := range bomcb.builders {
 		func(i int, root context.Context) {
 			builder := bomcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BillOfMaterialsMutation)
 				if !ok {
@@ -805,10 +1009,6 @@ func (bomcb *BillOfMaterialsCreateBulk) Save(ctx context.Context) ([]*BillOfMate
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -895,10 +1095,20 @@ type BillOfMaterialsUpsertBulk struct {
 //	client.BillOfMaterials.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(billofmaterials.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *BillOfMaterialsUpsertBulk) UpdateNewValues() *BillOfMaterialsUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(billofmaterials.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -930,7 +1140,7 @@ func (u *BillOfMaterialsUpsertBulk) Update(set func(*BillOfMaterialsUpsert)) *Bi
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *BillOfMaterialsUpsertBulk) SetPackageID(v int) *BillOfMaterialsUpsertBulk {
+func (u *BillOfMaterialsUpsertBulk) SetPackageID(v uuid.UUID) *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.SetPackageID(v)
 	})
@@ -951,7 +1161,7 @@ func (u *BillOfMaterialsUpsertBulk) ClearPackageID() *BillOfMaterialsUpsertBulk 
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *BillOfMaterialsUpsertBulk) SetArtifactID(v int) *BillOfMaterialsUpsertBulk {
+func (u *BillOfMaterialsUpsertBulk) SetArtifactID(v uuid.UUID) *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.SetArtifactID(v)
 	})
@@ -1066,6 +1276,62 @@ func (u *BillOfMaterialsUpsertBulk) SetKnownSince(v time.Time) *BillOfMaterialsU
 func (u *BillOfMaterialsUpsertBulk) UpdateKnownSince() *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateKnownSince()
+	})
+}
+
+// SetIncludedPackagesHash sets the "included_packages_hash" field.
+func (u *BillOfMaterialsUpsertBulk) SetIncludedPackagesHash(v string) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedPackagesHash(v)
+	})
+}
+
+// UpdateIncludedPackagesHash sets the "included_packages_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateIncludedPackagesHash() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedPackagesHash()
+	})
+}
+
+// SetIncludedArtifactsHash sets the "included_artifacts_hash" field.
+func (u *BillOfMaterialsUpsertBulk) SetIncludedArtifactsHash(v string) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedArtifactsHash(v)
+	})
+}
+
+// UpdateIncludedArtifactsHash sets the "included_artifacts_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateIncludedArtifactsHash() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedArtifactsHash()
+	})
+}
+
+// SetIncludedDependenciesHash sets the "included_dependencies_hash" field.
+func (u *BillOfMaterialsUpsertBulk) SetIncludedDependenciesHash(v string) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedDependenciesHash(v)
+	})
+}
+
+// UpdateIncludedDependenciesHash sets the "included_dependencies_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateIncludedDependenciesHash() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedDependenciesHash()
+	})
+}
+
+// SetIncludedOccurrencesHash sets the "included_occurrences_hash" field.
+func (u *BillOfMaterialsUpsertBulk) SetIncludedOccurrencesHash(v string) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetIncludedOccurrencesHash(v)
+	})
+}
+
+// UpdateIncludedOccurrencesHash sets the "included_occurrences_hash" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateIncludedOccurrencesHash() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateIncludedOccurrencesHash()
 	})
 }
 

@@ -6,13 +6,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // CertifyScorecardCreate is the builder for creating a CertifyScorecard entity.
@@ -24,20 +27,87 @@ type CertifyScorecardCreate struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (csc *CertifyScorecardCreate) SetSourceID(i int) *CertifyScorecardCreate {
-	csc.mutation.SetSourceID(i)
+func (csc *CertifyScorecardCreate) SetSourceID(u uuid.UUID) *CertifyScorecardCreate {
+	csc.mutation.SetSourceID(u)
 	return csc
 }
 
-// SetScorecardID sets the "scorecard_id" field.
-func (csc *CertifyScorecardCreate) SetScorecardID(i int) *CertifyScorecardCreate {
-	csc.mutation.SetScorecardID(i)
+// SetChecks sets the "checks" field.
+func (csc *CertifyScorecardCreate) SetChecks(mc []*model.ScorecardCheck) *CertifyScorecardCreate {
+	csc.mutation.SetChecks(mc)
 	return csc
 }
 
-// SetScorecard sets the "scorecard" edge to the Scorecard entity.
-func (csc *CertifyScorecardCreate) SetScorecard(s *Scorecard) *CertifyScorecardCreate {
-	return csc.SetScorecardID(s.ID)
+// SetAggregateScore sets the "aggregate_score" field.
+func (csc *CertifyScorecardCreate) SetAggregateScore(f float64) *CertifyScorecardCreate {
+	csc.mutation.SetAggregateScore(f)
+	return csc
+}
+
+// SetNillableAggregateScore sets the "aggregate_score" field if the given value is not nil.
+func (csc *CertifyScorecardCreate) SetNillableAggregateScore(f *float64) *CertifyScorecardCreate {
+	if f != nil {
+		csc.SetAggregateScore(*f)
+	}
+	return csc
+}
+
+// SetTimeScanned sets the "time_scanned" field.
+func (csc *CertifyScorecardCreate) SetTimeScanned(t time.Time) *CertifyScorecardCreate {
+	csc.mutation.SetTimeScanned(t)
+	return csc
+}
+
+// SetNillableTimeScanned sets the "time_scanned" field if the given value is not nil.
+func (csc *CertifyScorecardCreate) SetNillableTimeScanned(t *time.Time) *CertifyScorecardCreate {
+	if t != nil {
+		csc.SetTimeScanned(*t)
+	}
+	return csc
+}
+
+// SetScorecardVersion sets the "scorecard_version" field.
+func (csc *CertifyScorecardCreate) SetScorecardVersion(s string) *CertifyScorecardCreate {
+	csc.mutation.SetScorecardVersion(s)
+	return csc
+}
+
+// SetScorecardCommit sets the "scorecard_commit" field.
+func (csc *CertifyScorecardCreate) SetScorecardCommit(s string) *CertifyScorecardCreate {
+	csc.mutation.SetScorecardCommit(s)
+	return csc
+}
+
+// SetOrigin sets the "origin" field.
+func (csc *CertifyScorecardCreate) SetOrigin(s string) *CertifyScorecardCreate {
+	csc.mutation.SetOrigin(s)
+	return csc
+}
+
+// SetCollector sets the "collector" field.
+func (csc *CertifyScorecardCreate) SetCollector(s string) *CertifyScorecardCreate {
+	csc.mutation.SetCollector(s)
+	return csc
+}
+
+// SetChecksHash sets the "checks_hash" field.
+func (csc *CertifyScorecardCreate) SetChecksHash(s string) *CertifyScorecardCreate {
+	csc.mutation.SetChecksHash(s)
+	return csc
+}
+
+// SetID sets the "id" field.
+func (csc *CertifyScorecardCreate) SetID(u uuid.UUID) *CertifyScorecardCreate {
+	csc.mutation.SetID(u)
+	return csc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (csc *CertifyScorecardCreate) SetNillableID(u *uuid.UUID) *CertifyScorecardCreate {
+	if u != nil {
+		csc.SetID(*u)
+	}
+	return csc
 }
 
 // SetSource sets the "source" edge to the SourceName entity.
@@ -52,6 +122,7 @@ func (csc *CertifyScorecardCreate) Mutation() *CertifyScorecardMutation {
 
 // Save creates the CertifyScorecard in the database.
 func (csc *CertifyScorecardCreate) Save(ctx context.Context) (*CertifyScorecard, error) {
+	csc.defaults()
 	return withHooks(ctx, csc.sqlSave, csc.mutation, csc.hooks)
 }
 
@@ -77,16 +148,50 @@ func (csc *CertifyScorecardCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (csc *CertifyScorecardCreate) defaults() {
+	if _, ok := csc.mutation.AggregateScore(); !ok {
+		v := certifyscorecard.DefaultAggregateScore
+		csc.mutation.SetAggregateScore(v)
+	}
+	if _, ok := csc.mutation.TimeScanned(); !ok {
+		v := certifyscorecard.DefaultTimeScanned()
+		csc.mutation.SetTimeScanned(v)
+	}
+	if _, ok := csc.mutation.ID(); !ok {
+		v := certifyscorecard.DefaultID()
+		csc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (csc *CertifyScorecardCreate) check() error {
 	if _, ok := csc.mutation.SourceID(); !ok {
 		return &ValidationError{Name: "source_id", err: errors.New(`ent: missing required field "CertifyScorecard.source_id"`)}
 	}
-	if _, ok := csc.mutation.ScorecardID(); !ok {
-		return &ValidationError{Name: "scorecard_id", err: errors.New(`ent: missing required field "CertifyScorecard.scorecard_id"`)}
+	if _, ok := csc.mutation.Checks(); !ok {
+		return &ValidationError{Name: "checks", err: errors.New(`ent: missing required field "CertifyScorecard.checks"`)}
 	}
-	if _, ok := csc.mutation.ScorecardID(); !ok {
-		return &ValidationError{Name: "scorecard", err: errors.New(`ent: missing required edge "CertifyScorecard.scorecard"`)}
+	if _, ok := csc.mutation.AggregateScore(); !ok {
+		return &ValidationError{Name: "aggregate_score", err: errors.New(`ent: missing required field "CertifyScorecard.aggregate_score"`)}
+	}
+	if _, ok := csc.mutation.TimeScanned(); !ok {
+		return &ValidationError{Name: "time_scanned", err: errors.New(`ent: missing required field "CertifyScorecard.time_scanned"`)}
+	}
+	if _, ok := csc.mutation.ScorecardVersion(); !ok {
+		return &ValidationError{Name: "scorecard_version", err: errors.New(`ent: missing required field "CertifyScorecard.scorecard_version"`)}
+	}
+	if _, ok := csc.mutation.ScorecardCommit(); !ok {
+		return &ValidationError{Name: "scorecard_commit", err: errors.New(`ent: missing required field "CertifyScorecard.scorecard_commit"`)}
+	}
+	if _, ok := csc.mutation.Origin(); !ok {
+		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "CertifyScorecard.origin"`)}
+	}
+	if _, ok := csc.mutation.Collector(); !ok {
+		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyScorecard.collector"`)}
+	}
+	if _, ok := csc.mutation.ChecksHash(); !ok {
+		return &ValidationError{Name: "checks_hash", err: errors.New(`ent: missing required field "CertifyScorecard.checks_hash"`)}
 	}
 	if _, ok := csc.mutation.SourceID(); !ok {
 		return &ValidationError{Name: "source", err: errors.New(`ent: missing required edge "CertifyScorecard.source"`)}
@@ -105,8 +210,13 @@ func (csc *CertifyScorecardCreate) sqlSave(ctx context.Context) (*CertifyScoreca
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	csc.mutation.id = &_node.ID
 	csc.mutation.done = true
 	return _node, nil
@@ -115,25 +225,44 @@ func (csc *CertifyScorecardCreate) sqlSave(ctx context.Context) (*CertifyScoreca
 func (csc *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.CreateSpec) {
 	var (
 		_node = &CertifyScorecard{config: csc.config}
-		_spec = sqlgraph.NewCreateSpec(certifyscorecard.Table, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(certifyscorecard.Table, sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = csc.conflict
-	if nodes := csc.mutation.ScorecardIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   certifyscorecard.ScorecardTable,
-			Columns: []string{certifyscorecard.ScorecardColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(scorecard.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ScorecardID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
+	if id, ok := csc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := csc.mutation.Checks(); ok {
+		_spec.SetField(certifyscorecard.FieldChecks, field.TypeJSON, value)
+		_node.Checks = value
+	}
+	if value, ok := csc.mutation.AggregateScore(); ok {
+		_spec.SetField(certifyscorecard.FieldAggregateScore, field.TypeFloat64, value)
+		_node.AggregateScore = value
+	}
+	if value, ok := csc.mutation.TimeScanned(); ok {
+		_spec.SetField(certifyscorecard.FieldTimeScanned, field.TypeTime, value)
+		_node.TimeScanned = value
+	}
+	if value, ok := csc.mutation.ScorecardVersion(); ok {
+		_spec.SetField(certifyscorecard.FieldScorecardVersion, field.TypeString, value)
+		_node.ScorecardVersion = value
+	}
+	if value, ok := csc.mutation.ScorecardCommit(); ok {
+		_spec.SetField(certifyscorecard.FieldScorecardCommit, field.TypeString, value)
+		_node.ScorecardCommit = value
+	}
+	if value, ok := csc.mutation.Origin(); ok {
+		_spec.SetField(certifyscorecard.FieldOrigin, field.TypeString, value)
+		_node.Origin = value
+	}
+	if value, ok := csc.mutation.Collector(); ok {
+		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
+		_node.Collector = value
+	}
+	if value, ok := csc.mutation.ChecksHash(); ok {
+		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)
+		_node.ChecksHash = value
 	}
 	if nodes := csc.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -143,7 +272,7 @@ func (csc *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.Cr
 			Columns: []string{certifyscorecard.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -205,7 +334,7 @@ type (
 )
 
 // SetSourceID sets the "source_id" field.
-func (u *CertifyScorecardUpsert) SetSourceID(v int) *CertifyScorecardUpsert {
+func (u *CertifyScorecardUpsert) SetSourceID(v uuid.UUID) *CertifyScorecardUpsert {
 	u.Set(certifyscorecard.FieldSourceID, v)
 	return u
 }
@@ -216,28 +345,126 @@ func (u *CertifyScorecardUpsert) UpdateSourceID() *CertifyScorecardUpsert {
 	return u
 }
 
-// SetScorecardID sets the "scorecard_id" field.
-func (u *CertifyScorecardUpsert) SetScorecardID(v int) *CertifyScorecardUpsert {
-	u.Set(certifyscorecard.FieldScorecardID, v)
+// SetChecks sets the "checks" field.
+func (u *CertifyScorecardUpsert) SetChecks(v []*model.ScorecardCheck) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldChecks, v)
 	return u
 }
 
-// UpdateScorecardID sets the "scorecard_id" field to the value that was provided on create.
-func (u *CertifyScorecardUpsert) UpdateScorecardID() *CertifyScorecardUpsert {
-	u.SetExcluded(certifyscorecard.FieldScorecardID)
+// UpdateChecks sets the "checks" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateChecks() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldChecks)
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// SetAggregateScore sets the "aggregate_score" field.
+func (u *CertifyScorecardUpsert) SetAggregateScore(v float64) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldAggregateScore, v)
+	return u
+}
+
+// UpdateAggregateScore sets the "aggregate_score" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateAggregateScore() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldAggregateScore)
+	return u
+}
+
+// AddAggregateScore adds v to the "aggregate_score" field.
+func (u *CertifyScorecardUpsert) AddAggregateScore(v float64) *CertifyScorecardUpsert {
+	u.Add(certifyscorecard.FieldAggregateScore, v)
+	return u
+}
+
+// SetTimeScanned sets the "time_scanned" field.
+func (u *CertifyScorecardUpsert) SetTimeScanned(v time.Time) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldTimeScanned, v)
+	return u
+}
+
+// UpdateTimeScanned sets the "time_scanned" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateTimeScanned() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldTimeScanned)
+	return u
+}
+
+// SetScorecardVersion sets the "scorecard_version" field.
+func (u *CertifyScorecardUpsert) SetScorecardVersion(v string) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldScorecardVersion, v)
+	return u
+}
+
+// UpdateScorecardVersion sets the "scorecard_version" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateScorecardVersion() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldScorecardVersion)
+	return u
+}
+
+// SetScorecardCommit sets the "scorecard_commit" field.
+func (u *CertifyScorecardUpsert) SetScorecardCommit(v string) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldScorecardCommit, v)
+	return u
+}
+
+// UpdateScorecardCommit sets the "scorecard_commit" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateScorecardCommit() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldScorecardCommit)
+	return u
+}
+
+// SetOrigin sets the "origin" field.
+func (u *CertifyScorecardUpsert) SetOrigin(v string) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldOrigin, v)
+	return u
+}
+
+// UpdateOrigin sets the "origin" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateOrigin() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldOrigin)
+	return u
+}
+
+// SetCollector sets the "collector" field.
+func (u *CertifyScorecardUpsert) SetCollector(v string) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldCollector, v)
+	return u
+}
+
+// UpdateCollector sets the "collector" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateCollector() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldCollector)
+	return u
+}
+
+// SetChecksHash sets the "checks_hash" field.
+func (u *CertifyScorecardUpsert) SetChecksHash(v string) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldChecksHash, v)
+	return u
+}
+
+// UpdateChecksHash sets the "checks_hash" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateChecksHash() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldChecksHash)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.CertifyScorecard.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifyscorecard.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyScorecardUpsertOne) UpdateNewValues() *CertifyScorecardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(certifyscorecard.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -269,7 +496,7 @@ func (u *CertifyScorecardUpsertOne) Update(set func(*CertifyScorecardUpsert)) *C
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *CertifyScorecardUpsertOne) SetSourceID(v int) *CertifyScorecardUpsertOne {
+func (u *CertifyScorecardUpsertOne) SetSourceID(v uuid.UUID) *CertifyScorecardUpsertOne {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.SetSourceID(v)
 	})
@@ -282,17 +509,122 @@ func (u *CertifyScorecardUpsertOne) UpdateSourceID() *CertifyScorecardUpsertOne 
 	})
 }
 
-// SetScorecardID sets the "scorecard_id" field.
-func (u *CertifyScorecardUpsertOne) SetScorecardID(v int) *CertifyScorecardUpsertOne {
+// SetChecks sets the "checks" field.
+func (u *CertifyScorecardUpsertOne) SetChecks(v []*model.ScorecardCheck) *CertifyScorecardUpsertOne {
 	return u.Update(func(s *CertifyScorecardUpsert) {
-		s.SetScorecardID(v)
+		s.SetChecks(v)
 	})
 }
 
-// UpdateScorecardID sets the "scorecard_id" field to the value that was provided on create.
-func (u *CertifyScorecardUpsertOne) UpdateScorecardID() *CertifyScorecardUpsertOne {
+// UpdateChecks sets the "checks" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateChecks() *CertifyScorecardUpsertOne {
 	return u.Update(func(s *CertifyScorecardUpsert) {
-		s.UpdateScorecardID()
+		s.UpdateChecks()
+	})
+}
+
+// SetAggregateScore sets the "aggregate_score" field.
+func (u *CertifyScorecardUpsertOne) SetAggregateScore(v float64) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetAggregateScore(v)
+	})
+}
+
+// AddAggregateScore adds v to the "aggregate_score" field.
+func (u *CertifyScorecardUpsertOne) AddAggregateScore(v float64) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.AddAggregateScore(v)
+	})
+}
+
+// UpdateAggregateScore sets the "aggregate_score" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateAggregateScore() *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateAggregateScore()
+	})
+}
+
+// SetTimeScanned sets the "time_scanned" field.
+func (u *CertifyScorecardUpsertOne) SetTimeScanned(v time.Time) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetTimeScanned(v)
+	})
+}
+
+// UpdateTimeScanned sets the "time_scanned" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateTimeScanned() *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateTimeScanned()
+	})
+}
+
+// SetScorecardVersion sets the "scorecard_version" field.
+func (u *CertifyScorecardUpsertOne) SetScorecardVersion(v string) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetScorecardVersion(v)
+	})
+}
+
+// UpdateScorecardVersion sets the "scorecard_version" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateScorecardVersion() *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateScorecardVersion()
+	})
+}
+
+// SetScorecardCommit sets the "scorecard_commit" field.
+func (u *CertifyScorecardUpsertOne) SetScorecardCommit(v string) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetScorecardCommit(v)
+	})
+}
+
+// UpdateScorecardCommit sets the "scorecard_commit" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateScorecardCommit() *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateScorecardCommit()
+	})
+}
+
+// SetOrigin sets the "origin" field.
+func (u *CertifyScorecardUpsertOne) SetOrigin(v string) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetOrigin(v)
+	})
+}
+
+// UpdateOrigin sets the "origin" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateOrigin() *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateOrigin()
+	})
+}
+
+// SetCollector sets the "collector" field.
+func (u *CertifyScorecardUpsertOne) SetCollector(v string) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetCollector(v)
+	})
+}
+
+// UpdateCollector sets the "collector" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateCollector() *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateCollector()
+	})
+}
+
+// SetChecksHash sets the "checks_hash" field.
+func (u *CertifyScorecardUpsertOne) SetChecksHash(v string) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetChecksHash(v)
+	})
+}
+
+// UpdateChecksHash sets the "checks_hash" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateChecksHash() *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateChecksHash()
 	})
 }
 
@@ -312,7 +644,12 @@ func (u *CertifyScorecardUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CertifyScorecardUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *CertifyScorecardUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: CertifyScorecardUpsertOne.ID is not supported by MySQL driver. Use CertifyScorecardUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -321,7 +658,7 @@ func (u *CertifyScorecardUpsertOne) ID(ctx context.Context) (id int, err error) 
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *CertifyScorecardUpsertOne) IDX(ctx context.Context) int {
+func (u *CertifyScorecardUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -348,6 +685,7 @@ func (cscb *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifySco
 	for i := range cscb.builders {
 		func(i int, root context.Context) {
 			builder := cscb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertifyScorecardMutation)
 				if !ok {
@@ -375,10 +713,6 @@ func (cscb *CertifyScorecardCreateBulk) Save(ctx context.Context) ([]*CertifySco
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -465,10 +799,20 @@ type CertifyScorecardUpsertBulk struct {
 //	client.CertifyScorecard.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifyscorecard.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyScorecardUpsertBulk) UpdateNewValues() *CertifyScorecardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(certifyscorecard.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -500,7 +844,7 @@ func (u *CertifyScorecardUpsertBulk) Update(set func(*CertifyScorecardUpsert)) *
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *CertifyScorecardUpsertBulk) SetSourceID(v int) *CertifyScorecardUpsertBulk {
+func (u *CertifyScorecardUpsertBulk) SetSourceID(v uuid.UUID) *CertifyScorecardUpsertBulk {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.SetSourceID(v)
 	})
@@ -513,17 +857,122 @@ func (u *CertifyScorecardUpsertBulk) UpdateSourceID() *CertifyScorecardUpsertBul
 	})
 }
 
-// SetScorecardID sets the "scorecard_id" field.
-func (u *CertifyScorecardUpsertBulk) SetScorecardID(v int) *CertifyScorecardUpsertBulk {
+// SetChecks sets the "checks" field.
+func (u *CertifyScorecardUpsertBulk) SetChecks(v []*model.ScorecardCheck) *CertifyScorecardUpsertBulk {
 	return u.Update(func(s *CertifyScorecardUpsert) {
-		s.SetScorecardID(v)
+		s.SetChecks(v)
 	})
 }
 
-// UpdateScorecardID sets the "scorecard_id" field to the value that was provided on create.
-func (u *CertifyScorecardUpsertBulk) UpdateScorecardID() *CertifyScorecardUpsertBulk {
+// UpdateChecks sets the "checks" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateChecks() *CertifyScorecardUpsertBulk {
 	return u.Update(func(s *CertifyScorecardUpsert) {
-		s.UpdateScorecardID()
+		s.UpdateChecks()
+	})
+}
+
+// SetAggregateScore sets the "aggregate_score" field.
+func (u *CertifyScorecardUpsertBulk) SetAggregateScore(v float64) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetAggregateScore(v)
+	})
+}
+
+// AddAggregateScore adds v to the "aggregate_score" field.
+func (u *CertifyScorecardUpsertBulk) AddAggregateScore(v float64) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.AddAggregateScore(v)
+	})
+}
+
+// UpdateAggregateScore sets the "aggregate_score" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateAggregateScore() *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateAggregateScore()
+	})
+}
+
+// SetTimeScanned sets the "time_scanned" field.
+func (u *CertifyScorecardUpsertBulk) SetTimeScanned(v time.Time) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetTimeScanned(v)
+	})
+}
+
+// UpdateTimeScanned sets the "time_scanned" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateTimeScanned() *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateTimeScanned()
+	})
+}
+
+// SetScorecardVersion sets the "scorecard_version" field.
+func (u *CertifyScorecardUpsertBulk) SetScorecardVersion(v string) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetScorecardVersion(v)
+	})
+}
+
+// UpdateScorecardVersion sets the "scorecard_version" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateScorecardVersion() *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateScorecardVersion()
+	})
+}
+
+// SetScorecardCommit sets the "scorecard_commit" field.
+func (u *CertifyScorecardUpsertBulk) SetScorecardCommit(v string) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetScorecardCommit(v)
+	})
+}
+
+// UpdateScorecardCommit sets the "scorecard_commit" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateScorecardCommit() *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateScorecardCommit()
+	})
+}
+
+// SetOrigin sets the "origin" field.
+func (u *CertifyScorecardUpsertBulk) SetOrigin(v string) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetOrigin(v)
+	})
+}
+
+// UpdateOrigin sets the "origin" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateOrigin() *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateOrigin()
+	})
+}
+
+// SetCollector sets the "collector" field.
+func (u *CertifyScorecardUpsertBulk) SetCollector(v string) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetCollector(v)
+	})
+}
+
+// UpdateCollector sets the "collector" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateCollector() *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateCollector()
+	})
+}
+
+// SetChecksHash sets the "checks_hash" field.
+func (u *CertifyScorecardUpsertBulk) SetChecksHash(v string) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetChecksHash(v)
+	})
+}
+
+// UpdateChecksHash sets the "checks_hash" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateChecksHash() *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateChecksHash()
 	})
 }
 

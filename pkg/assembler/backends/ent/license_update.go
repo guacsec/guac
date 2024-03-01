@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -83,14 +84,14 @@ func (lu *LicenseUpdate) ClearListVersion() *LicenseUpdate {
 }
 
 // AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (lu *LicenseUpdate) AddDeclaredInCertifyLegalIDs(ids ...int) *LicenseUpdate {
+func (lu *LicenseUpdate) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
 	lu.mutation.AddDeclaredInCertifyLegalIDs(ids...)
 	return lu
 }
 
 // AddDeclaredInCertifyLegals adds the "declared_in_certify_legals" edges to the CertifyLegal entity.
 func (lu *LicenseUpdate) AddDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -98,14 +99,14 @@ func (lu *LicenseUpdate) AddDeclaredInCertifyLegals(c ...*CertifyLegal) *License
 }
 
 // AddDiscoveredInCertifyLegalIDs adds the "discovered_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (lu *LicenseUpdate) AddDiscoveredInCertifyLegalIDs(ids ...int) *LicenseUpdate {
+func (lu *LicenseUpdate) AddDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
 	lu.mutation.AddDiscoveredInCertifyLegalIDs(ids...)
 	return lu
 }
 
 // AddDiscoveredInCertifyLegals adds the "discovered_in_certify_legals" edges to the CertifyLegal entity.
 func (lu *LicenseUpdate) AddDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -124,14 +125,14 @@ func (lu *LicenseUpdate) ClearDeclaredInCertifyLegals() *LicenseUpdate {
 }
 
 // RemoveDeclaredInCertifyLegalIDs removes the "declared_in_certify_legals" edge to CertifyLegal entities by IDs.
-func (lu *LicenseUpdate) RemoveDeclaredInCertifyLegalIDs(ids ...int) *LicenseUpdate {
+func (lu *LicenseUpdate) RemoveDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
 	lu.mutation.RemoveDeclaredInCertifyLegalIDs(ids...)
 	return lu
 }
 
 // RemoveDeclaredInCertifyLegals removes "declared_in_certify_legals" edges to CertifyLegal entities.
 func (lu *LicenseUpdate) RemoveDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -145,14 +146,14 @@ func (lu *LicenseUpdate) ClearDiscoveredInCertifyLegals() *LicenseUpdate {
 }
 
 // RemoveDiscoveredInCertifyLegalIDs removes the "discovered_in_certify_legals" edge to CertifyLegal entities by IDs.
-func (lu *LicenseUpdate) RemoveDiscoveredInCertifyLegalIDs(ids ...int) *LicenseUpdate {
+func (lu *LicenseUpdate) RemoveDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdate {
 	lu.mutation.RemoveDiscoveredInCertifyLegalIDs(ids...)
 	return lu
 }
 
 // RemoveDiscoveredInCertifyLegals removes "discovered_in_certify_legals" edges to CertifyLegal entities.
 func (lu *LicenseUpdate) RemoveDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -200,7 +201,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := lu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeUUID))
 	if ps := lu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -231,7 +232,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: license.DeclaredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -244,7 +245,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: license.DeclaredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -260,7 +261,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: license.DeclaredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -276,7 +277,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: license.DiscoveredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -289,7 +290,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: license.DiscoveredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -305,7 +306,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: license.DiscoveredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -388,14 +389,14 @@ func (luo *LicenseUpdateOne) ClearListVersion() *LicenseUpdateOne {
 }
 
 // AddDeclaredInCertifyLegalIDs adds the "declared_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (luo *LicenseUpdateOne) AddDeclaredInCertifyLegalIDs(ids ...int) *LicenseUpdateOne {
+func (luo *LicenseUpdateOne) AddDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
 	luo.mutation.AddDeclaredInCertifyLegalIDs(ids...)
 	return luo
 }
 
 // AddDeclaredInCertifyLegals adds the "declared_in_certify_legals" edges to the CertifyLegal entity.
 func (luo *LicenseUpdateOne) AddDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdateOne {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -403,14 +404,14 @@ func (luo *LicenseUpdateOne) AddDeclaredInCertifyLegals(c ...*CertifyLegal) *Lic
 }
 
 // AddDiscoveredInCertifyLegalIDs adds the "discovered_in_certify_legals" edge to the CertifyLegal entity by IDs.
-func (luo *LicenseUpdateOne) AddDiscoveredInCertifyLegalIDs(ids ...int) *LicenseUpdateOne {
+func (luo *LicenseUpdateOne) AddDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
 	luo.mutation.AddDiscoveredInCertifyLegalIDs(ids...)
 	return luo
 }
 
 // AddDiscoveredInCertifyLegals adds the "discovered_in_certify_legals" edges to the CertifyLegal entity.
 func (luo *LicenseUpdateOne) AddDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdateOne {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -429,14 +430,14 @@ func (luo *LicenseUpdateOne) ClearDeclaredInCertifyLegals() *LicenseUpdateOne {
 }
 
 // RemoveDeclaredInCertifyLegalIDs removes the "declared_in_certify_legals" edge to CertifyLegal entities by IDs.
-func (luo *LicenseUpdateOne) RemoveDeclaredInCertifyLegalIDs(ids ...int) *LicenseUpdateOne {
+func (luo *LicenseUpdateOne) RemoveDeclaredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
 	luo.mutation.RemoveDeclaredInCertifyLegalIDs(ids...)
 	return luo
 }
 
 // RemoveDeclaredInCertifyLegals removes "declared_in_certify_legals" edges to CertifyLegal entities.
 func (luo *LicenseUpdateOne) RemoveDeclaredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdateOne {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -450,14 +451,14 @@ func (luo *LicenseUpdateOne) ClearDiscoveredInCertifyLegals() *LicenseUpdateOne 
 }
 
 // RemoveDiscoveredInCertifyLegalIDs removes the "discovered_in_certify_legals" edge to CertifyLegal entities by IDs.
-func (luo *LicenseUpdateOne) RemoveDiscoveredInCertifyLegalIDs(ids ...int) *LicenseUpdateOne {
+func (luo *LicenseUpdateOne) RemoveDiscoveredInCertifyLegalIDs(ids ...uuid.UUID) *LicenseUpdateOne {
 	luo.mutation.RemoveDiscoveredInCertifyLegalIDs(ids...)
 	return luo
 }
 
 // RemoveDiscoveredInCertifyLegals removes "discovered_in_certify_legals" edges to CertifyLegal entities.
 func (luo *LicenseUpdateOne) RemoveDiscoveredInCertifyLegals(c ...*CertifyLegal) *LicenseUpdateOne {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
@@ -518,7 +519,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 	if err := luo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeUUID))
 	id, ok := luo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "License.id" for update`)}
@@ -566,7 +567,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 			Columns: license.DeclaredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -579,7 +580,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 			Columns: license.DeclaredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -595,7 +596,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 			Columns: license.DeclaredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -611,7 +612,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 			Columns: license.DiscoveredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -624,7 +625,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 			Columns: license.DiscoveredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -640,7 +641,7 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 			Columns: license.DiscoveredInCertifyLegalsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

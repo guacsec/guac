@@ -21,21 +21,24 @@ import (
 	"crypto/sha1"
 	stdsql "database/sql"
 	"fmt"
-	"slices"
 	"sort"
-	"strconv"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+)
+
+const (
+	pkgTypeString      = "pkgType"
+	pkgNamespaceString = "pkgNamespace"
 )
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -43,162 +46,175 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	query := b.client.PackageType.Query().Limit(MaxPageSize)
+	query := b.client.PackageVersion.Query().Limit(MaxPageSize)
 
-	paths, isGQL := getPreloads(ctx)
+	// TODO: Fix preloads
+	//paths, isGQL := getPreloads(ctx)
 
 	query.Where(
-		optionalPredicate(pkgSpec.Type, packagetype.TypeEQ),
-		packagetype.HasNamespacesWith(
-			optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ),
-			packagenamespace.HasNamesWith(
-				optionalPredicate(pkgSpec.Name, packagename.NameEQ),
-				packagename.HasVersionsWith(
-					optionalPredicate(pkgSpec.ID, IDEQ),
-					optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
-					optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
-					packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
-				),
-			),
+		optionalPredicate(pkgSpec.ID, IDEQ),
+		optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
+		optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
+		packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
+		packageversion.HasNameWith(
+			optionalPredicate(pkgSpec.Type, packagename.TypeEQ),
+			optionalPredicate(pkgSpec.Namespace, packagename.NamespaceEQ),
+			optionalPredicate(pkgSpec.Name, packagename.NameEQ),
 		),
 	)
 
-	if slices.Contains(paths, "namespaces") || !isGQL {
-		query.WithNamespaces(func(q *ent.PackageNamespaceQuery) {
-			q.Where(optionalPredicate(pkgSpec.Namespace, packagenamespace.NamespaceEQ))
-
-			if slices.Contains(paths, "namespaces.names") || !isGQL {
-				q.WithNames(func(q *ent.PackageNameQuery) {
-					q.Where(optionalPredicate(pkgSpec.Name, packagename.NameEQ))
-
-					if slices.Contains(paths, "namespaces.names.versions") || !isGQL {
-						q.WithVersions(func(q *ent.PackageVersionQuery) {
-							q.Where(
-								optionalPredicate(pkgSpec.ID, IDEQ),
-								optionalPredicate(pkgSpec.Version, packageversion.VersionEQ),
-								optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
-								packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
-							)
-						})
-					}
-				})
-			}
-		})
-	}
+	// TODO: Fix preloads
+	query.WithName(func(q *ent.PackageNameQuery) {
+	})
 
 	pkgs, err := query.All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return collect(pkgs, toModelPackage), nil
+	var pkgNames []*ent.PackageName
+	for _, collectedPkgVersion := range pkgs {
+		pkgNames = append(pkgNames, backReferencePackageVersion(collectedPkgVersion))
+	}
+
+	return collect(pkgNames, toModelPackage), nil
 }
 
 func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error) {
-	// FIXME: (ivanvanderbyl) This will be suboptimal because we can't batch insert relations with upserts. See Readme.
-	pkgsID := make([]*model.PackageIDs, len(pkgs))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range pkgs {
-		index := i
-		pkg := pkgs[index]
-		concurrently(eg, func() error {
-			p, err := b.IngestPackage(ctx, *pkg)
-			if err == nil {
-				pkgsID[index] = p
-			}
-			return err
-		})
+	funcName := "IngestPackages"
+	var collectedPkgIDs []*model.PackageIDs
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]model.PackageIDs, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkPackage(ctx, client, pkgs)
+		if err != nil {
+			return nil, err
+		}
+		return slc, nil
+	})
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
+
+	for _, pkgIDs := range *ids {
+		p := pkgIDs
+		collectedPkgIDs = append(collectedPkgIDs, &p)
 	}
-	return pkgsID, nil
+
+	return collectedPkgIDs, nil
 }
 
 func (b *EntBackend) IngestPackage(ctx context.Context, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
-	pkgVersionID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*model.PackageIDs, error) {
-		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), *pkg.PackageInput)
+	pkgVersionID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*model.PackageIDs, error) {
+		p, err := upsertPackage(ctx, ent.TxFromContext(ctx), pkg)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to upsert package")
 		}
 		return p, nil
 	})
-	if err != nil {
-		return nil, err
+	if txErr != nil {
+		return nil, txErr
 	}
 
 	return pkgVersionID, nil
 }
 
+func generatePackageNameCreate(tx *ent.Tx, pkgNameID *uuid.UUID, pkgInput *model.IDorPkgInput) *ent.PackageNameCreate {
+	return tx.PackageName.Create().
+		SetID(*pkgNameID).
+		SetType(pkgInput.PackageInput.Type).
+		SetNamespace(stringOrEmpty(pkgInput.PackageInput.Namespace)).
+		SetName(pkgInput.PackageInput.Name)
+}
+
+func generatePackageVersionCreate(tx *ent.Tx, pkgVersionID *uuid.UUID, pkgNameID *uuid.UUID, pkgInput *model.IDorPkgInput) *ent.PackageVersionCreate {
+	return tx.PackageVersion.Create().
+		SetID(*pkgVersionID).
+		SetNameID(*pkgNameID).
+		SetNillableVersion(pkgInput.PackageInput.Version).
+		SetSubpath(ptrWithDefault(pkgInput.PackageInput.Subpath, "")).
+		SetQualifiers(normalizeInputQualifiers(pkgInput.PackageInput.Qualifiers)).
+		SetHash(versionHashFromInputSpec(*pkgInput.PackageInput))
+}
+
+func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorPkgInput) (*[]model.PackageIDs, error) {
+	batches := chunk(pkgInputs, 100)
+	pkgNameIDs := make([]string, 0)
+	pkgVersionIDs := make([]string, 0)
+
+	for _, pkgs := range batches {
+		pkgNameCreates := make([]*ent.PackageNameCreate, len(pkgs))
+		pkgVersionCreates := make([]*ent.PackageVersionCreate, len(pkgs))
+
+		for i, pkg := range pkgs {
+			pkgInput := pkg
+			pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkgInput.PackageInput, helpers.PkgServerKey)
+			pkgNameID := generateUUIDKey([]byte(pkgIDs.NameId))
+			pkgVersionID := generateUUIDKey([]byte(pkgIDs.VersionId))
+
+			pkgNameCreates[i] = generatePackageNameCreate(tx, &pkgNameID, pkgInput)
+			pkgVersionCreates[i] = generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, pkgInput)
+
+			pkgNameIDs = append(pkgNameIDs, pkgNameID.String())
+			pkgVersionIDs = append(pkgVersionIDs, pkgVersionID.String())
+		}
+
+		if err := tx.PackageName.CreateBulk(pkgNameCreates...).
+			OnConflict(
+				sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType),
+			).
+			DoNothing().
+			Exec(ctx); err != nil {
+
+			return nil, errors.Wrap(err, "bulk upsert pkgName node")
+		}
+
+		if err := tx.PackageVersion.CreateBulk(pkgVersionCreates...).
+			OnConflict(
+				sql.ConflictColumns(
+					packageversion.FieldHash,
+					packageversion.FieldNameID,
+				),
+			).
+			DoNothing().
+			Exec(ctx); err != nil {
+
+			return nil, errors.Wrap(err, "bulk upsert pkgVersion node")
+		}
+	}
+	var collectedPkgIDs []model.PackageIDs
+	for i := range pkgVersionIDs {
+		collectedPkgIDs = append(collectedPkgIDs, model.PackageIDs{
+			PackageTypeID:      fmt.Sprintf("%s:%s", pkgTypeString, pkgNameIDs[i]),
+			PackageNamespaceID: fmt.Sprintf("%s:%s", pkgNamespaceString, pkgNameIDs[i]),
+			PackageNameID:      pkgNameIDs[i],
+			PackageVersionID:   pkgVersionIDs[i]})
+	}
+
+	return &collectedPkgIDs, nil
+}
+
 // upsertPackage is a helper function to create or update a package node and its associated edges.
 // It is used in multiple places, so we extract it to a function.
-func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) (*model.PackageIDs, error) {
+func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*model.PackageIDs, error) {
+	pkgIDs := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg.PackageInput, helpers.PkgServerKey)
+	pkgNameID := generateUUIDKey([]byte(pkgIDs.NameId))
+	pkgVersionID := generateUUIDKey([]byte(pkgIDs.VersionId))
 
-	pkgID, err := client.PackageType.Create().
-		SetType(pkg.Type).
-		OnConflict(sql.ConflictColumns(packagetype.FieldType)).
-		DoNothing().
-		ID(ctx)
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert package node")
-		}
-		pkgID, err = client.PackageType.Query().
-			Where(packagetype.TypeEQ(pkg.Type)).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get package type")
-		}
-	}
+	pkgNameCreate := generatePackageNameCreate(tx, &pkgNameID, &pkg)
 
-	nsID, err := client.PackageNamespace.Create().
-		SetPackageID(pkgID).
-		SetNamespace(valueOrDefault(pkg.Namespace, "")).
-		OnConflict(sql.ConflictColumns(packagenamespace.FieldNamespace, packagenamespace.FieldPackageID)).
+	err := pkgNameCreate.
+		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespace, packagename.FieldType)).
 		DoNothing().
-		ID(ctx)
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert package namespace")
-		}
-		nsID, err = client.PackageNamespace.Query().
-			Where(
-				packagenamespace.PackageIDEQ(pkgID),
-				packagenamespace.NamespaceEQ(valueOrDefault(pkg.Namespace, "")),
-			).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get package namespace")
-		}
-	}
-
-	nameID, err := client.PackageName.Create().
-		SetNamespaceID(nsID).
-		SetName(pkg.Name).
-		OnConflict(sql.ConflictColumns(packagename.FieldName, packagename.FieldNamespaceID)).
-		DoNothing().
-		ID(ctx)
+		Exec(ctx)
 	if err != nil {
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert package name")
 		}
-		nameID, err = client.PackageName.Query().
-			Where(
-				packagename.NamespaceIDEQ(nsID),
-				packagename.NameEQ(pkg.Name),
-			).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get package name")
-		}
 	}
 
-	id, err := client.PackageVersion.Create().
-		SetNameID(nameID).
-		SetNillableVersion(pkg.Version).
-		SetSubpath(ptrWithDefault(pkg.Subpath, "")).
-		SetQualifiers(normalizeInputQualifiers(pkg.Qualifiers)).
-		SetHash(versionHashFromInputSpec(pkg)).
+	pkgVersionCreate := generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, &pkg)
+
+	if err := pkgVersionCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				packageversion.FieldHash,
@@ -206,27 +222,17 @@ func upsertPackage(ctx context.Context, client *ent.Tx, pkg model.PkgInputSpec) 
 			),
 		).
 		DoNothing().
-		ID(ctx)
-	if err != nil {
+		Exec(ctx); err != nil {
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert package version")
-		}
-		id, err = client.PackageVersion.Query().
-			Where(
-				packageversion.HashEQ(versionHashFromInputSpec(pkg)),
-				packageversion.NameIDEQ(nameID),
-			).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get package version")
 		}
 	}
 
 	return &model.PackageIDs{
-		PackageTypeID:      strconv.Itoa(pkgID),
-		PackageNamespaceID: strconv.Itoa(nsID),
-		PackageNameID:      strconv.Itoa(nameID),
-		PackageVersionID:   strconv.Itoa(id)}, nil
+		PackageTypeID:      fmt.Sprintf("%s:%s", pkgTypeString, pkgNameID.String()),
+		PackageNamespaceID: fmt.Sprintf("%s:%s", pkgNamespaceString, pkgNameID.String()),
+		PackageNameID:      pkgNameID.String(),
+		PackageVersionID:   pkgVersionID.String()}, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {
@@ -237,11 +243,7 @@ func withPackageVersionTree() func(*ent.PackageVersionQuery) {
 
 func withPackageNameTree() func(q *ent.PackageNameQuery) {
 	// TODO: (ivanvanderbyl) Filter the depth of this query using preloads
-	return func(q *ent.PackageNameQuery) {
-		q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-			q.WithPackage()
-		})
-	}
+	return func(q *ent.PackageNameQuery) {}
 }
 
 func versionHashFromInputSpec(pkg model.PkgInputSpec) string {
@@ -335,13 +337,9 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 		optionalPredicate(filter.Subpath, packageversion.SubpathEQ),
 		packageversion.QualifiersMatch(filter.Qualifiers, ptrWithDefault(filter.MatchOnlyEmptyQualifiers, false)),
 		packageversion.HasNameWith(
-			optionalPredicate(filter.Name, packagename.Name),
-			packagename.HasNamespaceWith(
-				optionalPredicate(filter.Namespace, packagenamespace.Namespace),
-				packagenamespace.HasPackageWith(
-					optionalPredicate(filter.Type, packagetype.Type),
-				),
-			),
+			optionalPredicate(filter.Name, packagename.NameEQ),
+			optionalPredicate(filter.Namespace, packagename.NamespaceEQ),
+			optionalPredicate(filter.Type, packagename.TypeEQ),
 		),
 	}
 
@@ -351,12 +349,8 @@ func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 func packageNameInputQuery(spec model.PkgInputSpec) predicate.PackageName {
 	rv := []predicate.PackageName{
 		packagename.NameEQ(spec.Name),
-		packagename.HasNamespaceWith(
-			packagenamespace.Namespace(stringOrEmpty(spec.Namespace)),
-			packagenamespace.HasPackageWith(
-				packagetype.TypeEQ(spec.Type),
-			),
-		),
+		packagename.Namespace(stringOrEmpty(spec.Namespace)),
+		packagename.Type(spec.Type),
 	}
 
 	return packagename.And(rv...)
@@ -368,13 +362,9 @@ func packageNameQuery(spec *model.PkgSpec) predicate.PackageName {
 	}
 	query := []predicate.PackageName{
 		optionalPredicate(spec.ID, IDEQ),
-		optionalPredicate(spec.Name, packagename.Name),
-		packagename.HasNamespaceWith(
-			optionalPredicate(spec.Namespace, packagenamespace.Namespace),
-			packagenamespace.HasPackageWith(
-				optionalPredicate(spec.Type, packagetype.Type),
-			),
-		),
+		optionalPredicate(spec.Name, packagename.NameEQ),
+		optionalPredicate(spec.Namespace, packagename.NamespaceEQ),
+		optionalPredicate(spec.Type, packagename.TypeEQ),
 	}
 
 	return packagename.And(query...)
@@ -393,62 +383,32 @@ func pkgNameQueryFromPkgSpec(filter *model.PkgSpec) *model.PkgSpec {
 	}
 }
 
-func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageType {
+func backReferencePackageName(pn *ent.PackageName) *ent.PackageName {
+	pt := &ent.PackageName{
+		ID:        pn.ID,
+		Type:      pn.Type,
+		Namespace: pn.Namespace,
+		Name:      pn.Name,
+	}
+	return pt
+}
+
+func backReferencePackageVersion(pv *ent.PackageVersion) *ent.PackageName {
 	if pv != nil &&
-		pv.Edges.Name != nil &&
-		pv.Edges.Name.Edges.Namespace != nil &&
-		pv.Edges.Name.Edges.Namespace.Edges.Package != nil {
+		pv.Edges.Name != nil {
 		pn := pv.Edges.Name
-		ns := pn.Edges.Namespace
 
 		// Rebuild a fresh package type from the back reference so that
 		// we don't mutate the edges of the original package type.
-		pt := &ent.PackageType{
-			ID:   ns.Edges.Package.ID,
-			Type: ns.Edges.Package.Type,
-			Edges: ent.PackageTypeEdges{
-				Namespaces: []*ent.PackageNamespace{
-					{
-						ID:        ns.ID,
-						PackageID: ns.PackageID,
-						Namespace: ns.Namespace,
-						Edges: ent.PackageNamespaceEdges{
-							Names: []*ent.PackageName{
-								{
-									ID:          pn.ID,
-									NamespaceID: pn.NamespaceID,
-									Name:        pn.Name,
-									Edges: ent.PackageNameEdges{
-										Versions: []*ent.PackageVersion{pv},
-									},
-								},
-							},
-						},
-					},
-				},
+		pt := &ent.PackageName{
+			ID:        pn.ID,
+			Type:      pn.Type,
+			Namespace: pn.Namespace,
+			Name:      pn.Name,
+			Edges: ent.PackageNameEdges{
+				Versions: []*ent.PackageVersion{pv},
 			},
 		}
-		return pt
-	}
-	return nil
-}
-
-func backReferencePackageName(pn *ent.PackageName) *ent.PackageType {
-	if pn.Edges.Namespace != nil &&
-		pn.Edges.Namespace.Edges.Package != nil {
-		ns := pn.Edges.Namespace
-		pt := ns.Edges.Package
-		ns.Edges.Names = []*ent.PackageName{pn}
-		pt.Edges.Namespaces = []*ent.PackageNamespace{ns}
-		return pt
-	}
-	return nil
-}
-
-func backReferencePackageNamespace(pns *ent.PackageNamespace) *ent.PackageType {
-	if pns.Edges.Package != nil {
-		pt := pns.Edges.Package
-		pt.Edges.Namespaces = []*ent.PackageNamespace{pns}
 		return pt
 	}
 	return nil

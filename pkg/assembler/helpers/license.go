@@ -19,11 +19,20 @@ import (
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func LicenseKey(l *generated.LicenseInputSpec) string {
-	if l.ListVersion != nil && *l.ListVersion != "" {
-		return strings.Join([]string{l.Name, *l.ListVersion}, ":")
+func LicenseServerKey(l *model.LicenseInputSpec) string {
+	return licenseKey(l.Name, l.ListVersion)
+}
+
+func LicenseClientKey(l *generated.LicenseInputSpec) string {
+	return licenseKey(l.Name, l.ListVersion)
+}
+
+func licenseKey(name string, listVersion *string) string {
+	if listVersion != nil && *listVersion != "" {
+		return strings.Join([]string{name, *listVersion}, ":")
 	}
-	return l.Name
+	return name
 }

@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -18,11 +19,11 @@ import (
 type CertifyLegal struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
-	PackageID *int `json:"package_id,omitempty"`
+	PackageID *uuid.UUID `json:"package_id,omitempty"`
 	// SourceID holds the value of the "source_id" field.
-	SourceID *int `json:"source_id,omitempty"`
+	SourceID *uuid.UUID `json:"source_id,omitempty"`
 	// DeclaredLicense holds the value of the "declared_license" field.
 	DeclaredLicense string `json:"declared_license,omitempty"`
 	// DiscoveredLicense holds the value of the "discovered_license" field.
@@ -116,12 +117,14 @@ func (*CertifyLegal) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case certifylegal.FieldID, certifylegal.FieldPackageID, certifylegal.FieldSourceID:
-			values[i] = new(sql.NullInt64)
+		case certifylegal.FieldPackageID, certifylegal.FieldSourceID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case certifylegal.FieldDeclaredLicense, certifylegal.FieldDiscoveredLicense, certifylegal.FieldAttribution, certifylegal.FieldJustification, certifylegal.FieldOrigin, certifylegal.FieldCollector, certifylegal.FieldDeclaredLicensesHash, certifylegal.FieldDiscoveredLicensesHash:
 			values[i] = new(sql.NullString)
 		case certifylegal.FieldTimeScanned:
 			values[i] = new(sql.NullTime)
+		case certifylegal.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -138,24 +141,24 @@ func (cl *CertifyLegal) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case certifylegal.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				cl.ID = *value
 			}
-			cl.ID = int(value.Int64)
 		case certifylegal.FieldPackageID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				cl.PackageID = new(int)
-				*cl.PackageID = int(value.Int64)
+				cl.PackageID = new(uuid.UUID)
+				*cl.PackageID = *value.S.(*uuid.UUID)
 			}
 		case certifylegal.FieldSourceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				cl.SourceID = new(int)
-				*cl.SourceID = int(value.Int64)
+				cl.SourceID = new(uuid.UUID)
+				*cl.SourceID = *value.S.(*uuid.UUID)
 			}
 		case certifylegal.FieldDeclaredLicense:
 			if value, ok := values[i].(*sql.NullString); !ok {

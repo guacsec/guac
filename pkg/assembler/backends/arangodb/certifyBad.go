@@ -24,6 +24,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 func (c *arangoClient) CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
@@ -288,7 +289,7 @@ func getCertifyBadQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Match
 	values := map[string]any{}
 	// add guac keys
 	if pkg != nil {
-		pkgId := guacPkgId(*pkg)
+		pkgId := helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pkg, helpers.PkgServerKey)
 		if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
 			values["pkgNameGuacKey"] = pkgId.NameId
 		} else {
@@ -298,8 +299,8 @@ func getCertifyBadQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Match
 		values["art_algorithm"] = strings.ToLower(artifact.Algorithm)
 		values["art_digest"] = strings.ToLower(artifact.Digest)
 	} else {
-		source := guacSrcId(*source)
-		values["srcNameGuacKey"] = source.NameId
+		srcIDs := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](source, helpers.SrcServerKey)
+		values["srcNameGuacKey"] = srcIDs.NameId
 	}
 
 	values["justification"] = certifyBad.Justification

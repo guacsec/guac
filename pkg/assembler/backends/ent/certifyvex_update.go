@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -32,15 +33,15 @@ func (cvu *CertifyVexUpdate) Where(ps ...predicate.CertifyVex) *CertifyVexUpdate
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvu *CertifyVexUpdate) SetPackageID(i int) *CertifyVexUpdate {
-	cvu.mutation.SetPackageID(i)
+func (cvu *CertifyVexUpdate) SetPackageID(u uuid.UUID) *CertifyVexUpdate {
+	cvu.mutation.SetPackageID(u)
 	return cvu
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillablePackageID(i *int) *CertifyVexUpdate {
-	if i != nil {
-		cvu.SetPackageID(*i)
+func (cvu *CertifyVexUpdate) SetNillablePackageID(u *uuid.UUID) *CertifyVexUpdate {
+	if u != nil {
+		cvu.SetPackageID(*u)
 	}
 	return cvu
 }
@@ -52,15 +53,15 @@ func (cvu *CertifyVexUpdate) ClearPackageID() *CertifyVexUpdate {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cvu *CertifyVexUpdate) SetArtifactID(i int) *CertifyVexUpdate {
-	cvu.mutation.SetArtifactID(i)
+func (cvu *CertifyVexUpdate) SetArtifactID(u uuid.UUID) *CertifyVexUpdate {
+	cvu.mutation.SetArtifactID(u)
 	return cvu
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableArtifactID(i *int) *CertifyVexUpdate {
-	if i != nil {
-		cvu.SetArtifactID(*i)
+func (cvu *CertifyVexUpdate) SetNillableArtifactID(u *uuid.UUID) *CertifyVexUpdate {
+	if u != nil {
+		cvu.SetArtifactID(*u)
 	}
 	return cvu
 }
@@ -72,15 +73,15 @@ func (cvu *CertifyVexUpdate) ClearArtifactID() *CertifyVexUpdate {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvu *CertifyVexUpdate) SetVulnerabilityID(i int) *CertifyVexUpdate {
-	cvu.mutation.SetVulnerabilityID(i)
+func (cvu *CertifyVexUpdate) SetVulnerabilityID(u uuid.UUID) *CertifyVexUpdate {
+	cvu.mutation.SetVulnerabilityID(u)
 	return cvu
 }
 
 // SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
-func (cvu *CertifyVexUpdate) SetNillableVulnerabilityID(i *int) *CertifyVexUpdate {
-	if i != nil {
-		cvu.SetVulnerabilityID(*i)
+func (cvu *CertifyVexUpdate) SetNillableVulnerabilityID(u *uuid.UUID) *CertifyVexUpdate {
+	if u != nil {
+		cvu.SetVulnerabilityID(*u)
 	}
 	return cvu
 }
@@ -260,7 +261,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := cvu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(certifyvex.Table, certifyvex.Columns, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(certifyvex.Table, certifyvex.Columns, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
 	if ps := cvu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -297,7 +298,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvex.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -310,7 +311,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvex.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -326,7 +327,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvex.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -339,7 +340,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvex.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -355,7 +356,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -368,7 +369,7 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -397,15 +398,15 @@ type CertifyVexUpdateOne struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvuo *CertifyVexUpdateOne) SetPackageID(i int) *CertifyVexUpdateOne {
-	cvuo.mutation.SetPackageID(i)
+func (cvuo *CertifyVexUpdateOne) SetPackageID(u uuid.UUID) *CertifyVexUpdateOne {
+	cvuo.mutation.SetPackageID(u)
 	return cvuo
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillablePackageID(i *int) *CertifyVexUpdateOne {
-	if i != nil {
-		cvuo.SetPackageID(*i)
+func (cvuo *CertifyVexUpdateOne) SetNillablePackageID(u *uuid.UUID) *CertifyVexUpdateOne {
+	if u != nil {
+		cvuo.SetPackageID(*u)
 	}
 	return cvuo
 }
@@ -417,15 +418,15 @@ func (cvuo *CertifyVexUpdateOne) ClearPackageID() *CertifyVexUpdateOne {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cvuo *CertifyVexUpdateOne) SetArtifactID(i int) *CertifyVexUpdateOne {
-	cvuo.mutation.SetArtifactID(i)
+func (cvuo *CertifyVexUpdateOne) SetArtifactID(u uuid.UUID) *CertifyVexUpdateOne {
+	cvuo.mutation.SetArtifactID(u)
 	return cvuo
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableArtifactID(i *int) *CertifyVexUpdateOne {
-	if i != nil {
-		cvuo.SetArtifactID(*i)
+func (cvuo *CertifyVexUpdateOne) SetNillableArtifactID(u *uuid.UUID) *CertifyVexUpdateOne {
+	if u != nil {
+		cvuo.SetArtifactID(*u)
 	}
 	return cvuo
 }
@@ -437,15 +438,15 @@ func (cvuo *CertifyVexUpdateOne) ClearArtifactID() *CertifyVexUpdateOne {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvuo *CertifyVexUpdateOne) SetVulnerabilityID(i int) *CertifyVexUpdateOne {
-	cvuo.mutation.SetVulnerabilityID(i)
+func (cvuo *CertifyVexUpdateOne) SetVulnerabilityID(u uuid.UUID) *CertifyVexUpdateOne {
+	cvuo.mutation.SetVulnerabilityID(u)
 	return cvuo
 }
 
 // SetNillableVulnerabilityID sets the "vulnerability_id" field if the given value is not nil.
-func (cvuo *CertifyVexUpdateOne) SetNillableVulnerabilityID(i *int) *CertifyVexUpdateOne {
-	if i != nil {
-		cvuo.SetVulnerabilityID(*i)
+func (cvuo *CertifyVexUpdateOne) SetNillableVulnerabilityID(u *uuid.UUID) *CertifyVexUpdateOne {
+	if u != nil {
+		cvuo.SetVulnerabilityID(*u)
 	}
 	return cvuo
 }
@@ -638,7 +639,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 	if err := cvuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(certifyvex.Table, certifyvex.Columns, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(certifyvex.Table, certifyvex.Columns, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
 	id, ok := cvuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "CertifyVex.id" for update`)}
@@ -692,7 +693,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 			Columns: []string{certifyvex.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -705,7 +706,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 			Columns: []string{certifyvex.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -721,7 +722,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 			Columns: []string{certifyvex.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -734,7 +735,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 			Columns: []string{certifyvex.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -750,7 +751,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -763,7 +764,7 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 			Columns: []string{certifyvex.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

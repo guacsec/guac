@@ -40,7 +40,7 @@ func (hsad *HasSourceAtDelete) ExecX(ctx context.Context) int {
 }
 
 func (hsad *HasSourceAtDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(hassourceat.Table, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(hassourceat.Table, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID))
 	if ps := hsad.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

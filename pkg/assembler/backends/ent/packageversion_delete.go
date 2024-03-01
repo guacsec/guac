@@ -40,7 +40,7 @@ func (pvd *PackageVersionDelete) ExecX(ctx context.Context) int {
 }
 
 func (pvd *PackageVersionDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(packageversion.Table, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(packageversion.Table, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID))
 	if ps := pvd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

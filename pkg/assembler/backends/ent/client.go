@@ -9,6 +9,7 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/migrate"
 
 	"entgo.io/ent"
@@ -27,24 +28,17 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 )
 
 // Client is the client that holds all ent builders.
@@ -76,18 +70,12 @@ type Client struct {
 	HasSourceAt *HasSourceAtClient
 	// HashEqual is the client for interacting with the HashEqual builders.
 	HashEqual *HashEqualClient
-	// IsVulnerability is the client for interacting with the IsVulnerability builders.
-	IsVulnerability *IsVulnerabilityClient
 	// License is the client for interacting with the License builders.
 	License *LicenseClient
 	// Occurrence is the client for interacting with the Occurrence builders.
 	Occurrence *OccurrenceClient
 	// PackageName is the client for interacting with the PackageName builders.
 	PackageName *PackageNameClient
-	// PackageNamespace is the client for interacting with the PackageNamespace builders.
-	PackageNamespace *PackageNamespaceClient
-	// PackageType is the client for interacting with the PackageType builders.
-	PackageType *PackageTypeClient
 	// PackageVersion is the client for interacting with the PackageVersion builders.
 	PackageVersion *PackageVersionClient
 	// PkgEqual is the client for interacting with the PkgEqual builders.
@@ -96,24 +84,14 @@ type Client struct {
 	PointOfContact *PointOfContactClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
-	// Scorecard is the client for interacting with the Scorecard builders.
-	Scorecard *ScorecardClient
 	// SourceName is the client for interacting with the SourceName builders.
 	SourceName *SourceNameClient
-	// SourceNamespace is the client for interacting with the SourceNamespace builders.
-	SourceNamespace *SourceNamespaceClient
-	// SourceType is the client for interacting with the SourceType builders.
-	SourceType *SourceTypeClient
 	// VulnEqual is the client for interacting with the VulnEqual builders.
 	VulnEqual *VulnEqualClient
 	// VulnerabilityID is the client for interacting with the VulnerabilityID builders.
 	VulnerabilityID *VulnerabilityIDClient
 	// VulnerabilityMetadata is the client for interacting with the VulnerabilityMetadata builders.
 	VulnerabilityMetadata *VulnerabilityMetadataClient
-	// VulnerabilityType is the client for interacting with the VulnerabilityType builders.
-	VulnerabilityType *VulnerabilityTypeClient
-	// additional fields for node api
-	tables tables
 }
 
 // NewClient creates a new client configured with the given options.
@@ -137,24 +115,17 @@ func (c *Client) init() {
 	c.HasMetadata = NewHasMetadataClient(c.config)
 	c.HasSourceAt = NewHasSourceAtClient(c.config)
 	c.HashEqual = NewHashEqualClient(c.config)
-	c.IsVulnerability = NewIsVulnerabilityClient(c.config)
 	c.License = NewLicenseClient(c.config)
 	c.Occurrence = NewOccurrenceClient(c.config)
 	c.PackageName = NewPackageNameClient(c.config)
-	c.PackageNamespace = NewPackageNamespaceClient(c.config)
-	c.PackageType = NewPackageTypeClient(c.config)
 	c.PackageVersion = NewPackageVersionClient(c.config)
 	c.PkgEqual = NewPkgEqualClient(c.config)
 	c.PointOfContact = NewPointOfContactClient(c.config)
 	c.SLSAAttestation = NewSLSAAttestationClient(c.config)
-	c.Scorecard = NewScorecardClient(c.config)
 	c.SourceName = NewSourceNameClient(c.config)
-	c.SourceNamespace = NewSourceNamespaceClient(c.config)
-	c.SourceType = NewSourceTypeClient(c.config)
 	c.VulnEqual = NewVulnEqualClient(c.config)
 	c.VulnerabilityID = NewVulnerabilityIDClient(c.config)
 	c.VulnerabilityMetadata = NewVulnerabilityMetadataClient(c.config)
-	c.VulnerabilityType = NewVulnerabilityTypeClient(c.config)
 }
 
 type (
@@ -259,24 +230,17 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		HasMetadata:           NewHasMetadataClient(cfg),
 		HasSourceAt:           NewHasSourceAtClient(cfg),
 		HashEqual:             NewHashEqualClient(cfg),
-		IsVulnerability:       NewIsVulnerabilityClient(cfg),
 		License:               NewLicenseClient(cfg),
 		Occurrence:            NewOccurrenceClient(cfg),
 		PackageName:           NewPackageNameClient(cfg),
-		PackageNamespace:      NewPackageNamespaceClient(cfg),
-		PackageType:           NewPackageTypeClient(cfg),
 		PackageVersion:        NewPackageVersionClient(cfg),
 		PkgEqual:              NewPkgEqualClient(cfg),
 		PointOfContact:        NewPointOfContactClient(cfg),
 		SLSAAttestation:       NewSLSAAttestationClient(cfg),
-		Scorecard:             NewScorecardClient(cfg),
 		SourceName:            NewSourceNameClient(cfg),
-		SourceNamespace:       NewSourceNamespaceClient(cfg),
-		SourceType:            NewSourceTypeClient(cfg),
 		VulnEqual:             NewVulnEqualClient(cfg),
 		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
 		VulnerabilityMetadata: NewVulnerabilityMetadataClient(cfg),
-		VulnerabilityType:     NewVulnerabilityTypeClient(cfg),
 	}, nil
 }
 
@@ -308,24 +272,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		HasMetadata:           NewHasMetadataClient(cfg),
 		HasSourceAt:           NewHasSourceAtClient(cfg),
 		HashEqual:             NewHashEqualClient(cfg),
-		IsVulnerability:       NewIsVulnerabilityClient(cfg),
 		License:               NewLicenseClient(cfg),
 		Occurrence:            NewOccurrenceClient(cfg),
 		PackageName:           NewPackageNameClient(cfg),
-		PackageNamespace:      NewPackageNamespaceClient(cfg),
-		PackageType:           NewPackageTypeClient(cfg),
 		PackageVersion:        NewPackageVersionClient(cfg),
 		PkgEqual:              NewPkgEqualClient(cfg),
 		PointOfContact:        NewPointOfContactClient(cfg),
 		SLSAAttestation:       NewSLSAAttestationClient(cfg),
-		Scorecard:             NewScorecardClient(cfg),
 		SourceName:            NewSourceNameClient(cfg),
-		SourceNamespace:       NewSourceNamespaceClient(cfg),
-		SourceType:            NewSourceTypeClient(cfg),
 		VulnEqual:             NewVulnEqualClient(cfg),
 		VulnerabilityID:       NewVulnerabilityIDClient(cfg),
 		VulnerabilityMetadata: NewVulnerabilityMetadataClient(cfg),
-		VulnerabilityType:     NewVulnerabilityTypeClient(cfg),
 	}, nil
 }
 
@@ -357,11 +314,9 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyLegal,
 		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasMetadata,
-		c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.License, c.Occurrence,
-		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
-		c.PointOfContact, c.SLSAAttestation, c.Scorecard, c.SourceName,
-		c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
-		c.VulnerabilityMetadata, c.VulnerabilityType,
+		c.HasSourceAt, c.HashEqual, c.License, c.Occurrence, c.PackageName,
+		c.PackageVersion, c.PkgEqual, c.PointOfContact, c.SLSAAttestation,
+		c.SourceName, c.VulnEqual, c.VulnerabilityID, c.VulnerabilityMetadata,
 	} {
 		n.Use(hooks...)
 	}
@@ -373,11 +328,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Artifact, c.BillOfMaterials, c.Builder, c.Certification, c.CertifyLegal,
 		c.CertifyScorecard, c.CertifyVex, c.CertifyVuln, c.Dependency, c.HasMetadata,
-		c.HasSourceAt, c.HashEqual, c.IsVulnerability, c.License, c.Occurrence,
-		c.PackageName, c.PackageNamespace, c.PackageType, c.PackageVersion, c.PkgEqual,
-		c.PointOfContact, c.SLSAAttestation, c.Scorecard, c.SourceName,
-		c.SourceNamespace, c.SourceType, c.VulnEqual, c.VulnerabilityID,
-		c.VulnerabilityMetadata, c.VulnerabilityType,
+		c.HasSourceAt, c.HashEqual, c.License, c.Occurrence, c.PackageName,
+		c.PackageVersion, c.PkgEqual, c.PointOfContact, c.SLSAAttestation,
+		c.SourceName, c.VulnEqual, c.VulnerabilityID, c.VulnerabilityMetadata,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -410,18 +363,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.HasSourceAt.mutate(ctx, m)
 	case *HashEqualMutation:
 		return c.HashEqual.mutate(ctx, m)
-	case *IsVulnerabilityMutation:
-		return c.IsVulnerability.mutate(ctx, m)
 	case *LicenseMutation:
 		return c.License.mutate(ctx, m)
 	case *OccurrenceMutation:
 		return c.Occurrence.mutate(ctx, m)
 	case *PackageNameMutation:
 		return c.PackageName.mutate(ctx, m)
-	case *PackageNamespaceMutation:
-		return c.PackageNamespace.mutate(ctx, m)
-	case *PackageTypeMutation:
-		return c.PackageType.mutate(ctx, m)
 	case *PackageVersionMutation:
 		return c.PackageVersion.mutate(ctx, m)
 	case *PkgEqualMutation:
@@ -430,22 +377,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PointOfContact.mutate(ctx, m)
 	case *SLSAAttestationMutation:
 		return c.SLSAAttestation.mutate(ctx, m)
-	case *ScorecardMutation:
-		return c.Scorecard.mutate(ctx, m)
 	case *SourceNameMutation:
 		return c.SourceName.mutate(ctx, m)
-	case *SourceNamespaceMutation:
-		return c.SourceNamespace.mutate(ctx, m)
-	case *SourceTypeMutation:
-		return c.SourceType.mutate(ctx, m)
 	case *VulnEqualMutation:
 		return c.VulnEqual.mutate(ctx, m)
 	case *VulnerabilityIDMutation:
 		return c.VulnerabilityID.mutate(ctx, m)
 	case *VulnerabilityMetadataMutation:
 		return c.VulnerabilityMetadata.mutate(ctx, m)
-	case *VulnerabilityTypeMutation:
-		return c.VulnerabilityType.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -512,7 +451,7 @@ func (c *ArtifactClient) UpdateOne(a *Artifact) *ArtifactUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ArtifactClient) UpdateOneID(id int) *ArtifactUpdateOne {
+func (c *ArtifactClient) UpdateOneID(id uuid.UUID) *ArtifactUpdateOne {
 	mutation := newArtifactMutation(c.config, OpUpdateOne, withArtifactID(id))
 	return &ArtifactUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -529,7 +468,7 @@ func (c *ArtifactClient) DeleteOne(a *Artifact) *ArtifactDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ArtifactClient) DeleteOneID(id int) *ArtifactDeleteOne {
+func (c *ArtifactClient) DeleteOneID(id uuid.UUID) *ArtifactDeleteOne {
 	builder := c.Delete().Where(artifact.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -546,12 +485,12 @@ func (c *ArtifactClient) Query() *ArtifactQuery {
 }
 
 // Get returns a Artifact entity by its id.
-func (c *ArtifactClient) Get(ctx context.Context, id int) (*Artifact, error) {
+func (c *ArtifactClient) Get(ctx context.Context, id uuid.UUID) (*Artifact, error) {
 	return c.Query().Where(artifact.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ArtifactClient) GetX(ctx context.Context, id int) *Artifact {
+func (c *ArtifactClient) GetX(ctx context.Context, id uuid.UUID) *Artifact {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -607,15 +546,31 @@ func (c *ArtifactClient) QueryAttestations(a *Artifact) *SLSAAttestationQuery {
 	return query
 }
 
-// QuerySame queries the same edge of a Artifact.
-func (c *ArtifactClient) QuerySame(a *Artifact) *HashEqualQuery {
+// QueryHashEqualArtA queries the hash_equal_art_a edge of a Artifact.
+func (c *ArtifactClient) QueryHashEqualArtA(a *Artifact) *HashEqualQuery {
 	query := (&HashEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, id),
 			sqlgraph.To(hashequal.Table, hashequal.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, artifact.SameTable, artifact.SamePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtATable, artifact.HashEqualArtAColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryHashEqualArtB queries the hash_equal_art_b edge of a Artifact.
+func (c *ArtifactClient) QueryHashEqualArtB(a *Artifact) *HashEqualQuery {
+	query := (&HashEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, id),
+			sqlgraph.To(hashequal.Table, hashequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtBTable, artifact.HashEqualArtBColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -725,7 +680,7 @@ func (c *BillOfMaterialsClient) UpdateOne(bom *BillOfMaterials) *BillOfMaterials
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *BillOfMaterialsClient) UpdateOneID(id int) *BillOfMaterialsUpdateOne {
+func (c *BillOfMaterialsClient) UpdateOneID(id uuid.UUID) *BillOfMaterialsUpdateOne {
 	mutation := newBillOfMaterialsMutation(c.config, OpUpdateOne, withBillOfMaterialsID(id))
 	return &BillOfMaterialsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -742,7 +697,7 @@ func (c *BillOfMaterialsClient) DeleteOne(bom *BillOfMaterials) *BillOfMaterials
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *BillOfMaterialsClient) DeleteOneID(id int) *BillOfMaterialsDeleteOne {
+func (c *BillOfMaterialsClient) DeleteOneID(id uuid.UUID) *BillOfMaterialsDeleteOne {
 	builder := c.Delete().Where(billofmaterials.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -759,12 +714,12 @@ func (c *BillOfMaterialsClient) Query() *BillOfMaterialsQuery {
 }
 
 // Get returns a BillOfMaterials entity by its id.
-func (c *BillOfMaterialsClient) Get(ctx context.Context, id int) (*BillOfMaterials, error) {
+func (c *BillOfMaterialsClient) Get(ctx context.Context, id uuid.UUID) (*BillOfMaterials, error) {
 	return c.Query().Where(billofmaterials.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *BillOfMaterialsClient) GetX(ctx context.Context, id int) *BillOfMaterials {
+func (c *BillOfMaterialsClient) GetX(ctx context.Context, id uuid.UUID) *BillOfMaterials {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -954,7 +909,7 @@ func (c *BuilderClient) UpdateOne(b *Builder) *BuilderUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *BuilderClient) UpdateOneID(id int) *BuilderUpdateOne {
+func (c *BuilderClient) UpdateOneID(id uuid.UUID) *BuilderUpdateOne {
 	mutation := newBuilderMutation(c.config, OpUpdateOne, withBuilderID(id))
 	return &BuilderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -971,7 +926,7 @@ func (c *BuilderClient) DeleteOne(b *Builder) *BuilderDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *BuilderClient) DeleteOneID(id int) *BuilderDeleteOne {
+func (c *BuilderClient) DeleteOneID(id uuid.UUID) *BuilderDeleteOne {
 	builderC := c.Delete().Where(builder.ID(id))
 	builderC.mutation.id = &id
 	builderC.mutation.op = OpDeleteOne
@@ -988,12 +943,12 @@ func (c *BuilderClient) Query() *BuilderQuery {
 }
 
 // Get returns a Builder entity by its id.
-func (c *BuilderClient) Get(ctx context.Context, id int) (*Builder, error) {
+func (c *BuilderClient) Get(ctx context.Context, id uuid.UUID) (*Builder, error) {
 	return c.Query().Where(builder.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *BuilderClient) GetX(ctx context.Context, id int) *Builder {
+func (c *BuilderClient) GetX(ctx context.Context, id uuid.UUID) *Builder {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1103,7 +1058,7 @@ func (c *CertificationClient) UpdateOne(ce *Certification) *CertificationUpdateO
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CertificationClient) UpdateOneID(id int) *CertificationUpdateOne {
+func (c *CertificationClient) UpdateOneID(id uuid.UUID) *CertificationUpdateOne {
 	mutation := newCertificationMutation(c.config, OpUpdateOne, withCertificationID(id))
 	return &CertificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1120,7 +1075,7 @@ func (c *CertificationClient) DeleteOne(ce *Certification) *CertificationDeleteO
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CertificationClient) DeleteOneID(id int) *CertificationDeleteOne {
+func (c *CertificationClient) DeleteOneID(id uuid.UUID) *CertificationDeleteOne {
 	builder := c.Delete().Where(certification.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1137,12 +1092,12 @@ func (c *CertificationClient) Query() *CertificationQuery {
 }
 
 // Get returns a Certification entity by its id.
-func (c *CertificationClient) Get(ctx context.Context, id int) (*Certification, error) {
+func (c *CertificationClient) Get(ctx context.Context, id uuid.UUID) (*Certification, error) {
 	return c.Query().Where(certification.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CertificationClient) GetX(ctx context.Context, id int) *Certification {
+func (c *CertificationClient) GetX(ctx context.Context, id uuid.UUID) *Certification {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1300,7 +1255,7 @@ func (c *CertifyLegalClient) UpdateOne(cl *CertifyLegal) *CertifyLegalUpdateOne 
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CertifyLegalClient) UpdateOneID(id int) *CertifyLegalUpdateOne {
+func (c *CertifyLegalClient) UpdateOneID(id uuid.UUID) *CertifyLegalUpdateOne {
 	mutation := newCertifyLegalMutation(c.config, OpUpdateOne, withCertifyLegalID(id))
 	return &CertifyLegalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1317,7 +1272,7 @@ func (c *CertifyLegalClient) DeleteOne(cl *CertifyLegal) *CertifyLegalDeleteOne 
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CertifyLegalClient) DeleteOneID(id int) *CertifyLegalDeleteOne {
+func (c *CertifyLegalClient) DeleteOneID(id uuid.UUID) *CertifyLegalDeleteOne {
 	builder := c.Delete().Where(certifylegal.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1334,12 +1289,12 @@ func (c *CertifyLegalClient) Query() *CertifyLegalQuery {
 }
 
 // Get returns a CertifyLegal entity by its id.
-func (c *CertifyLegalClient) Get(ctx context.Context, id int) (*CertifyLegal, error) {
+func (c *CertifyLegalClient) Get(ctx context.Context, id uuid.UUID) (*CertifyLegal, error) {
 	return c.Query().Where(certifylegal.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CertifyLegalClient) GetX(ctx context.Context, id int) *CertifyLegal {
+func (c *CertifyLegalClient) GetX(ctx context.Context, id uuid.UUID) *CertifyLegal {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1497,7 +1452,7 @@ func (c *CertifyScorecardClient) UpdateOne(cs *CertifyScorecard) *CertifyScoreca
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CertifyScorecardClient) UpdateOneID(id int) *CertifyScorecardUpdateOne {
+func (c *CertifyScorecardClient) UpdateOneID(id uuid.UUID) *CertifyScorecardUpdateOne {
 	mutation := newCertifyScorecardMutation(c.config, OpUpdateOne, withCertifyScorecardID(id))
 	return &CertifyScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1514,7 +1469,7 @@ func (c *CertifyScorecardClient) DeleteOne(cs *CertifyScorecard) *CertifyScoreca
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CertifyScorecardClient) DeleteOneID(id int) *CertifyScorecardDeleteOne {
+func (c *CertifyScorecardClient) DeleteOneID(id uuid.UUID) *CertifyScorecardDeleteOne {
 	builder := c.Delete().Where(certifyscorecard.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1531,33 +1486,17 @@ func (c *CertifyScorecardClient) Query() *CertifyScorecardQuery {
 }
 
 // Get returns a CertifyScorecard entity by its id.
-func (c *CertifyScorecardClient) Get(ctx context.Context, id int) (*CertifyScorecard, error) {
+func (c *CertifyScorecardClient) Get(ctx context.Context, id uuid.UUID) (*CertifyScorecard, error) {
 	return c.Query().Where(certifyscorecard.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CertifyScorecardClient) GetX(ctx context.Context, id int) *CertifyScorecard {
+func (c *CertifyScorecardClient) GetX(ctx context.Context, id uuid.UUID) *CertifyScorecard {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
 	return obj
-}
-
-// QueryScorecard queries the scorecard edge of a CertifyScorecard.
-func (c *CertifyScorecardClient) QueryScorecard(cs *CertifyScorecard) *ScorecardQuery {
-	query := (&ScorecardClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cs.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(certifyscorecard.Table, certifyscorecard.FieldID, id),
-			sqlgraph.To(scorecard.Table, scorecard.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, certifyscorecard.ScorecardTable, certifyscorecard.ScorecardColumn),
-		)
-		fromV = sqlgraph.Neighbors(cs.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // QuerySource queries the source edge of a CertifyScorecard.
@@ -1662,7 +1601,7 @@ func (c *CertifyVexClient) UpdateOne(cv *CertifyVex) *CertifyVexUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CertifyVexClient) UpdateOneID(id int) *CertifyVexUpdateOne {
+func (c *CertifyVexClient) UpdateOneID(id uuid.UUID) *CertifyVexUpdateOne {
 	mutation := newCertifyVexMutation(c.config, OpUpdateOne, withCertifyVexID(id))
 	return &CertifyVexUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1679,7 +1618,7 @@ func (c *CertifyVexClient) DeleteOne(cv *CertifyVex) *CertifyVexDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CertifyVexClient) DeleteOneID(id int) *CertifyVexDeleteOne {
+func (c *CertifyVexClient) DeleteOneID(id uuid.UUID) *CertifyVexDeleteOne {
 	builder := c.Delete().Where(certifyvex.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1696,12 +1635,12 @@ func (c *CertifyVexClient) Query() *CertifyVexQuery {
 }
 
 // Get returns a CertifyVex entity by its id.
-func (c *CertifyVexClient) Get(ctx context.Context, id int) (*CertifyVex, error) {
+func (c *CertifyVexClient) Get(ctx context.Context, id uuid.UUID) (*CertifyVex, error) {
 	return c.Query().Where(certifyvex.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CertifyVexClient) GetX(ctx context.Context, id int) *CertifyVex {
+func (c *CertifyVexClient) GetX(ctx context.Context, id uuid.UUID) *CertifyVex {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1843,7 +1782,7 @@ func (c *CertifyVulnClient) UpdateOne(cv *CertifyVuln) *CertifyVulnUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CertifyVulnClient) UpdateOneID(id int) *CertifyVulnUpdateOne {
+func (c *CertifyVulnClient) UpdateOneID(id uuid.UUID) *CertifyVulnUpdateOne {
 	mutation := newCertifyVulnMutation(c.config, OpUpdateOne, withCertifyVulnID(id))
 	return &CertifyVulnUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1860,7 +1799,7 @@ func (c *CertifyVulnClient) DeleteOne(cv *CertifyVuln) *CertifyVulnDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CertifyVulnClient) DeleteOneID(id int) *CertifyVulnDeleteOne {
+func (c *CertifyVulnClient) DeleteOneID(id uuid.UUID) *CertifyVulnDeleteOne {
 	builder := c.Delete().Where(certifyvuln.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1877,12 +1816,12 @@ func (c *CertifyVulnClient) Query() *CertifyVulnQuery {
 }
 
 // Get returns a CertifyVuln entity by its id.
-func (c *CertifyVulnClient) Get(ctx context.Context, id int) (*CertifyVuln, error) {
+func (c *CertifyVulnClient) Get(ctx context.Context, id uuid.UUID) (*CertifyVuln, error) {
 	return c.Query().Where(certifyvuln.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CertifyVulnClient) GetX(ctx context.Context, id int) *CertifyVuln {
+func (c *CertifyVulnClient) GetX(ctx context.Context, id uuid.UUID) *CertifyVuln {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2008,7 +1947,7 @@ func (c *DependencyClient) UpdateOne(d *Dependency) *DependencyUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *DependencyClient) UpdateOneID(id int) *DependencyUpdateOne {
+func (c *DependencyClient) UpdateOneID(id uuid.UUID) *DependencyUpdateOne {
 	mutation := newDependencyMutation(c.config, OpUpdateOne, withDependencyID(id))
 	return &DependencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -2025,7 +1964,7 @@ func (c *DependencyClient) DeleteOne(d *Dependency) *DependencyDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *DependencyClient) DeleteOneID(id int) *DependencyDeleteOne {
+func (c *DependencyClient) DeleteOneID(id uuid.UUID) *DependencyDeleteOne {
 	builder := c.Delete().Where(dependency.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -2042,12 +1981,12 @@ func (c *DependencyClient) Query() *DependencyQuery {
 }
 
 // Get returns a Dependency entity by its id.
-func (c *DependencyClient) Get(ctx context.Context, id int) (*Dependency, error) {
+func (c *DependencyClient) Get(ctx context.Context, id uuid.UUID) (*Dependency, error) {
 	return c.Query().Where(dependency.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *DependencyClient) GetX(ctx context.Context, id int) *Dependency {
+func (c *DependencyClient) GetX(ctx context.Context, id uuid.UUID) *Dependency {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2205,7 +2144,7 @@ func (c *HasMetadataClient) UpdateOne(hm *HasMetadata) *HasMetadataUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *HasMetadataClient) UpdateOneID(id int) *HasMetadataUpdateOne {
+func (c *HasMetadataClient) UpdateOneID(id uuid.UUID) *HasMetadataUpdateOne {
 	mutation := newHasMetadataMutation(c.config, OpUpdateOne, withHasMetadataID(id))
 	return &HasMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -2222,7 +2161,7 @@ func (c *HasMetadataClient) DeleteOne(hm *HasMetadata) *HasMetadataDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *HasMetadataClient) DeleteOneID(id int) *HasMetadataDeleteOne {
+func (c *HasMetadataClient) DeleteOneID(id uuid.UUID) *HasMetadataDeleteOne {
 	builder := c.Delete().Where(hasmetadata.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -2239,12 +2178,12 @@ func (c *HasMetadataClient) Query() *HasMetadataQuery {
 }
 
 // Get returns a HasMetadata entity by its id.
-func (c *HasMetadataClient) Get(ctx context.Context, id int) (*HasMetadata, error) {
+func (c *HasMetadataClient) Get(ctx context.Context, id uuid.UUID) (*HasMetadata, error) {
 	return c.Query().Where(hasmetadata.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *HasMetadataClient) GetX(ctx context.Context, id int) *HasMetadata {
+func (c *HasMetadataClient) GetX(ctx context.Context, id uuid.UUID) *HasMetadata {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2402,7 +2341,7 @@ func (c *HasSourceAtClient) UpdateOne(hsa *HasSourceAt) *HasSourceAtUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *HasSourceAtClient) UpdateOneID(id int) *HasSourceAtUpdateOne {
+func (c *HasSourceAtClient) UpdateOneID(id uuid.UUID) *HasSourceAtUpdateOne {
 	mutation := newHasSourceAtMutation(c.config, OpUpdateOne, withHasSourceAtID(id))
 	return &HasSourceAtUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -2419,7 +2358,7 @@ func (c *HasSourceAtClient) DeleteOne(hsa *HasSourceAt) *HasSourceAtDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *HasSourceAtClient) DeleteOneID(id int) *HasSourceAtDeleteOne {
+func (c *HasSourceAtClient) DeleteOneID(id uuid.UUID) *HasSourceAtDeleteOne {
 	builder := c.Delete().Where(hassourceat.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -2436,12 +2375,12 @@ func (c *HasSourceAtClient) Query() *HasSourceAtQuery {
 }
 
 // Get returns a HasSourceAt entity by its id.
-func (c *HasSourceAtClient) Get(ctx context.Context, id int) (*HasSourceAt, error) {
+func (c *HasSourceAtClient) Get(ctx context.Context, id uuid.UUID) (*HasSourceAt, error) {
 	return c.Query().Where(hassourceat.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *HasSourceAtClient) GetX(ctx context.Context, id int) *HasSourceAt {
+func (c *HasSourceAtClient) GetX(ctx context.Context, id uuid.UUID) *HasSourceAt {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2583,7 +2522,7 @@ func (c *HashEqualClient) UpdateOne(he *HashEqual) *HashEqualUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *HashEqualClient) UpdateOneID(id int) *HashEqualUpdateOne {
+func (c *HashEqualClient) UpdateOneID(id uuid.UUID) *HashEqualUpdateOne {
 	mutation := newHashEqualMutation(c.config, OpUpdateOne, withHashEqualID(id))
 	return &HashEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -2600,7 +2539,7 @@ func (c *HashEqualClient) DeleteOne(he *HashEqual) *HashEqualDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *HashEqualClient) DeleteOneID(id int) *HashEqualDeleteOne {
+func (c *HashEqualClient) DeleteOneID(id uuid.UUID) *HashEqualDeleteOne {
 	builder := c.Delete().Where(hashequal.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -2617,12 +2556,12 @@ func (c *HashEqualClient) Query() *HashEqualQuery {
 }
 
 // Get returns a HashEqual entity by its id.
-func (c *HashEqualClient) Get(ctx context.Context, id int) (*HashEqual, error) {
+func (c *HashEqualClient) Get(ctx context.Context, id uuid.UUID) (*HashEqual, error) {
 	return c.Query().Where(hashequal.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *HashEqualClient) GetX(ctx context.Context, id int) *HashEqual {
+func (c *HashEqualClient) GetX(ctx context.Context, id uuid.UUID) *HashEqual {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2630,15 +2569,31 @@ func (c *HashEqualClient) GetX(ctx context.Context, id int) *HashEqual {
 	return obj
 }
 
-// QueryArtifacts queries the artifacts edge of a HashEqual.
-func (c *HashEqualClient) QueryArtifacts(he *HashEqual) *ArtifactQuery {
+// QueryArtifactA queries the artifact_a edge of a HashEqual.
+func (c *HashEqualClient) QueryArtifactA(he *HashEqual) *ArtifactQuery {
 	query := (&ArtifactClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := he.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(hashequal.Table, hashequal.FieldID, id),
 			sqlgraph.To(artifact.Table, artifact.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, hashequal.ArtifactsTable, hashequal.ArtifactsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, hashequal.ArtifactATable, hashequal.ArtifactAColumn),
+		)
+		fromV = sqlgraph.Neighbors(he.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryArtifactB queries the artifact_b edge of a HashEqual.
+func (c *HashEqualClient) QueryArtifactB(he *HashEqual) *ArtifactQuery {
+	query := (&ArtifactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := he.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(hashequal.Table, hashequal.FieldID, id),
+			sqlgraph.To(artifact.Table, artifact.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, hashequal.ArtifactBTable, hashequal.ArtifactBColumn),
 		)
 		fromV = sqlgraph.Neighbors(he.driver.Dialect(), step)
 		return fromV, nil
@@ -2668,171 +2623,6 @@ func (c *HashEqualClient) mutate(ctx context.Context, m *HashEqualMutation) (Val
 		return (&HashEqualDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown HashEqual mutation op: %q", m.Op())
-	}
-}
-
-// IsVulnerabilityClient is a client for the IsVulnerability schema.
-type IsVulnerabilityClient struct {
-	config
-}
-
-// NewIsVulnerabilityClient returns a client for the IsVulnerability from the given config.
-func NewIsVulnerabilityClient(c config) *IsVulnerabilityClient {
-	return &IsVulnerabilityClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `isvulnerability.Hooks(f(g(h())))`.
-func (c *IsVulnerabilityClient) Use(hooks ...Hook) {
-	c.hooks.IsVulnerability = append(c.hooks.IsVulnerability, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `isvulnerability.Intercept(f(g(h())))`.
-func (c *IsVulnerabilityClient) Intercept(interceptors ...Interceptor) {
-	c.inters.IsVulnerability = append(c.inters.IsVulnerability, interceptors...)
-}
-
-// Create returns a builder for creating a IsVulnerability entity.
-func (c *IsVulnerabilityClient) Create() *IsVulnerabilityCreate {
-	mutation := newIsVulnerabilityMutation(c.config, OpCreate)
-	return &IsVulnerabilityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of IsVulnerability entities.
-func (c *IsVulnerabilityClient) CreateBulk(builders ...*IsVulnerabilityCreate) *IsVulnerabilityCreateBulk {
-	return &IsVulnerabilityCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *IsVulnerabilityClient) MapCreateBulk(slice any, setFunc func(*IsVulnerabilityCreate, int)) *IsVulnerabilityCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &IsVulnerabilityCreateBulk{err: fmt.Errorf("calling to IsVulnerabilityClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*IsVulnerabilityCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &IsVulnerabilityCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for IsVulnerability.
-func (c *IsVulnerabilityClient) Update() *IsVulnerabilityUpdate {
-	mutation := newIsVulnerabilityMutation(c.config, OpUpdate)
-	return &IsVulnerabilityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *IsVulnerabilityClient) UpdateOne(iv *IsVulnerability) *IsVulnerabilityUpdateOne {
-	mutation := newIsVulnerabilityMutation(c.config, OpUpdateOne, withIsVulnerability(iv))
-	return &IsVulnerabilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *IsVulnerabilityClient) UpdateOneID(id int) *IsVulnerabilityUpdateOne {
-	mutation := newIsVulnerabilityMutation(c.config, OpUpdateOne, withIsVulnerabilityID(id))
-	return &IsVulnerabilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for IsVulnerability.
-func (c *IsVulnerabilityClient) Delete() *IsVulnerabilityDelete {
-	mutation := newIsVulnerabilityMutation(c.config, OpDelete)
-	return &IsVulnerabilityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *IsVulnerabilityClient) DeleteOne(iv *IsVulnerability) *IsVulnerabilityDeleteOne {
-	return c.DeleteOneID(iv.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *IsVulnerabilityClient) DeleteOneID(id int) *IsVulnerabilityDeleteOne {
-	builder := c.Delete().Where(isvulnerability.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &IsVulnerabilityDeleteOne{builder}
-}
-
-// Query returns a query builder for IsVulnerability.
-func (c *IsVulnerabilityClient) Query() *IsVulnerabilityQuery {
-	return &IsVulnerabilityQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeIsVulnerability},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a IsVulnerability entity by its id.
-func (c *IsVulnerabilityClient) Get(ctx context.Context, id int) (*IsVulnerability, error) {
-	return c.Query().Where(isvulnerability.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *IsVulnerabilityClient) GetX(ctx context.Context, id int) *IsVulnerability {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryOsv queries the osv edge of a IsVulnerability.
-func (c *IsVulnerabilityClient) QueryOsv(iv *IsVulnerability) *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := iv.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(isvulnerability.Table, isvulnerability.FieldID, id),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isvulnerability.OsvTable, isvulnerability.OsvColumn),
-		)
-		fromV = sqlgraph.Neighbors(iv.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryVulnerability queries the vulnerability edge of a IsVulnerability.
-func (c *IsVulnerabilityClient) QueryVulnerability(iv *IsVulnerability) *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := iv.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(isvulnerability.Table, isvulnerability.FieldID, id),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, isvulnerability.VulnerabilityTable, isvulnerability.VulnerabilityColumn),
-		)
-		fromV = sqlgraph.Neighbors(iv.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *IsVulnerabilityClient) Hooks() []Hook {
-	return c.hooks.IsVulnerability
-}
-
-// Interceptors returns the client interceptors.
-func (c *IsVulnerabilityClient) Interceptors() []Interceptor {
-	return c.inters.IsVulnerability
-}
-
-func (c *IsVulnerabilityClient) mutate(ctx context.Context, m *IsVulnerabilityMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&IsVulnerabilityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&IsVulnerabilityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&IsVulnerabilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&IsVulnerabilityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown IsVulnerability mutation op: %q", m.Op())
 	}
 }
 
@@ -2897,7 +2687,7 @@ func (c *LicenseClient) UpdateOne(l *License) *LicenseUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *LicenseClient) UpdateOneID(id int) *LicenseUpdateOne {
+func (c *LicenseClient) UpdateOneID(id uuid.UUID) *LicenseUpdateOne {
 	mutation := newLicenseMutation(c.config, OpUpdateOne, withLicenseID(id))
 	return &LicenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -2914,7 +2704,7 @@ func (c *LicenseClient) DeleteOne(l *License) *LicenseDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *LicenseClient) DeleteOneID(id int) *LicenseDeleteOne {
+func (c *LicenseClient) DeleteOneID(id uuid.UUID) *LicenseDeleteOne {
 	builder := c.Delete().Where(license.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -2931,12 +2721,12 @@ func (c *LicenseClient) Query() *LicenseQuery {
 }
 
 // Get returns a License entity by its id.
-func (c *LicenseClient) Get(ctx context.Context, id int) (*License, error) {
+func (c *LicenseClient) Get(ctx context.Context, id uuid.UUID) (*License, error) {
 	return c.Query().Where(license.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *LicenseClient) GetX(ctx context.Context, id int) *License {
+func (c *LicenseClient) GetX(ctx context.Context, id uuid.UUID) *License {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -3062,7 +2852,7 @@ func (c *OccurrenceClient) UpdateOne(o *Occurrence) *OccurrenceUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *OccurrenceClient) UpdateOneID(id int) *OccurrenceUpdateOne {
+func (c *OccurrenceClient) UpdateOneID(id uuid.UUID) *OccurrenceUpdateOne {
 	mutation := newOccurrenceMutation(c.config, OpUpdateOne, withOccurrenceID(id))
 	return &OccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -3079,7 +2869,7 @@ func (c *OccurrenceClient) DeleteOne(o *Occurrence) *OccurrenceDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *OccurrenceClient) DeleteOneID(id int) *OccurrenceDeleteOne {
+func (c *OccurrenceClient) DeleteOneID(id uuid.UUID) *OccurrenceDeleteOne {
 	builder := c.Delete().Where(occurrence.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -3096,12 +2886,12 @@ func (c *OccurrenceClient) Query() *OccurrenceQuery {
 }
 
 // Get returns a Occurrence entity by its id.
-func (c *OccurrenceClient) Get(ctx context.Context, id int) (*Occurrence, error) {
+func (c *OccurrenceClient) Get(ctx context.Context, id uuid.UUID) (*Occurrence, error) {
 	return c.Query().Where(occurrence.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *OccurrenceClient) GetX(ctx context.Context, id int) *Occurrence {
+func (c *OccurrenceClient) GetX(ctx context.Context, id uuid.UUID) *Occurrence {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -3259,7 +3049,7 @@ func (c *PackageNameClient) UpdateOne(pn *PackageName) *PackageNameUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PackageNameClient) UpdateOneID(id int) *PackageNameUpdateOne {
+func (c *PackageNameClient) UpdateOneID(id uuid.UUID) *PackageNameUpdateOne {
 	mutation := newPackageNameMutation(c.config, OpUpdateOne, withPackageNameID(id))
 	return &PackageNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -3276,7 +3066,7 @@ func (c *PackageNameClient) DeleteOne(pn *PackageName) *PackageNameDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PackageNameClient) DeleteOneID(id int) *PackageNameDeleteOne {
+func (c *PackageNameClient) DeleteOneID(id uuid.UUID) *PackageNameDeleteOne {
 	builder := c.Delete().Where(packagename.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -3293,33 +3083,17 @@ func (c *PackageNameClient) Query() *PackageNameQuery {
 }
 
 // Get returns a PackageName entity by its id.
-func (c *PackageNameClient) Get(ctx context.Context, id int) (*PackageName, error) {
+func (c *PackageNameClient) Get(ctx context.Context, id uuid.UUID) (*PackageName, error) {
 	return c.Query().Where(packagename.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PackageNameClient) GetX(ctx context.Context, id int) *PackageName {
+func (c *PackageNameClient) GetX(ctx context.Context, id uuid.UUID) *PackageName {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
 	return obj
-}
-
-// QueryNamespace queries the namespace edge of a PackageName.
-func (c *PackageNameClient) QueryNamespace(pn *PackageName) *PackageNamespaceQuery {
-	query := (&PackageNamespaceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packagename.Table, packagename.FieldID, id),
-			sqlgraph.To(packagenamespace.Table, packagenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, packagename.NamespaceTable, packagename.NamespaceColumn),
-		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // QueryVersions queries the versions edge of a PackageName.
@@ -3360,320 +3134,6 @@ func (c *PackageNameClient) mutate(ctx context.Context, m *PackageNameMutation) 
 		return (&PackageNameDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown PackageName mutation op: %q", m.Op())
-	}
-}
-
-// PackageNamespaceClient is a client for the PackageNamespace schema.
-type PackageNamespaceClient struct {
-	config
-}
-
-// NewPackageNamespaceClient returns a client for the PackageNamespace from the given config.
-func NewPackageNamespaceClient(c config) *PackageNamespaceClient {
-	return &PackageNamespaceClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `packagenamespace.Hooks(f(g(h())))`.
-func (c *PackageNamespaceClient) Use(hooks ...Hook) {
-	c.hooks.PackageNamespace = append(c.hooks.PackageNamespace, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `packagenamespace.Intercept(f(g(h())))`.
-func (c *PackageNamespaceClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PackageNamespace = append(c.inters.PackageNamespace, interceptors...)
-}
-
-// Create returns a builder for creating a PackageNamespace entity.
-func (c *PackageNamespaceClient) Create() *PackageNamespaceCreate {
-	mutation := newPackageNamespaceMutation(c.config, OpCreate)
-	return &PackageNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of PackageNamespace entities.
-func (c *PackageNamespaceClient) CreateBulk(builders ...*PackageNamespaceCreate) *PackageNamespaceCreateBulk {
-	return &PackageNamespaceCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *PackageNamespaceClient) MapCreateBulk(slice any, setFunc func(*PackageNamespaceCreate, int)) *PackageNamespaceCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &PackageNamespaceCreateBulk{err: fmt.Errorf("calling to PackageNamespaceClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*PackageNamespaceCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &PackageNamespaceCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PackageNamespace.
-func (c *PackageNamespaceClient) Update() *PackageNamespaceUpdate {
-	mutation := newPackageNamespaceMutation(c.config, OpUpdate)
-	return &PackageNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PackageNamespaceClient) UpdateOne(pn *PackageNamespace) *PackageNamespaceUpdateOne {
-	mutation := newPackageNamespaceMutation(c.config, OpUpdateOne, withPackageNamespace(pn))
-	return &PackageNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PackageNamespaceClient) UpdateOneID(id int) *PackageNamespaceUpdateOne {
-	mutation := newPackageNamespaceMutation(c.config, OpUpdateOne, withPackageNamespaceID(id))
-	return &PackageNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PackageNamespace.
-func (c *PackageNamespaceClient) Delete() *PackageNamespaceDelete {
-	mutation := newPackageNamespaceMutation(c.config, OpDelete)
-	return &PackageNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *PackageNamespaceClient) DeleteOne(pn *PackageNamespace) *PackageNamespaceDeleteOne {
-	return c.DeleteOneID(pn.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PackageNamespaceClient) DeleteOneID(id int) *PackageNamespaceDeleteOne {
-	builder := c.Delete().Where(packagenamespace.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PackageNamespaceDeleteOne{builder}
-}
-
-// Query returns a query builder for PackageNamespace.
-func (c *PackageNamespaceClient) Query() *PackageNamespaceQuery {
-	return &PackageNamespaceQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypePackageNamespace},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a PackageNamespace entity by its id.
-func (c *PackageNamespaceClient) Get(ctx context.Context, id int) (*PackageNamespace, error) {
-	return c.Query().Where(packagenamespace.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PackageNamespaceClient) GetX(ctx context.Context, id int) *PackageNamespace {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryPackage queries the package edge of a PackageNamespace.
-func (c *PackageNamespaceClient) QueryPackage(pn *PackageNamespace) *PackageTypeQuery {
-	query := (&PackageTypeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packagenamespace.Table, packagenamespace.FieldID, id),
-			sqlgraph.To(packagetype.Table, packagetype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, packagenamespace.PackageTable, packagenamespace.PackageColumn),
-		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryNames queries the names edge of a PackageNamespace.
-func (c *PackageNamespaceClient) QueryNames(pn *PackageNamespace) *PackageNameQuery {
-	query := (&PackageNameClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packagenamespace.Table, packagenamespace.FieldID, id),
-			sqlgraph.To(packagename.Table, packagename.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, packagenamespace.NamesTable, packagenamespace.NamesColumn),
-		)
-		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *PackageNamespaceClient) Hooks() []Hook {
-	return c.hooks.PackageNamespace
-}
-
-// Interceptors returns the client interceptors.
-func (c *PackageNamespaceClient) Interceptors() []Interceptor {
-	return c.inters.PackageNamespace
-}
-
-func (c *PackageNamespaceClient) mutate(ctx context.Context, m *PackageNamespaceMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&PackageNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&PackageNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&PackageNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&PackageNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown PackageNamespace mutation op: %q", m.Op())
-	}
-}
-
-// PackageTypeClient is a client for the PackageType schema.
-type PackageTypeClient struct {
-	config
-}
-
-// NewPackageTypeClient returns a client for the PackageType from the given config.
-func NewPackageTypeClient(c config) *PackageTypeClient {
-	return &PackageTypeClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `packagetype.Hooks(f(g(h())))`.
-func (c *PackageTypeClient) Use(hooks ...Hook) {
-	c.hooks.PackageType = append(c.hooks.PackageType, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `packagetype.Intercept(f(g(h())))`.
-func (c *PackageTypeClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PackageType = append(c.inters.PackageType, interceptors...)
-}
-
-// Create returns a builder for creating a PackageType entity.
-func (c *PackageTypeClient) Create() *PackageTypeCreate {
-	mutation := newPackageTypeMutation(c.config, OpCreate)
-	return &PackageTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of PackageType entities.
-func (c *PackageTypeClient) CreateBulk(builders ...*PackageTypeCreate) *PackageTypeCreateBulk {
-	return &PackageTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *PackageTypeClient) MapCreateBulk(slice any, setFunc func(*PackageTypeCreate, int)) *PackageTypeCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &PackageTypeCreateBulk{err: fmt.Errorf("calling to PackageTypeClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*PackageTypeCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &PackageTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PackageType.
-func (c *PackageTypeClient) Update() *PackageTypeUpdate {
-	mutation := newPackageTypeMutation(c.config, OpUpdate)
-	return &PackageTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PackageTypeClient) UpdateOne(pt *PackageType) *PackageTypeUpdateOne {
-	mutation := newPackageTypeMutation(c.config, OpUpdateOne, withPackageType(pt))
-	return &PackageTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PackageTypeClient) UpdateOneID(id int) *PackageTypeUpdateOne {
-	mutation := newPackageTypeMutation(c.config, OpUpdateOne, withPackageTypeID(id))
-	return &PackageTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PackageType.
-func (c *PackageTypeClient) Delete() *PackageTypeDelete {
-	mutation := newPackageTypeMutation(c.config, OpDelete)
-	return &PackageTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *PackageTypeClient) DeleteOne(pt *PackageType) *PackageTypeDeleteOne {
-	return c.DeleteOneID(pt.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PackageTypeClient) DeleteOneID(id int) *PackageTypeDeleteOne {
-	builder := c.Delete().Where(packagetype.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PackageTypeDeleteOne{builder}
-}
-
-// Query returns a query builder for PackageType.
-func (c *PackageTypeClient) Query() *PackageTypeQuery {
-	return &PackageTypeQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypePackageType},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a PackageType entity by its id.
-func (c *PackageTypeClient) Get(ctx context.Context, id int) (*PackageType, error) {
-	return c.Query().Where(packagetype.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PackageTypeClient) GetX(ctx context.Context, id int) *PackageType {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryNamespaces queries the namespaces edge of a PackageType.
-func (c *PackageTypeClient) QueryNamespaces(pt *PackageType) *PackageNamespaceQuery {
-	query := (&PackageNamespaceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pt.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packagetype.Table, packagetype.FieldID, id),
-			sqlgraph.To(packagenamespace.Table, packagenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, packagetype.NamespacesTable, packagetype.NamespacesColumn),
-		)
-		fromV = sqlgraph.Neighbors(pt.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *PackageTypeClient) Hooks() []Hook {
-	return c.hooks.PackageType
-}
-
-// Interceptors returns the client interceptors.
-func (c *PackageTypeClient) Interceptors() []Interceptor {
-	return c.inters.PackageType
-}
-
-func (c *PackageTypeClient) mutate(ctx context.Context, m *PackageTypeMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&PackageTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&PackageTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&PackageTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&PackageTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown PackageType mutation op: %q", m.Op())
 	}
 }
 
@@ -3738,7 +3198,7 @@ func (c *PackageVersionClient) UpdateOne(pv *PackageVersion) *PackageVersionUpda
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PackageVersionClient) UpdateOneID(id int) *PackageVersionUpdateOne {
+func (c *PackageVersionClient) UpdateOneID(id uuid.UUID) *PackageVersionUpdateOne {
 	mutation := newPackageVersionMutation(c.config, OpUpdateOne, withPackageVersionID(id))
 	return &PackageVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -3755,7 +3215,7 @@ func (c *PackageVersionClient) DeleteOne(pv *PackageVersion) *PackageVersionDele
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PackageVersionClient) DeleteOneID(id int) *PackageVersionDeleteOne {
+func (c *PackageVersionClient) DeleteOneID(id uuid.UUID) *PackageVersionDeleteOne {
 	builder := c.Delete().Where(packageversion.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -3772,12 +3232,12 @@ func (c *PackageVersionClient) Query() *PackageVersionQuery {
 }
 
 // Get returns a PackageVersion entity by its id.
-func (c *PackageVersionClient) Get(ctx context.Context, id int) (*PackageVersion, error) {
+func (c *PackageVersionClient) Get(ctx context.Context, id uuid.UUID) (*PackageVersion, error) {
 	return c.Query().Where(packageversion.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PackageVersionClient) GetX(ctx context.Context, id int) *PackageVersion {
+func (c *PackageVersionClient) GetX(ctx context.Context, id uuid.UUID) *PackageVersion {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -3833,22 +3293,6 @@ func (c *PackageVersionClient) QuerySbom(pv *PackageVersion) *BillOfMaterialsQue
 	return query
 }
 
-// QueryEqualPackages queries the equal_packages edge of a PackageVersion.
-func (c *PackageVersionClient) QueryEqualPackages(pv *PackageVersion) *PkgEqualQuery {
-	query := (&PkgEqualClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pv.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
-			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.EqualPackagesTable, packageversion.EqualPackagesPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryIncludedInSboms queries the included_in_sboms edge of a PackageVersion.
 func (c *PackageVersionClient) QueryIncludedInSboms(pv *PackageVersion) *BillOfMaterialsQuery {
 	query := (&BillOfMaterialsClient{config: c.config}).Query()
@@ -3858,6 +3302,38 @@ func (c *PackageVersionClient) QueryIncludedInSboms(pv *PackageVersion) *BillOfM
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.IncludedInSbomsTable, packageversion.IncludedInSbomsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPkgEqualPkgA queries the pkg_equal_pkg_a edge of a PackageVersion.
+func (c *PackageVersionClient) QueryPkgEqualPkgA(pv *PackageVersion) *PkgEqualQuery {
+	query := (&PkgEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PkgEqualPkgATable, packageversion.PkgEqualPkgAColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPkgEqualPkgB queries the pkg_equal_pkg_b edge of a PackageVersion.
+func (c *PackageVersionClient) QueryPkgEqualPkgB(pv *PackageVersion) *PkgEqualQuery {
+	query := (&PkgEqualClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PkgEqualPkgBTable, packageversion.PkgEqualPkgBColumn),
 		)
 		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
 		return fromV, nil
@@ -3951,7 +3427,7 @@ func (c *PkgEqualClient) UpdateOne(pe *PkgEqual) *PkgEqualUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PkgEqualClient) UpdateOneID(id int) *PkgEqualUpdateOne {
+func (c *PkgEqualClient) UpdateOneID(id uuid.UUID) *PkgEqualUpdateOne {
 	mutation := newPkgEqualMutation(c.config, OpUpdateOne, withPkgEqualID(id))
 	return &PkgEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -3968,7 +3444,7 @@ func (c *PkgEqualClient) DeleteOne(pe *PkgEqual) *PkgEqualDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PkgEqualClient) DeleteOneID(id int) *PkgEqualDeleteOne {
+func (c *PkgEqualClient) DeleteOneID(id uuid.UUID) *PkgEqualDeleteOne {
 	builder := c.Delete().Where(pkgequal.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -3985,12 +3461,12 @@ func (c *PkgEqualClient) Query() *PkgEqualQuery {
 }
 
 // Get returns a PkgEqual entity by its id.
-func (c *PkgEqualClient) Get(ctx context.Context, id int) (*PkgEqual, error) {
+func (c *PkgEqualClient) Get(ctx context.Context, id uuid.UUID) (*PkgEqual, error) {
 	return c.Query().Where(pkgequal.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PkgEqualClient) GetX(ctx context.Context, id int) *PkgEqual {
+func (c *PkgEqualClient) GetX(ctx context.Context, id uuid.UUID) *PkgEqual {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -3998,15 +3474,31 @@ func (c *PkgEqualClient) GetX(ctx context.Context, id int) *PkgEqual {
 	return obj
 }
 
-// QueryPackages queries the packages edge of a PkgEqual.
-func (c *PkgEqualClient) QueryPackages(pe *PkgEqual) *PackageVersionQuery {
+// QueryPackageA queries the package_a edge of a PkgEqual.
+func (c *PkgEqualClient) QueryPackageA(pe *PkgEqual) *PackageVersionQuery {
 	query := (&PackageVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pe.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, id),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, pkgequal.PackagesTable, pkgequal.PackagesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageATable, pkgequal.PackageAColumn),
+		)
+		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPackageB queries the package_b edge of a PkgEqual.
+func (c *PkgEqualClient) QueryPackageB(pe *PkgEqual) *PackageVersionQuery {
+	query := (&PackageVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pkgequal.Table, pkgequal.FieldID, id),
+			sqlgraph.To(packageversion.Table, packageversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, pkgequal.PackageBTable, pkgequal.PackageBColumn),
 		)
 		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
 		return fromV, nil
@@ -4100,7 +3592,7 @@ func (c *PointOfContactClient) UpdateOne(poc *PointOfContact) *PointOfContactUpd
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PointOfContactClient) UpdateOneID(id int) *PointOfContactUpdateOne {
+func (c *PointOfContactClient) UpdateOneID(id uuid.UUID) *PointOfContactUpdateOne {
 	mutation := newPointOfContactMutation(c.config, OpUpdateOne, withPointOfContactID(id))
 	return &PointOfContactUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -4117,7 +3609,7 @@ func (c *PointOfContactClient) DeleteOne(poc *PointOfContact) *PointOfContactDel
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PointOfContactClient) DeleteOneID(id int) *PointOfContactDeleteOne {
+func (c *PointOfContactClient) DeleteOneID(id uuid.UUID) *PointOfContactDeleteOne {
 	builder := c.Delete().Where(pointofcontact.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -4134,12 +3626,12 @@ func (c *PointOfContactClient) Query() *PointOfContactQuery {
 }
 
 // Get returns a PointOfContact entity by its id.
-func (c *PointOfContactClient) Get(ctx context.Context, id int) (*PointOfContact, error) {
+func (c *PointOfContactClient) Get(ctx context.Context, id uuid.UUID) (*PointOfContact, error) {
 	return c.Query().Where(pointofcontact.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PointOfContactClient) GetX(ctx context.Context, id int) *PointOfContact {
+func (c *PointOfContactClient) GetX(ctx context.Context, id uuid.UUID) *PointOfContact {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -4297,7 +3789,7 @@ func (c *SLSAAttestationClient) UpdateOne(sa *SLSAAttestation) *SLSAAttestationU
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SLSAAttestationClient) UpdateOneID(id int) *SLSAAttestationUpdateOne {
+func (c *SLSAAttestationClient) UpdateOneID(id uuid.UUID) *SLSAAttestationUpdateOne {
 	mutation := newSLSAAttestationMutation(c.config, OpUpdateOne, withSLSAAttestationID(id))
 	return &SLSAAttestationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -4314,7 +3806,7 @@ func (c *SLSAAttestationClient) DeleteOne(sa *SLSAAttestation) *SLSAAttestationD
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SLSAAttestationClient) DeleteOneID(id int) *SLSAAttestationDeleteOne {
+func (c *SLSAAttestationClient) DeleteOneID(id uuid.UUID) *SLSAAttestationDeleteOne {
 	builder := c.Delete().Where(slsaattestation.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -4331,12 +3823,12 @@ func (c *SLSAAttestationClient) Query() *SLSAAttestationQuery {
 }
 
 // Get returns a SLSAAttestation entity by its id.
-func (c *SLSAAttestationClient) Get(ctx context.Context, id int) (*SLSAAttestation, error) {
+func (c *SLSAAttestationClient) Get(ctx context.Context, id uuid.UUID) (*SLSAAttestation, error) {
 	return c.Query().Where(slsaattestation.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SLSAAttestationClient) GetX(ctx context.Context, id int) *SLSAAttestation {
+func (c *SLSAAttestationClient) GetX(ctx context.Context, id uuid.UUID) *SLSAAttestation {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -4417,155 +3909,6 @@ func (c *SLSAAttestationClient) mutate(ctx context.Context, m *SLSAAttestationMu
 	}
 }
 
-// ScorecardClient is a client for the Scorecard schema.
-type ScorecardClient struct {
-	config
-}
-
-// NewScorecardClient returns a client for the Scorecard from the given config.
-func NewScorecardClient(c config) *ScorecardClient {
-	return &ScorecardClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `scorecard.Hooks(f(g(h())))`.
-func (c *ScorecardClient) Use(hooks ...Hook) {
-	c.hooks.Scorecard = append(c.hooks.Scorecard, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `scorecard.Intercept(f(g(h())))`.
-func (c *ScorecardClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Scorecard = append(c.inters.Scorecard, interceptors...)
-}
-
-// Create returns a builder for creating a Scorecard entity.
-func (c *ScorecardClient) Create() *ScorecardCreate {
-	mutation := newScorecardMutation(c.config, OpCreate)
-	return &ScorecardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Scorecard entities.
-func (c *ScorecardClient) CreateBulk(builders ...*ScorecardCreate) *ScorecardCreateBulk {
-	return &ScorecardCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *ScorecardClient) MapCreateBulk(slice any, setFunc func(*ScorecardCreate, int)) *ScorecardCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &ScorecardCreateBulk{err: fmt.Errorf("calling to ScorecardClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*ScorecardCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &ScorecardCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Scorecard.
-func (c *ScorecardClient) Update() *ScorecardUpdate {
-	mutation := newScorecardMutation(c.config, OpUpdate)
-	return &ScorecardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ScorecardClient) UpdateOne(s *Scorecard) *ScorecardUpdateOne {
-	mutation := newScorecardMutation(c.config, OpUpdateOne, withScorecard(s))
-	return &ScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ScorecardClient) UpdateOneID(id int) *ScorecardUpdateOne {
-	mutation := newScorecardMutation(c.config, OpUpdateOne, withScorecardID(id))
-	return &ScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Scorecard.
-func (c *ScorecardClient) Delete() *ScorecardDelete {
-	mutation := newScorecardMutation(c.config, OpDelete)
-	return &ScorecardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *ScorecardClient) DeleteOne(s *Scorecard) *ScorecardDeleteOne {
-	return c.DeleteOneID(s.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ScorecardClient) DeleteOneID(id int) *ScorecardDeleteOne {
-	builder := c.Delete().Where(scorecard.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ScorecardDeleteOne{builder}
-}
-
-// Query returns a query builder for Scorecard.
-func (c *ScorecardClient) Query() *ScorecardQuery {
-	return &ScorecardQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeScorecard},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Scorecard entity by its id.
-func (c *ScorecardClient) Get(ctx context.Context, id int) (*Scorecard, error) {
-	return c.Query().Where(scorecard.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ScorecardClient) GetX(ctx context.Context, id int) *Scorecard {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryCertifications queries the certifications edge of a Scorecard.
-func (c *ScorecardClient) QueryCertifications(s *Scorecard) *CertifyScorecardQuery {
-	query := (&CertifyScorecardClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(scorecard.Table, scorecard.FieldID, id),
-			sqlgraph.To(certifyscorecard.Table, certifyscorecard.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, scorecard.CertificationsTable, scorecard.CertificationsColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *ScorecardClient) Hooks() []Hook {
-	return c.hooks.Scorecard
-}
-
-// Interceptors returns the client interceptors.
-func (c *ScorecardClient) Interceptors() []Interceptor {
-	return c.inters.Scorecard
-}
-
-func (c *ScorecardClient) mutate(ctx context.Context, m *ScorecardMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&ScorecardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&ScorecardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&ScorecardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&ScorecardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown Scorecard mutation op: %q", m.Op())
-	}
-}
-
 // SourceNameClient is a client for the SourceName schema.
 type SourceNameClient struct {
 	config
@@ -4627,7 +3970,7 @@ func (c *SourceNameClient) UpdateOne(sn *SourceName) *SourceNameUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SourceNameClient) UpdateOneID(id int) *SourceNameUpdateOne {
+func (c *SourceNameClient) UpdateOneID(id uuid.UUID) *SourceNameUpdateOne {
 	mutation := newSourceNameMutation(c.config, OpUpdateOne, withSourceNameID(id))
 	return &SourceNameUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -4644,7 +3987,7 @@ func (c *SourceNameClient) DeleteOne(sn *SourceName) *SourceNameDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SourceNameClient) DeleteOneID(id int) *SourceNameDeleteOne {
+func (c *SourceNameClient) DeleteOneID(id uuid.UUID) *SourceNameDeleteOne {
 	builder := c.Delete().Where(sourcename.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -4661,33 +4004,17 @@ func (c *SourceNameClient) Query() *SourceNameQuery {
 }
 
 // Get returns a SourceName entity by its id.
-func (c *SourceNameClient) Get(ctx context.Context, id int) (*SourceName, error) {
+func (c *SourceNameClient) Get(ctx context.Context, id uuid.UUID) (*SourceName, error) {
 	return c.Query().Where(sourcename.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SourceNameClient) GetX(ctx context.Context, id int) *SourceName {
+func (c *SourceNameClient) GetX(ctx context.Context, id uuid.UUID) *SourceName {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
 	return obj
-}
-
-// QueryNamespace queries the namespace edge of a SourceName.
-func (c *SourceNameClient) QueryNamespace(sn *SourceName) *SourceNamespaceQuery {
-	query := (&SourceNamespaceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
-			sqlgraph.To(sourcenamespace.Table, sourcenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, sourcename.NamespaceTable, sourcename.NamespaceColumn),
-		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // QueryOccurrences queries the occurrences edge of a SourceName.
@@ -4728,320 +4055,6 @@ func (c *SourceNameClient) mutate(ctx context.Context, m *SourceNameMutation) (V
 		return (&SourceNameDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown SourceName mutation op: %q", m.Op())
-	}
-}
-
-// SourceNamespaceClient is a client for the SourceNamespace schema.
-type SourceNamespaceClient struct {
-	config
-}
-
-// NewSourceNamespaceClient returns a client for the SourceNamespace from the given config.
-func NewSourceNamespaceClient(c config) *SourceNamespaceClient {
-	return &SourceNamespaceClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `sourcenamespace.Hooks(f(g(h())))`.
-func (c *SourceNamespaceClient) Use(hooks ...Hook) {
-	c.hooks.SourceNamespace = append(c.hooks.SourceNamespace, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `sourcenamespace.Intercept(f(g(h())))`.
-func (c *SourceNamespaceClient) Intercept(interceptors ...Interceptor) {
-	c.inters.SourceNamespace = append(c.inters.SourceNamespace, interceptors...)
-}
-
-// Create returns a builder for creating a SourceNamespace entity.
-func (c *SourceNamespaceClient) Create() *SourceNamespaceCreate {
-	mutation := newSourceNamespaceMutation(c.config, OpCreate)
-	return &SourceNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of SourceNamespace entities.
-func (c *SourceNamespaceClient) CreateBulk(builders ...*SourceNamespaceCreate) *SourceNamespaceCreateBulk {
-	return &SourceNamespaceCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *SourceNamespaceClient) MapCreateBulk(slice any, setFunc func(*SourceNamespaceCreate, int)) *SourceNamespaceCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &SourceNamespaceCreateBulk{err: fmt.Errorf("calling to SourceNamespaceClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*SourceNamespaceCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &SourceNamespaceCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for SourceNamespace.
-func (c *SourceNamespaceClient) Update() *SourceNamespaceUpdate {
-	mutation := newSourceNamespaceMutation(c.config, OpUpdate)
-	return &SourceNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *SourceNamespaceClient) UpdateOne(sn *SourceNamespace) *SourceNamespaceUpdateOne {
-	mutation := newSourceNamespaceMutation(c.config, OpUpdateOne, withSourceNamespace(sn))
-	return &SourceNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *SourceNamespaceClient) UpdateOneID(id int) *SourceNamespaceUpdateOne {
-	mutation := newSourceNamespaceMutation(c.config, OpUpdateOne, withSourceNamespaceID(id))
-	return &SourceNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for SourceNamespace.
-func (c *SourceNamespaceClient) Delete() *SourceNamespaceDelete {
-	mutation := newSourceNamespaceMutation(c.config, OpDelete)
-	return &SourceNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *SourceNamespaceClient) DeleteOne(sn *SourceNamespace) *SourceNamespaceDeleteOne {
-	return c.DeleteOneID(sn.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SourceNamespaceClient) DeleteOneID(id int) *SourceNamespaceDeleteOne {
-	builder := c.Delete().Where(sourcenamespace.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &SourceNamespaceDeleteOne{builder}
-}
-
-// Query returns a query builder for SourceNamespace.
-func (c *SourceNamespaceClient) Query() *SourceNamespaceQuery {
-	return &SourceNamespaceQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeSourceNamespace},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a SourceNamespace entity by its id.
-func (c *SourceNamespaceClient) Get(ctx context.Context, id int) (*SourceNamespace, error) {
-	return c.Query().Where(sourcenamespace.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *SourceNamespaceClient) GetX(ctx context.Context, id int) *SourceNamespace {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QuerySourceType queries the source_type edge of a SourceNamespace.
-func (c *SourceNamespaceClient) QuerySourceType(sn *SourceNamespace) *SourceTypeQuery {
-	query := (&SourceTypeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(sourcenamespace.Table, sourcenamespace.FieldID, id),
-			sqlgraph.To(sourcetype.Table, sourcetype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, sourcenamespace.SourceTypeTable, sourcenamespace.SourceTypeColumn),
-		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryNames queries the names edge of a SourceNamespace.
-func (c *SourceNamespaceClient) QueryNames(sn *SourceNamespace) *SourceNameQuery {
-	query := (&SourceNameClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := sn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(sourcenamespace.Table, sourcenamespace.FieldID, id),
-			sqlgraph.To(sourcename.Table, sourcename.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, sourcenamespace.NamesTable, sourcenamespace.NamesColumn),
-		)
-		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *SourceNamespaceClient) Hooks() []Hook {
-	return c.hooks.SourceNamespace
-}
-
-// Interceptors returns the client interceptors.
-func (c *SourceNamespaceClient) Interceptors() []Interceptor {
-	return c.inters.SourceNamespace
-}
-
-func (c *SourceNamespaceClient) mutate(ctx context.Context, m *SourceNamespaceMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&SourceNamespaceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&SourceNamespaceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&SourceNamespaceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&SourceNamespaceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown SourceNamespace mutation op: %q", m.Op())
-	}
-}
-
-// SourceTypeClient is a client for the SourceType schema.
-type SourceTypeClient struct {
-	config
-}
-
-// NewSourceTypeClient returns a client for the SourceType from the given config.
-func NewSourceTypeClient(c config) *SourceTypeClient {
-	return &SourceTypeClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `sourcetype.Hooks(f(g(h())))`.
-func (c *SourceTypeClient) Use(hooks ...Hook) {
-	c.hooks.SourceType = append(c.hooks.SourceType, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `sourcetype.Intercept(f(g(h())))`.
-func (c *SourceTypeClient) Intercept(interceptors ...Interceptor) {
-	c.inters.SourceType = append(c.inters.SourceType, interceptors...)
-}
-
-// Create returns a builder for creating a SourceType entity.
-func (c *SourceTypeClient) Create() *SourceTypeCreate {
-	mutation := newSourceTypeMutation(c.config, OpCreate)
-	return &SourceTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of SourceType entities.
-func (c *SourceTypeClient) CreateBulk(builders ...*SourceTypeCreate) *SourceTypeCreateBulk {
-	return &SourceTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *SourceTypeClient) MapCreateBulk(slice any, setFunc func(*SourceTypeCreate, int)) *SourceTypeCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &SourceTypeCreateBulk{err: fmt.Errorf("calling to SourceTypeClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*SourceTypeCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &SourceTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for SourceType.
-func (c *SourceTypeClient) Update() *SourceTypeUpdate {
-	mutation := newSourceTypeMutation(c.config, OpUpdate)
-	return &SourceTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *SourceTypeClient) UpdateOne(st *SourceType) *SourceTypeUpdateOne {
-	mutation := newSourceTypeMutation(c.config, OpUpdateOne, withSourceType(st))
-	return &SourceTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *SourceTypeClient) UpdateOneID(id int) *SourceTypeUpdateOne {
-	mutation := newSourceTypeMutation(c.config, OpUpdateOne, withSourceTypeID(id))
-	return &SourceTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for SourceType.
-func (c *SourceTypeClient) Delete() *SourceTypeDelete {
-	mutation := newSourceTypeMutation(c.config, OpDelete)
-	return &SourceTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *SourceTypeClient) DeleteOne(st *SourceType) *SourceTypeDeleteOne {
-	return c.DeleteOneID(st.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SourceTypeClient) DeleteOneID(id int) *SourceTypeDeleteOne {
-	builder := c.Delete().Where(sourcetype.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &SourceTypeDeleteOne{builder}
-}
-
-// Query returns a query builder for SourceType.
-func (c *SourceTypeClient) Query() *SourceTypeQuery {
-	return &SourceTypeQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeSourceType},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a SourceType entity by its id.
-func (c *SourceTypeClient) Get(ctx context.Context, id int) (*SourceType, error) {
-	return c.Query().Where(sourcetype.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *SourceTypeClient) GetX(ctx context.Context, id int) *SourceType {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryNamespaces queries the namespaces edge of a SourceType.
-func (c *SourceTypeClient) QueryNamespaces(st *SourceType) *SourceNamespaceQuery {
-	query := (&SourceNamespaceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := st.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(sourcetype.Table, sourcetype.FieldID, id),
-			sqlgraph.To(sourcenamespace.Table, sourcenamespace.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, sourcetype.NamespacesTable, sourcetype.NamespacesColumn),
-		)
-		fromV = sqlgraph.Neighbors(st.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *SourceTypeClient) Hooks() []Hook {
-	return c.hooks.SourceType
-}
-
-// Interceptors returns the client interceptors.
-func (c *SourceTypeClient) Interceptors() []Interceptor {
-	return c.inters.SourceType
-}
-
-func (c *SourceTypeClient) mutate(ctx context.Context, m *SourceTypeMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&SourceTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&SourceTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&SourceTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&SourceTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown SourceType mutation op: %q", m.Op())
 	}
 }
 
@@ -5106,7 +4119,7 @@ func (c *VulnEqualClient) UpdateOne(ve *VulnEqual) *VulnEqualUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *VulnEqualClient) UpdateOneID(id int) *VulnEqualUpdateOne {
+func (c *VulnEqualClient) UpdateOneID(id uuid.UUID) *VulnEqualUpdateOne {
 	mutation := newVulnEqualMutation(c.config, OpUpdateOne, withVulnEqualID(id))
 	return &VulnEqualUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -5123,7 +4136,7 @@ func (c *VulnEqualClient) DeleteOne(ve *VulnEqual) *VulnEqualDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *VulnEqualClient) DeleteOneID(id int) *VulnEqualDeleteOne {
+func (c *VulnEqualClient) DeleteOneID(id uuid.UUID) *VulnEqualDeleteOne {
 	builder := c.Delete().Where(vulnequal.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -5140,12 +4153,12 @@ func (c *VulnEqualClient) Query() *VulnEqualQuery {
 }
 
 // Get returns a VulnEqual entity by its id.
-func (c *VulnEqualClient) Get(ctx context.Context, id int) (*VulnEqual, error) {
+func (c *VulnEqualClient) Get(ctx context.Context, id uuid.UUID) (*VulnEqual, error) {
 	return c.Query().Where(vulnequal.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *VulnEqualClient) GetX(ctx context.Context, id int) *VulnEqual {
+func (c *VulnEqualClient) GetX(ctx context.Context, id uuid.UUID) *VulnEqual {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -5153,15 +4166,31 @@ func (c *VulnEqualClient) GetX(ctx context.Context, id int) *VulnEqual {
 	return obj
 }
 
-// QueryVulnerabilityIds queries the vulnerability_ids edge of a VulnEqual.
-func (c *VulnEqualClient) QueryVulnerabilityIds(ve *VulnEqual) *VulnerabilityIDQuery {
+// QueryVulnerabilityA queries the vulnerability_a edge of a VulnEqual.
+func (c *VulnEqualClient) QueryVulnerabilityA(ve *VulnEqual) *VulnerabilityIDQuery {
 	query := (&VulnerabilityIDClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ve.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnequal.Table, vulnequal.FieldID, id),
 			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, vulnequal.VulnerabilityIdsTable, vulnequal.VulnerabilityIdsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityATable, vulnequal.VulnerabilityAColumn),
+		)
+		fromV = sqlgraph.Neighbors(ve.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVulnerabilityB queries the vulnerability_b edge of a VulnEqual.
+func (c *VulnEqualClient) QueryVulnerabilityB(ve *VulnEqual) *VulnerabilityIDQuery {
+	query := (&VulnerabilityIDClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ve.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vulnequal.Table, vulnequal.FieldID, id),
+			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, vulnequal.VulnerabilityBTable, vulnequal.VulnerabilityBColumn),
 		)
 		fromV = sqlgraph.Neighbors(ve.driver.Dialect(), step)
 		return fromV, nil
@@ -5255,7 +4284,7 @@ func (c *VulnerabilityIDClient) UpdateOne(vi *VulnerabilityID) *VulnerabilityIDU
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *VulnerabilityIDClient) UpdateOneID(id int) *VulnerabilityIDUpdateOne {
+func (c *VulnerabilityIDClient) UpdateOneID(id uuid.UUID) *VulnerabilityIDUpdateOne {
 	mutation := newVulnerabilityIDMutation(c.config, OpUpdateOne, withVulnerabilityIDID(id))
 	return &VulnerabilityIDUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -5272,7 +4301,7 @@ func (c *VulnerabilityIDClient) DeleteOne(vi *VulnerabilityID) *VulnerabilityIDD
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *VulnerabilityIDClient) DeleteOneID(id int) *VulnerabilityIDDeleteOne {
+func (c *VulnerabilityIDClient) DeleteOneID(id uuid.UUID) *VulnerabilityIDDeleteOne {
 	builder := c.Delete().Where(vulnerabilityid.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -5289,12 +4318,12 @@ func (c *VulnerabilityIDClient) Query() *VulnerabilityIDQuery {
 }
 
 // Get returns a VulnerabilityID entity by its id.
-func (c *VulnerabilityIDClient) Get(ctx context.Context, id int) (*VulnerabilityID, error) {
+func (c *VulnerabilityIDClient) Get(ctx context.Context, id uuid.UUID) (*VulnerabilityID, error) {
 	return c.Query().Where(vulnerabilityid.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *VulnerabilityIDClient) GetX(ctx context.Context, id int) *VulnerabilityID {
+func (c *VulnerabilityIDClient) GetX(ctx context.Context, id uuid.UUID) *VulnerabilityID {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -5302,15 +4331,15 @@ func (c *VulnerabilityIDClient) GetX(ctx context.Context, id int) *Vulnerability
 	return obj
 }
 
-// QueryType queries the type edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryType(vi *VulnerabilityID) *VulnerabilityTypeQuery {
-	query := (&VulnerabilityTypeClient{config: c.config}).Query()
+// QueryVulnEqualVulnA queries the vuln_equal_vuln_a edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryVulnEqualVulnA(vi *VulnerabilityID) *VulnEqualQuery {
+	query := (&VulnEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := vi.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
-			sqlgraph.To(vulnerabilitytype.Table, vulnerabilitytype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, vulnerabilityid.TypeTable, vulnerabilityid.TypeColumn),
+			sqlgraph.To(vulnequal.Table, vulnequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VulnEqualVulnATable, vulnerabilityid.VulnEqualVulnAColumn),
 		)
 		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
 		return fromV, nil
@@ -5318,15 +4347,15 @@ func (c *VulnerabilityIDClient) QueryType(vi *VulnerabilityID) *VulnerabilityTyp
 	return query
 }
 
-// QueryVulnEquals queries the vuln_equals edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryVulnEquals(vi *VulnerabilityID) *VulnEqualQuery {
+// QueryVulnEqualVulnB queries the vuln_equal_vuln_b edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryVulnEqualVulnB(vi *VulnerabilityID) *VulnEqualQuery {
 	query := (&VulnEqualClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := vi.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(vulnequal.Table, vulnequal.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, vulnerabilityid.VulnEqualsTable, vulnerabilityid.VulnEqualsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VulnEqualVulnBTable, vulnerabilityid.VulnEqualVulnBColumn),
 		)
 		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
 		return fromV, nil
@@ -5436,7 +4465,7 @@ func (c *VulnerabilityMetadataClient) UpdateOne(vm *VulnerabilityMetadata) *Vuln
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *VulnerabilityMetadataClient) UpdateOneID(id int) *VulnerabilityMetadataUpdateOne {
+func (c *VulnerabilityMetadataClient) UpdateOneID(id uuid.UUID) *VulnerabilityMetadataUpdateOne {
 	mutation := newVulnerabilityMetadataMutation(c.config, OpUpdateOne, withVulnerabilityMetadataID(id))
 	return &VulnerabilityMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -5453,7 +4482,7 @@ func (c *VulnerabilityMetadataClient) DeleteOne(vm *VulnerabilityMetadata) *Vuln
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *VulnerabilityMetadataClient) DeleteOneID(id int) *VulnerabilityMetadataDeleteOne {
+func (c *VulnerabilityMetadataClient) DeleteOneID(id uuid.UUID) *VulnerabilityMetadataDeleteOne {
 	builder := c.Delete().Where(vulnerabilitymetadata.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -5470,12 +4499,12 @@ func (c *VulnerabilityMetadataClient) Query() *VulnerabilityMetadataQuery {
 }
 
 // Get returns a VulnerabilityMetadata entity by its id.
-func (c *VulnerabilityMetadataClient) Get(ctx context.Context, id int) (*VulnerabilityMetadata, error) {
+func (c *VulnerabilityMetadataClient) Get(ctx context.Context, id uuid.UUID) (*VulnerabilityMetadata, error) {
 	return c.Query().Where(vulnerabilitymetadata.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *VulnerabilityMetadataClient) GetX(ctx context.Context, id int) *VulnerabilityMetadata {
+func (c *VulnerabilityMetadataClient) GetX(ctx context.Context, id uuid.UUID) *VulnerabilityMetadata {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -5524,171 +4553,20 @@ func (c *VulnerabilityMetadataClient) mutate(ctx context.Context, m *Vulnerabili
 	}
 }
 
-// VulnerabilityTypeClient is a client for the VulnerabilityType schema.
-type VulnerabilityTypeClient struct {
-	config
-}
-
-// NewVulnerabilityTypeClient returns a client for the VulnerabilityType from the given config.
-func NewVulnerabilityTypeClient(c config) *VulnerabilityTypeClient {
-	return &VulnerabilityTypeClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `vulnerabilitytype.Hooks(f(g(h())))`.
-func (c *VulnerabilityTypeClient) Use(hooks ...Hook) {
-	c.hooks.VulnerabilityType = append(c.hooks.VulnerabilityType, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `vulnerabilitytype.Intercept(f(g(h())))`.
-func (c *VulnerabilityTypeClient) Intercept(interceptors ...Interceptor) {
-	c.inters.VulnerabilityType = append(c.inters.VulnerabilityType, interceptors...)
-}
-
-// Create returns a builder for creating a VulnerabilityType entity.
-func (c *VulnerabilityTypeClient) Create() *VulnerabilityTypeCreate {
-	mutation := newVulnerabilityTypeMutation(c.config, OpCreate)
-	return &VulnerabilityTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of VulnerabilityType entities.
-func (c *VulnerabilityTypeClient) CreateBulk(builders ...*VulnerabilityTypeCreate) *VulnerabilityTypeCreateBulk {
-	return &VulnerabilityTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *VulnerabilityTypeClient) MapCreateBulk(slice any, setFunc func(*VulnerabilityTypeCreate, int)) *VulnerabilityTypeCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &VulnerabilityTypeCreateBulk{err: fmt.Errorf("calling to VulnerabilityTypeClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*VulnerabilityTypeCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &VulnerabilityTypeCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for VulnerabilityType.
-func (c *VulnerabilityTypeClient) Update() *VulnerabilityTypeUpdate {
-	mutation := newVulnerabilityTypeMutation(c.config, OpUpdate)
-	return &VulnerabilityTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *VulnerabilityTypeClient) UpdateOne(vt *VulnerabilityType) *VulnerabilityTypeUpdateOne {
-	mutation := newVulnerabilityTypeMutation(c.config, OpUpdateOne, withVulnerabilityType(vt))
-	return &VulnerabilityTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *VulnerabilityTypeClient) UpdateOneID(id int) *VulnerabilityTypeUpdateOne {
-	mutation := newVulnerabilityTypeMutation(c.config, OpUpdateOne, withVulnerabilityTypeID(id))
-	return &VulnerabilityTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for VulnerabilityType.
-func (c *VulnerabilityTypeClient) Delete() *VulnerabilityTypeDelete {
-	mutation := newVulnerabilityTypeMutation(c.config, OpDelete)
-	return &VulnerabilityTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *VulnerabilityTypeClient) DeleteOne(vt *VulnerabilityType) *VulnerabilityTypeDeleteOne {
-	return c.DeleteOneID(vt.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *VulnerabilityTypeClient) DeleteOneID(id int) *VulnerabilityTypeDeleteOne {
-	builder := c.Delete().Where(vulnerabilitytype.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &VulnerabilityTypeDeleteOne{builder}
-}
-
-// Query returns a query builder for VulnerabilityType.
-func (c *VulnerabilityTypeClient) Query() *VulnerabilityTypeQuery {
-	return &VulnerabilityTypeQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeVulnerabilityType},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a VulnerabilityType entity by its id.
-func (c *VulnerabilityTypeClient) Get(ctx context.Context, id int) (*VulnerabilityType, error) {
-	return c.Query().Where(vulnerabilitytype.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *VulnerabilityTypeClient) GetX(ctx context.Context, id int) *VulnerabilityType {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryVulnerabilityIds queries the vulnerability_ids edge of a VulnerabilityType.
-func (c *VulnerabilityTypeClient) QueryVulnerabilityIds(vt *VulnerabilityType) *VulnerabilityIDQuery {
-	query := (&VulnerabilityIDClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := vt.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(vulnerabilitytype.Table, vulnerabilitytype.FieldID, id),
-			sqlgraph.To(vulnerabilityid.Table, vulnerabilityid.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, vulnerabilitytype.VulnerabilityIdsTable, vulnerabilitytype.VulnerabilityIdsColumn),
-		)
-		fromV = sqlgraph.Neighbors(vt.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *VulnerabilityTypeClient) Hooks() []Hook {
-	return c.hooks.VulnerabilityType
-}
-
-// Interceptors returns the client interceptors.
-func (c *VulnerabilityTypeClient) Interceptors() []Interceptor {
-	return c.inters.VulnerabilityType
-}
-
-func (c *VulnerabilityTypeClient) mutate(ctx context.Context, m *VulnerabilityTypeMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&VulnerabilityTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&VulnerabilityTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&VulnerabilityTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&VulnerabilityTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown VulnerabilityType mutation op: %q", m.Op())
-	}
-}
-
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
 		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasMetadata,
-		HasSourceAt, HashEqual, IsVulnerability, License, Occurrence, PackageName,
-		PackageNamespace, PackageType, PackageVersion, PkgEqual, PointOfContact,
-		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
-		VulnerabilityID, VulnerabilityMetadata, VulnerabilityType []ent.Hook
+		HasSourceAt, HashEqual, License, Occurrence, PackageName, PackageVersion,
+		PkgEqual, PointOfContact, SLSAAttestation, SourceName, VulnEqual,
+		VulnerabilityID, VulnerabilityMetadata []ent.Hook
 	}
 	inters struct {
 		Artifact, BillOfMaterials, Builder, Certification, CertifyLegal,
 		CertifyScorecard, CertifyVex, CertifyVuln, Dependency, HasMetadata,
-		HasSourceAt, HashEqual, IsVulnerability, License, Occurrence, PackageName,
-		PackageNamespace, PackageType, PackageVersion, PkgEqual, PointOfContact,
-		SLSAAttestation, Scorecard, SourceName, SourceNamespace, SourceType, VulnEqual,
-		VulnerabilityID, VulnerabilityMetadata, VulnerabilityType []ent.Interceptor
+		HasSourceAt, HashEqual, License, Occurrence, PackageName, PackageVersion,
+		PkgEqual, PointOfContact, SLSAAttestation, SourceName, VulnEqual,
+		VulnerabilityID, VulnerabilityMetadata []ent.Interceptor
 	}
 )

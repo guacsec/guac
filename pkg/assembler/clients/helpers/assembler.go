@@ -39,7 +39,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				if id, err := ingestPackage(ctx, gqlclient, p); err != nil {
 					return fmt.Errorf("failed package ingest with error: %w", err)
 				} else {
-					collectedIDorPkgInputs[helpers.PkgInputSpecToPurl(p.PackageInput)] = id
+					collectedIDorPkgInputs[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](p.PackageInput, helpers.PkgClientKey).VersionId] = id
 					packageIDs = append(packageIDs, *id.PackageVersionID)
 				}
 			}
@@ -51,7 +51,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				if id, err := ingestSource(ctx, gqlclient, s); err != nil {
 					return fmt.Errorf("failed source ingest with error: %w", err)
 				} else {
-					collectedIDorSrcInputs[helpers.ConcatenateSourceInput(s.SourceInput)] = id
+					collectedIDorSrcInputs[helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](s.SourceInput, helpers.SrcClientKey).NameId] = id
 				}
 			}
 
@@ -63,7 +63,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				if id, err := ingestArtifact(ctx, gqlclient, a); err != nil {
 					return fmt.Errorf("failed artifact ingest with error: %w", err)
 				} else {
-					collectedIDorArtInputs[helpers.ArtifactKey(a.ArtifactInput)] = id
+					collectedIDorArtInputs[helpers.GetKey[*model.ArtifactInputSpec, string](a.ArtifactInput, helpers.ArtifactClientKey)] = id
 					artifactIDs = append(artifactIDs, *id.ArtifactID)
 				}
 			}
@@ -93,7 +93,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				if id, err := ingestVulnerability(ctx, gqlclient, v); err != nil {
 					return fmt.Errorf("failed vulnerability ingest with error: %w", err)
 				} else {
-					collectedIDorVulnInputs[helpers.VulnInputToVURI(v.VulnerabilityInput)] = id
+					collectedIDorVulnInputs[helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](v.VulnerabilityInput, helpers.VulnClientKey).VulnerabilityID] = id
 				}
 			}
 
@@ -104,7 +104,7 @@ func GetAssembler(ctx context.Context, gqlclient graphql.Client) func([]assemble
 				if id, err := ingestLicense(ctx, gqlclient, l); err != nil {
 					return fmt.Errorf("failed license ingest with error: %w", err)
 				} else {
-					collectedIDorLicenseInputs[helpers.LicenseKey(l.LicenseInput)] = id
+					collectedIDorLicenseInputs[helpers.GetKey[*model.LicenseInputSpec, string](l.LicenseInput, helpers.LicenseClientKey)] = id
 				}
 			}
 
@@ -313,9 +313,9 @@ func ingestLicense(ctx context.Context, client graphql.Client, l *model.IDorLice
 }
 
 func ingestCertifyScorecard(ctx context.Context, client graphql.Client, cs assembler.CertifyScorecardIngest, sourceInputMap map[string]*model.IDorSourceInput) error {
-	srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(cs.Source)]
+	srcID, found := sourceInputMap[helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](cs.Source, helpers.SrcClientKey).NameId]
 	if !found {
-		return fmt.Errorf("failed to find ingested Source ID for scorecard: %s", helpers.ConcatenateSourceInput(cs.Source))
+		return fmt.Errorf("failed to find ingested Source ID for scorecard: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](cs.Source, helpers.SrcClientKey).NameId)
 	}
 
 	_, err := model.IngestCertifyScorecard(ctx, client, *srcID, *cs.Scorecard)
@@ -323,14 +323,14 @@ func ingestCertifyScorecard(ctx context.Context, client graphql.Client, cs assem
 }
 
 func ingestIsDependency(ctx context.Context, client graphql.Client, d assembler.IsDependencyIngest, packageInputMap map[string]*model.IDorPkgInput) (*string, error) {
-	pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(d.Pkg)]
+	pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](d.Pkg, helpers.PkgClientKey).VersionId]
 	if !found {
-		return nil, fmt.Errorf("failed to find ingested Source ID for isDependency: %s", helpers.PkgInputSpecToPurl(d.Pkg))
+		return nil, fmt.Errorf("failed to find ingested Source ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](d.Pkg, helpers.PkgClientKey).VersionId)
 	}
 
-	depPkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(d.DepPkg)]
+	depPkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](d.DepPkg, helpers.PkgClientKey).VersionId]
 	if !found {
-		return nil, fmt.Errorf("failed to find ingested Source ID for isDependency: %s", helpers.PkgInputSpecToPurl(d.DepPkg))
+		return nil, fmt.Errorf("failed to find ingested Source ID for isDependency: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](d.DepPkg, helpers.PkgClientKey).VersionId)
 	}
 
 	if response, err := model.IngestIsDependency(ctx, client, *pkgID, *depPkgID, d.DepPkgMatchFlag, *d.IsDependency); err != nil {
@@ -351,15 +351,14 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, o assembler.
 	}
 
 	if o.Src != nil {
-
-		srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(o.Src)]
+		srcID, found := sourceInputMap[helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](o.Src, helpers.SrcClientKey).NameId]
 		if !found {
-			return nil, fmt.Errorf("failed to find ingested Source ID for isOccurrence: %s", helpers.ConcatenateSourceInput(o.Src))
+			return nil, fmt.Errorf("failed to find ingested Source ID for isOccurrence: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](o.Src, helpers.SrcClientKey).NameId)
 		}
 
-		artID, found := artInputMap[helpers.ArtifactKey(o.Artifact)]
+		artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](o.Artifact, helpers.ArtifactClientKey)]
 		if !found {
-			return nil, fmt.Errorf("failed to find ingested artifact ID for isOccurrence: %s", helpers.ArtifactKey(o.Artifact))
+			return nil, fmt.Errorf("failed to find ingested artifact ID for isOccurrence: %s", helpers.GetKey[*model.ArtifactInputSpec, string](o.Artifact, helpers.ArtifactClientKey))
 		}
 
 		if result, err := model.IngestIsOccurrenceSrc(ctx, client, *srcID, *artID, *o.IsOccurrence); err != nil {
@@ -370,14 +369,14 @@ func ingestIsOccurrence(ctx context.Context, client graphql.Client, o assembler.
 	}
 	if o.Pkg != nil {
 
-		pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(o.Pkg)]
+		pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](o.Pkg, helpers.PkgClientKey).VersionId]
 		if !found {
-			return nil, fmt.Errorf("failed to find ingested package ID for isOccurrence: %s", helpers.PkgInputSpecToPurl(o.Pkg))
+			return nil, fmt.Errorf("failed to find ingested package ID for isOccurrence: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](o.Pkg, helpers.PkgClientKey).VersionId)
 		}
 
-		artID, found := artInputMap[helpers.ArtifactKey(o.Artifact)]
+		artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](o.Artifact, helpers.ArtifactClientKey)]
 		if !found {
-			return nil, fmt.Errorf("failed to find ingested artifact ID for isOccurrence: %s", helpers.ArtifactKey(o.Artifact))
+			return nil, fmt.Errorf("failed to find ingested artifact ID for isOccurrence: %s", helpers.GetKey[*model.ArtifactInputSpec, string](o.Artifact, helpers.ArtifactClientKey))
 		}
 
 		if result, err := model.IngestIsOccurrencePkg(ctx, client, *pkgID, *artID, *o.IsOccurrence); err != nil {
@@ -394,16 +393,16 @@ func ingestHasSlsa(ctx context.Context, client graphql.Client, hs assembler.HasS
 
 	var matIDList []model.IDorArtifactInput
 	for _, mat := range hs.Materials {
-		if matID, found := matInputSpec[helpers.ArtifactKey(&mat)]; found {
+		if matID, found := matInputSpec[helpers.GetKey[*model.ArtifactInputSpec, string](&mat, helpers.ArtifactClientKey)]; found {
 			matIDList = append(matIDList, *matID)
 		} else {
-			return fmt.Errorf("failed to find ingested material ID for hasSLSA: %s", helpers.ArtifactKey(&mat))
+			return fmt.Errorf("failed to find ingested material ID for hasSLSA: %s", helpers.GetKey[*model.ArtifactInputSpec, string](&mat, helpers.ArtifactClientKey))
 		}
 	}
 
-	artID, found := artInputMap[helpers.ArtifactKey(hs.Artifact)]
+	artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](hs.Artifact, helpers.ArtifactClientKey)]
 	if !found {
-		return fmt.Errorf("failed to find ingested artifact ID for hasSLSA: %s", helpers.ArtifactKey(hs.Artifact))
+		return fmt.Errorf("failed to find ingested artifact ID for hasSLSA: %s", helpers.GetKey[*model.ArtifactInputSpec, string](hs.Artifact, helpers.ArtifactClientKey))
 	}
 
 	buildID, found := builderInputMap[hs.Builder.Uri]
@@ -418,13 +417,13 @@ func ingestHasSlsa(ctx context.Context, client graphql.Client, hs assembler.HasS
 func ingestCertifyVuln(ctx context.Context, client graphql.Client, cv assembler.CertifyVulnIngest, packageInputMap map[string]*model.IDorPkgInput,
 	vulnInputMap map[string]*model.IDorVulnerabilityInput) error {
 
-	pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(cv.Pkg)]
+	pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](cv.Pkg, helpers.PkgClientKey).VersionId]
 	if !found {
-		return fmt.Errorf("failed to find ingested package ID for certifyVuln: %s", helpers.PkgInputSpecToPurl(cv.Pkg))
+		return fmt.Errorf("failed to find ingested package ID for certifyVuln: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](cv.Pkg, helpers.PkgClientKey).VersionId)
 	}
-	vulnID, found := vulnInputMap[helpers.VulnInputToVURI(cv.Vulnerability)]
+	vulnID, found := vulnInputMap[helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](cv.Vulnerability, helpers.VulnClientKey).VulnerabilityID]
 	if !found {
-		return fmt.Errorf("failed to find ingested vulnerability ID for certifyVuln: %s", helpers.VulnInputToVURI(cv.Vulnerability))
+		return fmt.Errorf("failed to find ingested vulnerability ID for certifyVuln: %s", helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](cv.Vulnerability, helpers.VulnClientKey).VulnerabilityID)
 	}
 
 	_, err := model.IngestCertifyVulnPkg(ctx, client, *pkgID, *vulnID, *cv.VulnData)
@@ -439,14 +438,14 @@ func ingestVulnEqual(ctx context.Context, client graphql.Client, ve assembler.Vu
 		return fmt.Errorf("unable to create VulnEqual without equal vulnerability")
 	}
 
-	vulnID, found := vulnInputMap[helpers.VulnInputToVURI(ve.Vulnerability)]
+	vulnID, found := vulnInputMap[helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](ve.Vulnerability, helpers.VulnClientKey).VulnerabilityID]
 	if !found {
-		return fmt.Errorf("failed to find ingested vulnerability ID for vulnEqual: %s", helpers.VulnInputToVURI(ve.Vulnerability))
+		return fmt.Errorf("failed to find ingested vulnerability ID for vulnEqual: %s", helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](ve.Vulnerability, helpers.VulnClientKey).VulnerabilityID)
 	}
 
-	equalVulnID, found := vulnInputMap[helpers.VulnInputToVURI(ve.EqualVulnerability)]
+	equalVulnID, found := vulnInputMap[helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](ve.EqualVulnerability, helpers.VulnClientKey).VulnerabilityID]
 	if !found {
-		return fmt.Errorf("failed to find ingested vulnerability ID for vulnEqual: %s", helpers.VulnInputToVURI(ve.EqualVulnerability))
+		return fmt.Errorf("failed to find ingested vulnerability ID for vulnEqual: %s", helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](ve.EqualVulnerability, helpers.VulnClientKey).VulnerabilityID)
 	}
 
 	_, err := model.IngestVulnEqual(ctx, client, *vulnID, *equalVulnID, *ve.VulnEqual)
@@ -456,14 +455,14 @@ func ingestVulnEqual(ctx context.Context, client graphql.Client, ve assembler.Vu
 func hasSourceAt(ctx context.Context, client graphql.Client, hsa assembler.HasSourceAtIngest, packageInputMap map[string]*model.IDorPkgInput,
 	sourceInputMap map[string]*model.IDorSourceInput) error {
 
-	pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(hsa.Pkg)]
+	pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](hsa.Pkg, helpers.PkgClientKey).VersionId]
 	if !found {
-		return fmt.Errorf("failed to find ingested package ID for hasSourceAt: %s", helpers.PkgInputSpecToPurl(hsa.Pkg))
+		return fmt.Errorf("failed to find ingested package ID for hasSourceAt: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](hsa.Pkg, helpers.PkgClientKey).VersionId)
 	}
 
-	srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(hsa.Src)]
+	srcID, found := sourceInputMap[helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](hsa.Src, helpers.SrcClientKey).NameId]
 	if !found {
-		return fmt.Errorf("failed to find ingested Source ID for hasSourceAt: %s", helpers.ConcatenateSourceInput(hsa.Src))
+		return fmt.Errorf("failed to find ingested Source ID for hasSourceAt: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](hsa.Src, helpers.SrcClientKey).NameId)
 	}
 
 	_, err := model.IngestHasSourceAt(ctx, client, *pkgID, hsa.PkgMatchFlag, *srcID, *hsa.HasSourceAt)
@@ -478,25 +477,25 @@ func ingestCertifyBad(ctx context.Context, client graphql.Client, bad assembler.
 	}
 
 	if bad.Pkg != nil {
-		pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(bad.Pkg)]
+		pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](bad.Pkg, helpers.PkgClientKey).VersionId]
 		if !found {
-			return fmt.Errorf("failed to find ingested package ID for certifyBad: %s", helpers.PkgInputSpecToPurl(bad.Pkg))
+			return fmt.Errorf("failed to find ingested package ID for certifyBad: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](bad.Pkg, helpers.PkgClientKey).VersionId)
 		}
 		_, err := model.IngestCertifyBadPkg(ctx, client, *pkgID, bad.PkgMatchFlag, *bad.CertifyBad)
 		return err
 	}
 	if bad.Src != nil {
-		srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(bad.Src)]
+		srcID, found := sourceInputMap[helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](bad.Src, helpers.SrcClientKey).NameId]
 		if !found {
-			return fmt.Errorf("failed to find ingested Source ID for certifyBad: %s", helpers.ConcatenateSourceInput(bad.Src))
+			return fmt.Errorf("failed to find ingested Source ID for certifyBad: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](bad.Src, helpers.SrcClientKey).NameId)
 		}
 		_, err := model.IngestCertifyBadSrc(ctx, client, *srcID, *bad.CertifyBad)
 		return err
 	}
 	if bad.Artifact != nil {
-		artID, found := artInputMap[helpers.ArtifactKey(bad.Artifact)]
+		artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](bad.Artifact, helpers.ArtifactClientKey)]
 		if !found {
-			return fmt.Errorf("failed to find ingested artifact ID for certifyBad: %s", helpers.ArtifactKey(bad.Artifact))
+			return fmt.Errorf("failed to find ingested artifact ID for certifyBad: %s", helpers.GetKey[*model.ArtifactInputSpec, string](bad.Artifact, helpers.ArtifactClientKey))
 		}
 		_, err := model.IngestCertifyBadArtifact(ctx, client, *artID, *bad.CertifyBad)
 		return err
@@ -512,25 +511,25 @@ func ingestCertifyGood(ctx context.Context, client graphql.Client, good assemble
 	}
 
 	if good.Pkg != nil {
-		pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(good.Pkg)]
+		pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](good.Pkg, helpers.PkgClientKey).VersionId]
 		if !found {
-			return fmt.Errorf("failed to find ingested package ID for certifyGood: %s", helpers.PkgInputSpecToPurl(good.Pkg))
+			return fmt.Errorf("failed to find ingested package ID for certifyGood: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](good.Pkg, helpers.PkgClientKey).VersionId)
 		}
 		_, err := model.IngestCertifyGoodPkg(ctx, client, *pkgID, good.PkgMatchFlag, *good.CertifyGood)
 		return err
 	}
 	if good.Src != nil {
-		srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(good.Src)]
+		srcID, found := sourceInputMap[helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](good.Src, helpers.SrcClientKey).NameId]
 		if !found {
-			return fmt.Errorf("failed to find ingested Source ID for certifyGood: %s", helpers.ConcatenateSourceInput(good.Src))
+			return fmt.Errorf("failed to find ingested Source ID for certifyGood: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](good.Src, helpers.SrcClientKey).NameId)
 		}
 		_, err := model.IngestCertifyGoodSrc(ctx, client, *srcID, *good.CertifyGood)
 		return err
 	}
 	if good.Artifact != nil {
-		artID, found := artInputMap[helpers.ArtifactKey(good.Artifact)]
+		artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](good.Artifact, helpers.ArtifactClientKey)]
 		if !found {
-			return fmt.Errorf("failed to find ingested artifact ID for certifyGood: %s", helpers.ArtifactKey(good.Artifact))
+			return fmt.Errorf("failed to find ingested artifact ID for certifyGood: %s", helpers.GetKey[*model.ArtifactInputSpec, string](good.Artifact, helpers.ArtifactClientKey))
 		}
 		_, err := model.IngestCertifyGoodArtifact(ctx, client, *artID, *good.CertifyGood)
 		return err
@@ -546,25 +545,25 @@ func ingestPointOfContact(ctx context.Context, client graphql.Client, poc assemb
 	}
 
 	if poc.Pkg != nil {
-		pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(poc.Pkg)]
+		pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](poc.Pkg, helpers.PkgClientKey).VersionId]
 		if !found {
-			return fmt.Errorf("failed to find ingested package ID for pointOfContact: %s", helpers.PkgInputSpecToPurl(poc.Pkg))
+			return fmt.Errorf("failed to find ingested package ID for pointOfContact: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](poc.Pkg, helpers.PkgClientKey).VersionId)
 		}
 		_, err := model.IngestPointOfContactPkg(ctx, client, *pkgID, poc.PkgMatchFlag, *poc.PointOfContact)
 		return err
 	}
 	if poc.Src != nil {
-		srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(poc.Src)]
+		srcID, found := sourceInputMap[helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](poc.Src, helpers.SrcClientKey).NameId]
 		if !found {
-			return fmt.Errorf("failed to find ingested Source ID for pointOfContact: %s", helpers.ConcatenateSourceInput(poc.Src))
+			return fmt.Errorf("failed to find ingested Source ID for pointOfContact: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](poc.Src, helpers.SrcClientKey).NameId)
 		}
 		_, err := model.IngestPointOfContactSrc(ctx, client, *srcID, *poc.PointOfContact)
 		return err
 	}
 	if poc.Artifact != nil {
-		artID, found := artInputMap[helpers.ArtifactKey(poc.Artifact)]
+		artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](poc.Artifact, helpers.ArtifactClientKey)]
 		if !found {
-			return fmt.Errorf("failed to find ingested artifact ID for pointOfContact: %s", helpers.ArtifactKey(poc.Artifact))
+			return fmt.Errorf("failed to find ingested artifact ID for pointOfContact: %s", helpers.GetKey[*model.ArtifactInputSpec, string](poc.Artifact, helpers.ArtifactClientKey))
 		}
 		_, err := model.IngestPointOfContactArtifact(ctx, client, *artID, *poc.PointOfContact)
 		return err
@@ -580,25 +579,25 @@ func ingestHasMetadata(ctx context.Context, client graphql.Client, hm assembler.
 	}
 
 	if hm.Pkg != nil {
-		pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(hm.Pkg)]
+		pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](hm.Pkg, helpers.PkgClientKey).VersionId]
 		if !found {
-			return fmt.Errorf("failed to find ingested package ID for hasMetadata: %s", helpers.PkgInputSpecToPurl(hm.Pkg))
+			return fmt.Errorf("failed to find ingested package ID for hasMetadata: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](hm.Pkg, helpers.PkgClientKey).VersionId)
 		}
 		_, err := model.IngestHasMetadataPkg(ctx, client, *pkgID, hm.PkgMatchFlag, *hm.HasMetadata)
 		return err
 	}
 	if hm.Src != nil {
-		srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(hm.Src)]
+		srcID, found := sourceInputMap[helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](hm.Src, helpers.SrcClientKey).NameId]
 		if !found {
-			return fmt.Errorf("failed to find ingested Source ID for hasMetadata: %s", helpers.ConcatenateSourceInput(hm.Src))
+			return fmt.Errorf("failed to find ingested Source ID for hasMetadata: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](hm.Src, helpers.SrcClientKey).NameId)
 		}
 		_, err := model.IngestHasMetadataSrc(ctx, client, *srcID, *hm.HasMetadata)
 		return err
 	}
 	if hm.Artifact != nil {
-		artID, found := artInputMap[helpers.ArtifactKey(hm.Artifact)]
+		artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](hm.Artifact, helpers.ArtifactClientKey)]
 		if !found {
-			return fmt.Errorf("failed to find ingested artifact ID for hasMetadata: %s", helpers.ArtifactKey(hm.Artifact))
+			return fmt.Errorf("failed to find ingested artifact ID for hasMetadata: %s", helpers.GetKey[*model.ArtifactInputSpec, string](hm.Artifact, helpers.ArtifactClientKey))
 		}
 		_, err := model.IngestHasMetadataArtifact(ctx, client, *artID, *hm.HasMetadata)
 		return err
@@ -617,17 +616,17 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasS
 	}
 
 	if hb.Pkg != nil {
-		pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(hb.Pkg)]
+		pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](hb.Pkg, helpers.PkgClientKey).VersionId]
 		if !found {
-			return fmt.Errorf("failed to find ingested package ID for hasSBOM: %s", helpers.PkgInputSpecToPurl(hb.Pkg))
+			return fmt.Errorf("failed to find ingested package ID for hasSBOM: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](hb.Pkg, helpers.PkgClientKey).VersionId)
 		}
 		_, err := model.IngestHasSBOMPkg(ctx, client, *pkgID, *hb.HasSBOM, *hb.Includes)
 		return err
 	}
 	if hb.Artifact != nil {
-		artID, found := artInputMap[helpers.ArtifactKey(hb.Artifact)]
+		artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](hb.Artifact, helpers.ArtifactClientKey)]
 		if !found {
-			return fmt.Errorf("failed to find ingested artifact ID for hasMetadata: %s", helpers.ArtifactKey(hb.Artifact))
+			return fmt.Errorf("failed to find ingested artifact ID for hasMetadata: %s", helpers.GetKey[*model.ArtifactInputSpec, string](hb.Artifact, helpers.ArtifactClientKey))
 		}
 		_, err := model.IngestHasSBOMArtifact(ctx, client, *artID, *hb.HasSBOM, *hb.Includes)
 		return err
@@ -636,9 +635,9 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, hb assembler.HasS
 }
 
 func ingestVulnMetadata(ctx context.Context, client graphql.Client, vi assembler.VulnMetadataIngest, vulnInputMap map[string]*model.IDorVulnerabilityInput) error {
-	vulnID, found := vulnInputMap[helpers.VulnInputToVURI(vi.Vulnerability)]
+	vulnID, found := vulnInputMap[helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](vi.Vulnerability, helpers.VulnClientKey).VulnerabilityID]
 	if !found {
-		return fmt.Errorf("failed to find ingested vulnerability ID for vulnEqual: %s", helpers.VulnInputToVURI(vi.Vulnerability))
+		return fmt.Errorf("failed to find ingested vulnerability ID for vulnEqual: %s", helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](vi.Vulnerability, helpers.VulnClientKey).VulnerabilityID)
 	}
 
 	_, err := model.IngestVulnHasMetadata(ctx, client, *vulnID, *vi.VulnMetadata)
@@ -658,15 +657,15 @@ func ingestVex(ctx context.Context, client graphql.Client, vi assembler.VexInges
 		return fmt.Errorf("unable to create VexIngest without either Pkg or Artifact specified")
 	}
 
-	vulnID, found := vulnInputMap[helpers.VulnInputToVURI(vi.Vulnerability)]
+	vulnID, found := vulnInputMap[helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](vi.Vulnerability, helpers.VulnClientKey).VulnerabilityID]
 	if !found {
-		return fmt.Errorf("failed to find ingested vulnerability ID for VexIngest: %s", helpers.VulnInputToVURI(vi.Vulnerability))
+		return fmt.Errorf("failed to find ingested vulnerability ID for VexIngest: %s", helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](vi.Vulnerability, helpers.VulnClientKey).VulnerabilityID)
 	}
 
 	if vi.Pkg != nil {
-		pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(vi.Pkg)]
+		pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](vi.Pkg, helpers.PkgClientKey).VersionId]
 		if !found {
-			return fmt.Errorf("failed to find ingested package ID for VexIngest: %s", helpers.PkgInputSpecToPurl(vi.Pkg))
+			return fmt.Errorf("failed to find ingested package ID for VexIngest: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](vi.Pkg, helpers.PkgClientKey).VersionId)
 		}
 		_, err := model.IngestCertifyVexPkg(ctx, client, *pkgID, *vulnID, *vi.VexData)
 		if err != nil {
@@ -675,9 +674,9 @@ func ingestVex(ctx context.Context, client graphql.Client, vi assembler.VexInges
 	}
 
 	if vi.Artifact != nil {
-		artID, found := artInputMap[helpers.ArtifactKey(vi.Artifact)]
+		artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](vi.Artifact, helpers.ArtifactClientKey)]
 		if !found {
-			return fmt.Errorf("failed to find ingested artifact ID for hasMetadata: %s", helpers.ArtifactKey(vi.Artifact))
+			return fmt.Errorf("failed to find ingested artifact ID for hasMetadata: %s", helpers.GetKey[*model.ArtifactInputSpec, string](vi.Artifact, helpers.ArtifactClientKey))
 		}
 		_, err := model.IngestCertifyVexArtifact(ctx, client, *artID, *vulnID, *vi.VexData)
 		if err != nil {
@@ -695,14 +694,14 @@ func ingestPkgEqual(ctx context.Context, client graphql.Client, pe assembler.Pkg
 		return fmt.Errorf("unable to create pkgEqual without EqualPkg")
 	}
 
-	pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(pe.Pkg)]
+	pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pe.Pkg, helpers.PkgClientKey).VersionId]
 	if !found {
-		return fmt.Errorf("failed to find ingested package ID for pkgEqual: %s", helpers.PkgInputSpecToPurl(pe.Pkg))
+		return fmt.Errorf("failed to find ingested package ID for pkgEqual: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pe.Pkg, helpers.PkgClientKey).VersionId)
 	}
 
-	equalPkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(pe.EqualPkg)]
+	equalPkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pe.EqualPkg, helpers.PkgClientKey).VersionId]
 	if !found {
-		return fmt.Errorf("failed to find ingested package ID for pkgEqual: %s", helpers.PkgInputSpecToPurl(pe.EqualPkg))
+		return fmt.Errorf("failed to find ingested package ID for pkgEqual: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](pe.EqualPkg, helpers.PkgClientKey).VersionId)
 	}
 
 	_, err := model.IngestPkgEqual(ctx, client, *pkgID, *equalPkgID, *pe.PkgEqual)
@@ -717,13 +716,13 @@ func ingestHashEqual(ctx context.Context, client graphql.Client, he assembler.Ha
 		return fmt.Errorf("unable to create HashEqual without equal artifact")
 	}
 
-	artID, found := artInputMap[helpers.ArtifactKey(he.Artifact)]
+	artID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](he.Artifact, helpers.ArtifactClientKey)]
 	if !found {
-		return fmt.Errorf("failed to find ingested artifact ID for HashEqual: %s", helpers.ArtifactKey(he.Artifact))
+		return fmt.Errorf("failed to find ingested artifact ID for HashEqual: %s", helpers.GetKey[*model.ArtifactInputSpec, string](he.Artifact, helpers.ArtifactClientKey))
 	}
-	equalArtID, found := artInputMap[helpers.ArtifactKey(he.EqualArtifact)]
+	equalArtID, found := artInputMap[helpers.GetKey[*model.ArtifactInputSpec, string](he.Artifact, helpers.ArtifactClientKey)]
 	if !found {
-		return fmt.Errorf("failed to find ingested artifact ID for HashEqual: %s", helpers.ArtifactKey(he.EqualArtifact))
+		return fmt.Errorf("failed to find ingested artifact ID for HashEqual: %s", helpers.GetKey[*model.ArtifactInputSpec, string](he.Artifact, helpers.ArtifactClientKey))
 	}
 
 	_, err := model.IngestHashEqual(ctx, client, *artID, *equalArtID, *he.HashEqual)
@@ -743,35 +742,35 @@ func ingestCertifyLegal(ctx context.Context, client graphql.Client, cl assembler
 	// Declared Licenses
 	var decList []model.IDorLicenseInput
 	for _, dec := range cl.Declared {
-		if licID, found := licenseInputMap[helpers.LicenseKey(&dec)]; found {
+		if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dec, helpers.LicenseClientKey)]; found {
 			decList = append(decList, *licID)
 		} else {
-			return fmt.Errorf("failed to find ingested license ID for certifyLegal: %s", helpers.LicenseKey(&dec))
+			return fmt.Errorf("failed to find ingested license ID for certifyLegal: %s", helpers.GetKey[*model.LicenseInputSpec, string](&dec, helpers.LicenseClientKey))
 		}
 	}
 
 	// Discovered Licenses
 	var disList []model.IDorLicenseInput
 	for _, dis := range cl.Discovered {
-		if licID, found := licenseInputMap[helpers.LicenseKey(&dis)]; found {
+		if licID, found := licenseInputMap[helpers.GetKey[*model.LicenseInputSpec, string](&dis, helpers.LicenseClientKey)]; found {
 			disList = append(disList, *licID)
 		} else {
-			return fmt.Errorf("failed to find ingested license ID for certifyLegal: %s", helpers.LicenseKey(&dis))
+			return fmt.Errorf("failed to find ingested license ID for certifyLegal: %s", helpers.GetKey[*model.LicenseInputSpec, string](&dis, helpers.LicenseClientKey))
 		}
 	}
 
 	if cl.Src != nil {
-		srcID, found := sourceInputMap[helpers.ConcatenateSourceInput(cl.Src)]
+		srcID, found := sourceInputMap[helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](cl.Src, helpers.SrcClientKey).NameId]
 		if !found {
-			return fmt.Errorf("failed to find ingested Source ID for CertifyLegal: %s", helpers.ConcatenateSourceInput(cl.Src))
+			return fmt.Errorf("failed to find ingested Source ID for CertifyLegal: %s", helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](cl.Src, helpers.SrcClientKey).NameId)
 		}
 		_, err := model.IngestCertifyLegalSrc(ctx, client, *srcID, decList, disList, *cl.CertifyLegal)
 		return err
 	}
 	if cl.Pkg != nil {
-		pkgID, found := packageInputMap[helpers.PkgInputSpecToPurl(cl.Pkg)]
+		pkgID, found := packageInputMap[helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](cl.Pkg, helpers.PkgClientKey).VersionId]
 		if !found {
-			return fmt.Errorf("failed to find ingested package ID for CertifyLegal: %s", helpers.PkgInputSpecToPurl(cl.Pkg))
+			return fmt.Errorf("failed to find ingested package ID for CertifyLegal: %s", helpers.GetKey[*model.PkgInputSpec, helpers.PkgIds](cl.Pkg, helpers.PkgClientKey).VersionId)
 		}
 		_, err := model.IngestCertifyLegalPkg(ctx, client, *pkgID, decList, disList, *cl.CertifyLegal)
 		return err

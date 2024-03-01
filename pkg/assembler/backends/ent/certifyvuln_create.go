@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
@@ -25,14 +27,14 @@ type CertifyVulnCreate struct {
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (cvc *CertifyVulnCreate) SetVulnerabilityID(i int) *CertifyVulnCreate {
-	cvc.mutation.SetVulnerabilityID(i)
+func (cvc *CertifyVulnCreate) SetVulnerabilityID(u uuid.UUID) *CertifyVulnCreate {
+	cvc.mutation.SetVulnerabilityID(u)
 	return cvc
 }
 
 // SetPackageID sets the "package_id" field.
-func (cvc *CertifyVulnCreate) SetPackageID(i int) *CertifyVulnCreate {
-	cvc.mutation.SetPackageID(i)
+func (cvc *CertifyVulnCreate) SetPackageID(u uuid.UUID) *CertifyVulnCreate {
+	cvc.mutation.SetPackageID(u)
 	return cvc
 }
 
@@ -78,6 +80,20 @@ func (cvc *CertifyVulnCreate) SetCollector(s string) *CertifyVulnCreate {
 	return cvc
 }
 
+// SetID sets the "id" field.
+func (cvc *CertifyVulnCreate) SetID(u uuid.UUID) *CertifyVulnCreate {
+	cvc.mutation.SetID(u)
+	return cvc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (cvc *CertifyVulnCreate) SetNillableID(u *uuid.UUID) *CertifyVulnCreate {
+	if u != nil {
+		cvc.SetID(*u)
+	}
+	return cvc
+}
+
 // SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
 func (cvc *CertifyVulnCreate) SetVulnerability(v *VulnerabilityID) *CertifyVulnCreate {
 	return cvc.SetVulnerabilityID(v.ID)
@@ -95,6 +111,7 @@ func (cvc *CertifyVulnCreate) Mutation() *CertifyVulnMutation {
 
 // Save creates the CertifyVuln in the database.
 func (cvc *CertifyVulnCreate) Save(ctx context.Context) (*CertifyVuln, error) {
+	cvc.defaults()
 	return withHooks(ctx, cvc.sqlSave, cvc.mutation, cvc.hooks)
 }
 
@@ -117,6 +134,14 @@ func (cvc *CertifyVulnCreate) Exec(ctx context.Context) error {
 func (cvc *CertifyVulnCreate) ExecX(ctx context.Context) {
 	if err := cvc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cvc *CertifyVulnCreate) defaults() {
+	if _, ok := cvc.mutation.ID(); !ok {
+		v := certifyvuln.DefaultID()
+		cvc.mutation.SetID(v)
 	}
 }
 
@@ -169,8 +194,13 @@ func (cvc *CertifyVulnCreate) sqlSave(ctx context.Context) (*CertifyVuln, error)
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	cvc.mutation.id = &_node.ID
 	cvc.mutation.done = true
 	return _node, nil
@@ -179,9 +209,13 @@ func (cvc *CertifyVulnCreate) sqlSave(ctx context.Context) (*CertifyVuln, error)
 func (cvc *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) {
 	var (
 		_node = &CertifyVuln{config: cvc.config}
-		_spec = sqlgraph.NewCreateSpec(certifyvuln.Table, sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(certifyvuln.Table, sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = cvc.conflict
+	if id, ok := cvc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := cvc.mutation.TimeScanned(); ok {
 		_spec.SetField(certifyvuln.FieldTimeScanned, field.TypeTime, value)
 		_node.TimeScanned = value
@@ -218,7 +252,7 @@ func (cvc *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) 
 			Columns: []string{certifyvuln.VulnerabilityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(vulnerabilityid.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -235,7 +269,7 @@ func (cvc *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) 
 			Columns: []string{certifyvuln.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -297,7 +331,7 @@ type (
 )
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (u *CertifyVulnUpsert) SetVulnerabilityID(v int) *CertifyVulnUpsert {
+func (u *CertifyVulnUpsert) SetVulnerabilityID(v uuid.UUID) *CertifyVulnUpsert {
 	u.Set(certifyvuln.FieldVulnerabilityID, v)
 	return u
 }
@@ -309,7 +343,7 @@ func (u *CertifyVulnUpsert) UpdateVulnerabilityID() *CertifyVulnUpsert {
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *CertifyVulnUpsert) SetPackageID(v int) *CertifyVulnUpsert {
+func (u *CertifyVulnUpsert) SetPackageID(v uuid.UUID) *CertifyVulnUpsert {
 	u.Set(certifyvuln.FieldPackageID, v)
 	return u
 }
@@ -404,16 +438,24 @@ func (u *CertifyVulnUpsert) UpdateCollector() *CertifyVulnUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.CertifyVuln.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifyvuln.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyVulnUpsertOne) UpdateNewValues() *CertifyVulnUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(certifyvuln.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -445,7 +487,7 @@ func (u *CertifyVulnUpsertOne) Update(set func(*CertifyVulnUpsert)) *CertifyVuln
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (u *CertifyVulnUpsertOne) SetVulnerabilityID(v int) *CertifyVulnUpsertOne {
+func (u *CertifyVulnUpsertOne) SetVulnerabilityID(v uuid.UUID) *CertifyVulnUpsertOne {
 	return u.Update(func(s *CertifyVulnUpsert) {
 		s.SetVulnerabilityID(v)
 	})
@@ -459,7 +501,7 @@ func (u *CertifyVulnUpsertOne) UpdateVulnerabilityID() *CertifyVulnUpsertOne {
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *CertifyVulnUpsertOne) SetPackageID(v int) *CertifyVulnUpsertOne {
+func (u *CertifyVulnUpsertOne) SetPackageID(v uuid.UUID) *CertifyVulnUpsertOne {
 	return u.Update(func(s *CertifyVulnUpsert) {
 		s.SetPackageID(v)
 	})
@@ -586,7 +628,12 @@ func (u *CertifyVulnUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CertifyVulnUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *CertifyVulnUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: CertifyVulnUpsertOne.ID is not supported by MySQL driver. Use CertifyVulnUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -595,7 +642,7 @@ func (u *CertifyVulnUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *CertifyVulnUpsertOne) IDX(ctx context.Context) int {
+func (u *CertifyVulnUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -622,6 +669,7 @@ func (cvcb *CertifyVulnCreateBulk) Save(ctx context.Context) ([]*CertifyVuln, er
 	for i := range cvcb.builders {
 		func(i int, root context.Context) {
 			builder := cvcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertifyVulnMutation)
 				if !ok {
@@ -649,10 +697,6 @@ func (cvcb *CertifyVulnCreateBulk) Save(ctx context.Context) ([]*CertifyVuln, er
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -739,10 +783,20 @@ type CertifyVulnUpsertBulk struct {
 //	client.CertifyVuln.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifyvuln.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyVulnUpsertBulk) UpdateNewValues() *CertifyVulnUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(certifyvuln.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -774,7 +828,7 @@ func (u *CertifyVulnUpsertBulk) Update(set func(*CertifyVulnUpsert)) *CertifyVul
 }
 
 // SetVulnerabilityID sets the "vulnerability_id" field.
-func (u *CertifyVulnUpsertBulk) SetVulnerabilityID(v int) *CertifyVulnUpsertBulk {
+func (u *CertifyVulnUpsertBulk) SetVulnerabilityID(v uuid.UUID) *CertifyVulnUpsertBulk {
 	return u.Update(func(s *CertifyVulnUpsert) {
 		s.SetVulnerabilityID(v)
 	})
@@ -788,7 +842,7 @@ func (u *CertifyVulnUpsertBulk) UpdateVulnerabilityID() *CertifyVulnUpsertBulk {
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *CertifyVulnUpsertBulk) SetPackageID(v int) *CertifyVulnUpsertBulk {
+func (u *CertifyVulnUpsertBulk) SetPackageID(v uuid.UUID) *CertifyVulnUpsertBulk {
 	return u.Update(func(s *CertifyVulnUpsert) {
 		s.SetPackageID(v)
 	})

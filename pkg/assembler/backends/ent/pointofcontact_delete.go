@@ -40,7 +40,7 @@ func (pocd *PointOfContactDelete) ExecX(ctx context.Context) int {
 }
 
 func (pocd *PointOfContactDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(pointofcontact.Table, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(pointofcontact.Table, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
 	if ps := pocd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

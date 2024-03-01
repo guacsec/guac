@@ -7,7 +7,6 @@ package resolvers
 import (
 	"context"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -15,7 +14,7 @@ import (
 // IngestOccurrence is the resolver for the ingestOccurrence field.
 func (r *mutationResolver) IngestOccurrence(ctx context.Context, subject model.PackageOrSourceInput, artifact model.IDorArtifactInput, occurrence model.IsOccurrenceInputSpec) (string, error) {
 	funcName := "IngestOccurrence"
-	if err := helper.ValidatePackageOrSourceInput(&subject, funcName); err != nil {
+	if err := validatePackageOrSourceInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v :: %s", funcName, err)
 	}
 	return r.Backend.IngestOccurrence(ctx, subject, artifact, occurrence)
@@ -53,7 +52,7 @@ func (r *mutationResolver) IngestOccurrences(ctx context.Context, subjects model
 
 // IsOccurrence is the resolver for the IsOccurrence field.
 func (r *queryResolver) IsOccurrence(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
-	if err := helper.ValidatePackageOrSourceQueryFilter(isOccurrenceSpec.Subject); err != nil {
+	if err := validatePackageOrSourceQueryFilter(isOccurrenceSpec.Subject); err != nil {
 		return nil, gqlerror.Errorf("IsOccurrence :: %s", err)
 	}
 	return r.Backend.IsOccurrence(ctx, &isOccurrenceSpec)

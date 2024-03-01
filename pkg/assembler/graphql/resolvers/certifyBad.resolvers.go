@@ -7,7 +7,6 @@ package resolvers
 import (
 	"context"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -15,7 +14,7 @@ import (
 // IngestCertifyBad is the resolver for the ingestCertifyBad field.
 func (r *mutationResolver) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, certifyBad model.CertifyBadInputSpec) (string, error) {
 	funcName := "IngestCertifyBad"
-	if err := helper.ValidatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
+	if err := validatePackageSourceOrArtifactInput(&subject, funcName); err != nil {
 		return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 	}
 	if certifyBad.KnownSince.IsZero() {
@@ -62,7 +61,7 @@ func (r *mutationResolver) IngestCertifyBads(ctx context.Context, subjects model
 
 // CertifyBad is the resolver for the CertifyBad field.
 func (r *queryResolver) CertifyBad(ctx context.Context, certifyBadSpec model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	if err := helper.ValidatePackageSourceOrArtifactQueryFilter(certifyBadSpec.Subject); err != nil {
+	if err := validatePackageSourceOrArtifactQueryFilter(certifyBadSpec.Subject); err != nil {
 		return nil, gqlerror.Errorf("CertifyBad :: %s", err)
 	}
 	return r.Backend.CertifyBad(ctx, &certifyBadSpec)

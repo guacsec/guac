@@ -18,6 +18,7 @@ package backend
 import (
 	"fmt"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -25,7 +26,7 @@ import (
 
 func toModelArtifact(a *ent.Artifact) *model.Artifact {
 	return &model.Artifact{
-		ID:        nodeID(a.ID),
+		ID:        a.ID.String(),
 		Algorithm: a.Algorithm,
 		Digest:    a.Digest,
 	}
@@ -33,30 +34,30 @@ func toModelArtifact(a *ent.Artifact) *model.Artifact {
 
 func toModelBuilder(b *ent.Builder) *model.Builder {
 	return &model.Builder{
-		ID:  nodeID(b.ID),
+		ID:  b.ID.String(),
 		URI: b.URI,
 	}
 }
 
-func toModelPackage(p *ent.PackageType) *model.Package {
+func toModelPackage(p *ent.PackageName) *model.Package {
 	if p == nil {
 		return nil
 	}
 	return &model.Package{
-		ID:         nodeID(p.ID),
+		ID:         fmt.Sprintf("%s:%s", pkgTypeString, p.ID.String()),
 		Type:       p.Type,
-		Namespaces: collect(p.Edges.Namespaces, toModelNamespace),
+		Namespaces: collect([]*ent.PackageName{p}, toModelNamespace),
 	}
 }
 
-func toModelNamespace(n *ent.PackageNamespace) *model.PackageNamespace {
+func toModelNamespace(n *ent.PackageName) *model.PackageNamespace {
 	if n == nil {
 		return nil
 	}
 	return &model.PackageNamespace{
-		ID:        nodeID(n.ID),
+		ID:        fmt.Sprintf("%s:%s", pkgNamespaceString, n.ID.String()),
 		Namespace: n.Namespace,
-		Names:     collect(n.Edges.Names, toModelPackageName),
+		Names:     collect([]*ent.PackageName{n}, toModelPackageName),
 	}
 }
 
@@ -65,7 +66,7 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 		return nil
 	}
 	return &model.PackageName{
-		ID:       nodeID(n.ID),
+		ID:       n.ID.String(),
 		Name:     n.Name,
 		Versions: collect(n.Edges.Versions, toModelPackageVersion),
 	}
@@ -74,7 +75,7 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 func toModelPackageVersion(v *ent.PackageVersion) *model.PackageVersion {
 
 	return &model.PackageVersion{
-		ID:         nodeID(v.ID),
+		ID:         v.ID.String(),
 		Version:    v.Version,
 		Qualifiers: toPtrSlice(v.Qualifiers),
 		Subpath:    v.Subpath,
@@ -97,9 +98,9 @@ func collect[T any, R any](items []T, transformer func(T) R) []R {
 	return out
 }
 
-func nodeID(id int) string {
-	return fmt.Sprintf("%d", id)
-}
+// func nodeID(id int) string {
+// 	return fmt.Sprintf("%d", id)
+// }
 
 func stringOrEmpty(s *string) string {
 	return valueOrDefault(s, "")
@@ -114,7 +115,7 @@ func valueOrDefault[T any](v *T, def T) T {
 
 func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
 	return &model.IsOccurrence{
-		ID:            nodeID(o.ID),
+		ID:            o.ID.String(),
 		Subject:       toModelPackageOrSource(o.Edges.Package, o.Edges.Source),
 		Artifact:      toModelArtifact(o.Edges.Artifact),
 		Justification: o.Justification,
@@ -169,18 +170,18 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 			depPkg = toModelPackage(backReferencePackageVersion(id.Edges.DependentPackageVersion))
 		}
 	} else {
-		pkg = toModelPackage(id.Edges.Package.Edges.Name.Edges.Namespace.Edges.Package)
+		pkg = toModelPackage(id.Edges.Package.Edges.Name)
 		if id.Edges.DependentPackageName != nil {
-			depPkg = toModelPackage(id.Edges.DependentPackageName.Edges.Namespace.Edges.Package)
+			depPkg = toModelPackage(id.Edges.DependentPackageName)
 			// in this case, the expected response is package name with an empty package version array
 			depPkg.Namespaces[0].Names[0].Versions = []*model.PackageVersion{}
 		} else {
-			depPkg = toModelPackage(id.Edges.DependentPackageVersion.Edges.Name.Edges.Namespace.Edges.Package)
+			depPkg = toModelPackage(id.Edges.DependentPackageVersion.Edges.Name)
 		}
 	}
 
 	return &model.IsDependency{
-		ID:                nodeID(id.ID),
+		ID:                id.ID.String(),
 		Package:           pkg,
 		DependencyPackage: depPkg,
 		VersionRange:      id.VersionRange,
@@ -204,7 +205,7 @@ func dependencyTypeFromEnum(t dependency.DependencyType) model.DependencyType {
 
 func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 	return &model.HasSbom{
-		ID:                   nodeID(sbom.ID),
+		ID:                   sbom.ID.String(),
 		Subject:              toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
 		URI:                  sbom.URI,
 		Algorithm:            sbom.Algorithm,
@@ -240,17 +241,27 @@ func toIncludedSoftware(pkgs []*ent.PackageVersion, artifacts []*ent.Artifact) [
 }
 
 func toModelLicense(license *ent.License) *model.License {
+
+	var dbInLine *string
+	if license.Inline != "" {
+		dbInLine = ptrfrom.String(license.Inline)
+	}
+	var dbListVersion *string
+	if license.ListVersion != "" {
+		dbListVersion = ptrfrom.String(license.ListVersion)
+	}
+
 	return &model.License{
-		ID:          nodeID(license.ID),
+		ID:          license.ID.String(),
 		Name:        license.Name,
-		Inline:      license.Inline,
-		ListVersion: license.ListVersion,
+		Inline:      dbInLine,
+		ListVersion: dbListVersion,
 	}
 }
 
 func toModelCertifyLegal(cl *ent.CertifyLegal) *model.CertifyLegal {
 	return &model.CertifyLegal{
-		ID:                 nodeID(cl.ID),
+		ID:                 cl.ID.String(),
 		Subject:            toModelPackageOrSource(cl.Edges.Package, cl.Edges.Source),
 		DeclaredLicense:    cl.DeclaredLicense,
 		DeclaredLicenses:   collect(cl.Edges.DeclaredLicenses, toModelLicense),
@@ -267,15 +278,8 @@ func toModelCertifyLegal(cl *ent.CertifyLegal) *model.CertifyLegal {
 func toModelPackageOrSource(pkg *ent.PackageVersion, src *ent.SourceName) model.PackageOrSource {
 	if pkg != nil {
 		return toModelPackage(backReferencePackageVersion(pkg))
-	} else if src != nil &&
-		src.Edges.Namespace != nil &&
-		src.Edges.Namespace.Edges.SourceType != nil {
-		// Manually construct back references to avoid another 3 queries
-		ns := src.Edges.Namespace
-		ns.Edges.Names = []*ent.SourceName{src}
-		st := ns.Edges.SourceType
-		st.Edges.Namespaces = []*ent.SourceNamespace{ns}
-		return toModelSource(st)
+	} else if src != nil {
+		return toModelSource(src)
 	}
 	return nil
 }

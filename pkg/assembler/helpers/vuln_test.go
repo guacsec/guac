@@ -13,60 +13,78 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package helpers_test
+package helpers
 
 import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func TestVulnInputToVURI(t *testing.T) {
 	tests := []struct {
-		Name    string
-		Input   *generated.VulnerabilityInputSpec
-		ExpVURI string
+		Name        string
+		InputClient *generated.VulnerabilityInputSpec
+		InputServer *model.VulnerabilityInputSpec
+		want        VulnIds
 	}{
 		{
 			Name: "cve",
-			Input: &generated.VulnerabilityInputSpec{
+			InputClient: &generated.VulnerabilityInputSpec{
 				Type:            "cve",
 				VulnerabilityID: "cve-2023-8675",
 			},
-			ExpVURI: "vuln://cve/cve-2023-8675",
+			want: VulnIds{
+				TypeId:          "cve",
+				VulnerabilityID: "cve::cve-2023-8675",
+			},
 		},
 		{
 			Name: "ghsa",
-			Input: &generated.VulnerabilityInputSpec{
+			InputServer: &model.VulnerabilityInputSpec{
 				Type:            "ghsa",
 				VulnerabilityID: "GHSA-gwvq-rgqf-993f",
 			},
-			ExpVURI: "vuln://ghsa/ghsa-gwvq-rgqf-993f",
+			want: VulnIds{
+				TypeId:          "ghsa",
+				VulnerabilityID: "ghsa::ghsa-gwvq-rgqf-993f",
+			},
 		},
 		{
 			Name: "dsa",
-			Input: &generated.VulnerabilityInputSpec{
+			InputClient: &generated.VulnerabilityInputSpec{
 				Type:            "DSA",
 				VulnerabilityID: "DSA-5464-1",
 			},
-			ExpVURI: "vuln://dsa/dsa-5464-1",
+			want: VulnIds{
+				TypeId:          "dsa",
+				VulnerabilityID: "dsa::dsa-5464-1",
+			},
 		},
 		{
 			Name: "osv",
-			Input: &generated.VulnerabilityInputSpec{
+			InputServer: &model.VulnerabilityInputSpec{
 				Type:            "osv",
 				VulnerabilityID: "DLA-3515-1",
 			},
-			ExpVURI: "vuln://osv/dla-3515-1",
+			want: VulnIds{
+				TypeId:          "osv",
+				VulnerabilityID: "osv::dla-3515-1",
+			},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			vuln := helpers.VulnInputToVURI(test.Input)
-			if diff := cmp.Diff(test.ExpVURI, vuln); diff != "" {
-				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+			if test.InputClient != nil {
+				if got := GetKey[*generated.VulnerabilityInputSpec, VulnIds](test.InputClient, VulnClientKey); got != test.want {
+					t.Errorf("VulnerabilityKey() = %v, want %v", got, test.want)
+				}
+			} else {
+				if got := GetKey[*model.VulnerabilityInputSpec, VulnIds](test.InputServer, VulnServerKey); got != test.want {
+					t.Errorf("VulnerabilityKey() = %v, want %v", got, test.want)
+				}
 			}
 		})
 	}
@@ -124,7 +142,7 @@ func TestCreateVulnInput(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			vuln, err := helpers.CreateVulnInput(test.Input)
+			vuln, err := CreateVulnInput(test.Input)
 			if (err != nil) != test.ExpErr {
 				t.Errorf("Expected error: %v got: %v", test.ExpErr, err)
 			}

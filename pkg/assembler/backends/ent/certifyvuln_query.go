@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -131,8 +132,8 @@ func (cvq *CertifyVulnQuery) FirstX(ctx context.Context) *CertifyVuln {
 
 // FirstID returns the first CertifyVuln ID from the query.
 // Returns a *NotFoundError when no CertifyVuln ID was found.
-func (cvq *CertifyVulnQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (cvq *CertifyVulnQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = cvq.Limit(1).IDs(setContextOp(ctx, cvq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -144,7 +145,7 @@ func (cvq *CertifyVulnQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) FirstIDX(ctx context.Context) int {
+func (cvq *CertifyVulnQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := cvq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -182,8 +183,8 @@ func (cvq *CertifyVulnQuery) OnlyX(ctx context.Context) *CertifyVuln {
 // OnlyID is like Only, but returns the only CertifyVuln ID in the query.
 // Returns a *NotSingularError when more than one CertifyVuln ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cvq *CertifyVulnQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (cvq *CertifyVulnQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = cvq.Limit(2).IDs(setContextOp(ctx, cvq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -199,7 +200,7 @@ func (cvq *CertifyVulnQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) OnlyIDX(ctx context.Context) int {
+func (cvq *CertifyVulnQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := cvq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -227,7 +228,7 @@ func (cvq *CertifyVulnQuery) AllX(ctx context.Context) []*CertifyVuln {
 }
 
 // IDs executes the query and returns a list of CertifyVuln IDs.
-func (cvq *CertifyVulnQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (cvq *CertifyVulnQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if cvq.ctx.Unique == nil && cvq.path != nil {
 		cvq.Unique(true)
 	}
@@ -239,7 +240,7 @@ func (cvq *CertifyVulnQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cvq *CertifyVulnQuery) IDsX(ctx context.Context) []int {
+func (cvq *CertifyVulnQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := cvq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -335,7 +336,7 @@ func (cvq *CertifyVulnQuery) WithPackage(opts ...func(*PackageVersionQuery)) *Ce
 // Example:
 //
 //	var v []struct {
-//		VulnerabilityID int `json:"vulnerability_id,omitempty"`
+//		VulnerabilityID uuid.UUID `json:"vulnerability_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -358,7 +359,7 @@ func (cvq *CertifyVulnQuery) GroupBy(field string, fields ...string) *CertifyVul
 // Example:
 //
 //	var v []struct {
-//		VulnerabilityID int `json:"vulnerability_id,omitempty"`
+//		VulnerabilityID uuid.UUID `json:"vulnerability_id,omitempty"`
 //	}
 //
 //	client.CertifyVuln.Query().
@@ -454,8 +455,8 @@ func (cvq *CertifyVulnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 }
 
 func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *VulnerabilityIDQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *VulnerabilityID)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*CertifyVuln)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*CertifyVuln)
 	for i := range nodes {
 		fk := nodes[i].VulnerabilityID
 		if _, ok := nodeids[fk]; !ok {
@@ -483,8 +484,8 @@ func (cvq *CertifyVulnQuery) loadVulnerability(ctx context.Context, query *Vulne
 	return nil
 }
 func (cvq *CertifyVulnQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*CertifyVuln, init func(*CertifyVuln), assign func(*CertifyVuln, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*CertifyVuln)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*CertifyVuln)
 	for i := range nodes {
 		fk := nodes[i].PackageID
 		if _, ok := nodeids[fk]; !ok {
@@ -525,7 +526,7 @@ func (cvq *CertifyVulnQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cvq *CertifyVulnQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(certifyvuln.Table, certifyvuln.Columns, sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(certifyvuln.Table, certifyvuln.Columns, sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID))
 	_spec.From = cvq.sql
 	if unique := cvq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

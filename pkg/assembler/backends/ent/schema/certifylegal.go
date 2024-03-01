@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // CertifyLegal holds the schema definition for the CertifyLegal entity.
@@ -31,8 +32,12 @@ type CertifyLegal struct {
 // Fields of the CertifyLegal.
 func (CertifyLegal) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("package_id").Optional().Nillable(),
-		field.Int("source_id").Optional().Nillable(),
+		field.UUID("id", uuid.UUID{}).
+			Default(getUUIDv7).
+			Unique().
+			Immutable(),
+		field.UUID("package_id", getUUIDv7()).Optional().Nillable(),
+		field.UUID("source_id", getUUIDv7()).Optional().Nillable(),
 		field.String("declared_license"),
 		field.String("discovered_license"),
 		field.String("attribution"),
@@ -57,10 +62,12 @@ func (CertifyLegal) Edges() []ent.Edge {
 
 func (CertifyLegal) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("source_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned", "origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
+		index.Fields("source_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned",
+			"origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
 			Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")),
-		index.Fields("package_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned", "origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
+		index.Fields("package_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned",
+			"origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
 			Unique().
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")),
 	}

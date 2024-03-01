@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -29,14 +30,16 @@ type PackageVersionQuery struct {
 	withName                 *PackageNameQuery
 	withOccurrences          *OccurrenceQuery
 	withSbom                 *BillOfMaterialsQuery
-	withEqualPackages        *PkgEqualQuery
 	withIncludedInSboms      *BillOfMaterialsQuery
+	withPkgEqualPkgA         *PkgEqualQuery
+	withPkgEqualPkgB         *PkgEqualQuery
 	modifiers                []func(*sql.Selector)
 	loadTotal                []func(context.Context, []*PackageVersion) error
 	withNamedOccurrences     map[string]*OccurrenceQuery
 	withNamedSbom            map[string]*BillOfMaterialsQuery
-	withNamedEqualPackages   map[string]*PkgEqualQuery
 	withNamedIncludedInSboms map[string]*BillOfMaterialsQuery
+	withNamedPkgEqualPkgA    map[string]*PkgEqualQuery
+	withNamedPkgEqualPkgB    map[string]*PkgEqualQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -139,28 +142,6 @@ func (pvq *PackageVersionQuery) QuerySbom() *BillOfMaterialsQuery {
 	return query
 }
 
-// QueryEqualPackages chains the current query on the "equal_packages" edge.
-func (pvq *PackageVersionQuery) QueryEqualPackages() *PkgEqualQuery {
-	query := (&PkgEqualClient{config: pvq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pvq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pvq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
-			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.EqualPackagesTable, packageversion.EqualPackagesPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryIncludedInSboms chains the current query on the "included_in_sboms" edge.
 func (pvq *PackageVersionQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
 	query := (&BillOfMaterialsClient{config: pvq.config}).Query()
@@ -176,6 +157,50 @@ func (pvq *PackageVersionQuery) QueryIncludedInSboms() *BillOfMaterialsQuery {
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, packageversion.IncludedInSbomsTable, packageversion.IncludedInSbomsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPkgEqualPkgA chains the current query on the "pkg_equal_pkg_a" edge.
+func (pvq *PackageVersionQuery) QueryPkgEqualPkgA() *PkgEqualQuery {
+	query := (&PkgEqualClient{config: pvq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pvq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pvq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
+			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PkgEqualPkgATable, packageversion.PkgEqualPkgAColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPkgEqualPkgB chains the current query on the "pkg_equal_pkg_b" edge.
+func (pvq *PackageVersionQuery) QueryPkgEqualPkgB() *PkgEqualQuery {
+	query := (&PkgEqualClient{config: pvq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pvq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pvq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
+			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PkgEqualPkgBTable, packageversion.PkgEqualPkgBColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
 		return fromU, nil
@@ -207,8 +232,8 @@ func (pvq *PackageVersionQuery) FirstX(ctx context.Context) *PackageVersion {
 
 // FirstID returns the first PackageVersion ID from the query.
 // Returns a *NotFoundError when no PackageVersion ID was found.
-func (pvq *PackageVersionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pvq *PackageVersionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pvq.Limit(1).IDs(setContextOp(ctx, pvq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -220,7 +245,7 @@ func (pvq *PackageVersionQuery) FirstID(ctx context.Context) (id int, err error)
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pvq *PackageVersionQuery) FirstIDX(ctx context.Context) int {
+func (pvq *PackageVersionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := pvq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -258,8 +283,8 @@ func (pvq *PackageVersionQuery) OnlyX(ctx context.Context) *PackageVersion {
 // OnlyID is like Only, but returns the only PackageVersion ID in the query.
 // Returns a *NotSingularError when more than one PackageVersion ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pvq *PackageVersionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pvq *PackageVersionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pvq.Limit(2).IDs(setContextOp(ctx, pvq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -275,7 +300,7 @@ func (pvq *PackageVersionQuery) OnlyID(ctx context.Context) (id int, err error) 
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pvq *PackageVersionQuery) OnlyIDX(ctx context.Context) int {
+func (pvq *PackageVersionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := pvq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -303,7 +328,7 @@ func (pvq *PackageVersionQuery) AllX(ctx context.Context) []*PackageVersion {
 }
 
 // IDs executes the query and returns a list of PackageVersion IDs.
-func (pvq *PackageVersionQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (pvq *PackageVersionQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if pvq.ctx.Unique == nil && pvq.path != nil {
 		pvq.Unique(true)
 	}
@@ -315,7 +340,7 @@ func (pvq *PackageVersionQuery) IDs(ctx context.Context) (ids []int, err error) 
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pvq *PackageVersionQuery) IDsX(ctx context.Context) []int {
+func (pvq *PackageVersionQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := pvq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -378,8 +403,9 @@ func (pvq *PackageVersionQuery) Clone() *PackageVersionQuery {
 		withName:            pvq.withName.Clone(),
 		withOccurrences:     pvq.withOccurrences.Clone(),
 		withSbom:            pvq.withSbom.Clone(),
-		withEqualPackages:   pvq.withEqualPackages.Clone(),
 		withIncludedInSboms: pvq.withIncludedInSboms.Clone(),
+		withPkgEqualPkgA:    pvq.withPkgEqualPkgA.Clone(),
+		withPkgEqualPkgB:    pvq.withPkgEqualPkgB.Clone(),
 		// clone intermediate query.
 		sql:  pvq.sql.Clone(),
 		path: pvq.path,
@@ -419,17 +445,6 @@ func (pvq *PackageVersionQuery) WithSbom(opts ...func(*BillOfMaterialsQuery)) *P
 	return pvq
 }
 
-// WithEqualPackages tells the query-builder to eager-load the nodes that are connected to
-// the "equal_packages" edge. The optional arguments are used to configure the query builder of the edge.
-func (pvq *PackageVersionQuery) WithEqualPackages(opts ...func(*PkgEqualQuery)) *PackageVersionQuery {
-	query := (&PkgEqualClient{config: pvq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	pvq.withEqualPackages = query
-	return pvq
-}
-
 // WithIncludedInSboms tells the query-builder to eager-load the nodes that are connected to
 // the "included_in_sboms" edge. The optional arguments are used to configure the query builder of the edge.
 func (pvq *PackageVersionQuery) WithIncludedInSboms(opts ...func(*BillOfMaterialsQuery)) *PackageVersionQuery {
@@ -441,13 +456,35 @@ func (pvq *PackageVersionQuery) WithIncludedInSboms(opts ...func(*BillOfMaterial
 	return pvq
 }
 
+// WithPkgEqualPkgA tells the query-builder to eager-load the nodes that are connected to
+// the "pkg_equal_pkg_a" edge. The optional arguments are used to configure the query builder of the edge.
+func (pvq *PackageVersionQuery) WithPkgEqualPkgA(opts ...func(*PkgEqualQuery)) *PackageVersionQuery {
+	query := (&PkgEqualClient{config: pvq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pvq.withPkgEqualPkgA = query
+	return pvq
+}
+
+// WithPkgEqualPkgB tells the query-builder to eager-load the nodes that are connected to
+// the "pkg_equal_pkg_b" edge. The optional arguments are used to configure the query builder of the edge.
+func (pvq *PackageVersionQuery) WithPkgEqualPkgB(opts ...func(*PkgEqualQuery)) *PackageVersionQuery {
+	query := (&PkgEqualClient{config: pvq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pvq.withPkgEqualPkgB = query
+	return pvq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		NameID int `json:"name_id,omitempty"`
+//		NameID uuid.UUID `json:"name_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -470,7 +507,7 @@ func (pvq *PackageVersionQuery) GroupBy(field string, fields ...string) *Package
 // Example:
 //
 //	var v []struct {
-//		NameID int `json:"name_id,omitempty"`
+//		NameID uuid.UUID `json:"name_id,omitempty"`
 //	}
 //
 //	client.PackageVersion.Query().
@@ -519,12 +556,13 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	var (
 		nodes       = []*PackageVersion{}
 		_spec       = pvq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			pvq.withName != nil,
 			pvq.withOccurrences != nil,
 			pvq.withSbom != nil,
-			pvq.withEqualPackages != nil,
 			pvq.withIncludedInSboms != nil,
+			pvq.withPkgEqualPkgA != nil,
+			pvq.withPkgEqualPkgB != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -568,19 +606,26 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 			return nil, err
 		}
 	}
-	if query := pvq.withEqualPackages; query != nil {
-		if err := pvq.loadEqualPackages(ctx, query, nodes,
-			func(n *PackageVersion) { n.Edges.EqualPackages = []*PkgEqual{} },
-			func(n *PackageVersion, e *PkgEqual) { n.Edges.EqualPackages = append(n.Edges.EqualPackages, e) }); err != nil {
-			return nil, err
-		}
-	}
 	if query := pvq.withIncludedInSboms; query != nil {
 		if err := pvq.loadIncludedInSboms(ctx, query, nodes,
 			func(n *PackageVersion) { n.Edges.IncludedInSboms = []*BillOfMaterials{} },
 			func(n *PackageVersion, e *BillOfMaterials) {
 				n.Edges.IncludedInSboms = append(n.Edges.IncludedInSboms, e)
 			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := pvq.withPkgEqualPkgA; query != nil {
+		if err := pvq.loadPkgEqualPkgA(ctx, query, nodes,
+			func(n *PackageVersion) { n.Edges.PkgEqualPkgA = []*PkgEqual{} },
+			func(n *PackageVersion, e *PkgEqual) { n.Edges.PkgEqualPkgA = append(n.Edges.PkgEqualPkgA, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pvq.withPkgEqualPkgB; query != nil {
+		if err := pvq.loadPkgEqualPkgB(ctx, query, nodes,
+			func(n *PackageVersion) { n.Edges.PkgEqualPkgB = []*PkgEqual{} },
+			func(n *PackageVersion, e *PkgEqual) { n.Edges.PkgEqualPkgB = append(n.Edges.PkgEqualPkgB, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -598,17 +643,24 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 			return nil, err
 		}
 	}
-	for name, query := range pvq.withNamedEqualPackages {
-		if err := pvq.loadEqualPackages(ctx, query, nodes,
-			func(n *PackageVersion) { n.appendNamedEqualPackages(name) },
-			func(n *PackageVersion, e *PkgEqual) { n.appendNamedEqualPackages(name, e) }); err != nil {
-			return nil, err
-		}
-	}
 	for name, query := range pvq.withNamedIncludedInSboms {
 		if err := pvq.loadIncludedInSboms(ctx, query, nodes,
 			func(n *PackageVersion) { n.appendNamedIncludedInSboms(name) },
 			func(n *PackageVersion, e *BillOfMaterials) { n.appendNamedIncludedInSboms(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pvq.withNamedPkgEqualPkgA {
+		if err := pvq.loadPkgEqualPkgA(ctx, query, nodes,
+			func(n *PackageVersion) { n.appendNamedPkgEqualPkgA(name) },
+			func(n *PackageVersion, e *PkgEqual) { n.appendNamedPkgEqualPkgA(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pvq.withNamedPkgEqualPkgB {
+		if err := pvq.loadPkgEqualPkgB(ctx, query, nodes,
+			func(n *PackageVersion) { n.appendNamedPkgEqualPkgB(name) },
+			func(n *PackageVersion, e *PkgEqual) { n.appendNamedPkgEqualPkgB(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -621,8 +673,8 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 }
 
 func (pvq *PackageVersionQuery) loadName(ctx context.Context, query *PackageNameQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *PackageName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*PackageVersion)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PackageVersion)
 	for i := range nodes {
 		fk := nodes[i].NameID
 		if _, ok := nodeids[fk]; !ok {
@@ -651,7 +703,7 @@ func (pvq *PackageVersionQuery) loadName(ctx context.Context, query *PackageName
 }
 func (pvq *PackageVersionQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *Occurrence)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*PackageVersion)
+	nodeids := make(map[uuid.UUID]*PackageVersion)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -684,7 +736,7 @@ func (pvq *PackageVersionQuery) loadOccurrences(ctx context.Context, query *Occu
 }
 func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *BillOfMaterials)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*PackageVersion)
+	nodeids := make(map[uuid.UUID]*PackageVersion)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -715,71 +767,10 @@ func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *BillOfMater
 	}
 	return nil
 }
-func (pvq *PackageVersionQuery) loadEqualPackages(ctx context.Context, query *PkgEqualQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *PkgEqual)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*PackageVersion)
-	nids := make(map[int]map[*PackageVersion]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
-		}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(packageversion.EqualPackagesTable)
-		s.Join(joinT).On(s.C(pkgequal.FieldID), joinT.C(packageversion.EqualPackagesPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(packageversion.EqualPackagesPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(packageversion.EqualPackagesPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*PackageVersion]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*PkgEqual](ctx, query, qr, query.inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "equal_packages" node returned %v`, n.ID)
-		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
-	}
-	return nil
-}
 func (pvq *PackageVersionQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *BillOfMaterials)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*PackageVersion)
-	nids := make(map[int]map[*PackageVersion]struct{})
+	byID := make(map[uuid.UUID]*PackageVersion)
+	nids := make(map[uuid.UUID]map[*PackageVersion]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -808,11 +799,11 @@ func (pvq *PackageVersionQuery) loadIncludedInSboms(ctx context.Context, query *
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*PackageVersion]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -837,6 +828,66 @@ func (pvq *PackageVersionQuery) loadIncludedInSboms(ctx context.Context, query *
 	}
 	return nil
 }
+func (pvq *PackageVersionQuery) loadPkgEqualPkgA(ctx context.Context, query *PkgEqualQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *PkgEqual)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*PackageVersion)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pkgequal.FieldPkgID)
+	}
+	query.Where(predicate.PkgEqual(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packageversion.PkgEqualPkgAColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PkgID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "pkg_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pvq *PackageVersionQuery) loadPkgEqualPkgB(ctx context.Context, query *PkgEqualQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *PkgEqual)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*PackageVersion)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pkgequal.FieldEqualPkgID)
+	}
+	query.Where(predicate.PkgEqual(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packageversion.PkgEqualPkgBColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.EqualPkgID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "equal_pkg_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (pvq *PackageVersionQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pvq.querySpec()
@@ -851,7 +902,7 @@ func (pvq *PackageVersionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pvq *PackageVersionQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(packageversion.Table, packageversion.Columns, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(packageversion.Table, packageversion.Columns, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID))
 	_spec.From = pvq.sql
 	if unique := pvq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -953,20 +1004,6 @@ func (pvq *PackageVersionQuery) WithNamedSbom(name string, opts ...func(*BillOfM
 	return pvq
 }
 
-// WithNamedEqualPackages tells the query-builder to eager-load the nodes that are connected to the "equal_packages"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (pvq *PackageVersionQuery) WithNamedEqualPackages(name string, opts ...func(*PkgEqualQuery)) *PackageVersionQuery {
-	query := (&PkgEqualClient{config: pvq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	if pvq.withNamedEqualPackages == nil {
-		pvq.withNamedEqualPackages = make(map[string]*PkgEqualQuery)
-	}
-	pvq.withNamedEqualPackages[name] = query
-	return pvq
-}
-
 // WithNamedIncludedInSboms tells the query-builder to eager-load the nodes that are connected to the "included_in_sboms"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (pvq *PackageVersionQuery) WithNamedIncludedInSboms(name string, opts ...func(*BillOfMaterialsQuery)) *PackageVersionQuery {
@@ -978,6 +1015,34 @@ func (pvq *PackageVersionQuery) WithNamedIncludedInSboms(name string, opts ...fu
 		pvq.withNamedIncludedInSboms = make(map[string]*BillOfMaterialsQuery)
 	}
 	pvq.withNamedIncludedInSboms[name] = query
+	return pvq
+}
+
+// WithNamedPkgEqualPkgA tells the query-builder to eager-load the nodes that are connected to the "pkg_equal_pkg_a"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pvq *PackageVersionQuery) WithNamedPkgEqualPkgA(name string, opts ...func(*PkgEqualQuery)) *PackageVersionQuery {
+	query := (&PkgEqualClient{config: pvq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pvq.withNamedPkgEqualPkgA == nil {
+		pvq.withNamedPkgEqualPkgA = make(map[string]*PkgEqualQuery)
+	}
+	pvq.withNamedPkgEqualPkgA[name] = query
+	return pvq
+}
+
+// WithNamedPkgEqualPkgB tells the query-builder to eager-load the nodes that are connected to the "pkg_equal_pkg_b"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pvq *PackageVersionQuery) WithNamedPkgEqualPkgB(name string, opts ...func(*PkgEqualQuery)) *PackageVersionQuery {
+	query := (&PkgEqualClient{config: pvq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pvq.withNamedPkgEqualPkgB == nil {
+		pvq.withNamedPkgEqualPkgB = make(map[string]*PkgEqualQuery)
+	}
+	pvq.withNamedPkgEqualPkgB[name] = query
 	return pvq
 }
 

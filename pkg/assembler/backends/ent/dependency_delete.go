@@ -40,7 +40,7 @@ func (dd *DependencyDelete) ExecX(ctx context.Context) int {
 }
 
 func (dd *DependencyDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(dependency.Table, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(dependency.Table, sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID))
 	if ps := dd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

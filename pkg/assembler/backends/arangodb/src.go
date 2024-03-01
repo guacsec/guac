@@ -24,6 +24,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 type dbSrcName struct {
@@ -49,51 +50,10 @@ type dbSrcType struct {
 	SrcType string `json:"type"`
 }
 
-type srcIds struct {
-	TypeId      string
-	NamespaceId string
-	NameId      string
-}
-
-func guacSrcId(src model.SourceInputSpec) srcIds {
-	ids := srcIds{}
-
-	ids.TypeId = src.Type
-
-	var ns string
-	if src.Namespace != "" {
-		ns = src.Namespace
-	} else {
-		ns = guacEmpty
-	}
-	ids.NamespaceId = fmt.Sprintf("%s::%s", ids.TypeId, ns)
-
-	var tag string
-	if src.Tag != nil {
-		if *src.Tag != "" {
-			tag = *src.Tag
-		} else {
-			tag = guacEmpty
-		}
-	}
-
-	var commit string
-	if src.Commit != nil {
-		if *src.Commit != "" {
-			commit = *src.Commit
-		} else {
-			commit = guacEmpty
-		}
-	}
-
-	ids.NameId = fmt.Sprintf("%s::%s::%s::%s?", ids.NamespaceId, src.Name, tag, commit)
-	return ids
-}
-
 func getSourceQueryValues(source *model.SourceInputSpec) map[string]any {
 	values := map[string]any{}
 	// add guac keys
-	guacIds := guacSrcId(*source)
+	guacIds := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](source, helpers.SrcServerKey)
 	values["guacNsKey"] = guacIds.NamespaceId
 	values["guacNameKey"] = guacIds.NameId
 

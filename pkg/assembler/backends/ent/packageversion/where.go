@@ -5,56 +5,57 @@ package packageversion
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.PackageVersion {
+func ID(id uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.PackageVersion {
+func IDEQ(id uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.PackageVersion {
+func IDNEQ(id uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.PackageVersion {
+func IDIn(ids ...uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.PackageVersion {
+func IDNotIn(ids ...uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.PackageVersion {
+func IDGT(id uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.PackageVersion {
+func IDGTE(id uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.PackageVersion {
+func IDLT(id uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.PackageVersion {
+func IDLTE(id uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldLTE(FieldID, id))
 }
 
 // NameID applies equality check predicate on the "name_id" field. It's identical to NameIDEQ.
-func NameID(v int) predicate.PackageVersion {
+func NameID(v uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldEQ(FieldNameID, v))
 }
 
@@ -74,22 +75,22 @@ func Hash(v string) predicate.PackageVersion {
 }
 
 // NameIDEQ applies the EQ predicate on the "name_id" field.
-func NameIDEQ(v int) predicate.PackageVersion {
+func NameIDEQ(v uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldEQ(FieldNameID, v))
 }
 
 // NameIDNEQ applies the NEQ predicate on the "name_id" field.
-func NameIDNEQ(v int) predicate.PackageVersion {
+func NameIDNEQ(v uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldNEQ(FieldNameID, v))
 }
 
 // NameIDIn applies the In predicate on the "name_id" field.
-func NameIDIn(vs ...int) predicate.PackageVersion {
+func NameIDIn(vs ...uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldIn(FieldNameID, vs...))
 }
 
 // NameIDNotIn applies the NotIn predicate on the "name_id" field.
-func NameIDNotIn(vs ...int) predicate.PackageVersion {
+func NameIDNotIn(vs ...uuid.UUID) predicate.PackageVersion {
 	return predicate.PackageVersion(sql.FieldNotIn(FieldNameID, vs...))
 }
 
@@ -367,29 +368,6 @@ func HasSbomWith(preds ...predicate.BillOfMaterials) predicate.PackageVersion {
 	})
 }
 
-// HasEqualPackages applies the HasEdge predicate on the "equal_packages" edge.
-func HasEqualPackages() predicate.PackageVersion {
-	return predicate.PackageVersion(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, EqualPackagesTable, EqualPackagesPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasEqualPackagesWith applies the HasEdge predicate on the "equal_packages" edge with a given conditions (other predicates).
-func HasEqualPackagesWith(preds ...predicate.PkgEqual) predicate.PackageVersion {
-	return predicate.PackageVersion(func(s *sql.Selector) {
-		step := newEqualPackagesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasIncludedInSboms applies the HasEdge predicate on the "included_in_sboms" edge.
 func HasIncludedInSboms() predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {
@@ -405,6 +383,52 @@ func HasIncludedInSboms() predicate.PackageVersion {
 func HasIncludedInSbomsWith(preds ...predicate.BillOfMaterials) predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {
 		step := newIncludedInSbomsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPkgEqualPkgA applies the HasEdge predicate on the "pkg_equal_pkg_a" edge.
+func HasPkgEqualPkgA() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, PkgEqualPkgATable, PkgEqualPkgAColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPkgEqualPkgAWith applies the HasEdge predicate on the "pkg_equal_pkg_a" edge with a given conditions (other predicates).
+func HasPkgEqualPkgAWith(preds ...predicate.PkgEqual) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newPkgEqualPkgAStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPkgEqualPkgB applies the HasEdge predicate on the "pkg_equal_pkg_b" edge.
+func HasPkgEqualPkgB() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, PkgEqualPkgBTable, PkgEqualPkgBColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPkgEqualPkgBWith applies the HasEdge predicate on the "pkg_equal_pkg_b" edge with a given conditions (other predicates).
+func HasPkgEqualPkgBWith(preds ...predicate.PkgEqual) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newPkgEqualPkgBStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

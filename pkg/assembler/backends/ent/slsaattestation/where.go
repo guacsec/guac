@@ -7,51 +7,52 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.SLSAAttestation {
+func ID(id uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.SLSAAttestation {
+func IDEQ(id uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.SLSAAttestation {
+func IDNEQ(id uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.SLSAAttestation {
+func IDIn(ids ...uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.SLSAAttestation {
+func IDNotIn(ids ...uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.SLSAAttestation {
+func IDGT(id uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.SLSAAttestation {
+func IDGTE(id uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.SLSAAttestation {
+func IDLT(id uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.SLSAAttestation {
+func IDLTE(id uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldLTE(FieldID, id))
 }
 
@@ -61,12 +62,12 @@ func BuildType(v string) predicate.SLSAAttestation {
 }
 
 // BuiltByID applies equality check predicate on the "built_by_id" field. It's identical to BuiltByIDEQ.
-func BuiltByID(v int) predicate.SLSAAttestation {
+func BuiltByID(v uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldBuiltByID, v))
 }
 
 // SubjectID applies equality check predicate on the "subject_id" field. It's identical to SubjectIDEQ.
-func SubjectID(v int) predicate.SLSAAttestation {
+func SubjectID(v uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldSubjectID, v))
 }
 
@@ -166,42 +167,42 @@ func BuildTypeContainsFold(v string) predicate.SLSAAttestation {
 }
 
 // BuiltByIDEQ applies the EQ predicate on the "built_by_id" field.
-func BuiltByIDEQ(v int) predicate.SLSAAttestation {
+func BuiltByIDEQ(v uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldBuiltByID, v))
 }
 
 // BuiltByIDNEQ applies the NEQ predicate on the "built_by_id" field.
-func BuiltByIDNEQ(v int) predicate.SLSAAttestation {
+func BuiltByIDNEQ(v uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldNEQ(FieldBuiltByID, v))
 }
 
 // BuiltByIDIn applies the In predicate on the "built_by_id" field.
-func BuiltByIDIn(vs ...int) predicate.SLSAAttestation {
+func BuiltByIDIn(vs ...uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldIn(FieldBuiltByID, vs...))
 }
 
 // BuiltByIDNotIn applies the NotIn predicate on the "built_by_id" field.
-func BuiltByIDNotIn(vs ...int) predicate.SLSAAttestation {
+func BuiltByIDNotIn(vs ...uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldNotIn(FieldBuiltByID, vs...))
 }
 
 // SubjectIDEQ applies the EQ predicate on the "subject_id" field.
-func SubjectIDEQ(v int) predicate.SLSAAttestation {
+func SubjectIDEQ(v uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldSubjectID, v))
 }
 
 // SubjectIDNEQ applies the NEQ predicate on the "subject_id" field.
-func SubjectIDNEQ(v int) predicate.SLSAAttestation {
+func SubjectIDNEQ(v uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldNEQ(FieldSubjectID, v))
 }
 
 // SubjectIDIn applies the In predicate on the "subject_id" field.
-func SubjectIDIn(vs ...int) predicate.SLSAAttestation {
+func SubjectIDIn(vs ...uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldIn(FieldSubjectID, vs...))
 }
 
 // SubjectIDNotIn applies the NotIn predicate on the "subject_id" field.
-func SubjectIDNotIn(vs ...int) predicate.SLSAAttestation {
+func SubjectIDNotIn(vs ...uuid.UUID) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldNotIn(FieldSubjectID, vs...))
 }
 

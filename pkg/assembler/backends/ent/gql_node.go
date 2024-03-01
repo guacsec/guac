@@ -5,14 +5,10 @@ package ent
 import (
 	"context"
 	"fmt"
-	"sync"
-	"sync/atomic"
 
 	"entgo.io/contrib/entgql"
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/schema"
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
@@ -25,26 +21,18 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/hashicorp/go-multierror"
-	"golang.org/x/sync/semaphore"
 )
 
 // Noder wraps the basic Node method.
@@ -89,9 +77,6 @@ func (n *HasSourceAt) IsNode() {}
 func (n *HashEqual) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *IsVulnerability) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
 func (n *License) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
@@ -99,12 +84,6 @@ func (n *Occurrence) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *PackageName) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
-func (n *PackageNamespace) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
-func (n *PackageType) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *PackageVersion) IsNode() {}
@@ -119,16 +98,7 @@ func (n *PointOfContact) IsNode() {}
 func (n *SLSAAttestation) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *Scorecard) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
 func (n *SourceName) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
-func (n *SourceNamespace) IsNode() {}
-
-// IsNode implements the Node interface check for GQLGen.
-func (n *SourceType) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *VulnEqual) IsNode() {}
@@ -139,9 +109,6 @@ func (n *VulnerabilityID) IsNode() {}
 // IsNode implements the Node interface check for GQLGen.
 func (n *VulnerabilityMetadata) IsNode() {}
 
-// IsNode implements the Node interface check for GQLGen.
-func (n *VulnerabilityType) IsNode() {}
-
 var errNodeInvalidID = &NotFoundError{"node"}
 
 // NodeOption allows configuring the Noder execution using functional options.
@@ -150,7 +117,7 @@ type NodeOption func(*nodeOptions)
 // WithNodeType sets the node Type resolver function (i.e. the table to query).
 // If was not provided, the table will be derived from the universal-id
 // configuration as described in: https://entgo.io/docs/migrate/#universal-ids.
-func WithNodeType(f func(context.Context, int) (string, error)) NodeOption {
+func WithNodeType(f func(context.Context, uuid.UUID) (string, error)) NodeOption {
 	return func(o *nodeOptions) {
 		o.nodeType = f
 	}
@@ -158,13 +125,13 @@ func WithNodeType(f func(context.Context, int) (string, error)) NodeOption {
 
 // WithFixedNodeType sets the Type of the node to a fixed value.
 func WithFixedNodeType(t string) NodeOption {
-	return WithNodeType(func(context.Context, int) (string, error) {
+	return WithNodeType(func(context.Context, uuid.UUID) (string, error) {
 		return t, nil
 	})
 }
 
 type nodeOptions struct {
-	nodeType func(context.Context, int) (string, error)
+	nodeType func(context.Context, uuid.UUID) (string, error)
 }
 
 func (c *Client) newNodeOpts(opts []NodeOption) *nodeOptions {
@@ -173,8 +140,8 @@ func (c *Client) newNodeOpts(opts []NodeOption) *nodeOptions {
 		opt(nopts)
 	}
 	if nopts.nodeType == nil {
-		nopts.nodeType = func(ctx context.Context, id int) (string, error) {
-			return c.tables.nodeType(ctx, c.driver, id)
+		nopts.nodeType = func(ctx context.Context, id uuid.UUID) (string, error) {
+			return "", fmt.Errorf("cannot resolve noder (%v) without its type", id)
 		}
 	}
 	return nopts
@@ -185,7 +152,7 @@ func (c *Client) newNodeOpts(opts []NodeOption) *nodeOptions {
 //
 //	c.Noder(ctx, id)
 //	c.Noder(ctx, id, ent.WithNodeType(typeResolver))
-func (c *Client) Noder(ctx context.Context, id int, opts ...NodeOption) (_ Noder, err error) {
+func (c *Client) Noder(ctx context.Context, id uuid.UUID, opts ...NodeOption) (_ Noder, err error) {
 	defer func() {
 		if IsNotFound(err) {
 			err = multierror.Append(err, entgql.ErrNodeNotFound(id))
@@ -198,7 +165,7 @@ func (c *Client) Noder(ctx context.Context, id int, opts ...NodeOption) (_ Noder
 	return c.noder(ctx, table, id)
 }
 
-func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error) {
+func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, error) {
 	switch table {
 	case artifact.Table:
 		query := c.Artifact.Query().
@@ -344,18 +311,6 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			return nil, err
 		}
 		return n, nil
-	case isvulnerability.Table:
-		query := c.IsVulnerability.Query().
-			Where(isvulnerability.ID(id))
-		query, err := query.CollectFields(ctx, "IsVulnerability")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
 	case license.Table:
 		query := c.License.Query().
 			Where(license.ID(id))
@@ -384,30 +339,6 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.PackageName.Query().
 			Where(packagename.ID(id))
 		query, err := query.CollectFields(ctx, "PackageName")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case packagenamespace.Table:
-		query := c.PackageNamespace.Query().
-			Where(packagenamespace.ID(id))
-		query, err := query.CollectFields(ctx, "PackageNamespace")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case packagetype.Table:
-		query := c.PackageType.Query().
-			Where(packagetype.ID(id))
-		query, err := query.CollectFields(ctx, "PackageType")
 		if err != nil {
 			return nil, err
 		}
@@ -464,46 +395,10 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			return nil, err
 		}
 		return n, nil
-	case scorecard.Table:
-		query := c.Scorecard.Query().
-			Where(scorecard.ID(id))
-		query, err := query.CollectFields(ctx, "Scorecard")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
 	case sourcename.Table:
 		query := c.SourceName.Query().
 			Where(sourcename.ID(id))
 		query, err := query.CollectFields(ctx, "SourceName")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case sourcenamespace.Table:
-		query := c.SourceNamespace.Query().
-			Where(sourcenamespace.ID(id))
-		query, err := query.CollectFields(ctx, "SourceNamespace")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case sourcetype.Table:
-		query := c.SourceType.Query().
-			Where(sourcetype.ID(id))
-		query, err := query.CollectFields(ctx, "SourceType")
 		if err != nil {
 			return nil, err
 		}
@@ -548,24 +443,12 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			return nil, err
 		}
 		return n, nil
-	case vulnerabilitytype.Table:
-		query := c.VulnerabilityType.Query().
-			Where(vulnerabilitytype.ID(id))
-		query, err := query.CollectFields(ctx, "VulnerabilityType")
-		if err != nil {
-			return nil, err
-		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
 	default:
 		return nil, fmt.Errorf("cannot resolve noder from table %q: %w", table, errNodeInvalidID)
 	}
 }
 
-func (c *Client) Noders(ctx context.Context, ids []int, opts ...NodeOption) ([]Noder, error) {
+func (c *Client) Noders(ctx context.Context, ids []uuid.UUID, opts ...NodeOption) ([]Noder, error) {
 	switch len(ids) {
 	case 1:
 		noder, err := c.Noder(ctx, ids[0], opts...)
@@ -579,8 +462,8 @@ func (c *Client) Noders(ctx context.Context, ids []int, opts ...NodeOption) ([]N
 
 	noders := make([]Noder, len(ids))
 	errors := make([]error, len(ids))
-	tables := make(map[string][]int)
-	id2idx := make(map[int][]int, len(ids))
+	tables := make(map[string][]uuid.UUID)
+	id2idx := make(map[uuid.UUID][]int, len(ids))
 	nopts := c.newNodeOpts(opts)
 	for i, id := range ids {
 		table, err := nopts.nodeType(ctx, id)
@@ -626,9 +509,9 @@ func (c *Client) Noders(ctx context.Context, ids []int, opts ...NodeOption) ([]N
 	return noders, nil
 }
 
-func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, error) {
+func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]Noder, error) {
 	noders := make([]Noder, len(ids))
-	idmap := make(map[int][]*Noder, len(ids))
+	idmap := make(map[uuid.UUID][]*Noder, len(ids))
 	for i, id := range ids {
 		idmap[id] = append(idmap[id], &noders[i])
 	}
@@ -825,22 +708,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
-	case isvulnerability.Table:
-		query := c.IsVulnerability.Query().
-			Where(isvulnerability.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "IsVulnerability")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	case license.Table:
 		query := c.License.Query().
 			Where(license.IDIn(ids...))
@@ -877,38 +744,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.PackageName.Query().
 			Where(packagename.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "PackageName")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case packagenamespace.Table:
-		query := c.PackageNamespace.Query().
-			Where(packagenamespace.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "PackageNamespace")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case packagetype.Table:
-		query := c.PackageType.Query().
-			Where(packagetype.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "PackageType")
 		if err != nil {
 			return nil, err
 		}
@@ -985,58 +820,10 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
-	case scorecard.Table:
-		query := c.Scorecard.Query().
-			Where(scorecard.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "Scorecard")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	case sourcename.Table:
 		query := c.SourceName.Query().
 			Where(sourcename.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "SourceName")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case sourcenamespace.Table:
-		query := c.SourceNamespace.Query().
-			Where(sourcenamespace.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "SourceNamespace")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case sourcetype.Table:
-		query := c.SourceType.Query().
-			Where(sourcetype.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "SourceType")
 		if err != nil {
 			return nil, err
 		}
@@ -1097,76 +884,8 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
-	case vulnerabilitytype.Table:
-		query := c.VulnerabilityType.Query().
-			Where(vulnerabilitytype.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "VulnerabilityType")
-		if err != nil {
-			return nil, err
-		}
-		nodes, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	default:
 		return nil, fmt.Errorf("cannot resolve noders from table %q: %w", table, errNodeInvalidID)
 	}
 	return noders, nil
-}
-
-type tables struct {
-	once  sync.Once
-	sem   *semaphore.Weighted
-	value atomic.Value
-}
-
-func (t *tables) nodeType(ctx context.Context, drv dialect.Driver, id int) (string, error) {
-	tables, err := t.Load(ctx, drv)
-	if err != nil {
-		return "", err
-	}
-	idx := int(id / (1<<32 - 1))
-	if idx < 0 || idx >= len(tables) {
-		return "", fmt.Errorf("cannot resolve table from id %v: %w", id, errNodeInvalidID)
-	}
-	return tables[idx], nil
-}
-
-func (t *tables) Load(ctx context.Context, drv dialect.Driver) ([]string, error) {
-	if tables := t.value.Load(); tables != nil {
-		return tables.([]string), nil
-	}
-	t.once.Do(func() { t.sem = semaphore.NewWeighted(1) })
-	if err := t.sem.Acquire(ctx, 1); err != nil {
-		return nil, err
-	}
-	defer t.sem.Release(1)
-	if tables := t.value.Load(); tables != nil {
-		return tables.([]string), nil
-	}
-	tables, err := t.load(ctx, drv)
-	if err == nil {
-		t.value.Store(tables)
-	}
-	return tables, err
-}
-
-func (*tables) load(ctx context.Context, drv dialect.Driver) ([]string, error) {
-	rows := &sql.Rows{}
-	query, args := sql.Dialect(drv.Dialect()).
-		Select("type").
-		From(sql.Table(schema.TypeTable)).
-		OrderBy(sql.Asc("id")).
-		Query()
-	if err := drv.Query(ctx, query, args, rows); err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var tables []string
-	return tables, sql.ScanSlice(rows, &tables)
 }

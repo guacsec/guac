@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 )
@@ -20,6 +22,18 @@ type PkgEqualCreate struct {
 	mutation *PkgEqualMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetPkgID sets the "pkg_id" field.
+func (pec *PkgEqualCreate) SetPkgID(u uuid.UUID) *PkgEqualCreate {
+	pec.mutation.SetPkgID(u)
+	return pec
+}
+
+// SetEqualPkgID sets the "equal_pkg_id" field.
+func (pec *PkgEqualCreate) SetEqualPkgID(u uuid.UUID) *PkgEqualCreate {
+	pec.mutation.SetEqualPkgID(u)
+	return pec
 }
 
 // SetOrigin sets the "origin" field.
@@ -46,19 +60,40 @@ func (pec *PkgEqualCreate) SetPackagesHash(s string) *PkgEqualCreate {
 	return pec
 }
 
-// AddPackageIDs adds the "packages" edge to the PackageVersion entity by IDs.
-func (pec *PkgEqualCreate) AddPackageIDs(ids ...int) *PkgEqualCreate {
-	pec.mutation.AddPackageIDs(ids...)
+// SetID sets the "id" field.
+func (pec *PkgEqualCreate) SetID(u uuid.UUID) *PkgEqualCreate {
+	pec.mutation.SetID(u)
 	return pec
 }
 
-// AddPackages adds the "packages" edges to the PackageVersion entity.
-func (pec *PkgEqualCreate) AddPackages(p ...*PackageVersion) *PkgEqualCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pec *PkgEqualCreate) SetNillableID(u *uuid.UUID) *PkgEqualCreate {
+	if u != nil {
+		pec.SetID(*u)
 	}
-	return pec.AddPackageIDs(ids...)
+	return pec
+}
+
+// SetPackageAID sets the "package_a" edge to the PackageVersion entity by ID.
+func (pec *PkgEqualCreate) SetPackageAID(id uuid.UUID) *PkgEqualCreate {
+	pec.mutation.SetPackageAID(id)
+	return pec
+}
+
+// SetPackageA sets the "package_a" edge to the PackageVersion entity.
+func (pec *PkgEqualCreate) SetPackageA(p *PackageVersion) *PkgEqualCreate {
+	return pec.SetPackageAID(p.ID)
+}
+
+// SetPackageBID sets the "package_b" edge to the PackageVersion entity by ID.
+func (pec *PkgEqualCreate) SetPackageBID(id uuid.UUID) *PkgEqualCreate {
+	pec.mutation.SetPackageBID(id)
+	return pec
+}
+
+// SetPackageB sets the "package_b" edge to the PackageVersion entity.
+func (pec *PkgEqualCreate) SetPackageB(p *PackageVersion) *PkgEqualCreate {
+	return pec.SetPackageBID(p.ID)
 }
 
 // Mutation returns the PkgEqualMutation object of the builder.
@@ -68,6 +103,7 @@ func (pec *PkgEqualCreate) Mutation() *PkgEqualMutation {
 
 // Save creates the PkgEqual in the database.
 func (pec *PkgEqualCreate) Save(ctx context.Context) (*PkgEqual, error) {
+	pec.defaults()
 	return withHooks(ctx, pec.sqlSave, pec.mutation, pec.hooks)
 }
 
@@ -93,8 +129,22 @@ func (pec *PkgEqualCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pec *PkgEqualCreate) defaults() {
+	if _, ok := pec.mutation.ID(); !ok {
+		v := pkgequal.DefaultID()
+		pec.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pec *PkgEqualCreate) check() error {
+	if _, ok := pec.mutation.PkgID(); !ok {
+		return &ValidationError{Name: "pkg_id", err: errors.New(`ent: missing required field "PkgEqual.pkg_id"`)}
+	}
+	if _, ok := pec.mutation.EqualPkgID(); !ok {
+		return &ValidationError{Name: "equal_pkg_id", err: errors.New(`ent: missing required field "PkgEqual.equal_pkg_id"`)}
+	}
 	if _, ok := pec.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "PkgEqual.origin"`)}
 	}
@@ -107,8 +157,11 @@ func (pec *PkgEqualCreate) check() error {
 	if _, ok := pec.mutation.PackagesHash(); !ok {
 		return &ValidationError{Name: "packages_hash", err: errors.New(`ent: missing required field "PkgEqual.packages_hash"`)}
 	}
-	if len(pec.mutation.PackagesIDs()) == 0 {
-		return &ValidationError{Name: "packages", err: errors.New(`ent: missing required edge "PkgEqual.packages"`)}
+	if _, ok := pec.mutation.PackageAID(); !ok {
+		return &ValidationError{Name: "package_a", err: errors.New(`ent: missing required edge "PkgEqual.package_a"`)}
+	}
+	if _, ok := pec.mutation.PackageBID(); !ok {
+		return &ValidationError{Name: "package_b", err: errors.New(`ent: missing required edge "PkgEqual.package_b"`)}
 	}
 	return nil
 }
@@ -124,8 +177,13 @@ func (pec *PkgEqualCreate) sqlSave(ctx context.Context) (*PkgEqual, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	pec.mutation.id = &_node.ID
 	pec.mutation.done = true
 	return _node, nil
@@ -134,9 +192,13 @@ func (pec *PkgEqualCreate) sqlSave(ctx context.Context) (*PkgEqual, error) {
 func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 	var (
 		_node = &PkgEqual{config: pec.config}
-		_spec = sqlgraph.NewCreateSpec(pkgequal.Table, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(pkgequal.Table, sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = pec.conflict
+	if id, ok := pec.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := pec.mutation.Origin(); ok {
 		_spec.SetField(pkgequal.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
@@ -153,20 +215,38 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 		_spec.SetField(pkgequal.FieldPackagesHash, field.TypeString, value)
 		_node.PackagesHash = value
 	}
-	if nodes := pec.mutation.PackagesIDs(); len(nodes) > 0 {
+	if nodes := pec.mutation.PackageAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   pkgequal.PackagesTable,
-			Columns: pkgequal.PackagesPrimaryKey,
+			Table:   pkgequal.PackageATable,
+			Columns: []string{pkgequal.PackageAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.PkgID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pec.mutation.PackageBIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   pkgequal.PackageBTable,
+			Columns: []string{pkgequal.PackageBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.EqualPkgID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -176,7 +256,7 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.PkgEqual.Create().
-//		SetOrigin(v).
+//		SetPkgID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -185,7 +265,7 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PkgEqualUpsert) {
-//			SetOrigin(v+v).
+//			SetPkgID(v+v).
 //		}).
 //		Exec(ctx)
 func (pec *PkgEqualCreate) OnConflict(opts ...sql.ConflictOption) *PkgEqualUpsertOne {
@@ -220,6 +300,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetPkgID sets the "pkg_id" field.
+func (u *PkgEqualUpsert) SetPkgID(v uuid.UUID) *PkgEqualUpsert {
+	u.Set(pkgequal.FieldPkgID, v)
+	return u
+}
+
+// UpdatePkgID sets the "pkg_id" field to the value that was provided on create.
+func (u *PkgEqualUpsert) UpdatePkgID() *PkgEqualUpsert {
+	u.SetExcluded(pkgequal.FieldPkgID)
+	return u
+}
+
+// SetEqualPkgID sets the "equal_pkg_id" field.
+func (u *PkgEqualUpsert) SetEqualPkgID(v uuid.UUID) *PkgEqualUpsert {
+	u.Set(pkgequal.FieldEqualPkgID, v)
+	return u
+}
+
+// UpdateEqualPkgID sets the "equal_pkg_id" field to the value that was provided on create.
+func (u *PkgEqualUpsert) UpdateEqualPkgID() *PkgEqualUpsert {
+	u.SetExcluded(pkgequal.FieldEqualPkgID)
+	return u
+}
 
 // SetOrigin sets the "origin" field.
 func (u *PkgEqualUpsert) SetOrigin(v string) *PkgEqualUpsert {
@@ -269,16 +373,24 @@ func (u *PkgEqualUpsert) UpdatePackagesHash() *PkgEqualUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.PkgEqual.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(pkgequal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PkgEqualUpsertOne) UpdateNewValues() *PkgEqualUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(pkgequal.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -307,6 +419,34 @@ func (u *PkgEqualUpsertOne) Update(set func(*PkgEqualUpsert)) *PkgEqualUpsertOne
 		set(&PkgEqualUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetPkgID sets the "pkg_id" field.
+func (u *PkgEqualUpsertOne) SetPkgID(v uuid.UUID) *PkgEqualUpsertOne {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.SetPkgID(v)
+	})
+}
+
+// UpdatePkgID sets the "pkg_id" field to the value that was provided on create.
+func (u *PkgEqualUpsertOne) UpdatePkgID() *PkgEqualUpsertOne {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.UpdatePkgID()
+	})
+}
+
+// SetEqualPkgID sets the "equal_pkg_id" field.
+func (u *PkgEqualUpsertOne) SetEqualPkgID(v uuid.UUID) *PkgEqualUpsertOne {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.SetEqualPkgID(v)
+	})
+}
+
+// UpdateEqualPkgID sets the "equal_pkg_id" field to the value that was provided on create.
+func (u *PkgEqualUpsertOne) UpdateEqualPkgID() *PkgEqualUpsertOne {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.UpdateEqualPkgID()
+	})
 }
 
 // SetOrigin sets the "origin" field.
@@ -381,7 +521,12 @@ func (u *PkgEqualUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *PkgEqualUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *PkgEqualUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: PkgEqualUpsertOne.ID is not supported by MySQL driver. Use PkgEqualUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -390,7 +535,7 @@ func (u *PkgEqualUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *PkgEqualUpsertOne) IDX(ctx context.Context) int {
+func (u *PkgEqualUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -417,6 +562,7 @@ func (pecb *PkgEqualCreateBulk) Save(ctx context.Context) ([]*PkgEqual, error) {
 	for i := range pecb.builders {
 		func(i int, root context.Context) {
 			builder := pecb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PkgEqualMutation)
 				if !ok {
@@ -444,10 +590,6 @@ func (pecb *PkgEqualCreateBulk) Save(ctx context.Context) ([]*PkgEqual, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -499,7 +641,7 @@ func (pecb *PkgEqualCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PkgEqualUpsert) {
-//			SetOrigin(v+v).
+//			SetPkgID(v+v).
 //		}).
 //		Exec(ctx)
 func (pecb *PkgEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *PkgEqualUpsertBulk {
@@ -534,10 +676,20 @@ type PkgEqualUpsertBulk struct {
 //	client.PkgEqual.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(pkgequal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PkgEqualUpsertBulk) UpdateNewValues() *PkgEqualUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(pkgequal.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -566,6 +718,34 @@ func (u *PkgEqualUpsertBulk) Update(set func(*PkgEqualUpsert)) *PkgEqualUpsertBu
 		set(&PkgEqualUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetPkgID sets the "pkg_id" field.
+func (u *PkgEqualUpsertBulk) SetPkgID(v uuid.UUID) *PkgEqualUpsertBulk {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.SetPkgID(v)
+	})
+}
+
+// UpdatePkgID sets the "pkg_id" field to the value that was provided on create.
+func (u *PkgEqualUpsertBulk) UpdatePkgID() *PkgEqualUpsertBulk {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.UpdatePkgID()
+	})
+}
+
+// SetEqualPkgID sets the "equal_pkg_id" field.
+func (u *PkgEqualUpsertBulk) SetEqualPkgID(v uuid.UUID) *PkgEqualUpsertBulk {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.SetEqualPkgID(v)
+	})
+}
+
+// UpdateEqualPkgID sets the "equal_pkg_id" field to the value that was provided on create.
+func (u *PkgEqualUpsertBulk) UpdateEqualPkgID() *PkgEqualUpsertBulk {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.UpdateEqualPkgID()
+	})
 }
 
 // SetOrigin sets the "origin" field.

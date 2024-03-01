@@ -17,10 +17,27 @@ package helpers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
-func ArtifactKey(input *generated.ArtifactInputSpec) string {
-	return fmt.Sprintf("%s:%s", input.Algorithm, input.Digest)
+// collect is a simple helper to transform collections of a certain type to another type
+// using the transform function func(T) R
+func GetKey[T any, R any](item T, transformer func(T) R) R {
+	out := transformer(item)
+	return out
+}
+
+func ArtifactServerKey(input *model.ArtifactInputSpec) string {
+	return artifactKey(input.Algorithm, input.Digest)
+}
+
+func ArtifactClientKey(input *generated.ArtifactInputSpec) string {
+	return artifactKey(input.Algorithm, input.Digest)
+}
+
+func artifactKey(algo, digest string) string {
+	return fmt.Sprintf("%s:%s", strings.ToLower(algo), strings.ToLower(digest))
 }

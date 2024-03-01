@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -18,11 +19,11 @@ import (
 type BillOfMaterials struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
-	PackageID *int `json:"package_id,omitempty"`
+	PackageID *uuid.UUID `json:"package_id,omitempty"`
 	// ArtifactID holds the value of the "artifact_id" field.
-	ArtifactID *int `json:"artifact_id,omitempty"`
+	ArtifactID *uuid.UUID `json:"artifact_id,omitempty"`
 	// SBOM's URI
 	URI string `json:"uri,omitempty"`
 	// Digest algorithm
@@ -37,6 +38,14 @@ type BillOfMaterials struct {
 	Collector string `json:"collector,omitempty"`
 	// KnownSince holds the value of the "known_since" field.
 	KnownSince time.Time `json:"known_since,omitempty"`
+	// An opaque hash of the included packages
+	IncludedPackagesHash string `json:"included_packages_hash,omitempty"`
+	// An opaque hash of the included artifacts
+	IncludedArtifactsHash string `json:"included_artifacts_hash,omitempty"`
+	// An opaque hash of the included dependencies
+	IncludedDependenciesHash string `json:"included_dependencies_hash,omitempty"`
+	// An opaque hash of the included occurrences
+	IncludedOccurrencesHash string `json:"included_occurrences_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BillOfMaterialsQuery when eager-loading is set.
 	Edges        BillOfMaterialsEdges `json:"edges"`
@@ -136,12 +145,14 @@ func (*BillOfMaterials) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case billofmaterials.FieldID, billofmaterials.FieldPackageID, billofmaterials.FieldArtifactID:
-			values[i] = new(sql.NullInt64)
-		case billofmaterials.FieldURI, billofmaterials.FieldAlgorithm, billofmaterials.FieldDigest, billofmaterials.FieldDownloadLocation, billofmaterials.FieldOrigin, billofmaterials.FieldCollector:
+		case billofmaterials.FieldPackageID, billofmaterials.FieldArtifactID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case billofmaterials.FieldURI, billofmaterials.FieldAlgorithm, billofmaterials.FieldDigest, billofmaterials.FieldDownloadLocation, billofmaterials.FieldOrigin, billofmaterials.FieldCollector, billofmaterials.FieldIncludedPackagesHash, billofmaterials.FieldIncludedArtifactsHash, billofmaterials.FieldIncludedDependenciesHash, billofmaterials.FieldIncludedOccurrencesHash:
 			values[i] = new(sql.NullString)
 		case billofmaterials.FieldKnownSince:
 			values[i] = new(sql.NullTime)
+		case billofmaterials.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -158,24 +169,24 @@ func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case billofmaterials.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				bom.ID = *value
 			}
-			bom.ID = int(value.Int64)
 		case billofmaterials.FieldPackageID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				bom.PackageID = new(int)
-				*bom.PackageID = int(value.Int64)
+				bom.PackageID = new(uuid.UUID)
+				*bom.PackageID = *value.S.(*uuid.UUID)
 			}
 		case billofmaterials.FieldArtifactID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				bom.ArtifactID = new(int)
-				*bom.ArtifactID = int(value.Int64)
+				bom.ArtifactID = new(uuid.UUID)
+				*bom.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case billofmaterials.FieldURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -218,6 +229,30 @@ func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field known_since", values[i])
 			} else if value.Valid {
 				bom.KnownSince = value.Time
+			}
+		case billofmaterials.FieldIncludedPackagesHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field included_packages_hash", values[i])
+			} else if value.Valid {
+				bom.IncludedPackagesHash = value.String
+			}
+		case billofmaterials.FieldIncludedArtifactsHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field included_artifacts_hash", values[i])
+			} else if value.Valid {
+				bom.IncludedArtifactsHash = value.String
+			}
+		case billofmaterials.FieldIncludedDependenciesHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field included_dependencies_hash", values[i])
+			} else if value.Valid {
+				bom.IncludedDependenciesHash = value.String
+			}
+		case billofmaterials.FieldIncludedOccurrencesHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field included_occurrences_hash", values[i])
+			} else if value.Valid {
+				bom.IncludedOccurrencesHash = value.String
 			}
 		default:
 			bom.selectValues.Set(columns[i], values[i])
@@ -315,6 +350,18 @@ func (bom *BillOfMaterials) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("known_since=")
 	builder.WriteString(bom.KnownSince.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("included_packages_hash=")
+	builder.WriteString(bom.IncludedPackagesHash)
+	builder.WriteString(", ")
+	builder.WriteString("included_artifacts_hash=")
+	builder.WriteString(bom.IncludedArtifactsHash)
+	builder.WriteString(", ")
+	builder.WriteString("included_dependencies_hash=")
+	builder.WriteString(bom.IncludedDependenciesHash)
+	builder.WriteString(", ")
+	builder.WriteString("included_occurrences_hash=")
+	builder.WriteString(bom.IncludedOccurrencesHash)
 	builder.WriteByte(')')
 	return builder.String()
 }

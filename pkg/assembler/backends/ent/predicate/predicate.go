@@ -42,9 +42,6 @@ type HasSourceAt func(*sql.Selector)
 // HashEqual is the predicate function for hashequal builders.
 type HashEqual func(*sql.Selector)
 
-// IsVulnerability is the predicate function for isvulnerability builders.
-type IsVulnerability func(*sql.Selector)
-
 // License is the predicate function for license builders.
 type License func(*sql.Selector)
 
@@ -53,12 +50,6 @@ type Occurrence func(*sql.Selector)
 
 // PackageName is the predicate function for packagename builders.
 type PackageName func(*sql.Selector)
-
-// PackageNamespace is the predicate function for packagenamespace builders.
-type PackageNamespace func(*sql.Selector)
-
-// PackageType is the predicate function for packagetype builders.
-type PackageType func(*sql.Selector)
 
 // PackageVersion is the predicate function for packageversion builders.
 type PackageVersion func(*sql.Selector)
@@ -72,17 +63,8 @@ type PointOfContact func(*sql.Selector)
 // SLSAAttestation is the predicate function for slsaattestation builders.
 type SLSAAttestation func(*sql.Selector)
 
-// Scorecard is the predicate function for scorecard builders.
-type Scorecard func(*sql.Selector)
-
 // SourceName is the predicate function for sourcename builders.
 type SourceName func(*sql.Selector)
-
-// SourceNamespace is the predicate function for sourcenamespace builders.
-type SourceNamespace func(*sql.Selector)
-
-// SourceType is the predicate function for sourcetype builders.
-type SourceType func(*sql.Selector)
 
 // VulnEqual is the predicate function for vulnequal builders.
 type VulnEqual func(*sql.Selector)
@@ -92,6 +74,3 @@ type VulnerabilityID func(*sql.Selector)
 
 // VulnerabilityMetadata is the predicate function for vulnerabilitymetadata builders.
 type VulnerabilityMetadata func(*sql.Selector)
-
-// VulnerabilityType is the predicate function for vulnerabilitytype builders.
-type VulnerabilityType func(*sql.Selector)

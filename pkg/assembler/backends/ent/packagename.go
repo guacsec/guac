@@ -8,17 +8,19 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagenamespace"
 )
 
 // PackageName is the model entity for the PackageName schema.
 type PackageName struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
-	// NamespaceID holds the value of the "namespace_id" field.
-	NamespaceID int `json:"namespace_id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// This node matches a pkg:<type> partial pURL
+	Type string `json:"type,omitempty"`
+	// In the pURL representation, each PackageNamespace matches the pkg:<type>/<namespace>/ partial pURL
+	Namespace string `json:"namespace,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -29,36 +31,21 @@ type PackageName struct {
 
 // PackageNameEdges holds the relations/edges for other nodes in the graph.
 type PackageNameEdges struct {
-	// Namespace holds the value of the namespace edge.
-	Namespace *PackageNamespace `json:"namespace,omitempty"`
 	// Versions holds the value of the versions edge.
 	Versions []*PackageVersion `json:"versions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]map[string]int
+	totalCount [1]map[string]int
 
 	namedVersions map[string][]*PackageVersion
-}
-
-// NamespaceOrErr returns the Namespace value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PackageNameEdges) NamespaceOrErr() (*PackageNamespace, error) {
-	if e.loadedTypes[0] {
-		if e.Namespace == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: packagenamespace.Label}
-		}
-		return e.Namespace, nil
-	}
-	return nil, &NotLoadedError{edge: "namespace"}
 }
 
 // VersionsOrErr returns the Versions value or an error if the edge
 // was not loaded in eager-loading.
 func (e PackageNameEdges) VersionsOrErr() ([]*PackageVersion, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.Versions, nil
 	}
 	return nil, &NotLoadedError{edge: "versions"}
@@ -69,10 +56,10 @@ func (*PackageName) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case packagename.FieldID, packagename.FieldNamespaceID:
-			values[i] = new(sql.NullInt64)
-		case packagename.FieldName:
+		case packagename.FieldType, packagename.FieldNamespace, packagename.FieldName:
 			values[i] = new(sql.NullString)
+		case packagename.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -89,16 +76,22 @@ func (pn *PackageName) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case packagename.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pn.ID = *value
 			}
-			pn.ID = int(value.Int64)
-		case packagename.FieldNamespaceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field namespace_id", values[i])
+		case packagename.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				pn.NamespaceID = int(value.Int64)
+				pn.Type = value.String
+			}
+		case packagename.FieldNamespace:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field namespace", values[i])
+			} else if value.Valid {
+				pn.Namespace = value.String
 			}
 		case packagename.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -117,11 +110,6 @@ func (pn *PackageName) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (pn *PackageName) Value(name string) (ent.Value, error) {
 	return pn.selectValues.Get(name)
-}
-
-// QueryNamespace queries the "namespace" edge of the PackageName entity.
-func (pn *PackageName) QueryNamespace() *PackageNamespaceQuery {
-	return NewPackageNameClient(pn.config).QueryNamespace(pn)
 }
 
 // QueryVersions queries the "versions" edge of the PackageName entity.
@@ -152,8 +140,11 @@ func (pn *PackageName) String() string {
 	var builder strings.Builder
 	builder.WriteString("PackageName(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pn.ID))
-	builder.WriteString("namespace_id=")
-	builder.WriteString(fmt.Sprintf("%v", pn.NamespaceID))
+	builder.WriteString("type=")
+	builder.WriteString(pn.Type)
+	builder.WriteString(", ")
+	builder.WriteString("namespace=")
+	builder.WriteString(pn.Namespace)
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(pn.Name)

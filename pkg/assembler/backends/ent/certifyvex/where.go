@@ -7,66 +7,67 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.CertifyVex {
+func ID(id uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.CertifyVex {
+func IDEQ(id uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.CertifyVex {
+func IDNEQ(id uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.CertifyVex {
+func IDIn(ids ...uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.CertifyVex {
+func IDNotIn(ids ...uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.CertifyVex {
+func IDGT(id uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.CertifyVex {
+func IDGTE(id uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.CertifyVex {
+func IDLT(id uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.CertifyVex {
+func IDLTE(id uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldLTE(FieldID, id))
 }
 
 // PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
-func PackageID(v int) predicate.CertifyVex {
+func PackageID(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldPackageID, v))
 }
 
 // ArtifactID applies equality check predicate on the "artifact_id" field. It's identical to ArtifactIDEQ.
-func ArtifactID(v int) predicate.CertifyVex {
+func ArtifactID(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldArtifactID, v))
 }
 
 // VulnerabilityID applies equality check predicate on the "vulnerability_id" field. It's identical to VulnerabilityIDEQ.
-func VulnerabilityID(v int) predicate.CertifyVex {
+func VulnerabilityID(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldVulnerabilityID, v))
 }
 
@@ -106,22 +107,22 @@ func Collector(v string) predicate.CertifyVex {
 }
 
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
-func PackageIDEQ(v int) predicate.CertifyVex {
+func PackageIDEQ(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldPackageID, v))
 }
 
 // PackageIDNEQ applies the NEQ predicate on the "package_id" field.
-func PackageIDNEQ(v int) predicate.CertifyVex {
+func PackageIDNEQ(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNEQ(FieldPackageID, v))
 }
 
 // PackageIDIn applies the In predicate on the "package_id" field.
-func PackageIDIn(vs ...int) predicate.CertifyVex {
+func PackageIDIn(vs ...uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldIn(FieldPackageID, vs...))
 }
 
 // PackageIDNotIn applies the NotIn predicate on the "package_id" field.
-func PackageIDNotIn(vs ...int) predicate.CertifyVex {
+func PackageIDNotIn(vs ...uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNotIn(FieldPackageID, vs...))
 }
 
@@ -136,22 +137,22 @@ func PackageIDNotNil() predicate.CertifyVex {
 }
 
 // ArtifactIDEQ applies the EQ predicate on the "artifact_id" field.
-func ArtifactIDEQ(v int) predicate.CertifyVex {
+func ArtifactIDEQ(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDNEQ applies the NEQ predicate on the "artifact_id" field.
-func ArtifactIDNEQ(v int) predicate.CertifyVex {
+func ArtifactIDNEQ(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDIn applies the In predicate on the "artifact_id" field.
-func ArtifactIDIn(vs ...int) predicate.CertifyVex {
+func ArtifactIDIn(vs ...uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldIn(FieldArtifactID, vs...))
 }
 
 // ArtifactIDNotIn applies the NotIn predicate on the "artifact_id" field.
-func ArtifactIDNotIn(vs ...int) predicate.CertifyVex {
+func ArtifactIDNotIn(vs ...uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNotIn(FieldArtifactID, vs...))
 }
 
@@ -166,22 +167,22 @@ func ArtifactIDNotNil() predicate.CertifyVex {
 }
 
 // VulnerabilityIDEQ applies the EQ predicate on the "vulnerability_id" field.
-func VulnerabilityIDEQ(v int) predicate.CertifyVex {
+func VulnerabilityIDEQ(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldVulnerabilityID, v))
 }
 
 // VulnerabilityIDNEQ applies the NEQ predicate on the "vulnerability_id" field.
-func VulnerabilityIDNEQ(v int) predicate.CertifyVex {
+func VulnerabilityIDNEQ(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNEQ(FieldVulnerabilityID, v))
 }
 
 // VulnerabilityIDIn applies the In predicate on the "vulnerability_id" field.
-func VulnerabilityIDIn(vs ...int) predicate.CertifyVex {
+func VulnerabilityIDIn(vs ...uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldIn(FieldVulnerabilityID, vs...))
 }
 
 // VulnerabilityIDNotIn applies the NotIn predicate on the "vulnerability_id" field.
-func VulnerabilityIDNotIn(vs ...int) predicate.CertifyVex {
+func VulnerabilityIDNotIn(vs ...uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldNotIn(FieldVulnerabilityID, vs...))
 }
 

@@ -7,71 +7,72 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Certification {
+func ID(id uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Certification {
+func IDEQ(id uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Certification {
+func IDNEQ(id uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Certification {
+func IDIn(ids ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Certification {
+func IDNotIn(ids ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Certification {
+func IDGT(id uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Certification {
+func IDGTE(id uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Certification {
+func IDLT(id uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Certification {
+func IDLTE(id uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldLTE(FieldID, id))
 }
 
 // SourceID applies equality check predicate on the "source_id" field. It's identical to SourceIDEQ.
-func SourceID(v int) predicate.Certification {
+func SourceID(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldSourceID, v))
 }
 
 // PackageVersionID applies equality check predicate on the "package_version_id" field. It's identical to PackageVersionIDEQ.
-func PackageVersionID(v int) predicate.Certification {
+func PackageVersionID(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldPackageVersionID, v))
 }
 
 // PackageNameID applies equality check predicate on the "package_name_id" field. It's identical to PackageNameIDEQ.
-func PackageNameID(v int) predicate.Certification {
+func PackageNameID(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldPackageNameID, v))
 }
 
 // ArtifactID applies equality check predicate on the "artifact_id" field. It's identical to ArtifactIDEQ.
-func ArtifactID(v int) predicate.Certification {
+func ArtifactID(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldArtifactID, v))
 }
 
@@ -96,22 +97,22 @@ func KnownSince(v time.Time) predicate.Certification {
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
-func SourceIDEQ(v int) predicate.Certification {
+func SourceIDEQ(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldSourceID, v))
 }
 
 // SourceIDNEQ applies the NEQ predicate on the "source_id" field.
-func SourceIDNEQ(v int) predicate.Certification {
+func SourceIDNEQ(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNEQ(FieldSourceID, v))
 }
 
 // SourceIDIn applies the In predicate on the "source_id" field.
-func SourceIDIn(vs ...int) predicate.Certification {
+func SourceIDIn(vs ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldIn(FieldSourceID, vs...))
 }
 
 // SourceIDNotIn applies the NotIn predicate on the "source_id" field.
-func SourceIDNotIn(vs ...int) predicate.Certification {
+func SourceIDNotIn(vs ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNotIn(FieldSourceID, vs...))
 }
 
@@ -126,22 +127,22 @@ func SourceIDNotNil() predicate.Certification {
 }
 
 // PackageVersionIDEQ applies the EQ predicate on the "package_version_id" field.
-func PackageVersionIDEQ(v int) predicate.Certification {
+func PackageVersionIDEQ(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldPackageVersionID, v))
 }
 
 // PackageVersionIDNEQ applies the NEQ predicate on the "package_version_id" field.
-func PackageVersionIDNEQ(v int) predicate.Certification {
+func PackageVersionIDNEQ(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNEQ(FieldPackageVersionID, v))
 }
 
 // PackageVersionIDIn applies the In predicate on the "package_version_id" field.
-func PackageVersionIDIn(vs ...int) predicate.Certification {
+func PackageVersionIDIn(vs ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldIn(FieldPackageVersionID, vs...))
 }
 
 // PackageVersionIDNotIn applies the NotIn predicate on the "package_version_id" field.
-func PackageVersionIDNotIn(vs ...int) predicate.Certification {
+func PackageVersionIDNotIn(vs ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNotIn(FieldPackageVersionID, vs...))
 }
 
@@ -156,22 +157,22 @@ func PackageVersionIDNotNil() predicate.Certification {
 }
 
 // PackageNameIDEQ applies the EQ predicate on the "package_name_id" field.
-func PackageNameIDEQ(v int) predicate.Certification {
+func PackageNameIDEQ(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldPackageNameID, v))
 }
 
 // PackageNameIDNEQ applies the NEQ predicate on the "package_name_id" field.
-func PackageNameIDNEQ(v int) predicate.Certification {
+func PackageNameIDNEQ(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNEQ(FieldPackageNameID, v))
 }
 
 // PackageNameIDIn applies the In predicate on the "package_name_id" field.
-func PackageNameIDIn(vs ...int) predicate.Certification {
+func PackageNameIDIn(vs ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldIn(FieldPackageNameID, vs...))
 }
 
 // PackageNameIDNotIn applies the NotIn predicate on the "package_name_id" field.
-func PackageNameIDNotIn(vs ...int) predicate.Certification {
+func PackageNameIDNotIn(vs ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNotIn(FieldPackageNameID, vs...))
 }
 
@@ -186,22 +187,22 @@ func PackageNameIDNotNil() predicate.Certification {
 }
 
 // ArtifactIDEQ applies the EQ predicate on the "artifact_id" field.
-func ArtifactIDEQ(v int) predicate.Certification {
+func ArtifactIDEQ(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDNEQ applies the NEQ predicate on the "artifact_id" field.
-func ArtifactIDNEQ(v int) predicate.Certification {
+func ArtifactIDNEQ(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDIn applies the In predicate on the "artifact_id" field.
-func ArtifactIDIn(vs ...int) predicate.Certification {
+func ArtifactIDIn(vs ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldIn(FieldArtifactID, vs...))
 }
 
 // ArtifactIDNotIn applies the NotIn predicate on the "artifact_id" field.
-func ArtifactIDNotIn(vs ...int) predicate.Certification {
+func ArtifactIDNotIn(vs ...uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldNotIn(FieldArtifactID, vs...))
 }
 

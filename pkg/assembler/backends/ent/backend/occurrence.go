@@ -17,20 +17,19 @@ package backend
 
 import (
 	"context"
-	"strconv"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/sync/errgroup"
 )
 
 func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
@@ -39,17 +38,9 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 		Where(isOccurrenceQuery(query)).
 		WithArtifact().
 		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
+			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
-		WithSource(func(q *ent.SourceNameQuery) {
-			q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
-				q.WithSourceType()
-			})
-		}).
+		WithSource(func(q *ent.SourceNameQuery) {}).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -64,30 +55,177 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 }
 
 func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
-	models := make([]string, len(occurrences))
-	eg, ctx := errgroup.WithContext(ctx)
-	for i := range occurrences {
-		index := i
-		var subject model.PackageOrSourceInput
-		if len(subjects.Packages) > 0 {
-			subject = model.PackageOrSourceInput{Package: subjects.Packages[index]}
-		} else {
-			subject = model.PackageOrSourceInput{Source: subjects.Sources[index]}
+	funcName := "IngestOccurrences"
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkOccurrences(ctx, client, subjects, artifacts, occurrences)
+		if err != nil {
+			return nil, err
 		}
-		art := artifacts[index]
-		occ := occurrences[index]
-		concurrently(eg, func() error {
-			modelOccurrence, err := b.IngestOccurrence(ctx, subject, *art, *occ)
-			if err == nil {
-				models[index] = modelOccurrence
+		return slc, nil
+	})
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
+	}
+
+	return *ids, nil
+}
+
+func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	occurrenceConflictColumns := []string{
+		occurrence.FieldArtifactID,
+		occurrence.FieldJustification,
+		occurrence.FieldOrigin,
+		occurrence.FieldCollector,
+	}
+
+	var conflictWhere *sql.Predicate
+
+	switch {
+	case len(subjects.Packages) > 0:
+		occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldPackageID)
+		conflictWhere = sql.And(
+			sql.NotNull(occurrence.FieldPackageID),
+			sql.IsNull(occurrence.FieldSourceID),
+		)
+	case len(subjects.Sources) > 0:
+		occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldSourceID)
+		conflictWhere = sql.And(
+			sql.IsNull(occurrence.FieldPackageID),
+			sql.NotNull(occurrence.FieldSourceID),
+		)
+	default:
+		return nil, gqlerror.Errorf("%v :: %s", "upsertBulkOccurrences", "subject must be either a package or source")
+	}
+
+	batches := chunk(occurrences, 100)
+
+	index := 0
+	for _, occurs := range batches {
+		creates := make([]*ent.OccurrenceCreate, len(occurs))
+		for i, occur := range occurs {
+			occur := occur
+			switch {
+			case len(subjects.Packages) > 0:
+				var err error
+				var isOccurrenceID *uuid.UUID
+				creates[i], isOccurrenceID, err = generateOccurrenceCreate(ctx, tx, subjects.Packages[index], nil, artifacts[index], occur)
+				if err != nil {
+					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
+				}
+				ids = append(ids, isOccurrenceID.String())
+
+			case len(subjects.Sources) > 0:
+				var err error
+				var isOccurrenceID *uuid.UUID
+				creates[i], isOccurrenceID, err = generateOccurrenceCreate(ctx, tx, nil, subjects.Sources[index], artifacts[index], occur)
+				if err != nil {
+					return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
+				}
+				ids = append(ids, isOccurrenceID.String())
+			default:
+				return nil, gqlerror.Errorf("%v :: %s", "upsertBulkOccurrences", "subject must be either a package or source")
 			}
-			return err
-		})
+			index++
+		}
+
+		err := tx.Occurrence.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(occurrenceConflictColumns...),
+				sql.ConflictWhere(conflictWhere),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "bulk upsert Occurrence node")
+		}
 	}
-	if err := eg.Wait(); err != nil {
-		return nil, err
+
+	return &ids, nil
+}
+
+func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, src *model.IDorSourceInput, art *model.IDorArtifactInput, occur *model.IsOccurrenceInputSpec) (*ent.OccurrenceCreate, *uuid.UUID, error) {
+
+	occurrenceCreate := tx.Occurrence.Create()
+
+	if art == nil {
+		return nil, nil, fmt.Errorf("artifact must be specified for isOccurrence")
 	}
-	return models, nil
+	var artID uuid.UUID
+	if art.ArtifactID != nil {
+		var err error
+		artID, err = uuid.Parse(*art.ArtifactID)
+		if err != nil {
+			return nil, nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		}
+	} else {
+		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*art.ArtifactInput)).Only(ctx)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to query for artifact")
+		}
+		artID = foundArt.ID
+	}
+
+	occurrenceCreate.
+		SetArtifactID(artID).
+		SetJustification(occur.Justification).
+		SetOrigin(occur.Origin).
+		SetCollector(occur.Collector)
+
+	var isOccurrenceID *uuid.UUID
+	if pkg != nil {
+		var pkgVersionID uuid.UUID
+		if pkg.PackageVersionID != nil {
+			var err error
+			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			if err != nil {
+				return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+			}
+		} else {
+			pv, err := getPkgVersion(ctx, tx.Client(), *pkg.PackageInput)
+			if err != nil {
+				return nil, nil, fmt.Errorf("getPkgVersion :: %w", err)
+			}
+			pkgVersionID = pv.ID
+		}
+		occurrenceCreate.SetPackageID(pkgVersionID)
+
+		var err error
+		isOccurrenceID, err = guacOccurrenceKey(ptrfrom.String(pkgVersionID.String()), nil, ptrfrom.String(artID.String()), *occur)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create occurrence uuid with error: %w", err)
+		}
+		occurrenceCreate.SetID(*isOccurrenceID)
+	} else if src != nil {
+		var sourceID uuid.UUID
+		if src.SourceNameID != nil {
+			var err error
+			sourceID, err = uuid.Parse(*src.SourceNameID)
+			if err != nil {
+				return nil, nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
+			}
+		} else {
+			srcID, err := getSourceNameID(ctx, tx.Client(), *src.SourceInput)
+			if err != nil {
+				return nil, nil, err
+			}
+			sourceID = srcID
+		}
+		occurrenceCreate.SetSourceID(sourceID)
+
+		var err error
+		isOccurrenceID, err = guacOccurrenceKey(nil, ptrfrom.String(sourceID.String()), ptrfrom.String(artID.String()), *occur)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create occurrence uuid with error: %w", err)
+		}
+		occurrenceCreate.SetID(*isOccurrenceID)
+	} else {
+		return nil, nil, gqlerror.Errorf("%v :: %s", "generateOccurrenceCreate", "subject must be either a package or source")
+	}
+
+	return occurrenceCreate, isOccurrenceID, nil
 }
 
 func (b *EntBackend) IngestOccurrence(ctx context.Context,
@@ -97,24 +235,8 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 ) (string, error) {
 	funcName := "IngestOccurrence"
 
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
-		client := tx.Client()
-		var err error
-
-		artRecord, err := client.Artifact.Query().
-			Order(ent.Asc(artifact.FieldID)). // is order important here?
-			Where(artifactQueryInputPredicates(*art.ArtifactInput)).
-			Only(ctx) // should already be ingested
-		if err != nil {
-			return nil, err
-		}
-
-		occurrenceCreate := client.Occurrence.Create().
-			SetArtifact(artRecord).
-			SetJustification(spec.Justification).
-			SetOrigin(spec.Origin).
-			SetCollector(spec.Collector)
 
 		occurrenceConflictColumns := []string{
 			occurrence.FieldArtifactID,
@@ -126,26 +248,12 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
-			pkgVersion, err := getPkgVersion(ctx, client, *subject.Package.PackageInput)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to get package version")
-			}
-			occurrenceCreate.SetPackage(pkgVersion)
 			occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldPackageID)
 			conflictWhere = sql.And(
 				sql.NotNull(occurrence.FieldPackageID),
 				sql.IsNull(occurrence.FieldSourceID),
 			)
 		} else if subject.Source != nil {
-			srcNameID, err := upsertSource(ctx, tx, *subject.Source.SourceInput)
-			if err != nil {
-				return nil, err
-			}
-			srcID, err := strconv.Atoi(srcNameID.SourceNameID)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to get Source ID")
-			}
-			occurrenceCreate.SetSourceID(srcID)
 			occurrenceConflictColumns = append(occurrenceConflictColumns, occurrence.FieldSourceID)
 			conflictWhere = sql.And(
 				sql.IsNull(occurrence.FieldPackageID),
@@ -155,47 +263,28 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 			return nil, gqlerror.Errorf("%v :: %s", funcName, "subject must be either a package or source")
 		}
 
-		id, err := occurrenceCreate.
+		insert, _, err := generateOccurrenceCreate(ctx, tx, subject.Package, subject.Source, &art, &spec)
+		if err != nil {
+			return nil, gqlerror.Errorf("generateDependencyCreate :: %s", err)
+		}
+
+		if id, err := insert.
 			OnConflict(
 				sql.ConflictColumns(occurrenceConflictColumns...),
 				sql.ConflictWhere(conflictWhere),
 			).
-			UpdateNewValues().
-			ID(ctx)
-		if err != nil {
-			return nil, err
+			Ignore().
+			ID(ctx); err != nil {
+			return nil, errors.Wrap(err, "upsert isOccurrence node")
+		} else {
+			return ptrfrom.String(id.String()), nil
 		}
-
-		return &id, nil
 	})
-	if err != nil {
-		return "", gqlerror.Errorf("%v :: %s", funcName, err)
+	if txErr != nil {
+		return "", gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	// TODO: Prepare response using a resusable resolver that accounts for preloads.
-
-	record, err := b.client.Occurrence.Query().
-		Where(occurrence.ID(*recordID)).
-		WithArtifact().
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {
-				q.WithNamespace(func(q *ent.PackageNamespaceQuery) {
-					q.WithPackage()
-				})
-			})
-		}).
-		WithSource(func(q *ent.SourceNameQuery) {
-			q.WithNamespace(func(q *ent.SourceNamespaceQuery) {
-				q.WithSourceType()
-			})
-		}).
-		Only(ctx)
-	if err != nil {
-		return "", gqlerror.Errorf("%v :: %s", funcName, err)
-	}
-
-	//TODO optimize for only returning ID
-	return nodeID(record.ID), nil
+	return *recordID, nil
 }
 
 func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
@@ -228,12 +317,8 @@ func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
 			predicates = append(predicates,
 				occurrence.HasSourceWith(
 					optionalPredicate(filter.Subject.Source.ID, IDEQ),
-					sourcename.HasNamespaceWith(
-						optionalPredicate(filter.Subject.Source.Namespace, sourcenamespace.NamespaceEQ),
-						sourcenamespace.HasSourceTypeWith(
-							optionalPredicate(filter.Subject.Source.Type, sourcetype.TypeEQ),
-						),
-					),
+					optionalPredicate(filter.Subject.Source.Namespace, sourcename.NamespaceEQ),
+					optionalPredicate(filter.Subject.Source.Type, sourcename.TypeEQ),
 					optionalPredicate(filter.Subject.Source.Name, sourcename.NameEQ),
 					optionalPredicate(filter.Subject.Source.Commit, sourcename.CommitEQ),
 					optionalPredicate(filter.Subject.Source.Tag, sourcename.TagEQ),
@@ -242,4 +327,28 @@ func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
 		}
 	}
 	return occurrence.And(predicates...)
+}
+
+func canonicalOccurrenceString(occur model.IsOccurrenceInputSpec) string {
+	return fmt.Sprintf("%s::%s::%s", occur.Justification, occur.Origin, occur.Collector)
+}
+
+func guacOccurrenceKey(pkgVersionID *string, srcNameID *string, artID *string, occur model.IsOccurrenceInputSpec) (*uuid.UUID, error) {
+	var subjectID string
+	if pkgVersionID != nil {
+		subjectID = *pkgVersionID
+	} else if srcNameID != nil {
+		subjectID = *srcNameID
+	} else {
+		return nil, gqlerror.Errorf("%v :: %s", "guacOccurrenceKey", "subject must be either a package or source")
+	}
+
+	if artID == nil {
+		return nil, gqlerror.Errorf("%v :: %s", "guacOccurrenceKey", "artifact must be specified")
+	}
+
+	occurIDString := fmt.Sprintf("%s::%s::%s?", subjectID, *artID, canonicalOccurrenceString(occur))
+
+	occurID := generateUUIDKey([]byte(occurIDString))
+	return &occurID, nil
 }

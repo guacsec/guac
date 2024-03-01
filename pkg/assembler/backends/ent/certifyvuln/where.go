@@ -7,61 +7,62 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.CertifyVuln {
+func ID(id uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.CertifyVuln {
+func IDEQ(id uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.CertifyVuln {
+func IDNEQ(id uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.CertifyVuln {
+func IDIn(ids ...uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.CertifyVuln {
+func IDNotIn(ids ...uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.CertifyVuln {
+func IDGT(id uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.CertifyVuln {
+func IDGTE(id uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.CertifyVuln {
+func IDLT(id uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.CertifyVuln {
+func IDLTE(id uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldLTE(FieldID, id))
 }
 
 // VulnerabilityID applies equality check predicate on the "vulnerability_id" field. It's identical to VulnerabilityIDEQ.
-func VulnerabilityID(v int) predicate.CertifyVuln {
+func VulnerabilityID(v uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldEQ(FieldVulnerabilityID, v))
 }
 
 // PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
-func PackageID(v int) predicate.CertifyVuln {
+func PackageID(v uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldEQ(FieldPackageID, v))
 }
 
@@ -101,42 +102,42 @@ func Collector(v string) predicate.CertifyVuln {
 }
 
 // VulnerabilityIDEQ applies the EQ predicate on the "vulnerability_id" field.
-func VulnerabilityIDEQ(v int) predicate.CertifyVuln {
+func VulnerabilityIDEQ(v uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldEQ(FieldVulnerabilityID, v))
 }
 
 // VulnerabilityIDNEQ applies the NEQ predicate on the "vulnerability_id" field.
-func VulnerabilityIDNEQ(v int) predicate.CertifyVuln {
+func VulnerabilityIDNEQ(v uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldNEQ(FieldVulnerabilityID, v))
 }
 
 // VulnerabilityIDIn applies the In predicate on the "vulnerability_id" field.
-func VulnerabilityIDIn(vs ...int) predicate.CertifyVuln {
+func VulnerabilityIDIn(vs ...uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldIn(FieldVulnerabilityID, vs...))
 }
 
 // VulnerabilityIDNotIn applies the NotIn predicate on the "vulnerability_id" field.
-func VulnerabilityIDNotIn(vs ...int) predicate.CertifyVuln {
+func VulnerabilityIDNotIn(vs ...uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldNotIn(FieldVulnerabilityID, vs...))
 }
 
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
-func PackageIDEQ(v int) predicate.CertifyVuln {
+func PackageIDEQ(v uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldEQ(FieldPackageID, v))
 }
 
 // PackageIDNEQ applies the NEQ predicate on the "package_id" field.
-func PackageIDNEQ(v int) predicate.CertifyVuln {
+func PackageIDNEQ(v uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldNEQ(FieldPackageID, v))
 }
 
 // PackageIDIn applies the In predicate on the "package_id" field.
-func PackageIDIn(vs ...int) predicate.CertifyVuln {
+func PackageIDIn(vs ...uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldIn(FieldPackageID, vs...))
 }
 
 // PackageIDNotIn applies the NotIn predicate on the "package_id" field.
-func PackageIDNotIn(vs ...int) predicate.CertifyVuln {
+func PackageIDNotIn(vs ...uuid.UUID) predicate.CertifyVuln {
 	return predicate.CertifyVuln(sql.FieldNotIn(FieldPackageID, vs...))
 }
 

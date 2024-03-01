@@ -24,6 +24,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 // Query VulnEqual
@@ -191,10 +192,10 @@ func getVulnEqualQueryValues(vulnerability *model.VulnerabilityInputSpec, otherV
 
 	values := map[string]any{}
 	// add guac keys
-	vuln := guacVulnId(vulns[0])
+	vuln := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](&vulns[0], helpers.VulnServerKey)
 	values["guacVulnKey"] = vuln.VulnerabilityID
 
-	equalVuln := guacVulnId(vulns[1])
+	equalVuln := helpers.GetKey[*model.VulnerabilityInputSpec, helpers.VulnIds](&vulns[1], helpers.VulnServerKey)
 	values["equalGuacVulnKey"] = equalVuln.VulnerabilityID
 
 	values[justification] = vulnEqual.Justification

@@ -21,7 +21,16 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
+
+func getUUIDv7() uuid.UUID {
+	uuid, err := uuid.NewV7()
+	if err != nil {
+		panic(err)
+	}
+	return uuid
+}
 
 // Artifact holds the schema definition for the Artifact entity.
 type Artifact struct {
@@ -31,6 +40,10 @@ type Artifact struct {
 // Fields of the Artifact.
 func (Artifact) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(getUUIDv7).
+			Unique().
+			Immutable(),
 		field.String("algorithm"),
 		field.String("digest"),
 	}
@@ -42,7 +55,8 @@ func (Artifact) Edges() []ent.Edge {
 		edge.From("occurrences", Occurrence.Type).Ref("artifact").Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From("sbom", BillOfMaterials.Type).Ref("artifact"),
 		edge.From("attestations", SLSAAttestation.Type).Ref("built_from"),
-		edge.From("same", HashEqual.Type).Ref("artifacts"),
+		edge.From("hash_equal_art_a", HashEqual.Type).Ref("artifact_a"),
+		edge.From("hash_equal_art_b", HashEqual.Type).Ref("artifact_b"),
 		// edge.To("dependency", Artifact.Type).Annotations(entsql.OnDelete(entsql.Cascade)).From("dependents"),
 		// edge.From("source_occurrences", SourceOccurrence.Type).Ref("artifact"),
 		// edge.To("sources", Source.Type).Through("source_occurrences", SourceOccurrence.Type),

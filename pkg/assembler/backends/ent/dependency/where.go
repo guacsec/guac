@@ -5,66 +5,67 @@ package dependency
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Dependency {
+func ID(id uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Dependency {
+func IDEQ(id uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Dependency {
+func IDNEQ(id uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Dependency {
+func IDIn(ids ...uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Dependency {
+func IDNotIn(ids ...uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Dependency {
+func IDGT(id uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Dependency {
+func IDGTE(id uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Dependency {
+func IDLT(id uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Dependency {
+func IDLTE(id uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldLTE(FieldID, id))
 }
 
 // PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
-func PackageID(v int) predicate.Dependency {
+func PackageID(v uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldPackageID, v))
 }
 
 // DependentPackageNameID applies equality check predicate on the "dependent_package_name_id" field. It's identical to DependentPackageNameIDEQ.
-func DependentPackageNameID(v int) predicate.Dependency {
+func DependentPackageNameID(v uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageNameID, v))
 }
 
 // DependentPackageVersionID applies equality check predicate on the "dependent_package_version_id" field. It's identical to DependentPackageVersionIDEQ.
-func DependentPackageVersionID(v int) predicate.Dependency {
+func DependentPackageVersionID(v uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageVersionID, v))
 }
 
@@ -89,42 +90,42 @@ func Collector(v string) predicate.Dependency {
 }
 
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
-func PackageIDEQ(v int) predicate.Dependency {
+func PackageIDEQ(v uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldPackageID, v))
 }
 
 // PackageIDNEQ applies the NEQ predicate on the "package_id" field.
-func PackageIDNEQ(v int) predicate.Dependency {
+func PackageIDNEQ(v uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNEQ(FieldPackageID, v))
 }
 
 // PackageIDIn applies the In predicate on the "package_id" field.
-func PackageIDIn(vs ...int) predicate.Dependency {
+func PackageIDIn(vs ...uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldIn(FieldPackageID, vs...))
 }
 
 // PackageIDNotIn applies the NotIn predicate on the "package_id" field.
-func PackageIDNotIn(vs ...int) predicate.Dependency {
+func PackageIDNotIn(vs ...uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNotIn(FieldPackageID, vs...))
 }
 
 // DependentPackageNameIDEQ applies the EQ predicate on the "dependent_package_name_id" field.
-func DependentPackageNameIDEQ(v int) predicate.Dependency {
+func DependentPackageNameIDEQ(v uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageNameID, v))
 }
 
 // DependentPackageNameIDNEQ applies the NEQ predicate on the "dependent_package_name_id" field.
-func DependentPackageNameIDNEQ(v int) predicate.Dependency {
+func DependentPackageNameIDNEQ(v uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNEQ(FieldDependentPackageNameID, v))
 }
 
 // DependentPackageNameIDIn applies the In predicate on the "dependent_package_name_id" field.
-func DependentPackageNameIDIn(vs ...int) predicate.Dependency {
+func DependentPackageNameIDIn(vs ...uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldIn(FieldDependentPackageNameID, vs...))
 }
 
 // DependentPackageNameIDNotIn applies the NotIn predicate on the "dependent_package_name_id" field.
-func DependentPackageNameIDNotIn(vs ...int) predicate.Dependency {
+func DependentPackageNameIDNotIn(vs ...uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNotIn(FieldDependentPackageNameID, vs...))
 }
 
@@ -139,22 +140,22 @@ func DependentPackageNameIDNotNil() predicate.Dependency {
 }
 
 // DependentPackageVersionIDEQ applies the EQ predicate on the "dependent_package_version_id" field.
-func DependentPackageVersionIDEQ(v int) predicate.Dependency {
+func DependentPackageVersionIDEQ(v uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldEQ(FieldDependentPackageVersionID, v))
 }
 
 // DependentPackageVersionIDNEQ applies the NEQ predicate on the "dependent_package_version_id" field.
-func DependentPackageVersionIDNEQ(v int) predicate.Dependency {
+func DependentPackageVersionIDNEQ(v uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNEQ(FieldDependentPackageVersionID, v))
 }
 
 // DependentPackageVersionIDIn applies the In predicate on the "dependent_package_version_id" field.
-func DependentPackageVersionIDIn(vs ...int) predicate.Dependency {
+func DependentPackageVersionIDIn(vs ...uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldIn(FieldDependentPackageVersionID, vs...))
 }
 
 // DependentPackageVersionIDNotIn applies the NotIn predicate on the "dependent_package_version_id" field.
-func DependentPackageVersionIDNotIn(vs ...int) predicate.Dependency {
+func DependentPackageVersionIDNotIn(vs ...uuid.UUID) predicate.Dependency {
 	return predicate.Dependency(sql.FieldNotIn(FieldDependentPackageVersionID, vs...))
 }
 

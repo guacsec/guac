@@ -7,14 +7,13 @@ package resolvers
 import (
 	"context"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 // IngestLicense is the resolver for the ingestLicense field.
 func (r *mutationResolver) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
 	if license.LicenseInput != nil {
-		if err := helper.ValidateLicenseInput(license.LicenseInput); err != nil {
+		if err := validateLicenseInput(license.LicenseInput); err != nil {
 			return "", err
 		}
 	}
@@ -25,7 +24,7 @@ func (r *mutationResolver) IngestLicense(ctx context.Context, license *model.IDo
 func (r *mutationResolver) IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error) {
 	for _, l := range licenses {
 		if l.LicenseInput != nil {
-			if err := helper.ValidateLicenseInput(l.LicenseInput); err != nil {
+			if err := validateLicenseInput(l.LicenseInput); err != nil {
 				return nil, err
 			}
 		}

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package helper
+package resolvers
 
 import (
 	"strings"
@@ -22,7 +22,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func ValidatePackageSourceOrArtifactQueryFilter(subject *model.PackageSourceOrArtifactSpec) error {
+func validatePackageSourceOrArtifactQueryFilter(subject *model.PackageSourceOrArtifactSpec) error {
 	if subject == nil {
 		return nil
 	} else {
@@ -43,7 +43,7 @@ func ValidatePackageSourceOrArtifactQueryFilter(subject *model.PackageSourceOrAr
 	return nil
 }
 
-func ValidatePackageSourceOrArtifactInput(item *model.PackageSourceOrArtifactInput, path string) error {
+func validatePackageSourceOrArtifactInput(item *model.PackageSourceOrArtifactInput, path string) error {
 	valuesDefined := 0
 	if item.Package != nil {
 		valuesDefined = valuesDefined + 1
@@ -61,7 +61,7 @@ func ValidatePackageSourceOrArtifactInput(item *model.PackageSourceOrArtifactInp
 	return nil
 }
 
-func ValidatePackageOrSourceInput(item *model.PackageOrSourceInput, path string) error {
+func validatePackageOrSourceInput(item *model.PackageOrSourceInput, path string) error {
 	valuesDefined := 0
 	if item.Package != nil {
 		valuesDefined = valuesDefined + 1
@@ -76,7 +76,7 @@ func ValidatePackageOrSourceInput(item *model.PackageOrSourceInput, path string)
 	return nil
 }
 
-func ValidatePackageOrSourceQueryFilter(subject *model.PackageOrSourceSpec) error {
+func validatePackageOrSourceQueryFilter(subject *model.PackageOrSourceSpec) error {
 	if subject == nil {
 		return nil
 	} else {
@@ -94,7 +94,7 @@ func ValidatePackageOrSourceQueryFilter(subject *model.PackageOrSourceSpec) erro
 	return nil
 }
 
-func ValidatePackageOrArtifactInput(item *model.PackageOrArtifactInput, path string) error {
+func validatePackageOrArtifactInput(item *model.PackageOrArtifactInput, path string) error {
 	valuesDefined := 0
 	if item.Package != nil {
 		valuesDefined = valuesDefined + 1
@@ -109,7 +109,7 @@ func ValidatePackageOrArtifactInput(item *model.PackageOrArtifactInput, path str
 	return nil
 }
 
-func ValidatePackageOrArtifactQueryFilter(subject *model.PackageOrArtifactSpec) error {
+func validatePackageOrArtifactQueryFilter(subject *model.PackageOrArtifactSpec) error {
 	if subject == nil {
 		return nil
 	} else {
@@ -127,7 +127,7 @@ func ValidatePackageOrArtifactQueryFilter(subject *model.PackageOrArtifactSpec) 
 	return nil
 }
 
-func ValidateLicenseInput(license *model.LicenseInputSpec) error {
+func validateLicenseInput(license *model.LicenseInputSpec) error {
 	var inline string
 	var listVersion string
 	if license.Inline != nil {
@@ -157,7 +157,7 @@ For [status] “not_affected”, a VEX statement SHOULD provide a [justification
 If [justification] is not provided then [impact_statement] MUST be provided.
 For [status] “affected”, MUST include one [action_statement]
 */
-func ValidateVexInput(vexStatement model.VexStatementInputSpec) error {
+func validateVexInput(vexStatement model.VexStatementInputSpec) error {
 	if vexStatement.Status == model.VexStatusNotAffected && vexStatement.VexJustification == model.VexJustificationNotProvided && vexStatement.Statement == "" {
 		return gqlerror.Errorf("for [status] “not_affected”, if [justification] is not provided then [statement] MUST be provided")
 	} else if vexStatement.Status == model.VexStatusAffected && vexStatement.VexJustification == model.VexJustificationNotProvided && vexStatement.Statement == "" {
@@ -166,21 +166,21 @@ func ValidateVexInput(vexStatement model.VexStatementInputSpec) error {
 	return nil
 }
 
-func ValidateNoVul(vulnerability model.VulnerabilityInputSpec) error {
+func validateNoVul(vulnerability model.VulnerabilityInputSpec) error {
 	if strings.ToLower(vulnerability.Type) == "novuln" {
 		return gqlerror.Errorf("novuln type cannot be used")
 	}
 	return nil
 }
 
-func ValidateVulnerabilityIDInputSpec(vulnerability model.VulnerabilityInputSpec) error {
+func validateVulnerabilityIDInputSpec(vulnerability model.VulnerabilityInputSpec) error {
 	if strings.ToLower(vulnerability.Type) != "novuln" && vulnerability.VulnerabilityID == "" {
 		return gqlerror.Errorf("vulnerabilityID must be specified for type %s", vulnerability.Type)
 	}
 	return nil
 }
 
-func ValidateVulnerabilitySpec(vulnerability model.VulnerabilitySpec) error {
+func validateVulnerabilitySpec(vulnerability model.VulnerabilitySpec) error {
 	if vulnerability.NoVuln != nil && !*vulnerability.NoVuln {
 		if vulnerability.Type != nil && strings.EqualFold(*vulnerability.Type, "novuln") {
 			return gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")

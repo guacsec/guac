@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 )
 
@@ -15,13 +16,13 @@ import (
 type License struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Inline holds the value of the "inline" field.
-	Inline *string `json:"inline,omitempty"`
+	Inline string `json:"inline,omitempty"`
 	// ListVersion holds the value of the "list_version" field.
-	ListVersion *string `json:"list_version,omitempty"`
+	ListVersion string `json:"list_version,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LicenseQuery when eager-loading is set.
 	Edges        LicenseEdges `json:"edges"`
@@ -67,10 +68,10 @@ func (*License) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case license.FieldID:
-			values[i] = new(sql.NullInt64)
 		case license.FieldName, license.FieldInline, license.FieldListVersion:
 			values[i] = new(sql.NullString)
+		case license.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -87,11 +88,11 @@ func (l *License) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case license.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				l.ID = *value
 			}
-			l.ID = int(value.Int64)
 		case license.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -102,15 +103,13 @@ func (l *License) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field inline", values[i])
 			} else if value.Valid {
-				l.Inline = new(string)
-				*l.Inline = value.String
+				l.Inline = value.String
 			}
 		case license.FieldListVersion:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field list_version", values[i])
 			} else if value.Valid {
-				l.ListVersion = new(string)
-				*l.ListVersion = value.String
+				l.ListVersion = value.String
 			}
 		default:
 			l.selectValues.Set(columns[i], values[i])
@@ -161,15 +160,11 @@ func (l *License) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(l.Name)
 	builder.WriteString(", ")
-	if v := l.Inline; v != nil {
-		builder.WriteString("inline=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("inline=")
+	builder.WriteString(l.Inline)
 	builder.WriteString(", ")
-	if v := l.ListVersion; v != nil {
-		builder.WriteString("list_version=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("list_version=")
+	builder.WriteString(l.ListVersion)
 	builder.WriteByte(')')
 	return builder.String()
 }

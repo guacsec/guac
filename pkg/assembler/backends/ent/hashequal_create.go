@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 )
@@ -20,6 +22,18 @@ type HashEqualCreate struct {
 	mutation *HashEqualMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetArtID sets the "art_id" field.
+func (hec *HashEqualCreate) SetArtID(u uuid.UUID) *HashEqualCreate {
+	hec.mutation.SetArtID(u)
+	return hec
+}
+
+// SetEqualArtID sets the "equal_art_id" field.
+func (hec *HashEqualCreate) SetEqualArtID(u uuid.UUID) *HashEqualCreate {
+	hec.mutation.SetEqualArtID(u)
+	return hec
 }
 
 // SetOrigin sets the "origin" field.
@@ -40,19 +54,46 @@ func (hec *HashEqualCreate) SetJustification(s string) *HashEqualCreate {
 	return hec
 }
 
-// AddArtifactIDs adds the "artifacts" edge to the Artifact entity by IDs.
-func (hec *HashEqualCreate) AddArtifactIDs(ids ...int) *HashEqualCreate {
-	hec.mutation.AddArtifactIDs(ids...)
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (hec *HashEqualCreate) SetArtifactsHash(s string) *HashEqualCreate {
+	hec.mutation.SetArtifactsHash(s)
 	return hec
 }
 
-// AddArtifacts adds the "artifacts" edges to the Artifact entity.
-func (hec *HashEqualCreate) AddArtifacts(a ...*Artifact) *HashEqualCreate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// SetID sets the "id" field.
+func (hec *HashEqualCreate) SetID(u uuid.UUID) *HashEqualCreate {
+	hec.mutation.SetID(u)
+	return hec
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (hec *HashEqualCreate) SetNillableID(u *uuid.UUID) *HashEqualCreate {
+	if u != nil {
+		hec.SetID(*u)
 	}
-	return hec.AddArtifactIDs(ids...)
+	return hec
+}
+
+// SetArtifactAID sets the "artifact_a" edge to the Artifact entity by ID.
+func (hec *HashEqualCreate) SetArtifactAID(id uuid.UUID) *HashEqualCreate {
+	hec.mutation.SetArtifactAID(id)
+	return hec
+}
+
+// SetArtifactA sets the "artifact_a" edge to the Artifact entity.
+func (hec *HashEqualCreate) SetArtifactA(a *Artifact) *HashEqualCreate {
+	return hec.SetArtifactAID(a.ID)
+}
+
+// SetArtifactBID sets the "artifact_b" edge to the Artifact entity by ID.
+func (hec *HashEqualCreate) SetArtifactBID(id uuid.UUID) *HashEqualCreate {
+	hec.mutation.SetArtifactBID(id)
+	return hec
+}
+
+// SetArtifactB sets the "artifact_b" edge to the Artifact entity.
+func (hec *HashEqualCreate) SetArtifactB(a *Artifact) *HashEqualCreate {
+	return hec.SetArtifactBID(a.ID)
 }
 
 // Mutation returns the HashEqualMutation object of the builder.
@@ -62,6 +103,7 @@ func (hec *HashEqualCreate) Mutation() *HashEqualMutation {
 
 // Save creates the HashEqual in the database.
 func (hec *HashEqualCreate) Save(ctx context.Context) (*HashEqual, error) {
+	hec.defaults()
 	return withHooks(ctx, hec.sqlSave, hec.mutation, hec.hooks)
 }
 
@@ -87,8 +129,22 @@ func (hec *HashEqualCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (hec *HashEqualCreate) defaults() {
+	if _, ok := hec.mutation.ID(); !ok {
+		v := hashequal.DefaultID()
+		hec.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (hec *HashEqualCreate) check() error {
+	if _, ok := hec.mutation.ArtID(); !ok {
+		return &ValidationError{Name: "art_id", err: errors.New(`ent: missing required field "HashEqual.art_id"`)}
+	}
+	if _, ok := hec.mutation.EqualArtID(); !ok {
+		return &ValidationError{Name: "equal_art_id", err: errors.New(`ent: missing required field "HashEqual.equal_art_id"`)}
+	}
 	if _, ok := hec.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "HashEqual.origin"`)}
 	}
@@ -98,8 +154,14 @@ func (hec *HashEqualCreate) check() error {
 	if _, ok := hec.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "HashEqual.justification"`)}
 	}
-	if len(hec.mutation.ArtifactsIDs()) == 0 {
-		return &ValidationError{Name: "artifacts", err: errors.New(`ent: missing required edge "HashEqual.artifacts"`)}
+	if _, ok := hec.mutation.ArtifactsHash(); !ok {
+		return &ValidationError{Name: "artifacts_hash", err: errors.New(`ent: missing required field "HashEqual.artifacts_hash"`)}
+	}
+	if _, ok := hec.mutation.ArtifactAID(); !ok {
+		return &ValidationError{Name: "artifact_a", err: errors.New(`ent: missing required edge "HashEqual.artifact_a"`)}
+	}
+	if _, ok := hec.mutation.ArtifactBID(); !ok {
+		return &ValidationError{Name: "artifact_b", err: errors.New(`ent: missing required edge "HashEqual.artifact_b"`)}
 	}
 	return nil
 }
@@ -115,8 +177,13 @@ func (hec *HashEqualCreate) sqlSave(ctx context.Context) (*HashEqual, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	hec.mutation.id = &_node.ID
 	hec.mutation.done = true
 	return _node, nil
@@ -125,9 +192,13 @@ func (hec *HashEqualCreate) sqlSave(ctx context.Context) (*HashEqual, error) {
 func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 	var (
 		_node = &HashEqual{config: hec.config}
-		_spec = sqlgraph.NewCreateSpec(hashequal.Table, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(hashequal.Table, sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = hec.conflict
+	if id, ok := hec.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := hec.mutation.Origin(); ok {
 		_spec.SetField(hashequal.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
@@ -140,20 +211,42 @@ func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
-	if nodes := hec.mutation.ArtifactsIDs(); len(nodes) > 0 {
+	if value, ok := hec.mutation.ArtifactsHash(); ok {
+		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
+		_node.ArtifactsHash = value
+	}
+	if nodes := hec.mutation.ArtifactAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   hashequal.ArtifactsTable,
-			Columns: hashequal.ArtifactsPrimaryKey,
+			Table:   hashequal.ArtifactATable,
+			Columns: []string{hashequal.ArtifactAColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.ArtID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := hec.mutation.ArtifactBIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   hashequal.ArtifactBTable,
+			Columns: []string{hashequal.ArtifactBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.EqualArtID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -163,7 +256,7 @@ func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.HashEqual.Create().
-//		SetOrigin(v).
+//		SetArtID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -172,7 +265,7 @@ func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.HashEqualUpsert) {
-//			SetOrigin(v+v).
+//			SetArtID(v+v).
 //		}).
 //		Exec(ctx)
 func (hec *HashEqualCreate) OnConflict(opts ...sql.ConflictOption) *HashEqualUpsertOne {
@@ -207,6 +300,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetArtID sets the "art_id" field.
+func (u *HashEqualUpsert) SetArtID(v uuid.UUID) *HashEqualUpsert {
+	u.Set(hashequal.FieldArtID, v)
+	return u
+}
+
+// UpdateArtID sets the "art_id" field to the value that was provided on create.
+func (u *HashEqualUpsert) UpdateArtID() *HashEqualUpsert {
+	u.SetExcluded(hashequal.FieldArtID)
+	return u
+}
+
+// SetEqualArtID sets the "equal_art_id" field.
+func (u *HashEqualUpsert) SetEqualArtID(v uuid.UUID) *HashEqualUpsert {
+	u.Set(hashequal.FieldEqualArtID, v)
+	return u
+}
+
+// UpdateEqualArtID sets the "equal_art_id" field to the value that was provided on create.
+func (u *HashEqualUpsert) UpdateEqualArtID() *HashEqualUpsert {
+	u.SetExcluded(hashequal.FieldEqualArtID)
+	return u
+}
 
 // SetOrigin sets the "origin" field.
 func (u *HashEqualUpsert) SetOrigin(v string) *HashEqualUpsert {
@@ -244,16 +361,36 @@ func (u *HashEqualUpsert) UpdateJustification() *HashEqualUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (u *HashEqualUpsert) SetArtifactsHash(v string) *HashEqualUpsert {
+	u.Set(hashequal.FieldArtifactsHash, v)
+	return u
+}
+
+// UpdateArtifactsHash sets the "artifacts_hash" field to the value that was provided on create.
+func (u *HashEqualUpsert) UpdateArtifactsHash() *HashEqualUpsert {
+	u.SetExcluded(hashequal.FieldArtifactsHash)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.HashEqual.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(hashequal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *HashEqualUpsertOne) UpdateNewValues() *HashEqualUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(hashequal.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -282,6 +419,34 @@ func (u *HashEqualUpsertOne) Update(set func(*HashEqualUpsert)) *HashEqualUpsert
 		set(&HashEqualUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetArtID sets the "art_id" field.
+func (u *HashEqualUpsertOne) SetArtID(v uuid.UUID) *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetArtID(v)
+	})
+}
+
+// UpdateArtID sets the "art_id" field to the value that was provided on create.
+func (u *HashEqualUpsertOne) UpdateArtID() *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateArtID()
+	})
+}
+
+// SetEqualArtID sets the "equal_art_id" field.
+func (u *HashEqualUpsertOne) SetEqualArtID(v uuid.UUID) *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetEqualArtID(v)
+	})
+}
+
+// UpdateEqualArtID sets the "equal_art_id" field to the value that was provided on create.
+func (u *HashEqualUpsertOne) UpdateEqualArtID() *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateEqualArtID()
+	})
 }
 
 // SetOrigin sets the "origin" field.
@@ -326,6 +491,20 @@ func (u *HashEqualUpsertOne) UpdateJustification() *HashEqualUpsertOne {
 	})
 }
 
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (u *HashEqualUpsertOne) SetArtifactsHash(v string) *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetArtifactsHash(v)
+	})
+}
+
+// UpdateArtifactsHash sets the "artifacts_hash" field to the value that was provided on create.
+func (u *HashEqualUpsertOne) UpdateArtifactsHash() *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateArtifactsHash()
+	})
+}
+
 // Exec executes the query.
 func (u *HashEqualUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -342,7 +521,12 @@ func (u *HashEqualUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *HashEqualUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *HashEqualUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: HashEqualUpsertOne.ID is not supported by MySQL driver. Use HashEqualUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -351,7 +535,7 @@ func (u *HashEqualUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *HashEqualUpsertOne) IDX(ctx context.Context) int {
+func (u *HashEqualUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -378,6 +562,7 @@ func (hecb *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error)
 	for i := range hecb.builders {
 		func(i int, root context.Context) {
 			builder := hecb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*HashEqualMutation)
 				if !ok {
@@ -405,10 +590,6 @@ func (hecb *HashEqualCreateBulk) Save(ctx context.Context) ([]*HashEqual, error)
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -460,7 +641,7 @@ func (hecb *HashEqualCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.HashEqualUpsert) {
-//			SetOrigin(v+v).
+//			SetArtID(v+v).
 //		}).
 //		Exec(ctx)
 func (hecb *HashEqualCreateBulk) OnConflict(opts ...sql.ConflictOption) *HashEqualUpsertBulk {
@@ -495,10 +676,20 @@ type HashEqualUpsertBulk struct {
 //	client.HashEqual.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(hashequal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *HashEqualUpsertBulk) UpdateNewValues() *HashEqualUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(hashequal.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -527,6 +718,34 @@ func (u *HashEqualUpsertBulk) Update(set func(*HashEqualUpsert)) *HashEqualUpser
 		set(&HashEqualUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetArtID sets the "art_id" field.
+func (u *HashEqualUpsertBulk) SetArtID(v uuid.UUID) *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetArtID(v)
+	})
+}
+
+// UpdateArtID sets the "art_id" field to the value that was provided on create.
+func (u *HashEqualUpsertBulk) UpdateArtID() *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateArtID()
+	})
+}
+
+// SetEqualArtID sets the "equal_art_id" field.
+func (u *HashEqualUpsertBulk) SetEqualArtID(v uuid.UUID) *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetEqualArtID(v)
+	})
+}
+
+// UpdateEqualArtID sets the "equal_art_id" field to the value that was provided on create.
+func (u *HashEqualUpsertBulk) UpdateEqualArtID() *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateEqualArtID()
+	})
 }
 
 // SetOrigin sets the "origin" field.
@@ -568,6 +787,20 @@ func (u *HashEqualUpsertBulk) SetJustification(v string) *HashEqualUpsertBulk {
 func (u *HashEqualUpsertBulk) UpdateJustification() *HashEqualUpsertBulk {
 	return u.Update(func(s *HashEqualUpsert) {
 		s.UpdateJustification()
+	})
+}
+
+// SetArtifactsHash sets the "artifacts_hash" field.
+func (u *HashEqualUpsertBulk) SetArtifactsHash(v string) *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetArtifactsHash(v)
+	})
+}
+
+// UpdateArtifactsHash sets the "artifacts_hash" field to the value that was provided on create.
+func (u *HashEqualUpsertBulk) UpdateArtifactsHash() *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateArtifactsHash()
 	})
 }
 

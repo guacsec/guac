@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -33,15 +34,15 @@ func (cu *CertificationUpdate) Where(ps ...predicate.Certification) *Certificati
 }
 
 // SetSourceID sets the "source_id" field.
-func (cu *CertificationUpdate) SetSourceID(i int) *CertificationUpdate {
-	cu.mutation.SetSourceID(i)
+func (cu *CertificationUpdate) SetSourceID(u uuid.UUID) *CertificationUpdate {
+	cu.mutation.SetSourceID(u)
 	return cu
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableSourceID(i *int) *CertificationUpdate {
-	if i != nil {
-		cu.SetSourceID(*i)
+func (cu *CertificationUpdate) SetNillableSourceID(u *uuid.UUID) *CertificationUpdate {
+	if u != nil {
+		cu.SetSourceID(*u)
 	}
 	return cu
 }
@@ -53,15 +54,15 @@ func (cu *CertificationUpdate) ClearSourceID() *CertificationUpdate {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (cu *CertificationUpdate) SetPackageVersionID(i int) *CertificationUpdate {
-	cu.mutation.SetPackageVersionID(i)
+func (cu *CertificationUpdate) SetPackageVersionID(u uuid.UUID) *CertificationUpdate {
+	cu.mutation.SetPackageVersionID(u)
 	return cu
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillablePackageVersionID(i *int) *CertificationUpdate {
-	if i != nil {
-		cu.SetPackageVersionID(*i)
+func (cu *CertificationUpdate) SetNillablePackageVersionID(u *uuid.UUID) *CertificationUpdate {
+	if u != nil {
+		cu.SetPackageVersionID(*u)
 	}
 	return cu
 }
@@ -73,15 +74,15 @@ func (cu *CertificationUpdate) ClearPackageVersionID() *CertificationUpdate {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (cu *CertificationUpdate) SetPackageNameID(i int) *CertificationUpdate {
-	cu.mutation.SetPackageNameID(i)
+func (cu *CertificationUpdate) SetPackageNameID(u uuid.UUID) *CertificationUpdate {
+	cu.mutation.SetPackageNameID(u)
 	return cu
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillablePackageNameID(i *int) *CertificationUpdate {
-	if i != nil {
-		cu.SetPackageNameID(*i)
+func (cu *CertificationUpdate) SetNillablePackageNameID(u *uuid.UUID) *CertificationUpdate {
+	if u != nil {
+		cu.SetPackageNameID(*u)
 	}
 	return cu
 }
@@ -93,15 +94,15 @@ func (cu *CertificationUpdate) ClearPackageNameID() *CertificationUpdate {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cu *CertificationUpdate) SetArtifactID(i int) *CertificationUpdate {
-	cu.mutation.SetArtifactID(i)
+func (cu *CertificationUpdate) SetArtifactID(u uuid.UUID) *CertificationUpdate {
+	cu.mutation.SetArtifactID(u)
 	return cu
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableArtifactID(i *int) *CertificationUpdate {
-	if i != nil {
-		cu.SetArtifactID(*i)
+func (cu *CertificationUpdate) SetNillableArtifactID(u *uuid.UUID) *CertificationUpdate {
+	if u != nil {
+		cu.SetArtifactID(*u)
 	}
 	return cu
 }
@@ -193,13 +194,13 @@ func (cu *CertificationUpdate) SetPackageVersion(p *PackageVersion) *Certificati
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (cu *CertificationUpdate) SetAllVersionsID(id int) *CertificationUpdate {
+func (cu *CertificationUpdate) SetAllVersionsID(id uuid.UUID) *CertificationUpdate {
 	cu.mutation.SetAllVersionsID(id)
 	return cu
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableAllVersionsID(id *int) *CertificationUpdate {
+func (cu *CertificationUpdate) SetNillableAllVersionsID(id *uuid.UUID) *CertificationUpdate {
 	if id != nil {
 		cu = cu.SetAllVersionsID(*id)
 	}
@@ -286,7 +287,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := cu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID))
 	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -317,7 +318,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -330,7 +331,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -346,7 +347,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -359,7 +360,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -375,7 +376,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -388,7 +389,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -404,7 +405,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -417,7 +418,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -446,15 +447,15 @@ type CertificationUpdateOne struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (cuo *CertificationUpdateOne) SetSourceID(i int) *CertificationUpdateOne {
-	cuo.mutation.SetSourceID(i)
+func (cuo *CertificationUpdateOne) SetSourceID(u uuid.UUID) *CertificationUpdateOne {
+	cuo.mutation.SetSourceID(u)
 	return cuo
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableSourceID(i *int) *CertificationUpdateOne {
-	if i != nil {
-		cuo.SetSourceID(*i)
+func (cuo *CertificationUpdateOne) SetNillableSourceID(u *uuid.UUID) *CertificationUpdateOne {
+	if u != nil {
+		cuo.SetSourceID(*u)
 	}
 	return cuo
 }
@@ -466,15 +467,15 @@ func (cuo *CertificationUpdateOne) ClearSourceID() *CertificationUpdateOne {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (cuo *CertificationUpdateOne) SetPackageVersionID(i int) *CertificationUpdateOne {
-	cuo.mutation.SetPackageVersionID(i)
+func (cuo *CertificationUpdateOne) SetPackageVersionID(u uuid.UUID) *CertificationUpdateOne {
+	cuo.mutation.SetPackageVersionID(u)
 	return cuo
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillablePackageVersionID(i *int) *CertificationUpdateOne {
-	if i != nil {
-		cuo.SetPackageVersionID(*i)
+func (cuo *CertificationUpdateOne) SetNillablePackageVersionID(u *uuid.UUID) *CertificationUpdateOne {
+	if u != nil {
+		cuo.SetPackageVersionID(*u)
 	}
 	return cuo
 }
@@ -486,15 +487,15 @@ func (cuo *CertificationUpdateOne) ClearPackageVersionID() *CertificationUpdateO
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (cuo *CertificationUpdateOne) SetPackageNameID(i int) *CertificationUpdateOne {
-	cuo.mutation.SetPackageNameID(i)
+func (cuo *CertificationUpdateOne) SetPackageNameID(u uuid.UUID) *CertificationUpdateOne {
+	cuo.mutation.SetPackageNameID(u)
 	return cuo
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillablePackageNameID(i *int) *CertificationUpdateOne {
-	if i != nil {
-		cuo.SetPackageNameID(*i)
+func (cuo *CertificationUpdateOne) SetNillablePackageNameID(u *uuid.UUID) *CertificationUpdateOne {
+	if u != nil {
+		cuo.SetPackageNameID(*u)
 	}
 	return cuo
 }
@@ -506,15 +507,15 @@ func (cuo *CertificationUpdateOne) ClearPackageNameID() *CertificationUpdateOne 
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (cuo *CertificationUpdateOne) SetArtifactID(i int) *CertificationUpdateOne {
-	cuo.mutation.SetArtifactID(i)
+func (cuo *CertificationUpdateOne) SetArtifactID(u uuid.UUID) *CertificationUpdateOne {
+	cuo.mutation.SetArtifactID(u)
 	return cuo
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableArtifactID(i *int) *CertificationUpdateOne {
-	if i != nil {
-		cuo.SetArtifactID(*i)
+func (cuo *CertificationUpdateOne) SetNillableArtifactID(u *uuid.UUID) *CertificationUpdateOne {
+	if u != nil {
+		cuo.SetArtifactID(*u)
 	}
 	return cuo
 }
@@ -606,13 +607,13 @@ func (cuo *CertificationUpdateOne) SetPackageVersion(p *PackageVersion) *Certifi
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (cuo *CertificationUpdateOne) SetAllVersionsID(id int) *CertificationUpdateOne {
+func (cuo *CertificationUpdateOne) SetAllVersionsID(id uuid.UUID) *CertificationUpdateOne {
 	cuo.mutation.SetAllVersionsID(id)
 	return cuo
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableAllVersionsID(id *int) *CertificationUpdateOne {
+func (cuo *CertificationUpdateOne) SetNillableAllVersionsID(id *uuid.UUID) *CertificationUpdateOne {
 	if id != nil {
 		cuo = cuo.SetAllVersionsID(*id)
 	}
@@ -712,7 +713,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 	if err := cuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID))
 	id, ok := cuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Certification.id" for update`)}
@@ -760,7 +761,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -773,7 +774,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -789,7 +790,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -802,7 +803,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -818,7 +819,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -831,7 +832,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -847,7 +848,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -860,7 +861,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

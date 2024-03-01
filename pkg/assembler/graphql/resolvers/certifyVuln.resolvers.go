@@ -8,7 +8,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -18,7 +17,7 @@ func (r *mutationResolver) IngestCertifyVuln(ctx context.Context, pkg model.IDor
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 	if vulnerability.VulnerabilityInput != nil {
 		funcName := "IngestCertifyVuln"
-		err := helper.ValidateVulnerabilityIDInputSpec(*vulnerability.VulnerabilityInput)
+		err := validateVulnerabilityIDInputSpec(*vulnerability.VulnerabilityInput)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
@@ -50,7 +49,7 @@ func (r *mutationResolver) IngestCertifyVulns(ctx context.Context, pkgs []*model
 			lowercaseVulnList = append(lowercaseVulnList, v)
 			continue
 		}
-		err := helper.ValidateVulnerabilityIDInputSpec(*v.VulnerabilityInput)
+		err := validateVulnerabilityIDInputSpec(*v.VulnerabilityInput)
 		if err != nil {
 			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}

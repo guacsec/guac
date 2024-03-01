@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
@@ -32,15 +33,15 @@ func (ou *OccurrenceUpdate) Where(ps ...predicate.Occurrence) *OccurrenceUpdate 
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (ou *OccurrenceUpdate) SetArtifactID(i int) *OccurrenceUpdate {
-	ou.mutation.SetArtifactID(i)
+func (ou *OccurrenceUpdate) SetArtifactID(u uuid.UUID) *OccurrenceUpdate {
+	ou.mutation.SetArtifactID(u)
 	return ou
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillableArtifactID(i *int) *OccurrenceUpdate {
-	if i != nil {
-		ou.SetArtifactID(*i)
+func (ou *OccurrenceUpdate) SetNillableArtifactID(u *uuid.UUID) *OccurrenceUpdate {
+	if u != nil {
+		ou.SetArtifactID(*u)
 	}
 	return ou
 }
@@ -88,15 +89,15 @@ func (ou *OccurrenceUpdate) SetNillableCollector(s *string) *OccurrenceUpdate {
 }
 
 // SetSourceID sets the "source_id" field.
-func (ou *OccurrenceUpdate) SetSourceID(i int) *OccurrenceUpdate {
-	ou.mutation.SetSourceID(i)
+func (ou *OccurrenceUpdate) SetSourceID(u uuid.UUID) *OccurrenceUpdate {
+	ou.mutation.SetSourceID(u)
 	return ou
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillableSourceID(i *int) *OccurrenceUpdate {
-	if i != nil {
-		ou.SetSourceID(*i)
+func (ou *OccurrenceUpdate) SetNillableSourceID(u *uuid.UUID) *OccurrenceUpdate {
+	if u != nil {
+		ou.SetSourceID(*u)
 	}
 	return ou
 }
@@ -108,15 +109,15 @@ func (ou *OccurrenceUpdate) ClearSourceID() *OccurrenceUpdate {
 }
 
 // SetPackageID sets the "package_id" field.
-func (ou *OccurrenceUpdate) SetPackageID(i int) *OccurrenceUpdate {
-	ou.mutation.SetPackageID(i)
+func (ou *OccurrenceUpdate) SetPackageID(u uuid.UUID) *OccurrenceUpdate {
+	ou.mutation.SetPackageID(u)
 	return ou
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (ou *OccurrenceUpdate) SetNillablePackageID(i *int) *OccurrenceUpdate {
-	if i != nil {
-		ou.SetPackageID(*i)
+func (ou *OccurrenceUpdate) SetNillablePackageID(u *uuid.UUID) *OccurrenceUpdate {
+	if u != nil {
+		ou.SetPackageID(*u)
 	}
 	return ou
 }
@@ -143,14 +144,14 @@ func (ou *OccurrenceUpdate) SetSource(s *SourceName) *OccurrenceUpdate {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (ou *OccurrenceUpdate) AddIncludedInSbomIDs(ids ...int) *OccurrenceUpdate {
+func (ou *OccurrenceUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdate {
 	ou.mutation.AddIncludedInSbomIDs(ids...)
 	return ou
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (ou *OccurrenceUpdate) AddIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -187,14 +188,14 @@ func (ou *OccurrenceUpdate) ClearIncludedInSboms() *OccurrenceUpdate {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (ou *OccurrenceUpdate) RemoveIncludedInSbomIDs(ids ...int) *OccurrenceUpdate {
+func (ou *OccurrenceUpdate) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdate {
 	ou.mutation.RemoveIncludedInSbomIDs(ids...)
 	return ou
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
 func (ou *OccurrenceUpdate) RemoveIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -240,7 +241,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := ou.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(occurrence.Table, occurrence.Columns, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(occurrence.Table, occurrence.Columns, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID))
 	if ps := ou.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -265,7 +266,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{occurrence.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -278,7 +279,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{occurrence.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -294,7 +295,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{occurrence.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -307,7 +308,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{occurrence.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -323,7 +324,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{occurrence.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -336,7 +337,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{occurrence.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -352,7 +353,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: occurrence.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -365,7 +366,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: occurrence.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -381,7 +382,7 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: occurrence.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -410,15 +411,15 @@ type OccurrenceUpdateOne struct {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (ouo *OccurrenceUpdateOne) SetArtifactID(i int) *OccurrenceUpdateOne {
-	ouo.mutation.SetArtifactID(i)
+func (ouo *OccurrenceUpdateOne) SetArtifactID(u uuid.UUID) *OccurrenceUpdateOne {
+	ouo.mutation.SetArtifactID(u)
 	return ouo
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillableArtifactID(i *int) *OccurrenceUpdateOne {
-	if i != nil {
-		ouo.SetArtifactID(*i)
+func (ouo *OccurrenceUpdateOne) SetNillableArtifactID(u *uuid.UUID) *OccurrenceUpdateOne {
+	if u != nil {
+		ouo.SetArtifactID(*u)
 	}
 	return ouo
 }
@@ -466,15 +467,15 @@ func (ouo *OccurrenceUpdateOne) SetNillableCollector(s *string) *OccurrenceUpdat
 }
 
 // SetSourceID sets the "source_id" field.
-func (ouo *OccurrenceUpdateOne) SetSourceID(i int) *OccurrenceUpdateOne {
-	ouo.mutation.SetSourceID(i)
+func (ouo *OccurrenceUpdateOne) SetSourceID(u uuid.UUID) *OccurrenceUpdateOne {
+	ouo.mutation.SetSourceID(u)
 	return ouo
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillableSourceID(i *int) *OccurrenceUpdateOne {
-	if i != nil {
-		ouo.SetSourceID(*i)
+func (ouo *OccurrenceUpdateOne) SetNillableSourceID(u *uuid.UUID) *OccurrenceUpdateOne {
+	if u != nil {
+		ouo.SetSourceID(*u)
 	}
 	return ouo
 }
@@ -486,15 +487,15 @@ func (ouo *OccurrenceUpdateOne) ClearSourceID() *OccurrenceUpdateOne {
 }
 
 // SetPackageID sets the "package_id" field.
-func (ouo *OccurrenceUpdateOne) SetPackageID(i int) *OccurrenceUpdateOne {
-	ouo.mutation.SetPackageID(i)
+func (ouo *OccurrenceUpdateOne) SetPackageID(u uuid.UUID) *OccurrenceUpdateOne {
+	ouo.mutation.SetPackageID(u)
 	return ouo
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (ouo *OccurrenceUpdateOne) SetNillablePackageID(i *int) *OccurrenceUpdateOne {
-	if i != nil {
-		ouo.SetPackageID(*i)
+func (ouo *OccurrenceUpdateOne) SetNillablePackageID(u *uuid.UUID) *OccurrenceUpdateOne {
+	if u != nil {
+		ouo.SetPackageID(*u)
 	}
 	return ouo
 }
@@ -521,14 +522,14 @@ func (ouo *OccurrenceUpdateOne) SetSource(s *SourceName) *OccurrenceUpdateOne {
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (ouo *OccurrenceUpdateOne) AddIncludedInSbomIDs(ids ...int) *OccurrenceUpdateOne {
+func (ouo *OccurrenceUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdateOne {
 	ouo.mutation.AddIncludedInSbomIDs(ids...)
 	return ouo
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (ouo *OccurrenceUpdateOne) AddIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -565,14 +566,14 @@ func (ouo *OccurrenceUpdateOne) ClearIncludedInSboms() *OccurrenceUpdateOne {
 }
 
 // RemoveIncludedInSbomIDs removes the "included_in_sboms" edge to BillOfMaterials entities by IDs.
-func (ouo *OccurrenceUpdateOne) RemoveIncludedInSbomIDs(ids ...int) *OccurrenceUpdateOne {
+func (ouo *OccurrenceUpdateOne) RemoveIncludedInSbomIDs(ids ...uuid.UUID) *OccurrenceUpdateOne {
 	ouo.mutation.RemoveIncludedInSbomIDs(ids...)
 	return ouo
 }
 
 // RemoveIncludedInSboms removes "included_in_sboms" edges to BillOfMaterials entities.
 func (ouo *OccurrenceUpdateOne) RemoveIncludedInSboms(b ...*BillOfMaterials) *OccurrenceUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -631,7 +632,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 	if err := ouo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(occurrence.Table, occurrence.Columns, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(occurrence.Table, occurrence.Columns, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID))
 	id, ok := ouo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Occurrence.id" for update`)}
@@ -673,7 +674,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Columns: []string{occurrence.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -686,7 +687,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Columns: []string{occurrence.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -702,7 +703,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Columns: []string{occurrence.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -715,7 +716,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Columns: []string{occurrence.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -731,7 +732,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Columns: []string{occurrence.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -744,7 +745,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Columns: []string{occurrence.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -760,7 +761,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Columns: occurrence.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -773,7 +774,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Columns: occurrence.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -789,7 +790,7 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 			Columns: occurrence.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

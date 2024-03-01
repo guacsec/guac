@@ -40,7 +40,7 @@ func (od *OccurrenceDelete) ExecX(ctx context.Context) int {
 }
 
 func (od *OccurrenceDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(occurrence.Table, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(occurrence.Table, sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID))
 	if ps := od.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

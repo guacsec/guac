@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -179,8 +180,8 @@ func (cq *CertificationQuery) FirstX(ctx context.Context) *Certification {
 
 // FirstID returns the first Certification ID from the query.
 // Returns a *NotFoundError when no Certification ID was found.
-func (cq *CertificationQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (cq *CertificationQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -192,7 +193,7 @@ func (cq *CertificationQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cq *CertificationQuery) FirstIDX(ctx context.Context) int {
+func (cq *CertificationQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -230,8 +231,8 @@ func (cq *CertificationQuery) OnlyX(ctx context.Context) *Certification {
 // OnlyID is like Only, but returns the only Certification ID in the query.
 // Returns a *NotSingularError when more than one Certification ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cq *CertificationQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (cq *CertificationQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -247,7 +248,7 @@ func (cq *CertificationQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cq *CertificationQuery) OnlyIDX(ctx context.Context) int {
+func (cq *CertificationQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := cq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -275,7 +276,7 @@ func (cq *CertificationQuery) AllX(ctx context.Context) []*Certification {
 }
 
 // IDs executes the query and returns a list of Certification IDs.
-func (cq *CertificationQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (cq *CertificationQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if cq.ctx.Unique == nil && cq.path != nil {
 		cq.Unique(true)
 	}
@@ -287,7 +288,7 @@ func (cq *CertificationQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cq *CertificationQuery) IDsX(ctx context.Context) []int {
+func (cq *CertificationQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := cq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -407,7 +408,7 @@ func (cq *CertificationQuery) WithArtifact(opts ...func(*ArtifactQuery)) *Certif
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		SourceID uuid.UUID `json:"source_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -430,7 +431,7 @@ func (cq *CertificationQuery) GroupBy(field string, fields ...string) *Certifica
 // Example:
 //
 //	var v []struct {
-//		SourceID int `json:"source_id,omitempty"`
+//		SourceID uuid.UUID `json:"source_id,omitempty"`
 //	}
 //
 //	client.Certification.Query().
@@ -540,8 +541,8 @@ func (cq *CertificationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 }
 
 func (cq *CertificationQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*Certification, init func(*Certification), assign func(*Certification, *SourceName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Certification)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Certification)
 	for i := range nodes {
 		if nodes[i].SourceID == nil {
 			continue
@@ -572,8 +573,8 @@ func (cq *CertificationQuery) loadSource(ctx context.Context, query *SourceNameQ
 	return nil
 }
 func (cq *CertificationQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*Certification, init func(*Certification), assign func(*Certification, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Certification)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Certification)
 	for i := range nodes {
 		if nodes[i].PackageVersionID == nil {
 			continue
@@ -604,8 +605,8 @@ func (cq *CertificationQuery) loadPackageVersion(ctx context.Context, query *Pac
 	return nil
 }
 func (cq *CertificationQuery) loadAllVersions(ctx context.Context, query *PackageNameQuery, nodes []*Certification, init func(*Certification), assign func(*Certification, *PackageName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Certification)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Certification)
 	for i := range nodes {
 		if nodes[i].PackageNameID == nil {
 			continue
@@ -636,8 +637,8 @@ func (cq *CertificationQuery) loadAllVersions(ctx context.Context, query *Packag
 	return nil
 }
 func (cq *CertificationQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*Certification, init func(*Certification), assign func(*Certification, *Artifact)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Certification)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Certification)
 	for i := range nodes {
 		if nodes[i].ArtifactID == nil {
 			continue
@@ -681,7 +682,7 @@ func (cq *CertificationQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *CertificationQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID))
 	_spec.From = cq.sql
 	if unique := cq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

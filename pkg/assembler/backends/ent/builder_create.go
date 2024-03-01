@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
@@ -28,15 +30,29 @@ func (bc *BuilderCreate) SetURI(s string) *BuilderCreate {
 	return bc
 }
 
+// SetID sets the "id" field.
+func (bc *BuilderCreate) SetID(u uuid.UUID) *BuilderCreate {
+	bc.mutation.SetID(u)
+	return bc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (bc *BuilderCreate) SetNillableID(u *uuid.UUID) *BuilderCreate {
+	if u != nil {
+		bc.SetID(*u)
+	}
+	return bc
+}
+
 // AddSlsaAttestationIDs adds the "slsa_attestations" edge to the SLSAAttestation entity by IDs.
-func (bc *BuilderCreate) AddSlsaAttestationIDs(ids ...int) *BuilderCreate {
+func (bc *BuilderCreate) AddSlsaAttestationIDs(ids ...uuid.UUID) *BuilderCreate {
 	bc.mutation.AddSlsaAttestationIDs(ids...)
 	return bc
 }
 
 // AddSlsaAttestations adds the "slsa_attestations" edges to the SLSAAttestation entity.
 func (bc *BuilderCreate) AddSlsaAttestations(s ...*SLSAAttestation) *BuilderCreate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -50,6 +66,7 @@ func (bc *BuilderCreate) Mutation() *BuilderMutation {
 
 // Save creates the Builder in the database.
 func (bc *BuilderCreate) Save(ctx context.Context) (*Builder, error) {
+	bc.defaults()
 	return withHooks(ctx, bc.sqlSave, bc.mutation, bc.hooks)
 }
 
@@ -75,6 +92,14 @@ func (bc *BuilderCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (bc *BuilderCreate) defaults() {
+	if _, ok := bc.mutation.ID(); !ok {
+		v := builder.DefaultID()
+		bc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (bc *BuilderCreate) check() error {
 	if _, ok := bc.mutation.URI(); !ok {
@@ -94,8 +119,13 @@ func (bc *BuilderCreate) sqlSave(ctx context.Context) (*Builder, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	bc.mutation.id = &_node.ID
 	bc.mutation.done = true
 	return _node, nil
@@ -104,9 +134,13 @@ func (bc *BuilderCreate) sqlSave(ctx context.Context) (*Builder, error) {
 func (bc *BuilderCreate) createSpec() (*Builder, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Builder{config: bc.config}
-		_spec = sqlgraph.NewCreateSpec(builder.Table, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(builder.Table, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = bc.conflict
+	if id, ok := bc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := bc.mutation.URI(); ok {
 		_spec.SetField(builder.FieldURI, field.TypeString, value)
 		_node.URI = value
@@ -119,7 +153,7 @@ func (bc *BuilderCreate) createSpec() (*Builder, *sqlgraph.CreateSpec) {
 			Columns: []string{builder.SlsaAttestationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -179,17 +213,23 @@ type (
 	}
 )
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Builder.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(builder.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *BuilderUpsertOne) UpdateNewValues() *BuilderUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(builder.FieldID)
+		}
 		if _, exists := u.create.mutation.URI(); exists {
 			s.SetIgnore(builder.FieldURI)
 		}
@@ -240,7 +280,12 @@ func (u *BuilderUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *BuilderUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *BuilderUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: BuilderUpsertOne.ID is not supported by MySQL driver. Use BuilderUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -249,7 +294,7 @@ func (u *BuilderUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *BuilderUpsertOne) IDX(ctx context.Context) int {
+func (u *BuilderUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -276,6 +321,7 @@ func (bcb *BuilderCreateBulk) Save(ctx context.Context) ([]*Builder, error) {
 	for i := range bcb.builders {
 		func(i int, root context.Context) {
 			builder := bcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BuilderMutation)
 				if !ok {
@@ -303,10 +349,6 @@ func (bcb *BuilderCreateBulk) Save(ctx context.Context) ([]*Builder, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -393,12 +435,18 @@ type BuilderUpsertBulk struct {
 //	client.Builder.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(builder.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *BuilderUpsertBulk) UpdateNewValues() *BuilderUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(builder.FieldID)
+			}
 			if _, exists := b.mutation.URI(); exists {
 				s.SetIgnore(builder.FieldURI)
 			}

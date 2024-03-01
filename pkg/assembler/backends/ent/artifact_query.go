@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
@@ -29,14 +30,16 @@ type ArtifactQuery struct {
 	withOccurrences          *OccurrenceQuery
 	withSbom                 *BillOfMaterialsQuery
 	withAttestations         *SLSAAttestationQuery
-	withSame                 *HashEqualQuery
+	withHashEqualArtA        *HashEqualQuery
+	withHashEqualArtB        *HashEqualQuery
 	withIncludedInSboms      *BillOfMaterialsQuery
 	modifiers                []func(*sql.Selector)
 	loadTotal                []func(context.Context, []*Artifact) error
 	withNamedOccurrences     map[string]*OccurrenceQuery
 	withNamedSbom            map[string]*BillOfMaterialsQuery
 	withNamedAttestations    map[string]*SLSAAttestationQuery
-	withNamedSame            map[string]*HashEqualQuery
+	withNamedHashEqualArtA   map[string]*HashEqualQuery
+	withNamedHashEqualArtB   map[string]*HashEqualQuery
 	withNamedIncludedInSboms map[string]*BillOfMaterialsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -140,8 +143,8 @@ func (aq *ArtifactQuery) QueryAttestations() *SLSAAttestationQuery {
 	return query
 }
 
-// QuerySame chains the current query on the "same" edge.
-func (aq *ArtifactQuery) QuerySame() *HashEqualQuery {
+// QueryHashEqualArtA chains the current query on the "hash_equal_art_a" edge.
+func (aq *ArtifactQuery) QueryHashEqualArtA() *HashEqualQuery {
 	query := (&HashEqualClient{config: aq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
@@ -154,7 +157,29 @@ func (aq *ArtifactQuery) QuerySame() *HashEqualQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
 			sqlgraph.To(hashequal.Table, hashequal.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, artifact.SameTable, artifact.SamePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtATable, artifact.HashEqualArtAColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryHashEqualArtB chains the current query on the "hash_equal_art_b" edge.
+func (aq *ArtifactQuery) QueryHashEqualArtB() *HashEqualQuery {
+	query := (&HashEqualClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(hashequal.Table, hashequal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtBTable, artifact.HashEqualArtBColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -208,8 +233,8 @@ func (aq *ArtifactQuery) FirstX(ctx context.Context) *Artifact {
 
 // FirstID returns the first Artifact ID from the query.
 // Returns a *NotFoundError when no Artifact ID was found.
-func (aq *ArtifactQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *ArtifactQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -221,7 +246,7 @@ func (aq *ArtifactQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *ArtifactQuery) FirstIDX(ctx context.Context) int {
+func (aq *ArtifactQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -259,8 +284,8 @@ func (aq *ArtifactQuery) OnlyX(ctx context.Context) *Artifact {
 // OnlyID is like Only, but returns the only Artifact ID in the query.
 // Returns a *NotSingularError when more than one Artifact ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -276,7 +301,7 @@ func (aq *ArtifactQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *ArtifactQuery) OnlyIDX(ctx context.Context) int {
+func (aq *ArtifactQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -304,7 +329,7 @@ func (aq *ArtifactQuery) AllX(ctx context.Context) []*Artifact {
 }
 
 // IDs executes the query and returns a list of Artifact IDs.
-func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if aq.ctx.Unique == nil && aq.path != nil {
 		aq.Unique(true)
 	}
@@ -316,7 +341,7 @@ func (aq *ArtifactQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *ArtifactQuery) IDsX(ctx context.Context) []int {
+func (aq *ArtifactQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := aq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -379,7 +404,8 @@ func (aq *ArtifactQuery) Clone() *ArtifactQuery {
 		withOccurrences:     aq.withOccurrences.Clone(),
 		withSbom:            aq.withSbom.Clone(),
 		withAttestations:    aq.withAttestations.Clone(),
-		withSame:            aq.withSame.Clone(),
+		withHashEqualArtA:   aq.withHashEqualArtA.Clone(),
+		withHashEqualArtB:   aq.withHashEqualArtB.Clone(),
 		withIncludedInSboms: aq.withIncludedInSboms.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
@@ -420,14 +446,25 @@ func (aq *ArtifactQuery) WithAttestations(opts ...func(*SLSAAttestationQuery)) *
 	return aq
 }
 
-// WithSame tells the query-builder to eager-load the nodes that are connected to
-// the "same" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithSame(opts ...func(*HashEqualQuery)) *ArtifactQuery {
+// WithHashEqualArtA tells the query-builder to eager-load the nodes that are connected to
+// the "hash_equal_art_a" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithHashEqualArtA(opts ...func(*HashEqualQuery)) *ArtifactQuery {
 	query := (&HashEqualClient{config: aq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withSame = query
+	aq.withHashEqualArtA = query
+	return aq
+}
+
+// WithHashEqualArtB tells the query-builder to eager-load the nodes that are connected to
+// the "hash_equal_art_b" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithHashEqualArtB(opts ...func(*HashEqualQuery)) *ArtifactQuery {
+	query := (&HashEqualClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withHashEqualArtB = query
 	return aq
 }
 
@@ -520,11 +557,12 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	var (
 		nodes       = []*Artifact{}
 		_spec       = aq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			aq.withOccurrences != nil,
 			aq.withSbom != nil,
 			aq.withAttestations != nil,
-			aq.withSame != nil,
+			aq.withHashEqualArtA != nil,
+			aq.withHashEqualArtB != nil,
 			aq.withIncludedInSboms != nil,
 		}
 	)
@@ -570,10 +608,17 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 			return nil, err
 		}
 	}
-	if query := aq.withSame; query != nil {
-		if err := aq.loadSame(ctx, query, nodes,
-			func(n *Artifact) { n.Edges.Same = []*HashEqual{} },
-			func(n *Artifact, e *HashEqual) { n.Edges.Same = append(n.Edges.Same, e) }); err != nil {
+	if query := aq.withHashEqualArtA; query != nil {
+		if err := aq.loadHashEqualArtA(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.HashEqualArtA = []*HashEqual{} },
+			func(n *Artifact, e *HashEqual) { n.Edges.HashEqualArtA = append(n.Edges.HashEqualArtA, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withHashEqualArtB; query != nil {
+		if err := aq.loadHashEqualArtB(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.HashEqualArtB = []*HashEqual{} },
+			func(n *Artifact, e *HashEqual) { n.Edges.HashEqualArtB = append(n.Edges.HashEqualArtB, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -605,10 +650,17 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 			return nil, err
 		}
 	}
-	for name, query := range aq.withNamedSame {
-		if err := aq.loadSame(ctx, query, nodes,
-			func(n *Artifact) { n.appendNamedSame(name) },
-			func(n *Artifact, e *HashEqual) { n.appendNamedSame(name, e) }); err != nil {
+	for name, query := range aq.withNamedHashEqualArtA {
+		if err := aq.loadHashEqualArtA(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedHashEqualArtA(name) },
+			func(n *Artifact, e *HashEqual) { n.appendNamedHashEqualArtA(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedHashEqualArtB {
+		if err := aq.loadHashEqualArtB(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedHashEqualArtB(name) },
+			func(n *Artifact, e *HashEqual) { n.appendNamedHashEqualArtB(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -629,7 +681,7 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 
 func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *Occurrence)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Artifact)
+	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -659,7 +711,7 @@ func (aq *ArtifactQuery) loadOccurrences(ctx context.Context, query *OccurrenceQ
 }
 func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Artifact)
+	nodeids := make(map[uuid.UUID]*Artifact)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -692,8 +744,8 @@ func (aq *ArtifactQuery) loadSbom(ctx context.Context, query *BillOfMaterialsQue
 }
 func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttestationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SLSAAttestation)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Artifact)
-	nids := make(map[int]map[*Artifact]struct{})
+	byID := make(map[uuid.UUID]*Artifact)
+	nids := make(map[uuid.UUID]map[*Artifact]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -722,11 +774,11 @@ func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttest
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Artifact]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -751,71 +803,70 @@ func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttest
 	}
 	return nil
 }
-func (aq *ArtifactQuery) loadSame(ctx context.Context, query *HashEqualQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HashEqual)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Artifact)
-	nids := make(map[int]map[*Artifact]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
+func (aq *ArtifactQuery) loadHashEqualArtA(ctx context.Context, query *HashEqualQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HashEqual)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Artifact)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 		if init != nil {
-			init(node)
+			init(nodes[i])
 		}
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(artifact.SameTable)
-		s.Join(joinT).On(s.C(hashequal.FieldID), joinT.C(artifact.SamePrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(artifact.SamePrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(artifact.SamePrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(hashequal.FieldArtID)
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Artifact]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*HashEqual](ctx, query, qr, query.inters)
+	query.Where(predicate.HashEqual(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(artifact.HashEqualArtAColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		fk := n.ArtID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected "same" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "art_id" returned %v for node %v`, fk, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		assign(node, n)
+	}
+	return nil
+}
+func (aq *ArtifactQuery) loadHashEqualArtB(ctx context.Context, query *HashEqualQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HashEqual)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Artifact)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(hashequal.FieldEqualArtID)
+	}
+	query.Where(predicate.HashEqual(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(artifact.HashEqualArtBColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.EqualArtID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "equal_art_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }
 func (aq *ArtifactQuery) loadIncludedInSboms(ctx context.Context, query *BillOfMaterialsQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *BillOfMaterials)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Artifact)
-	nids := make(map[int]map[*Artifact]struct{})
+	byID := make(map[uuid.UUID]*Artifact)
+	nids := make(map[uuid.UUID]map[*Artifact]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -844,11 +895,11 @@ func (aq *ArtifactQuery) loadIncludedInSboms(ctx context.Context, query *BillOfM
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Artifact]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -887,7 +938,7 @@ func (aq *ArtifactQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (aq *ArtifactQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(artifact.Table, artifact.Columns, sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID))
 	_spec.From = aq.sql
 	if unique := aq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -1000,17 +1051,31 @@ func (aq *ArtifactQuery) WithNamedAttestations(name string, opts ...func(*SLSAAt
 	return aq
 }
 
-// WithNamedSame tells the query-builder to eager-load the nodes that are connected to the "same"
+// WithNamedHashEqualArtA tells the query-builder to eager-load the nodes that are connected to the "hash_equal_art_a"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArtifactQuery) WithNamedSame(name string, opts ...func(*HashEqualQuery)) *ArtifactQuery {
+func (aq *ArtifactQuery) WithNamedHashEqualArtA(name string, opts ...func(*HashEqualQuery)) *ArtifactQuery {
 	query := (&HashEqualClient{config: aq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if aq.withNamedSame == nil {
-		aq.withNamedSame = make(map[string]*HashEqualQuery)
+	if aq.withNamedHashEqualArtA == nil {
+		aq.withNamedHashEqualArtA = make(map[string]*HashEqualQuery)
 	}
-	aq.withNamedSame[name] = query
+	aq.withNamedHashEqualArtA[name] = query
+	return aq
+}
+
+// WithNamedHashEqualArtB tells the query-builder to eager-load the nodes that are connected to the "hash_equal_art_b"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedHashEqualArtB(name string, opts ...func(*HashEqualQuery)) *ArtifactQuery {
+	query := (&HashEqualClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedHashEqualArtB == nil {
+		aq.withNamedHashEqualArtB = make(map[string]*HashEqualQuery)
+	}
+	aq.withNamedHashEqualArtB[name] = query
 	return aq
 }
 

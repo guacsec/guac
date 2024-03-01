@@ -65,7 +65,8 @@ var skipMatrix = map[string]map[string]bool{
 	// keyvalue: failing on dep package querying
 	"TestIsDependency": {ent: true, memmap: true, redis: true, tikv: true},
 	// arango errors when ID is not found
-	"TestOccurrence": {arango: true},
+	// ent errors when ID is not found
+	"TestOccurrence": {ent: true, arango: true},
 	// ent: Path/Nodes/Neighbors not implemented
 	// keyvalue: path: input: No path found up to specified length
 	// neighbors: sorting not done, testdata is only in order for arango
@@ -86,10 +87,13 @@ var skipMatrix = map[string]map[string]bool{
 	// arango: errors when ID is not found
 	// ent: query by novuln fails, query by ID fails
 	"TestVulnerability": {arango: true, ent: true},
+	// redis order issues
+	"TestVEX": {redis: true},
+	// redis order issues
+	"TestVEXBulkIngest": {redis: true},
 	// ent: query by id fails, Query_greater_than_-_no_score_value fails
 	"TestIngestVulnMetadata": {ent: true},
-
-	"TestFindSoftware": {ent: true, redis: true, arango: true},
+	"TestFindSoftware":       {ent: true, redis: true, arango: true},
 }
 
 type backend interface {

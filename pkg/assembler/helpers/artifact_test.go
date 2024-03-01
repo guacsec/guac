@@ -16,16 +16,19 @@
 package helpers
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func TestArtifactKey(t *testing.T) {
 	tests := []struct {
-		name  string
-		input *generated.ArtifactInputSpec
-		want  string
+		name        string
+		input       *generated.ArtifactInputSpec
+		inputServer *model.ArtifactInputSpec
+		want        string
 	}{
 		{
 			name: "sha1",
@@ -33,7 +36,7 @@ func TestArtifactKey(t *testing.T) {
 				Algorithm: "sha1",
 				Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
 			},
-			want: "sha1:7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+			want: strings.ToLower("sha1:7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
 		},
 		{
 			name: "sha256",
@@ -41,21 +44,27 @@ func TestArtifactKey(t *testing.T) {
 				Algorithm: "sha256",
 				Digest:    "1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
 			},
-			want: "sha256:1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4",
+			want: strings.ToLower("sha256:1234e40ac7250263c5dbe1cf3138912f3f416140aa248637a60d65fe22c47da4"),
 		},
 		{
 			name: "sha256",
-			input: &generated.ArtifactInputSpec{
+			inputServer: &model.ArtifactInputSpec{
 				Algorithm: "sha256",
 				Digest:    "575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
 			},
-			want: "sha256:575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3",
+			want: strings.ToLower("sha256:575d810a9fae5f2f0671c9b2c0ce973e46c7207fbe5cb8d1b0d1836a6a0470e3"),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ArtifactKey(tt.input); got != tt.want {
-				t.Errorf("ArtifactKey() = %v, want %v", got, tt.want)
+			if tt.input != nil {
+				if got := GetKey[*generated.ArtifactInputSpec, string](tt.input, ArtifactClientKey); got != tt.want {
+					t.Errorf("ArtifactKey() = %v, want %v", got, tt.want)
+				}
+			} else {
+				if got := GetKey[*model.ArtifactInputSpec, string](tt.inputServer, ArtifactServerKey); got != tt.want {
+					t.Errorf("ArtifactKey() = %v, want %v", got, tt.want)
+				}
 			}
 		})
 	}

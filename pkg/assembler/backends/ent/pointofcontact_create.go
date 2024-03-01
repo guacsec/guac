@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -27,57 +29,57 @@ type PointOfContactCreate struct {
 }
 
 // SetSourceID sets the "source_id" field.
-func (pocc *PointOfContactCreate) SetSourceID(i int) *PointOfContactCreate {
-	pocc.mutation.SetSourceID(i)
+func (pocc *PointOfContactCreate) SetSourceID(u uuid.UUID) *PointOfContactCreate {
+	pocc.mutation.SetSourceID(u)
 	return pocc
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillableSourceID(i *int) *PointOfContactCreate {
-	if i != nil {
-		pocc.SetSourceID(*i)
+func (pocc *PointOfContactCreate) SetNillableSourceID(u *uuid.UUID) *PointOfContactCreate {
+	if u != nil {
+		pocc.SetSourceID(*u)
 	}
 	return pocc
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (pocc *PointOfContactCreate) SetPackageVersionID(i int) *PointOfContactCreate {
-	pocc.mutation.SetPackageVersionID(i)
+func (pocc *PointOfContactCreate) SetPackageVersionID(u uuid.UUID) *PointOfContactCreate {
+	pocc.mutation.SetPackageVersionID(u)
 	return pocc
 }
 
 // SetNillablePackageVersionID sets the "package_version_id" field if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillablePackageVersionID(i *int) *PointOfContactCreate {
-	if i != nil {
-		pocc.SetPackageVersionID(*i)
+func (pocc *PointOfContactCreate) SetNillablePackageVersionID(u *uuid.UUID) *PointOfContactCreate {
+	if u != nil {
+		pocc.SetPackageVersionID(*u)
 	}
 	return pocc
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (pocc *PointOfContactCreate) SetPackageNameID(i int) *PointOfContactCreate {
-	pocc.mutation.SetPackageNameID(i)
+func (pocc *PointOfContactCreate) SetPackageNameID(u uuid.UUID) *PointOfContactCreate {
+	pocc.mutation.SetPackageNameID(u)
 	return pocc
 }
 
 // SetNillablePackageNameID sets the "package_name_id" field if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillablePackageNameID(i *int) *PointOfContactCreate {
-	if i != nil {
-		pocc.SetPackageNameID(*i)
+func (pocc *PointOfContactCreate) SetNillablePackageNameID(u *uuid.UUID) *PointOfContactCreate {
+	if u != nil {
+		pocc.SetPackageNameID(*u)
 	}
 	return pocc
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (pocc *PointOfContactCreate) SetArtifactID(i int) *PointOfContactCreate {
-	pocc.mutation.SetArtifactID(i)
+func (pocc *PointOfContactCreate) SetArtifactID(u uuid.UUID) *PointOfContactCreate {
+	pocc.mutation.SetArtifactID(u)
 	return pocc
 }
 
 // SetNillableArtifactID sets the "artifact_id" field if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillableArtifactID(i *int) *PointOfContactCreate {
-	if i != nil {
-		pocc.SetArtifactID(*i)
+func (pocc *PointOfContactCreate) SetNillableArtifactID(u *uuid.UUID) *PointOfContactCreate {
+	if u != nil {
+		pocc.SetArtifactID(*u)
 	}
 	return pocc
 }
@@ -118,6 +120,20 @@ func (pocc *PointOfContactCreate) SetCollector(s string) *PointOfContactCreate {
 	return pocc
 }
 
+// SetID sets the "id" field.
+func (pocc *PointOfContactCreate) SetID(u uuid.UUID) *PointOfContactCreate {
+	pocc.mutation.SetID(u)
+	return pocc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pocc *PointOfContactCreate) SetNillableID(u *uuid.UUID) *PointOfContactCreate {
+	if u != nil {
+		pocc.SetID(*u)
+	}
+	return pocc
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (pocc *PointOfContactCreate) SetSource(s *SourceName) *PointOfContactCreate {
 	return pocc.SetSourceID(s.ID)
@@ -129,13 +145,13 @@ func (pocc *PointOfContactCreate) SetPackageVersion(p *PackageVersion) *PointOfC
 }
 
 // SetAllVersionsID sets the "all_versions" edge to the PackageName entity by ID.
-func (pocc *PointOfContactCreate) SetAllVersionsID(id int) *PointOfContactCreate {
+func (pocc *PointOfContactCreate) SetAllVersionsID(id uuid.UUID) *PointOfContactCreate {
 	pocc.mutation.SetAllVersionsID(id)
 	return pocc
 }
 
 // SetNillableAllVersionsID sets the "all_versions" edge to the PackageName entity by ID if the given value is not nil.
-func (pocc *PointOfContactCreate) SetNillableAllVersionsID(id *int) *PointOfContactCreate {
+func (pocc *PointOfContactCreate) SetNillableAllVersionsID(id *uuid.UUID) *PointOfContactCreate {
 	if id != nil {
 		pocc = pocc.SetAllVersionsID(*id)
 	}
@@ -159,6 +175,7 @@ func (pocc *PointOfContactCreate) Mutation() *PointOfContactMutation {
 
 // Save creates the PointOfContact in the database.
 func (pocc *PointOfContactCreate) Save(ctx context.Context) (*PointOfContact, error) {
+	pocc.defaults()
 	return withHooks(ctx, pocc.sqlSave, pocc.mutation, pocc.hooks)
 }
 
@@ -181,6 +198,14 @@ func (pocc *PointOfContactCreate) Exec(ctx context.Context) error {
 func (pocc *PointOfContactCreate) ExecX(ctx context.Context) {
 	if err := pocc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pocc *PointOfContactCreate) defaults() {
+	if _, ok := pocc.mutation.ID(); !ok {
+		v := pointofcontact.DefaultID()
+		pocc.mutation.SetID(v)
 	}
 }
 
@@ -218,8 +243,13 @@ func (pocc *PointOfContactCreate) sqlSave(ctx context.Context) (*PointOfContact,
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	pocc.mutation.id = &_node.ID
 	pocc.mutation.done = true
 	return _node, nil
@@ -228,9 +258,13 @@ func (pocc *PointOfContactCreate) sqlSave(ctx context.Context) (*PointOfContact,
 func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.CreateSpec) {
 	var (
 		_node = &PointOfContact{config: pocc.config}
-		_spec = sqlgraph.NewCreateSpec(pointofcontact.Table, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(pointofcontact.Table, sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = pocc.conflict
+	if id, ok := pocc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := pocc.mutation.Email(); ok {
 		_spec.SetField(pointofcontact.FieldEmail, field.TypeString, value)
 		_node.Email = value
@@ -263,7 +297,7 @@ func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.Creat
 			Columns: []string{pointofcontact.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -280,7 +314,7 @@ func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.Creat
 			Columns: []string{pointofcontact.PackageVersionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -297,7 +331,7 @@ func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.Creat
 			Columns: []string{pointofcontact.AllVersionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -314,7 +348,7 @@ func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.Creat
 			Columns: []string{pointofcontact.ArtifactColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(artifact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -376,7 +410,7 @@ type (
 )
 
 // SetSourceID sets the "source_id" field.
-func (u *PointOfContactUpsert) SetSourceID(v int) *PointOfContactUpsert {
+func (u *PointOfContactUpsert) SetSourceID(v uuid.UUID) *PointOfContactUpsert {
 	u.Set(pointofcontact.FieldSourceID, v)
 	return u
 }
@@ -394,7 +428,7 @@ func (u *PointOfContactUpsert) ClearSourceID() *PointOfContactUpsert {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *PointOfContactUpsert) SetPackageVersionID(v int) *PointOfContactUpsert {
+func (u *PointOfContactUpsert) SetPackageVersionID(v uuid.UUID) *PointOfContactUpsert {
 	u.Set(pointofcontact.FieldPackageVersionID, v)
 	return u
 }
@@ -412,7 +446,7 @@ func (u *PointOfContactUpsert) ClearPackageVersionID() *PointOfContactUpsert {
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *PointOfContactUpsert) SetPackageNameID(v int) *PointOfContactUpsert {
+func (u *PointOfContactUpsert) SetPackageNameID(v uuid.UUID) *PointOfContactUpsert {
 	u.Set(pointofcontact.FieldPackageNameID, v)
 	return u
 }
@@ -430,7 +464,7 @@ func (u *PointOfContactUpsert) ClearPackageNameID() *PointOfContactUpsert {
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *PointOfContactUpsert) SetArtifactID(v int) *PointOfContactUpsert {
+func (u *PointOfContactUpsert) SetArtifactID(v uuid.UUID) *PointOfContactUpsert {
 	u.Set(pointofcontact.FieldArtifactID, v)
 	return u
 }
@@ -519,16 +553,24 @@ func (u *PointOfContactUpsert) UpdateCollector() *PointOfContactUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.PointOfContact.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(pointofcontact.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PointOfContactUpsertOne) UpdateNewValues() *PointOfContactUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(pointofcontact.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -560,7 +602,7 @@ func (u *PointOfContactUpsertOne) Update(set func(*PointOfContactUpsert)) *Point
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *PointOfContactUpsertOne) SetSourceID(v int) *PointOfContactUpsertOne {
+func (u *PointOfContactUpsertOne) SetSourceID(v uuid.UUID) *PointOfContactUpsertOne {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.SetSourceID(v)
 	})
@@ -581,7 +623,7 @@ func (u *PointOfContactUpsertOne) ClearSourceID() *PointOfContactUpsertOne {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *PointOfContactUpsertOne) SetPackageVersionID(v int) *PointOfContactUpsertOne {
+func (u *PointOfContactUpsertOne) SetPackageVersionID(v uuid.UUID) *PointOfContactUpsertOne {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.SetPackageVersionID(v)
 	})
@@ -602,7 +644,7 @@ func (u *PointOfContactUpsertOne) ClearPackageVersionID() *PointOfContactUpsertO
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *PointOfContactUpsertOne) SetPackageNameID(v int) *PointOfContactUpsertOne {
+func (u *PointOfContactUpsertOne) SetPackageNameID(v uuid.UUID) *PointOfContactUpsertOne {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.SetPackageNameID(v)
 	})
@@ -623,7 +665,7 @@ func (u *PointOfContactUpsertOne) ClearPackageNameID() *PointOfContactUpsertOne 
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *PointOfContactUpsertOne) SetArtifactID(v int) *PointOfContactUpsertOne {
+func (u *PointOfContactUpsertOne) SetArtifactID(v uuid.UUID) *PointOfContactUpsertOne {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.SetArtifactID(v)
 	})
@@ -743,7 +785,12 @@ func (u *PointOfContactUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *PointOfContactUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *PointOfContactUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: PointOfContactUpsertOne.ID is not supported by MySQL driver. Use PointOfContactUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -752,7 +799,7 @@ func (u *PointOfContactUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *PointOfContactUpsertOne) IDX(ctx context.Context) int {
+func (u *PointOfContactUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -779,6 +826,7 @@ func (poccb *PointOfContactCreateBulk) Save(ctx context.Context) ([]*PointOfCont
 	for i := range poccb.builders {
 		func(i int, root context.Context) {
 			builder := poccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PointOfContactMutation)
 				if !ok {
@@ -806,10 +854,6 @@ func (poccb *PointOfContactCreateBulk) Save(ctx context.Context) ([]*PointOfCont
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -896,10 +940,20 @@ type PointOfContactUpsertBulk struct {
 //	client.PointOfContact.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(pointofcontact.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PointOfContactUpsertBulk) UpdateNewValues() *PointOfContactUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(pointofcontact.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -931,7 +985,7 @@ func (u *PointOfContactUpsertBulk) Update(set func(*PointOfContactUpsert)) *Poin
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *PointOfContactUpsertBulk) SetSourceID(v int) *PointOfContactUpsertBulk {
+func (u *PointOfContactUpsertBulk) SetSourceID(v uuid.UUID) *PointOfContactUpsertBulk {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.SetSourceID(v)
 	})
@@ -952,7 +1006,7 @@ func (u *PointOfContactUpsertBulk) ClearSourceID() *PointOfContactUpsertBulk {
 }
 
 // SetPackageVersionID sets the "package_version_id" field.
-func (u *PointOfContactUpsertBulk) SetPackageVersionID(v int) *PointOfContactUpsertBulk {
+func (u *PointOfContactUpsertBulk) SetPackageVersionID(v uuid.UUID) *PointOfContactUpsertBulk {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.SetPackageVersionID(v)
 	})
@@ -973,7 +1027,7 @@ func (u *PointOfContactUpsertBulk) ClearPackageVersionID() *PointOfContactUpsert
 }
 
 // SetPackageNameID sets the "package_name_id" field.
-func (u *PointOfContactUpsertBulk) SetPackageNameID(v int) *PointOfContactUpsertBulk {
+func (u *PointOfContactUpsertBulk) SetPackageNameID(v uuid.UUID) *PointOfContactUpsertBulk {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.SetPackageNameID(v)
 	})
@@ -994,7 +1048,7 @@ func (u *PointOfContactUpsertBulk) ClearPackageNameID() *PointOfContactUpsertBul
 }
 
 // SetArtifactID sets the "artifact_id" field.
-func (u *PointOfContactUpsertBulk) SetArtifactID(v int) *PointOfContactUpsertBulk {
+func (u *PointOfContactUpsertBulk) SetArtifactID(v uuid.UUID) *PointOfContactUpsertBulk {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.SetArtifactID(v)
 	})

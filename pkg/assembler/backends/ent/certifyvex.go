@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -19,13 +20,13 @@ import (
 type CertifyVex struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
-	PackageID *int `json:"package_id,omitempty"`
+	PackageID *uuid.UUID `json:"package_id,omitempty"`
 	// ArtifactID holds the value of the "artifact_id" field.
-	ArtifactID *int `json:"artifact_id,omitempty"`
+	ArtifactID *uuid.UUID `json:"artifact_id,omitempty"`
 	// VulnerabilityID holds the value of the "vulnerability_id" field.
-	VulnerabilityID int `json:"vulnerability_id,omitempty"`
+	VulnerabilityID uuid.UUID `json:"vulnerability_id,omitempty"`
 	// KnownSince holds the value of the "known_since" field.
 	KnownSince time.Time `json:"known_since,omitempty"`
 	// Status holds the value of the "status" field.
@@ -105,12 +106,14 @@ func (*CertifyVex) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case certifyvex.FieldID, certifyvex.FieldPackageID, certifyvex.FieldArtifactID, certifyvex.FieldVulnerabilityID:
-			values[i] = new(sql.NullInt64)
+		case certifyvex.FieldPackageID, certifyvex.FieldArtifactID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case certifyvex.FieldStatus, certifyvex.FieldStatement, certifyvex.FieldStatusNotes, certifyvex.FieldJustification, certifyvex.FieldOrigin, certifyvex.FieldCollector:
 			values[i] = new(sql.NullString)
 		case certifyvex.FieldKnownSince:
 			values[i] = new(sql.NullTime)
+		case certifyvex.FieldID, certifyvex.FieldVulnerabilityID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -127,30 +130,30 @@ func (cv *CertifyVex) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case certifyvex.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				cv.ID = *value
 			}
-			cv.ID = int(value.Int64)
 		case certifyvex.FieldPackageID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_id", values[i])
 			} else if value.Valid {
-				cv.PackageID = new(int)
-				*cv.PackageID = int(value.Int64)
+				cv.PackageID = new(uuid.UUID)
+				*cv.PackageID = *value.S.(*uuid.UUID)
 			}
 		case certifyvex.FieldArtifactID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				cv.ArtifactID = new(int)
-				*cv.ArtifactID = int(value.Int64)
+				cv.ArtifactID = new(uuid.UUID)
+				*cv.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case certifyvex.FieldVulnerabilityID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field vulnerability_id", values[i])
-			} else if value.Valid {
-				cv.VulnerabilityID = int(value.Int64)
+			} else if value != nil {
+				cv.VulnerabilityID = *value
 			}
 		case certifyvex.FieldKnownSince:
 			if value, ok := values[i].(*sql.NullTime); !ok {

@@ -5,6 +5,7 @@ package artifact
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 const (
@@ -22,8 +23,10 @@ const (
 	EdgeSbom = "sbom"
 	// EdgeAttestations holds the string denoting the attestations edge name in mutations.
 	EdgeAttestations = "attestations"
-	// EdgeSame holds the string denoting the same edge name in mutations.
-	EdgeSame = "same"
+	// EdgeHashEqualArtA holds the string denoting the hash_equal_art_a edge name in mutations.
+	EdgeHashEqualArtA = "hash_equal_art_a"
+	// EdgeHashEqualArtB holds the string denoting the hash_equal_art_b edge name in mutations.
+	EdgeHashEqualArtB = "hash_equal_art_b"
 	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
 	EdgeIncludedInSboms = "included_in_sboms"
 	// Table holds the table name of the artifact in the database.
@@ -47,11 +50,20 @@ const (
 	// AttestationsInverseTable is the table name for the SLSAAttestation entity.
 	// It exists in this package in order to avoid circular dependency with the "slsaattestation" package.
 	AttestationsInverseTable = "slsa_attestations"
-	// SameTable is the table that holds the same relation/edge. The primary key declared below.
-	SameTable = "hash_equal_artifacts"
-	// SameInverseTable is the table name for the HashEqual entity.
+	// HashEqualArtATable is the table that holds the hash_equal_art_a relation/edge.
+	HashEqualArtATable = "hash_equals"
+	// HashEqualArtAInverseTable is the table name for the HashEqual entity.
 	// It exists in this package in order to avoid circular dependency with the "hashequal" package.
-	SameInverseTable = "hash_equals"
+	HashEqualArtAInverseTable = "hash_equals"
+	// HashEqualArtAColumn is the table column denoting the hash_equal_art_a relation/edge.
+	HashEqualArtAColumn = "art_id"
+	// HashEqualArtBTable is the table that holds the hash_equal_art_b relation/edge.
+	HashEqualArtBTable = "hash_equals"
+	// HashEqualArtBInverseTable is the table name for the HashEqual entity.
+	// It exists in this package in order to avoid circular dependency with the "hashequal" package.
+	HashEqualArtBInverseTable = "hash_equals"
+	// HashEqualArtBColumn is the table column denoting the hash_equal_art_b relation/edge.
+	HashEqualArtBColumn = "equal_art_id"
 	// IncludedInSbomsTable is the table that holds the included_in_sboms relation/edge. The primary key declared below.
 	IncludedInSbomsTable = "bill_of_materials_included_software_artifacts"
 	// IncludedInSbomsInverseTable is the table name for the BillOfMaterials entity.
@@ -70,9 +82,6 @@ var (
 	// AttestationsPrimaryKey and AttestationsColumn2 are the table columns denoting the
 	// primary key for the attestations relation (M2M).
 	AttestationsPrimaryKey = []string{"slsa_attestation_id", "artifact_id"}
-	// SamePrimaryKey and SameColumn2 are the table columns denoting the
-	// primary key for the same relation (M2M).
-	SamePrimaryKey = []string{"hash_equal_id", "artifact_id"}
 	// IncludedInSbomsPrimaryKey and IncludedInSbomsColumn2 are the table columns denoting the
 	// primary key for the included_in_sboms relation (M2M).
 	IncludedInSbomsPrimaryKey = []string{"bill_of_materials_id", "artifact_id"}
@@ -87,6 +96,11 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)
 
 // OrderOption defines the ordering options for the Artifact queries.
 type OrderOption func(*sql.Selector)
@@ -148,17 +162,31 @@ func ByAttestations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// BySameCount orders the results by same count.
-func BySameCount(opts ...sql.OrderTermOption) OrderOption {
+// ByHashEqualArtACount orders the results by hash_equal_art_a count.
+func ByHashEqualArtACount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newSameStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newHashEqualArtAStep(), opts...)
 	}
 }
 
-// BySame orders the results by same terms.
-func BySame(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByHashEqualArtA orders the results by hash_equal_art_a terms.
+func ByHashEqualArtA(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSameStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newHashEqualArtAStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByHashEqualArtBCount orders the results by hash_equal_art_b count.
+func ByHashEqualArtBCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newHashEqualArtBStep(), opts...)
+	}
+}
+
+// ByHashEqualArtB orders the results by hash_equal_art_b terms.
+func ByHashEqualArtB(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newHashEqualArtBStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -196,11 +224,18 @@ func newAttestationsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2M, true, AttestationsTable, AttestationsPrimaryKey...),
 	)
 }
-func newSameStep() *sqlgraph.Step {
+func newHashEqualArtAStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SameInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, SameTable, SamePrimaryKey...),
+		sqlgraph.To(HashEqualArtAInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, HashEqualArtATable, HashEqualArtAColumn),
+	)
+}
+func newHashEqualArtBStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(HashEqualArtBInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, HashEqualArtBTable, HashEqualArtBColumn),
 	)
 }
 func newIncludedInSbomsStep() *sqlgraph.Step {

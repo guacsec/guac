@@ -8,7 +8,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -18,12 +17,12 @@ func (r *mutationResolver) IngestVulnerabilityMetadata(ctx context.Context, vuln
 	funcName := "IngestVulnerabilityMetadata"
 
 	if vulnerability.VulnerabilityInput != nil {
-		err := helper.ValidateNoVul(*vulnerability.VulnerabilityInput)
+		err := validateNoVul(*vulnerability.VulnerabilityInput)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
-		err = helper.ValidateVulnerabilityIDInputSpec(*vulnerability.VulnerabilityInput)
+		err = validateVulnerabilityIDInputSpec(*vulnerability.VulnerabilityInput)
 		if err != nil {
 			return "", gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
@@ -51,12 +50,12 @@ func (r *mutationResolver) IngestBulkVulnerabilityMetadata(ctx context.Context, 
 			lowercaseVulnInputList = append(lowercaseVulnInputList, v)
 			continue
 		}
-		err := helper.ValidateNoVul(*v.VulnerabilityInput)
+		err := validateNoVul(*v.VulnerabilityInput)
 		if err != nil {
 			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
 
-		err = helper.ValidateVulnerabilityIDInputSpec(*v.VulnerabilityInput)
+		err = validateVulnerabilityIDInputSpec(*v.VulnerabilityInput)
 		if err != nil {
 			return []string{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}
@@ -96,7 +95,7 @@ func (r *queryResolver) VulnerabilityMetadata(ctx context.Context, vulnerability
 			vulnIDLowerCase = &lower
 		}
 
-		err := helper.ValidateVulnerabilitySpec(*vulnerabilityMetadataSpec.Vulnerability)
+		err := validateVulnerabilitySpec(*vulnerabilityMetadataSpec.Vulnerability)
 		if err != nil {
 			return []*model.VulnerabilityMetadata{}, gqlerror.Errorf("%v ::  %s", funcName, err)
 		}

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
@@ -230,8 +231,8 @@ func (bomq *BillOfMaterialsQuery) FirstX(ctx context.Context) *BillOfMaterials {
 
 // FirstID returns the first BillOfMaterials ID from the query.
 // Returns a *NotFoundError when no BillOfMaterials ID was found.
-func (bomq *BillOfMaterialsQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bomq *BillOfMaterialsQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = bomq.Limit(1).IDs(setContextOp(ctx, bomq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -243,7 +244,7 @@ func (bomq *BillOfMaterialsQuery) FirstID(ctx context.Context) (id int, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (bomq *BillOfMaterialsQuery) FirstIDX(ctx context.Context) int {
+func (bomq *BillOfMaterialsQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := bomq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -281,8 +282,8 @@ func (bomq *BillOfMaterialsQuery) OnlyX(ctx context.Context) *BillOfMaterials {
 // OnlyID is like Only, but returns the only BillOfMaterials ID in the query.
 // Returns a *NotSingularError when more than one BillOfMaterials ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (bomq *BillOfMaterialsQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bomq *BillOfMaterialsQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = bomq.Limit(2).IDs(setContextOp(ctx, bomq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -298,7 +299,7 @@ func (bomq *BillOfMaterialsQuery) OnlyID(ctx context.Context) (id int, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (bomq *BillOfMaterialsQuery) OnlyIDX(ctx context.Context) int {
+func (bomq *BillOfMaterialsQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := bomq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -326,7 +327,7 @@ func (bomq *BillOfMaterialsQuery) AllX(ctx context.Context) []*BillOfMaterials {
 }
 
 // IDs executes the query and returns a list of BillOfMaterials IDs.
-func (bomq *BillOfMaterialsQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (bomq *BillOfMaterialsQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if bomq.ctx.Unique == nil && bomq.path != nil {
 		bomq.Unique(true)
 	}
@@ -338,7 +339,7 @@ func (bomq *BillOfMaterialsQuery) IDs(ctx context.Context) (ids []int, err error
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (bomq *BillOfMaterialsQuery) IDsX(ctx context.Context) []int {
+func (bomq *BillOfMaterialsQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := bomq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -482,7 +483,7 @@ func (bomq *BillOfMaterialsQuery) WithIncludedOccurrences(opts ...func(*Occurren
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -505,7 +506,7 @@ func (bomq *BillOfMaterialsQuery) GroupBy(field string, fields ...string) *BillO
 // Example:
 //
 //	var v []struct {
-//		PackageID int `json:"package_id,omitempty"`
+//		PackageID uuid.UUID `json:"package_id,omitempty"`
 //	}
 //
 //	client.BillOfMaterials.Query().
@@ -669,8 +670,8 @@ func (bomq *BillOfMaterialsQuery) sqlAll(ctx context.Context, hooks ...queryHook
 }
 
 func (bomq *BillOfMaterialsQuery) loadPackage(ctx context.Context, query *PackageVersionQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*BillOfMaterials)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*BillOfMaterials)
 	for i := range nodes {
 		if nodes[i].PackageID == nil {
 			continue
@@ -701,8 +702,8 @@ func (bomq *BillOfMaterialsQuery) loadPackage(ctx context.Context, query *Packag
 	return nil
 }
 func (bomq *BillOfMaterialsQuery) loadArtifact(ctx context.Context, query *ArtifactQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *Artifact)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*BillOfMaterials)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*BillOfMaterials)
 	for i := range nodes {
 		if nodes[i].ArtifactID == nil {
 			continue
@@ -734,8 +735,8 @@ func (bomq *BillOfMaterialsQuery) loadArtifact(ctx context.Context, query *Artif
 }
 func (bomq *BillOfMaterialsQuery) loadIncludedSoftwarePackages(ctx context.Context, query *PackageVersionQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *PackageVersion)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*BillOfMaterials)
-	nids := make(map[int]map[*BillOfMaterials]struct{})
+	byID := make(map[uuid.UUID]*BillOfMaterials)
+	nids := make(map[uuid.UUID]map[*BillOfMaterials]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -764,11 +765,11 @@ func (bomq *BillOfMaterialsQuery) loadIncludedSoftwarePackages(ctx context.Conte
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*BillOfMaterials]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -795,8 +796,8 @@ func (bomq *BillOfMaterialsQuery) loadIncludedSoftwarePackages(ctx context.Conte
 }
 func (bomq *BillOfMaterialsQuery) loadIncludedSoftwareArtifacts(ctx context.Context, query *ArtifactQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *Artifact)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*BillOfMaterials)
-	nids := make(map[int]map[*BillOfMaterials]struct{})
+	byID := make(map[uuid.UUID]*BillOfMaterials)
+	nids := make(map[uuid.UUID]map[*BillOfMaterials]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -825,11 +826,11 @@ func (bomq *BillOfMaterialsQuery) loadIncludedSoftwareArtifacts(ctx context.Cont
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*BillOfMaterials]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -856,8 +857,8 @@ func (bomq *BillOfMaterialsQuery) loadIncludedSoftwareArtifacts(ctx context.Cont
 }
 func (bomq *BillOfMaterialsQuery) loadIncludedDependencies(ctx context.Context, query *DependencyQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *Dependency)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*BillOfMaterials)
-	nids := make(map[int]map[*BillOfMaterials]struct{})
+	byID := make(map[uuid.UUID]*BillOfMaterials)
+	nids := make(map[uuid.UUID]map[*BillOfMaterials]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -886,11 +887,11 @@ func (bomq *BillOfMaterialsQuery) loadIncludedDependencies(ctx context.Context, 
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*BillOfMaterials]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -917,8 +918,8 @@ func (bomq *BillOfMaterialsQuery) loadIncludedDependencies(ctx context.Context, 
 }
 func (bomq *BillOfMaterialsQuery) loadIncludedOccurrences(ctx context.Context, query *OccurrenceQuery, nodes []*BillOfMaterials, init func(*BillOfMaterials), assign func(*BillOfMaterials, *Occurrence)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*BillOfMaterials)
-	nids := make(map[int]map[*BillOfMaterials]struct{})
+	byID := make(map[uuid.UUID]*BillOfMaterials)
+	nids := make(map[uuid.UUID]map[*BillOfMaterials]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -947,11 +948,11 @@ func (bomq *BillOfMaterialsQuery) loadIncludedOccurrences(ctx context.Context, q
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*BillOfMaterials]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -990,7 +991,7 @@ func (bomq *BillOfMaterialsQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (bomq *BillOfMaterialsQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(billofmaterials.Table, billofmaterials.Columns, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(billofmaterials.Table, billofmaterials.Columns, sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID))
 	_spec.From = bomq.sql
 	if unique := bomq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

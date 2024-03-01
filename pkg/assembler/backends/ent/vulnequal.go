@@ -8,20 +8,28 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 )
 
 // VulnEqual is the model entity for the VulnEqual schema.
 type VulnEqual struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// VulnID holds the value of the "vuln_id" field.
+	VulnID uuid.UUID `json:"vuln_id,omitempty"`
+	// EqualVulnID holds the value of the "equal_vuln_id" field.
+	EqualVulnID uuid.UUID `json:"equal_vuln_id,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
 	// Origin holds the value of the "origin" field.
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// An opaque hash of the vulnerability IDs that are equal
+	VulnerabilitiesHash string `json:"vulnerabilities_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the VulnEqualQuery when eager-loading is set.
 	Edges        VulnEqualEdges `json:"edges"`
@@ -30,24 +38,41 @@ type VulnEqual struct {
 
 // VulnEqualEdges holds the relations/edges for other nodes in the graph.
 type VulnEqualEdges struct {
-	// VulnerabilityIds holds the value of the vulnerability_ids edge.
-	VulnerabilityIds []*VulnerabilityID `json:"vulnerability_ids,omitempty"`
+	// VulnerabilityA holds the value of the vulnerability_a edge.
+	VulnerabilityA *VulnerabilityID `json:"vulnerability_a,omitempty"`
+	// VulnerabilityB holds the value of the vulnerability_b edge.
+	VulnerabilityB *VulnerabilityID `json:"vulnerability_b,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
-
-	namedVulnerabilityIds map[string][]*VulnerabilityID
+	totalCount [2]map[string]int
 }
 
-// VulnerabilityIdsOrErr returns the VulnerabilityIds value or an error if the edge
-// was not loaded in eager-loading.
-func (e VulnEqualEdges) VulnerabilityIdsOrErr() ([]*VulnerabilityID, error) {
+// VulnerabilityAOrErr returns the VulnerabilityA value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e VulnEqualEdges) VulnerabilityAOrErr() (*VulnerabilityID, error) {
 	if e.loadedTypes[0] {
-		return e.VulnerabilityIds, nil
+		if e.VulnerabilityA == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: vulnerabilityid.Label}
+		}
+		return e.VulnerabilityA, nil
 	}
-	return nil, &NotLoadedError{edge: "vulnerability_ids"}
+	return nil, &NotLoadedError{edge: "vulnerability_a"}
+}
+
+// VulnerabilityBOrErr returns the VulnerabilityB value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e VulnEqualEdges) VulnerabilityBOrErr() (*VulnerabilityID, error) {
+	if e.loadedTypes[1] {
+		if e.VulnerabilityB == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: vulnerabilityid.Label}
+		}
+		return e.VulnerabilityB, nil
+	}
+	return nil, &NotLoadedError{edge: "vulnerability_b"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -55,10 +80,10 @@ func (*VulnEqual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case vulnequal.FieldID:
-			values[i] = new(sql.NullInt64)
-		case vulnequal.FieldJustification, vulnequal.FieldOrigin, vulnequal.FieldCollector:
+		case vulnequal.FieldJustification, vulnequal.FieldOrigin, vulnequal.FieldCollector, vulnequal.FieldVulnerabilitiesHash:
 			values[i] = new(sql.NullString)
+		case vulnequal.FieldID, vulnequal.FieldVulnID, vulnequal.FieldEqualVulnID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -75,11 +100,23 @@ func (ve *VulnEqual) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case vulnequal.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				ve.ID = *value
 			}
-			ve.ID = int(value.Int64)
+		case vulnequal.FieldVulnID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field vuln_id", values[i])
+			} else if value != nil {
+				ve.VulnID = *value
+			}
+		case vulnequal.FieldEqualVulnID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field equal_vuln_id", values[i])
+			} else if value != nil {
+				ve.EqualVulnID = *value
+			}
 		case vulnequal.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
@@ -98,6 +135,12 @@ func (ve *VulnEqual) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ve.Collector = value.String
 			}
+		case vulnequal.FieldVulnerabilitiesHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field vulnerabilities_hash", values[i])
+			} else if value.Valid {
+				ve.VulnerabilitiesHash = value.String
+			}
 		default:
 			ve.selectValues.Set(columns[i], values[i])
 		}
@@ -111,9 +154,14 @@ func (ve *VulnEqual) Value(name string) (ent.Value, error) {
 	return ve.selectValues.Get(name)
 }
 
-// QueryVulnerabilityIds queries the "vulnerability_ids" edge of the VulnEqual entity.
-func (ve *VulnEqual) QueryVulnerabilityIds() *VulnerabilityIDQuery {
-	return NewVulnEqualClient(ve.config).QueryVulnerabilityIds(ve)
+// QueryVulnerabilityA queries the "vulnerability_a" edge of the VulnEqual entity.
+func (ve *VulnEqual) QueryVulnerabilityA() *VulnerabilityIDQuery {
+	return NewVulnEqualClient(ve.config).QueryVulnerabilityA(ve)
+}
+
+// QueryVulnerabilityB queries the "vulnerability_b" edge of the VulnEqual entity.
+func (ve *VulnEqual) QueryVulnerabilityB() *VulnerabilityIDQuery {
+	return NewVulnEqualClient(ve.config).QueryVulnerabilityB(ve)
 }
 
 // Update returns a builder for updating this VulnEqual.
@@ -139,6 +187,12 @@ func (ve *VulnEqual) String() string {
 	var builder strings.Builder
 	builder.WriteString("VulnEqual(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ve.ID))
+	builder.WriteString("vuln_id=")
+	builder.WriteString(fmt.Sprintf("%v", ve.VulnID))
+	builder.WriteString(", ")
+	builder.WriteString("equal_vuln_id=")
+	builder.WriteString(fmt.Sprintf("%v", ve.EqualVulnID))
+	builder.WriteString(", ")
 	builder.WriteString("justification=")
 	builder.WriteString(ve.Justification)
 	builder.WriteString(", ")
@@ -147,32 +201,11 @@ func (ve *VulnEqual) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(ve.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("vulnerabilities_hash=")
+	builder.WriteString(ve.VulnerabilitiesHash)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// NamedVulnerabilityIds returns the VulnerabilityIds named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (ve *VulnEqual) NamedVulnerabilityIds(name string) ([]*VulnerabilityID, error) {
-	if ve.Edges.namedVulnerabilityIds == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := ve.Edges.namedVulnerabilityIds[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (ve *VulnEqual) appendNamedVulnerabilityIds(name string, edges ...*VulnerabilityID) {
-	if ve.Edges.namedVulnerabilityIds == nil {
-		ve.Edges.namedVulnerabilityIds = make(map[string][]*VulnerabilityID)
-	}
-	if len(edges) == 0 {
-		ve.Edges.namedVulnerabilityIds[name] = []*VulnerabilityID{}
-	} else {
-		ve.Edges.namedVulnerabilityIds[name] = append(ve.Edges.namedVulnerabilityIds[name], edges...)
-	}
 }
 
 // VulnEquals is a parsable slice of VulnEqual.

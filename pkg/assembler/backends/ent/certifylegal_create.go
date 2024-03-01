@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -26,29 +28,29 @@ type CertifyLegalCreate struct {
 }
 
 // SetPackageID sets the "package_id" field.
-func (clc *CertifyLegalCreate) SetPackageID(i int) *CertifyLegalCreate {
-	clc.mutation.SetPackageID(i)
+func (clc *CertifyLegalCreate) SetPackageID(u uuid.UUID) *CertifyLegalCreate {
+	clc.mutation.SetPackageID(u)
 	return clc
 }
 
 // SetNillablePackageID sets the "package_id" field if the given value is not nil.
-func (clc *CertifyLegalCreate) SetNillablePackageID(i *int) *CertifyLegalCreate {
-	if i != nil {
-		clc.SetPackageID(*i)
+func (clc *CertifyLegalCreate) SetNillablePackageID(u *uuid.UUID) *CertifyLegalCreate {
+	if u != nil {
+		clc.SetPackageID(*u)
 	}
 	return clc
 }
 
 // SetSourceID sets the "source_id" field.
-func (clc *CertifyLegalCreate) SetSourceID(i int) *CertifyLegalCreate {
-	clc.mutation.SetSourceID(i)
+func (clc *CertifyLegalCreate) SetSourceID(u uuid.UUID) *CertifyLegalCreate {
+	clc.mutation.SetSourceID(u)
 	return clc
 }
 
 // SetNillableSourceID sets the "source_id" field if the given value is not nil.
-func (clc *CertifyLegalCreate) SetNillableSourceID(i *int) *CertifyLegalCreate {
-	if i != nil {
-		clc.SetSourceID(*i)
+func (clc *CertifyLegalCreate) SetNillableSourceID(u *uuid.UUID) *CertifyLegalCreate {
+	if u != nil {
+		clc.SetSourceID(*u)
 	}
 	return clc
 }
@@ -107,6 +109,20 @@ func (clc *CertifyLegalCreate) SetDiscoveredLicensesHash(s string) *CertifyLegal
 	return clc
 }
 
+// SetID sets the "id" field.
+func (clc *CertifyLegalCreate) SetID(u uuid.UUID) *CertifyLegalCreate {
+	clc.mutation.SetID(u)
+	return clc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (clc *CertifyLegalCreate) SetNillableID(u *uuid.UUID) *CertifyLegalCreate {
+	if u != nil {
+		clc.SetID(*u)
+	}
+	return clc
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (clc *CertifyLegalCreate) SetPackage(p *PackageVersion) *CertifyLegalCreate {
 	return clc.SetPackageID(p.ID)
@@ -118,14 +134,14 @@ func (clc *CertifyLegalCreate) SetSource(s *SourceName) *CertifyLegalCreate {
 }
 
 // AddDeclaredLicenseIDs adds the "declared_licenses" edge to the License entity by IDs.
-func (clc *CertifyLegalCreate) AddDeclaredLicenseIDs(ids ...int) *CertifyLegalCreate {
+func (clc *CertifyLegalCreate) AddDeclaredLicenseIDs(ids ...uuid.UUID) *CertifyLegalCreate {
 	clc.mutation.AddDeclaredLicenseIDs(ids...)
 	return clc
 }
 
 // AddDeclaredLicenses adds the "declared_licenses" edges to the License entity.
 func (clc *CertifyLegalCreate) AddDeclaredLicenses(l ...*License) *CertifyLegalCreate {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -133,14 +149,14 @@ func (clc *CertifyLegalCreate) AddDeclaredLicenses(l ...*License) *CertifyLegalC
 }
 
 // AddDiscoveredLicenseIDs adds the "discovered_licenses" edge to the License entity by IDs.
-func (clc *CertifyLegalCreate) AddDiscoveredLicenseIDs(ids ...int) *CertifyLegalCreate {
+func (clc *CertifyLegalCreate) AddDiscoveredLicenseIDs(ids ...uuid.UUID) *CertifyLegalCreate {
 	clc.mutation.AddDiscoveredLicenseIDs(ids...)
 	return clc
 }
 
 // AddDiscoveredLicenses adds the "discovered_licenses" edges to the License entity.
 func (clc *CertifyLegalCreate) AddDiscoveredLicenses(l ...*License) *CertifyLegalCreate {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -154,6 +170,7 @@ func (clc *CertifyLegalCreate) Mutation() *CertifyLegalMutation {
 
 // Save creates the CertifyLegal in the database.
 func (clc *CertifyLegalCreate) Save(ctx context.Context) (*CertifyLegal, error) {
+	clc.defaults()
 	return withHooks(ctx, clc.sqlSave, clc.mutation, clc.hooks)
 }
 
@@ -176,6 +193,14 @@ func (clc *CertifyLegalCreate) Exec(ctx context.Context) error {
 func (clc *CertifyLegalCreate) ExecX(ctx context.Context) {
 	if err := clc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (clc *CertifyLegalCreate) defaults() {
+	if _, ok := clc.mutation.ID(); !ok {
+		v := certifylegal.DefaultID()
+		clc.mutation.SetID(v)
 	}
 }
 
@@ -222,8 +247,13 @@ func (clc *CertifyLegalCreate) sqlSave(ctx context.Context) (*CertifyLegal, erro
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	clc.mutation.id = &_node.ID
 	clc.mutation.done = true
 	return _node, nil
@@ -232,9 +262,13 @@ func (clc *CertifyLegalCreate) sqlSave(ctx context.Context) (*CertifyLegal, erro
 func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec) {
 	var (
 		_node = &CertifyLegal{config: clc.config}
-		_spec = sqlgraph.NewCreateSpec(certifylegal.Table, sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(certifylegal.Table, sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = clc.conflict
+	if id, ok := clc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := clc.mutation.DeclaredLicense(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicense, field.TypeString, value)
 		_node.DeclaredLicense = value
@@ -279,7 +313,7 @@ func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec
 			Columns: []string{certifylegal.PackageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -296,7 +330,7 @@ func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec
 			Columns: []string{certifylegal.SourceColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -313,7 +347,7 @@ func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec
 			Columns: certifylegal.DeclaredLicensesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(license.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -329,7 +363,7 @@ func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec
 			Columns: certifylegal.DiscoveredLicensesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(license.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -390,7 +424,7 @@ type (
 )
 
 // SetPackageID sets the "package_id" field.
-func (u *CertifyLegalUpsert) SetPackageID(v int) *CertifyLegalUpsert {
+func (u *CertifyLegalUpsert) SetPackageID(v uuid.UUID) *CertifyLegalUpsert {
 	u.Set(certifylegal.FieldPackageID, v)
 	return u
 }
@@ -408,7 +442,7 @@ func (u *CertifyLegalUpsert) ClearPackageID() *CertifyLegalUpsert {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *CertifyLegalUpsert) SetSourceID(v int) *CertifyLegalUpsert {
+func (u *CertifyLegalUpsert) SetSourceID(v uuid.UUID) *CertifyLegalUpsert {
 	u.Set(certifylegal.FieldSourceID, v)
 	return u
 }
@@ -533,16 +567,24 @@ func (u *CertifyLegalUpsert) UpdateDiscoveredLicensesHash() *CertifyLegalUpsert 
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.CertifyLegal.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifylegal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyLegalUpsertOne) UpdateNewValues() *CertifyLegalUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(certifylegal.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -574,7 +616,7 @@ func (u *CertifyLegalUpsertOne) Update(set func(*CertifyLegalUpsert)) *CertifyLe
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *CertifyLegalUpsertOne) SetPackageID(v int) *CertifyLegalUpsertOne {
+func (u *CertifyLegalUpsertOne) SetPackageID(v uuid.UUID) *CertifyLegalUpsertOne {
 	return u.Update(func(s *CertifyLegalUpsert) {
 		s.SetPackageID(v)
 	})
@@ -595,7 +637,7 @@ func (u *CertifyLegalUpsertOne) ClearPackageID() *CertifyLegalUpsertOne {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *CertifyLegalUpsertOne) SetSourceID(v int) *CertifyLegalUpsertOne {
+func (u *CertifyLegalUpsertOne) SetSourceID(v uuid.UUID) *CertifyLegalUpsertOne {
 	return u.Update(func(s *CertifyLegalUpsert) {
 		s.SetSourceID(v)
 	})
@@ -757,7 +799,12 @@ func (u *CertifyLegalUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CertifyLegalUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *CertifyLegalUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: CertifyLegalUpsertOne.ID is not supported by MySQL driver. Use CertifyLegalUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -766,7 +813,7 @@ func (u *CertifyLegalUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *CertifyLegalUpsertOne) IDX(ctx context.Context) int {
+func (u *CertifyLegalUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -793,6 +840,7 @@ func (clcb *CertifyLegalCreateBulk) Save(ctx context.Context) ([]*CertifyLegal, 
 	for i := range clcb.builders {
 		func(i int, root context.Context) {
 			builder := clcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertifyLegalMutation)
 				if !ok {
@@ -820,10 +868,6 @@ func (clcb *CertifyLegalCreateBulk) Save(ctx context.Context) ([]*CertifyLegal, 
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -910,10 +954,20 @@ type CertifyLegalUpsertBulk struct {
 //	client.CertifyLegal.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(certifylegal.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CertifyLegalUpsertBulk) UpdateNewValues() *CertifyLegalUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(certifylegal.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -945,7 +999,7 @@ func (u *CertifyLegalUpsertBulk) Update(set func(*CertifyLegalUpsert)) *CertifyL
 }
 
 // SetPackageID sets the "package_id" field.
-func (u *CertifyLegalUpsertBulk) SetPackageID(v int) *CertifyLegalUpsertBulk {
+func (u *CertifyLegalUpsertBulk) SetPackageID(v uuid.UUID) *CertifyLegalUpsertBulk {
 	return u.Update(func(s *CertifyLegalUpsert) {
 		s.SetPackageID(v)
 	})
@@ -966,7 +1020,7 @@ func (u *CertifyLegalUpsertBulk) ClearPackageID() *CertifyLegalUpsertBulk {
 }
 
 // SetSourceID sets the "source_id" field.
-func (u *CertifyLegalUpsertBulk) SetSourceID(v int) *CertifyLegalUpsertBulk {
+func (u *CertifyLegalUpsertBulk) SetSourceID(v uuid.UUID) *CertifyLegalUpsertBulk {
 	return u.Update(func(s *CertifyLegalUpsert) {
 		s.SetSourceID(v)
 	})

@@ -20,13 +20,15 @@ import (
 
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func TestLicenseKey(t *testing.T) {
 	tests := []struct {
-		name string
-		lic  *generated.LicenseInputSpec
-		want string
+		name      string
+		lic       *generated.LicenseInputSpec
+		licServer *model.LicenseInputSpec
+		want      string
 	}{
 		{
 			name: "LicenseRef",
@@ -39,15 +41,21 @@ func TestLicenseKey(t *testing.T) {
 			want: "asdf:1.2.3",
 		},
 		{
-			name: "ListVersion2",
-			lic:  &generated.LicenseInputSpec{Name: "qwer", ListVersion: ptrfrom.String("1.2.3")},
-			want: "qwer:1.2.3",
+			name:      "ListVersion2",
+			licServer: &model.LicenseInputSpec{Name: "qwer", ListVersion: ptrfrom.String("1.2.3")},
+			want:      "qwer:1.2.3",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := LicenseKey(tt.lic); got != tt.want {
-				t.Errorf("LicenseKey() = %v, want %v", got, tt.want)
+			if tt.lic != nil {
+				if got := GetKey[*generated.LicenseInputSpec, string](tt.lic, LicenseClientKey); got != tt.want {
+					t.Errorf("LicenseKey() = %v, want %v", got, tt.want)
+				}
+			} else {
+				if got := GetKey[*model.LicenseInputSpec, string](tt.licServer, LicenseServerKey); got != tt.want {
+					t.Errorf("LicenseKey() = %v, want %v", got, tt.want)
+				}
 			}
 		})
 	}

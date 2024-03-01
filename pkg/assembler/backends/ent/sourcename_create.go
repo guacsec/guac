@@ -7,12 +7,13 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcenamespace"
 )
 
 // SourceNameCreate is the builder for creating a SourceName entity.
@@ -21,6 +22,18 @@ type SourceNameCreate struct {
 	mutation *SourceNameMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetType sets the "type" field.
+func (snc *SourceNameCreate) SetType(s string) *SourceNameCreate {
+	snc.mutation.SetType(s)
+	return snc
+}
+
+// SetNamespace sets the "namespace" field.
+func (snc *SourceNameCreate) SetNamespace(s string) *SourceNameCreate {
+	snc.mutation.SetNamespace(s)
+	return snc
 }
 
 // SetName sets the "name" field.
@@ -57,26 +70,29 @@ func (snc *SourceNameCreate) SetNillableTag(s *string) *SourceNameCreate {
 	return snc
 }
 
-// SetNamespaceID sets the "namespace_id" field.
-func (snc *SourceNameCreate) SetNamespaceID(i int) *SourceNameCreate {
-	snc.mutation.SetNamespaceID(i)
+// SetID sets the "id" field.
+func (snc *SourceNameCreate) SetID(u uuid.UUID) *SourceNameCreate {
+	snc.mutation.SetID(u)
 	return snc
 }
 
-// SetNamespace sets the "namespace" edge to the SourceNamespace entity.
-func (snc *SourceNameCreate) SetNamespace(s *SourceNamespace) *SourceNameCreate {
-	return snc.SetNamespaceID(s.ID)
+// SetNillableID sets the "id" field if the given value is not nil.
+func (snc *SourceNameCreate) SetNillableID(u *uuid.UUID) *SourceNameCreate {
+	if u != nil {
+		snc.SetID(*u)
+	}
+	return snc
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (snc *SourceNameCreate) AddOccurrenceIDs(ids ...int) *SourceNameCreate {
+func (snc *SourceNameCreate) AddOccurrenceIDs(ids ...uuid.UUID) *SourceNameCreate {
 	snc.mutation.AddOccurrenceIDs(ids...)
 	return snc
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
 func (snc *SourceNameCreate) AddOccurrences(o ...*Occurrence) *SourceNameCreate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -90,6 +106,7 @@ func (snc *SourceNameCreate) Mutation() *SourceNameMutation {
 
 // Save creates the SourceName in the database.
 func (snc *SourceNameCreate) Save(ctx context.Context) (*SourceName, error) {
+	snc.defaults()
 	return withHooks(ctx, snc.sqlSave, snc.mutation, snc.hooks)
 }
 
@@ -115,16 +132,24 @@ func (snc *SourceNameCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (snc *SourceNameCreate) defaults() {
+	if _, ok := snc.mutation.ID(); !ok {
+		v := sourcename.DefaultID()
+		snc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (snc *SourceNameCreate) check() error {
+	if _, ok := snc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "SourceName.type"`)}
+	}
+	if _, ok := snc.mutation.Namespace(); !ok {
+		return &ValidationError{Name: "namespace", err: errors.New(`ent: missing required field "SourceName.namespace"`)}
+	}
 	if _, ok := snc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "SourceName.name"`)}
-	}
-	if _, ok := snc.mutation.NamespaceID(); !ok {
-		return &ValidationError{Name: "namespace_id", err: errors.New(`ent: missing required field "SourceName.namespace_id"`)}
-	}
-	if _, ok := snc.mutation.NamespaceID(); !ok {
-		return &ValidationError{Name: "namespace", err: errors.New(`ent: missing required edge "SourceName.namespace"`)}
 	}
 	return nil
 }
@@ -140,8 +165,13 @@ func (snc *SourceNameCreate) sqlSave(ctx context.Context) (*SourceName, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	snc.mutation.id = &_node.ID
 	snc.mutation.done = true
 	return _node, nil
@@ -150,9 +180,21 @@ func (snc *SourceNameCreate) sqlSave(ctx context.Context) (*SourceName, error) {
 func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SourceName{config: snc.config}
-		_spec = sqlgraph.NewCreateSpec(sourcename.Table, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(sourcename.Table, sqlgraph.NewFieldSpec(sourcename.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = snc.conflict
+	if id, ok := snc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := snc.mutation.GetType(); ok {
+		_spec.SetField(sourcename.FieldType, field.TypeString, value)
+		_node.Type = value
+	}
+	if value, ok := snc.mutation.Namespace(); ok {
+		_spec.SetField(sourcename.FieldNamespace, field.TypeString, value)
+		_node.Namespace = value
+	}
 	if value, ok := snc.mutation.Name(); ok {
 		_spec.SetField(sourcename.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -165,23 +207,6 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 		_spec.SetField(sourcename.FieldTag, field.TypeString, value)
 		_node.Tag = value
 	}
-	if nodes := snc.mutation.NamespaceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   sourcename.NamespaceTable,
-			Columns: []string{sourcename.NamespaceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sourcenamespace.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.NamespaceID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	if nodes := snc.mutation.OccurrencesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -190,7 +215,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 			Columns: []string{sourcename.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -205,7 +230,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.SourceName.Create().
-//		SetName(v).
+//		SetType(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -214,7 +239,7 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.SourceNameUpsert) {
-//			SetName(v+v).
+//			SetType(v+v).
 //		}).
 //		Exec(ctx)
 func (snc *SourceNameCreate) OnConflict(opts ...sql.ConflictOption) *SourceNameUpsertOne {
@@ -249,6 +274,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetType sets the "type" field.
+func (u *SourceNameUpsert) SetType(v string) *SourceNameUpsert {
+	u.Set(sourcename.FieldType, v)
+	return u
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *SourceNameUpsert) UpdateType() *SourceNameUpsert {
+	u.SetExcluded(sourcename.FieldType)
+	return u
+}
+
+// SetNamespace sets the "namespace" field.
+func (u *SourceNameUpsert) SetNamespace(v string) *SourceNameUpsert {
+	u.Set(sourcename.FieldNamespace, v)
+	return u
+}
+
+// UpdateNamespace sets the "namespace" field to the value that was provided on create.
+func (u *SourceNameUpsert) UpdateNamespace() *SourceNameUpsert {
+	u.SetExcluded(sourcename.FieldNamespace)
+	return u
+}
 
 // SetName sets the "name" field.
 func (u *SourceNameUpsert) SetName(v string) *SourceNameUpsert {
@@ -298,28 +347,24 @@ func (u *SourceNameUpsert) ClearTag() *SourceNameUpsert {
 	return u
 }
 
-// SetNamespaceID sets the "namespace_id" field.
-func (u *SourceNameUpsert) SetNamespaceID(v int) *SourceNameUpsert {
-	u.Set(sourcename.FieldNamespaceID, v)
-	return u
-}
-
-// UpdateNamespaceID sets the "namespace_id" field to the value that was provided on create.
-func (u *SourceNameUpsert) UpdateNamespaceID() *SourceNameUpsert {
-	u.SetExcluded(sourcename.FieldNamespaceID)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.SourceName.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(sourcename.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *SourceNameUpsertOne) UpdateNewValues() *SourceNameUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(sourcename.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -348,6 +393,34 @@ func (u *SourceNameUpsertOne) Update(set func(*SourceNameUpsert)) *SourceNameUps
 		set(&SourceNameUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetType sets the "type" field.
+func (u *SourceNameUpsertOne) SetType(v string) *SourceNameUpsertOne {
+	return u.Update(func(s *SourceNameUpsert) {
+		s.SetType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *SourceNameUpsertOne) UpdateType() *SourceNameUpsertOne {
+	return u.Update(func(s *SourceNameUpsert) {
+		s.UpdateType()
+	})
+}
+
+// SetNamespace sets the "namespace" field.
+func (u *SourceNameUpsertOne) SetNamespace(v string) *SourceNameUpsertOne {
+	return u.Update(func(s *SourceNameUpsert) {
+		s.SetNamespace(v)
+	})
+}
+
+// UpdateNamespace sets the "namespace" field to the value that was provided on create.
+func (u *SourceNameUpsertOne) UpdateNamespace() *SourceNameUpsertOne {
+	return u.Update(func(s *SourceNameUpsert) {
+		s.UpdateNamespace()
+	})
 }
 
 // SetName sets the "name" field.
@@ -406,20 +479,6 @@ func (u *SourceNameUpsertOne) ClearTag() *SourceNameUpsertOne {
 	})
 }
 
-// SetNamespaceID sets the "namespace_id" field.
-func (u *SourceNameUpsertOne) SetNamespaceID(v int) *SourceNameUpsertOne {
-	return u.Update(func(s *SourceNameUpsert) {
-		s.SetNamespaceID(v)
-	})
-}
-
-// UpdateNamespaceID sets the "namespace_id" field to the value that was provided on create.
-func (u *SourceNameUpsertOne) UpdateNamespaceID() *SourceNameUpsertOne {
-	return u.Update(func(s *SourceNameUpsert) {
-		s.UpdateNamespaceID()
-	})
-}
-
 // Exec executes the query.
 func (u *SourceNameUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -436,7 +495,12 @@ func (u *SourceNameUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *SourceNameUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *SourceNameUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: SourceNameUpsertOne.ID is not supported by MySQL driver. Use SourceNameUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -445,7 +509,7 @@ func (u *SourceNameUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *SourceNameUpsertOne) IDX(ctx context.Context) int {
+func (u *SourceNameUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -472,6 +536,7 @@ func (sncb *SourceNameCreateBulk) Save(ctx context.Context) ([]*SourceName, erro
 	for i := range sncb.builders {
 		func(i int, root context.Context) {
 			builder := sncb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SourceNameMutation)
 				if !ok {
@@ -499,10 +564,6 @@ func (sncb *SourceNameCreateBulk) Save(ctx context.Context) ([]*SourceName, erro
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -554,7 +615,7 @@ func (sncb *SourceNameCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.SourceNameUpsert) {
-//			SetName(v+v).
+//			SetType(v+v).
 //		}).
 //		Exec(ctx)
 func (sncb *SourceNameCreateBulk) OnConflict(opts ...sql.ConflictOption) *SourceNameUpsertBulk {
@@ -589,10 +650,20 @@ type SourceNameUpsertBulk struct {
 //	client.SourceName.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(sourcename.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *SourceNameUpsertBulk) UpdateNewValues() *SourceNameUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(sourcename.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -621,6 +692,34 @@ func (u *SourceNameUpsertBulk) Update(set func(*SourceNameUpsert)) *SourceNameUp
 		set(&SourceNameUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetType sets the "type" field.
+func (u *SourceNameUpsertBulk) SetType(v string) *SourceNameUpsertBulk {
+	return u.Update(func(s *SourceNameUpsert) {
+		s.SetType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *SourceNameUpsertBulk) UpdateType() *SourceNameUpsertBulk {
+	return u.Update(func(s *SourceNameUpsert) {
+		s.UpdateType()
+	})
+}
+
+// SetNamespace sets the "namespace" field.
+func (u *SourceNameUpsertBulk) SetNamespace(v string) *SourceNameUpsertBulk {
+	return u.Update(func(s *SourceNameUpsert) {
+		s.SetNamespace(v)
+	})
+}
+
+// UpdateNamespace sets the "namespace" field to the value that was provided on create.
+func (u *SourceNameUpsertBulk) UpdateNamespace() *SourceNameUpsertBulk {
+	return u.Update(func(s *SourceNameUpsert) {
+		s.UpdateNamespace()
+	})
 }
 
 // SetName sets the "name" field.
@@ -676,20 +775,6 @@ func (u *SourceNameUpsertBulk) UpdateTag() *SourceNameUpsertBulk {
 func (u *SourceNameUpsertBulk) ClearTag() *SourceNameUpsertBulk {
 	return u.Update(func(s *SourceNameUpsert) {
 		s.ClearTag()
-	})
-}
-
-// SetNamespaceID sets the "namespace_id" field.
-func (u *SourceNameUpsertBulk) SetNamespaceID(v int) *SourceNameUpsertBulk {
-	return u.Update(func(s *SourceNameUpsert) {
-		s.SetNamespaceID(v)
-	})
-}
-
-// UpdateNamespaceID sets the "namespace_id" field to the value that was provided on create.
-func (u *SourceNameUpsertBulk) UpdateNamespaceID() *SourceNameUpsertBulk {
-	return u.Update(func(s *SourceNameUpsert) {
-		s.UpdateNamespaceID()
 	})
 }
 

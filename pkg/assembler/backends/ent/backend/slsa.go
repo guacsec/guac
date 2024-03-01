@@ -21,13 +21,17 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"sort"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
+	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -69,69 +73,172 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 }
 
 func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (string, error) {
-	var builtFromInput []*model.ArtifactInputSpec
-	for _, bf := range builtFrom {
-		builtFromInput = append(builtFromInput, bf.ArtifactInput)
-	}
-
-	att, err := WithinTX(ctx, b.client, func(ctx context.Context) (*ent.SLSAAttestation, error) {
-		return upsertSLSA(ctx, ent.TxFromContext(ctx), *subject.ArtifactInput, builtFromInput, *builtBy.BuilderInput, slsa)
+	id, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		return upsertSLSA(ctx, ent.TxFromContext(ctx), subject, builtFrom, builtBy, slsa)
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
-	//TODO optimize for only returning ID
-	return nodeID(att.ID), nil
+	return *id, nil
 }
 
 func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) ([]string, error) {
-	var modelHasSlsas []string
-	for i, slsa := range slsaList {
-		modelHasSlsa, err := b.IngestSLSA(ctx, *subjects[i], builtFromList[i], *builtByList[i], *slsa)
+	funcName := "IngestSLSAs"
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkSLSA(ctx, client, subjects, builtFromList, builtByList, slsaList)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestSLSAs failed with err: %v", err)
+			return nil, err
 		}
-		modelHasSlsas = append(modelHasSlsas, modelHasSlsa)
+		return slc, nil
+	})
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
-	return modelHasSlsas, nil
+
+	return *ids, nil
 }
 
-func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInputSpec, builtFrom []*model.ArtifactInputSpec, builtBy model.BuilderInputSpec, slsa model.SLSAInputSpec) (*ent.SLSAAttestation, error) {
-	builder, err := client.Builder.Query().Where(builderInputQueryPredicate(builtBy)).Only(ctx)
-	if err != nil {
-		return nil, err
+func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := []string{
+		slsaattestation.FieldSubjectID,
+		slsaattestation.FieldOrigin,
+		slsaattestation.FieldCollector,
+		slsaattestation.FieldBuildType,
+		slsaattestation.FieldSlsaVersion,
+		slsaattestation.FieldBuiltByID,
+		slsaattestation.FieldBuiltFromHash}
+
+	batches := chunk(slsaList, 100)
+
+	index := 0
+	for _, css := range batches {
+		creates := make([]*ent.SLSAAttestationCreate, len(css))
+		for i, slsa := range css {
+			slsa := slsa
+			var err error
+			creates[i], err = generateSLSACreate(ctx, tx, subjects[index], builtFromList[index], builtByList[index], slsa)
+			if err != nil {
+				return nil, gqlerror.Errorf("generateSLSACreate :: %s", err)
+			}
+			index++
+		}
+
+		err := tx.SLSAAttestation.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "bulk upsert slsa node")
+		}
 	}
 
-	// artifacts, err := ingestArtifacts(ctx, client.Client(), builtFrom)
-	artifacts, err := client.Artifact.Query().Where(
-		artifact.Or(collect(fromPtrSlice(builtFrom), artifactQueryInputPredicates)...),
-	).All(ctx)
-	if err != nil {
-		return nil, err
-	}
+	return &ids, nil
+}
 
-	if len(artifacts) == 0 {
-		return nil, fmt.Errorf("no artifacts found for builtFrom")
-	}
+func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*ent.SLSAAttestationCreate, error) {
+	slsaCreate := tx.SLSAAttestation.Create()
 
-	subjectArtifact, err := client.Artifact.Query().Where(artifactQueryInputPredicates(subject)).Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	id, err := client.SLSAAttestation.Create().
-		SetBuiltFromHash(hashBuiltFromVersion(artifacts)).
-		SetSubject(subjectArtifact).
+	slsaCreate.
 		SetBuildType(slsa.BuildType).
-		SetBuiltBy(builder).
 		SetCollector(slsa.Collector).
 		SetOrigin(slsa.Origin).
 		SetSlsaVersion(slsa.SlsaVersion).
 		SetSlsaPredicate(toSLSAInputPredicate(slsa.SlsaPredicate)).
 		SetNillableStartedOn(slsa.StartedOn).
-		SetNillableFinishedOn(slsa.FinishedOn).
-		AddBuiltFrom(artifacts...).
+		SetNillableFinishedOn(slsa.FinishedOn)
+
+	if builtBy == nil {
+		return nil, fmt.Errorf("builtBy not specified for SLSA")
+	}
+	var buildID uuid.UUID
+	if builtBy.BuilderID != nil {
+		var err error
+		buildID, err = uuid.Parse(*builtBy.BuilderID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from BuilderID failed with error: %w", err)
+		}
+	} else {
+		builder, err := tx.Builder.Query().Where(builderInputQueryPredicate(*builtBy.BuilderInput)).Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		buildID = builder.ID
+	}
+	slsaCreate.SetBuiltByID(buildID)
+
+	var subjectArtifactID uuid.UUID
+	if subject.ArtifactID != nil {
+		var err error
+		subjectArtifactID, err = uuid.Parse(*subject.ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		}
+	} else {
+		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*subject.ArtifactInput)).Only(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for artifact")
+		}
+		subjectArtifactID = foundArt.ID
+	}
+	slsaCreate.SetSubjectID(subjectArtifactID)
+
+	var builtFromIDs []string
+	var builtFromHash string
+
+	if len(builtFrom) > 0 {
+		for _, bf := range builtFrom {
+			if bf.ArtifactID != nil {
+				builtFromIDs = append(builtFromIDs, *bf.ArtifactID)
+			} else {
+				foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*bf.ArtifactInput)).Only(ctx)
+				if err != nil {
+					return nil, err
+				}
+				builtFromIDs = append(builtFromIDs, foundArt.ID.String())
+			}
+		}
+
+		sortedBuildFromIDs := helper.SortAndRemoveDups(builtFromIDs)
+
+		for _, sbfID := range sortedBuildFromIDs {
+			sbfUUID, err := uuid.Parse(sbfID)
+			if err != nil {
+				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+			}
+			slsaCreate.AddBuiltFromIDs(sbfUUID)
+		}
+
+		builtFromHash = hashListOfSortedKeys(sortedBuildFromIDs)
+		slsaCreate.SetBuiltFromHash(builtFromHash)
+	} else {
+		builtFromHash = hashListOfSortedKeys([]string{""})
+		slsaCreate.SetBuiltFromHash(builtFromHash)
+	}
+
+	slsaID, err := guacSLSAKey(ptrfrom.String(subjectArtifactID.String()), builtFromHash, ptrfrom.String(buildID.String()), slsa)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create slsa uuid with error: %w", err)
+	}
+
+	slsaCreate.SetID(*slsaID)
+
+	return slsaCreate, nil
+}
+
+func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (*string, error) {
+
+	slsaCreate, err := generateSLSACreate(ctx, tx, &subject, builtFrom, &builtBy, &slsa)
+	if err != nil {
+		return nil, gqlerror.Errorf("generateSLSACreate :: %s", err)
+	}
+
+	if id, err := slsaCreate.
 		OnConflict(
 			sql.ConflictColumns(
 				slsaattestation.FieldSubjectID,
@@ -143,18 +250,13 @@ func upsertSLSA(ctx context.Context, client *ent.Tx, subject model.ArtifactInput
 				slsaattestation.FieldBuiltFromHash,
 			),
 		).
-		UpdateNewValues().
-		ID(ctx)
-	if err != nil {
-		return nil, err
-	}
+		Ignore().
+		ID(ctx); err != nil {
 
-	return client.SLSAAttestation.Query().
-		Where(slsaattestation.IDEQ(id)).
-		WithBuiltBy().
-		WithBuiltFrom().
-		WithSubject().
-		Only(ctx)
+		return nil, errors.Wrap(err, "upsert slsa node")
+	} else {
+		return ptrfrom.String(id.String()), nil
+	}
 }
 
 func toSLSAInputPredicate(rows []*model.SLSAPredicateInputSpec) []*model.SLSAPredicate {
@@ -175,7 +277,7 @@ func toSLSAInputPredicate(rows []*model.SLSAPredicateInputSpec) []*model.SLSAPre
 
 func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 	return &model.HasSlsa{
-		ID:      nodeID(att.ID),
+		ID:      att.ID.String(),
 		Subject: toModelArtifact(att.Edges.Subject),
 		Slsa: &model.Slsa{
 			BuiltFrom:     collect(att.Edges.BuiltFrom, toModelArtifact),
@@ -191,16 +293,68 @@ func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 	}
 }
 
-func hashBuiltFromVersion(builtFrom []*ent.Artifact) string {
+// hashListOfSortedKeys is used to create a hash of all the keys (i.e. builtFrom artifacts,
+// hasSBOM included packages, included artifacts, included dependencies, included occurrences)
+func hashListOfSortedKeys(slc []string) string {
+	builtFrom := slc
 	hash := sha1.New()
 	content := bytes.NewBuffer(nil)
 
-	sort.Slice(builtFrom, func(i, j int) bool { return builtFrom[i].Digest < builtFrom[j].Digest })
-
 	for _, v := range builtFrom {
-		content.WriteString(v.Digest)
+		content.WriteString(v)
 	}
 
 	hash.Write(content.Bytes())
 	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
+func canonicalSLSAString(slsa model.SLSAInputSpec) string {
+
+	// To ensure consistency, always sort the checks by key
+	predicateMap := map[string]string{}
+	var keys []string
+	for _, kv := range slsa.SlsaPredicate {
+		predicateMap[kv.Key] = kv.Value
+		keys = append(keys, kv.Key)
+	}
+	sort.Strings(keys)
+	var predicate []string
+	for _, k := range keys {
+		predicate = append(predicate, k, predicateMap[k])
+	}
+
+	hash := sha1.New()
+	content := bytes.NewBuffer(nil)
+
+	for _, v := range predicate {
+		content.WriteString(v)
+	}
+
+	hash.Write(content.Bytes())
+
+	var startedOn time.Time
+	var finishedOn time.Time
+	if slsa.StartedOn != nil {
+		startedOn = slsa.StartedOn.UTC()
+	} else {
+		startedOn = time.Unix(0, 0).UTC()
+	}
+	if slsa.FinishedOn != nil {
+		finishedOn = slsa.FinishedOn.UTC()
+	} else {
+		finishedOn = time.Unix(0, 0).UTC()
+	}
+
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", slsa.BuildType, fmt.Sprintf("%x", hash.Sum(nil)), slsa.SlsaVersion, startedOn, finishedOn, slsa.Origin, slsa.Collector)
+}
+
+// guacSLSAKey generates an uuid based on the hash of the inputspec and inputs. slsa ID has to be set for bulk ingestion
+// when ingesting multiple edges otherwise you get "violates foreign key constraint" as it creates
+// a new ID for slsa node (even when already ingested) that it maps to the edge and fails the look up. This only occurs when using UUID with
+// "Default" func to generate a new UUID
+func guacSLSAKey(subjectID *string, builtFromHash string, builderID *string, slsa *model.SLSAInputSpec) (*uuid.UUID, error) {
+	depIDString := fmt.Sprintf("%s::%s::%s::%s?", *subjectID, builtFromHash, *builderID, canonicalSLSAString(*slsa))
+
+	depID := generateUUIDKey([]byte(depIDString))
+	return &depID, nil
 }

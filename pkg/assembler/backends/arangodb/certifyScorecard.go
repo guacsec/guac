@@ -26,6 +26,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
 const (
@@ -151,7 +152,7 @@ func getChecks(qualifiersSpec []*model.ScorecardCheckSpec) []string {
 func getScorecardValues(src *model.SourceInputSpec, scorecard *model.ScorecardInputSpec) map[string]any {
 	values := map[string]any{}
 	// add guac keys
-	source := guacSrcId(*src)
+	source := helpers.GetKey[*model.SourceInputSpec, helpers.SrcIds](src, helpers.SrcServerKey)
 	values["srcNameGuacKey"] = source.NameId
 
 	// To ensure consistency, always sort the checks by key

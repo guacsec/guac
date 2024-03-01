@@ -5,6 +5,7 @@ package hashequal
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 const (
@@ -12,36 +13,50 @@ const (
 	Label = "hash_equal"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldArtID holds the string denoting the art_id field in the database.
+	FieldArtID = "art_id"
+	// FieldEqualArtID holds the string denoting the equal_art_id field in the database.
+	FieldEqualArtID = "equal_art_id"
 	// FieldOrigin holds the string denoting the origin field in the database.
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
 	// FieldJustification holds the string denoting the justification field in the database.
 	FieldJustification = "justification"
-	// EdgeArtifacts holds the string denoting the artifacts edge name in mutations.
-	EdgeArtifacts = "artifacts"
+	// FieldArtifactsHash holds the string denoting the artifacts_hash field in the database.
+	FieldArtifactsHash = "artifacts_hash"
+	// EdgeArtifactA holds the string denoting the artifact_a edge name in mutations.
+	EdgeArtifactA = "artifact_a"
+	// EdgeArtifactB holds the string denoting the artifact_b edge name in mutations.
+	EdgeArtifactB = "artifact_b"
 	// Table holds the table name of the hashequal in the database.
 	Table = "hash_equals"
-	// ArtifactsTable is the table that holds the artifacts relation/edge. The primary key declared below.
-	ArtifactsTable = "hash_equal_artifacts"
-	// ArtifactsInverseTable is the table name for the Artifact entity.
+	// ArtifactATable is the table that holds the artifact_a relation/edge.
+	ArtifactATable = "hash_equals"
+	// ArtifactAInverseTable is the table name for the Artifact entity.
 	// It exists in this package in order to avoid circular dependency with the "artifact" package.
-	ArtifactsInverseTable = "artifacts"
+	ArtifactAInverseTable = "artifacts"
+	// ArtifactAColumn is the table column denoting the artifact_a relation/edge.
+	ArtifactAColumn = "art_id"
+	// ArtifactBTable is the table that holds the artifact_b relation/edge.
+	ArtifactBTable = "hash_equals"
+	// ArtifactBInverseTable is the table name for the Artifact entity.
+	// It exists in this package in order to avoid circular dependency with the "artifact" package.
+	ArtifactBInverseTable = "artifacts"
+	// ArtifactBColumn is the table column denoting the artifact_b relation/edge.
+	ArtifactBColumn = "equal_art_id"
 )
 
 // Columns holds all SQL columns for hashequal fields.
 var Columns = []string{
 	FieldID,
+	FieldArtID,
+	FieldEqualArtID,
 	FieldOrigin,
 	FieldCollector,
 	FieldJustification,
+	FieldArtifactsHash,
 }
-
-var (
-	// ArtifactsPrimaryKey and ArtifactsColumn2 are the table columns denoting the
-	// primary key for the artifacts relation (M2M).
-	ArtifactsPrimaryKey = []string{"hash_equal_id", "artifact_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -53,12 +68,27 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)
+
 // OrderOption defines the ordering options for the HashEqual queries.
 type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByArtID orders the results by the art_id field.
+func ByArtID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldArtID, opts...).ToFunc()
+}
+
+// ByEqualArtID orders the results by the equal_art_id field.
+func ByEqualArtID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEqualArtID, opts...).ToFunc()
 }
 
 // ByOrigin orders the results by the origin field.
@@ -76,23 +106,35 @@ func ByJustification(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldJustification, opts...).ToFunc()
 }
 
-// ByArtifactsCount orders the results by artifacts count.
-func ByArtifactsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByArtifactsHash orders the results by the artifacts_hash field.
+func ByArtifactsHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldArtifactsHash, opts...).ToFunc()
+}
+
+// ByArtifactAField orders the results by artifact_a field.
+func ByArtifactAField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newArtifactsStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newArtifactAStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByArtifacts orders the results by artifacts terms.
-func ByArtifacts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByArtifactBField orders the results by artifact_b field.
+func ByArtifactBField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newArtifactsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newArtifactBStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newArtifactsStep() *sqlgraph.Step {
+func newArtifactAStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ArtifactsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, ArtifactsTable, ArtifactsPrimaryKey...),
+		sqlgraph.To(ArtifactAInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ArtifactATable, ArtifactAColumn),
+	)
+}
+func newArtifactBStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ArtifactBInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ArtifactBTable, ArtifactBColumn),
 	)
 }

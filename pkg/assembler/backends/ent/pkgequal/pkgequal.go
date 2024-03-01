@@ -5,6 +5,7 @@ package pkgequal
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 const (
@@ -12,6 +13,10 @@ const (
 	Label = "pkg_equal"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldPkgID holds the string denoting the pkg_id field in the database.
+	FieldPkgID = "pkg_id"
+	// FieldEqualPkgID holds the string denoting the equal_pkg_id field in the database.
+	FieldEqualPkgID = "equal_pkg_id"
 	// FieldOrigin holds the string denoting the origin field in the database.
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
@@ -20,31 +25,38 @@ const (
 	FieldJustification = "justification"
 	// FieldPackagesHash holds the string denoting the packages_hash field in the database.
 	FieldPackagesHash = "packages_hash"
-	// EdgePackages holds the string denoting the packages edge name in mutations.
-	EdgePackages = "packages"
+	// EdgePackageA holds the string denoting the package_a edge name in mutations.
+	EdgePackageA = "package_a"
+	// EdgePackageB holds the string denoting the package_b edge name in mutations.
+	EdgePackageB = "package_b"
 	// Table holds the table name of the pkgequal in the database.
 	Table = "pkg_equals"
-	// PackagesTable is the table that holds the packages relation/edge. The primary key declared below.
-	PackagesTable = "pkg_equal_packages"
-	// PackagesInverseTable is the table name for the PackageVersion entity.
+	// PackageATable is the table that holds the package_a relation/edge.
+	PackageATable = "pkg_equals"
+	// PackageAInverseTable is the table name for the PackageVersion entity.
 	// It exists in this package in order to avoid circular dependency with the "packageversion" package.
-	PackagesInverseTable = "package_versions"
+	PackageAInverseTable = "package_versions"
+	// PackageAColumn is the table column denoting the package_a relation/edge.
+	PackageAColumn = "pkg_id"
+	// PackageBTable is the table that holds the package_b relation/edge.
+	PackageBTable = "pkg_equals"
+	// PackageBInverseTable is the table name for the PackageVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "packageversion" package.
+	PackageBInverseTable = "package_versions"
+	// PackageBColumn is the table column denoting the package_b relation/edge.
+	PackageBColumn = "equal_pkg_id"
 )
 
 // Columns holds all SQL columns for pkgequal fields.
 var Columns = []string{
 	FieldID,
+	FieldPkgID,
+	FieldEqualPkgID,
 	FieldOrigin,
 	FieldCollector,
 	FieldJustification,
 	FieldPackagesHash,
 }
-
-var (
-	// PackagesPrimaryKey and PackagesColumn2 are the table columns denoting the
-	// primary key for the packages relation (M2M).
-	PackagesPrimaryKey = []string{"pkg_equal_id", "package_version_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -56,12 +68,27 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)
+
 // OrderOption defines the ordering options for the PkgEqual queries.
 type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByPkgID orders the results by the pkg_id field.
+func ByPkgID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPkgID, opts...).ToFunc()
+}
+
+// ByEqualPkgID orders the results by the equal_pkg_id field.
+func ByEqualPkgID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEqualPkgID, opts...).ToFunc()
 }
 
 // ByOrigin orders the results by the origin field.
@@ -84,23 +111,30 @@ func ByPackagesHash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPackagesHash, opts...).ToFunc()
 }
 
-// ByPackagesCount orders the results by packages count.
-func ByPackagesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPackageAField orders the results by package_a field.
+func ByPackageAField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPackagesStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newPackageAStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByPackages orders the results by packages terms.
-func ByPackages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPackageBField orders the results by package_b field.
+func ByPackageBField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPackagesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPackageBStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newPackagesStep() *sqlgraph.Step {
+func newPackageAStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PackagesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, PackagesTable, PackagesPrimaryKey...),
+		sqlgraph.To(PackageAInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, PackageATable, PackageAColumn),
+	)
+}
+func newPackageBStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PackageBInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, PackageBTable, PackageBColumn),
 	)
 }

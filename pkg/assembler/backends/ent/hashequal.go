@@ -8,6 +8,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 )
 
@@ -15,13 +17,19 @@ import (
 type HashEqual struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// ArtID holds the value of the "art_id" field.
+	ArtID uuid.UUID `json:"art_id,omitempty"`
+	// EqualArtID holds the value of the "equal_art_id" field.
+	EqualArtID uuid.UUID `json:"equal_art_id,omitempty"`
 	// Origin holds the value of the "origin" field.
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
+	// An opaque hash of the artifact IDs that are equal
+	ArtifactsHash string `json:"artifacts_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the HashEqualQuery when eager-loading is set.
 	Edges        HashEqualEdges `json:"edges"`
@@ -30,24 +38,41 @@ type HashEqual struct {
 
 // HashEqualEdges holds the relations/edges for other nodes in the graph.
 type HashEqualEdges struct {
-	// Artifacts holds the value of the artifacts edge.
-	Artifacts []*Artifact `json:"artifacts,omitempty"`
+	// ArtifactA holds the value of the artifact_a edge.
+	ArtifactA *Artifact `json:"artifact_a,omitempty"`
+	// ArtifactB holds the value of the artifact_b edge.
+	ArtifactB *Artifact `json:"artifact_b,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
-
-	namedArtifacts map[string][]*Artifact
+	totalCount [2]map[string]int
 }
 
-// ArtifactsOrErr returns the Artifacts value or an error if the edge
-// was not loaded in eager-loading.
-func (e HashEqualEdges) ArtifactsOrErr() ([]*Artifact, error) {
+// ArtifactAOrErr returns the ArtifactA value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e HashEqualEdges) ArtifactAOrErr() (*Artifact, error) {
 	if e.loadedTypes[0] {
-		return e.Artifacts, nil
+		if e.ArtifactA == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: artifact.Label}
+		}
+		return e.ArtifactA, nil
 	}
-	return nil, &NotLoadedError{edge: "artifacts"}
+	return nil, &NotLoadedError{edge: "artifact_a"}
+}
+
+// ArtifactBOrErr returns the ArtifactB value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e HashEqualEdges) ArtifactBOrErr() (*Artifact, error) {
+	if e.loadedTypes[1] {
+		if e.ArtifactB == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: artifact.Label}
+		}
+		return e.ArtifactB, nil
+	}
+	return nil, &NotLoadedError{edge: "artifact_b"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -55,10 +80,10 @@ func (*HashEqual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case hashequal.FieldID:
-			values[i] = new(sql.NullInt64)
-		case hashequal.FieldOrigin, hashequal.FieldCollector, hashequal.FieldJustification:
+		case hashequal.FieldOrigin, hashequal.FieldCollector, hashequal.FieldJustification, hashequal.FieldArtifactsHash:
 			values[i] = new(sql.NullString)
+		case hashequal.FieldID, hashequal.FieldArtID, hashequal.FieldEqualArtID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -75,11 +100,23 @@ func (he *HashEqual) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case hashequal.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				he.ID = *value
 			}
-			he.ID = int(value.Int64)
+		case hashequal.FieldArtID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field art_id", values[i])
+			} else if value != nil {
+				he.ArtID = *value
+			}
+		case hashequal.FieldEqualArtID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field equal_art_id", values[i])
+			} else if value != nil {
+				he.EqualArtID = *value
+			}
 		case hashequal.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
@@ -98,6 +135,12 @@ func (he *HashEqual) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				he.Justification = value.String
 			}
+		case hashequal.FieldArtifactsHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field artifacts_hash", values[i])
+			} else if value.Valid {
+				he.ArtifactsHash = value.String
+			}
 		default:
 			he.selectValues.Set(columns[i], values[i])
 		}
@@ -111,9 +154,14 @@ func (he *HashEqual) Value(name string) (ent.Value, error) {
 	return he.selectValues.Get(name)
 }
 
-// QueryArtifacts queries the "artifacts" edge of the HashEqual entity.
-func (he *HashEqual) QueryArtifacts() *ArtifactQuery {
-	return NewHashEqualClient(he.config).QueryArtifacts(he)
+// QueryArtifactA queries the "artifact_a" edge of the HashEqual entity.
+func (he *HashEqual) QueryArtifactA() *ArtifactQuery {
+	return NewHashEqualClient(he.config).QueryArtifactA(he)
+}
+
+// QueryArtifactB queries the "artifact_b" edge of the HashEqual entity.
+func (he *HashEqual) QueryArtifactB() *ArtifactQuery {
+	return NewHashEqualClient(he.config).QueryArtifactB(he)
 }
 
 // Update returns a builder for updating this HashEqual.
@@ -139,6 +187,12 @@ func (he *HashEqual) String() string {
 	var builder strings.Builder
 	builder.WriteString("HashEqual(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", he.ID))
+	builder.WriteString("art_id=")
+	builder.WriteString(fmt.Sprintf("%v", he.ArtID))
+	builder.WriteString(", ")
+	builder.WriteString("equal_art_id=")
+	builder.WriteString(fmt.Sprintf("%v", he.EqualArtID))
+	builder.WriteString(", ")
 	builder.WriteString("origin=")
 	builder.WriteString(he.Origin)
 	builder.WriteString(", ")
@@ -147,32 +201,11 @@ func (he *HashEqual) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
 	builder.WriteString(he.Justification)
+	builder.WriteString(", ")
+	builder.WriteString("artifacts_hash=")
+	builder.WriteString(he.ArtifactsHash)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// NamedArtifacts returns the Artifacts named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (he *HashEqual) NamedArtifacts(name string) ([]*Artifact, error) {
-	if he.Edges.namedArtifacts == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := he.Edges.namedArtifacts[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (he *HashEqual) appendNamedArtifacts(name string, edges ...*Artifact) {
-	if he.Edges.namedArtifacts == nil {
-		he.Edges.namedArtifacts = make(map[string][]*Artifact)
-	}
-	if len(edges) == 0 {
-		he.Edges.namedArtifacts[name] = []*Artifact{}
-	} else {
-		he.Edges.namedArtifacts[name] = append(he.Edges.namedArtifacts[name], edges...)
-	}
 }
 
 // HashEquals is a parsable slice of HashEqual.

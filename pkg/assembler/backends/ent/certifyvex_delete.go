@@ -40,7 +40,7 @@ func (cvd *CertifyVexDelete) ExecX(ctx context.Context) int {
 }
 
 func (cvd *CertifyVexDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(certifyvex.Table, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(certifyvex.Table, sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID))
 	if ps := cvd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

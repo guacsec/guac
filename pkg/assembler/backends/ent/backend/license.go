@@ -20,28 +20,36 @@ import (
 	stdsql "database/sql"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error) {
-	var modelLicenses []string
-	for i, license := range licenses {
-		modelLicense, err := b.IngestLicense(ctx, license)
+	funcName := "IngestLicenses"
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkLicense(ctx, client, licenses)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestLicense failed with element #%v with err: %v", i, err)
+			return nil, err
 		}
-		modelLicenses = append(modelLicenses, modelLicense)
+		return slc, nil
+	})
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
-	return modelLicenses, nil
+
+	return *ids, nil
 }
 
 func (b *EntBackend) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
-	record, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
+	record, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
 		licenseID, err := upsertLicense(ctx, client, *license.LicenseInput)
 		if err != nil {
@@ -50,11 +58,11 @@ func (b *EntBackend) IngestLicense(ctx context.Context, license *model.IDorLicen
 
 		return licenseID, nil
 	})
-	if err != nil {
-		return "", err
+	if txErr != nil {
+		return "", txErr
 	}
 
-	return nodeID(*record), nil
+	return *record, nil
 }
 
 func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([]*model.License, error) {
@@ -76,48 +84,64 @@ func getLicenses(ctx context.Context, client *ent.Client, filter model.LicenseSp
 	return results, nil
 }
 
-func upsertLicense(ctx context.Context, client *ent.Tx, spec model.LicenseInputSpec) (*int, error) {
-	conflictColumns := []string{license.FieldName}
-	var inLineConflictWhere *sql.Predicate
-	if spec.Inline != nil {
-		conflictColumns = append(conflictColumns, license.FieldInline)
-		inLineConflictWhere = sql.And(sql.NotNull(license.FieldInline))
-	} else {
-		inLineConflictWhere = sql.And(sql.IsNull(license.FieldInline))
+func upsertBulkLicense(ctx context.Context, tx *ent.Tx, licenseInputs []*model.IDorLicenseInput) (*[]string, error) {
+	batches := chunk(licenseInputs, 100)
+	ids := make([]string, 0)
+
+	for _, licenses := range batches {
+		creates := make([]*ent.LicenseCreate, len(licenses))
+		for i, lic := range licenses {
+			l := lic
+			licenseID := generateUUIDKey([]byte(helpers.GetKey[*model.LicenseInputSpec, string](l.LicenseInput, helpers.LicenseServerKey)))
+			creates[i] = generateLicenseCreate(tx, &licenseID, l.LicenseInput)
+			ids = append(ids, licenseID.String())
+		}
+
+		err := tx.License.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(
+					license.FieldName,
+					license.FieldInline,
+					license.FieldListVersion,
+				),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "bulk upsert license node")
+		}
 	}
-	var listVersionConflictWhere *sql.Predicate
-	if spec.ListVersion != nil {
-		conflictColumns = append(conflictColumns, license.FieldListVersion)
-		listVersionConflictWhere = sql.And(sql.NotNull(license.FieldListVersion))
-	} else {
-		listVersionConflictWhere = sql.And(sql.IsNull(license.FieldListVersion))
-	}
-	licenseId, err := client.License.Create().
-		SetName(spec.Name).
-		SetNillableInline(spec.Inline).
-		SetNillableListVersion(spec.ListVersion).
+
+	return &ids, nil
+}
+
+func generateLicenseCreate(tx *ent.Tx, licenseID *uuid.UUID, licInput *model.LicenseInputSpec) *ent.LicenseCreate {
+	return tx.License.Create().
+		SetID(*licenseID).
+		SetName(licInput.Name).
+		SetInline(stringOrEmpty(licInput.Inline)).
+		SetListVersion(stringOrEmpty(licInput.ListVersion))
+}
+
+func upsertLicense(ctx context.Context, tx *ent.Tx, spec model.LicenseInputSpec) (*string, error) {
+	licenseID := generateUUIDKey([]byte(helpers.GetKey[*model.LicenseInputSpec, string](&spec, helpers.LicenseServerKey)))
+	insert := generateLicenseCreate(tx, &licenseID, &spec)
+	err := insert.
 		OnConflict(
-			sql.ConflictColumns(conflictColumns...),
-			sql.ConflictWhere(sql.And(inLineConflictWhere, listVersionConflictWhere)),
+			sql.ConflictColumns(
+				license.FieldName,
+				license.FieldInline,
+				license.FieldListVersion,
+			),
 		).
 		DoNothing().
-		ID(ctx)
+		Exec(ctx)
 	if err != nil {
 		if err != stdsql.ErrNoRows {
 			return nil, errors.Wrap(err, "upsert license node")
 		}
-		licenseId, err = client.License.Query().
-			Where(
-				license.NameEQ(spec.Name),
-				optionalPredicate(spec.Inline, license.InlineEQ),
-				optionalPredicate(spec.ListVersion, license.ListVersionEQ),
-			).
-			OnlyID(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "get package type")
-		}
 	}
-	return &licenseId, nil
+	return ptrfrom.String(licenseID.String()), nil
 }
 
 func licenseQuery(filter model.LicenseSpec) predicate.License {
@@ -137,6 +161,6 @@ func licenseInputQuery(filter model.LicenseInputSpec) predicate.License {
 	})
 }
 
-func getLicenseID(ctx context.Context, client *ent.Client, license model.LicenseInputSpec) (int, error) {
+func getLicenseID(ctx context.Context, client *ent.Client, license model.LicenseInputSpec) (uuid.UUID, error) {
 	return client.License.Query().Where(licenseInputQuery(license)).OnlyID(ctx)
 }

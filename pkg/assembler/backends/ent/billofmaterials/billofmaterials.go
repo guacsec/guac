@@ -5,6 +5,7 @@ package billofmaterials
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 const (
@@ -30,6 +31,14 @@ const (
 	FieldCollector = "collector"
 	// FieldKnownSince holds the string denoting the known_since field in the database.
 	FieldKnownSince = "known_since"
+	// FieldIncludedPackagesHash holds the string denoting the included_packages_hash field in the database.
+	FieldIncludedPackagesHash = "included_packages_hash"
+	// FieldIncludedArtifactsHash holds the string denoting the included_artifacts_hash field in the database.
+	FieldIncludedArtifactsHash = "included_artifacts_hash"
+	// FieldIncludedDependenciesHash holds the string denoting the included_dependencies_hash field in the database.
+	FieldIncludedDependenciesHash = "included_dependencies_hash"
+	// FieldIncludedOccurrencesHash holds the string denoting the included_occurrences_hash field in the database.
+	FieldIncludedOccurrencesHash = "included_occurrences_hash"
 	// EdgePackage holds the string denoting the package edge name in mutations.
 	EdgePackage = "package"
 	// EdgeArtifact holds the string denoting the artifact edge name in mutations.
@@ -92,6 +101,10 @@ var Columns = []string{
 	FieldOrigin,
 	FieldCollector,
 	FieldKnownSince,
+	FieldIncludedPackagesHash,
+	FieldIncludedArtifactsHash,
+	FieldIncludedDependenciesHash,
+	FieldIncludedOccurrencesHash,
 }
 
 var (
@@ -118,6 +131,11 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)
 
 // OrderOption defines the ordering options for the BillOfMaterials queries.
 type OrderOption func(*sql.Selector)
@@ -170,6 +188,26 @@ func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 // ByKnownSince orders the results by the known_since field.
 func ByKnownSince(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldKnownSince, opts...).ToFunc()
+}
+
+// ByIncludedPackagesHash orders the results by the included_packages_hash field.
+func ByIncludedPackagesHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIncludedPackagesHash, opts...).ToFunc()
+}
+
+// ByIncludedArtifactsHash orders the results by the included_artifacts_hash field.
+func ByIncludedArtifactsHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIncludedArtifactsHash, opts...).ToFunc()
+}
+
+// ByIncludedDependenciesHash orders the results by the included_dependencies_hash field.
+func ByIncludedDependenciesHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIncludedDependenciesHash, opts...).ToFunc()
+}
+
+// ByIncludedOccurrencesHash orders the results by the included_occurrences_hash field.
+func ByIncludedOccurrencesHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIncludedOccurrencesHash, opts...).ToFunc()
 }
 
 // ByPackageField orders the results by package field.

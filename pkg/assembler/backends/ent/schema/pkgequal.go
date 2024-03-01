@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // PkgEqual holds the schema definition for the PkgEqual entity.
@@ -36,27 +37,30 @@ type PkgEqual struct {
 // Fields of the PkgEqual.
 func (PkgEqual) Fields() []ent.Field {
 	return []ent.Field{
-		// field.Int("package_version_id"),
-		// field.Int("equal_package_id"),
+		field.UUID("id", uuid.UUID{}).
+			Default(getUUIDv7).
+			Unique().
+			Immutable(),
+		field.UUID("pkg_id", getUUIDv7()),
+		field.UUID("equal_pkg_id", getUUIDv7()),
 		field.String("origin"),
 		field.String("collector"),
 		field.String("justification"),
-		field.String("packages_hash").Comment("An opaque hash of the packages that are equal"),
+		field.String("packages_hash").Comment("An opaque hash of the package IDs that are equal"),
 	}
 }
 
 // Edges of the PkgEqual.
 func (PkgEqual) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("packages", PackageVersion.Type).Required(),
-		// edge.To("package", PackageVersion.Type).Required().Field("equal_package_id").Unique(),
-		// edge.To("dependant_package", PackageVersion.Type).Required().Field("package_version_id").Unique(),
+		edge.To("package_a", PackageVersion.Type).Required().Field("pkg_id").Unique(),
+		edge.To("package_b", PackageVersion.Type).Required().Field("equal_pkg_id").Unique(),
 	}
 }
 
 // Indexes of the PkgEqual.
 func (PkgEqual) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("packages_hash", "origin", "justification", "collector").Unique(),
+		index.Fields("pkg_id", "equal_pkg_id", "packages_hash", "origin", "justification", "collector").Unique(),
 	}
 }

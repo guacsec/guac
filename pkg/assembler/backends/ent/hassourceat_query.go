@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -155,8 +156,8 @@ func (hsaq *HasSourceAtQuery) FirstX(ctx context.Context) *HasSourceAt {
 
 // FirstID returns the first HasSourceAt ID from the query.
 // Returns a *NotFoundError when no HasSourceAt ID was found.
-func (hsaq *HasSourceAtQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (hsaq *HasSourceAtQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = hsaq.Limit(1).IDs(setContextOp(ctx, hsaq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -168,7 +169,7 @@ func (hsaq *HasSourceAtQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (hsaq *HasSourceAtQuery) FirstIDX(ctx context.Context) int {
+func (hsaq *HasSourceAtQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := hsaq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -206,8 +207,8 @@ func (hsaq *HasSourceAtQuery) OnlyX(ctx context.Context) *HasSourceAt {
 // OnlyID is like Only, but returns the only HasSourceAt ID in the query.
 // Returns a *NotSingularError when more than one HasSourceAt ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (hsaq *HasSourceAtQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (hsaq *HasSourceAtQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = hsaq.Limit(2).IDs(setContextOp(ctx, hsaq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -223,7 +224,7 @@ func (hsaq *HasSourceAtQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (hsaq *HasSourceAtQuery) OnlyIDX(ctx context.Context) int {
+func (hsaq *HasSourceAtQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := hsaq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -251,7 +252,7 @@ func (hsaq *HasSourceAtQuery) AllX(ctx context.Context) []*HasSourceAt {
 }
 
 // IDs executes the query and returns a list of HasSourceAt IDs.
-func (hsaq *HasSourceAtQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (hsaq *HasSourceAtQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if hsaq.ctx.Unique == nil && hsaq.path != nil {
 		hsaq.Unique(true)
 	}
@@ -263,7 +264,7 @@ func (hsaq *HasSourceAtQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (hsaq *HasSourceAtQuery) IDsX(ctx context.Context) []int {
+func (hsaq *HasSourceAtQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := hsaq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -371,7 +372,7 @@ func (hsaq *HasSourceAtQuery) WithSource(opts ...func(*SourceNameQuery)) *HasSou
 // Example:
 //
 //	var v []struct {
-//		PackageVersionID int `json:"package_version_id,omitempty"`
+//		PackageVersionID uuid.UUID `json:"package_version_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -394,7 +395,7 @@ func (hsaq *HasSourceAtQuery) GroupBy(field string, fields ...string) *HasSource
 // Example:
 //
 //	var v []struct {
-//		PackageVersionID int `json:"package_version_id,omitempty"`
+//		PackageVersionID uuid.UUID `json:"package_version_id,omitempty"`
 //	}
 //
 //	client.HasSourceAt.Query().
@@ -497,8 +498,8 @@ func (hsaq *HasSourceAtQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 }
 
 func (hsaq *HasSourceAtQuery) loadPackageVersion(ctx context.Context, query *PackageVersionQuery, nodes []*HasSourceAt, init func(*HasSourceAt), assign func(*HasSourceAt, *PackageVersion)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*HasSourceAt)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*HasSourceAt)
 	for i := range nodes {
 		if nodes[i].PackageVersionID == nil {
 			continue
@@ -529,8 +530,8 @@ func (hsaq *HasSourceAtQuery) loadPackageVersion(ctx context.Context, query *Pac
 	return nil
 }
 func (hsaq *HasSourceAtQuery) loadAllVersions(ctx context.Context, query *PackageNameQuery, nodes []*HasSourceAt, init func(*HasSourceAt), assign func(*HasSourceAt, *PackageName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*HasSourceAt)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*HasSourceAt)
 	for i := range nodes {
 		if nodes[i].PackageNameID == nil {
 			continue
@@ -561,8 +562,8 @@ func (hsaq *HasSourceAtQuery) loadAllVersions(ctx context.Context, query *Packag
 	return nil
 }
 func (hsaq *HasSourceAtQuery) loadSource(ctx context.Context, query *SourceNameQuery, nodes []*HasSourceAt, init func(*HasSourceAt), assign func(*HasSourceAt, *SourceName)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*HasSourceAt)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*HasSourceAt)
 	for i := range nodes {
 		fk := nodes[i].SourceID
 		if _, ok := nodeids[fk]; !ok {
@@ -603,7 +604,7 @@ func (hsaq *HasSourceAtQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (hsaq *HasSourceAtQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(hassourceat.Table, hassourceat.Columns, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(hassourceat.Table, hassourceat.Columns, sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID))
 	_spec.From = hsaq.sql
 	if unique := hsaq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

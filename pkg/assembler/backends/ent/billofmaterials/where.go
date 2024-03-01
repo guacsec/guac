@@ -7,61 +7,62 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.BillOfMaterials {
+func ID(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.BillOfMaterials {
+func IDEQ(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.BillOfMaterials {
+func IDNEQ(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.BillOfMaterials {
+func IDIn(ids ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.BillOfMaterials {
+func IDNotIn(ids ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.BillOfMaterials {
+func IDGT(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.BillOfMaterials {
+func IDGTE(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.BillOfMaterials {
+func IDLT(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.BillOfMaterials {
+func IDLTE(id uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldLTE(FieldID, id))
 }
 
 // PackageID applies equality check predicate on the "package_id" field. It's identical to PackageIDEQ.
-func PackageID(v int) predicate.BillOfMaterials {
+func PackageID(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldPackageID, v))
 }
 
 // ArtifactID applies equality check predicate on the "artifact_id" field. It's identical to ArtifactIDEQ.
-func ArtifactID(v int) predicate.BillOfMaterials {
+func ArtifactID(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldArtifactID, v))
 }
 
@@ -100,23 +101,43 @@ func KnownSince(v time.Time) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldKnownSince, v))
 }
 
+// IncludedPackagesHash applies equality check predicate on the "included_packages_hash" field. It's identical to IncludedPackagesHashEQ.
+func IncludedPackagesHash(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldIncludedPackagesHash, v))
+}
+
+// IncludedArtifactsHash applies equality check predicate on the "included_artifacts_hash" field. It's identical to IncludedArtifactsHashEQ.
+func IncludedArtifactsHash(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedDependenciesHash applies equality check predicate on the "included_dependencies_hash" field. It's identical to IncludedDependenciesHashEQ.
+func IncludedDependenciesHash(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedOccurrencesHash applies equality check predicate on the "included_occurrences_hash" field. It's identical to IncludedOccurrencesHashEQ.
+func IncludedOccurrencesHash(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldIncludedOccurrencesHash, v))
+}
+
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
-func PackageIDEQ(v int) predicate.BillOfMaterials {
+func PackageIDEQ(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldPackageID, v))
 }
 
 // PackageIDNEQ applies the NEQ predicate on the "package_id" field.
-func PackageIDNEQ(v int) predicate.BillOfMaterials {
+func PackageIDNEQ(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNEQ(FieldPackageID, v))
 }
 
 // PackageIDIn applies the In predicate on the "package_id" field.
-func PackageIDIn(vs ...int) predicate.BillOfMaterials {
+func PackageIDIn(vs ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldIn(FieldPackageID, vs...))
 }
 
 // PackageIDNotIn applies the NotIn predicate on the "package_id" field.
-func PackageIDNotIn(vs ...int) predicate.BillOfMaterials {
+func PackageIDNotIn(vs ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNotIn(FieldPackageID, vs...))
 }
 
@@ -131,22 +152,22 @@ func PackageIDNotNil() predicate.BillOfMaterials {
 }
 
 // ArtifactIDEQ applies the EQ predicate on the "artifact_id" field.
-func ArtifactIDEQ(v int) predicate.BillOfMaterials {
+func ArtifactIDEQ(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDNEQ applies the NEQ predicate on the "artifact_id" field.
-func ArtifactIDNEQ(v int) predicate.BillOfMaterials {
+func ArtifactIDNEQ(v uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNEQ(FieldArtifactID, v))
 }
 
 // ArtifactIDIn applies the In predicate on the "artifact_id" field.
-func ArtifactIDIn(vs ...int) predicate.BillOfMaterials {
+func ArtifactIDIn(vs ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldIn(FieldArtifactID, vs...))
 }
 
 // ArtifactIDNotIn applies the NotIn predicate on the "artifact_id" field.
-func ArtifactIDNotIn(vs ...int) predicate.BillOfMaterials {
+func ArtifactIDNotIn(vs ...uuid.UUID) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldNotIn(FieldArtifactID, vs...))
 }
 
@@ -588,6 +609,266 @@ func KnownSinceLT(v time.Time) predicate.BillOfMaterials {
 // KnownSinceLTE applies the LTE predicate on the "known_since" field.
 func KnownSinceLTE(v time.Time) predicate.BillOfMaterials {
 	return predicate.BillOfMaterials(sql.FieldLTE(FieldKnownSince, v))
+}
+
+// IncludedPackagesHashEQ applies the EQ predicate on the "included_packages_hash" field.
+func IncludedPackagesHashEQ(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashNEQ applies the NEQ predicate on the "included_packages_hash" field.
+func IncludedPackagesHashNEQ(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNEQ(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashIn applies the In predicate on the "included_packages_hash" field.
+func IncludedPackagesHashIn(vs ...string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldIn(FieldIncludedPackagesHash, vs...))
+}
+
+// IncludedPackagesHashNotIn applies the NotIn predicate on the "included_packages_hash" field.
+func IncludedPackagesHashNotIn(vs ...string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNotIn(FieldIncludedPackagesHash, vs...))
+}
+
+// IncludedPackagesHashGT applies the GT predicate on the "included_packages_hash" field.
+func IncludedPackagesHashGT(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGT(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashGTE applies the GTE predicate on the "included_packages_hash" field.
+func IncludedPackagesHashGTE(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGTE(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashLT applies the LT predicate on the "included_packages_hash" field.
+func IncludedPackagesHashLT(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLT(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashLTE applies the LTE predicate on the "included_packages_hash" field.
+func IncludedPackagesHashLTE(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLTE(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashContains applies the Contains predicate on the "included_packages_hash" field.
+func IncludedPackagesHashContains(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldContains(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashHasPrefix applies the HasPrefix predicate on the "included_packages_hash" field.
+func IncludedPackagesHashHasPrefix(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldHasPrefix(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashHasSuffix applies the HasSuffix predicate on the "included_packages_hash" field.
+func IncludedPackagesHashHasSuffix(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldHasSuffix(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashEqualFold applies the EqualFold predicate on the "included_packages_hash" field.
+func IncludedPackagesHashEqualFold(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEqualFold(FieldIncludedPackagesHash, v))
+}
+
+// IncludedPackagesHashContainsFold applies the ContainsFold predicate on the "included_packages_hash" field.
+func IncludedPackagesHashContainsFold(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldContainsFold(FieldIncludedPackagesHash, v))
+}
+
+// IncludedArtifactsHashEQ applies the EQ predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashEQ(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashNEQ applies the NEQ predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashNEQ(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNEQ(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashIn applies the In predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashIn(vs ...string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldIn(FieldIncludedArtifactsHash, vs...))
+}
+
+// IncludedArtifactsHashNotIn applies the NotIn predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashNotIn(vs ...string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNotIn(FieldIncludedArtifactsHash, vs...))
+}
+
+// IncludedArtifactsHashGT applies the GT predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashGT(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGT(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashGTE applies the GTE predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashGTE(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGTE(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashLT applies the LT predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashLT(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLT(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashLTE applies the LTE predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashLTE(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLTE(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashContains applies the Contains predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashContains(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldContains(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashHasPrefix applies the HasPrefix predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashHasPrefix(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldHasPrefix(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashHasSuffix applies the HasSuffix predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashHasSuffix(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldHasSuffix(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashEqualFold applies the EqualFold predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashEqualFold(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEqualFold(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedArtifactsHashContainsFold applies the ContainsFold predicate on the "included_artifacts_hash" field.
+func IncludedArtifactsHashContainsFold(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldContainsFold(FieldIncludedArtifactsHash, v))
+}
+
+// IncludedDependenciesHashEQ applies the EQ predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashEQ(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashNEQ applies the NEQ predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashNEQ(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNEQ(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashIn applies the In predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashIn(vs ...string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldIn(FieldIncludedDependenciesHash, vs...))
+}
+
+// IncludedDependenciesHashNotIn applies the NotIn predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashNotIn(vs ...string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNotIn(FieldIncludedDependenciesHash, vs...))
+}
+
+// IncludedDependenciesHashGT applies the GT predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashGT(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGT(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashGTE applies the GTE predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashGTE(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGTE(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashLT applies the LT predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashLT(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLT(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashLTE applies the LTE predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashLTE(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLTE(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashContains applies the Contains predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashContains(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldContains(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashHasPrefix applies the HasPrefix predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashHasPrefix(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldHasPrefix(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashHasSuffix applies the HasSuffix predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashHasSuffix(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldHasSuffix(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashEqualFold applies the EqualFold predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashEqualFold(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEqualFold(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedDependenciesHashContainsFold applies the ContainsFold predicate on the "included_dependencies_hash" field.
+func IncludedDependenciesHashContainsFold(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldContainsFold(FieldIncludedDependenciesHash, v))
+}
+
+// IncludedOccurrencesHashEQ applies the EQ predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashEQ(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEQ(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashNEQ applies the NEQ predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashNEQ(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNEQ(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashIn applies the In predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashIn(vs ...string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldIn(FieldIncludedOccurrencesHash, vs...))
+}
+
+// IncludedOccurrencesHashNotIn applies the NotIn predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashNotIn(vs ...string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldNotIn(FieldIncludedOccurrencesHash, vs...))
+}
+
+// IncludedOccurrencesHashGT applies the GT predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashGT(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGT(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashGTE applies the GTE predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashGTE(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldGTE(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashLT applies the LT predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashLT(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLT(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashLTE applies the LTE predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashLTE(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldLTE(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashContains applies the Contains predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashContains(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldContains(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashHasPrefix applies the HasPrefix predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashHasPrefix(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldHasPrefix(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashHasSuffix applies the HasSuffix predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashHasSuffix(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldHasSuffix(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashEqualFold applies the EqualFold predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashEqualFold(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldEqualFold(FieldIncludedOccurrencesHash, v))
+}
+
+// IncludedOccurrencesHashContainsFold applies the ContainsFold predicate on the "included_occurrences_hash" field.
+func IncludedOccurrencesHashContainsFold(v string) predicate.BillOfMaterials {
+	return predicate.BillOfMaterials(sql.FieldContainsFold(FieldIncludedOccurrencesHash, v))
 }
 
 // HasPackage applies the HasEdge predicate on the "package" edge.

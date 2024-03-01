@@ -199,13 +199,13 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	packageMap := make(map[string]*generated.IDorPkgInput)
 	for _, dep := range i.IsDependency {
 		if dep.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(dep.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](dep.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: dep.Pkg}
 			}
 		}
 		if dep.DepPkg != nil {
-			depPkgPurl := helpers.PkgInputSpecToPurl(dep.DepPkg)
+			depPkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](dep.DepPkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[depPkgPurl]; !ok {
 				packageMap[depPkgPurl] = &generated.IDorPkgInput{PackageInput: dep.DepPkg}
 			}
@@ -213,7 +213,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, occur := range i.IsOccurrence {
 		if occur.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(occur.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](occur.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: occur.Pkg}
 			}
@@ -221,7 +221,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, vuln := range i.CertifyVuln {
 		if vuln.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(vuln.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](vuln.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: vuln.Pkg}
 			}
@@ -229,7 +229,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, hasSource := range i.HasSourceAt {
 		if hasSource.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(hasSource.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](hasSource.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: hasSource.Pkg}
 			}
@@ -237,7 +237,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, bad := range i.CertifyBad {
 		if bad.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(bad.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](bad.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: bad.Pkg}
 			}
@@ -245,7 +245,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, good := range i.CertifyGood {
 		if good.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(good.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](good.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: good.Pkg}
 			}
@@ -253,7 +253,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, sbom := range i.HasSBOM {
 		if sbom.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(sbom.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](sbom.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: sbom.Pkg}
 			}
@@ -261,7 +261,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, v := range i.Vex {
 		if v.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(v.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](v.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: v.Pkg}
 			}
@@ -269,7 +269,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, poc := range i.PointOfContact {
 		if poc.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(poc.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](poc.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: poc.Pkg}
 			}
@@ -277,7 +277,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, hm := range i.HasMetadata {
 		if hm.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(hm.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](hm.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: hm.Pkg}
 			}
@@ -285,13 +285,13 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, equal := range i.PkgEqual {
 		if equal.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(equal.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](equal.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: equal.Pkg}
 			}
 		}
 		if equal.EqualPkg != nil {
-			equalPkgPurl := helpers.PkgInputSpecToPurl(equal.EqualPkg)
+			equalPkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](equal.EqualPkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[equalPkgPurl]; !ok {
 				packageMap[equalPkgPurl] = &generated.IDorPkgInput{PackageInput: equal.EqualPkg}
 			}
@@ -299,7 +299,7 @@ func (i IngestPredicates) GetPackages(ctx context.Context) map[string]*generated
 	}
 	for _, cl := range i.CertifyLegal {
 		if cl.Pkg != nil {
-			pkgPurl := helpers.PkgInputSpecToPurl(cl.Pkg)
+			pkgPurl := helpers.GetKey[*generated.PkgInputSpec, helpers.PkgIds](cl.Pkg, helpers.PkgClientKey).VersionId
 			if _, ok := packageMap[pkgPurl]; !ok {
 				packageMap[pkgPurl] = &generated.IDorPkgInput{PackageInput: cl.Pkg}
 			}
@@ -313,7 +313,7 @@ func (i IngestPredicates) GetSources(ctx context.Context) map[string]*generated.
 	sourceMap := make(map[string]*generated.IDorSourceInput)
 	for _, score := range i.CertifyScorecard {
 		if score.Source != nil {
-			sourceString := helpers.ConcatenateSourceInput(score.Source)
+			sourceString := helpers.GetKey[*generated.SourceInputSpec, helpers.SrcIds](score.Source, helpers.SrcClientKey).NameId
 			if _, ok := sourceMap[sourceString]; !ok {
 				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: score.Source}
 			}
@@ -321,7 +321,7 @@ func (i IngestPredicates) GetSources(ctx context.Context) map[string]*generated.
 	}
 	for _, occur := range i.IsOccurrence {
 		if occur.Src != nil {
-			sourceString := helpers.ConcatenateSourceInput(occur.Src)
+			sourceString := helpers.GetKey[*generated.SourceInputSpec, helpers.SrcIds](occur.Src, helpers.SrcClientKey).NameId
 			if _, ok := sourceMap[sourceString]; !ok {
 				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: occur.Src}
 			}
@@ -329,7 +329,7 @@ func (i IngestPredicates) GetSources(ctx context.Context) map[string]*generated.
 	}
 	for _, hasSource := range i.HasSourceAt {
 		if hasSource.Src != nil {
-			sourceString := helpers.ConcatenateSourceInput(hasSource.Src)
+			sourceString := helpers.GetKey[*generated.SourceInputSpec, helpers.SrcIds](hasSource.Src, helpers.SrcClientKey).NameId
 			if _, ok := sourceMap[sourceString]; !ok {
 				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: hasSource.Src}
 			}
@@ -337,7 +337,7 @@ func (i IngestPredicates) GetSources(ctx context.Context) map[string]*generated.
 	}
 	for _, bad := range i.CertifyBad {
 		if bad.Src != nil {
-			sourceString := helpers.ConcatenateSourceInput(bad.Src)
+			sourceString := helpers.GetKey[*generated.SourceInputSpec, helpers.SrcIds](bad.Src, helpers.SrcClientKey).NameId
 			if _, ok := sourceMap[sourceString]; !ok {
 				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: bad.Src}
 			}
@@ -345,7 +345,7 @@ func (i IngestPredicates) GetSources(ctx context.Context) map[string]*generated.
 	}
 	for _, good := range i.CertifyGood {
 		if good.Src != nil {
-			sourceString := helpers.ConcatenateSourceInput(good.Src)
+			sourceString := helpers.GetKey[*generated.SourceInputSpec, helpers.SrcIds](good.Src, helpers.SrcClientKey).NameId
 			if _, ok := sourceMap[sourceString]; !ok {
 				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: good.Src}
 			}
@@ -353,7 +353,7 @@ func (i IngestPredicates) GetSources(ctx context.Context) map[string]*generated.
 	}
 	for _, poc := range i.PointOfContact {
 		if poc.Src != nil {
-			sourceString := helpers.ConcatenateSourceInput(poc.Src)
+			sourceString := helpers.GetKey[*generated.SourceInputSpec, helpers.SrcIds](poc.Src, helpers.SrcClientKey).NameId
 			if _, ok := sourceMap[sourceString]; !ok {
 				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: poc.Src}
 			}
@@ -361,7 +361,7 @@ func (i IngestPredicates) GetSources(ctx context.Context) map[string]*generated.
 	}
 	for _, hm := range i.HasMetadata {
 		if hm.Src != nil {
-			sourceString := helpers.ConcatenateSourceInput(hm.Src)
+			sourceString := helpers.GetKey[*generated.SourceInputSpec, helpers.SrcIds](hm.Src, helpers.SrcClientKey).NameId
 			if _, ok := sourceMap[sourceString]; !ok {
 				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: hm.Src}
 			}
@@ -369,7 +369,7 @@ func (i IngestPredicates) GetSources(ctx context.Context) map[string]*generated.
 	}
 	for _, cl := range i.CertifyLegal {
 		if cl.Src != nil {
-			sourceString := helpers.ConcatenateSourceInput(cl.Src)
+			sourceString := helpers.GetKey[*generated.SourceInputSpec, helpers.SrcIds](cl.Src, helpers.SrcClientKey).NameId
 			if _, ok := sourceMap[sourceString]; !ok {
 				sourceMap[sourceString] = &generated.IDorSourceInput{SourceInput: cl.Src}
 			}
@@ -383,7 +383,7 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generate
 	artifactMap := make(map[string]*generated.IDorArtifactInput)
 	for _, occur := range i.IsOccurrence {
 		if occur.Artifact != nil {
-			artifactString := helpers.ArtifactKey(occur.Artifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](occur.Artifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: occur.Artifact}
 			}
@@ -391,7 +391,7 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generate
 	}
 	for _, slsa := range i.HasSlsa {
 		if slsa.Artifact != nil {
-			artifactString := helpers.ArtifactKey(slsa.Artifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](slsa.Artifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: slsa.Artifact}
 			}
@@ -399,7 +399,7 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generate
 	}
 	for _, sbom := range i.HasSBOM {
 		if sbom.Artifact != nil {
-			artifactString := helpers.ArtifactKey(sbom.Artifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](sbom.Artifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: sbom.Artifact}
 			}
@@ -407,7 +407,7 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generate
 	}
 	for _, bad := range i.CertifyBad {
 		if bad.Artifact != nil {
-			artifactString := helpers.ArtifactKey(bad.Artifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](bad.Artifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: bad.Artifact}
 			}
@@ -415,7 +415,7 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generate
 	}
 	for _, good := range i.CertifyGood {
 		if good.Artifact != nil {
-			artifactString := helpers.ArtifactKey(good.Artifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](good.Artifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: good.Artifact}
 			}
@@ -423,7 +423,7 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generate
 	}
 	for _, v := range i.Vex {
 		if v.Artifact != nil {
-			artifactString := helpers.ArtifactKey(v.Artifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](v.Artifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: v.Artifact}
 			}
@@ -431,7 +431,7 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generate
 	}
 	for _, poc := range i.PointOfContact {
 		if poc.Artifact != nil {
-			artifactString := helpers.ArtifactKey(poc.Artifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](poc.Artifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: poc.Artifact}
 			}
@@ -439,7 +439,7 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generate
 	}
 	for _, hm := range i.HasMetadata {
 		if hm.Artifact != nil {
-			artifactString := helpers.ArtifactKey(hm.Artifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](hm.Artifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: hm.Artifact}
 			}
@@ -447,13 +447,13 @@ func (i IngestPredicates) GetArtifacts(ctx context.Context) map[string]*generate
 	}
 	for _, equal := range i.HashEqual {
 		if equal.Artifact != nil {
-			artifactString := helpers.ArtifactKey(equal.Artifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](equal.Artifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: equal.Artifact}
 			}
 		}
 		if equal.EqualArtifact != nil {
-			artifactString := helpers.ArtifactKey(equal.EqualArtifact)
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](equal.EqualArtifact, helpers.ArtifactClientKey)
 			if _, ok := artifactMap[artifactString]; !ok {
 				artifactMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: equal.EqualArtifact}
 			}
@@ -467,7 +467,7 @@ func (i IngestPredicates) GetMaterials(ctx context.Context) map[string]*generate
 	materialMap := make(map[string]*generated.IDorArtifactInput)
 	for _, slsa := range i.HasSlsa {
 		for _, mat := range slsa.Materials {
-			artifactString := mat.Algorithm + ":" + mat.Digest
+			artifactString := helpers.GetKey[*generated.ArtifactInputSpec, string](&mat, helpers.ArtifactClientKey)
 			if _, ok := materialMap[artifactString]; !ok {
 				materialMap[artifactString] = &generated.IDorArtifactInput{ArtifactInput: &mat}
 			}
@@ -493,13 +493,13 @@ func (i IngestPredicates) GetBuilders(ctx context.Context) map[string]*generated
 func (i IngestPredicates) GetVulnerabilities(ctx context.Context) map[string]*generated.IDorVulnerabilityInput {
 	vulnMap := make(map[string]*generated.IDorVulnerabilityInput)
 	for _, v := range i.CertifyVuln {
-		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
+		equalVURI := helpers.GetKey[*generated.VulnerabilityInputSpec, helpers.VulnIds](v.Vulnerability, helpers.VulnClientKey).VulnerabilityID
 		if _, ok := vulnMap[equalVURI]; !ok {
 			vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.Vulnerability}
 		}
 	}
 	for _, v := range i.VulnMetadata {
-		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
+		equalVURI := helpers.GetKey[*generated.VulnerabilityInputSpec, helpers.VulnIds](v.Vulnerability, helpers.VulnClientKey).VulnerabilityID
 		if _, ok := vulnMap[equalVURI]; !ok {
 			vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.Vulnerability}
 		}
@@ -507,20 +507,20 @@ func (i IngestPredicates) GetVulnerabilities(ctx context.Context) map[string]*ge
 	}
 	for _, v := range i.VulnEqual {
 		if v.Vulnerability != nil {
-			equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
+			equalVURI := helpers.GetKey[*generated.VulnerabilityInputSpec, helpers.VulnIds](v.Vulnerability, helpers.VulnClientKey).VulnerabilityID
 			if _, ok := vulnMap[equalVURI]; !ok {
 				vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.Vulnerability}
 			}
 		}
 		if v.EqualVulnerability != nil {
-			equalVURI := helpers.VulnInputToVURI(v.EqualVulnerability)
+			equalVURI := helpers.GetKey[*generated.VulnerabilityInputSpec, helpers.VulnIds](v.EqualVulnerability, helpers.VulnClientKey).VulnerabilityID
 			if _, ok := vulnMap[equalVURI]; !ok {
 				vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.EqualVulnerability}
 			}
 		}
 	}
 	for _, v := range i.Vex {
-		equalVURI := helpers.VulnInputToVURI(v.Vulnerability)
+		equalVURI := helpers.GetKey[*generated.VulnerabilityInputSpec, helpers.VulnIds](v.Vulnerability, helpers.VulnClientKey).VulnerabilityID
 		if _, ok := vulnMap[equalVURI]; !ok {
 			vulnMap[equalVURI] = &generated.IDorVulnerabilityInput{VulnerabilityInput: v.Vulnerability}
 		}
@@ -533,13 +533,13 @@ func (i IngestPredicates) GetLicenses(ctx context.Context) map[string]*generated
 	licenseMap := make(map[string]*generated.IDorLicenseInput)
 	for _, cl := range i.CertifyLegal {
 		for i := range cl.Declared {
-			k := helpers.LicenseKey(&cl.Declared[i])
+			k := helpers.GetKey[*generated.LicenseInputSpec, string](&cl.Declared[i], helpers.LicenseClientKey)
 			if _, ok := licenseMap[k]; !ok {
 				licenseMap[k] = &generated.IDorLicenseInput{LicenseInput: &cl.Declared[i]}
 			}
 		}
 		for i := range cl.Discovered {
-			k := helpers.LicenseKey(&cl.Discovered[i])
+			k := helpers.GetKey[*generated.LicenseInputSpec, string](&cl.Discovered[i], helpers.LicenseClientKey)
 			if _, ok := licenseMap[k]; !ok {
 				licenseMap[k] = &generated.IDorLicenseInput{LicenseInput: &cl.Discovered[i]}
 			}

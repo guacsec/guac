@@ -40,7 +40,7 @@ func (cld *CertifyLegalDelete) ExecX(ctx context.Context) int {
 }
 
 func (cld *CertifyLegalDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(certifylegal.Table, sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(certifylegal.Table, sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID))
 	if ps := cld.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

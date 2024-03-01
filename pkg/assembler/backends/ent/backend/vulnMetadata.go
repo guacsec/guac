@@ -17,17 +17,15 @@ package backend
 
 import (
 	"context"
-	stdsql "database/sql"
 	"fmt"
-	"strconv"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -38,9 +36,7 @@ func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 	records, err := b.client.VulnerabilityMetadata.Query().
 		Where(vulnerabilityMetadataPredicate(filter)).
 		Limit(MaxPageSize).
-		WithVulnerabilityID(func(q *ent.VulnerabilityIDQuery) {
-			q.WithType()
-		}).
+		WithVulnerabilityID(func(q *ent.VulnerabilityIDQuery) {}).
 		All(ctx)
 
 	if err != nil {
@@ -51,26 +47,31 @@ func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 }
 
 func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
-	recordID, err := WithinTX(ctx, b.client, func(ctx context.Context) (*int, error) {
-		return upsertVulnerabilityMetadata(ctx, ent.TxFromContext(ctx), *vulnerability.VulnerabilityInput, vulnerabilityMetadata)
+	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
+		return upsertVulnerabilityMetadata(ctx, ent.TxFromContext(ctx), vulnerability, vulnerabilityMetadata)
 	})
-	if err != nil {
-		return "", fmt.Errorf("failed to execute IngestVulnerabilityMetadata :: %s", err)
+	if txErr != nil {
+		return "", fmt.Errorf("failed to execute IngestVulnerabilityMetadata :: %s", txErr)
 	}
 
-	return strconv.Itoa(*recordID), nil
+	return *recordID, nil
 }
 
 func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
-	var results []string
-	for i := range vulnerabilityMetadataList {
-		hm, err := b.IngestVulnerabilityMetadata(ctx, *vulnerabilities[i], *vulnerabilityMetadataList[i])
+	funcName := "IngestBulkVulnerabilityMetadata"
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		slc, err := upsertBulkVulnerabilityMetadata(ctx, client, vulnerabilities, vulnerabilityMetadataList)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestBulkVulnerabilityMetadata failed with element #%v with err: %v", i, err)
+			return nil, err
 		}
-		results = append(results, hm)
+		return slc, nil
+	})
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
-	return results, nil
+
+	return *ids, nil
 }
 
 func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) predicate.VulnerabilityMetadata {
@@ -110,16 +111,14 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) pre
 		predicates = append(predicates,
 			vulnerabilitymetadata.HasVulnerabilityIDWith(
 				optionalPredicate(filter.Vulnerability.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold),
-				vulnerabilityid.HasTypeWith(
-					optionalPredicate(filter.Vulnerability.ID, IDEQ),
-					optionalPredicate(filter.Vulnerability.Type, vulnerabilitytype.TypeEqualFold),
-				),
+				optionalPredicate(filter.Vulnerability.ID, IDEQ),
+				optionalPredicate(filter.Vulnerability.Type, vulnerabilityid.TypeEqualFold),
 			),
 		)
 		if filter.Vulnerability.NoVuln != nil && *filter.Vulnerability.NoVuln {
 			predicates = append(predicates,
 				vulnerabilitymetadata.HasVulnerabilityIDWith(
-					vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(NoVuln)),
+					vulnerabilityid.TypeEqualFold(NoVuln),
 				),
 			)
 		}
@@ -127,24 +126,8 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) pre
 	return vulnerabilitymetadata.And(predicates...)
 }
 
-func upsertVulnerabilityMetadata(ctx context.Context, client *ent.Tx, vulnerability model.VulnerabilityInputSpec, spec model.VulnerabilityMetadataInputSpec) (*int, error) {
-	vulnerabilityRecordID, err := client.VulnerabilityID.Query().
-		Where(
-			vulnerabilityid.VulnerabilityIDEqualFold(vulnerability.VulnerabilityID),
-			vulnerabilityid.HasTypeWith(vulnerabilitytype.TypeEqualFold(vulnerability.Type)),
-		).
-		OnlyID(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "get VulnerabilityID")
-	}
-
-	insert := client.VulnerabilityMetadata.Create().
-		SetVulnerabilityIDID(vulnerabilityRecordID).
-		SetScoreType(vulnerabilitymetadata.ScoreType(spec.ScoreType)).
-		SetScoreValue(spec.ScoreValue).
-		SetTimestamp(spec.Timestamp.UTC()).
-		SetOrigin(spec.Origin).
-		SetCollector(spec.Collector)
+func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	conflictColumns := []string{
 		vulnerabilitymetadata.FieldVulnerabilityIDID,
@@ -154,38 +137,110 @@ func upsertVulnerabilityMetadata(ctx context.Context, client *ent.Tx, vulnerabil
 		vulnerabilitymetadata.FieldOrigin,
 		vulnerabilitymetadata.FieldCollector,
 	}
-	var conflictWhere *sql.Predicate
 
-	id, err := insert.OnConflict(
-		sql.ConflictColumns(conflictColumns...),
-		sql.ConflictWhere(conflictWhere),
-	).
-		DoNothing().
-		ID(ctx)
-	if err != nil {
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert VulnerabilityMetadata node")
+	batches := chunk(vulnerabilityMetadataList, 100)
+
+	index := 0
+	for _, vml := range batches {
+		creates := make([]*ent.VulnerabilityMetadataCreate, len(vml))
+		for i, vm := range vml {
+			vm := vm
+			var err error
+
+			creates[i], err = generateVulnMetadataCreate(ctx, tx, vulnerabilities[index], vm)
+			if err != nil {
+				return nil, gqlerror.Errorf("generateVulnEqualCreate :: %s", err)
+			}
+			index++
 		}
-		id, err = client.VulnerabilityMetadata.Query().
-			Where(vulnerabilityMetadataInputPredicate(vulnerability, spec)).
-			OnlyID(ctx)
+
+		err := tx.VulnerabilityMetadata.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+			).
+			DoNothing().
+			Exec(ctx)
 		if err != nil {
-			return nil, errors.Wrap(err, "get VulnerabilityMetadata")
+			return nil, errors.Wrap(err, "bulk upsert VulnerabilityMetadata node")
 		}
 	}
 
-	return &id, nil
+	return &ids, nil
+}
+
+func generateVulnMetadataCreate(ctx context.Context, tx *ent.Tx, vuln *model.IDorVulnerabilityInput, metadata *model.VulnerabilityMetadataInputSpec) (*ent.VulnerabilityMetadataCreate, error) {
+
+	if vuln == nil {
+		return nil, fmt.Errorf("vulnerability must be specified for vulnMetadata")
+	}
+	var vulnID uuid.UUID
+	if vuln.VulnerabilityNodeID != nil {
+		var err error
+		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
+		}
+	} else {
+		foundVulnID, err := tx.VulnerabilityID.Query().
+			Where(
+				vulnerabilityid.VulnerabilityIDEqualFold(vuln.VulnerabilityInput.VulnerabilityID),
+				vulnerabilityid.TypeEqualFold(vuln.VulnerabilityInput.Type),
+			).
+			OnlyID(ctx)
+		if err != nil {
+			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
+		}
+		vulnID = foundVulnID
+	}
+
+	vulnMetadataCreate := tx.VulnerabilityMetadata.Create()
+
+	vulnMetadataCreate.
+		SetVulnerabilityIDID(vulnID).
+		SetScoreType(vulnerabilitymetadata.ScoreType(metadata.ScoreType)).
+		SetScoreValue(metadata.ScoreValue).
+		SetTimestamp(metadata.Timestamp.UTC()).
+		SetOrigin(metadata.Origin).
+		SetCollector(metadata.Collector)
+
+	return vulnMetadataCreate, nil
+}
+
+func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability model.IDorVulnerabilityInput, spec model.VulnerabilityMetadataInputSpec) (*string, error) {
+	conflictColumns := []string{
+		vulnerabilitymetadata.FieldVulnerabilityIDID,
+		vulnerabilitymetadata.FieldScoreType,
+		vulnerabilitymetadata.FieldScoreValue,
+		vulnerabilitymetadata.FieldTimestamp,
+		vulnerabilitymetadata.FieldOrigin,
+		vulnerabilitymetadata.FieldCollector,
+	}
+
+	insert, err := generateVulnMetadataCreate(ctx, tx, &vulnerability, &spec)
+	if err != nil {
+		return nil, gqlerror.Errorf("generateVulnMetadataCreate :: %s", err)
+
+	}
+	if id, err := insert.OnConflict(
+		sql.ConflictColumns(conflictColumns...),
+	).
+		Ignore().
+		ID(ctx); err != nil {
+		return nil, errors.Wrap(err, "upsert VulnerabilityMetadata node")
+	} else {
+		return ptrfrom.String(id.String()), nil
+	}
 }
 
 func toModelVulnerabilityMetadata(v *ent.VulnerabilityMetadata) *model.VulnerabilityMetadata {
 	return &model.VulnerabilityMetadata{
-		ID: nodeID(v.ID),
+		ID: v.ID.String(),
 		Vulnerability: &model.Vulnerability{
-			ID:   nodeID(v.Edges.VulnerabilityID.Edges.Type.ID),
-			Type: v.Edges.VulnerabilityID.Edges.Type.Type,
+			ID:   fmt.Sprintf("%s:%s", vulnTypeString, v.Edges.VulnerabilityID.ID.String()),
+			Type: v.Edges.VulnerabilityID.Type,
 			VulnerabilityIDs: []*model.VulnerabilityID{
 				{
-					ID:              nodeID(v.Edges.VulnerabilityID.ID),
+					ID:              v.Edges.VulnerabilityID.ID.String(),
 					VulnerabilityID: v.Edges.VulnerabilityID.VulnerabilityID,
 				},
 			},
@@ -196,18 +251,4 @@ func toModelVulnerabilityMetadata(v *ent.VulnerabilityMetadata) *model.Vulnerabi
 		Origin:     v.Origin,
 		Collector:  v.Collector,
 	}
-}
-
-func vulnerabilityMetadataInputPredicate(vulnerability model.VulnerabilityInputSpec, filter model.VulnerabilityMetadataInputSpec) predicate.VulnerabilityMetadata {
-	return vulnerabilityMetadataPredicate(&model.VulnerabilityMetadataSpec{
-		Vulnerability: &model.VulnerabilitySpec{
-			Type:            &vulnerability.Type,
-			VulnerabilityID: &vulnerability.VulnerabilityID,
-		},
-		ScoreType:  &filter.ScoreType,
-		ScoreValue: &filter.ScoreValue,
-		Timestamp:  &filter.Timestamp,
-		Origin:     &filter.Origin,
-		Collector:  &filter.Collector,
-	})
 }

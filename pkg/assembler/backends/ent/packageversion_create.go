@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -27,8 +29,8 @@ type PackageVersionCreate struct {
 }
 
 // SetNameID sets the "name_id" field.
-func (pvc *PackageVersionCreate) SetNameID(i int) *PackageVersionCreate {
-	pvc.mutation.SetNameID(i)
+func (pvc *PackageVersionCreate) SetNameID(u uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.SetNameID(u)
 	return pvc
 }
 
@@ -72,20 +74,34 @@ func (pvc *PackageVersionCreate) SetHash(s string) *PackageVersionCreate {
 	return pvc
 }
 
+// SetID sets the "id" field.
+func (pvc *PackageVersionCreate) SetID(u uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.SetID(u)
+	return pvc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pvc *PackageVersionCreate) SetNillableID(u *uuid.UUID) *PackageVersionCreate {
+	if u != nil {
+		pvc.SetID(*u)
+	}
+	return pvc
+}
+
 // SetName sets the "name" edge to the PackageName entity.
 func (pvc *PackageVersionCreate) SetName(p *PackageName) *PackageVersionCreate {
 	return pvc.SetNameID(p.ID)
 }
 
 // AddOccurrenceIDs adds the "occurrences" edge to the Occurrence entity by IDs.
-func (pvc *PackageVersionCreate) AddOccurrenceIDs(ids ...int) *PackageVersionCreate {
+func (pvc *PackageVersionCreate) AddOccurrenceIDs(ids ...uuid.UUID) *PackageVersionCreate {
 	pvc.mutation.AddOccurrenceIDs(ids...)
 	return pvc
 }
 
 // AddOccurrences adds the "occurrences" edges to the Occurrence entity.
 func (pvc *PackageVersionCreate) AddOccurrences(o ...*Occurrence) *PackageVersionCreate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -93,48 +109,63 @@ func (pvc *PackageVersionCreate) AddOccurrences(o ...*Occurrence) *PackageVersio
 }
 
 // AddSbomIDs adds the "sbom" edge to the BillOfMaterials entity by IDs.
-func (pvc *PackageVersionCreate) AddSbomIDs(ids ...int) *PackageVersionCreate {
+func (pvc *PackageVersionCreate) AddSbomIDs(ids ...uuid.UUID) *PackageVersionCreate {
 	pvc.mutation.AddSbomIDs(ids...)
 	return pvc
 }
 
 // AddSbom adds the "sbom" edges to the BillOfMaterials entity.
 func (pvc *PackageVersionCreate) AddSbom(b ...*BillOfMaterials) *PackageVersionCreate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
 	return pvc.AddSbomIDs(ids...)
 }
 
-// AddEqualPackageIDs adds the "equal_packages" edge to the PkgEqual entity by IDs.
-func (pvc *PackageVersionCreate) AddEqualPackageIDs(ids ...int) *PackageVersionCreate {
-	pvc.mutation.AddEqualPackageIDs(ids...)
-	return pvc
-}
-
-// AddEqualPackages adds the "equal_packages" edges to the PkgEqual entity.
-func (pvc *PackageVersionCreate) AddEqualPackages(p ...*PkgEqual) *PackageVersionCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pvc.AddEqualPackageIDs(ids...)
-}
-
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
-func (pvc *PackageVersionCreate) AddIncludedInSbomIDs(ids ...int) *PackageVersionCreate {
+func (pvc *PackageVersionCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionCreate {
 	pvc.mutation.AddIncludedInSbomIDs(ids...)
 	return pvc
 }
 
 // AddIncludedInSboms adds the "included_in_sboms" edges to the BillOfMaterials entity.
 func (pvc *PackageVersionCreate) AddIncludedInSboms(b ...*BillOfMaterials) *PackageVersionCreate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
 	return pvc.AddIncludedInSbomIDs(ids...)
+}
+
+// AddPkgEqualPkgAIDs adds the "pkg_equal_pkg_a" edge to the PkgEqual entity by IDs.
+func (pvc *PackageVersionCreate) AddPkgEqualPkgAIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddPkgEqualPkgAIDs(ids...)
+	return pvc
+}
+
+// AddPkgEqualPkgA adds the "pkg_equal_pkg_a" edges to the PkgEqual entity.
+func (pvc *PackageVersionCreate) AddPkgEqualPkgA(p ...*PkgEqual) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvc.AddPkgEqualPkgAIDs(ids...)
+}
+
+// AddPkgEqualPkgBIDs adds the "pkg_equal_pkg_b" edge to the PkgEqual entity by IDs.
+func (pvc *PackageVersionCreate) AddPkgEqualPkgBIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddPkgEqualPkgBIDs(ids...)
+	return pvc
+}
+
+// AddPkgEqualPkgB adds the "pkg_equal_pkg_b" edges to the PkgEqual entity.
+func (pvc *PackageVersionCreate) AddPkgEqualPkgB(p ...*PkgEqual) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvc.AddPkgEqualPkgBIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -180,6 +211,10 @@ func (pvc *PackageVersionCreate) defaults() {
 		v := packageversion.DefaultSubpath
 		pvc.mutation.SetSubpath(v)
 	}
+	if _, ok := pvc.mutation.ID(); !ok {
+		v := packageversion.DefaultID()
+		pvc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -213,8 +248,13 @@ func (pvc *PackageVersionCreate) sqlSave(ctx context.Context) (*PackageVersion, 
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	pvc.mutation.id = &_node.ID
 	pvc.mutation.done = true
 	return _node, nil
@@ -223,9 +263,13 @@ func (pvc *PackageVersionCreate) sqlSave(ctx context.Context) (*PackageVersion, 
 func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.CreateSpec) {
 	var (
 		_node = &PackageVersion{config: pvc.config}
-		_spec = sqlgraph.NewCreateSpec(packageversion.Table, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(packageversion.Table, sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = pvc.conflict
+	if id, ok := pvc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := pvc.mutation.Version(); ok {
 		_spec.SetField(packageversion.FieldVersion, field.TypeString, value)
 		_node.Version = value
@@ -250,7 +294,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			Columns: []string{packageversion.NameColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(packagename.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -267,7 +311,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			Columns: []string{packageversion.OccurrencesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -283,23 +327,7 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			Columns: []string{packageversion.SbomColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := pvc.mutation.EqualPackagesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   packageversion.EqualPackagesTable,
-			Columns: packageversion.EqualPackagesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -315,7 +343,39 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			Columns: packageversion.IncludedInSbomsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.PkgEqualPkgAIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgATable,
+			Columns: []string{packageversion.PkgEqualPkgAColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.PkgEqualPkgBIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PkgEqualPkgBTable,
+			Columns: []string{packageversion.PkgEqualPkgBColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -376,7 +436,7 @@ type (
 )
 
 // SetNameID sets the "name_id" field.
-func (u *PackageVersionUpsert) SetNameID(v int) *PackageVersionUpsert {
+func (u *PackageVersionUpsert) SetNameID(v uuid.UUID) *PackageVersionUpsert {
 	u.Set(packageversion.FieldNameID, v)
 	return u
 }
@@ -441,16 +501,24 @@ func (u *PackageVersionUpsert) UpdateHash() *PackageVersionUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.PackageVersion.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(packageversion.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PackageVersionUpsertOne) UpdateNewValues() *PackageVersionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(packageversion.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -482,7 +550,7 @@ func (u *PackageVersionUpsertOne) Update(set func(*PackageVersionUpsert)) *Packa
 }
 
 // SetNameID sets the "name_id" field.
-func (u *PackageVersionUpsertOne) SetNameID(v int) *PackageVersionUpsertOne {
+func (u *PackageVersionUpsertOne) SetNameID(v uuid.UUID) *PackageVersionUpsertOne {
 	return u.Update(func(s *PackageVersionUpsert) {
 		s.SetNameID(v)
 	})
@@ -574,7 +642,12 @@ func (u *PackageVersionUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *PackageVersionUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *PackageVersionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: PackageVersionUpsertOne.ID is not supported by MySQL driver. Use PackageVersionUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -583,7 +656,7 @@ func (u *PackageVersionUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *PackageVersionUpsertOne) IDX(ctx context.Context) int {
+func (u *PackageVersionUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -638,10 +711,6 @@ func (pvcb *PackageVersionCreateBulk) Save(ctx context.Context) ([]*PackageVersi
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -728,10 +797,20 @@ type PackageVersionUpsertBulk struct {
 //	client.PackageVersion.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(packageversion.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PackageVersionUpsertBulk) UpdateNewValues() *PackageVersionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(packageversion.FieldID)
+			}
+		}
+	}))
 	return u
 }
 
@@ -763,7 +842,7 @@ func (u *PackageVersionUpsertBulk) Update(set func(*PackageVersionUpsert)) *Pack
 }
 
 // SetNameID sets the "name_id" field.
-func (u *PackageVersionUpsertBulk) SetNameID(v int) *PackageVersionUpsertBulk {
+func (u *PackageVersionUpsertBulk) SetNameID(v uuid.UUID) *PackageVersionUpsertBulk {
 	return u.Update(func(s *PackageVersionUpsert) {
 		s.SetNameID(v)
 	})

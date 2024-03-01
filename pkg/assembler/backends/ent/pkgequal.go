@@ -8,6 +8,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 )
 
@@ -15,14 +17,18 @@ import (
 type PkgEqual struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// PkgID holds the value of the "pkg_id" field.
+	PkgID uuid.UUID `json:"pkg_id,omitempty"`
+	// EqualPkgID holds the value of the "equal_pkg_id" field.
+	EqualPkgID uuid.UUID `json:"equal_pkg_id,omitempty"`
 	// Origin holds the value of the "origin" field.
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
-	// An opaque hash of the packages that are equal
+	// An opaque hash of the package IDs that are equal
 	PackagesHash string `json:"packages_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PkgEqualQuery when eager-loading is set.
@@ -32,24 +38,41 @@ type PkgEqual struct {
 
 // PkgEqualEdges holds the relations/edges for other nodes in the graph.
 type PkgEqualEdges struct {
-	// Packages holds the value of the packages edge.
-	Packages []*PackageVersion `json:"packages,omitempty"`
+	// PackageA holds the value of the package_a edge.
+	PackageA *PackageVersion `json:"package_a,omitempty"`
+	// PackageB holds the value of the package_b edge.
+	PackageB *PackageVersion `json:"package_b,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
-
-	namedPackages map[string][]*PackageVersion
+	totalCount [2]map[string]int
 }
 
-// PackagesOrErr returns the Packages value or an error if the edge
-// was not loaded in eager-loading.
-func (e PkgEqualEdges) PackagesOrErr() ([]*PackageVersion, error) {
+// PackageAOrErr returns the PackageA value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PkgEqualEdges) PackageAOrErr() (*PackageVersion, error) {
 	if e.loadedTypes[0] {
-		return e.Packages, nil
+		if e.PackageA == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: packageversion.Label}
+		}
+		return e.PackageA, nil
 	}
-	return nil, &NotLoadedError{edge: "packages"}
+	return nil, &NotLoadedError{edge: "package_a"}
+}
+
+// PackageBOrErr returns the PackageB value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PkgEqualEdges) PackageBOrErr() (*PackageVersion, error) {
+	if e.loadedTypes[1] {
+		if e.PackageB == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: packageversion.Label}
+		}
+		return e.PackageB, nil
+	}
+	return nil, &NotLoadedError{edge: "package_b"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -57,10 +80,10 @@ func (*PkgEqual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case pkgequal.FieldID:
-			values[i] = new(sql.NullInt64)
 		case pkgequal.FieldOrigin, pkgequal.FieldCollector, pkgequal.FieldJustification, pkgequal.FieldPackagesHash:
 			values[i] = new(sql.NullString)
+		case pkgequal.FieldID, pkgequal.FieldPkgID, pkgequal.FieldEqualPkgID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -77,11 +100,23 @@ func (pe *PkgEqual) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case pkgequal.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pe.ID = *value
 			}
-			pe.ID = int(value.Int64)
+		case pkgequal.FieldPkgID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field pkg_id", values[i])
+			} else if value != nil {
+				pe.PkgID = *value
+			}
+		case pkgequal.FieldEqualPkgID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field equal_pkg_id", values[i])
+			} else if value != nil {
+				pe.EqualPkgID = *value
+			}
 		case pkgequal.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
@@ -119,9 +154,14 @@ func (pe *PkgEqual) Value(name string) (ent.Value, error) {
 	return pe.selectValues.Get(name)
 }
 
-// QueryPackages queries the "packages" edge of the PkgEqual entity.
-func (pe *PkgEqual) QueryPackages() *PackageVersionQuery {
-	return NewPkgEqualClient(pe.config).QueryPackages(pe)
+// QueryPackageA queries the "package_a" edge of the PkgEqual entity.
+func (pe *PkgEqual) QueryPackageA() *PackageVersionQuery {
+	return NewPkgEqualClient(pe.config).QueryPackageA(pe)
+}
+
+// QueryPackageB queries the "package_b" edge of the PkgEqual entity.
+func (pe *PkgEqual) QueryPackageB() *PackageVersionQuery {
+	return NewPkgEqualClient(pe.config).QueryPackageB(pe)
 }
 
 // Update returns a builder for updating this PkgEqual.
@@ -147,6 +187,12 @@ func (pe *PkgEqual) String() string {
 	var builder strings.Builder
 	builder.WriteString("PkgEqual(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pe.ID))
+	builder.WriteString("pkg_id=")
+	builder.WriteString(fmt.Sprintf("%v", pe.PkgID))
+	builder.WriteString(", ")
+	builder.WriteString("equal_pkg_id=")
+	builder.WriteString(fmt.Sprintf("%v", pe.EqualPkgID))
+	builder.WriteString(", ")
 	builder.WriteString("origin=")
 	builder.WriteString(pe.Origin)
 	builder.WriteString(", ")
@@ -160,30 +206,6 @@ func (pe *PkgEqual) String() string {
 	builder.WriteString(pe.PackagesHash)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// NamedPackages returns the Packages named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (pe *PkgEqual) NamedPackages(name string) ([]*PackageVersion, error) {
-	if pe.Edges.namedPackages == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := pe.Edges.namedPackages[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (pe *PkgEqual) appendNamedPackages(name string, edges ...*PackageVersion) {
-	if pe.Edges.namedPackages == nil {
-		pe.Edges.namedPackages = make(map[string][]*PackageVersion)
-	}
-	if len(edges) == 0 {
-		pe.Edges.namedPackages[name] = []*PackageVersion{}
-	} else {
-		pe.Edges.namedPackages[name] = append(pe.Edges.namedPackages[name], edges...)
-	}
 }
 
 // PkgEquals is a parsable slice of PkgEqual.

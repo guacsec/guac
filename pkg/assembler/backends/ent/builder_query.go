@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
@@ -109,8 +110,8 @@ func (bq *BuilderQuery) FirstX(ctx context.Context) *Builder {
 
 // FirstID returns the first Builder ID from the query.
 // Returns a *NotFoundError when no Builder ID was found.
-func (bq *BuilderQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BuilderQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -122,7 +123,7 @@ func (bq *BuilderQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (bq *BuilderQuery) FirstIDX(ctx context.Context) int {
+func (bq *BuilderQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := bq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +161,8 @@ func (bq *BuilderQuery) OnlyX(ctx context.Context) *Builder {
 // OnlyID is like Only, but returns the only Builder ID in the query.
 // Returns a *NotSingularError when more than one Builder ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (bq *BuilderQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BuilderQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -177,7 +178,7 @@ func (bq *BuilderQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (bq *BuilderQuery) OnlyIDX(ctx context.Context) int {
+func (bq *BuilderQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := bq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -205,7 +206,7 @@ func (bq *BuilderQuery) AllX(ctx context.Context) []*Builder {
 }
 
 // IDs executes the query and returns a list of Builder IDs.
-func (bq *BuilderQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (bq *BuilderQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if bq.ctx.Unique == nil && bq.path != nil {
 		bq.Unique(true)
 	}
@@ -217,7 +218,7 @@ func (bq *BuilderQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (bq *BuilderQuery) IDsX(ctx context.Context) []int {
+func (bq *BuilderQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := bq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -422,7 +423,7 @@ func (bq *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Buil
 
 func (bq *BuilderQuery) loadSlsaAttestations(ctx context.Context, query *SLSAAttestationQuery, nodes []*Builder, init func(*Builder), assign func(*Builder, *SLSAAttestation)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Builder)
+	nodeids := make(map[uuid.UUID]*Builder)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -464,7 +465,7 @@ func (bq *BuilderQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (bq *BuilderQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(builder.Table, builder.Columns, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(builder.Table, builder.Columns, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeUUID))
 	_spec.From = bq.sql
 	if unique := bq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

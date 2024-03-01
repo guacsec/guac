@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -20,15 +21,15 @@ import (
 type PointOfContact struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// SourceID holds the value of the "source_id" field.
-	SourceID *int `json:"source_id,omitempty"`
+	SourceID *uuid.UUID `json:"source_id,omitempty"`
 	// PackageVersionID holds the value of the "package_version_id" field.
-	PackageVersionID *int `json:"package_version_id,omitempty"`
+	PackageVersionID *uuid.UUID `json:"package_version_id,omitempty"`
 	// PackageNameID holds the value of the "package_name_id" field.
-	PackageNameID *int `json:"package_name_id,omitempty"`
+	PackageNameID *uuid.UUID `json:"package_name_id,omitempty"`
 	// ArtifactID holds the value of the "artifact_id" field.
-	ArtifactID *int `json:"artifact_id,omitempty"`
+	ArtifactID *uuid.UUID `json:"artifact_id,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Info holds the value of the "info" field.
@@ -121,12 +122,14 @@ func (*PointOfContact) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case pointofcontact.FieldID, pointofcontact.FieldSourceID, pointofcontact.FieldPackageVersionID, pointofcontact.FieldPackageNameID, pointofcontact.FieldArtifactID:
-			values[i] = new(sql.NullInt64)
+		case pointofcontact.FieldSourceID, pointofcontact.FieldPackageVersionID, pointofcontact.FieldPackageNameID, pointofcontact.FieldArtifactID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case pointofcontact.FieldEmail, pointofcontact.FieldInfo, pointofcontact.FieldJustification, pointofcontact.FieldOrigin, pointofcontact.FieldCollector:
 			values[i] = new(sql.NullString)
 		case pointofcontact.FieldSince:
 			values[i] = new(sql.NullTime)
+		case pointofcontact.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -143,38 +146,38 @@ func (poc *PointOfContact) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case pointofcontact.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				poc.ID = *value
 			}
-			poc.ID = int(value.Int64)
 		case pointofcontact.FieldSourceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field source_id", values[i])
 			} else if value.Valid {
-				poc.SourceID = new(int)
-				*poc.SourceID = int(value.Int64)
+				poc.SourceID = new(uuid.UUID)
+				*poc.SourceID = *value.S.(*uuid.UUID)
 			}
 		case pointofcontact.FieldPackageVersionID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_version_id", values[i])
 			} else if value.Valid {
-				poc.PackageVersionID = new(int)
-				*poc.PackageVersionID = int(value.Int64)
+				poc.PackageVersionID = new(uuid.UUID)
+				*poc.PackageVersionID = *value.S.(*uuid.UUID)
 			}
 		case pointofcontact.FieldPackageNameID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field package_name_id", values[i])
 			} else if value.Valid {
-				poc.PackageNameID = new(int)
-				*poc.PackageNameID = int(value.Int64)
+				poc.PackageNameID = new(uuid.UUID)
+				*poc.PackageNameID = *value.S.(*uuid.UUID)
 			}
 		case pointofcontact.FieldArtifactID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field artifact_id", values[i])
 			} else if value.Valid {
-				poc.ArtifactID = new(int)
-				*poc.ArtifactID = int(value.Int64)
+				poc.ArtifactID = new(uuid.UUID)
+				*poc.ArtifactID = *value.S.(*uuid.UUID)
 			}
 		case pointofcontact.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
