@@ -43,6 +43,13 @@ func nodeHash(n *Node) string {
 	return n.ID
 }
 
+func truncateNewline(original string, length int) string {
+    if len(original) > 20 {
+        return original[:length]
+    } else {
+        return original
+    }
+}
 func setNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interface{}){
 	var (
 		err error
@@ -161,18 +168,15 @@ func verifyFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, purl bool)
 
 func printSBOMs(sboms []model.HasSBOMsHasSBOM) {
 
-	// Create a new table
 	table := tablewriter.NewWriter(os.Stdout)
 
-	// Define the table headers
 	table.SetHeader([]string{"ID", "Uri", "Algorithm", "Digest", "Download Location", "Origin", "Collector", "known Since"})
 
 	for _, sbom := range sboms {
-		table.Append([]string{sbom.Id, sbom.Uri, sbom.Algorithm, sbom.Digest, sbom.DownloadLocation, sbom.Origin, sbom.Collector, sbom.KnownSince.String()})
+		table.Append([]string{truncateNewline(sbom.Id,20), truncateNewline(sbom.Uri,20), truncateNewline(sbom.Algorithm,20), truncateNewline(sbom.Digest,20), truncateNewline(sbom.DownloadLocation,20), truncateNewline(sbom.Origin,20), truncateNewline(sbom.Collector,20), truncateNewline(sbom.KnownSince.String(),20)})
 	}
 
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetAutoWrapText(true)
 
 	table.Render()
 }
@@ -243,7 +247,6 @@ var diffCmd = &cobra.Command{
 			if rootCmd.PersistentFlags().Changed("Collector"){
 				listCollector, _ := cmd.Flags().GetString("Collector")
 				listCollectorAddr = &listCollector
-				
 			}
 		
 			//This might not output anything as graphql would consider "" as a valid entry @abhi
