@@ -51,8 +51,22 @@ type arangoClient struct {
 	graph  driver.Graph
 }
 
+type index struct {
+	name   string
+	fields []string
+	unique bool
+}
+
 func init() {
 	backends.Register("arango", getBackend)
+}
+
+func initIndex(name string, fields []string, unique bool) *index {
+	return &index{
+		name: name,
+		fields: fields,
+		unique: unique,
+	}
 }
 
 func arangoDBConnect(address, user, password string) (driver.Client, error) {
@@ -133,7 +147,6 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 	var graph driver.Graph
 
 	// check if graph exists
-
 	graphExists, err := db.GraphExists(ctx, arangoGraph)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check if graph exists with error: %w", err)
@@ -148,6 +161,11 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to get create missing edge collections: %w", err)
 		}
 
+		err = compareAndCreateIndexes(ctx, db)
+		if err != nil {
+			return nil, fmt.Errorf("failed to compare with existing indexes and create new ones: %w", err)
+		}
+
 	} else {
 		err := createGraph(ctx, db, arangoGraph, edgeDefinitions)
 		if err != nil {
@@ -157,231 +175,11 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		// TODO (pxp928): Add missing indexes for verbs as needed
 
 		// add indexes to artifact and edge collections
-		if err := createIndexPerCollection(ctx, db, artifactsStr, []string{"digest"}, true, "byDigest"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for artifacts: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, artifactsStr, []string{"algorithm", "digest"}, true, "byArtAndDigest"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for artifacts: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, buildersStr, []string{"uri"}, true, "byUri"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for builders: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, vulnTypesStr, []string{"type"}, true, "byVulnType"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for vulnTypes: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, vulnerabilitiesStr, []string{"vulnerabilityID"}, false, "byVulnID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for vulnerabilities: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, licensesStr, []string{"name", "inline", "listversion"}, true, "byNameInlineListVer"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for licenses: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgTypesStr, []string{"type"}, true, "byPkgType"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgTypes: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgNamespacesStr, []string{"namespace"}, false, "byPkgNamespace"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgNamespaces: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgNamesStr, []string{"name"}, false, "byPkgNames"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgNames: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"version"}, false, "byVersion"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgVersions: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"subpath"}, false, "bySubpath"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgVersions: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"qualifier_list[*]"}, false, "byQualifierList"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgVersions: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, srcTypesStr, []string{"type"}, true, "bySrcType"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for srcTypes: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, srcNamespacesStr, []string{"namespace"}, false, "bySrcNamespace"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for srcNamespaces: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, srcNamesStr, []string{"name"}, false, "bySrcNames"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for srcNames: %w", err)
-		}
-
-		// index for isDependency
-		if err := createIndexPerCollection(ctx, db, isDependenciesStr, []string{"packageID", "depPackageID", "versionRange", "origin"}, false, "byPkgIDDepPkgIDversionRangeOrigin"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for isDependencies: %w", err)
-		}
-
-		// index for isOccurrence
-		if err := createIndexPerCollection(ctx, db, isOccurrencesStr, []string{"packageID", "artifactID", "justification", "origin"}, true, "byPkgIDArtIDOriginJust"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
-		}
-
-		// index for certifyBad - Artifact
-		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"artifactID", "justification", "knownSince"}, false, "certifyBadArtifactID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyBad: %w", err)
-		}
-
-		// index for certifyBad - Package
-		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"packageID", "justification", "knownSince"}, false, "certifyBadPackageID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyBad: %w", err)
-		}
-
-		// index for certifyBad - Source
-		if err := createIndexPerCollection(ctx, db, certifyBadsStr, []string{"sourceID", "justification", "knownSince"}, false, "certifyBadSourceID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyBad: %w", err)
-		}
-
-		// index for certifyGood - Artifact
-		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"artifactID", "justification", "knownSince"}, false, "certifyGoodArtifactID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyGood: %w", err)
-		}
-
-		// index for certifyGood - Package
-		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"packageID", "justification", "knownSince"}, false, "certifyGoodPackageID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyGood: %w", err)
-		}
-
-		// index for certifyGood - Source
-		if err := createIndexPerCollection(ctx, db, certifyGoodsStr, []string{"sourceID", "justification", "knownSince"}, false, "certifyGoodSourceID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyGood: %w", err)
-		}
-
-		// index for certifyLegal - Package
-		if err := createIndexPerCollection(ctx, db, certifyLegalsStr, []string{"packageID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false, "certifyLegalPackageID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyLegal: %w", err)
-		}
-
-		// index for certifyLegal - Source
-		if err := createIndexPerCollection(ctx, db, certifyLegalsStr, []string{"sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false, "certifyLegalSourceID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
-		}
-
-		// index for certifyScorecard
-		if err := createIndexPerCollection(ctx, db, scorecardStr, []string{"sourceID", "checks", "aggregateScore", "timeScanned", "origin"}, true, "certifyScorecard"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyScorecard: %w", err)
-		}
-
-		// index for certifyVex - Package
-		if err := createIndexPerCollection(ctx, db, certifyVEXsStr, []string{"packageID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false, "certifyVexPackageID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyVex: %w", err)
-		}
-
-		// index for certifyVex - Artifact
-		if err := createIndexPerCollection(ctx, db, certifyVEXsStr, []string{"artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false, "certifyVexArtifactID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for isOccurrences: %w", err)
-		}
-
-		// index for certifyVuln
-		if err := createIndexPerCollection(ctx, db, certifyVulnsStr, []string{"packageID", "vulnerabilityID", "ScannerVersion", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "timeScanned", "origin"}, true, "certifyVuln"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for certifyVuln: %w", err)
-		}
-
-		// index for hashEquals
-		if err := createIndexPerCollection(ctx, db, hashEqualsStr, []string{"artifactID", "equalArtifactID", "justification", "origin"}, true, "hashEquals"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hashEquals: %w", err)
-		}
-
-		// index for hashMetadata - Artifact
-		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"artifactID", "key", "value", "timestamp", "justification", "origin"}, false, "hashMetadataArtifactID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hashMetadata: %w", err)
-		}
-
-		// index for hashMetadata - Package
-		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"packageID", "key", "value", "timestamp", "justification", "origin"}, false, "hashMetadataPackageID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hashMetadata: %w", err)
-		}
-
-		// index for hashMetadata - Source
-		if err := createIndexPerCollection(ctx, db, hasMetadataStr, []string{"sourceID", "key", "value", "timestamp", "justification", "origin"}, false, "hashMetadataSourceID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hashMetadata: %w", err)
-		}
-
-		// index for hasSbom - Artifact
-		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"artifactID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false, "hasSbomArtifactID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hasSbom: %w", err)
-		}
-
-		// index for hasSbom - Package
-		if err := createIndexPerCollection(ctx, db, hasSBOMsStr, []string{"packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false, "hasSbomPackageID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hasSbom: %w", err)
-		}
-
-		// index for hasSlsa
-		if err := createIndexPerCollection(ctx, db, hasSLSAsStr, []string{"subjectID", "builtByID", "buildType", "builtFrom", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin"}, true, "hasSlsa"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hasSlsa: %w", err)
-		}
-
-		// index for hasSourceAt
-		if err := createIndexPerCollection(ctx, db, hasSourceAtsStr, []string{"packageID", "sourceID", "justification", "knownSince", "origin"}, true, "hasSourceAt"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for hasSourceAt: %w", err)
-		}
-
-		// index for pkgEqual
-		if err := createIndexPerCollection(ctx, db, pkgEqualsStr, []string{"packageID", "equalPackageID", "justification", "origin"}, true, "pkgEqual"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pkgEqual: %w", err)
-		}
-
-		// index for pointOfContact - Artifact
-		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"artifactID", "email", "info", "since", "justification", "origin"}, false, "pointOfContactArtifactID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pointOfContact: %w", err)
-		}
-
-		// index for pointOfContact - Package
-		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"packageID", "email", "info", "since", "justification", "origin"}, false, "pointOfContactPackageID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pointOfContact: %w", err)
-		}
-
-		// index for pointOfContact - Source
-		if err := createIndexPerCollection(ctx, db, pointOfContactStr, []string{"sourceID", "email", "info", "since", "justification", "origin"}, false, "pointOfContactSourceID"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for pointOfContact: %w", err)
-		}
-
-		// index for vulnEqual
-		if err := createIndexPerCollection(ctx, db, vulnEqualsStr, []string{"vulnerabilityID", "equalVulnerabilityID", "justification", "origin"}, true, "vulnEqual"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for vulnEqual: %w", err)
-		}
-
-		// index for vulnMetadata
-		if err := createIndexPerCollection(ctx, db, vulnMetadataStr, []string{"vulnerabilityID", "scoreType", "scoreValue", "timestamp", "origin"}, true, "vulnMetadata"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for vulnMetadata: %w", err)
-		}
-
-		// GUAC key indices for package
-		if err := createIndexPerCollection(ctx, db, pkgNamespacesStr, []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
-			return nil, fmt.Errorf("failed to generate guackey index for pkgNamespaces: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgNamesStr, []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
-			return nil, fmt.Errorf("failed to generate guackey index for pkgNames: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, pkgVersionsStr, []string{"guacKey"}, true, "byVersionGuacKey"); err != nil {
-			return nil, fmt.Errorf("failed to generate guackey index for pkgVersions: %w", err)
-		}
-
-		// GUAC key indices for source
-		if err := createIndexPerCollection(ctx, db, srcNamespacesStr, []string{"guacKey"}, true, "byNsGuacKey"); err != nil {
-			return nil, fmt.Errorf("failed to generate guackey index for srcNamespaces: %w", err)
-		}
-
-		if err := createIndexPerCollection(ctx, db, srcNamesStr, []string{"guacKey"}, true, "byNameGuacKey"); err != nil {
-			return nil, fmt.Errorf("failed to generate guackey index for srcNames: %w", err)
-		}
-
-		// GUAC key indices for vulnerabilities
-		if err := createIndexPerCollection(ctx, db, vulnerabilitiesStr, []string{"guacKey"}, false, "byVulnGuacKey"); err != nil {
-			return nil, fmt.Errorf("failed to generate index for vulnerabilities: %w", err)
+		fullCollectionIndexMap := getCollectionIndexMap()
+		for collectionName, indexes := range fullCollectionIndexMap {
+			for _, index := range indexes {
+				createIndexPerCollection(ctx, db, collectionName, index.fields, index.unique, index.name)
+			}
 		}
 
 		if err := createAnalyzer(ctx, db, driver.ArangoSearchAnalyzerDefinition{
@@ -473,6 +271,22 @@ func createIndexPerCollection(ctx context.Context, db driver.Database, collectio
 		return err
 	}
 	return nil
+}
+
+func deleteIndexPerCollection(ctx context.Context, db driver.Database, collection string, indexName string) error {
+	databaseCollection, err := db.Collection(ctx, collection)
+	if err != nil {
+		return err
+	}
+
+	idx, err := databaseCollection.Index(ctx, indexName)
+	if err != nil {
+		return err
+	}
+
+	err = idx.Remove(ctx)
+
+	return err
 }
 
 func createView(ctx context.Context, db driver.Database, viewName string, opts *driver.ArangoSearchViewProperties) error {
@@ -652,14 +466,225 @@ func createGraph(ctx context.Context, db driver.Database, graphName string, edge
 
 func createMissingEdgeCollection(ctx context.Context, graph driver.Graph, edgeDefinitions []driver.EdgeDefinition) error {
 	fmt.Println("Checking for collection to exists ")
-	for _, edgeDefination := range edgeDefinitions {
-		exists, _ := graph.EdgeCollectionExists(ctx, edgeDefination.Collection)
+	for _, edgeDefinition := range edgeDefinitions {
+		// check if the edge collection itself exists
+		exists, _ := graph.EdgeCollectionExists(ctx, edgeDefinition.Collection)
 		if !exists {
-			_, err := graph.CreateEdgeCollection(ctx, edgeDefination.Collection, driver.VertexConstraints{From: edgeDefination.From, To: edgeDefination.To})
+			_, err := graph.CreateEdgeCollection(ctx, edgeDefinition.Collection, driver.VertexConstraints{From: edgeDefinition.From, To: edgeDefinition.To})
 			if err != nil {
 				return err
 			}
 		}
+
+		// Note:: even though the edge collection exists, its corresponding vertex collections might not
+		var vertexCollections []string
+		vertexCollections = append(vertexCollections, edgeDefinition.From...)
+		vertexCollections = append(vertexCollections, edgeDefinition.To...)
+
+		// create the edge collection if any vertex collection is missing
+		for _, vertexCollection := range vertexCollections {
+			exists, err := graph.VertexCollectionExists(ctx, vertexCollection)
+			if err != nil {
+				return err
+			}
+
+			if !exists {
+				_, err := graph.CreateVertexCollection(ctx, vertexCollection)
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
+	return nil
+}
+
+func getCollectionIndexMap() map[string][]index {
+	collectionIndexMap := make(map[string][]index)
+
+	collectionIndexMap[artifactsStr] = []index{
+		*(initIndex("byDigest", []string{"digest"}, true)),
+		*(initIndex("byArtAndDigest", []string{"algorithm", "digest"}, true)),
+	}
+
+	collectionIndexMap[buildersStr] = []index{
+		*(initIndex("byUri", []string{"uri"}, true)),
+	}
+
+	collectionIndexMap[vulnTypesStr] = []index{
+		*(initIndex("byVulnType", []string{"type"}, true)),
+	}
+
+	collectionIndexMap[vulnerabilitiesStr] = []index{
+		*(initIndex("byVulnID", []string{"vulnerabilityID"}, false)),
+		*(initIndex("byVulnGuacKey", []string{"guacKey"}, false)),
+	}
+
+	collectionIndexMap[licensesStr] = []index{
+		*(initIndex("byNameInlineListVer", []string{"name", "inline", "listversion"}, true)),
+	}
+
+	collectionIndexMap[pkgTypesStr] = []index{
+		*(initIndex("byPkgType", []string{"type"}, true)),
+	}
+
+	collectionIndexMap[pkgNamespacesStr] = []index{
+		*(initIndex("byPkgNamespace", []string{"namespace"}, false)),
+		*(initIndex("byNsGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[pkgNamesStr] = []index{
+		*(initIndex("byPkgNames", []string{"name"}, false)),
+		*(initIndex("byNameGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[pkgVersionsStr] = []index{
+		*(initIndex("byVersion", []string{"version"}, false)),
+		*(initIndex("bySubpath", []string{"subpath"}, false)),
+		*(initIndex("byQualifierList", []string{"qualifier_list[*]"}, false)),
+		*(initIndex("byVersionGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[srcTypesStr] = []index{
+		*(initIndex("bySrcType", []string{"type"}, true)),
+	}
+
+	collectionIndexMap[srcNamespacesStr] = []index{
+		*(initIndex("bySrcNamespace", []string{"namespace"}, false)),
+		*(initIndex("byNsGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[srcNamesStr] = []index{
+		*(initIndex("bySrcNames", []string{"name"}, false)),
+		*(initIndex("byNameGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[isDependenciesStr] = []index{
+		*(initIndex("byPkgIDDepPkgIDversionRangeOrigin", []string{"packageID", "depPackageID", "versionRange", "origin"}, false)),
+	}
+
+	collectionIndexMap[isOccurrencesStr] = []index{
+		*(initIndex("byPkgIDArtIDOriginJust", []string{"packageID", "artifactID", "justification", "origin"}, true)),
+	}
+
+	collectionIndexMap[certifyBadsStr] = []index{
+		*(initIndex("certifyBadArtifactID", []string{"artifactID", "justification", "knownSince"}, false)),
+		*(initIndex("certifyBadPackageID", []string{"packageID", "justification", "knownSince"}, false)),
+		*(initIndex("certifyBadSourceID", []string{"sourceID", "justification", "knownSince"}, false)),
+	}
+
+	collectionIndexMap[certifyGoodsStr] = []index{
+		*(initIndex("certifyGoodArtifactID", []string{"artifactID", "justification", "knownSince"}, false)),
+		*(initIndex("certifyGoodPackageID", []string{"packageID", "justification", "knownSince"}, false)),
+		*(initIndex("certifyGoodSourceID", []string{"sourceID", "justification", "knownSince"}, false)),
+	}
+
+	collectionIndexMap[certifyLegalsStr] = []index{
+		*(initIndex("certifyLegalPackageID", []string{"packageID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false)),
+		*(initIndex("certifyLegalSourceID", []string{"sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false)),
+	}
+
+	collectionIndexMap[scorecardStr] = []index{
+		*(initIndex("certifyScorecard", []string{"sourceID", "checks", "aggregateScore", "timeScanned", "origin"}, true)),
+	}
+
+	collectionIndexMap[certifyVEXsStr] = []index{
+		*(initIndex("certifyVexPackageID", []string{"packageID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false)),
+		*(initIndex("certifyVexArtifactID", []string{"artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false)),
+	}
+
+	collectionIndexMap[certifyVulnsStr] = []index{
+		*(initIndex("certifyVuln", []string{"packageID", "vulnerabilityID", "ScannerVersion", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "timeScanned", "origin"}, true)),
+	}
+
+	collectionIndexMap[hashEqualsStr] = []index{
+		*(initIndex("hashEquals", []string{"artifactID", "equalArtifactID", "justification", "origin"}, true)),
+	}
+
+	collectionIndexMap[hasMetadataStr] = []index{
+		*(initIndex("hashMetadataArtifactID", []string{"artifactID", "key", "value", "timestamp", "justification", "origin"}, false)),
+		*(initIndex("hashMetadataPackageID", []string{"packageID", "key", "value", "timestamp", "justification", "origin"}, false)),
+		*(initIndex("hashMetadataSourceID", []string{"sourceID", "key", "value", "timestamp", "justification", "origin"}, false)),
+	}
+
+	collectionIndexMap[hasSBOMsStr] = []index{
+		*(initIndex("hasSbomArtifactID", []string{"artifactID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false)),
+		*(initIndex("hasSbomPackageID", []string{"packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false)),
+	}
+
+	collectionIndexMap[hasSLSAsStr] = []index{
+		*(initIndex("hasSlsa", []string{"subjectID", "builtByID", "buildType", "builtFrom", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin"}, true)),
+	}
+
+	collectionIndexMap[hasSourceAtsStr] = []index{
+		*(initIndex("hasSourceAt", []string{"packageID", "sourceID", "justification", "knownSince", "origin"}, true)),
+	}
+
+	collectionIndexMap[pkgEqualsStr] = []index{
+		*(initIndex("pkgEqual", []string{"packageID", "equalPackageID", "justification", "origin"}, true)),
+	}
+
+	collectionIndexMap[pointOfContactStr] = []index{
+		*(initIndex("pointOfContactArtifactID", []string{"artifactID", "email", "info", "since", "justification", "origin"}, false)),
+		*(initIndex("pointOfContactPackageID", []string{"packageID", "email", "info", "since", "justification", "origin"}, false)),
+		*(initIndex("pointOfContactSourceID", []string{"sourceID", "email", "info", "since", "justification", "origin"}, false)),
+	}
+
+	collectionIndexMap[vulnEqualsStr] = []index{
+		*(initIndex("vulnEqual", []string{"vulnerabilityID", "equalVulnerabilityID", "justification", "origin"}, true)),
+	}
+
+	collectionIndexMap[vulnMetadataStr] = []index{
+		*(initIndex("vulnMetadata", []string{"vulnerabilityID", "scoreType", "scoreValue", "timestamp", "origin"}, true)),
+	}
+
+	return collectionIndexMap
+}
+
+// conditionally add indexes to artifact and edge collections
+func compareAndCreateIndexes(ctx context.Context, arangoDb driver.Database) error {
+	fullCollectionIndexMap := getCollectionIndexMap()
+
+	for collectionName, indexes := range fullCollectionIndexMap {
+		indexExpected := make(map[string]bool)
+		indexExists := make(map[string]bool)
+
+		for _, index := range indexes {
+			indexExpected[index.name] = true
+		}
+
+		// get all the existing indexes for the collection
+		fmt.Printf("fetching collection: %s from the arango db\n", collectionName)
+		collection, err := arangoDb.Collection(ctx, collectionName)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("fetching all the indexes for the collection: %s\n", collectionName)
+		existingIndexes, err := collection.Indexes(ctx)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("re-indexing collection: %s\n", collectionName)
+		for _, existingIndex := range existingIndexes {
+			if !indexExpected[existingIndex.UserName()] && existingIndex.Type() != "primary" {
+				// delete the outdated index
+				fmt.Printf("deleting unexpected index: %s for collection: %s\n", existingIndex.UserName(), collectionName)
+				deleteIndexPerCollection(ctx, arangoDb, collectionName, existingIndex.UserName())
+			} else {
+				indexExists[existingIndex.UserName()] = true
+			}
+		}
+
+		for _, index := range indexes {
+			// create the index if doesn't already exist
+			if !indexExists[index.name] {
+				fmt.Printf("creating index: %s for collection: %s\n", index.name, collectionName)
+				createIndexPerCollection(ctx, arangoDb, collectionName, index.fields, index.unique, index.name)
+			}
+		}
+	}
+
 	return nil
 }
