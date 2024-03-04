@@ -112,7 +112,7 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 		slsaattestation.FieldBuiltByID,
 		slsaattestation.FieldBuiltFromHash}
 
-	batches := chunk(slsaList, 100)
+	batches := chunk(slsaList, MaxBatchSize)
 
 	index := 0
 	for _, css := range batches {

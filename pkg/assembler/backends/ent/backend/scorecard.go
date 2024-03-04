@@ -158,7 +158,7 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 		certifyscorecard.FieldAggregateScore,
 		certifyscorecard.FieldChecksHash}
 
-	batches := chunk(scorecards, 100)
+	batches := chunk(scorecards, MaxBatchSize)
 
 	index := 0
 	for _, css := range batches {

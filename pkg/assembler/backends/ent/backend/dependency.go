@@ -96,7 +96,7 @@ func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 		)
 	}
 
-	batches := chunk(dependencies, 100)
+	batches := chunk(dependencies, MaxBatchSize)
 
 	index := 0
 	for _, deps := range batches {

@@ -152,7 +152,7 @@ func upsertBulkPointOfContact(ctx context.Context, tx *ent.Tx, subjects model.Pa
 		)
 	}
 
-	batches := chunk(pointOfContactList, 100)
+	batches := chunk(pointOfContactList, MaxBatchSize)
 
 	index := 0
 	for _, pocs := range batches {
