@@ -89,7 +89,7 @@ func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorB
 }
 
 func upsertBulkBuilder(ctx context.Context, tx *ent.Tx, buildInputs []*model.IDorBuilderInput) (*[]string, error) {
-	batches := chunk(buildInputs, 100)
+	batches := chunk(buildInputs, MaxBatchSize)
 	ids := make([]string, 0)
 
 	for _, builders := range batches {

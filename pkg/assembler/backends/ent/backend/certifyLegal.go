@@ -281,7 +281,7 @@ func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.Pack
 		return nil, gqlerror.Errorf("%v :: %s", "upsertBulkCertifyLegal", "subject must be either a package or source")
 	}
 
-	batches := chunk(certifyLegals, 100)
+	batches := chunk(certifyLegals, MaxBatchSize)
 
 	index := 0
 	for _, cls := range batches {

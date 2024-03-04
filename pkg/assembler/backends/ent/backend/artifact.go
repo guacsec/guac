@@ -88,7 +88,7 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifact
 }
 
 func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDorArtifactInput) (*[]string, error) {
-	batches := chunk(artInputs, 100)
+	batches := chunk(artInputs, MaxBatchSize)
 	ids := make([]string, 0)
 
 	for _, artifacts := range batches {

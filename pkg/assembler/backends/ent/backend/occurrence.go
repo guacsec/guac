@@ -100,7 +100,7 @@ func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.Packa
 		return nil, gqlerror.Errorf("%v :: %s", "upsertBulkOccurrences", "subject must be either a package or source")
 	}
 
-	batches := chunk(occurrences, 100)
+	batches := chunk(occurrences, MaxBatchSize)
 
 	index := 0
 	for _, occurs := range batches {

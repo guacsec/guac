@@ -377,7 +377,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 
 	switch certifies := any(spec).(type) {
 	case []*model.CertifyBadInputSpec:
-		batches := chunk(certifies, 100)
+		batches := chunk(certifies, MaxBatchSize)
 
 		index := 0
 		for _, certifyBads := range batches {
@@ -417,7 +417,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 			}
 		}
 	case []*model.CertifyGoodInputSpec:
-		batches := chunk(certifies, 100)
+		batches := chunk(certifies, MaxBatchSize)
 
 		index := 0
 		for _, certifyGoods := range batches {

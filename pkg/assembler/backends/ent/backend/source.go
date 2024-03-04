@@ -122,7 +122,7 @@ func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorP
 		conflictWhere = sql.And(sql.NotNull(hassourceat.FieldPackageVersionID), sql.IsNull(hassourceat.FieldPackageNameID))
 	}
 
-	batches := chunk(hasSourceAts, 100)
+	batches := chunk(hasSourceAts, MaxBatchSize)
 
 	index := 0
 	for _, hsas := range batches {
@@ -305,7 +305,7 @@ func (b *EntBackend) IngestSource(ctx context.Context, source model.IDorSourceIn
 }
 
 func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSourceInput) (*[]model.SourceIDs, error) {
-	batches := chunk(srcInputs, 100)
+	batches := chunk(srcInputs, MaxBatchSize)
 	srcNameIDs := make([]string, 0)
 
 	for _, srcs := range batches {

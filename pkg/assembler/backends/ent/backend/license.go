@@ -85,7 +85,7 @@ func getLicenses(ctx context.Context, client *ent.Client, filter model.LicenseSp
 }
 
 func upsertBulkLicense(ctx context.Context, tx *ent.Tx, licenseInputs []*model.IDorLicenseInput) (*[]string, error) {
-	batches := chunk(licenseInputs, 100)
+	batches := chunk(licenseInputs, MaxBatchSize)
 	ids := make([]string, 0)
 
 	for _, licenses := range batches {

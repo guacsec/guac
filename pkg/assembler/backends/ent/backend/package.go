@@ -137,7 +137,7 @@ func generatePackageVersionCreate(tx *ent.Tx, pkgVersionID *uuid.UUID, pkgNameID
 }
 
 func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorPkgInput) (*[]model.PackageIDs, error) {
-	batches := chunk(pkgInputs, 100)
+	batches := chunk(pkgInputs, MaxBatchSize)
 	pkgNameIDs := make([]string, 0)
 	pkgVersionIDs := make([]string, 0)
 
