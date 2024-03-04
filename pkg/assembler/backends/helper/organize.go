@@ -16,8 +16,10 @@
 package helper
 
 import (
+	"context"
 	"slices"
 
+	"github.com/arangodb/go-driver"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -53,4 +55,24 @@ func GetPackageAndArtifactFilters(filters []*model.PackageOrArtifactSpec) (pkgs 
 func IsIDPresent(id string, linkIDs []string) bool {
 	_, found := slices.BinarySearch[[]string](linkIDs, id)
 	return found
+}
+
+func IsIndexPresent(ctx context.Context, arangoDriver driver.Database, collectionName string, indexName string) (bool, error) {
+	collection, err := arangoDriver.Collection(ctx, collectionName)
+	if err != nil {
+		return false, err
+	}
+
+	indexes, err := collection.Indexes(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	for _, index := range indexes {
+		if index.UserName() == indexName {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
