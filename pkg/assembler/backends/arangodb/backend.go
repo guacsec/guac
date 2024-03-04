@@ -666,7 +666,7 @@ func createMissingEdgeCollection(ctx context.Context, graph driver.Graph, edgeDe
 	return nil
 }
 
-func createCollectionIndexMap() map[string][]index {
+func getCollectionIndexMap() map[string][]index {
 	collectionIndexMap := make(map[string][]index)
 
 	collectionIndexMap[artifactsStr] = []index{
@@ -676,6 +676,133 @@ func createCollectionIndexMap() map[string][]index {
 
 	collectionIndexMap[buildersStr] = []index{
 		*(initIndex("byUri", []string{"uri"}, true)),
+	}
+
+	collectionIndexMap[vulnTypesStr] = []index{
+		*(initIndex("byVulnType", []string{"type"}, true)),
+	}
+
+	collectionIndexMap[vulnerabilitiesStr] = []index{
+		*(initIndex("byVulnID", []string{"vulnerabilityID"}, false)),
+		*(initIndex("byVulnGuacKey", []string{"guacKey"}, false)),
+	}
+
+	collectionIndexMap[licensesStr] = []index{
+		*(initIndex("byNameInlineListVer", []string{"name", "inline", "listversion"}, true)),
+	}
+
+	collectionIndexMap[pkgTypesStr] = []index{
+		*(initIndex("byPkgType", []string{"type"}, true)),
+	}
+
+	collectionIndexMap[pkgNamespacesStr] = []index{
+		*(initIndex("byPkgNamespace", []string{"namespace"}, false)),
+		*(initIndex("byNsGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[pkgNamesStr] = []index{
+		*(initIndex("byPkgNames", []string{"name"}, false)),
+		*(initIndex("byNameGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[pkgVersionsStr] = []index{
+		*(initIndex("byVersion", []string{"version"}, false)),
+		*(initIndex("bySubpath", []string{"subpath"}, false)),
+		*(initIndex("byQualifierList", []string{"qualifier_list[*]"}, false)),
+		*(initIndex("byVersionGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[srcTypesStr] = []index{
+		*(initIndex("bySrcType", []string{"type"}, true)),
+	}
+
+	collectionIndexMap[srcNamespacesStr] = []index{
+		*(initIndex("bySrcNamespace", []string{"namespace"}, false)),
+		*(initIndex("byNsGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[srcNamesStr] = []index{
+		*(initIndex("bySrcNames", []string{"name"}, false)),
+		*(initIndex("byNameGuacKey", []string{"guacKey"}, true)),
+	}
+
+	collectionIndexMap[isDependenciesStr] = []index{
+		*(initIndex("byPkgIDDepPkgIDversionRangeOrigin", []string{"packageID", "depPackageID", "versionRange", "origin"}, false)),
+	}
+
+	collectionIndexMap[isOccurrencesStr] = []index{
+		*(initIndex("byPkgIDArtIDOriginJust", []string{"packageID", "artifactID", "justification", "origin"}, true)),
+	}
+
+	collectionIndexMap[certifyBadsStr] = []index{
+		*(initIndex("certifyBadArtifactID", []string{"artifactID", "justification", "knownSince"}, false)),
+		*(initIndex("certifyBadPackageID", []string{"packageID", "justification", "knownSince"}, false)),
+		*(initIndex("certifyBadSourceID", []string{"sourceID", "justification", "knownSince"}, false)),
+	}
+
+	collectionIndexMap[certifyGoodsStr] = []index{
+		*(initIndex("certifyGoodArtifactID", []string{"artifactID", "justification", "knownSince"}, false)),
+		*(initIndex("certifyGoodPackageID", []string{"packageID", "justification", "knownSince"}, false)),
+		*(initIndex("certifyGoodSourceID", []string{"sourceID", "justification", "knownSince"}, false)),
+	}
+
+	collectionIndexMap[certifyLegalsStr] = []index{
+		*(initIndex("certifyLegalPackageID", []string{"packageID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false)),
+		*(initIndex("certifyLegalSourceID", []string{"sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false)),
+	}
+
+	collectionIndexMap[scorecardStr] = []index{
+		*(initIndex("certifyScorecard", []string{"sourceID", "checks", "aggregateScore", "timeScanned", "origin"}, true)),
+	}
+
+	collectionIndexMap[certifyVEXsStr] = []index{
+		*(initIndex("certifyVexPackageID", []string{"packageID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false)),
+		*(initIndex("certifyVexArtifactID", []string{"artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false)),
+	}
+
+	collectionIndexMap[certifyVulnsStr] = []index{
+		*(initIndex("certifyVuln", []string{"packageID", "vulnerabilityID", "ScannerVersion", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "timeScanned", "origin"}, true)),
+	}
+
+	collectionIndexMap[hashEqualsStr] = []index{
+		*(initIndex("hashEquals", []string{"artifactID", "equalArtifactID", "justification", "origin"}, true)),
+	}
+
+	collectionIndexMap[hasMetadataStr] = []index{
+		*(initIndex("hashMetadataArtifactID", []string{"artifactID", "key", "value", "timestamp", "justification", "origin"}, false)),
+		*(initIndex("hashMetadataPackageID", []string{"packageID", "key", "value", "timestamp", "justification", "origin"}, false)),
+		*(initIndex("hashMetadataSourceID", []string{"sourceID", "key", "value", "timestamp", "justification", "origin"}, false)),
+	}
+
+	collectionIndexMap[hasSBOMsStr] = []index{
+		*(initIndex("hasSbomArtifactID", []string{"artifactID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false)),
+		*(initIndex("hasSbomPackageID", []string{"packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false)),
+	}
+
+	collectionIndexMap[hasSLSAsStr] = []index{
+		*(initIndex("hasSlsa", []string{"subjectID", "builtByID", "buildType", "builtFrom", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin"}, true)),
+	}
+
+	collectionIndexMap[hasSourceAtsStr] = []index{
+		*(initIndex("hasSourceAt", []string{"packageID", "sourceID", "justification", "knownSince", "origin"}, true)),
+	}
+
+	collectionIndexMap[pkgEqualsStr] = []index{
+		*(initIndex("pkgEqual", []string{"packageID", "equalPackageID", "justification", "origin"}, true)),
+	}
+
+	collectionIndexMap[pointOfContactStr] = []index{
+		*(initIndex("pointOfContactArtifactID", []string{"artifactID", "email", "info", "since", "justification", "origin"}, false)),
+		*(initIndex("pointOfContactPackageID", []string{"packageID", "email", "info", "since", "justification", "origin"}, false)),
+		*(initIndex("pointOfContactSourceID", []string{"sourceID", "email", "info", "since", "justification", "origin"}, false)),
+	}
+
+	collectionIndexMap[vulnEqualsStr] = []index{
+		*(initIndex("vulnEqual", []string{"vulnerabilityID", "equalVulnerabilityID", "justification", "origin"}, true)),
+	}
+
+	collectionIndexMap[vulnMetadataStr] = []index{
+		*(initIndex("vulnMetadata", []string{"vulnerabilityID", "scoreType", "scoreValue", "timestamp", "origin"}, true)),
 	}
 
 	return collectionIndexMap
