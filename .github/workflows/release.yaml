@@ -178,3 +178,14 @@ jobs:
           gh release upload ${{ github.ref_name }} guac-compose.tar.gz
           rm guac-compose.tar.gz
         shell: bash
+      - name: Modify and publish demo compose yaml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          cp container_files/guac-demo-compose.yaml .
+          sed -i s/\$GUAC_IMAGE/ghcr.io\\/${{ github.repository_owner }}\\/guac:${{ github.ref_name }}/ guac-demo-compose.yaml
+          gh release upload ${{ github.ref_name }} guac-demo-compose.yaml
+          rm guac-demo-compose.yaml
+        shell: bash
