@@ -148,6 +148,8 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 			return nil, fmt.Errorf("failed to get create missing edge collections: %w", err)
 		}
 
+		// add logic to recreate indexes
+
 	} else {
 		err := createGraph(ctx, db, arangoGraph, edgeDefinitions)
 		if err != nil {
@@ -662,4 +664,19 @@ func createMissingEdgeCollection(ctx context.Context, graph driver.Graph, edgeDe
 		}
 	}
 	return nil
+}
+
+func createCollectionIndexMap() map[string][]index {
+	collectionIndexMap := make(map[string][]index)
+
+	collectionIndexMap[artifactsStr] = []index{
+		*(initIndex("byDigest", []string{"digest"}, true)),
+		*(initIndex("byArtAndDigest", []string{"algorithm", "digest"}, true)),
+	}
+
+	collectionIndexMap[buildersStr] = []index{
+		*(initIndex("byUri", []string{"uri"}, true)),
+	}
+
+	return collectionIndexMap
 }
