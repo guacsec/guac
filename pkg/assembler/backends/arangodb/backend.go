@@ -631,7 +631,7 @@ func compareAndCreateIndexes(ctx context.Context, arangoDb driver.Database) erro
 
 		for _, existingIndex := range existingIndexes {
 			if !indexExpected[existingIndex.UserName()] {
-				// TODO:: delete the outdated index
+				// delete the outdated index
 				deleteIndexPerCollection(ctx, arangoDb, collectionName, existingIndex.UserName())
 			} else {
 				indexExists[existingIndex.UserName()] = true
