@@ -452,12 +452,33 @@ func createGraph(ctx context.Context, db driver.Database, graphName string, edge
 
 func createMissingEdgeCollection(ctx context.Context, graph driver.Graph, edgeDefinitions []driver.EdgeDefinition) error {
 	fmt.Println("Checking for collection to exists ")
-	for _, edgeDefination := range edgeDefinitions {
-		exists, _ := graph.EdgeCollectionExists(ctx, edgeDefination.Collection)
+	for _, edgeDefinition := range edgeDefinitions {
+		// check if the edge collection itself exists
+		exists, _ := graph.EdgeCollectionExists(ctx, edgeDefinition.Collection)
 		if !exists {
-			_, err := graph.CreateEdgeCollection(ctx, edgeDefination.Collection, driver.VertexConstraints{From: edgeDefination.From, To: edgeDefination.To})
+			_, err := graph.CreateEdgeCollection(ctx, edgeDefinition.Collection, driver.VertexConstraints{From: edgeDefinition.From, To: edgeDefinition.To})
 			if err != nil {
 				return err
+			}
+		}
+
+		// Note:: even though the edge collection exists, its corresponding vertex collections might not
+		var vertexCollections []string
+		vertexCollections = append(vertexCollections, edgeDefinition.From...)
+		vertexCollections = append(vertexCollections, edgeDefinition.To...)
+
+		// create the edge collection if any vertex collection is missing
+		for _, vertexCollection := range vertexCollections {
+			exists, err := graph.VertexCollectionExists(ctx, vertexCollection)
+			if err != nil {
+				return err
+			}
+
+			if !exists {
+				_, err := graph.CreateVertexCollection(ctx, vertexCollection)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -619,19 +640,24 @@ func compareAndCreateIndexes(ctx context.Context, arangoDb driver.Database) erro
 		}
 
 		// get all the existing indexes for the collection
+		fmt.Printf("fetching collection: %s from the arango db\n", collectionName)
 		collection, err := arangoDb.Collection(ctx, collectionName)
 		if err != nil {
 			return err
 		}
 
+		fmt.Printf("fetching all the indexes for the collection: %s\n", collectionName)
 		existingIndexes, err := collection.Indexes(ctx)
 		if err != nil {
 			return err
 		}
 
 		for _, existingIndex := range existingIndexes {
+			fmt.Printf("re-indexing collection: %s\n", collectionName)
+
 			if !indexExpected[existingIndex.UserName()] {
 				// delete the outdated index
+				fmt.Printf("deleting unexpected index: %s for collection: %s\n", existingIndex.UserName(), collectionName)
 				deleteIndexPerCollection(ctx, arangoDb, collectionName, existingIndex.UserName())
 			} else {
 				indexExists[existingIndex.UserName()] = true
@@ -641,6 +667,7 @@ func compareAndCreateIndexes(ctx context.Context, arangoDb driver.Database) erro
 		for _, index := range indexes {
 			// create the index if doesn't already exist
 			if !indexExists[index.name] {
+				fmt.Printf("creating index: %s for collection: %s\n", index.name, collectionName)
 				createIndexPerCollection(ctx, arangoDb, collectionName, index.fields, index.unique, index.name)
 			}
 		}
