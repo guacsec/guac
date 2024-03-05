@@ -51,8 +51,22 @@ type arangoClient struct {
 	graph  driver.Graph
 }
 
+type index struct {
+	name   string
+	fields []string
+	unique bool
+}
+
 func init() {
 	backends.Register("arango", getBackend)
+}
+
+func initIndex(name string, fields []string, unique bool) *index {
+	return &index{
+		name: name,
+		fields: fields,
+		unique: unique,
+	}
 }
 
 func arangoDBConnect(address, user, password string) (driver.Client, error) {
