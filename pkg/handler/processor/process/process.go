@@ -43,6 +43,7 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/klauspost/compress/zstd"
+	"gocloud.dev/pubsub"
 )
 
 var (
@@ -74,7 +75,7 @@ func RegisterDocumentProcessor(p processor.DocumentProcessor, d processor.Docume
 
 // Subscribe receives the CD event and decodes the event to obtain the blob store key.
 // The key is used to retrieve the "document" from the blob store to be processed and ingested.
-func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
+func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobStore, emPubSub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
@@ -82,14 +83,14 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	sub, err := pubsub.Subscribe(ctx, uuidString)
+	sub, err := emPubSub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}
 	// should still continue if there are errors since problem is with individual documents
-	processFunc := func(d []byte) error {
+	processFunc := func(d *pubsub.Message) error {
 
-		blobStoreKey, err := events.DecodeEventSubject(ctx, d)
+		blobStoreKey, err := events.DecodeEventSubject(ctx, d.Body)
 		if err != nil {
 			logger.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
 			return nil
@@ -111,16 +112,20 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 			logger.Error("[processor: %s] failed transportFunc: %v", uuidString, err)
 			return nil
 		}
+		// ack the message from the queue once the ingestion has occurred via the Emitter (em) function specified above
+		d.Ack()
+		logger.Infof("[processor: %s] message acknowledged in pusbub", uuidString)
+
 		return nil
 	}
 
 	err = sub.GetDataFromSubscriber(ctx, processFunc)
 	if err != nil {
-		return fmt.Errorf("[processor: %s] failed to get data from %s: %w", uuidString, pubsub.ServiceURL, err)
+		return fmt.Errorf("[processor: %s] failed to get data from %s: %w", uuidString, emPubSub.ServiceURL, err)
 	}
 
 	if err := sub.CloseSubscriber(ctx); err != nil {
-		return fmt.Errorf("[processor: %s] failed to close subscriber: %s,  with error: %w", uuidString, pubsub.ServiceURL, err)
+		return fmt.Errorf("[processor: %s] failed to close subscriber: %s,  with error: %w", uuidString, emPubSub.ServiceURL, err)
 	}
 
 	return nil

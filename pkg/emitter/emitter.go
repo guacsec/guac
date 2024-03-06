@@ -38,13 +38,13 @@ type EmitterPubSub struct {
 	ServiceURL string
 }
 
-// DataFunc determines how the data return from NATS is transformed based on implementation per module
-type DataFunc func([]byte) error
+// DataFunc determines how the data return from the pubsub is transformed based on implementation per module
+type DataFunc func(*pubsub.Message) error
 
 // subscriber provides dataChan to read the collected data from the stream, errChan for any error that return and
 // the pubsub.Subscription to close the subscription once complete
 type subscriber struct {
-	dataChan     <-chan []byte
+	dataChan     <-chan *pubsub.Message
 	errChan      <-chan error
 	subscription *pubsub.Subscription
 }
@@ -157,9 +157,9 @@ func (s *subscriber) CloseSubscriber(ctx context.Context) error {
 }
 
 // createSubscriber receives from the subscription and use the dataChan and errChan to continuously send collected data or errors
-func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id string) (<-chan []byte, <-chan error, error) {
+func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id string) (<-chan *pubsub.Message, <-chan error, error) {
 	// docChan to collect artifacts
-	dataChan := make(chan []byte, bufferChannelSize)
+	dataChan := make(chan *pubsub.Message, bufferChannelSize)
 	// errChan to receive error from collectors
 	errChan := make(chan error, 1)
 	go func() {
@@ -185,8 +185,7 @@ func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id
 					return
 				}
 			}
-			msg.Ack()
-			dataChan <- msg.Body
+			dataChan <- msg
 		}
 	}()
 	return dataChan, errChan, nil
