@@ -91,7 +91,7 @@ func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgI
 		pkgequal.FieldJustification,
 	}
 
-	batches := chunk(pkgEquals, 100)
+	batches := chunk(pkgEquals, MaxBatchSize)
 
 	index := 0
 	for _, pes := range batches {

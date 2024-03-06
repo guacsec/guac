@@ -305,7 +305,7 @@ func upsertBulkHasMetadata(ctx context.Context, tx *ent.Tx, subjects model.Packa
 		)
 	}
 
-	batches := chunk(hasMetadataList, 100)
+	batches := chunk(hasMetadataList, MaxBatchSize)
 
 	index := 0
 	for _, hms := range batches {

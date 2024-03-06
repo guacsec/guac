@@ -219,7 +219,7 @@ func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArti
 		)
 	}
 
-	batches := chunk(vexStatements, 100)
+	batches := chunk(vexStatements, MaxBatchSize)
 
 	index := 0
 	for _, vexs := range batches {

@@ -166,7 +166,7 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 		certifyvuln.FieldTimeScanned,
 	}
 
-	batches := chunk(certifyVulns, 100)
+	batches := chunk(certifyVulns, MaxBatchSize)
 
 	index := 0
 	for _, vulns := range batches {

@@ -138,7 +138,7 @@ func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabil
 		vulnerabilitymetadata.FieldCollector,
 	}
 
-	batches := chunk(vulnerabilityMetadataList, 100)
+	batches := chunk(vulnerabilityMetadataList, MaxBatchSize)
 
 	index := 0
 	for _, vml := range batches {

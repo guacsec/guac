@@ -27,11 +27,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var Errorf = gqlerror.Errorf
+const (
+	// MaxPageSize is the maximum number of results that will be returned in a single query.
+	// const MaxPageSize = 1000
+	MaxPageSize = 999999
 
-// MaxPageSize is the maximum number of results that will be returned in a single query.
-// const MaxPageSize = 1000
-const MaxPageSize = 999999
+	// Batch size for ingesting in bulk. Increasing this could results in "PostgreSQL only supports 65535 parameters" error
+	MaxBatchSize = 5000
+)
+
+var Errorf = gqlerror.Errorf
 
 type EntBackend struct {
 	client *ent.Client

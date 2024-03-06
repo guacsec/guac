@@ -144,7 +144,7 @@ func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*mo
 		vulnequal.FieldJustification,
 	}
 
-	batches := chunk(vulnEquals, 100)
+	batches := chunk(vulnEquals, MaxBatchSize)
 
 	index := 0
 	for _, ves := range batches {

@@ -116,7 +116,7 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 		hashequal.FieldJustification,
 	}
 
-	batches := chunk(hashEquals, 100)
+	batches := chunk(hashEquals, MaxBatchSize)
 
 	index := 0
 	for _, hes := range batches {
