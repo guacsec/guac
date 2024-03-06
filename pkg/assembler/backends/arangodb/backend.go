@@ -30,6 +30,7 @@ import (
 	arangodbdriverhttp "github.com/arangodb/go-driver/http"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -61,8 +62,8 @@ func init() {
 	backends.Register("arango", getBackend)
 }
 
-func initIndex(name string, fields []string, unique bool) *index {
-	return &index{
+func initIndex(name string, fields []string, unique bool) index {
+	return index{
 		name: name,
 		fields: fields,
 		unique: unique,
@@ -276,17 +277,20 @@ func createIndexPerCollection(ctx context.Context, db driver.Database, collectio
 func deleteIndexPerCollection(ctx context.Context, db driver.Database, collection string, indexName string) error {
 	databaseCollection, err := db.Collection(ctx, collection)
 	if err != nil {
-		return err
+		return fmt.Errorf("error while opening connection to the collection: %s :: %v", collection, err)
 	}
 
 	idx, err := databaseCollection.Index(ctx, indexName)
 	if err != nil {
-		return err
+		return fmt.Errorf("error while opening connection to the index: %s in collection: %s :: %v", indexName, collection, err)
 	}
 
 	err = idx.Remove(ctx)
+	if err != nil {
+		return fmt.Errorf("error while removing index: %s in collection: %s :: %v", indexName, collection, err)
+	}
 
-	return err
+	return nil
 }
 
 func createView(ctx context.Context, db driver.Database, viewName string, opts *driver.ArangoSearchViewProperties) error {
@@ -468,11 +472,15 @@ func createMissingEdgeCollection(ctx context.Context, graph driver.Graph, edgeDe
 	fmt.Println("Checking for collection to exists ")
 	for _, edgeDefinition := range edgeDefinitions {
 		// check if the edge collection itself exists
-		exists, _ := graph.EdgeCollectionExists(ctx, edgeDefinition.Collection)
+		exists, err := graph.EdgeCollectionExists(ctx, edgeDefinition.Collection)
+		if err != nil {
+			return fmt.Errorf("error while checking if edge collection: %s exists :: %v", edgeDefinition.Collection, err)
+		}
+
 		if !exists {
 			_, err := graph.CreateEdgeCollection(ctx, edgeDefinition.Collection, driver.VertexConstraints{From: edgeDefinition.From, To: edgeDefinition.To})
 			if err != nil {
-				return err
+				return fmt.Errorf("error while creating edge collection: %s :: %v", edgeDefinition.Collection, err)
 			}
 		}
 
@@ -485,13 +493,13 @@ func createMissingEdgeCollection(ctx context.Context, graph driver.Graph, edgeDe
 		for _, vertexCollection := range vertexCollections {
 			exists, err := graph.VertexCollectionExists(ctx, vertexCollection)
 			if err != nil {
-				return err
+				return fmt.Errorf("error while checking if vertex collection: %s exists :: %v", vertexCollection, err)
 			}
 
 			if !exists {
 				_, err := graph.CreateVertexCollection(ctx, vertexCollection)
 				if err != nil {
-					return err
+					return fmt.Errorf("error while creating vertex collection: %s :: %v", vertexCollection, err)
 				}
 			}
 		}
@@ -503,139 +511,139 @@ func getCollectionIndexMap() map[string][]index {
 	collectionIndexMap := make(map[string][]index)
 
 	collectionIndexMap[artifactsStr] = []index{
-		*(initIndex("byDigest", []string{"digest"}, true)),
-		*(initIndex("byArtAndDigest", []string{"algorithm", "digest"}, true)),
+		initIndex("byDigest", []string{"digest"}, true),
+		initIndex("byArtAndDigest", []string{"algorithm", "digest"}, true),
 	}
 
 	collectionIndexMap[buildersStr] = []index{
-		*(initIndex("byUri", []string{"uri"}, true)),
+		initIndex("byUri", []string{"uri"}, true),
 	}
 
 	collectionIndexMap[vulnTypesStr] = []index{
-		*(initIndex("byVulnType", []string{"type"}, true)),
+		initIndex("byVulnType", []string{"type"}, true),
 	}
 
 	collectionIndexMap[vulnerabilitiesStr] = []index{
-		*(initIndex("byVulnID", []string{"vulnerabilityID"}, false)),
-		*(initIndex("byVulnGuacKey", []string{"guacKey"}, false)),
+		initIndex("byVulnID", []string{"vulnerabilityID"}, false),
+		initIndex("byVulnGuacKey", []string{"guacKey"}, false),
 	}
 
 	collectionIndexMap[licensesStr] = []index{
-		*(initIndex("byNameInlineListVer", []string{"name", "inline", "listversion"}, true)),
+		initIndex("byNameInlineListVer", []string{"name", "inline", "listversion"}, true),
 	}
 
 	collectionIndexMap[pkgTypesStr] = []index{
-		*(initIndex("byPkgType", []string{"type"}, true)),
+		initIndex("byPkgType", []string{"type"}, true),
 	}
 
 	collectionIndexMap[pkgNamespacesStr] = []index{
-		*(initIndex("byPkgNamespace", []string{"namespace"}, false)),
-		*(initIndex("byNsGuacKey", []string{"guacKey"}, true)),
+		initIndex("byPkgNamespace", []string{"namespace"}, false),
+		initIndex("byNsGuacKey", []string{"guacKey"}, true),
 	}
 
 	collectionIndexMap[pkgNamesStr] = []index{
-		*(initIndex("byPkgNames", []string{"name"}, false)),
-		*(initIndex("byNameGuacKey", []string{"guacKey"}, true)),
+		initIndex("byPkgNames", []string{"name"}, false),
+		initIndex("byNameGuacKey", []string{"guacKey"}, true),
 	}
 
 	collectionIndexMap[pkgVersionsStr] = []index{
-		*(initIndex("byVersion", []string{"version"}, false)),
-		*(initIndex("bySubpath", []string{"subpath"}, false)),
-		*(initIndex("byQualifierList", []string{"qualifier_list[*]"}, false)),
-		*(initIndex("byVersionGuacKey", []string{"guacKey"}, true)),
+		initIndex("byVersion", []string{"version"}, false),
+		initIndex("bySubpath", []string{"subpath"}, false),
+		initIndex("byQualifierList", []string{"qualifier_list[*]"}, false),
+		initIndex("byVersionGuacKey", []string{"guacKey"}, true),
 	}
 
 	collectionIndexMap[srcTypesStr] = []index{
-		*(initIndex("bySrcType", []string{"type"}, true)),
+		initIndex("bySrcType", []string{"type"}, true),
 	}
 
 	collectionIndexMap[srcNamespacesStr] = []index{
-		*(initIndex("bySrcNamespace", []string{"namespace"}, false)),
-		*(initIndex("byNsGuacKey", []string{"guacKey"}, true)),
+		initIndex("bySrcNamespace", []string{"namespace"}, false),
+		initIndex("byNsGuacKey", []string{"guacKey"}, true),
 	}
 
 	collectionIndexMap[srcNamesStr] = []index{
-		*(initIndex("bySrcNames", []string{"name"}, false)),
-		*(initIndex("byNameGuacKey", []string{"guacKey"}, true)),
+		initIndex("bySrcNames", []string{"name"}, false),
+		initIndex("byNameGuacKey", []string{"guacKey"}, true),
 	}
 
 	collectionIndexMap[isDependenciesStr] = []index{
-		*(initIndex("byPkgIDDepPkgIDversionRangeOrigin", []string{"packageID", "depPackageID", "versionRange", "origin"}, false)),
+		initIndex("byPkgIDDepPkgIDversionRangeOrigin", []string{"packageID", "depPackageID", "versionRange", "origin"}, false),
 	}
 
 	collectionIndexMap[isOccurrencesStr] = []index{
-		*(initIndex("byPkgIDArtIDOriginJust", []string{"packageID", "artifactID", "justification", "origin"}, true)),
+		initIndex("byPkgIDArtIDOriginJust", []string{"packageID", "artifactID", "justification", "origin"}, true),
 	}
 
 	collectionIndexMap[certifyBadsStr] = []index{
-		*(initIndex("certifyBadArtifactID", []string{"artifactID", "justification", "knownSince"}, false)),
-		*(initIndex("certifyBadPackageID", []string{"packageID", "justification", "knownSince"}, false)),
-		*(initIndex("certifyBadSourceID", []string{"sourceID", "justification", "knownSince"}, false)),
+		initIndex("certifyBadArtifactID", []string{"artifactID", "justification", "knownSince"}, false),
+		initIndex("certifyBadPackageID", []string{"packageID", "justification", "knownSince"}, false),
+		initIndex("certifyBadSourceID", []string{"sourceID", "justification", "knownSince"}, false),
 	}
 
 	collectionIndexMap[certifyGoodsStr] = []index{
-		*(initIndex("certifyGoodArtifactID", []string{"artifactID", "justification", "knownSince"}, false)),
-		*(initIndex("certifyGoodPackageID", []string{"packageID", "justification", "knownSince"}, false)),
-		*(initIndex("certifyGoodSourceID", []string{"sourceID", "justification", "knownSince"}, false)),
+		initIndex("certifyGoodArtifactID", []string{"artifactID", "justification", "knownSince"}, false),
+		initIndex("certifyGoodPackageID", []string{"packageID", "justification", "knownSince"}, false),
+		initIndex("certifyGoodSourceID", []string{"sourceID", "justification", "knownSince"}, false),
 	}
 
 	collectionIndexMap[certifyLegalsStr] = []index{
-		*(initIndex("certifyLegalPackageID", []string{"packageID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false)),
-		*(initIndex("certifyLegalSourceID", []string{"sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false)),
+		initIndex("certifyLegalPackageID", []string{"packageID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false),
+		initIndex("certifyLegalSourceID", []string{"sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false),
 	}
 
 	collectionIndexMap[scorecardStr] = []index{
-		*(initIndex("certifyScorecard", []string{"sourceID", "checks", "aggregateScore", "timeScanned", "origin"}, true)),
+		initIndex("certifyScorecard", []string{"sourceID", "checks", "aggregateScore", "timeScanned", "origin"}, true),
 	}
 
 	collectionIndexMap[certifyVEXsStr] = []index{
-		*(initIndex("certifyVexPackageID", []string{"packageID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false)),
-		*(initIndex("certifyVexArtifactID", []string{"artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false)),
+		initIndex("certifyVexPackageID", []string{"packageID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false),
+		initIndex("certifyVexArtifactID", []string{"artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false),
 	}
 
 	collectionIndexMap[certifyVulnsStr] = []index{
-		*(initIndex("certifyVuln", []string{"packageID", "vulnerabilityID", "ScannerVersion", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "timeScanned", "origin"}, true)),
+		initIndex("certifyVuln", []string{"packageID", "vulnerabilityID", "ScannerVersion", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "timeScanned", "origin"}, true),
 	}
 
 	collectionIndexMap[hashEqualsStr] = []index{
-		*(initIndex("hashEquals", []string{"artifactID", "equalArtifactID", "justification", "origin"}, true)),
+		initIndex("hashEquals", []string{"artifactID", "equalArtifactID", "justification", "origin"}, true),
 	}
 
 	collectionIndexMap[hasMetadataStr] = []index{
-		*(initIndex("hashMetadataArtifactID", []string{"artifactID", "key", "value", "timestamp", "justification", "origin"}, false)),
-		*(initIndex("hashMetadataPackageID", []string{"packageID", "key", "value", "timestamp", "justification", "origin"}, false)),
-		*(initIndex("hashMetadataSourceID", []string{"sourceID", "key", "value", "timestamp", "justification", "origin"}, false)),
+		initIndex("hashMetadataArtifactID", []string{"artifactID", "key", "value", "timestamp", "justification", "origin"}, false),
+		initIndex("hashMetadataPackageID", []string{"packageID", "key", "value", "timestamp", "justification", "origin"}, false),
+		initIndex("hashMetadataSourceID", []string{"sourceID", "key", "value", "timestamp", "justification", "origin"}, false),
 	}
 
 	collectionIndexMap[hasSBOMsStr] = []index{
-		*(initIndex("hasSbomArtifactID", []string{"artifactID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false)),
-		*(initIndex("hasSbomPackageID", []string{"packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false)),
+		initIndex("hasSbomArtifactID", []string{"artifactID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false),
+		initIndex("hasSbomPackageID", []string{"packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false),
 	}
 
 	collectionIndexMap[hasSLSAsStr] = []index{
-		*(initIndex("hasSlsa", []string{"subjectID", "builtByID", "buildType", "builtFrom", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin"}, true)),
+		initIndex("hasSlsa", []string{"subjectID", "builtByID", "buildType", "builtFrom", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin"}, true),
 	}
 
 	collectionIndexMap[hasSourceAtsStr] = []index{
-		*(initIndex("hasSourceAt", []string{"packageID", "sourceID", "justification", "knownSince", "origin"}, true)),
+		initIndex("hasSourceAt", []string{"packageID", "sourceID", "justification", "knownSince", "origin"}, true),
 	}
 
 	collectionIndexMap[pkgEqualsStr] = []index{
-		*(initIndex("pkgEqual", []string{"packageID", "equalPackageID", "justification", "origin"}, true)),
+		initIndex("pkgEqual", []string{"packageID", "equalPackageID", "justification", "origin"}, true),
 	}
 
 	collectionIndexMap[pointOfContactStr] = []index{
-		*(initIndex("pointOfContactArtifactID", []string{"artifactID", "email", "info", "since", "justification", "origin"}, false)),
-		*(initIndex("pointOfContactPackageID", []string{"packageID", "email", "info", "since", "justification", "origin"}, false)),
-		*(initIndex("pointOfContactSourceID", []string{"sourceID", "email", "info", "since", "justification", "origin"}, false)),
+		initIndex("pointOfContactArtifactID", []string{"artifactID", "email", "info", "since", "justification", "origin"}, false),
+		initIndex("pointOfContactPackageID", []string{"packageID", "email", "info", "since", "justification", "origin"}, false),
+		initIndex("pointOfContactSourceID", []string{"sourceID", "email", "info", "since", "justification", "origin"}, false),
 	}
 
 	collectionIndexMap[vulnEqualsStr] = []index{
-		*(initIndex("vulnEqual", []string{"vulnerabilityID", "equalVulnerabilityID", "justification", "origin"}, true)),
+		initIndex("vulnEqual", []string{"vulnerabilityID", "equalVulnerabilityID", "justification", "origin"}, true),
 	}
 
 	collectionIndexMap[vulnMetadataStr] = []index{
-		*(initIndex("vulnMetadata", []string{"vulnerabilityID", "scoreType", "scoreValue", "timestamp", "origin"}, true)),
+		initIndex("vulnMetadata", []string{"vulnerabilityID", "scoreType", "scoreValue", "timestamp", "origin"}, true),
 	}
 
 	return collectionIndexMap
@@ -643,6 +651,7 @@ func getCollectionIndexMap() map[string][]index {
 
 // conditionally add indexes to artifact and edge collections
 func compareAndCreateIndexes(ctx context.Context, arangoDb driver.Database) error {
+	logger := logging.FromContext(ctx)
 	fullCollectionIndexMap := getCollectionIndexMap()
 
 	for collectionName, indexes := range fullCollectionIndexMap {
@@ -654,23 +663,23 @@ func compareAndCreateIndexes(ctx context.Context, arangoDb driver.Database) erro
 		}
 
 		// get all the existing indexes for the collection
-		fmt.Printf("fetching collection: %s from the arango db\n", collectionName)
+		logger.Infof("fetching collection: %s from the arango db\n", collectionName)
 		collection, err := arangoDb.Collection(ctx, collectionName)
 		if err != nil {
-			return err
+			return fmt.Errorf("error while opening connection to collection: %s :: %v", collectionName, err)
 		}
 
-		fmt.Printf("fetching all the indexes for the collection: %s\n", collectionName)
+		logger.Infof("fetching all the indexes for collection: %s\n", collectionName)
 		existingIndexes, err := collection.Indexes(ctx)
 		if err != nil {
-			return err
+			return fmt.Errorf("error while fetching all the indexes for collection: %s :: %v", collectionName, err)
 		}
 
-		fmt.Printf("re-indexing collection: %s\n", collectionName)
+		logger.Infof("re-indexing collection: %s\n", collectionName)
 		for _, existingIndex := range existingIndexes {
 			if !indexExpected[existingIndex.UserName()] && existingIndex.Type() != "primary" {
 				// delete the outdated index
-				fmt.Printf("deleting unexpected index: %s for collection: %s\n", existingIndex.UserName(), collectionName)
+				logger.Infof("deleting unexpected index: %s for collection: %s\n", existingIndex.UserName(), collectionName)
 				deleteIndexPerCollection(ctx, arangoDb, collectionName, existingIndex.UserName())
 			} else {
 				indexExists[existingIndex.UserName()] = true
@@ -680,7 +689,7 @@ func compareAndCreateIndexes(ctx context.Context, arangoDb driver.Database) erro
 		for _, index := range indexes {
 			// create the index if doesn't already exist
 			if !indexExists[index.name] {
-				fmt.Printf("creating index: %s for collection: %s\n", index.name, collectionName)
+				logger.Infof("creating index: %s for collection: %s\n", index.name, collectionName)
 				createIndexPerCollection(ctx, arangoDb, collectionName, index.fields, index.unique, index.name)
 			}
 		}
