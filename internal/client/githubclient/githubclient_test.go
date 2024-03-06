@@ -437,11 +437,11 @@ func Test_githubClient_GetWorkflow(t *testing.T) {
 				return
 			}
 			if len(got) != len(test.want) {
-				t.Fatalf("GetWorkflow() got = %v, want %v", err, test.want)
+				t.Fatalf("GetWorkflow() got length doesn't match want length = %v, want %v", len(got), len(test.want))
 			}
 			for i := range got {
 				if got[i].Name != test.want[i].Name {
-					t.Errorf("GetWorkflow() got = %v, want %v", got, test.want)
+					t.Fatalf("GetWorkflow() got %v, want %v", got[i].Name, test.want[i].Name)
 				}
 			}
 		})
