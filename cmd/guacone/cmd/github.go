@@ -24,6 +24,8 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor"
 	"os"
 	"strings"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/guacsec/guac/internal/client/githubclient"
@@ -36,6 +38,7 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os/signal"
 )
 
 const (
@@ -47,8 +50,6 @@ const (
 type githubOptions struct {
 	// datasource for the collector
 	dataSource datasource.CollectSource
-	// address for NATS connection
-	natsAddr string
 	// run as poll collector
 	poll bool
 	// the mode to run the collector in
@@ -79,7 +80,6 @@ var githubCmd = &cobra.Command{
 			viper.GetString(githubMode),
 			viper.GetString(githubSbom),
 			viper.GetString(githubWorkflowFile),
-			viper.GetString("nats-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
@@ -163,12 +163,32 @@ var githubCmd = &cobra.Command{
 			return false
 		}
 
-		cancelCtx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
-		if err := collector.Collect(cancelCtx, emit, errHandler); err != nil {
-			logger.Fatal(err)
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+		// Use a wait group to wait for the collector to finish
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := collector.Collect(ctx, emit, errHandler); err != nil {
+				logger.Fatal(err)
+			}
+		}()
+
+		select {
+		case <-sigs:
+			logger.Info("Signal received, shutting down gracefully")
+			cancel()
+		case <-ctx.Done():
+			logger.Info("Collector finished")
 		}
+
+		wg.Wait()
+		logger.Info("Shutdown complete")
 
 		if errFound {
 			logger.Fatalf("completed ingestion with error")
@@ -178,9 +198,8 @@ var githubCmd = &cobra.Command{
 	},
 }
 
-func validateGithubFlags(githubMode, sbomName, workflowFileName, natsAddr, csubAddr string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(githubMode, sbomName, workflowFileName, csubAddr string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
 	var opts githubOptions
-	opts.natsAddr = natsAddr
 	opts.poll = poll
 	opts.githubMode = githubMode
 	opts.sbomName = sbomName
