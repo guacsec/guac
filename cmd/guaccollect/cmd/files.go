@@ -129,7 +129,7 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 	// initialize blob store
 	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
 	if err != nil {
-		logger.Fatalf("unable to connect to blog store: %v", err)
+		logger.Fatalf("unable to connect to blob store: %v", err)
 	}
 
 	// initialize pubsub

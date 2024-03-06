@@ -113,7 +113,7 @@ func Test_Publish(t *testing.T) {
 
 	blobStore, err := blob.NewBlobStore(ctx, "mem://")
 	if err != nil {
-		t.Fatalf("unable to connect to blog store: %v", err)
+		t.Fatalf("unable to connect to blob store: %v", err)
 	}
 
 	pubsub := emitter.NewEmitterPubSub(ctx, url)
