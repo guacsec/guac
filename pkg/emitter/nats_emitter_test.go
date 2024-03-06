@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	jsoniter "github.com/json-iterator/go"
+	"gocloud.dev/pubsub"
 
 	uuid "github.com/gofrs/uuid"
 	nats_test "github.com/guacsec/guac/internal/testing/nats"
@@ -112,7 +113,7 @@ func TestNatsEmitter_RecreateStream(t *testing.T) {
 					t.Errorf("failed to delete stream: %v", err)
 				}
 				_, err = jetStream.js.StreamInfo(streamName)
-				if err == nil || (err != nil) && !errors.Is(err, tt.wantErrMessage) {
+				if err != nil && !errors.Is(err, tt.wantErrMessage) {
 					t.Errorf("RecreateStream() error = %v, wantErr %v", err, tt.wantErrMessage)
 					return
 				}
@@ -145,7 +146,7 @@ func testPublish(ctx context.Context, d *processor.Document, pubsub *EmitterPubS
 	return nil
 }
 
-func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error, pubsub *EmitterPubSub) error {
+func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error, emPubSub *EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
@@ -153,13 +154,13 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	sub, err := pubsub.Subscribe(ctx, uuidString)
+	sub, err := emPubSub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return err
 	}
-	processFunc := func(d []byte) error {
+	processFunc := func(d *pubsub.Message) error {
 		doc := processor.Document{}
-		err := json.Unmarshal(d, &doc)
+		err := json.Unmarshal(d.Body, &doc)
 		if err != nil {
 			fmtErrString := fmt.Sprintf("[processor: %s] failed unmarshal the document bytes", uuidString)
 			logger.Errorf(fmtErrString+": %v", err)
@@ -179,6 +180,10 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 			return fmt.Errorf(fmtErrString+": %w", err)
 		}
 		logger.Infof("[processor: %s] docTree Processed: %+v", uuidString, docTree.Document.SourceInformation)
+		// ack the message from the queue once the ingestion has occurred
+		d.Ack()
+		logger.Infof("[processor: %s] message acknowledged in pusbub", uuidString)
+
 		return nil
 	}
 
