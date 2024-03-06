@@ -75,7 +75,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	// initialize blob store
 	blobStore, err := blob.NewBlobStore(ctx, opts.blobAddr)
 	if err != nil {
-		logger.Fatalf("unable to connect to blog store: %v", err)
+		logger.Fatalf("unable to connect to blob store: %v", err)
 	}
 
 	// initialize pubsub

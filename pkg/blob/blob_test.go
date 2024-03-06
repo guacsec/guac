@@ -31,14 +31,14 @@ import (
 func initializeInMemBlobStore(ctx context.Context) (*BlobStore, error) {
 	blobStore, err := NewBlobStore(ctx, "mem://")
 	if err != nil {
-		return nil, fmt.Errorf("unable to connect to blog store: %w", err)
+		return nil, fmt.Errorf("unable to connect to blob store: %w", err)
 	}
 	return blobStore, nil
 }
 
 func Test_blobStore_Write_Read(t *testing.T) {
 	ctx := context.Background()
-	inmemBlog, err := initializeInMemBlobStore(ctx)
+	inmemBlob, err := initializeInMemBlobStore(ctx)
 	if err != nil {
 		t.Fatalf("failed to initialize blob store with error: %v", err)
 	}
@@ -73,10 +73,10 @@ func Test_blobStore_Write_Read(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := inmemBlog.Write(ctx, tt.args.key, tt.args.value); err != nil {
+			if err := inmemBlob.Write(ctx, tt.args.key, tt.args.value); err != nil {
 				t.Errorf("blobStore.Write() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			got, err := inmemBlog.Read(ctx, tt.searchKey)
+			got, err := inmemBlob.Read(ctx, tt.searchKey)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("blobStore.Read() error = %v, wantErr %v", err, tt.wantErr)
 				return
