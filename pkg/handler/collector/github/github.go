@@ -132,6 +132,12 @@ func WithRepo(repo string) Opt {
 	}
 }
 
+func WithRelease(isRelease bool) Opt {
+	return func(g *githubCollector) {
+		g.isRelease = isRelease
+	}
+}
+
 func WithClient(client githubclient.GithubClient) Opt {
 	return func(g *githubCollector) {
 		g.client = client
@@ -323,6 +329,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 					Source:    artifact.Name,
 				},
 			}
+
 			docChannel <- doc
 		}
 
