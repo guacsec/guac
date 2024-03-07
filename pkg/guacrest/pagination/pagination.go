@@ -88,11 +88,11 @@ func Paginate[T any](ctx context.Context, lst []T, spec models.PaginationSpec) (
 		start = decoded
 	}
 
-	end := start + uint64(pagesize) // end is exclusive
-	nextCursor := cursorFromIndex(end)
-	if end >= inputLength {
-		end = inputLength
-		nextCursor = ""
+	end := inputLength // end is exlusive
+	var nextCursor *string
+	if start+uint64(pagesize) < inputLength {
+		end = start + uint64(pagesize)
+		nextCursor = PointerOf(cursorFromIndex(end))
 	}
 
 	info := models.PaginationInfo{

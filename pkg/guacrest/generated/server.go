@@ -292,6 +292,7 @@ type BadRequestJSONResponse Error
 type InternalServerErrorJSONResponse Error
 
 type PurlListJSONResponse struct {
+	// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
 	PaginationInfo PaginationInfo `json:"PaginationInfo"`
 	PurlList       []Purl         `json:"PurlList"`
 }

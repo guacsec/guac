@@ -100,8 +100,9 @@ components:
       type: string
     PaginationInfo:
       type: object
-      required:
-        - NextCursor
+      description: >
+        Contains the cursor to retrieve more pages. If there are no more, 
+        NextCursor will be nil.
       properties: 
         NextCursor:
           type: string

@@ -35,11 +35,14 @@ func Test_Cursors(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected error when calling Paginate to retrieve a cursor: %s", err)
 		}
+		if info.NextCursor == nil {
+			t.Fatalf("info.NextCursor is nil after calling Paginate to retrieve a cursor")
+		}
 
 		// check that spec.NextCursor does point to the next element
 		spec = models.PaginationSpec{
 			PageSize: pagination.PointerOf(100),
-			Cursor:   &info.NextCursor,
+			Cursor:   info.NextCursor,
 		}
 		page, _, err := pagination.Paginate(ctx, inputList, spec)
 		if err != nil {
@@ -69,7 +72,10 @@ func Test_Paginate(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected error when calling Paginate to set up the tests: %s", err)
 		}
-		cursors = append(cursors, info.NextCursor)
+		if info.NextCursor == nil {
+			t.Fatalf("info.NextCursor is nil after calling Paginate to set up the tests")
+		}
+		cursors = append(cursors, *info.NextCursor)
 	}
 
 	// generate a cursor that is out of range of inputList
@@ -80,16 +86,15 @@ func Test_Paginate(t *testing.T) {
 		t.Fatalf("Unexpected error when calling Paginate to set up the"+
 			" out-of-range cursor test: %s", err)
 	}
-	// check that we got the intended cursor
+	// check that we got a valid cursor
 	outOfRangeCursor := info.NextCursor
-	if outOfRangeCursor == "" {
+	if outOfRangeCursor == nil {
 		t.Fatal("Unexpected cursor when calling Paginate to set up the" +
 			" out-of-range cursor test: Cursor is empty.")
 	}
 
 	tests := []struct {
 		name                   string
-		inputList              []int // defaults to inputList defined above if not set
 		inputSpec              models.PaginationSpec
 		expectedPage           []int
 		expectedPaginationInfo models.PaginationInfo
@@ -97,12 +102,11 @@ func Test_Paginate(t *testing.T) {
 	}{
 		{
 			name:         "Only PageSize specified",
-			inputList:    inputList,
 			inputSpec:    models.PaginationSpec{PageSize: pagination.PointerOf(3)},
 			expectedPage: []int{12, 13, 14},
 			expectedPaginationInfo: models.PaginationInfo{
 				TotalCount: pagination.PointerOf(6),
-				NextCursor: cursors[3],
+				NextCursor: &cursors[3],
 			},
 		},
 		{
@@ -127,7 +131,7 @@ func Test_Paginate(t *testing.T) {
 			expectedPage: []int{},
 			expectedPaginationInfo: models.PaginationInfo{
 				TotalCount: pagination.PointerOf(6),
-				NextCursor: cursors[0],
+				NextCursor: &cursors[0],
 			},
 		},
 		{
@@ -144,7 +148,7 @@ func Test_Paginate(t *testing.T) {
 			expectedPage: []int{14, 15},
 			expectedPaginationInfo: models.PaginationInfo{
 				TotalCount: pagination.PointerOf(6),
-				NextCursor: cursors[4],
+				NextCursor: &cursors[4],
 			},
 		},
 		{
@@ -204,7 +208,7 @@ func Test_Paginate(t *testing.T) {
 		{
 			name: "Cursor is out of range",
 			inputSpec: models.PaginationSpec{
-				Cursor: pagination.PointerOf(outOfRangeCursor),
+				Cursor: outOfRangeCursor,
 			},
 			wantErr: true,
 		},
@@ -222,11 +226,7 @@ func Test_Paginate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := inputList
-			if tt.inputList != nil {
-				in = tt.inputList
-			}
-			page, info, err := pagination.Paginate(ctx, in, tt.inputSpec)
+			page, info, err := pagination.Paginate(ctx, inputList, tt.inputSpec)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("tt.wantErr is %v, but got %v", tt.wantErr, err)
 				return
