@@ -15,6 +15,8 @@ In both modes, the collector utilizes a GitHub client to interact with the GitHu
 
 ## Running the GitHub Collector
 
+Note: For the collector to run, `guacIngest` along with a pubsub and a blob store are required.
+
 ### Prerequisites
 
 - A valid GitHub token set in the environment variable [GITHUB_TOKEN](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
