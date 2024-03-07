@@ -109,7 +109,7 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 			pkgId := dependency.Package.Namespaces[0].Names[0].Versions[0].Id
 
 			if len(dependency.DependencyPackage.Namespaces[0].Names[0].Versions) == 0 {
-				findMatchingDepPkgVersionIDs, err := findDepPkgVersionIDs(ctx, gqlClient, dependency.DependencyPackage.Type,
+				findMatchingDepPkgVersionIDs, err := FindDepPkgVersionIDs(ctx, gqlClient, dependency.DependencyPackage.Type,
 					dependency.DependencyPackage.Namespaces[0].Namespace,
 					dependency.DependencyPackage.Namespaces[0].Names[0].Name, dependency.VersionRange)
 				if err != nil {
@@ -130,9 +130,9 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 					continue
 				}
 
-				// First we need to find all the packages that have pkgName as a dependency
+				// First we need to find all the packages that have pkgName as a dependent
 
-				// Initialize a visited map and a queue for BFS to find all packages that have pkgName as a dependency.
+				// Initialize a visited map and a queue for BFS to find all packages that have pkgName as a dependent.
 				visited := make(map[string]bool)
 				queue := []string{depPkgId}
 
@@ -195,12 +195,12 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 	return packages, nil
 }
 
-// findDepPkgVersionIDs queries for packages matching the specified filters (type, namespace, name) and version range.
+// FindDepPkgVersionIDs queries for packages matching the specified filters (type, namespace, name) and version range.
 // It returns a slice of version IDs that match the given version range criteria.
 // This function returns:
 // - A slice of matching dependent package version IDs.
 // - An error
-func findDepPkgVersionIDs(ctx context.Context, gqlclient graphql.Client, depPkgType string, depPkgNameSpace string, depPkgName string, versionRange string) ([]string, error) {
+func FindDepPkgVersionIDs(ctx context.Context, gqlclient graphql.Client, depPkgType string, depPkgNameSpace string, depPkgName string, versionRange string) ([]string, error) {
 	var matchingDepPkgVersionIDs []string
 
 	depPkgFilter := &model.PkgSpec{

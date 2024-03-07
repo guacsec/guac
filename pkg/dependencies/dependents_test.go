@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integrationMerge
+//go:build integration
 
 package dependencies
 
@@ -222,6 +222,10 @@ func createNodes(t *testing.T, ctx context.Context, gqlClient graphql.Client, pk
 
 	err, id := createOccurrenceAndArtifact(t, ctx, gqlClient, info)
 
+	if err != nil {
+		t.Fatalf("failed to create occurrence and artifact: %v", err)
+	}
+
 	err = ingestHasSBOM(ctx, gqlClient, dependencyIds, packageIds, []string{id.IngestOccurrence})
 
 	if err != nil {
@@ -262,7 +266,8 @@ func ingestHasSBOM(ctx context.Context, client graphql.Client, dependencyIds, so
 			includes: model.HasSBOMIncludesInputSpec{
 				Dependencies: dependencyIds,
 				Occurrences:  occIds,
-				Software:     softwareIds,
+				Packages:     softwareIds,
+				Artifacts:    []string{},
 			},
 		},
 	}
@@ -325,8 +330,9 @@ func check(t *testing.T, wantErr bool, want map[string]int) {
 	endpoint := "http://localhost:8080/query"
 	httpClient := http.Client{}
 	gqlClient := graphql.NewClient(endpoint, &httpClient)
+	ctx := context.Background()
 
-	got, err := findDependentsOfDependencies(gqlClient)
+	got, err := findDependentsOfDependencies(ctx, gqlClient)
 	if (err != nil) != wantErr {
 		t.Errorf("findDependentsOfDependencies() error = %v, wantErr %v", err, wantErr)
 		return

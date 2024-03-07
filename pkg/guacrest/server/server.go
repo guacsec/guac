@@ -67,15 +67,15 @@ func (s *DefaultServer) HealthCheck(ctx context.Context, request gen.HealthCheck
 }
 
 func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.AnalyzeDependenciesRequestObject) (gen.AnalyzeDependenciesResponseObject, error) {
-	if request.Params.Sort == "frequency" {
-		deps := dependencies.New(ctx, s.gqlClient)
-		packages, err := deps.GetSortedDependents()
+	switch request.Params.Sort {
+	case gen.Frequency:
+		packages, err := dependencies.GetDependenciesBySortedDependentCnt(ctx, s.gqlClient)
 		if err != nil {
 			return gen.AnalyzeDependencies500JSONResponse{
 				InternalServerErrorJSONResponse: gen.InternalServerErrorJSONResponse{
-					Message: fmt.Sprintf("failed to get sorted dependents %v", err.Error()),
+					Message: err.Error(),
 				},
-			}, fmt.Errorf("failed to get sorted dependencies %v", err)
+			}, nil
 		}
 
 		var packageNames []gen.PackageName
@@ -83,8 +83,8 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 		for _, p := range packages {
 			pac := p // have to do this because we don't want packageNames to keep on appending a pointer of the same variable p.
 			packageNames = append(packageNames, gen.PackageName{
-				Name:           &pac.Name,
-				DependentCount: &pac.DependentCount,
+				Name:           pac.Name,
+				DependentCount: pac.DependentCount,
 			})
 		}
 
@@ -93,6 +93,9 @@ func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.Ana
 		}
 
 		return val, nil
+	case gen.Scorecard:
+		return nil, fmt.Errorf("scorecard sort is unimplemented")
+	default:
+		return nil, fmt.Errorf("%v sort is unsupported", request.Params.Sort)
 	}
-	return gen.AnalyzeDependencies200JSONResponse{PackageNameListJSONResponse: []gen.PackageName{}}, nil
 }
