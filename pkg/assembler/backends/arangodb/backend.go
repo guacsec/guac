@@ -179,7 +179,10 @@ func getBackend(ctx context.Context, args backends.BackendArgs) (backends.Backen
 		fullCollectionIndexMap := getCollectionIndexMap()
 		for collectionName, indexes := range fullCollectionIndexMap {
 			for _, index := range indexes {
-				createIndexPerCollection(ctx, db, collectionName, index.fields, index.unique, index.name)
+				err = createIndexPerCollection(ctx, db, collectionName, index.fields, index.unique, index.name)
+				if err != nil {
+					return nil, fmt.Errorf("failed to create index:%s in collection:%s :: %w", index.name, collectionName, err)
+				}
 			}
 		}
 
@@ -680,7 +683,10 @@ func compareAndCreateIndexes(ctx context.Context, arangoDb driver.Database) erro
 			if !indexExpected[existingIndex.UserName()] && existingIndex.Type() != "primary" {
 				// delete the outdated index
 				logger.Infof("deleting unexpected index: %s for collection: %s\n", existingIndex.UserName(), collectionName)
-				deleteIndexPerCollection(ctx, arangoDb, collectionName, existingIndex.UserName())
+				err = deleteIndexPerCollection(ctx, arangoDb, collectionName, existingIndex.UserName())
+				if err != nil {
+					return fmt.Errorf("failed to delete index:%s in collection:%s :: %w", existingIndex.UserName(), collectionName, err)
+				}
 			} else {
 				indexExists[existingIndex.UserName()] = true
 			}
@@ -690,7 +696,10 @@ func compareAndCreateIndexes(ctx context.Context, arangoDb driver.Database) erro
 			// create the index if doesn't already exist
 			if !indexExists[index.name] {
 				logger.Infof("creating index: %s for collection: %s\n", index.name, collectionName)
-				createIndexPerCollection(ctx, arangoDb, collectionName, index.fields, index.unique, index.name)
+				err = createIndexPerCollection(ctx, arangoDb, collectionName, index.fields, index.unique, index.name)
+				if err != nil {
+					return fmt.Errorf("failed to create index:%s in collection:%s :: %w", index.name, collectionName, err)
+				}
 			}
 		}
 	}
