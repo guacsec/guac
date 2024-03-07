@@ -407,7 +407,7 @@ func Test_githubClient_GetWorkflow(t *testing.T) {
 			},
 			want: []client.Workflow{
 				{
-					Name: "Test Workflow",
+					Name: "Create and Upload Artifact",
 				},
 				{
 					Name: "Test Workflow - Version 2",
@@ -420,11 +420,11 @@ func Test_githubClient_GetWorkflow(t *testing.T) {
 				ctx:                context.Background(),
 				owner:              "guacsec",
 				repo:               "guac-test",
-				githubWorkflowName: "Test Workflow",
+				githubWorkflowName: "testWorkflow.yaml",
 			},
 			want: []client.Workflow{
 				{
-					Name: "Test Workflow",
+					Name: "Create and Upload Artifact",
 				},
 			},
 		},
@@ -437,11 +437,11 @@ func Test_githubClient_GetWorkflow(t *testing.T) {
 				return
 			}
 			if len(got) != len(test.want) {
-				t.Fatalf("GetWorkflow got %v, want %v", got, test.want)
+				t.Fatalf("GetWorkflow() got length doesn't match want length = %v, want %v", len(got), len(test.want))
 			}
-			for i := 0; i < len(got); i++ {
+			for i := range got {
 				if got[i].Name != test.want[i].Name {
-					t.Fatalf("GetWorkflow got %v, want %v", got[i].Name, test.want[i].Name)
+					t.Fatalf("GetWorkflow() got %v, want %v", got[i].Name, test.want[i].Name)
 				}
 			}
 		})
