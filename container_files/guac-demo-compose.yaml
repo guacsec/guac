@@ -23,7 +23,6 @@ services:
     restart: on-failure
     ports:
       - "2782:2782"
-    depends_on:
     healthcheck:
       test: [ "CMD", "wget", "--spider", "http://localhost:2782" ]
       interval: 10s
