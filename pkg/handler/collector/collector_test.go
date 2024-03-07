@@ -33,6 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/collector/file"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"gocloud.dev/pubsub"
 )
 
 func TestCollect(t *testing.T) {
@@ -113,7 +114,7 @@ func Test_Publish(t *testing.T) {
 
 	blobStore, err := blob.NewBlobStore(ctx, "mem://")
 	if err != nil {
-		t.Fatalf("unable to connect to blog store: %v", err)
+		t.Fatalf("unable to connect to blob store: %v", err)
 	}
 
 	pubsub := emitter.NewEmitterPubSub(ctx, url)
@@ -143,7 +144,7 @@ func Test_Publish(t *testing.T) {
 	}
 }
 
-func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
+func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error, blobStore *blob.BlobStore, emPubSub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
 
 	uuid, err := uuid.NewV4()
@@ -151,13 +152,13 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	sub, err := pubsub.Subscribe(ctx, uuidString)
+	sub, err := emPubSub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return err
 	}
-	processFunc := func(d []byte) error {
+	processFunc := func(d *pubsub.Message) error {
 
-		blobStoreKey, err := events.DecodeEventSubject(ctx, d)
+		blobStoreKey, err := events.DecodeEventSubject(ctx, d.Body)
 		if err != nil {
 			logger.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
 			return nil
@@ -189,6 +190,10 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 			return fmt.Errorf(fmtErrString+": %w", err)
 		}
 		logger.Infof("[processor: %s] docTree Processed: %+v", uuidString, docTree.Document.SourceInformation)
+		// ack the message from the queue once the ingestion has occurred
+		d.Ack()
+		logger.Infof("[processor: %s] message acknowledged in pusbub", uuidString)
+
 		return nil
 	}
 

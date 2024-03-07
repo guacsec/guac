@@ -132,6 +132,12 @@ func WithRepo(repo string) Opt {
 	}
 }
 
+func WithRelease(isRelease bool) Opt {
+	return func(g *githubCollector) {
+		g.isRelease = isRelease
+	}
+}
+
 func WithClient(client githubclient.GithubClient) Opt {
 	return func(g *githubCollector) {
 		g.client = client
@@ -179,12 +185,23 @@ func (g *githubCollector) RetrieveArtifacts(ctx context.Context, docChannel chan
 		}
 	} else {
 		if g.poll {
-			g.fetchWorkflowRunArtifacts(ctx, docChannel)
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case <-time.After(g.interval):
+			ticker := time.NewTicker(g.interval)
+
+			poll := func(ctx context.Context) {
+				logger := logging.FromContext(ctx)
+				for {
+					select {
+					case <-ticker.C:
+						logger.Infof("Polling...")
+						g.fetchWorkflowRunArtifacts(ctx, docChannel)
+						ticker.Reset(g.interval)
+					case <-ctx.Done():
+						return
+					}
+				}
 			}
+
+			go poll(ctx)
 		} else {
 			g.fetchWorkflowRunArtifacts(ctx, docChannel)
 		}
@@ -323,6 +340,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 					Source:    artifact.Name,
 				},
 			}
+
 			docChannel <- doc
 		}
 
