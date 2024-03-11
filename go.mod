@@ -302,13 +302,13 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nats-io/nats-server/v2 v2.10.10
+	github.com/nats-io/nats-server/v2 v2.10.11
 	github.com/nats-io/nats.go v1.33.1
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/openvex/go-vex v0.2.5
 	github.com/ossf/scorecard/v4 v4.13.1
 	github.com/package-url/packageurl-go v0.1.2
-	github.com/pitabwire/natspubsub v0.1.1
+	github.com/pitabwire/natspubsub v0.1.2
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.0
 	github.com/redis/go-redis/v9 v9.5.0
