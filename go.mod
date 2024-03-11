@@ -11,7 +11,7 @@ require (
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.7
 	github.com/secure-systems-lab/go-securesystemslib v0.8.0
 	github.com/spf13/cobra v1.8.0
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	google.golang.org/api v0.167.0
 )
 
