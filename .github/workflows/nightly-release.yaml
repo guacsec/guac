@@ -40,7 +40,7 @@ jobs:
     name: trigger nightly build 
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # tag=v3
 
       - name: Get GitHub App token
         uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c # v1.9.0
