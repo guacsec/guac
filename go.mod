@@ -272,7 +272,7 @@ require (
 	entgo.io/ent v0.13.0
 	github.com/99designs/gqlgen v0.17.44
 	github.com/CycloneDX/cyclonedx-go v0.8.0
-	github.com/Khan/genqlient v0.6.0
+	github.com/Khan/genqlient v0.7.0
 	github.com/Masterminds/semver v1.5.0
 	github.com/arangodb/go-driver v1.6.1
 	github.com/aws/aws-sdk-go v1.50.36
