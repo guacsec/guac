@@ -290,6 +290,66 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		},
 		errMessage: errors.New("image tag not specified to fetch"),
 		wantErr:    true,
+	}, {
+		name: "reference by digest",
+		fields: fields{
+			ociValues: []string{
+				"ghcr.io/guacsec/guac-test-image@sha256:9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09",
+			},
+			poll:     false,
+			interval: 0,
+		},
+		want: []*processor.Document{
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIDsseAttExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCISPDXExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
+				},
+			},
+		},
+		wantErr: false,
+	}, {
+		name: "reference by tag AND digest",
+		fields: fields{
+			ociValues: []string{
+				"ghcr.io/guacsec/guac-test-image:carrot@sha256:9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09",
+			},
+			poll:     false,
+			interval: 0,
+		},
+		want: []*processor.Document{
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIDsseAttExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCISPDXExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector: string(OCICollector),
+					Source:    "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
+				},
+			},
+		},
+		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
