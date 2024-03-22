@@ -17,6 +17,9 @@ package cyclonedx
 
 import (
 	"context"
+	"github.com/Khan/genqlient/graphql"
+	"net/http"
+	"reflect"
 	"testing"
 	"time"
 
@@ -558,5 +561,44 @@ func noAnalysisVexPredicates() *assembler.IngestPredicates {
 				},
 			},
 		},
+	}
+}
+
+func Test_findCDXPkgVersionIDs(t *testing.T) {
+	httpClient := http.Client{}
+	gqlclient := graphql.NewClient("http://localhost:8080", &httpClient)
+	type args struct {
+		ctx           context.Context
+		gqlClient     graphql.Client
+		pkgIdentifier string
+		versionRange  string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []string
+		wantErr bool
+	}{
+		{
+			name: "default versions",
+			args: args{
+				ctx:           context.Background(),
+				gqlClient:     gqlclient,
+				pkgIdentifier: "guac",
+				versionRange:  "vers:generic/>=2.9|<=4.1",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := findCDXPkgVersionIDs(tt.args.ctx, tt.args.gqlClient, tt.args.pkgIdentifier, tt.args.versionRange)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("findCDXPkgVersionIDs() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("findCDXPkgVersionIDs() got = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

@@ -19,7 +19,10 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
+	"net/http"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -63,6 +66,13 @@ type vulnData struct {
 	vulnMetadata []assembler.VulnMetadataIngest
 	certifyVuln  []assembler.CertifyVulnIngest
 	vex          []assembler.VexIngest
+}
+
+type VersionMatchObject struct {
+	MinVersion   string
+	MaxVersion   string
+	MinInclusive bool
+	MaxInclusive bool
 }
 
 func NewCycloneDXParser() common.DocumentParser {
@@ -410,7 +420,9 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 
 // Get package name and range versions to create package input spec for the affected packages.
 func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *model.VulnerabilityInputSpec, vexData model.VexStatementInputSpec, affectsObj cdx.Affects) (*[]assembler.VexIngest, error) {
-	logger := logging.FromContext(ctx)
+	httpClient := http.Client{}
+	gqlclient := graphql.NewClient("http://localhost:8080", &httpClient)
+
 	pkgRef := affectsObj.Ref
 
 	var foundVexIngest []assembler.VexIngest
@@ -430,15 +442,15 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 	if len(pkgRefInfo) != 2 {
 		return nil, fmt.Errorf("malformed affected-package reference: %q", affectsObj.Ref)
 	}
-	pkdIdentifier := pkgRefInfo[1]
+	pkgIdentifier := pkgRefInfo[1]
 
 	// check whether the ref contains a purl
-	if strings.Contains(pkdIdentifier, "pkg:") {
-		pkg, err := asmhelpers.PurlToPkg(pkdIdentifier)
+	if strings.Contains(pkgIdentifier, "pkg:") {
+		pkg, err := asmhelpers.PurlToPkg(pkgIdentifier)
 		if err != nil {
 			return nil, fmt.Errorf("unable to create package input spec: %v", err)
 		}
-		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkdIdentifier)
+		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkgIdentifier)
 		return &[]assembler.VexIngest{{VexData: &vexData, Vulnerability: vulnInput, Pkg: pkg}}, nil
 	}
 
@@ -448,31 +460,171 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 
 	var viList []assembler.VexIngest
 	for _, affect := range *affectsObj.Range {
-		// TODO: Handle package range versions (see - https://github.com/CycloneDX/bom-examples/blob/master/VEX/CISA-Use-Cases/Case-8/vex.json#L42)
+		// Handles package range versions like https://github.com/CycloneDX/bom-examples/blob/master/VEX/CISA-Use-Cases/Case-8/vex.json#L42
 		if affect.Range != "" {
-			logger.Debugf("[cdx vex] package range versions not supported yet: %q", affect.Range)
+			purls, err := findCDXPkgVersionIDs(ctx, gqlclient, pkgIdentifier, affect.Range)
+			if err != nil {
+				return nil, fmt.Errorf("error searching version ranges for %s: %v", affect.Range, err)
+			}
+
+			for _, purl := range purls {
+				var addVulnDataErr error
+				viList, addVulnDataErr = c.AddVulnerabilityIngestionData(purl, vexData, vulnInput, viList)
+				if addVulnDataErr != nil {
+					return nil, fmt.Errorf("could not add Vulnerability information for %s: %v", pkgIdentifier, err)
+				}
+			}
+
 			continue
 		}
 		if affect.Version == "" {
 			return nil, fmt.Errorf("no version found for package ref %q", pkgRef)
 		}
-		vi := &assembler.VexIngest{
-			VexData:       &vexData,
-			Vulnerability: vulnInput,
-		}
 
 		// create guac specific identifier string using affected package name and version.
-		pkgID := guacCDXPkgPurl(pkdIdentifier, affect.Version, "", false)
-		pkg, err := asmhelpers.PurlToPkg(pkgID)
+		purl := guacCDXPkgPurl(pkgIdentifier, affect.Version, "", false)
+		var err error
+		viList, err = c.AddVulnerabilityIngestionData(purl, vexData, vulnInput, viList)
 		if err != nil {
-			return nil, fmt.Errorf("unable to create package input spec from guac pkg purl: %v", err)
+			return nil, fmt.Errorf("could not add Vulnerability information for %s: %v", pkgIdentifier, err)
 		}
-		vi.Pkg = pkg
-		viList = append(viList, *vi)
-		c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, pkgID)
 	}
 
 	return &viList, nil
+}
+
+func (c *cyclonedxParser) AddVulnerabilityIngestionData(purl string, vexData model.VexStatementInputSpec, vulnInput *model.VulnerabilityInputSpec, viList []assembler.VexIngest) ([]assembler.VexIngest, error) {
+	pkg, err := asmhelpers.PurlToPkg(purl)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create package input spec from guac pkg purl: %v", err)
+	}
+	vi := &assembler.VexIngest{
+		VexData:       &vexData,
+		Vulnerability: vulnInput,
+		Pkg:           pkg,
+	}
+	viList = append(viList, *vi)
+	c.identifierStrings.PurlStrings = append(c.identifierStrings.PurlStrings, purl)
+	return viList, nil
+}
+
+func findCDXPkgVersionIDs(ctx context.Context, gqlClient graphql.Client, pkgIdentifier string, versionRange string) ([]string, error) {
+	var matchingVersionPurls []string
+
+	// search for all packages that have a matching type, namespace, and name.
+	typeGUAC, namespace := "guac", "cdx"
+	pkgResponse, err := model.Packages(ctx, gqlClient, model.PkgSpec{
+		Type:      &typeGUAC,
+		Namespace: &namespace,
+		Name:      &pkgIdentifier,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error querying for packages: %w", err)
+	}
+
+	pkgVersionsMap := map[string]string{}
+	var pkgVersions []string
+	for _, depPkgVersion := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
+		pkgVersions = append(pkgVersions, depPkgVersion.Version)
+		pkgVersionsMap[depPkgVersion.Version] = depPkgVersion.Id
+		pkgVersionsMap[depPkgVersion.Version] = guacCDXPkgPurl(typeGUAC, depPkgVersion.Version, "", false)
+	}
+
+	matchingDepPkgVersions, err := WhichVersionMatches(pkgVersions, versionRange)
+	if err != nil {
+		return nil, fmt.Errorf("error determining dependent version matches: %w", err)
+	}
+
+	for matchingDepPkgVersion := range matchingDepPkgVersions {
+		matchingVersionPurls = append(matchingVersionPurls, pkgVersionsMap[matchingDepPkgVersion])
+	}
+
+	return matchingVersionPurls, nil
+}
+
+func WhichVersionMatches(versions []string, versionRange string) (map[string]bool, error) {
+	matchedVersions := make(map[string]bool)
+	versionMatchObjects, excludedVersions, err := parseVersionRange(versionRange)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse version range: %w", err)
+	}
+
+	for _, version := range versions {
+		for _, vmo := range versionMatchObjects {
+			if vmo.Match(version, excludedVersions) {
+				matchedVersions[version] = true
+			}
+		}
+	}
+
+	return matchedVersions, nil
+}
+
+// Match checks if the given version is within the range specified by the VersionMatchObject.
+func (vmo VersionMatchObject) Match(version string, excludedVersions []string) bool {
+	withinRange := (vmo.MinVersion <= version) && (version < vmo.MaxVersion)
+	if !withinRange {
+		return false
+	}
+	for _, excludedVersion := range excludedVersions {
+		if version == excludedVersion {
+			return false // Version is explicitly excluded
+		}
+	}
+	return true
+}
+
+func parseVersionRange(rangeStr string) ([]VersionMatchObject, []string, error) {
+	// Split the range string on the logical OR operator `|` so that we can find different comparisons
+	parts := strings.Split(rangeStr, "|")
+
+	var versionMatchObjects []VersionMatchObject
+	var excludedVersions []string
+
+	for _, part := range parts {
+		// Regular expression to capture version comparison operators and version numbers
+		// This is for cases like: "vers:generic/>=2.9|<=4.1" and ">=2.0.0 <3.0.0 | != 2.3.0",
+		re := regexp.MustCompile(`(!=|[><]=?|=)?\s*v?(\d+(\.\d+)?(\.\d+)?)`)
+
+		// Find all matches for version constraints within the part.
+		matches := re.FindAllStringSubmatch(part, -1)
+		if len(matches) == 0 {
+			return nil, nil, fmt.Errorf("no version constraints found in: %s", part)
+		}
+
+		vmo := VersionMatchObject{}
+
+		for _, match := range matches {
+			operator := match[1]
+			version := match[2]
+
+			switch operator {
+			case ">":
+				vmo.MinVersion = version
+				vmo.MinInclusive = false
+			case ">=":
+				vmo.MinVersion = version
+				vmo.MinInclusive = true
+			case "<":
+				vmo.MaxVersion = version
+				vmo.MaxInclusive = false
+			case "<=":
+				vmo.MaxVersion = version
+				vmo.MaxInclusive = true
+			case "=":
+				vmo.MinVersion = version
+				vmo.MaxVersion = version
+				vmo.MinInclusive = true
+				vmo.MaxInclusive = true
+			case "!=":
+				excludedVersions = append(excludedVersions, version)
+			}
+		}
+
+		versionMatchObjects = append(versionMatchObjects, vmo)
+	}
+
+	return versionMatchObjects, excludedVersions, nil
 }
 
 func (c *cyclonedxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
