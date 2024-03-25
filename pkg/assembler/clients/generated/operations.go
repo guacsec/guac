@@ -23634,29 +23634,29 @@ fragment AllArtifactTree on Artifact {
 `
 
 func Artifacts(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter ArtifactSpec,
 ) (*ArtifactsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Artifacts",
 		Query:  Artifacts_Operation,
 		Variables: &__ArtifactsInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data ArtifactsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ ArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by CertifyBads.
@@ -23728,29 +23728,29 @@ fragment AllArtifactTree on Artifact {
 `
 
 func CertifyBads(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter CertifyBadSpec,
 ) (*CertifyBadsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "CertifyBads",
 		Query:  CertifyBads_Operation,
 		Variables: &__CertifyBadsInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data CertifyBadsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ CertifyBadsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by CertifyLegals.
@@ -23829,29 +23829,29 @@ fragment AllLicenseTree on License {
 `
 
 func CertifyLegals(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter CertifyLegalSpec,
 ) (*CertifyLegalsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "CertifyLegals",
 		Query:  CertifyLegals_Operation,
 		Variables: &__CertifyLegalsInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data CertifyLegalsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ CertifyLegalsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by Dependencies.
@@ -23899,29 +23899,29 @@ fragment AllPkgTree on Package {
 `
 
 func Dependencies(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter IsDependencySpec,
 ) (*DependenciesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Dependencies",
 		Query:  Dependencies_Operation,
 		Variables: &__DependenciesInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data DependenciesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ DependenciesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by FindSoftware.
@@ -23983,29 +23983,29 @@ fragment AllArtifactTree on Artifact {
 `
 
 func FindSoftware(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	searchText string,
 ) (*FindSoftwareResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "FindSoftware",
 		Query:  FindSoftware_Operation,
 		Variables: &__FindSoftwareInput{
 			SearchText: searchText,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data FindSoftwareResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ FindSoftwareResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by HasSBOMs.
@@ -24124,29 +24124,29 @@ fragment AllSourceTree on Source {
 `
 
 func HasSBOMs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter HasSBOMSpec,
 ) (*HasSBOMsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "HasSBOMs",
 		Query:  HasSBOMs_Operation,
 		Variables: &__HasSBOMsInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data HasSBOMsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ HasSBOMsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestArtifact.
@@ -24157,29 +24157,29 @@ mutation IngestArtifact ($artifact: IDorArtifactInput!) {
 `
 
 func IngestArtifact(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifact IDorArtifactInput,
 ) (*IngestArtifactResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestArtifact",
 		Query:  IngestArtifact_Operation,
 		Variables: &__IngestArtifactInput{
 			Artifact: artifact,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestArtifactResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestArtifactResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestArtifacts.
@@ -24190,29 +24190,29 @@ mutation IngestArtifacts ($artifacts: [IDorArtifactInput!]!) {
 `
 
 func IngestArtifacts(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifacts []IDorArtifactInput,
 ) (*IngestArtifactsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestArtifacts",
 		Query:  IngestArtifacts_Operation,
 		Variables: &__IngestArtifactsInput{
 			Artifacts: artifacts,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestArtifactsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestBuilder.
@@ -24223,29 +24223,29 @@ mutation IngestBuilder ($builder: IDorBuilderInput!) {
 `
 
 func IngestBuilder(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	builder IDorBuilderInput,
 ) (*IngestBuilderResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestBuilder",
 		Query:  IngestBuilder_Operation,
 		Variables: &__IngestBuilderInput{
 			Builder: builder,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestBuilderResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestBuilderResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestBuilders.
@@ -24256,29 +24256,29 @@ mutation IngestBuilders ($builders: [IDorBuilderInput!]!) {
 `
 
 func IngestBuilders(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	builders []IDorBuilderInput,
 ) (*IngestBuildersResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestBuilders",
 		Query:  IngestBuilders_Operation,
 		Variables: &__IngestBuildersInput{
 			Builders: builders,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestBuildersResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestBuildersResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestBulkVulnHasMetadata.
@@ -24289,12 +24289,12 @@ mutation IngestBulkVulnHasMetadata ($vulnerabilities: [IDorVulnerabilityInput!]!
 `
 
 func IngestBulkVulnHasMetadata(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	vulnerabilities []IDorVulnerabilityInput,
 	vulnerabilityMetadataList []VulnerabilityMetadataInputSpec,
 ) (*IngestBulkVulnHasMetadataResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestBulkVulnHasMetadata",
 		Query:  IngestBulkVulnHasMetadata_Operation,
 		Variables: &__IngestBulkVulnHasMetadataInput{
@@ -24302,18 +24302,18 @@ func IngestBulkVulnHasMetadata(
 			VulnerabilityMetadataList: vulnerabilityMetadataList,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestBulkVulnHasMetadataResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestBulkVulnHasMetadataResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyBadArtifact.
@@ -24324,12 +24324,12 @@ mutation IngestCertifyBadArtifact ($artifact: IDorArtifactInput!, $certifyBad: C
 `
 
 func IngestCertifyBadArtifact(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifact IDorArtifactInput,
 	certifyBad CertifyBadInputSpec,
 ) (*IngestCertifyBadArtifactResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyBadArtifact",
 		Query:  IngestCertifyBadArtifact_Operation,
 		Variables: &__IngestCertifyBadArtifactInput{
@@ -24337,18 +24337,18 @@ func IngestCertifyBadArtifact(
 			CertifyBad: certifyBad,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyBadArtifactResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyBadArtifactResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyBadArtifacts.
@@ -24359,12 +24359,12 @@ mutation IngestCertifyBadArtifacts ($artifacts: [IDorArtifactInput!]!, $certifyB
 `
 
 func IngestCertifyBadArtifacts(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifacts []IDorArtifactInput,
 	certifyBads []CertifyBadInputSpec,
 ) (*IngestCertifyBadArtifactsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyBadArtifacts",
 		Query:  IngestCertifyBadArtifacts_Operation,
 		Variables: &__IngestCertifyBadArtifactsInput{
@@ -24372,18 +24372,18 @@ func IngestCertifyBadArtifacts(
 			CertifyBads: certifyBads,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyBadArtifactsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyBadArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyBadPkg.
@@ -24394,13 +24394,13 @@ mutation IngestCertifyBadPkg ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags!, $
 `
 
 func IngestCertifyBadPkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
 	certifyBad CertifyBadInputSpec,
 ) (*IngestCertifyBadPkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyBadPkg",
 		Query:  IngestCertifyBadPkg_Operation,
 		Variables: &__IngestCertifyBadPkgInput{
@@ -24409,18 +24409,18 @@ func IngestCertifyBadPkg(
 			CertifyBad:   certifyBad,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyBadPkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyBadPkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyBadPkgs.
@@ -24431,13 +24431,13 @@ mutation IngestCertifyBadPkgs ($pkgs: [IDorPkgInput!]!, $pkgMatchType: MatchFlag
 `
 
 func IngestCertifyBadPkgs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
 	certifyBads []CertifyBadInputSpec,
 ) (*IngestCertifyBadPkgsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyBadPkgs",
 		Query:  IngestCertifyBadPkgs_Operation,
 		Variables: &__IngestCertifyBadPkgsInput{
@@ -24446,18 +24446,18 @@ func IngestCertifyBadPkgs(
 			CertifyBads:  certifyBads,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyBadPkgsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyBadPkgsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyBadSrc.
@@ -24468,12 +24468,12 @@ mutation IngestCertifyBadSrc ($source: IDorSourceInput!, $certifyBad: CertifyBad
 `
 
 func IngestCertifyBadSrc(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	source IDorSourceInput,
 	certifyBad CertifyBadInputSpec,
 ) (*IngestCertifyBadSrcResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyBadSrc",
 		Query:  IngestCertifyBadSrc_Operation,
 		Variables: &__IngestCertifyBadSrcInput{
@@ -24481,18 +24481,18 @@ func IngestCertifyBadSrc(
 			CertifyBad: certifyBad,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyBadSrcResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyBadSrcResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyBadSrcs.
@@ -24503,12 +24503,12 @@ mutation IngestCertifyBadSrcs ($sources: [IDorSourceInput!]!, $certifyBads: [Cer
 `
 
 func IngestCertifyBadSrcs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	sources []IDorSourceInput,
 	certifyBads []CertifyBadInputSpec,
 ) (*IngestCertifyBadSrcsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyBadSrcs",
 		Query:  IngestCertifyBadSrcs_Operation,
 		Variables: &__IngestCertifyBadSrcsInput{
@@ -24516,18 +24516,18 @@ func IngestCertifyBadSrcs(
 			CertifyBads: certifyBads,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyBadSrcsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyBadSrcsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyGoodArtifact.
@@ -24538,12 +24538,12 @@ mutation IngestCertifyGoodArtifact ($artifact: IDorArtifactInput!, $certifyGood:
 `
 
 func IngestCertifyGoodArtifact(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifact IDorArtifactInput,
 	certifyGood CertifyGoodInputSpec,
 ) (*IngestCertifyGoodArtifactResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyGoodArtifact",
 		Query:  IngestCertifyGoodArtifact_Operation,
 		Variables: &__IngestCertifyGoodArtifactInput{
@@ -24551,18 +24551,18 @@ func IngestCertifyGoodArtifact(
 			CertifyGood: certifyGood,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyGoodArtifactResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyGoodArtifactResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyGoodArtifacts.
@@ -24573,12 +24573,12 @@ mutation IngestCertifyGoodArtifacts ($artifacts: [IDorArtifactInput!]!, $certify
 `
 
 func IngestCertifyGoodArtifacts(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifacts []IDorArtifactInput,
 	certifyGoods []CertifyGoodInputSpec,
 ) (*IngestCertifyGoodArtifactsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyGoodArtifacts",
 		Query:  IngestCertifyGoodArtifacts_Operation,
 		Variables: &__IngestCertifyGoodArtifactsInput{
@@ -24586,18 +24586,18 @@ func IngestCertifyGoodArtifacts(
 			CertifyGoods: certifyGoods,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyGoodArtifactsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyGoodArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyGoodPkg.
@@ -24608,13 +24608,13 @@ mutation IngestCertifyGoodPkg ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags!, 
 `
 
 func IngestCertifyGoodPkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
 	certifyGood CertifyGoodInputSpec,
 ) (*IngestCertifyGoodPkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyGoodPkg",
 		Query:  IngestCertifyGoodPkg_Operation,
 		Variables: &__IngestCertifyGoodPkgInput{
@@ -24623,18 +24623,18 @@ func IngestCertifyGoodPkg(
 			CertifyGood:  certifyGood,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyGoodPkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyGoodPkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyGoodPkgs.
@@ -24645,13 +24645,13 @@ mutation IngestCertifyGoodPkgs ($pkgs: [IDorPkgInput!]!, $pkgMatchType: MatchFla
 `
 
 func IngestCertifyGoodPkgs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
 	certifyGoods []CertifyGoodInputSpec,
 ) (*IngestCertifyGoodPkgsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyGoodPkgs",
 		Query:  IngestCertifyGoodPkgs_Operation,
 		Variables: &__IngestCertifyGoodPkgsInput{
@@ -24660,18 +24660,18 @@ func IngestCertifyGoodPkgs(
 			CertifyGoods: certifyGoods,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyGoodPkgsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyGoodPkgsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyGoodSrc.
@@ -24682,12 +24682,12 @@ mutation IngestCertifyGoodSrc ($source: IDorSourceInput!, $certifyGood: CertifyG
 `
 
 func IngestCertifyGoodSrc(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	source IDorSourceInput,
 	certifyGood CertifyGoodInputSpec,
 ) (*IngestCertifyGoodSrcResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyGoodSrc",
 		Query:  IngestCertifyGoodSrc_Operation,
 		Variables: &__IngestCertifyGoodSrcInput{
@@ -24695,18 +24695,18 @@ func IngestCertifyGoodSrc(
 			CertifyGood: certifyGood,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyGoodSrcResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyGoodSrcResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyGoodSrcs.
@@ -24717,12 +24717,12 @@ mutation IngestCertifyGoodSrcs ($sources: [IDorSourceInput!]!, $certifyGoods: [C
 `
 
 func IngestCertifyGoodSrcs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	sources []IDorSourceInput,
 	certifyGoods []CertifyGoodInputSpec,
 ) (*IngestCertifyGoodSrcsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyGoodSrcs",
 		Query:  IngestCertifyGoodSrcs_Operation,
 		Variables: &__IngestCertifyGoodSrcsInput{
@@ -24730,18 +24730,18 @@ func IngestCertifyGoodSrcs(
 			CertifyGoods: certifyGoods,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyGoodSrcsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyGoodSrcsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyLegalPkg.
@@ -24752,14 +24752,14 @@ mutation IngestCertifyLegalPkg ($pkg: IDorPkgInput!, $declaredLicenses: [IDorLic
 `
 
 func IngestCertifyLegalPkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	declaredLicenses []IDorLicenseInput,
 	discoveredLicenses []IDorLicenseInput,
 	legal CertifyLegalInputSpec,
 ) (*IngestCertifyLegalPkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyLegalPkg",
 		Query:  IngestCertifyLegalPkg_Operation,
 		Variables: &__IngestCertifyLegalPkgInput{
@@ -24769,18 +24769,18 @@ func IngestCertifyLegalPkg(
 			Legal:              legal,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyLegalPkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyLegalPkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyLegalPkgs.
@@ -24791,14 +24791,14 @@ mutation IngestCertifyLegalPkgs ($pkgs: [IDorPkgInput!]!, $declaredLicensesList:
 `
 
 func IngestCertifyLegalPkgs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	declaredLicensesList [][]IDorLicenseInput,
 	discoveredLicensesList [][]IDorLicenseInput,
 	legals []CertifyLegalInputSpec,
 ) (*IngestCertifyLegalPkgsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyLegalPkgs",
 		Query:  IngestCertifyLegalPkgs_Operation,
 		Variables: &__IngestCertifyLegalPkgsInput{
@@ -24808,18 +24808,18 @@ func IngestCertifyLegalPkgs(
 			Legals:                 legals,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyLegalPkgsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyLegalPkgsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyLegalSrc.
@@ -24830,14 +24830,14 @@ mutation IngestCertifyLegalSrc ($src: IDorSourceInput!, $declaredLicenses: [IDor
 `
 
 func IngestCertifyLegalSrc(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	src IDorSourceInput,
 	declaredLicenses []IDorLicenseInput,
 	discoveredLicenses []IDorLicenseInput,
 	legal CertifyLegalInputSpec,
 ) (*IngestCertifyLegalSrcResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyLegalSrc",
 		Query:  IngestCertifyLegalSrc_Operation,
 		Variables: &__IngestCertifyLegalSrcInput{
@@ -24847,18 +24847,18 @@ func IngestCertifyLegalSrc(
 			Legal:              legal,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyLegalSrcResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyLegalSrcResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyLegalSrcs.
@@ -24869,14 +24869,14 @@ mutation IngestCertifyLegalSrcs ($srcs: [IDorSourceInput!]!, $declaredLicensesLi
 `
 
 func IngestCertifyLegalSrcs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	srcs []IDorSourceInput,
 	declaredLicensesList [][]IDorLicenseInput,
 	discoveredLicensesList [][]IDorLicenseInput,
 	legals []CertifyLegalInputSpec,
 ) (*IngestCertifyLegalSrcsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyLegalSrcs",
 		Query:  IngestCertifyLegalSrcs_Operation,
 		Variables: &__IngestCertifyLegalSrcsInput{
@@ -24886,18 +24886,18 @@ func IngestCertifyLegalSrcs(
 			Legals:                 legals,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyLegalSrcsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyLegalSrcsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyScorecard.
@@ -24908,12 +24908,12 @@ mutation IngestCertifyScorecard ($source: IDorSourceInput!, $scorecard: Scorecar
 `
 
 func IngestCertifyScorecard(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	source IDorSourceInput,
 	scorecard ScorecardInputSpec,
 ) (*IngestCertifyScorecardResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyScorecard",
 		Query:  IngestCertifyScorecard_Operation,
 		Variables: &__IngestCertifyScorecardInput{
@@ -24921,18 +24921,18 @@ func IngestCertifyScorecard(
 			Scorecard: scorecard,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyScorecardResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyScorecardResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyScorecards.
@@ -24943,12 +24943,12 @@ mutation IngestCertifyScorecards ($sources: [IDorSourceInput!]!, $scorecards: [S
 `
 
 func IngestCertifyScorecards(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	sources []IDorSourceInput,
 	scorecards []ScorecardInputSpec,
 ) (*IngestCertifyScorecardsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyScorecards",
 		Query:  IngestCertifyScorecards_Operation,
 		Variables: &__IngestCertifyScorecardsInput{
@@ -24956,18 +24956,18 @@ func IngestCertifyScorecards(
 			Scorecards: scorecards,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyScorecardsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyScorecardsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyVexArtifact.
@@ -24978,13 +24978,13 @@ mutation IngestCertifyVexArtifact ($artifact: IDorArtifactInput!, $vulnerability
 `
 
 func IngestCertifyVexArtifact(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifact IDorArtifactInput,
 	vulnerability IDorVulnerabilityInput,
 	vexStatement VexStatementInputSpec,
 ) (*IngestCertifyVexArtifactResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyVexArtifact",
 		Query:  IngestCertifyVexArtifact_Operation,
 		Variables: &__IngestCertifyVexArtifactInput{
@@ -24993,18 +24993,18 @@ func IngestCertifyVexArtifact(
 			VexStatement:  vexStatement,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyVexArtifactResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyVexArtifactResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyVexArtifacts.
@@ -25015,13 +25015,13 @@ mutation IngestCertifyVexArtifacts ($artifacts: [IDorArtifactInput!]!, $vulnerab
 `
 
 func IngestCertifyVexArtifacts(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifacts []IDorArtifactInput,
 	vulnerabilities []IDorVulnerabilityInput,
 	vexStatements []VexStatementInputSpec,
 ) (*IngestCertifyVexArtifactsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyVexArtifacts",
 		Query:  IngestCertifyVexArtifacts_Operation,
 		Variables: &__IngestCertifyVexArtifactsInput{
@@ -25030,18 +25030,18 @@ func IngestCertifyVexArtifacts(
 			VexStatements:   vexStatements,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyVexArtifactsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyVexArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyVexPkg.
@@ -25052,13 +25052,13 @@ mutation IngestCertifyVexPkg ($pkg: IDorPkgInput!, $vulnerability: IDorVulnerabi
 `
 
 func IngestCertifyVexPkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	vulnerability IDorVulnerabilityInput,
 	vexStatement VexStatementInputSpec,
 ) (*IngestCertifyVexPkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyVexPkg",
 		Query:  IngestCertifyVexPkg_Operation,
 		Variables: &__IngestCertifyVexPkgInput{
@@ -25067,18 +25067,18 @@ func IngestCertifyVexPkg(
 			VexStatement:  vexStatement,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyVexPkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyVexPkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyVexPkgs.
@@ -25089,13 +25089,13 @@ mutation IngestCertifyVexPkgs ($pkgs: [IDorPkgInput!]!, $vulnerabilities: [IDorV
 `
 
 func IngestCertifyVexPkgs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	vulnerabilities []IDorVulnerabilityInput,
 	vexStatements []VexStatementInputSpec,
 ) (*IngestCertifyVexPkgsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyVexPkgs",
 		Query:  IngestCertifyVexPkgs_Operation,
 		Variables: &__IngestCertifyVexPkgsInput{
@@ -25104,18 +25104,18 @@ func IngestCertifyVexPkgs(
 			VexStatements:   vexStatements,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyVexPkgsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyVexPkgsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyVulnPkg.
@@ -25126,13 +25126,13 @@ mutation IngestCertifyVulnPkg ($pkg: IDorPkgInput!, $vulnerability: IDorVulnerab
 `
 
 func IngestCertifyVulnPkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	vulnerability IDorVulnerabilityInput,
 	certifyVuln ScanMetadataInput,
 ) (*IngestCertifyVulnPkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyVulnPkg",
 		Query:  IngestCertifyVulnPkg_Operation,
 		Variables: &__IngestCertifyVulnPkgInput{
@@ -25141,18 +25141,18 @@ func IngestCertifyVulnPkg(
 			CertifyVuln:   certifyVuln,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyVulnPkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyVulnPkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestCertifyVulnPkgs.
@@ -25163,13 +25163,13 @@ mutation IngestCertifyVulnPkgs ($pkgs: [IDorPkgInput!]!, $vulnerabilities: [IDor
 `
 
 func IngestCertifyVulnPkgs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	vulnerabilities []IDorVulnerabilityInput,
 	certifyVulns []ScanMetadataInput,
 ) (*IngestCertifyVulnPkgsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestCertifyVulnPkgs",
 		Query:  IngestCertifyVulnPkgs_Operation,
 		Variables: &__IngestCertifyVulnPkgsInput{
@@ -25178,18 +25178,18 @@ func IngestCertifyVulnPkgs(
 			CertifyVulns:    certifyVulns,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestCertifyVulnPkgsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestCertifyVulnPkgsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasMetadataArtifact.
@@ -25200,12 +25200,12 @@ mutation IngestHasMetadataArtifact ($artifact: IDorArtifactInput!, $hasMetadata:
 `
 
 func IngestHasMetadataArtifact(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifact IDorArtifactInput,
 	hasMetadata HasMetadataInputSpec,
 ) (*IngestHasMetadataArtifactResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasMetadataArtifact",
 		Query:  IngestHasMetadataArtifact_Operation,
 		Variables: &__IngestHasMetadataArtifactInput{
@@ -25213,18 +25213,18 @@ func IngestHasMetadataArtifact(
 			HasMetadata: hasMetadata,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasMetadataArtifactResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasMetadataArtifactResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasMetadataArtifacts.
@@ -25235,12 +25235,12 @@ mutation IngestHasMetadataArtifacts ($artifacts: [IDorArtifactInput!]!, $hasMeta
 `
 
 func IngestHasMetadataArtifacts(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifacts []IDorArtifactInput,
 	hasMetadataList []HasMetadataInputSpec,
 ) (*IngestHasMetadataArtifactsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasMetadataArtifacts",
 		Query:  IngestHasMetadataArtifacts_Operation,
 		Variables: &__IngestHasMetadataArtifactsInput{
@@ -25248,18 +25248,18 @@ func IngestHasMetadataArtifacts(
 			HasMetadataList: hasMetadataList,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasMetadataArtifactsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasMetadataArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasMetadataPkg.
@@ -25270,13 +25270,13 @@ mutation IngestHasMetadataPkg ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags!, 
 `
 
 func IngestHasMetadataPkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
 	hasMetadata HasMetadataInputSpec,
 ) (*IngestHasMetadataPkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasMetadataPkg",
 		Query:  IngestHasMetadataPkg_Operation,
 		Variables: &__IngestHasMetadataPkgInput{
@@ -25285,18 +25285,18 @@ func IngestHasMetadataPkg(
 			HasMetadata:  hasMetadata,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasMetadataPkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasMetadataPkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasMetadataPkgs.
@@ -25307,13 +25307,13 @@ mutation IngestHasMetadataPkgs ($pkgs: [IDorPkgInput!]!, $pkgMatchType: MatchFla
 `
 
 func IngestHasMetadataPkgs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
 	hasMetadataList []HasMetadataInputSpec,
 ) (*IngestHasMetadataPkgsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasMetadataPkgs",
 		Query:  IngestHasMetadataPkgs_Operation,
 		Variables: &__IngestHasMetadataPkgsInput{
@@ -25322,18 +25322,18 @@ func IngestHasMetadataPkgs(
 			HasMetadataList: hasMetadataList,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasMetadataPkgsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasMetadataPkgsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasMetadataSrc.
@@ -25344,12 +25344,12 @@ mutation IngestHasMetadataSrc ($source: IDorSourceInput!, $hasMetadata: HasMetad
 `
 
 func IngestHasMetadataSrc(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	source IDorSourceInput,
 	hasMetadata HasMetadataInputSpec,
 ) (*IngestHasMetadataSrcResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasMetadataSrc",
 		Query:  IngestHasMetadataSrc_Operation,
 		Variables: &__IngestHasMetadataSrcInput{
@@ -25357,18 +25357,18 @@ func IngestHasMetadataSrc(
 			HasMetadata: hasMetadata,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasMetadataSrcResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasMetadataSrcResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasMetadataSrcs.
@@ -25379,12 +25379,12 @@ mutation IngestHasMetadataSrcs ($sources: [IDorSourceInput!]!, $hasMetadataList:
 `
 
 func IngestHasMetadataSrcs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	sources []IDorSourceInput,
 	hasMetadataList []HasMetadataInputSpec,
 ) (*IngestHasMetadataSrcsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasMetadataSrcs",
 		Query:  IngestHasMetadataSrcs_Operation,
 		Variables: &__IngestHasMetadataSrcsInput{
@@ -25392,18 +25392,18 @@ func IngestHasMetadataSrcs(
 			HasMetadataList: hasMetadataList,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasMetadataSrcsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasMetadataSrcsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasSBOMArtifact.
@@ -25414,13 +25414,13 @@ mutation IngestHasSBOMArtifact ($artifact: IDorArtifactInput!, $hasSBOM: HasSBOM
 `
 
 func IngestHasSBOMArtifact(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifact IDorArtifactInput,
 	hasSBOM HasSBOMInputSpec,
 	includes HasSBOMIncludesInputSpec,
 ) (*IngestHasSBOMArtifactResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasSBOMArtifact",
 		Query:  IngestHasSBOMArtifact_Operation,
 		Variables: &__IngestHasSBOMArtifactInput{
@@ -25429,18 +25429,18 @@ func IngestHasSBOMArtifact(
 			Includes: includes,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasSBOMArtifactResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasSBOMArtifactResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasSBOMArtifacts.
@@ -25451,13 +25451,13 @@ mutation IngestHasSBOMArtifacts ($artifacts: [IDorArtifactInput!]!, $hasSBOMs: [
 `
 
 func IngestHasSBOMArtifacts(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifacts []IDorArtifactInput,
 	hasSBOMs []HasSBOMInputSpec,
 	includes []HasSBOMIncludesInputSpec,
 ) (*IngestHasSBOMArtifactsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasSBOMArtifacts",
 		Query:  IngestHasSBOMArtifacts_Operation,
 		Variables: &__IngestHasSBOMArtifactsInput{
@@ -25466,18 +25466,18 @@ func IngestHasSBOMArtifacts(
 			Includes:  includes,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasSBOMArtifactsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasSBOMArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasSBOMPkg.
@@ -25488,13 +25488,13 @@ mutation IngestHasSBOMPkg ($pkg: IDorPkgInput!, $hasSBOM: HasSBOMInputSpec!, $in
 `
 
 func IngestHasSBOMPkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	hasSBOM HasSBOMInputSpec,
 	includes HasSBOMIncludesInputSpec,
 ) (*IngestHasSBOMPkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasSBOMPkg",
 		Query:  IngestHasSBOMPkg_Operation,
 		Variables: &__IngestHasSBOMPkgInput{
@@ -25503,18 +25503,18 @@ func IngestHasSBOMPkg(
 			Includes: includes,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasSBOMPkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasSBOMPkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasSBOMPkgs.
@@ -25525,13 +25525,13 @@ mutation IngestHasSBOMPkgs ($pkgs: [IDorPkgInput!]!, $hasSBOMs: [HasSBOMInputSpe
 `
 
 func IngestHasSBOMPkgs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	hasSBOMs []HasSBOMInputSpec,
 	includes []HasSBOMIncludesInputSpec,
 ) (*IngestHasSBOMPkgsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasSBOMPkgs",
 		Query:  IngestHasSBOMPkgs_Operation,
 		Variables: &__IngestHasSBOMPkgsInput{
@@ -25540,18 +25540,18 @@ func IngestHasSBOMPkgs(
 			Includes: includes,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasSBOMPkgsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasSBOMPkgsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasSourceAt.
@@ -25562,14 +25562,14 @@ mutation IngestHasSourceAt ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags!, $so
 `
 
 func IngestHasSourceAt(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
 	source IDorSourceInput,
 	hasSourceAt HasSourceAtInputSpec,
 ) (*IngestHasSourceAtResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasSourceAt",
 		Query:  IngestHasSourceAt_Operation,
 		Variables: &__IngestHasSourceAtInput{
@@ -25579,18 +25579,18 @@ func IngestHasSourceAt(
 			HasSourceAt:  hasSourceAt,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasSourceAtResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasSourceAtResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHasSourcesAt.
@@ -25601,14 +25601,14 @@ mutation IngestHasSourcesAt ($pkgs: [IDorPkgInput!]!, $pkgMatchType: MatchFlags!
 `
 
 func IngestHasSourcesAt(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
 	sources []IDorSourceInput,
 	hasSourceAts []HasSourceAtInputSpec,
 ) (*IngestHasSourcesAtResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHasSourcesAt",
 		Query:  IngestHasSourcesAt_Operation,
 		Variables: &__IngestHasSourcesAtInput{
@@ -25618,18 +25618,18 @@ func IngestHasSourcesAt(
 			HasSourceAts: hasSourceAts,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHasSourcesAtResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHasSourcesAtResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHashEqual.
@@ -25640,13 +25640,13 @@ mutation IngestHashEqual ($artifact: IDorArtifactInput!, $otherArtifact: IDorArt
 `
 
 func IngestHashEqual(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifact IDorArtifactInput,
 	otherArtifact IDorArtifactInput,
 	hashEqual HashEqualInputSpec,
 ) (*IngestHashEqualResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHashEqual",
 		Query:  IngestHashEqual_Operation,
 		Variables: &__IngestHashEqualInput{
@@ -25655,18 +25655,18 @@ func IngestHashEqual(
 			HashEqual:     hashEqual,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHashEqualResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHashEqualResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestHashEquals.
@@ -25677,13 +25677,13 @@ mutation IngestHashEquals ($artifacts: [IDorArtifactInput!]!, $otherArtifacts: [
 `
 
 func IngestHashEquals(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifacts []IDorArtifactInput,
 	otherArtifacts []IDorArtifactInput,
 	hashEquals []HashEqualInputSpec,
 ) (*IngestHashEqualsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestHashEquals",
 		Query:  IngestHashEquals_Operation,
 		Variables: &__IngestHashEqualsInput{
@@ -25692,18 +25692,18 @@ func IngestHashEquals(
 			HashEquals:     hashEquals,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestHashEqualsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestHashEqualsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestIsDependencies.
@@ -25714,14 +25714,14 @@ mutation IngestIsDependencies ($pkgs: [IDorPkgInput!]!, $depPkgs: [IDorPkgInput!
 `
 
 func IngestIsDependencies(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	depPkgs []IDorPkgInput,
 	depPkgMatchType MatchFlags,
 	dependencies []IsDependencyInputSpec,
 ) (*IngestIsDependenciesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestIsDependencies",
 		Query:  IngestIsDependencies_Operation,
 		Variables: &__IngestIsDependenciesInput{
@@ -25731,18 +25731,18 @@ func IngestIsDependencies(
 			Dependencies:    dependencies,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestIsDependenciesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestIsDependenciesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestIsDependency.
@@ -25753,14 +25753,14 @@ mutation IngestIsDependency ($pkg: IDorPkgInput!, $depPkg: IDorPkgInput!, $depPk
 `
 
 func IngestIsDependency(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	depPkg IDorPkgInput,
 	depPkgMatchType MatchFlags,
 	dependency IsDependencyInputSpec,
 ) (*IngestIsDependencyResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestIsDependency",
 		Query:  IngestIsDependency_Operation,
 		Variables: &__IngestIsDependencyInput{
@@ -25770,18 +25770,18 @@ func IngestIsDependency(
 			Dependency:      dependency,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestIsDependencyResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestIsDependencyResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestIsOccurrencePkg.
@@ -25792,13 +25792,13 @@ mutation IngestIsOccurrencePkg ($pkg: IDorPkgInput!, $artifact: IDorArtifactInpu
 `
 
 func IngestIsOccurrencePkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	artifact IDorArtifactInput,
 	occurrence IsOccurrenceInputSpec,
 ) (*IngestIsOccurrencePkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestIsOccurrencePkg",
 		Query:  IngestIsOccurrencePkg_Operation,
 		Variables: &__IngestIsOccurrencePkgInput{
@@ -25807,18 +25807,18 @@ func IngestIsOccurrencePkg(
 			Occurrence: occurrence,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestIsOccurrencePkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestIsOccurrencePkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestIsOccurrenceSrc.
@@ -25829,13 +25829,13 @@ mutation IngestIsOccurrenceSrc ($source: IDorSourceInput!, $artifact: IDorArtifa
 `
 
 func IngestIsOccurrenceSrc(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	source IDorSourceInput,
 	artifact IDorArtifactInput,
 	occurrence IsOccurrenceInputSpec,
 ) (*IngestIsOccurrenceSrcResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestIsOccurrenceSrc",
 		Query:  IngestIsOccurrenceSrc_Operation,
 		Variables: &__IngestIsOccurrenceSrcInput{
@@ -25844,18 +25844,18 @@ func IngestIsOccurrenceSrc(
 			Occurrence: occurrence,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestIsOccurrenceSrcResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestIsOccurrenceSrcResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestIsOccurrencesPkg.
@@ -25866,13 +25866,13 @@ mutation IngestIsOccurrencesPkg ($pkgs: [IDorPkgInput!]!, $artifacts: [IDorArtif
 `
 
 func IngestIsOccurrencesPkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	artifacts []IDorArtifactInput,
 	occurrences []IsOccurrenceInputSpec,
 ) (*IngestIsOccurrencesPkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestIsOccurrencesPkg",
 		Query:  IngestIsOccurrencesPkg_Operation,
 		Variables: &__IngestIsOccurrencesPkgInput{
@@ -25881,18 +25881,18 @@ func IngestIsOccurrencesPkg(
 			Occurrences: occurrences,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestIsOccurrencesPkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestIsOccurrencesPkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestIsOccurrencesSrc.
@@ -25903,13 +25903,13 @@ mutation IngestIsOccurrencesSrc ($sources: [IDorSourceInput!]!, $artifacts: [IDo
 `
 
 func IngestIsOccurrencesSrc(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	sources []IDorSourceInput,
 	artifacts []IDorArtifactInput,
 	occurrences []IsOccurrenceInputSpec,
 ) (*IngestIsOccurrencesSrcResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestIsOccurrencesSrc",
 		Query:  IngestIsOccurrencesSrc_Operation,
 		Variables: &__IngestIsOccurrencesSrcInput{
@@ -25918,18 +25918,18 @@ func IngestIsOccurrencesSrc(
 			Occurrences: occurrences,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestIsOccurrencesSrcResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestIsOccurrencesSrcResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestLicense.
@@ -25940,29 +25940,29 @@ mutation IngestLicense ($license: IDorLicenseInput!) {
 `
 
 func IngestLicense(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	license IDorLicenseInput,
 ) (*IngestLicenseResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestLicense",
 		Query:  IngestLicense_Operation,
 		Variables: &__IngestLicenseInput{
 			License: license,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestLicenseResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestLicenseResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestLicenses.
@@ -25973,29 +25973,29 @@ mutation IngestLicenses ($licenses: [IDorLicenseInput!]!) {
 `
 
 func IngestLicenses(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	licenses []IDorLicenseInput,
 ) (*IngestLicensesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestLicenses",
 		Query:  IngestLicenses_Operation,
 		Variables: &__IngestLicensesInput{
 			Licenses: licenses,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestLicensesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestLicensesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPackage.
@@ -26011,29 +26011,29 @@ mutation IngestPackage ($pkg: IDorPkgInput!) {
 `
 
 func IngestPackage(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 ) (*IngestPackageResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPackage",
 		Query:  IngestPackage_Operation,
 		Variables: &__IngestPackageInput{
 			Pkg: pkg,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPackageResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPackageResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPackages.
@@ -26049,29 +26049,29 @@ mutation IngestPackages ($pkgs: [IDorPkgInput!]!) {
 `
 
 func IngestPackages(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 ) (*IngestPackagesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPackages",
 		Query:  IngestPackages_Operation,
 		Variables: &__IngestPackagesInput{
 			Pkgs: pkgs,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPackagesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPackagesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPkgEqual.
@@ -26082,13 +26082,13 @@ mutation IngestPkgEqual ($pkg: IDorPkgInput!, $otherPackage: IDorPkgInput!, $pkg
 `
 
 func IngestPkgEqual(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	otherPackage IDorPkgInput,
 	pkgEqual PkgEqualInputSpec,
 ) (*IngestPkgEqualResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPkgEqual",
 		Query:  IngestPkgEqual_Operation,
 		Variables: &__IngestPkgEqualInput{
@@ -26097,18 +26097,18 @@ func IngestPkgEqual(
 			PkgEqual:     pkgEqual,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPkgEqualResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPkgEqualResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPkgEquals.
@@ -26119,13 +26119,13 @@ mutation IngestPkgEquals ($pkgs: [IDorPkgInput!]!, $otherPackages: [IDorPkgInput
 `
 
 func IngestPkgEquals(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	otherPackages []IDorPkgInput,
 	pkgEquals []PkgEqualInputSpec,
 ) (*IngestPkgEqualsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPkgEquals",
 		Query:  IngestPkgEquals_Operation,
 		Variables: &__IngestPkgEqualsInput{
@@ -26134,18 +26134,18 @@ func IngestPkgEquals(
 			PkgEquals:     pkgEquals,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPkgEqualsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPkgEqualsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPointOfContactArtifact.
@@ -26156,12 +26156,12 @@ mutation IngestPointOfContactArtifact ($artifact: IDorArtifactInput!, $pointOfCo
 `
 
 func IngestPointOfContactArtifact(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifact IDorArtifactInput,
 	pointOfContact PointOfContactInputSpec,
 ) (*IngestPointOfContactArtifactResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPointOfContactArtifact",
 		Query:  IngestPointOfContactArtifact_Operation,
 		Variables: &__IngestPointOfContactArtifactInput{
@@ -26169,18 +26169,18 @@ func IngestPointOfContactArtifact(
 			PointOfContact: pointOfContact,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPointOfContactArtifactResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPointOfContactArtifactResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPointOfContactArtifacts.
@@ -26191,12 +26191,12 @@ mutation IngestPointOfContactArtifacts ($artifacts: [IDorArtifactInput!]!, $poin
 `
 
 func IngestPointOfContactArtifacts(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifacts []IDorArtifactInput,
 	pointOfContacts []PointOfContactInputSpec,
 ) (*IngestPointOfContactArtifactsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPointOfContactArtifacts",
 		Query:  IngestPointOfContactArtifacts_Operation,
 		Variables: &__IngestPointOfContactArtifactsInput{
@@ -26204,18 +26204,18 @@ func IngestPointOfContactArtifacts(
 			PointOfContacts: pointOfContacts,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPointOfContactArtifactsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPointOfContactArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPointOfContactPkg.
@@ -26226,13 +26226,13 @@ mutation IngestPointOfContactPkg ($pkg: IDorPkgInput!, $pkgMatchType: MatchFlags
 `
 
 func IngestPointOfContactPkg(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkg IDorPkgInput,
 	pkgMatchType MatchFlags,
 	pointOfContact PointOfContactInputSpec,
 ) (*IngestPointOfContactPkgResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPointOfContactPkg",
 		Query:  IngestPointOfContactPkg_Operation,
 		Variables: &__IngestPointOfContactPkgInput{
@@ -26241,18 +26241,18 @@ func IngestPointOfContactPkg(
 			PointOfContact: pointOfContact,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPointOfContactPkgResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPointOfContactPkgResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPointOfContactPkgs.
@@ -26263,13 +26263,13 @@ mutation IngestPointOfContactPkgs ($pkgs: [IDorPkgInput!]!, $pkgMatchType: Match
 `
 
 func IngestPointOfContactPkgs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	pkgs []IDorPkgInput,
 	pkgMatchType MatchFlags,
 	pointOfContacts []PointOfContactInputSpec,
 ) (*IngestPointOfContactPkgsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPointOfContactPkgs",
 		Query:  IngestPointOfContactPkgs_Operation,
 		Variables: &__IngestPointOfContactPkgsInput{
@@ -26278,18 +26278,18 @@ func IngestPointOfContactPkgs(
 			PointOfContacts: pointOfContacts,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPointOfContactPkgsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPointOfContactPkgsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPointOfContactSrc.
@@ -26300,12 +26300,12 @@ mutation IngestPointOfContactSrc ($source: IDorSourceInput!, $pointOfContact: Po
 `
 
 func IngestPointOfContactSrc(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	source IDorSourceInput,
 	pointOfContact PointOfContactInputSpec,
 ) (*IngestPointOfContactSrcResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPointOfContactSrc",
 		Query:  IngestPointOfContactSrc_Operation,
 		Variables: &__IngestPointOfContactSrcInput{
@@ -26313,18 +26313,18 @@ func IngestPointOfContactSrc(
 			PointOfContact: pointOfContact,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPointOfContactSrcResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPointOfContactSrcResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestPointOfContactSrcs.
@@ -26335,12 +26335,12 @@ mutation IngestPointOfContactSrcs ($sources: [IDorSourceInput!]!, $pointOfContac
 `
 
 func IngestPointOfContactSrcs(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	sources []IDorSourceInput,
 	pointOfContacts []PointOfContactInputSpec,
 ) (*IngestPointOfContactSrcsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestPointOfContactSrcs",
 		Query:  IngestPointOfContactSrcs_Operation,
 		Variables: &__IngestPointOfContactSrcsInput{
@@ -26348,18 +26348,18 @@ func IngestPointOfContactSrcs(
 			PointOfContacts: pointOfContacts,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestPointOfContactSrcsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestPointOfContactSrcsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestSLSAForArtifact.
@@ -26370,14 +26370,14 @@ mutation IngestSLSAForArtifact ($artifact: IDorArtifactInput!, $materials: [IDor
 `
 
 func IngestSLSAForArtifact(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifact IDorArtifactInput,
 	materials []IDorArtifactInput,
 	builder IDorBuilderInput,
 	slsa SLSAInputSpec,
 ) (*IngestSLSAForArtifactResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestSLSAForArtifact",
 		Query:  IngestSLSAForArtifact_Operation,
 		Variables: &__IngestSLSAForArtifactInput{
@@ -26387,18 +26387,18 @@ func IngestSLSAForArtifact(
 			Slsa:      slsa,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestSLSAForArtifactResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestSLSAForArtifactResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestSLSAForArtifacts.
@@ -26409,14 +26409,14 @@ mutation IngestSLSAForArtifacts ($artifacts: [IDorArtifactInput!]!, $materialsLi
 `
 
 func IngestSLSAForArtifacts(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	artifacts []IDorArtifactInput,
 	materialsList [][]IDorArtifactInput,
 	builders []IDorBuilderInput,
 	slsaList []SLSAInputSpec,
 ) (*IngestSLSAForArtifactsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestSLSAForArtifacts",
 		Query:  IngestSLSAForArtifacts_Operation,
 		Variables: &__IngestSLSAForArtifactsInput{
@@ -26426,18 +26426,18 @@ func IngestSLSAForArtifacts(
 			SlsaList:      slsaList,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestSLSAForArtifactsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestSLSAForArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestSource.
@@ -26452,29 +26452,29 @@ mutation IngestSource ($source: IDorSourceInput!) {
 `
 
 func IngestSource(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	source IDorSourceInput,
 ) (*IngestSourceResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestSource",
 		Query:  IngestSource_Operation,
 		Variables: &__IngestSourceInput{
 			Source: source,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestSourceResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestSourceResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestSources.
@@ -26489,29 +26489,29 @@ mutation IngestSources ($sources: [IDorSourceInput!]!) {
 `
 
 func IngestSources(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	sources []IDorSourceInput,
 ) (*IngestSourcesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestSources",
 		Query:  IngestSources_Operation,
 		Variables: &__IngestSourcesInput{
 			Sources: sources,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestSourcesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestSourcesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestVulnEqual.
@@ -26522,13 +26522,13 @@ mutation IngestVulnEqual ($vulnerability: IDorVulnerabilityInput!, $otherVulnera
 `
 
 func IngestVulnEqual(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	vulnerability IDorVulnerabilityInput,
 	otherVulnerability IDorVulnerabilityInput,
 	vulnEqual VulnEqualInputSpec,
 ) (*IngestVulnEqualResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestVulnEqual",
 		Query:  IngestVulnEqual_Operation,
 		Variables: &__IngestVulnEqualInput{
@@ -26537,18 +26537,18 @@ func IngestVulnEqual(
 			VulnEqual:          vulnEqual,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestVulnEqualResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestVulnEqualResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestVulnEquals.
@@ -26559,13 +26559,13 @@ mutation IngestVulnEquals ($vulnerabilities: [IDorVulnerabilityInput!]!, $otherV
 `
 
 func IngestVulnEquals(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	vulnerabilities []IDorVulnerabilityInput,
 	otherVulnerabilities []IDorVulnerabilityInput,
 	vulnEquals []VulnEqualInputSpec,
 ) (*IngestVulnEqualsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestVulnEquals",
 		Query:  IngestVulnEquals_Operation,
 		Variables: &__IngestVulnEqualsInput{
@@ -26574,18 +26574,18 @@ func IngestVulnEquals(
 			VulnEquals:           vulnEquals,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestVulnEqualsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestVulnEqualsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestVulnHasMetadata.
@@ -26596,12 +26596,12 @@ mutation IngestVulnHasMetadata ($vulnerability: IDorVulnerabilityInput!, $vulnMe
 `
 
 func IngestVulnHasMetadata(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	vulnerability IDorVulnerabilityInput,
 	vulnMetadata VulnerabilityMetadataInputSpec,
 ) (*IngestVulnHasMetadataResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestVulnHasMetadata",
 		Query:  IngestVulnHasMetadata_Operation,
 		Variables: &__IngestVulnHasMetadataInput{
@@ -26609,18 +26609,18 @@ func IngestVulnHasMetadata(
 			VulnMetadata:  vulnMetadata,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestVulnHasMetadataResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestVulnHasMetadataResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestVulnerabilities.
@@ -26634,29 +26634,29 @@ mutation IngestVulnerabilities ($vulns: [IDorVulnerabilityInput!]!) {
 `
 
 func IngestVulnerabilities(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	vulns []IDorVulnerabilityInput,
 ) (*IngestVulnerabilitiesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestVulnerabilities",
 		Query:  IngestVulnerabilities_Operation,
 		Variables: &__IngestVulnerabilitiesInput{
 			Vulns: vulns,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestVulnerabilitiesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestVulnerabilitiesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by IngestVulnerability.
@@ -26670,29 +26670,29 @@ mutation IngestVulnerability ($vuln: IDorVulnerabilityInput!) {
 `
 
 func IngestVulnerability(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	vuln IDorVulnerabilityInput,
 ) (*IngestVulnerabilityResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "IngestVulnerability",
 		Query:  IngestVulnerability_Operation,
 		Variables: &__IngestVulnerabilityInput{
 			Vuln: vuln,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data IngestVulnerabilityResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ IngestVulnerabilityResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by Licenses.
@@ -26711,29 +26711,29 @@ fragment AllLicenseTree on License {
 `
 
 func Licenses(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter LicenseSpec,
 ) (*LicensesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Licenses",
 		Query:  Licenses_Operation,
 		Variables: &__LicensesInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data LicensesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ LicensesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by Neighbors.
@@ -27186,12 +27186,12 @@ fragment AllCertifyLegalTree on CertifyLegal {
 `
 
 func Neighbors(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	node string,
 	usingOnly []Edge,
 ) (*NeighborsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Neighbors",
 		Query:  Neighbors_Operation,
 		Variables: &__NeighborsInput{
@@ -27199,18 +27199,18 @@ func Neighbors(
 			UsingOnly: usingOnly,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data NeighborsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ NeighborsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by Node.
@@ -27663,29 +27663,29 @@ fragment AllCertifyLegalTree on CertifyLegal {
 `
 
 func Node(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	node string,
 ) (*NodeResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Node",
 		Query:  Node_Operation,
 		Variables: &__NodeInput{
 			Node: node,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data NodeResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ NodeResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by Nodes.
@@ -28138,29 +28138,29 @@ fragment AllCertifyLegalTree on CertifyLegal {
 `
 
 func Nodes(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	nodes []string,
 ) (*NodesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Nodes",
 		Query:  Nodes_Operation,
 		Variables: &__NodesInput{
 			Nodes: nodes,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data NodesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ NodesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by PackageNames.
@@ -28182,29 +28182,29 @@ query PackageNames ($filter: PkgSpec!) {
 `
 
 func PackageNames(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter PkgSpec,
 ) (*PackageNamesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "PackageNames",
 		Query:  PackageNames_Operation,
 		Variables: &__PackageNamesInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data PackageNamesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ PackageNamesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by PackageNamespaces.
@@ -28222,29 +28222,29 @@ query PackageNamespaces ($filter: PkgSpec!) {
 `
 
 func PackageNamespaces(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter PkgSpec,
 ) (*PackageNamespacesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "PackageNamespaces",
 		Query:  PackageNamespaces_Operation,
 		Variables: &__PackageNamespacesInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data PackageNamespacesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ PackageNamespacesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by PackageTypes.
@@ -28258,29 +28258,29 @@ query PackageTypes ($filter: PkgSpec!) {
 `
 
 func PackageTypes(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter PkgSpec,
 ) (*PackageTypesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "PackageTypes",
 		Query:  PackageTypes_Operation,
 		Variables: &__PackageTypesInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data PackageTypesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ PackageTypesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by PackageVersions.
@@ -28311,29 +28311,29 @@ query PackageVersions ($filter: PkgSpec!) {
 `
 
 func PackageVersions(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter PkgSpec,
 ) (*PackageVersionsResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "PackageVersions",
 		Query:  PackageVersions_Operation,
 		Variables: &__PackageVersionsInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data PackageVersionsResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ PackageVersionsResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by Packages.
@@ -28367,29 +28367,29 @@ fragment AllPkgTree on Package {
 `
 
 func Packages(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter PkgSpec,
 ) (*PackagesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Packages",
 		Query:  Packages_Operation,
 		Variables: &__PackagesInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data PackagesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ PackagesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by Path.
@@ -28842,14 +28842,14 @@ fragment AllCertifyLegalTree on CertifyLegal {
 `
 
 func Path(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	subject string,
 	target string,
 	maxPathLength int,
 	usingOnly []Edge,
 ) (*PathResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Path",
 		Query:  Path_Operation,
 		Variables: &__PathInput{
@@ -28859,18 +28859,18 @@ func Path(
 			UsingOnly:     usingOnly,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data PathResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ PathResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by Sources.
@@ -28897,29 +28897,29 @@ fragment AllSourceTree on Source {
 `
 
 func Sources(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter SourceSpec,
 ) (*SourcesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Sources",
 		Query:  Sources_Operation,
 		Variables: &__SourcesInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data SourcesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ SourcesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
 
 // The query or mutation executed by Vulnerabilities.
@@ -28940,27 +28940,27 @@ fragment AllVulnerabilityTree on Vulnerability {
 `
 
 func Vulnerabilities(
-	ctx context.Context,
-	client graphql.Client,
+	ctx_ context.Context,
+	client_ graphql.Client,
 	filter VulnerabilitySpec,
 ) (*VulnerabilitiesResponse, error) {
-	req := &graphql.Request{
+	req_ := &graphql.Request{
 		OpName: "Vulnerabilities",
 		Query:  Vulnerabilities_Operation,
 		Variables: &__VulnerabilitiesInput{
 			Filter: filter,
 		},
 	}
-	var err error
+	var err_ error
 
-	var data VulnerabilitiesResponse
-	resp := &graphql.Response{Data: &data}
+	var data_ VulnerabilitiesResponse
+	resp_ := &graphql.Response{Data: &data_}
 
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
 	)
 
-	return &data, err
+	return &data_, err_
 }
