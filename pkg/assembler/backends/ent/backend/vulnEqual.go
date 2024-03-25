@@ -40,6 +40,12 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 		return nil, fmt.Errorf("too many vulnerability specified in vuln equal filter")
 	}
 
+	// return nil for invalid UUIDs
+	if !isValidUUID(filter.ID) {
+		// return nil, fmt.Errorf("invalid UUID: %s", *filter.ID)
+		return nil, nil
+	}
+
 	query := b.client.VulnEqual.Query().
 		Where(vulnEqualQuery(filter)).
 		WithVulnerabilityA(func(query *ent.VulnerabilityIDQuery) {}).
@@ -64,7 +70,7 @@ func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
 	}
 
 	if len(filter.Vulnerabilities) == 1 {
-		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
 			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold))))
 
 		if filter.Vulnerabilities[0].NoVuln != nil {
@@ -75,11 +81,11 @@ func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
 			}
 		}
 	} else if len(filter.Vulnerabilities) == 2 {
-		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
-			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold))))
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
+			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold))))
 
-		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[1].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[1].Type, vulnerabilityid.TypeEqualFold)),
-			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[1].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[1].Type, vulnerabilityid.TypeEqualFold))))
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[1].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[1].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[1].Type, vulnerabilityid.TypeEqualFold)),
+			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[1].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[1].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[1].Type, vulnerabilityid.TypeEqualFold))))
 
 		if filter.Vulnerabilities[0].NoVuln != nil {
 			if *filter.Vulnerabilities[0].NoVuln {

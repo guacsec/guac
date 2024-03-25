@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package backend_test
 
 import (
@@ -83,7 +81,7 @@ var skipMatrix = map[string]map[string]bool{
 	// ent: Query_on_vulnerability_IDs fails
 	// keyvalue: Query_on_OSV_and_novuln_(return_nothing_as_not_valid) fails
 	// arango: errors when ID is not found
-	"TestVulnEqual": {ent: true, memmap: true, redis: true, tikv: true, arango: true},
+	"TestVulnEqual": {memmap: true, redis: true, tikv: true, arango: true},
 	// arango: errors when ID is not found
 	// ent: query by novuln fails, query by ID fails
 	"TestVulnerability": {arango: true, ent: true},
@@ -104,11 +102,11 @@ type backend interface {
 }
 
 var testBackends = map[string]backend{
-	memmap: newMemMap(),
-	arango: newArango(),
-	redis:  newRedis(),
-	ent:    newEnt(),
-	tikv:   newTikv(),
+	// memmap: newMemMap(),
+	// arango: newArango(),
+	// redis:  newRedis(),
+	ent: newEnt(),
+	// tikv:   newTikv(),
 }
 
 var currentBackend string

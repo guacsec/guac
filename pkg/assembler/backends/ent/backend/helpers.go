@@ -108,3 +108,12 @@ func chunk[T any](collection []T, size int) [][]T {
 func generateUUIDKey(data []byte) uuid.UUID {
 	return uuid.NewHash(sha256.New(), uuid.NameSpaceDNS, data, 5)
 }
+
+// isValidUUID will check to determine if the ID contained in the query is a valid UUID
+func isValidUUID(u *string) bool {
+	if u == nil {
+		return true
+	}
+	_, err := uuid.Parse(*u)
+	return err == nil
+}
