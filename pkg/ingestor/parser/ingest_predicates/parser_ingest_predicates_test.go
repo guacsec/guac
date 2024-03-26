@@ -47,7 +47,7 @@ func Test_ingestPredicatesParser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewIngestPredicatesParser()
+			s := NewIngestPredicatesParser(nil)
 			err := s.Parse(ctx, tt.doc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("slsa.Parse() error = %v, wantErr %v", err, tt.wantErr)

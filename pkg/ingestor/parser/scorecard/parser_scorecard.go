@@ -18,6 +18,7 @@ package scorecard
 import (
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 	"strings"
 	"time"
 
@@ -38,8 +39,8 @@ type scorecardParser struct {
 	vcsStrings          []string
 }
 
-// NewSLSAParser initializes the slsaParser
-func NewScorecardParser() common.DocumentParser {
+// NewScorecardParser initializes the scorecardParser
+func NewScorecardParser(gqlClient graphql.Client) common.DocumentParser {
 	return &scorecardParser{}
 }
 

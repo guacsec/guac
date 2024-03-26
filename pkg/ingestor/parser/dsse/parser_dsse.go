@@ -18,6 +18,7 @@ package dsse
 import (
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -33,7 +34,7 @@ type dsseParser struct {
 }
 
 // NewDSSEParser initializes the dsseParser
-func NewDSSEParser() common.DocumentParser {
+func NewDSSEParser(gqlClient graphql.Client) common.DocumentParser {
 	return &dsseParser{
 		identities: []common.TrustInformation{},
 	}

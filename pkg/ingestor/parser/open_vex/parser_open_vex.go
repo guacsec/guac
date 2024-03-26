@@ -18,6 +18,7 @@ package open_vex
 import (
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 
 	json "github.com/json-iterator/go"
 	"github.com/openvex/go-vex/pkg/vex"
@@ -52,7 +53,7 @@ type openVEXParser struct {
 	cvs               []assembler.CertifyVulnIngest
 }
 
-func NewOpenVEXParser() common.DocumentParser {
+func NewOpenVEXParser(gqlClient graphql.Client) common.DocumentParser {
 	return &openVEXParser{
 		identifierStrings: &common.IdentifierStrings{},
 	}
