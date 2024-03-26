@@ -37,10 +37,6 @@ const (
 var skipMatrix = map[string]map[string]bool{
 	// arango fails IncludedOccurrences_-_Valid_Included_ID and IncludedDependencies_-_Valid_Included_ID
 	"TestHasSBOM": {arango: true},
-	//  ent: source_name not singular
-	"TestHasSourceAt": {ent: true},
-	//  input: IngestHasSourceAts failed with err: ent: source_name not singular
-	"TestIngestHasSourceAts": {ent: true},
 	// ent: dep pkg querying subpath not working
 	// keyvalue: failing on dep package querying
 	"TestIsDependency": {ent: true, memmap: true, redis: true, tikv: true},

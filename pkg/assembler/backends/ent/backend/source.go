@@ -388,8 +388,8 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 
 func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
 	return sourceQuery(&model.SourceSpec{
-		Commit:    filter.Commit,
-		Tag:       filter.Tag,
+		Commit:    ptrfrom.String(stringOrEmpty(filter.Commit)),
+		Tag:       ptrfrom.String(stringOrEmpty(filter.Tag)),
 		Name:      &filter.Name,
 		Type:      &filter.Type,
 		Namespace: &filter.Namespace,

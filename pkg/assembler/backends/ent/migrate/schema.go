@@ -544,25 +544,20 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "hassourceat_source_id_package_version_id_justification",
+				Name:    "hassourceat_source_id_package_version_id_justification_origin_collector_known_since",
 				Unique:  true,
-				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[5], HasSourceAtsColumns[2]},
+				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[5], HasSourceAtsColumns[2], HasSourceAtsColumns[3], HasSourceAtsColumns[4], HasSourceAtsColumns[1]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_version_id IS NOT NULL AND package_name_id IS NULL",
 				},
 			},
 			{
-				Name:    "hassourceat_source_id_package_name_id_justification",
+				Name:    "hassourceat_source_id_package_name_id_justification_origin_collector_known_since",
 				Unique:  true,
-				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[6], HasSourceAtsColumns[2]},
+				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[6], HasSourceAtsColumns[2], HasSourceAtsColumns[3], HasSourceAtsColumns[4], HasSourceAtsColumns[1]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_name_id IS NOT NULL AND package_version_id IS NULL",
 				},
-			},
-			{
-				Name:    "hassourceat_known_since",
-				Unique:  false,
-				Columns: []*schema.Column{HasSourceAtsColumns[1]},
 			},
 		},
 	}
