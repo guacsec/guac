@@ -63,25 +63,9 @@ func (sac *SLSAAttestationCreate) SetStartedOn(t time.Time) *SLSAAttestationCrea
 	return sac
 }
 
-// SetNillableStartedOn sets the "started_on" field if the given value is not nil.
-func (sac *SLSAAttestationCreate) SetNillableStartedOn(t *time.Time) *SLSAAttestationCreate {
-	if t != nil {
-		sac.SetStartedOn(*t)
-	}
-	return sac
-}
-
 // SetFinishedOn sets the "finished_on" field.
 func (sac *SLSAAttestationCreate) SetFinishedOn(t time.Time) *SLSAAttestationCreate {
 	sac.mutation.SetFinishedOn(t)
-	return sac
-}
-
-// SetNillableFinishedOn sets the "finished_on" field if the given value is not nil.
-func (sac *SLSAAttestationCreate) SetNillableFinishedOn(t *time.Time) *SLSAAttestationCreate {
-	if t != nil {
-		sac.SetFinishedOn(*t)
-	}
 	return sac
 }
 
@@ -197,6 +181,12 @@ func (sac *SLSAAttestationCreate) check() error {
 	if _, ok := sac.mutation.SlsaVersion(); !ok {
 		return &ValidationError{Name: "slsa_version", err: errors.New(`ent: missing required field "SLSAAttestation.slsa_version"`)}
 	}
+	if _, ok := sac.mutation.StartedOn(); !ok {
+		return &ValidationError{Name: "started_on", err: errors.New(`ent: missing required field "SLSAAttestation.started_on"`)}
+	}
+	if _, ok := sac.mutation.FinishedOn(); !ok {
+		return &ValidationError{Name: "finished_on", err: errors.New(`ent: missing required field "SLSAAttestation.finished_on"`)}
+	}
 	if _, ok := sac.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "SLSAAttestation.origin"`)}
 	}
@@ -262,11 +252,11 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 	}
 	if value, ok := sac.mutation.StartedOn(); ok {
 		_spec.SetField(slsaattestation.FieldStartedOn, field.TypeTime, value)
-		_node.StartedOn = &value
+		_node.StartedOn = value
 	}
 	if value, ok := sac.mutation.FinishedOn(); ok {
 		_spec.SetField(slsaattestation.FieldFinishedOn, field.TypeTime, value)
-		_node.FinishedOn = &value
+		_node.FinishedOn = value
 	}
 	if value, ok := sac.mutation.Origin(); ok {
 		_spec.SetField(slsaattestation.FieldOrigin, field.TypeString, value)
@@ -460,12 +450,6 @@ func (u *SLSAAttestationUpsert) UpdateStartedOn() *SLSAAttestationUpsert {
 	return u
 }
 
-// ClearStartedOn clears the value of the "started_on" field.
-func (u *SLSAAttestationUpsert) ClearStartedOn() *SLSAAttestationUpsert {
-	u.SetNull(slsaattestation.FieldStartedOn)
-	return u
-}
-
 // SetFinishedOn sets the "finished_on" field.
 func (u *SLSAAttestationUpsert) SetFinishedOn(v time.Time) *SLSAAttestationUpsert {
 	u.Set(slsaattestation.FieldFinishedOn, v)
@@ -475,12 +459,6 @@ func (u *SLSAAttestationUpsert) SetFinishedOn(v time.Time) *SLSAAttestationUpser
 // UpdateFinishedOn sets the "finished_on" field to the value that was provided on create.
 func (u *SLSAAttestationUpsert) UpdateFinishedOn() *SLSAAttestationUpsert {
 	u.SetExcluded(slsaattestation.FieldFinishedOn)
-	return u
-}
-
-// ClearFinishedOn clears the value of the "finished_on" field.
-func (u *SLSAAttestationUpsert) ClearFinishedOn() *SLSAAttestationUpsert {
-	u.SetNull(slsaattestation.FieldFinishedOn)
 	return u
 }
 
@@ -659,13 +637,6 @@ func (u *SLSAAttestationUpsertOne) UpdateStartedOn() *SLSAAttestationUpsertOne {
 	})
 }
 
-// ClearStartedOn clears the value of the "started_on" field.
-func (u *SLSAAttestationUpsertOne) ClearStartedOn() *SLSAAttestationUpsertOne {
-	return u.Update(func(s *SLSAAttestationUpsert) {
-		s.ClearStartedOn()
-	})
-}
-
 // SetFinishedOn sets the "finished_on" field.
 func (u *SLSAAttestationUpsertOne) SetFinishedOn(v time.Time) *SLSAAttestationUpsertOne {
 	return u.Update(func(s *SLSAAttestationUpsert) {
@@ -677,13 +648,6 @@ func (u *SLSAAttestationUpsertOne) SetFinishedOn(v time.Time) *SLSAAttestationUp
 func (u *SLSAAttestationUpsertOne) UpdateFinishedOn() *SLSAAttestationUpsertOne {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.UpdateFinishedOn()
-	})
-}
-
-// ClearFinishedOn clears the value of the "finished_on" field.
-func (u *SLSAAttestationUpsertOne) ClearFinishedOn() *SLSAAttestationUpsertOne {
-	return u.Update(func(s *SLSAAttestationUpsert) {
-		s.ClearFinishedOn()
 	})
 }
 
@@ -1035,13 +999,6 @@ func (u *SLSAAttestationUpsertBulk) UpdateStartedOn() *SLSAAttestationUpsertBulk
 	})
 }
 
-// ClearStartedOn clears the value of the "started_on" field.
-func (u *SLSAAttestationUpsertBulk) ClearStartedOn() *SLSAAttestationUpsertBulk {
-	return u.Update(func(s *SLSAAttestationUpsert) {
-		s.ClearStartedOn()
-	})
-}
-
 // SetFinishedOn sets the "finished_on" field.
 func (u *SLSAAttestationUpsertBulk) SetFinishedOn(v time.Time) *SLSAAttestationUpsertBulk {
 	return u.Update(func(s *SLSAAttestationUpsert) {
@@ -1053,13 +1010,6 @@ func (u *SLSAAttestationUpsertBulk) SetFinishedOn(v time.Time) *SLSAAttestationU
 func (u *SLSAAttestationUpsertBulk) UpdateFinishedOn() *SLSAAttestationUpsertBulk {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.UpdateFinishedOn()
-	})
-}
-
-// ClearFinishedOn clears the value of the "finished_on" field.
-func (u *SLSAAttestationUpsertBulk) ClearFinishedOn() *SLSAAttestationUpsertBulk {
-	return u.Update(func(s *SLSAAttestationUpsert) {
-		s.ClearFinishedOn()
 	})
 }
 

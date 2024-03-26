@@ -50,8 +50,8 @@ func (SLSAAttestation) Fields() []ent.Field {
 		field.UUID("subject_id", getUUIDv7()).Comment("ID of the subject artifact"),
 		field.JSON("slsa_predicate", []*model.SLSAPredicate{}).Optional().Comment("Individual predicates found in the attestation"),
 		field.String("slsa_version").Comment("Version of the SLSA predicate"),
-		field.Time("started_on").Optional().Nillable().Comment("Timestamp of build start time"),
-		field.Time("finished_on").Optional().Nillable().Comment("Timestamp of build end time"),
+		field.Time("started_on").Comment("Timestamp of build start time"),
+		field.Time("finished_on").Comment("Timestamp of build end time"),
 		field.String("origin").Comment("Document from which this attestation is generated from"),
 		field.String("collector").Comment("GUAC collector for the document"),
 		field.String("built_from_hash").Comment("Hash of the artifacts that was built"),
@@ -71,8 +71,6 @@ func (SLSAAttestation) Edges() []ent.Edge {
 
 func (SLSAAttestation) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("subject_id", "origin", "collector", "build_type", "slsa_version", "built_by_id", "built_from_hash").Unique(),
-		index.Fields("started_on"),
-		index.Fields("finished_on"),
+		index.Fields("subject_id", "origin", "collector", "build_type", "slsa_version", "built_by_id", "built_from_hash", "started_on", "finished_on").Unique(),
 	}
 }

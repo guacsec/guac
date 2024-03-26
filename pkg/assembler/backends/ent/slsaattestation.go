@@ -33,9 +33,9 @@ type SLSAAttestation struct {
 	// Version of the SLSA predicate
 	SlsaVersion string `json:"slsa_version,omitempty"`
 	// Timestamp of build start time
-	StartedOn *time.Time `json:"started_on,omitempty"`
+	StartedOn time.Time `json:"started_on,omitempty"`
 	// Timestamp of build end time
-	FinishedOn *time.Time `json:"finished_on,omitempty"`
+	FinishedOn time.Time `json:"finished_on,omitempty"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin,omitempty"`
 	// GUAC collector for the document
@@ -170,15 +170,13 @@ func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field started_on", values[i])
 			} else if value.Valid {
-				sa.StartedOn = new(time.Time)
-				*sa.StartedOn = value.Time
+				sa.StartedOn = value.Time
 			}
 		case slsaattestation.FieldFinishedOn:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field finished_on", values[i])
 			} else if value.Valid {
-				sa.FinishedOn = new(time.Time)
-				*sa.FinishedOn = value.Time
+				sa.FinishedOn = value.Time
 			}
 		case slsaattestation.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -264,15 +262,11 @@ func (sa *SLSAAttestation) String() string {
 	builder.WriteString("slsa_version=")
 	builder.WriteString(sa.SlsaVersion)
 	builder.WriteString(", ")
-	if v := sa.StartedOn; v != nil {
-		builder.WriteString("started_on=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
+	builder.WriteString("started_on=")
+	builder.WriteString(sa.StartedOn.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := sa.FinishedOn; v != nil {
-		builder.WriteString("finished_on=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
+	builder.WriteString("finished_on=")
+	builder.WriteString(sa.FinishedOn.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("origin=")
 	builder.WriteString(sa.Origin)

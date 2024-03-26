@@ -16793,7 +16793,7 @@ func (m *SLSAAttestationMutation) StartedOn() (r time.Time, exists bool) {
 // OldStartedOn returns the old "started_on" field's value of the SLSAAttestation entity.
 // If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SLSAAttestationMutation) OldStartedOn(ctx context.Context) (v *time.Time, err error) {
+func (m *SLSAAttestationMutation) OldStartedOn(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStartedOn is only allowed on UpdateOne operations")
 	}
@@ -16807,22 +16807,9 @@ func (m *SLSAAttestationMutation) OldStartedOn(ctx context.Context) (v *time.Tim
 	return oldValue.StartedOn, nil
 }
 
-// ClearStartedOn clears the value of the "started_on" field.
-func (m *SLSAAttestationMutation) ClearStartedOn() {
-	m.started_on = nil
-	m.clearedFields[slsaattestation.FieldStartedOn] = struct{}{}
-}
-
-// StartedOnCleared returns if the "started_on" field was cleared in this mutation.
-func (m *SLSAAttestationMutation) StartedOnCleared() bool {
-	_, ok := m.clearedFields[slsaattestation.FieldStartedOn]
-	return ok
-}
-
 // ResetStartedOn resets all changes to the "started_on" field.
 func (m *SLSAAttestationMutation) ResetStartedOn() {
 	m.started_on = nil
-	delete(m.clearedFields, slsaattestation.FieldStartedOn)
 }
 
 // SetFinishedOn sets the "finished_on" field.
@@ -16842,7 +16829,7 @@ func (m *SLSAAttestationMutation) FinishedOn() (r time.Time, exists bool) {
 // OldFinishedOn returns the old "finished_on" field's value of the SLSAAttestation entity.
 // If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SLSAAttestationMutation) OldFinishedOn(ctx context.Context) (v *time.Time, err error) {
+func (m *SLSAAttestationMutation) OldFinishedOn(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldFinishedOn is only allowed on UpdateOne operations")
 	}
@@ -16856,22 +16843,9 @@ func (m *SLSAAttestationMutation) OldFinishedOn(ctx context.Context) (v *time.Ti
 	return oldValue.FinishedOn, nil
 }
 
-// ClearFinishedOn clears the value of the "finished_on" field.
-func (m *SLSAAttestationMutation) ClearFinishedOn() {
-	m.finished_on = nil
-	m.clearedFields[slsaattestation.FieldFinishedOn] = struct{}{}
-}
-
-// FinishedOnCleared returns if the "finished_on" field was cleared in this mutation.
-func (m *SLSAAttestationMutation) FinishedOnCleared() bool {
-	_, ok := m.clearedFields[slsaattestation.FieldFinishedOn]
-	return ok
-}
-
 // ResetFinishedOn resets all changes to the "finished_on" field.
 func (m *SLSAAttestationMutation) ResetFinishedOn() {
 	m.finished_on = nil
-	delete(m.clearedFields, slsaattestation.FieldFinishedOn)
 }
 
 // SetOrigin sets the "origin" field.
@@ -17324,12 +17298,6 @@ func (m *SLSAAttestationMutation) ClearedFields() []string {
 	if m.FieldCleared(slsaattestation.FieldSlsaPredicate) {
 		fields = append(fields, slsaattestation.FieldSlsaPredicate)
 	}
-	if m.FieldCleared(slsaattestation.FieldStartedOn) {
-		fields = append(fields, slsaattestation.FieldStartedOn)
-	}
-	if m.FieldCleared(slsaattestation.FieldFinishedOn) {
-		fields = append(fields, slsaattestation.FieldFinishedOn)
-	}
 	return fields
 }
 
@@ -17346,12 +17314,6 @@ func (m *SLSAAttestationMutation) ClearField(name string) error {
 	switch name {
 	case slsaattestation.FieldSlsaPredicate:
 		m.ClearSlsaPredicate()
-		return nil
-	case slsaattestation.FieldStartedOn:
-		m.ClearStartedOn()
-		return nil
-	case slsaattestation.FieldFinishedOn:
-		m.ClearFinishedOn()
 		return nil
 	}
 	return fmt.Errorf("unknown SLSAAttestation nullable field %s", name)

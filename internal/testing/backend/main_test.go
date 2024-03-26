@@ -37,11 +37,6 @@ const (
 var skipMatrix = map[string]map[string]bool{
 	// arango fails IncludedOccurrences_-_Valid_Included_ID and IncludedDependencies_-_Valid_Included_ID
 	"TestHasSBOM": {arango: true},
-	// ent hash equal querying seems to be off
-	"TestHashEqual":        {ent: true},
-	"TestIngestHashEquals": {ent: true},
-	// ent is filling in "StartedOn" when not provided on input, but "FinishedOn" is.
-	"TestHasSLSA": {ent: true},
 	//  ent: source_name not singular
 	"TestHasSourceAt": {ent: true},
 	//  input: IngestHasSourceAts failed with err: ent: source_name not singular
