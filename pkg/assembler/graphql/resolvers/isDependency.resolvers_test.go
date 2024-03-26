@@ -17,6 +17,7 @@ package resolvers_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -24,6 +25,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func TestIngestDependencies(t *testing.T) {
@@ -36,7 +38,7 @@ func TestIngestDependencies(t *testing.T) {
 	tests := []struct {
 		Name         string
 		Calls        []call
-		ExpIngestErr bool
+		ExpIngestErr string
 	}{
 		{
 			Name: "Ingest two packages and one dependent package",
@@ -55,7 +57,7 @@ func TestIngestDependencies(t *testing.T) {
 					},
 				},
 			},
-			ExpIngestErr: true,
+			ExpIngestErr: "uneven packages and dependent packages for ingestion",
 		},
 		{
 			Name: "Ingest one package and two dependency notes",
@@ -76,7 +78,19 @@ func TestIngestDependencies(t *testing.T) {
 					},
 				},
 			},
-			ExpIngestErr: true,
+			ExpIngestErr: "uneven packages and dependencies nodes for ingestion",
+		},
+		{
+			Name: "Ingest two packages but one has an invalid dependency type",
+			Calls: []call{
+				{
+					P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+					P2s: []*model.IDorPkgInput{{PackageInput: testdata.P4}, {PackageInput: testdata.P5}},
+					MF:  testdata.MAll,
+					IDs: []*model.IsDependencyInputSpec{{DependencyType: "DIRECT"}, {DependencyType: "bad value"}},
+				},
+			},
+			ExpIngestErr: "not all dependencies had valid types",
 		},
 		{
 			Name: "HappyPath",
@@ -105,7 +119,7 @@ func TestIngestDependencies(t *testing.T) {
 			r := resolvers.Resolver{Backend: b}
 			for _, o := range test.Calls {
 				times := 1
-				if test.ExpIngestErr {
+				if test.ExpIngestErr != "" {
 					times = 0
 				}
 				b.
@@ -114,8 +128,10 @@ func TestIngestDependencies(t *testing.T) {
 					Return(nil, nil).
 					Times(times)
 				_, err := r.Mutation().IngestDependencies(ctx, o.P1s, o.P2s, o.MF, o.IDs)
-				if (err != nil) != test.ExpIngestErr {
-					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				wantErrorMsg := fmt.Sprintf("input: IngestDependencies :: %s", test.ExpIngestErr)
+				_, isGqlErr := err.(*gqlerror.Error)
+				if (err != nil) && (!isGqlErr || err.Error() != wantErrorMsg) {
+					t.Fatalf("did not get expected ingest error, want: %+v, got: %+v", wantErrorMsg, err)
 				}
 				if err != nil {
 					return
