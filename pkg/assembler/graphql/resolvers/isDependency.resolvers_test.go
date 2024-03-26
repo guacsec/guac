@@ -133,9 +133,6 @@ func TestIngestDependencies(t *testing.T) {
 				if (err != nil) && (!isGqlErr || err.Error() != wantErrorMsg) {
 					t.Fatalf("did not get expected ingest error, want: %+v, got: %+v", wantErrorMsg, err)
 				}
-				if err != nil {
-					return
-				}
 			}
 		})
 	}
