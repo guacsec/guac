@@ -18,7 +18,6 @@ package cyclonedx
 import (
 	"context"
 	"github.com/Khan/genqlient/graphql"
-	"net/http"
 	"reflect"
 	"testing"
 	"time"
@@ -133,7 +132,7 @@ func Test_cyclonedxParser(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewCycloneDXParser()
+			s := NewCycloneDXParser(nil)
 			err := s.Parse(ctx, tt.doc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("cyclonedxParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
@@ -565,39 +564,302 @@ func noAnalysisVexPredicates() *assembler.IngestPredicates {
 }
 
 func Test_findCDXPkgVersionIDs(t *testing.T) {
-	httpClient := http.Client{}
-	gqlclient := graphql.NewClient("http://localhost:8080", &httpClient)
+	testPypiPackage := model.PackagesPackagesPackage{}
+
+	testPypiPackage.Type = "type"
+	testPypiPackage.Namespaces = append(testPypiPackage.Namespaces, model.AllPkgTreeNamespacesPackageNamespace{
+		Id:        "",
+		Namespace: "namespace",
+		Names: []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName{
+			{
+				Name: "name",
+				Versions: []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion{
+					{
+						Version: "1.11.1",
+					},
+					{
+						Version: "1.11.2",
+					},
+					{
+						Version: "2.33.1",
+					},
+					{
+						Version: "0.1.2",
+					},
+				},
+			},
+		},
+	})
+
 	type args struct {
 		ctx           context.Context
-		gqlClient     graphql.Client
 		pkgIdentifier string
 		versionRange  string
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    []string
-		wantErr bool
+		name        string
+		args        args
+		getPackages func(ctx context.Context, client graphql.Client, filter model.PkgSpec) (*model.PackagesResponse, error)
+		want        []string
+		wantErr     bool
 	}{
 		{
-			name: "default versions",
+			name: "Default",
 			args: args{
 				ctx:           context.Background(),
-				gqlClient:     gqlclient,
-				pkgIdentifier: "guac",
-				versionRange:  "vers:generic/>=2.9|<=4.1",
+				pkgIdentifier: "identifier",
+				versionRange:  ">=1.0.0 <2.0.0",
 			},
+			getPackages: func(ctx context.Context, client graphql.Client, filter model.PkgSpec) (*model.PackagesResponse, error) {
+				return &model.PackagesResponse{
+					Packages: []model.PackagesPackagesPackage{testPypiPackage},
+				}, nil
+			},
+			want:    []string{"pkg:guac/pkg/guac@1.11.1", "pkg:guac/pkg/guac@1.11.2"},
+			wantErr: false,
+		},
+		{
+			name: "Multiple Ranges",
+			args: args{
+				ctx:           context.Background(),
+				pkgIdentifier: "identifier",
+				versionRange:  ">=1.0.0 <2.0.0 | >=0.0.0 <0.5.0",
+			},
+			getPackages: func(ctx context.Context, client graphql.Client, filter model.PkgSpec) (*model.PackagesResponse, error) {
+				return &model.PackagesResponse{
+					Packages: []model.PackagesPackagesPackage{testPypiPackage},
+				}, nil
+			},
+			want:    []string{"pkg:guac/pkg/guac@1.11.1", "pkg:guac/pkg/guac@1.11.2", "pkg:guac/pkg/guac@0.1.2"},
+			wantErr: false,
+		},
+		{
+			name: "Explicit Equals",
+			args: args{
+				ctx:           context.Background(),
+				pkgIdentifier: "identifier",
+				versionRange:  "=2.33.1",
+			},
+			getPackages: func(ctx context.Context, client graphql.Client, filter model.PkgSpec) (*model.PackagesResponse, error) {
+				return &model.PackagesResponse{
+					Packages: []model.PackagesPackagesPackage{testPypiPackage},
+				}, nil
+			},
+			want:    []string{"pkg:guac/pkg/guac@2.33.1"},
+			wantErr: false,
+		},
+		{
+			name: "Implicit Equals",
+			args: args{
+				ctx:           context.Background(),
+				pkgIdentifier: "identifier",
+				versionRange:  "2.33.1",
+			},
+			getPackages: func(ctx context.Context, client graphql.Client, filter model.PkgSpec) (*model.PackagesResponse, error) {
+				return &model.PackagesResponse{
+					Packages: []model.PackagesPackagesPackage{testPypiPackage},
+				}, nil
+			},
+			want:    []string{"pkg:guac/pkg/guac@2.33.1"},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := findCDXPkgVersionIDs(tt.args.ctx, tt.args.gqlClient, tt.args.pkgIdentifier, tt.args.versionRange)
+			getPackages = tt.getPackages
+
+			c := cyclonedxParser{
+				gqlClient: nil,
+			}
+
+			got, err := c.findCDXPkgVersionIDs(tt.args.ctx, tt.args.pkgIdentifier, tt.args.versionRange)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("findCDXPkgVersionIDs() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("findCDXPkgVersionIDs() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_parseVersionRange(t *testing.T) {
+	type args struct {
+		rangeStr string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []VersionMatchObject
+		want1   []string
+		wantErr bool
+	}{
+		{
+			name: "Single Version Implicit Equal",
+			args: args{
+				rangeStr: "1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.3",
+					MaxVersion:   "1.2.3",
+					MinInclusive: true,
+					MaxInclusive: true,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Single Version Explicit Equal",
+			args: args{
+				rangeStr: "=1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.3",
+					MaxVersion:   "1.2.3",
+					MinInclusive: true,
+					MaxInclusive: true,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Greater Than",
+			args: args{
+				rangeStr: ">1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.3",
+					MaxVersion:   "",
+					MinInclusive: false,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Greater Than or Equal",
+			args: args{
+				rangeStr: ">=1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.3",
+					MaxVersion:   "",
+					MinInclusive: true,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Less Than",
+			args: args{
+				rangeStr: "<1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "",
+					MaxVersion:   "1.2.3",
+					MinInclusive: false,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Less Than or Equal",
+			args: args{
+				rangeStr: "<=1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "",
+					MaxVersion:   "1.2.3",
+					MinInclusive: false,
+					MaxInclusive: true,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Range Inclusive",
+			args: args{
+				rangeStr: ">=1.2.0,<=1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.0",
+					MaxVersion:   "1.2.3",
+					MinInclusive: true,
+					MaxInclusive: true,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Range Exclusive",
+			args: args{
+				rangeStr: ">1.2.0,<1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.0",
+					MaxVersion:   "1.2.3",
+					MinInclusive: false,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Complex Range",
+			args: args{
+				rangeStr: ">=1.0.0,<1.0.5 | >=1.1.0,<1.1.5",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.0.0",
+					MaxVersion:   "1.0.5",
+					MinInclusive: true,
+					MaxInclusive: false,
+				},
+				{
+					MinVersion:   "1.1.0",
+					MaxVersion:   "1.1.5",
+					MinInclusive: true,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := parseVersionRange(tt.args.rangeStr)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseVersionRange() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("parseVersionRange() got = %v, want %v", got, tt.want)
+			}
+			if len(got1) == 0 && len(tt.want1) == 0 {
+				// Both slices are empty, consider this a match.
+			} else if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("parseVersionRange() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}

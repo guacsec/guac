@@ -20,7 +20,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/Khan/genqlient/graphql"
-	"net/http"
 	"reflect"
 	"regexp"
 	"strings"
@@ -60,6 +59,7 @@ type cyclonedxParser struct {
 	identifierStrings *common.IdentifierStrings
 	cdxBom            *cdx.BOM
 	vulnData          vulnData
+	gqlClient         graphql.Client
 }
 
 type vulnData struct {
@@ -75,11 +75,15 @@ type VersionMatchObject struct {
 	MaxInclusive bool
 }
 
-func NewCycloneDXParser() common.DocumentParser {
+var getPackages func(ctx context.Context, gqlClient graphql.Client, filter model.PkgSpec) (*model.PackagesResponse, error)
+
+func NewCycloneDXParser(gqlClient graphql.Client) common.DocumentParser {
+	getPackages = model.Packages
 	return &cyclonedxParser{
 		packagePackages:   map[string][]*model.PkgInputSpec{},
 		packageArtifacts:  map[string][]*model.ArtifactInputSpec{},
 		identifierStrings: &common.IdentifierStrings{},
+		gqlClient:         gqlClient,
 	}
 }
 
@@ -420,9 +424,6 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 
 // Get package name and range versions to create package input spec for the affected packages.
 func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *model.VulnerabilityInputSpec, vexData model.VexStatementInputSpec, affectsObj cdx.Affects) (*[]assembler.VexIngest, error) {
-	httpClient := http.Client{}
-	gqlclient := graphql.NewClient("http://localhost:8080", &httpClient)
-
 	pkgRef := affectsObj.Ref
 
 	var foundVexIngest []assembler.VexIngest
@@ -462,7 +463,7 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 	for _, affect := range *affectsObj.Range {
 		// Handles package range versions like https://github.com/CycloneDX/bom-examples/blob/master/VEX/CISA-Use-Cases/Case-8/vex.json#L42
 		if affect.Range != "" {
-			purls, err := findCDXPkgVersionIDs(ctx, gqlclient, pkgIdentifier, affect.Range)
+			purls, err := c.findCDXPkgVersionIDs(ctx, pkgIdentifier, affect.Range)
 			if err != nil {
 				return nil, fmt.Errorf("error searching version ranges for %s: %v", affect.Range, err)
 			}
@@ -508,18 +509,18 @@ func (c *cyclonedxParser) AddVulnerabilityIngestionData(purl string, vexData mod
 	return viList, nil
 }
 
-func findCDXPkgVersionIDs(ctx context.Context, gqlClient graphql.Client, pkgIdentifier string, versionRange string) ([]string, error) {
+func (c *cyclonedxParser) findCDXPkgVersionIDs(ctx context.Context, pkgIdentifier string, versionRange string) ([]string, error) {
 	var matchingVersionPurls []string
 
 	// search for all packages that have a matching type, namespace, and name.
-	typeGUAC, namespace := "guac", "cdx"
-	pkgResponse, err := model.Packages(ctx, gqlClient, model.PkgSpec{
+	typeGUAC, namespace := "guac", "pkg"
+	pkgResponse, err := getPackages(ctx, c.gqlClient, model.PkgSpec{
 		Type:      &typeGUAC,
 		Namespace: &namespace,
 		Name:      &pkgIdentifier,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error querying for packages: %w", err)
+		return nil, fmt.Errorf("error querying for packages1: %w", err)
 	}
 
 	pkgVersionsMap := map[string]string{}
@@ -562,7 +563,9 @@ func WhichVersionMatches(versions []string, versionRange string) (map[string]boo
 
 // Match checks if the given version is within the range specified by the VersionMatchObject.
 func (vmo VersionMatchObject) Match(version string, excludedVersions []string) bool {
-	withinRange := (vmo.MinVersion <= version) && (version < vmo.MaxVersion)
+	withinRange := ((vmo.MinInclusive && vmo.MinVersion <= version) || (vmo.MinVersion < version)) &&
+		((vmo.MaxInclusive && vmo.MaxVersion >= version) || (vmo.MaxVersion > version))
+
 	if !withinRange {
 		return false
 	}
@@ -576,20 +579,32 @@ func (vmo VersionMatchObject) Match(version string, excludedVersions []string) b
 
 func parseVersionRange(rangeStr string) ([]VersionMatchObject, []string, error) {
 	// Split the range string on the logical OR operator `|` so that we can find different comparisons
-	parts := strings.Split(rangeStr, "|")
+	ranges := strings.Split(rangeStr, "|")
 
 	var versionMatchObjects []VersionMatchObject
 	var excludedVersions []string
 
-	for _, part := range parts {
+	for _, r := range ranges {
+		// Check for implicit equals by detecting an absence of range operators.
+		if !strings.ContainsAny(r, "><=") {
+			versionMatchObjects = append(versionMatchObjects, VersionMatchObject{
+				MinVersion:   r,
+				MaxVersion:   r,
+				MinInclusive: true,
+				MaxInclusive: true,
+			})
+			continue
+		}
+
 		// Regular expression to capture version comparison operators and version numbers
-		// This is for cases like: "vers:generic/>=2.9|<=4.1" and ">=2.0.0 <3.0.0 | != 2.3.0",
+		// This is for cases like: "vers:generic/>=2.9|<=4.1" and ">=2.0.0 <3.0.0 | != 2.3.0".
+		// This doesn't check for implicit equality
 		re := regexp.MustCompile(`(!=|[><]=?|=)?\s*v?(\d+(\.\d+)?(\.\d+)?)`)
 
-		// Find all matches for version constraints within the part.
-		matches := re.FindAllStringSubmatch(part, -1)
+		// Find all matches for version constraints within r.
+		matches := re.FindAllStringSubmatch(r, -1)
 		if len(matches) == 0 {
-			return nil, nil, fmt.Errorf("no version constraints found in: %s", part)
+			return nil, nil, fmt.Errorf("no version constraints found in: %s", r)
 		}
 
 		vmo := VersionMatchObject{}
