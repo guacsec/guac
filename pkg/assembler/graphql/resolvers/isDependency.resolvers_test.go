@@ -166,24 +166,24 @@ func TestIngestDependenciesDependencyTypeValidity(t *testing.T) {
 		ExpAllValid     bool
 	}{
 		{
-			"nil",
-			nil,
-			true,
+			Name:            "nil",
+			DependencyTypes: nil,
+			ExpAllValid:     true,
 		},
 		{
-			"empty",
-			[]string{},
-			true,
+			Name:            "empty",
+			DependencyTypes: []string{},
+			ExpAllValid:     true,
 		},
 		{
-			"valid non-empty",
-			[]string{"DIRECT", "INDIRECT", "UNKNOWN"},
-			true,
+			Name:            "valid non-empty",
+			DependencyTypes: []string{"DIRECT", "INDIRECT", "UNKNOWN"},
+			ExpAllValid:     true,
 		},
 		{
-			"invalid non-empty",
-			[]string{""},
-			false,
+			Name:            "invalid non-empty",
+			DependencyTypes: []string{""},
+			ExpAllValid:     false,
 		},
 	}
 
