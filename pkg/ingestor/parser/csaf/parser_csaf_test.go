@@ -57,7 +57,7 @@ func Test_csafParser(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewCsafParser()
+			s := NewCsafParser(nil)
 			err := s.Parse(ctx, tt.doc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("csafParse.Parse() error = %v, wantErr %v", err, tt.wantErr)
@@ -295,7 +295,7 @@ func Test_csafParser_GetIdentifiers(t *testing.T) {
 		},
 	}
 
-	c := NewCsafParser()
+	c := NewCsafParser(nil)
 
 	err := c.Parse(test.ctx, test.fields.doc)
 	if err != nil {

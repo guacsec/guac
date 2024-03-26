@@ -21,6 +21,7 @@ package ingest_predicates
 
 import (
 	"context"
+	"github.com/Khan/genqlient/graphql"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -32,12 +33,15 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type ingestPredicatesParser struct {
-	preds assembler.IngestPredicates
+	preds     assembler.IngestPredicates
+	gqlClient graphql.Client
 }
 
 // NewIngestPredicatesParser initializes the ingestPredicatesParser
-func NewIngestPredicatesParser() common.DocumentParser {
-	return &ingestPredicatesParser{}
+func NewIngestPredicatesParser(gqlClient graphql.Client) common.DocumentParser {
+	return &ingestPredicatesParser{
+		gqlClient: gqlClient,
+	}
 }
 
 // Parse breaks out the document into the graph components

@@ -81,7 +81,7 @@ func Test_scorecardParser(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewScorecardParser()
+			s := NewScorecardParser(nil)
 			if err := s.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
 				t.Errorf("scorecard.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}

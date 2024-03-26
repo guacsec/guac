@@ -44,7 +44,7 @@ func TestNewDepsDevParser(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewDepsDevParser(); !reflect.DeepEqual(got, tt.want) {
+			if got := NewDepsDevParser(nil); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewDepsDevParser() = %v, want %v", got, tt.want)
 			}
 		})
@@ -522,7 +522,7 @@ func Test_depsDevParser_Parse(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := NewDepsDevParser()
+			d := NewDepsDevParser(nil)
 			if err := d.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
 				t.Errorf("deps.dev.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -567,7 +567,7 @@ func Test_depsDevParser_GetIdentifiers(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := NewDepsDevParser()
+			d := NewDepsDevParser(nil)
 			if err := d.Parse(ctx, tt.doc); (err != nil) != tt.wantErr {
 				t.Errorf("deps.dev.Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}

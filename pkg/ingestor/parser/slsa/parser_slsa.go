@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 	"strings"
 
 	jsoniter "github.com/json-iterator/go"
@@ -68,7 +69,7 @@ type slsaParser struct {
 }
 
 // NewSLSAParser initializes the slsaParser
-func NewSLSAParser() common.DocumentParser {
+func NewSLSAParser(gqlClient graphql.Client) common.DocumentParser {
 	return &slsaParser{
 		identifierStrings: &common.IdentifierStrings{},
 	}

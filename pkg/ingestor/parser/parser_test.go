@@ -21,9 +21,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/guacsec/guac/pkg/logging"
-
+	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
+	"github.com/guacsec/guac/pkg/logging"
 
 	"github.com/guacsec/guac/internal/testing/mocks"
 
@@ -74,7 +74,7 @@ func TestParserHelper(t *testing.T) {
 
 			parser := common.DocumentParser(mockDocumentParser)
 
-			f := func() common.DocumentParser {
+			f := func(gqlClient graphql.Client) common.DocumentParser {
 				return parser
 			}
 
@@ -88,7 +88,7 @@ func TestParserHelper(t *testing.T) {
 
 			_ = RegisterDocumentParser(f, test.registerArgs) // Ignoring error because it is mutating a global variable
 
-			if _, err := parseHelper(ctx, test.parseArg); err != nil { // Ignoring the graphBuilder because the mock will always return an empty graphBuilder
+			if _, err := parseHelper(ctx, test.parseArg, nil); err != nil { // Ignoring the graphBuilder because the mock will always return an empty graphBuilder
 				t.Logf("error parsing document: %v", err)
 			}
 		})
@@ -181,7 +181,7 @@ func Test_docTreeBuilder_parse(t *testing.T) {
 
 			parser := common.DocumentParser(mockDocumentParser)
 
-			f := func() common.DocumentParser {
+			f := func(gqlClient graphql.Client) common.DocumentParser {
 				return parser
 			}
 
@@ -208,7 +208,7 @@ func Test_docTreeBuilder_parse(t *testing.T) {
 				identities:    test.fields.identities,
 				graphBuilders: test.fields.graphBuilders,
 			}
-			if err := treeBuilder.parse(ctx, test.root, map[visitedKey]bool{}); (err != nil) != test.wantErr {
+			if err := treeBuilder.parse(ctx, test.root, map[visitedKey]bool{}, nil); (err != nil) != test.wantErr {
 				t1.Errorf("parse() error = %v, wantErr %v", err, test.wantErr)
 			}
 		})
@@ -275,7 +275,7 @@ func TestParseDocumentTree(t *testing.T) {
 
 			parser := common.DocumentParser(mockDocumentParser)
 
-			f := func() common.DocumentParser {
+			f := func(gqlClient graphql.Client) common.DocumentParser {
 				return parser
 			}
 
@@ -293,7 +293,7 @@ func TestParseDocumentTree(t *testing.T) {
 
 			_ = RegisterDocumentParser(f, test.registerDocType) // Ignoring error because it is mutating a global variable
 
-			got, got1, err := ParseDocumentTree(ctx, test.docTree)
+			got, got1, err := ParseDocumentTree(ctx, test.docTree, nil)
 
 			if (err != nil) != test.wantErr {
 				t.Errorf("ParseDocumentTree() error = %v, wantErr %v", err, test.wantErr)

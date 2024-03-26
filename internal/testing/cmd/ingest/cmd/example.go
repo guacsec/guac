@@ -37,7 +37,7 @@ type options struct {
 	graphqlEndpoint string
 }
 
-func ingestExample(cmd *cobra.Command, args []string) {
+func ingestExample(cmd *cobra.Command, args []string, gqlClient graphql.Client) {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
 
@@ -59,7 +59,7 @@ func ingestExample(cmd *cobra.Command, args []string) {
 	var inputs []assembler.IngestPredicates
 	for _, doc := range docs {
 		// This is a test example, so we will ignore calling out to a collectsub service
-		input, _, err := parser.ParseDocumentTree(ctx, doc)
+		input, _, err := parser.ParseDocumentTree(ctx, doc, gqlClient)
 		if err != nil {
 			logger.Fatalf("unable to parse document: %v", err)
 		}
