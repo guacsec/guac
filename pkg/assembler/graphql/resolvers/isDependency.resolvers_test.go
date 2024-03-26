@@ -66,10 +66,12 @@ func TestIngestDependencies(t *testing.T) {
 					MF:  testdata.MAll,
 					IDs: []*model.IsDependencyInputSpec{
 						{
-							Justification: "test justification",
+							Justification:  "test justification",
+							DependencyType: "DIRECT",
 						},
 						{
-							Justification: "test justification",
+							Justification:  "test justification",
+							DependencyType: "INDIRECT",
 						},
 					},
 				},
@@ -84,10 +86,12 @@ func TestIngestDependencies(t *testing.T) {
 				MF:  testdata.MAll,
 				IDs: []*model.IsDependencyInputSpec{
 					{
-						Justification: "test justification",
+						Justification:  "test justification",
+						DependencyType: "UNKNOWN",
 					},
 					{
-						Justification: "test justification",
+						Justification:  "test justification",
+						DependencyType: "UNKNOWN",
 					},
 				},
 			}},
@@ -116,6 +120,103 @@ func TestIngestDependencies(t *testing.T) {
 				if err != nil {
 					return
 				}
+			}
+		})
+	}
+}
+
+func TestDependencyTypeIsValid(t *testing.T) {
+	tests := []struct {
+		Name       string
+		ExpIsValid bool
+	}{
+		{
+			Name:       "DIRECT",
+			ExpIsValid: true,
+		},
+		{
+			Name:       "INDIRECT",
+			ExpIsValid: true,
+		},
+		{
+			Name:       "UNKNOWN",
+			ExpIsValid: true,
+		},
+		{
+			Name:       "Some other value",
+			ExpIsValid: false,
+		},
+		{
+			Name:       "",
+			ExpIsValid: false,
+		},
+	}
+
+	for _, test := range tests {
+		if model.DependencyType(test.Name).IsValid() != test.ExpIsValid {
+			t.Errorf("Expected dependency type %s to have validity %v but it did not", test.Name, test.ExpIsValid)
+		}
+	}
+}
+
+func TestIngestDependenciesDependencyTypeValidity(t *testing.T) {
+	tests := []struct {
+		Name            string
+		DependencyTypes []string
+		ExpAllValid     bool
+	}{
+		{
+			"nil",
+			nil,
+			true,
+		},
+		{
+			"empty",
+			[]string{},
+			true,
+		},
+		{
+			"valid non-empty",
+			[]string{"DIRECT", "INDIRECT", "UNKNOWN"},
+			true,
+		},
+		{
+			"invalid non-empty",
+			[]string{""},
+			false,
+		},
+	}
+
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			var pkgs, depPkgs []*model.IDorPkgInput
+			var dependencies []*model.IsDependencyInputSpec
+
+			for _, dependencyType := range test.DependencyTypes {
+				pkgs = append(pkgs, &model.IDorPkgInput{})
+				depPkgs = append(depPkgs, &model.IDorPkgInput{})
+				dependencies = append(dependencies, &model.IsDependencyInputSpec{DependencyType: model.DependencyType(dependencyType)})
+			}
+
+			b := mocks.NewMockBackend(ctrl)
+			r := resolvers.Resolver{Backend: b}
+
+			times := 0
+			if test.ExpAllValid {
+				times = 1
+			}
+
+			b.
+				EXPECT().
+				IngestDependencies(ctx, pkgs, depPkgs, testdata.MAll, dependencies).
+				Return(nil, nil).
+				Times(times)
+			_, err := r.Mutation().IngestDependencies(ctx, pkgs, depPkgs, testdata.MAll, dependencies)
+			if (err != nil) == test.ExpAllValid {
+				t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpAllValid, err)
 			}
 		})
 	}
