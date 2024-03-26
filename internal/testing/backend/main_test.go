@@ -35,12 +35,6 @@ const (
 )
 
 var skipMatrix = map[string]map[string]bool{
-	// get Scorecard ID: ent: scorecard not found
-	"TestCertifyScorecard": {ent: true},
-	// input: IngestScorecards failed with err: get Scorecard ID: ent: scorecard not singular
-	"TestIngestScorecards": {ent: true},
-	// ent vuln query / novuln seems to be off
-	"TestIngestCertifyVulnerability": {ent: true},
 	// failed to execute IngestHasMetadata :: get HasMetadata: ent: has_metadata not singular
 	"TestHasMetadata": {ent: true},
 	// input: IngestBulkHasMetadata failed with element #1 {Type:pypi Namespace:<nil> Name:tensorflow Version:<nil> Qualifiers:[] Subpath:<nil>} with err: failed to execute IngestHasMetadata :: get HasMetadata: ent: has_metadata not singular
