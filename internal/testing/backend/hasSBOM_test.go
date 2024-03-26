@@ -964,7 +964,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Package: &model.PkgSpec{ID: ptrfrom.String("10000")}}}},
+			Query: &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Package: &model.PkgSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}}},
 			ExpHS: nil,
 		},
 		{
@@ -1186,7 +1186,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String("10000")}}}},
+			Query: &model.HasSBOMSpec{IncludedSoftware: []*model.PackageOrArtifactSpec{{Artifact: &model.ArtifactSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}}},
 			ExpHS: nil,
 		},
 		{
@@ -1289,7 +1289,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{ID: ptrfrom.String("10000")}}},
+			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}},
 			ExpHS: nil,
 		},
 		{
@@ -1323,7 +1323,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String("10000")}}}},
+			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}}},
 			ExpHS: nil,
 		},
 		{
@@ -1545,7 +1545,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{DependencyPackage: &model.PkgSpec{ID: ptrfrom.String("10000")}}}},
+			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{DependencyPackage: &model.PkgSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}}},
 			ExpHS: nil,
 		},
 		{
@@ -1767,7 +1767,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String("4")}, DependencyPackage: &model.PkgSpec{ID: ptrfrom.String("10000")}}}},
+			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}, DependencyPackage: &model.PkgSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}}},
 			ExpHS: nil,
 		},
 		{
@@ -1784,7 +1784,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String("10000")}, DependencyPackage: &model.PkgSpec{ID: ptrfrom.String("8")}}}},
+			Query: &model.HasSBOMSpec{IncludedDependencies: []*model.IsDependencySpec{{Package: &model.PkgSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}, DependencyPackage: &model.PkgSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}}},
 			ExpHS: nil,
 		},
 		{
@@ -2050,7 +2050,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{ID: ptrfrom.String("10000")}}},
+			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}},
 			ExpHS: nil,
 		},
 		{
@@ -2084,7 +2084,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{ID: ptrfrom.String("10000")}}}}},
+			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Package: &model.PkgSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}}}},
 			ExpHS: nil,
 		},
 		{
@@ -2305,7 +2305,7 @@ func TestHasSBOM(t *testing.T) {
 				},
 				HS: includedHasSBOM,
 			}},
-			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Source: &model.SourceSpec{ID: ptrfrom.String("10000")}}}}},
+			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Subject: &model.PackageOrSourceSpec{Source: &model.SourceSpec{ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e")}}}}},
 			ExpHS: nil,
 		},
 		{
@@ -2479,7 +2479,7 @@ func TestHasSBOM(t *testing.T) {
 			Query: &model.HasSBOMSpec{
 				IncludedOccurrences: []*model.IsOccurrenceSpec{{
 					Artifact: &model.ArtifactSpec{
-						ID: ptrfrom.String("10000"),
+						ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e"),
 					},
 				}},
 			},

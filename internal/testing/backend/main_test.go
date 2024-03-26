@@ -35,15 +35,8 @@ const (
 )
 
 var skipMatrix = map[string]map[string]bool{
-	// failed to execute IngestHasMetadata :: get HasMetadata: ent: has_metadata not singular
-	"TestHasMetadata": {ent: true},
-	// input: IngestBulkHasMetadata failed with element #1 {Type:pypi Namespace:<nil> Name:tensorflow Version:<nil> Qualifiers:[] Subpath:<nil>} with err: failed to execute IngestHasMetadata :: get HasMetadata: ent: has_metadata not singular
-	"TestIngestBulkHasMetadata": {ent: true},
-	// input: IngestHasSbom :: input: IngestHasSbom ::  ent: bill_of_materials not singular
 	// arango fails IncludedOccurrences_-_Valid_Included_ID and IncludedDependencies_-_Valid_Included_ID
-	"TestHasSBOM": {ent: true, arango: true},
-	// input: IngestHasSBOMs failed with err: input: IngestHasSbom :: input: IngestHasSbom ::  ent: bill_of_materials not singular
-	"TestIngestHasSBOMs": {ent: true},
+	"TestHasSBOM": {arango: true},
 	// ent hash equal querying seems to be off
 	"TestHashEqual":        {ent: true},
 	"TestIngestHashEquals": {ent: true},

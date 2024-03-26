@@ -78,12 +78,15 @@ func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {
 	predicates := []predicate.HasMetadata{
 		optionalPredicate(filter.ID, IDEQ),
-		optionalPredicate(filter.Since, hasmetadata.TimestampGTE),
 		optionalPredicate(filter.Key, hasmetadata.KeyEQ),
 		optionalPredicate(filter.Value, hasmetadata.ValueEQ),
 		optionalPredicate(filter.Justification, hasmetadata.JustificationEQ),
 		optionalPredicate(filter.Origin, hasmetadata.OriginEQ),
 		optionalPredicate(filter.Collector, hasmetadata.CollectorEQ),
+	}
+	if filter.Since != nil {
+		timeSince := *filter.Since
+		predicates = append(predicates, optionalPredicate(ptrfrom.Time(timeSince.UTC()), hasmetadata.TimestampGTE))
 	}
 
 	if filter.Subject != nil {
@@ -108,6 +111,7 @@ func upsertHasMetadata(ctx context.Context, tx *ent.Tx, subject model.PackageSou
 		hasmetadata.FieldKey,
 		hasmetadata.FieldValue,
 		hasmetadata.FieldJustification,
+		hasmetadata.FieldTimestamp,
 		hasmetadata.FieldOrigin,
 		hasmetadata.FieldCollector,
 	}
@@ -261,6 +265,7 @@ func upsertBulkHasMetadata(ctx context.Context, tx *ent.Tx, subjects model.Packa
 		hasmetadata.FieldKey,
 		hasmetadata.FieldValue,
 		hasmetadata.FieldJustification,
+		hasmetadata.FieldTimestamp,
 		hasmetadata.FieldOrigin,
 		hasmetadata.FieldCollector,
 	}
