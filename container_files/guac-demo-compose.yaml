@@ -70,7 +70,7 @@ services:
           "CMD",
           "wget",
           "--spider",
-          "http://localhost:8222/healthz"
+          "http://localhost:8081/healthz"
         ]
       interval: 10s
       timeout: 10s
