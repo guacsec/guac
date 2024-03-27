@@ -21,9 +21,9 @@ import (
 	"log"
 
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -43,6 +43,41 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	// switch idSplit[0] {
+	// case certifyLegalsStr:
+	// 	return c.buildCertifyLegalByID(ctx, nodeID, nil)
+	// case scorecardStr:
+	// 	return c.buildCertifyScorecardByID(ctx, nodeID, nil)
+	// case certifyVEXsStr:
+	// 	return c.buildCertifyVexByID(ctx, nodeID, nil)
+	// case certifyVulnsStr:
+	// 	return c.buildCertifyVulnByID(ctx, nodeID, nil)
+	// case hashEqualsStr:
+	// 	return c.buildHashEqualByID(ctx, nodeID, nil)
+	// case hasMetadataStr:
+	// 	return c.buildHasMetadataByID(ctx, nodeID, nil)
+	// case hasSBOMsStr:
+	// 	return c.buildHasSbomByID(ctx, nodeID, nil)
+	// case hasSLSAsStr:
+	// 	return c.buildHasSlsaByID(ctx, nodeID, nil)
+	// case hasSourceAtsStr:
+	// 	return c.buildHasSourceAtByID(ctx, nodeID, nil)
+	// case isDependenciesStr:
+	// 	return c.buildIsDependencyByID(ctx, nodeID, nil)
+	// case isOccurrencesStr:
+	// 	return c.buildIsOccurrenceByID(ctx, nodeID, nil)
+	// case pkgEqualsStr:
+	// 	return c.buildPkgEqualByID(ctx, nodeID, nil)
+	// case pointOfContactStr:
+	// 	return c.buildPointOfContactByID(ctx, nodeID, nil)
+	// case vulnEqualsStr:
+	// 	return c.buildVulnEqualByID(ctx, nodeID, nil)
+	// case vulnMetadataStr:
+	// 	return c.buildVulnerabilityMetadataByID(ctx, nodeID, nil)
+	// default:
+	// 	return nil, fmt.Errorf("unknown ID for node query: %s", nodeID)
+	// }
 
 	switch v := record.(type) {
 	case *ent.Artifact:
@@ -65,48 +100,48 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 			return nil, err
 		}
 		return toModelPackage(backReferencePackageName(pn)), nil
-	// case *ent.PackageNamespace:
-	// 	pns, err := b.client.PackageNamespace.Query().
-	// 		Where(packagenamespace.ID(v.ID)).
-	// 		WithPackage().
-	// 		WithNames(func(q *ent.PackageNameQuery) {
-	// 			q.WithVersions()
-	// 		}).
-	// 		Only(ctx)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	return toModelPackage(backReferencePackageNamespace(pns)), nil
-	// case *ent.PackageType:
-	// 	pt, err := b.client.PackageType.Query().
-	// 		Where(packagetype.ID(v.ID)).
-	// 		WithNamespaces().
-	// 		Only(ctx)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	return toModelPackage(pt), nil
-	// case *ent.SourceType:
-	// 	s, err := b.client.SourceType.Query().
-	// 		Where(sourcetype.ID(v.ID)).
-	// 		WithNamespaces().
-	// 		Only(ctx)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	return toModelSource(s), nil
 	case *ent.SourceName:
-		s, err := b.client.SourceName.Query().
-			Where(sourcename.IDIn(v.ID)).
+		return toModelSourceName(v), nil
+	case *ent.Builder:
+		return toModelBuilder(v), nil
+	case *ent.License:
+		return toModelLicense(v), nil
+	case *ent.VulnerabilityID:
+		return toModelVulnerabilityFromVulnerabilityID(v), nil
+	case *ent.Certification:
+		cert, err := b.client.Certification.Query().
+			Where(certification.ID(v.ID)).
+			Limit(MaxPageSize).
+			WithSource(withSourceNameTreeQuery()).
+			WithArtifact().
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions(withPackageNameTree()).
 			Only(ctx)
 		if err != nil {
 			return nil, err
 		}
-		return toModelSourceName(s), nil
-	case *ent.Builder:
-		return toModelBuilder(v), nil
-	// case *ent.VulnerabilityType:
-	// 	return toModelVulnerability(v), nil
+		if cert.Type == certification.TypeBAD {
+			return toModelCertifyBad(cert), nil
+		} else {
+			return toModelCertifyGood(cert), nil
+		}
+	case *ent.CertifyLegal:
+		cert, err := b.client.Certification.Query().
+			Where(certification.ID(v.ID)).
+			Limit(MaxPageSize).
+			WithSource(withSourceNameTreeQuery()).
+			WithArtifact().
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions(withPackageNameTree()).
+			Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if cert.Type == certification.TypeBAD {
+			return toModelCertifyBad(cert), nil
+		} else {
+			return toModelCertifyGood(cert), nil
+		}
 	default:
 		log.Printf("Unknown node type: %T", v)
 	}
