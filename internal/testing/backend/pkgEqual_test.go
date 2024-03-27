@@ -19,7 +19,6 @@ package backend_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -572,7 +571,6 @@ func TestPkgEqual(t *testing.T) {
 					}
 				}
 			}
-			fmt.Println(test.Query)
 			got, err := b.PkgEqual(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)

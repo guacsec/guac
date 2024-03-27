@@ -121,12 +121,6 @@ func (sau *SLSAAttestationUpdate) SetNillableStartedOn(t *time.Time) *SLSAAttest
 	return sau
 }
 
-// ClearStartedOn clears the value of the "started_on" field.
-func (sau *SLSAAttestationUpdate) ClearStartedOn() *SLSAAttestationUpdate {
-	sau.mutation.ClearStartedOn()
-	return sau
-}
-
 // SetFinishedOn sets the "finished_on" field.
 func (sau *SLSAAttestationUpdate) SetFinishedOn(t time.Time) *SLSAAttestationUpdate {
 	sau.mutation.SetFinishedOn(t)
@@ -138,12 +132,6 @@ func (sau *SLSAAttestationUpdate) SetNillableFinishedOn(t *time.Time) *SLSAAttes
 	if t != nil {
 		sau.SetFinishedOn(*t)
 	}
-	return sau
-}
-
-// ClearFinishedOn clears the value of the "finished_on" field.
-func (sau *SLSAAttestationUpdate) ClearFinishedOn() *SLSAAttestationUpdate {
-	sau.mutation.ClearFinishedOn()
 	return sau
 }
 
@@ -322,14 +310,8 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 	if value, ok := sau.mutation.StartedOn(); ok {
 		_spec.SetField(slsaattestation.FieldStartedOn, field.TypeTime, value)
 	}
-	if sau.mutation.StartedOnCleared() {
-		_spec.ClearField(slsaattestation.FieldStartedOn, field.TypeTime)
-	}
 	if value, ok := sau.mutation.FinishedOn(); ok {
 		_spec.SetField(slsaattestation.FieldFinishedOn, field.TypeTime, value)
-	}
-	if sau.mutation.FinishedOnCleared() {
-		_spec.ClearField(slsaattestation.FieldFinishedOn, field.TypeTime)
 	}
 	if value, ok := sau.mutation.Origin(); ok {
 		_spec.SetField(slsaattestation.FieldOrigin, field.TypeString, value)
@@ -551,12 +533,6 @@ func (sauo *SLSAAttestationUpdateOne) SetNillableStartedOn(t *time.Time) *SLSAAt
 	return sauo
 }
 
-// ClearStartedOn clears the value of the "started_on" field.
-func (sauo *SLSAAttestationUpdateOne) ClearStartedOn() *SLSAAttestationUpdateOne {
-	sauo.mutation.ClearStartedOn()
-	return sauo
-}
-
 // SetFinishedOn sets the "finished_on" field.
 func (sauo *SLSAAttestationUpdateOne) SetFinishedOn(t time.Time) *SLSAAttestationUpdateOne {
 	sauo.mutation.SetFinishedOn(t)
@@ -568,12 +544,6 @@ func (sauo *SLSAAttestationUpdateOne) SetNillableFinishedOn(t *time.Time) *SLSAA
 	if t != nil {
 		sauo.SetFinishedOn(*t)
 	}
-	return sauo
-}
-
-// ClearFinishedOn clears the value of the "finished_on" field.
-func (sauo *SLSAAttestationUpdateOne) ClearFinishedOn() *SLSAAttestationUpdateOne {
-	sauo.mutation.ClearFinishedOn()
 	return sauo
 }
 
@@ -782,14 +752,8 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 	if value, ok := sauo.mutation.StartedOn(); ok {
 		_spec.SetField(slsaattestation.FieldStartedOn, field.TypeTime, value)
 	}
-	if sauo.mutation.StartedOnCleared() {
-		_spec.ClearField(slsaattestation.FieldStartedOn, field.TypeTime)
-	}
 	if value, ok := sauo.mutation.FinishedOn(); ok {
 		_spec.SetField(slsaattestation.FieldFinishedOn, field.TypeTime, value)
-	}
-	if sauo.mutation.FinishedOnCleared() {
-		_spec.ClearField(slsaattestation.FieldFinishedOn, field.TypeTime)
 	}
 	if value, ok := sauo.mutation.Origin(); ok {
 		_spec.SetField(slsaattestation.FieldOrigin, field.TypeString, value)

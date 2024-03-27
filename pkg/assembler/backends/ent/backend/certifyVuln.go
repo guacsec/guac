@@ -203,10 +203,11 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 		optionalPredicate(spec.DbURI, certifyvuln.DbURIEQ),
 		optionalPredicate(spec.DbVersion, certifyvuln.DbVersionEQ),
 		optionalPredicate(spec.ScannerURI, certifyvuln.ScannerURIEQ),
+		optionalPredicate(spec.ScannerVersion, certifyvuln.ScannerVersionEQ),
 		optionalPredicate(spec.TimeScanned, certifyvuln.TimeScannedEQ),
 		optionalPredicate(spec.Package, func(pkg model.PkgSpec) predicate.CertifyVuln {
 			return certifyvuln.HasPackageWith(
-				optionalPredicate(spec.ID, IDEQ),
+				optionalPredicate(pkg.ID, IDEQ),
 				optionalPredicate(pkg.Version, packageversion.VersionEQ),
 				optionalPredicate(pkg.Subpath, packageversion.SubpathEQ),
 				packageversion.QualifiersMatch(pkg.Qualifiers, ptrWithDefault(pkg.MatchOnlyEmptyQualifiers, false)),
@@ -219,6 +220,7 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 		}),
 		optionalPredicate(spec.Vulnerability, func(vuln model.VulnerabilitySpec) predicate.CertifyVuln {
 			return certifyvuln.HasVulnerabilityWith(
+				optionalPredicate(vuln.ID, IDEQ),
 				optionalPredicate(vuln.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold),
 				optionalPredicate(vuln.Type, vulnerabilityid.TypeEqualFold),
 			)

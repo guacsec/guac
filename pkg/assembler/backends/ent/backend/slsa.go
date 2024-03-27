@@ -110,6 +110,8 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 		slsaattestation.FieldBuildType,
 		slsaattestation.FieldSlsaVersion,
 		slsaattestation.FieldBuiltByID,
+		slsaattestation.FieldStartedOn,
+		slsaattestation.FieldFinishedOn,
 		slsaattestation.FieldBuiltFromHash}
 
 	batches := chunk(slsaList, MaxBatchSize)
@@ -141,6 +143,14 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 	return &ids, nil
 }
 
+func setDefaultTime(inputTime *time.Time) time.Time {
+	if inputTime != nil {
+		return inputTime.UTC()
+	} else {
+		return time.Unix(0, 0).UTC()
+	}
+}
+
 func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy *model.IDorBuilderInput, slsa *model.SLSAInputSpec) (*ent.SLSAAttestationCreate, error) {
 	slsaCreate := tx.SLSAAttestation.Create()
 
@@ -150,8 +160,8 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		SetOrigin(slsa.Origin).
 		SetSlsaVersion(slsa.SlsaVersion).
 		SetSlsaPredicate(toSLSAInputPredicate(slsa.SlsaPredicate)).
-		SetNillableStartedOn(slsa.StartedOn).
-		SetNillableFinishedOn(slsa.FinishedOn)
+		SetStartedOn(setDefaultTime(slsa.StartedOn)).
+		SetFinishedOn(setDefaultTime(slsa.FinishedOn))
 
 	if builtBy == nil {
 		return nil, fmt.Errorf("builtBy not specified for SLSA")
@@ -247,6 +257,8 @@ func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput
 				slsaattestation.FieldBuildType,
 				slsaattestation.FieldSlsaVersion,
 				slsaattestation.FieldBuiltByID,
+				slsaattestation.FieldStartedOn,
+				slsaattestation.FieldFinishedOn,
 				slsaattestation.FieldBuiltFromHash,
 			),
 		).
@@ -276,20 +288,29 @@ func toSLSAInputPredicate(rows []*model.SLSAPredicateInputSpec) []*model.SLSAPre
 }
 
 func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
+
+	slsa := &model.Slsa{
+		BuiltFrom:     collect(att.Edges.BuiltFrom, toModelArtifact),
+		BuiltBy:       toModelBuilder(att.Edges.BuiltBy),
+		BuildType:     att.BuildType,
+		SlsaPredicate: att.SlsaPredicate,
+		SlsaVersion:   att.SlsaVersion,
+		Origin:        att.Origin,
+		Collector:     att.Collector,
+	}
+
+	if !att.StartedOn.Equal(time.Unix(0, 0).UTC()) {
+		slsa.StartedOn = &att.StartedOn
+	}
+
+	if !att.FinishedOn.Equal(time.Unix(0, 0).UTC()) {
+		slsa.FinishedOn = &att.FinishedOn
+	}
+
 	return &model.HasSlsa{
 		ID:      att.ID.String(),
 		Subject: toModelArtifact(att.Edges.Subject),
-		Slsa: &model.Slsa{
-			BuiltFrom:     collect(att.Edges.BuiltFrom, toModelArtifact),
-			BuiltBy:       toModelBuilder(att.Edges.BuiltBy),
-			BuildType:     att.BuildType,
-			SlsaPredicate: att.SlsaPredicate,
-			SlsaVersion:   att.SlsaVersion,
-			StartedOn:     att.StartedOn,
-			FinishedOn:    att.FinishedOn,
-			Origin:        att.Origin,
-			Collector:     att.Collector,
-		},
+		Slsa:    slsa,
 	}
 }
 

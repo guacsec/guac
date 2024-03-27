@@ -54,6 +54,7 @@ func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.Certify
 	if filter == nil {
 		return NoOpSelector()
 	}
+
 	predicates := []predicate.CertifyScorecard{
 		optionalPredicate(filter.ID, IDEQ),
 		optionalPredicate(filter.AggregateScore, certifyscorecard.AggregateScoreEQ),
@@ -62,6 +63,20 @@ func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.Certify
 		optionalPredicate(filter.ScorecardCommit, certifyscorecard.ScorecardCommitEqualFold),
 		optionalPredicate(filter.Origin, certifyscorecard.OriginEQ),
 		optionalPredicate(filter.Collector, certifyscorecard.CollectorEQ),
+	}
+
+	if len(filter.Checks) > 0 {
+		checks := make([]*model.ScorecardCheck, len(filter.Checks))
+		for i, check := range filter.Checks {
+			checks[i] = &model.ScorecardCheck{
+				Check: check.Check,
+				Score: check.Score,
+			}
+		}
+
+		sort.Slice(checks, func(i, j int) bool { return checks[i].Check < checks[j].Check })
+
+		predicates = append(predicates, optionalPredicate(ptrfrom.String(hashSortedScorecardChecks(checks)), certifyscorecard.ChecksHashEQ))
 	}
 
 	if filter.Source != nil {

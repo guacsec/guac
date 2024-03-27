@@ -473,33 +473,33 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "hasmetadata_key_value_justification_origin_collector_source_id",
+				Name:    "hasmetadata_key_value_justification_origin_collector_timestamp_source_id",
 				Unique:  true,
-				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[7]},
+				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[1], HasMetadataColumns[7]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "hasmetadata_key_value_justification_origin_collector_package_version_id",
+				Name:    "hasmetadata_key_value_justification_origin_collector_timestamp_package_version_id",
 				Unique:  true,
-				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[8]},
+				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[1], HasMetadataColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "hasmetadata_key_value_justification_origin_collector_package_name_id",
+				Name:    "hasmetadata_key_value_justification_origin_collector_timestamp_package_name_id",
 				Unique:  true,
-				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[9]},
+				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[1], HasMetadataColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "hasmetadata_key_value_justification_origin_collector_artifact_id",
+				Name:    "hasmetadata_key_value_justification_origin_collector_timestamp_artifact_id",
 				Unique:  true,
-				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[10]},
+				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[1], HasMetadataColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL",
 				},
@@ -544,25 +544,20 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "hassourceat_source_id_package_version_id_justification",
+				Name:    "hassourceat_source_id_package_version_id_justification_origin_collector_known_since",
 				Unique:  true,
-				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[5], HasSourceAtsColumns[2]},
+				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[5], HasSourceAtsColumns[2], HasSourceAtsColumns[3], HasSourceAtsColumns[4], HasSourceAtsColumns[1]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_version_id IS NOT NULL AND package_name_id IS NULL",
 				},
 			},
 			{
-				Name:    "hassourceat_source_id_package_name_id_justification",
+				Name:    "hassourceat_source_id_package_name_id_justification_origin_collector_known_since",
 				Unique:  true,
-				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[6], HasSourceAtsColumns[2]},
+				Columns: []*schema.Column{HasSourceAtsColumns[7], HasSourceAtsColumns[6], HasSourceAtsColumns[2], HasSourceAtsColumns[3], HasSourceAtsColumns[4], HasSourceAtsColumns[1]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_name_id IS NOT NULL AND package_version_id IS NULL",
 				},
-			},
-			{
-				Name:    "hassourceat_known_since",
-				Unique:  false,
-				Columns: []*schema.Column{HasSourceAtsColumns[1]},
 			},
 		},
 	}
@@ -865,8 +860,8 @@ var (
 		{Name: "build_type", Type: field.TypeString},
 		{Name: "slsa_predicate", Type: field.TypeJSON, Nullable: true},
 		{Name: "slsa_version", Type: field.TypeString},
-		{Name: "started_on", Type: field.TypeTime, Nullable: true},
-		{Name: "finished_on", Type: field.TypeTime, Nullable: true},
+		{Name: "started_on", Type: field.TypeTime},
+		{Name: "finished_on", Type: field.TypeTime},
 		{Name: "origin", Type: field.TypeString},
 		{Name: "collector", Type: field.TypeString},
 		{Name: "built_from_hash", Type: field.TypeString},
@@ -894,19 +889,9 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "slsaattestation_subject_id_origin_collector_build_type_slsa_version_built_by_id_built_from_hash",
+				Name:    "slsaattestation_subject_id_origin_collector_build_type_slsa_version_built_by_id_built_from_hash_started_on_finished_on",
 				Unique:  true,
-				Columns: []*schema.Column{SlsaAttestationsColumns[10], SlsaAttestationsColumns[6], SlsaAttestationsColumns[7], SlsaAttestationsColumns[1], SlsaAttestationsColumns[3], SlsaAttestationsColumns[9], SlsaAttestationsColumns[8]},
-			},
-			{
-				Name:    "slsaattestation_started_on",
-				Unique:  false,
-				Columns: []*schema.Column{SlsaAttestationsColumns[4]},
-			},
-			{
-				Name:    "slsaattestation_finished_on",
-				Unique:  false,
-				Columns: []*schema.Column{SlsaAttestationsColumns[5]},
+				Columns: []*schema.Column{SlsaAttestationsColumns[10], SlsaAttestationsColumns[6], SlsaAttestationsColumns[7], SlsaAttestationsColumns[1], SlsaAttestationsColumns[3], SlsaAttestationsColumns[9], SlsaAttestationsColumns[8], SlsaAttestationsColumns[4], SlsaAttestationsColumns[5]},
 			},
 		},
 	}

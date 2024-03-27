@@ -321,16 +321,6 @@ func StartedOnLTE(v time.Time) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldLTE(FieldStartedOn, v))
 }
 
-// StartedOnIsNil applies the IsNil predicate on the "started_on" field.
-func StartedOnIsNil() predicate.SLSAAttestation {
-	return predicate.SLSAAttestation(sql.FieldIsNull(FieldStartedOn))
-}
-
-// StartedOnNotNil applies the NotNil predicate on the "started_on" field.
-func StartedOnNotNil() predicate.SLSAAttestation {
-	return predicate.SLSAAttestation(sql.FieldNotNull(FieldStartedOn))
-}
-
 // FinishedOnEQ applies the EQ predicate on the "finished_on" field.
 func FinishedOnEQ(v time.Time) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldFinishedOn, v))
@@ -369,16 +359,6 @@ func FinishedOnLT(v time.Time) predicate.SLSAAttestation {
 // FinishedOnLTE applies the LTE predicate on the "finished_on" field.
 func FinishedOnLTE(v time.Time) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldLTE(FieldFinishedOn, v))
-}
-
-// FinishedOnIsNil applies the IsNil predicate on the "finished_on" field.
-func FinishedOnIsNil() predicate.SLSAAttestation {
-	return predicate.SLSAAttestation(sql.FieldIsNull(FieldFinishedOn))
-}
-
-// FinishedOnNotNil applies the NotNil predicate on the "finished_on" field.
-func FinishedOnNotNil() predicate.SLSAAttestation {
-	return predicate.SLSAAttestation(sql.FieldNotNull(FieldFinishedOn))
 }
 
 // OriginEQ applies the EQ predicate on the "origin" field.

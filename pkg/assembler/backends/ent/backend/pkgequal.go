@@ -221,8 +221,8 @@ func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {
 	if len(spec.Packages) == 1 {
 		predicates = append(predicates, pkgequal.Or(pkgequal.HasPackageAWith(packageVersionQuery(spec.Packages[0])), pkgequal.HasPackageBWith(packageVersionQuery(spec.Packages[0]))))
 	} else if len(spec.Packages) == 2 {
-		predicates = append(predicates, pkgequal.Or(pkgequal.HasPackageAWith(packageVersionQuery(spec.Packages[0])), pkgequal.HasPackageBWith(packageVersionQuery(spec.Packages[0]))))
-		predicates = append(predicates, pkgequal.Or(pkgequal.HasPackageAWith(packageVersionQuery(spec.Packages[1])), pkgequal.HasPackageBWith(packageVersionQuery(spec.Packages[1]))))
+		predicates = append(predicates, pkgequal.Or(pkgequal.HasPackageAWith(packageVersionQuery(spec.Packages[0])), pkgequal.HasPackageAWith(packageVersionQuery(spec.Packages[1]))))
+		predicates = append(predicates, pkgequal.Or(pkgequal.HasPackageBWith(packageVersionQuery(spec.Packages[0])), pkgequal.HasPackageBWith(packageVersionQuery(spec.Packages[1]))))
 	}
 
 	return pkgequal.And(predicates...)
@@ -240,20 +240,12 @@ func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 	equalPkgs := []*ent.PackageVersion{record.Edges.PackageA, record.Edges.PackageB}
 	packages := collect(equalPkgs, backReferencePackageVersion)
 
-	// packages := []*ent.PackageVersion{
-	// 	record.Edges.Package,
-	// 	record.Edges.DependantPackage,
-	// }
-
 	return &model.PkgEqual{
 		ID:            record.ID.String(),
 		Origin:        record.Origin,
 		Collector:     record.Collector,
 		Justification: record.Justification,
 		Packages:      collect(packages, toModelPackage),
-		// Packages: collect(packages, func(record *ent.PackageVersion) *model.Package {
-		// 	return toModelPackage(backReferencePackageVersion(record))
-		// }),
 	}
 }
 

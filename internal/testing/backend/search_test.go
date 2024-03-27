@@ -1,3 +1,18 @@
+//
+// Copyright 2023 The GUAC Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 //go:build integration
 
 package backend_test
@@ -26,7 +41,7 @@ func TestFindSoftware(t *testing.T) {
 			name:       "default package",
 			InPkg:      []*model.PkgInputSpec{testdata.P1},
 			searchText: "tensorflow",
-			want:       []model.PackageSourceOrArtifact{*testdata.P1out},
+			want:       []model.PackageSourceOrArtifact{testdata.P1out},
 		},
 		{
 			name:       "package no match",
@@ -65,7 +80,7 @@ func TestFindSoftware(t *testing.T) {
 			name:       "default source",
 			InSrc:      []*model.SourceInputSpec{testdata.S1},
 			searchText: "jeff",
-			want:       []model.PackageSourceOrArtifact{*testdata.S1out},
+			want:       []model.PackageSourceOrArtifact{testdata.S1out},
 		},
 		{
 			name:       "source no match",
@@ -90,7 +105,7 @@ func TestFindSoftware(t *testing.T) {
 			},
 			searchText: "sourceAndPackage",
 			want: []model.PackageSourceOrArtifact{
-				model.Package{
+				&model.Package{
 					Type: "p",
 					Namespaces: []*model.PackageNamespace{{
 						Names: []*model.PackageName{{
@@ -99,7 +114,7 @@ func TestFindSoftware(t *testing.T) {
 						}},
 					}},
 				},
-				model.Source{
+				&model.Source{
 					Type: "s",
 					Namespaces: []*model.SourceNamespace{{
 						Namespace: "testSourceNamespace",
