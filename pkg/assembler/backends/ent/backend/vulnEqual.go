@@ -40,12 +40,6 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 		return nil, fmt.Errorf("too many vulnerability specified in vuln equal filter")
 	}
 
-	// return nil for invalid UUIDs
-	if !isValidUUID(filter.ID) {
-		// return nil, fmt.Errorf("invalid UUID: %s", *filter.ID)
-		return nil, nil
-	}
-
 	query := b.client.VulnEqual.Query().
 		Where(vulnEqualQuery(filter)).
 		WithVulnerabilityA(func(query *ent.VulnerabilityIDQuery) {}).

@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package backend_test
 
 import (
@@ -555,7 +557,7 @@ func TestVulnEqual(t *testing.T) {
 				},
 			},
 			Query: &model.VulnEqualSpec{
-				ID: ptrfrom.String("123456"),
+				ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e"),
 			},
 			ExpVulnEqual: nil,
 			ExpQueryErr:  false,
