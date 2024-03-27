@@ -53,3 +53,27 @@ services:
         condition: service_healthy
       graphql:
         condition: service_healthy
+
+  guac-rest:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacrest --gql-addr=http://graphql:8080/query"
+    working_dir: /guac
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    depends_on:
+      graphql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "http://localhost:8222/healthz"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+

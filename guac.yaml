@@ -33,6 +33,9 @@ gql-listen-port: 8080
 gql-debug: true
 gql-addr: http://localhost:8080/query
 
+# REST API setup
+rest-api-server-port: 8081
+
 # Collector behavior
 service-poll: true
 use-csub: true
