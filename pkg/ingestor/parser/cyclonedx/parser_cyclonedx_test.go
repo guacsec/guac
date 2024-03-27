@@ -664,21 +664,34 @@ func Test_findCDXPkgVersionIDs(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			getPackages = tt.getPackages
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			getPackages = test.getPackages
 
 			c := cyclonedxParser{
 				gqlClient: nil,
 			}
 
-			got, err := c.findCDXPkgVersionIDs(tt.args.ctx, tt.args.pkgIdentifier, tt.args.versionRange)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("findCDXPkgVersionIDs() error = %v, wantErr %v", err, tt.wantErr)
+			got, err := c.findCDXPkgVersionIDs(test.args.ctx, test.args.pkgIdentifier, test.args.versionRange)
+			if (err != nil) != test.wantErr {
+				t.Errorf("findCDXPkgVersionIDs() error = %v, wantErr %v", err, test.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findCDXPkgVersionIDs() got = %v, want %v", got, tt.want)
+			if len(got) != len(test.want) {
+				t.Errorf("findCDXPkgVersionIDs() got = %v, want = %v", got, test.want)
+				return
+			}
+			wantValues := map[string]bool{}
+			for _, val := range test.want {
+				wantValues[val] = true
+			}
+			for _, val := range got {
+				if wantValues[val] {
+					delete(wantValues, val)
+				} else {
+					t.Errorf("findCDXPkgVersionIDs() got = %v, want = %v", got, test.want)
+					return
+				}
 			}
 		})
 	}
