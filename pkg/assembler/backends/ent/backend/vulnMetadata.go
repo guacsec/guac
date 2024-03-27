@@ -33,14 +33,18 @@ import (
 
 func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
 
+	vulnMetadataPred, err := vulnerabilityMetadataPredicate(filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate vulnerabilityMetadataPredicate :: %w", err)
+	}
 	records, err := b.client.VulnerabilityMetadata.Query().
-		Where(vulnerabilityMetadataPredicate(filter)).
+		Where(vulnMetadataPred).
 		Limit(MaxPageSize).
 		WithVulnerabilityID(func(q *ent.VulnerabilityIDQuery) {}).
 		All(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve VulnerabilityMetadata :: %s", err)
+		return nil, fmt.Errorf("failed to retrieve VulnerabilityMetadata :: %w", err)
 	}
 
 	return collect(records, toModelVulnerabilityMetadata), nil
@@ -74,7 +78,7 @@ func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulner
 	return *ids, nil
 }
 
-func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) predicate.VulnerabilityMetadata {
+func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) (predicate.VulnerabilityMetadata, error) {
 	predicates := []predicate.VulnerabilityMetadata{
 		optionalPredicate(filter.ID, IDEQ),
 		optionalPredicate(filter.Timestamp, vulnerabilitymetadata.TimestampGTE),
@@ -90,6 +94,9 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) pre
 
 	var comparator predicate.VulnerabilityMetadata
 	if filter.Comparator != nil {
+		if filter.ScoreValue == nil {
+			return nil, fmt.Errorf("comparator set without a vulnerability score being specified")
+		}
 		switch *filter.Comparator {
 		case model.ComparatorGreater:
 			comparator = optionalPredicate(filter.ScoreValue, vulnerabilitymetadata.ScoreValueGT)
@@ -123,7 +130,7 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) pre
 			)
 		}
 	}
-	return vulnerabilitymetadata.And(predicates...)
+	return vulnerabilitymetadata.And(predicates...), nil
 }
 
 func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) (*[]string, error) {
