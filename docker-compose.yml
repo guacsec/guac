@@ -100,6 +100,33 @@ services:
         condition: service_healthy
     volumes:
       - ./container_files/guac:/guac:z
+  
+  guac-rest:
+    networks: [ frontend ]
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacrest"
+    working_dir: /guac
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./container_files/guac:/guac:z
+    depends_on:
+      guac-graphql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "http://localhost:8081/healthz"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
 
 networks:
   frontend:

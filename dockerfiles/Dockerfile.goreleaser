@@ -11,3 +11,4 @@ COPY guaccsub*  /opt/guac/guaccsub
 COPY guacgql*  /opt/guac/guacgql
 COPY guacingest*  /opt/guac/guacingest
 COPY guacone*  /opt/guac/guacone
+COPY guacrest*  /opt/guac/guacrest
