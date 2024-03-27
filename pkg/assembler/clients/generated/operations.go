@@ -7079,89 +7079,6 @@ func (v *CertifyScorecardSpec) GetOrigin() *string { return v.Origin }
 // GetCollector returns CertifyScorecardSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyScorecardSpec) GetCollector() *string { return v.Collector }
 
-// CertifyScorecardsResponse is returned by CertifyScorecards on success.
-type CertifyScorecardsResponse struct {
-	// Returns all Scorecard certifications matching the filter.
-	Scorecards []CertifyScorecardsScorecardsCertifyScorecard `json:"scorecards"`
-}
-
-// GetScorecards returns CertifyScorecardsResponse.Scorecards, and is useful for accessing the field via an interface.
-func (v *CertifyScorecardsResponse) GetScorecards() []CertifyScorecardsScorecardsCertifyScorecard {
-	return v.Scorecards
-}
-
-// CertifyScorecardsScorecardsCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
-// The GraphQL type's documentation follows.
-//
-// CertifyScorecard is an attestation to attach a Scorecard analysis to a
-// particular source repository.
-type CertifyScorecardsScorecardsCertifyScorecard struct {
-	AllCertifyScorecard `json:"-"`
-}
-
-// GetId returns CertifyScorecardsScorecardsCertifyScorecard.Id, and is useful for accessing the field via an interface.
-func (v *CertifyScorecardsScorecardsCertifyScorecard) GetId() string { return v.AllCertifyScorecard.Id }
-
-// GetSource returns CertifyScorecardsScorecardsCertifyScorecard.Source, and is useful for accessing the field via an interface.
-func (v *CertifyScorecardsScorecardsCertifyScorecard) GetSource() AllCertifyScorecardSource {
-	return v.AllCertifyScorecard.Source
-}
-
-// GetScorecard returns CertifyScorecardsScorecardsCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
-func (v *CertifyScorecardsScorecardsCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
-	return v.AllCertifyScorecard.Scorecard
-}
-
-func (v *CertifyScorecardsScorecardsCertifyScorecard) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*CertifyScorecardsScorecardsCertifyScorecard
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.CertifyScorecardsScorecardsCertifyScorecard = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.AllCertifyScorecard)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalCertifyScorecardsScorecardsCertifyScorecard struct {
-	Id string `json:"id"`
-
-	Source AllCertifyScorecardSource `json:"source"`
-
-	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
-}
-
-func (v *CertifyScorecardsScorecardsCertifyScorecard) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *CertifyScorecardsScorecardsCertifyScorecard) __premarshalJSON() (*__premarshalCertifyScorecardsScorecardsCertifyScorecard, error) {
-	var retval __premarshalCertifyScorecardsScorecardsCertifyScorecard
-
-	retval.Id = v.AllCertifyScorecard.Id
-	retval.Source = v.AllCertifyScorecard.Source
-	retval.Scorecard = v.AllCertifyScorecard.Scorecard
-	return &retval, nil
-}
-
 // DependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
 // The GraphQL type's documentation follows.
 //
@@ -22109,6 +22026,89 @@ func (v *ScorecardInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns ScorecardInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *ScorecardInputSpec) GetCollector() string { return v.Collector }
 
+// ScorecardsResponse is returned by Scorecards on success.
+type ScorecardsResponse struct {
+	// Returns all Scorecard certifications matching the filter.
+	Scorecards []ScorecardsScorecardsCertifyScorecard `json:"scorecards"`
+}
+
+// GetScorecards returns ScorecardsResponse.Scorecards, and is useful for accessing the field via an interface.
+func (v *ScorecardsResponse) GetScorecards() []ScorecardsScorecardsCertifyScorecard {
+	return v.Scorecards
+}
+
+// ScorecardsScorecardsCertifyScorecard includes the requested fields of the GraphQL type CertifyScorecard.
+// The GraphQL type's documentation follows.
+//
+// CertifyScorecard is an attestation to attach a Scorecard analysis to a
+// particular source repository.
+type ScorecardsScorecardsCertifyScorecard struct {
+	AllCertifyScorecard `json:"-"`
+}
+
+// GetId returns ScorecardsScorecardsCertifyScorecard.Id, and is useful for accessing the field via an interface.
+func (v *ScorecardsScorecardsCertifyScorecard) GetId() string { return v.AllCertifyScorecard.Id }
+
+// GetSource returns ScorecardsScorecardsCertifyScorecard.Source, and is useful for accessing the field via an interface.
+func (v *ScorecardsScorecardsCertifyScorecard) GetSource() AllCertifyScorecardSource {
+	return v.AllCertifyScorecard.Source
+}
+
+// GetScorecard returns ScorecardsScorecardsCertifyScorecard.Scorecard, and is useful for accessing the field via an interface.
+func (v *ScorecardsScorecardsCertifyScorecard) GetScorecard() AllCertifyScorecardScorecard {
+	return v.AllCertifyScorecard.Scorecard
+}
+
+func (v *ScorecardsScorecardsCertifyScorecard) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ScorecardsScorecardsCertifyScorecard
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ScorecardsScorecardsCertifyScorecard = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyScorecard)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalScorecardsScorecardsCertifyScorecard struct {
+	Id string `json:"id"`
+
+	Source AllCertifyScorecardSource `json:"source"`
+
+	Scorecard AllCertifyScorecardScorecard `json:"scorecard"`
+}
+
+func (v *ScorecardsScorecardsCertifyScorecard) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ScorecardsScorecardsCertifyScorecard) __premarshalJSON() (*__premarshalScorecardsScorecardsCertifyScorecard, error) {
+	var retval __premarshalScorecardsScorecardsCertifyScorecard
+
+	retval.Id = v.AllCertifyScorecard.Id
+	retval.Source = v.AllCertifyScorecard.Source
+	retval.Scorecard = v.AllCertifyScorecard.Scorecard
+	return &retval, nil
+}
+
 // SourceInputSpec specifies a source for mutations.
 //
 // This is different than SourceSpec because we want to encode that all fields
@@ -22547,14 +22547,6 @@ type __CertifyLegalsInput struct {
 
 // GetFilter returns __CertifyLegalsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__CertifyLegalsInput) GetFilter() CertifyLegalSpec { return v.Filter }
-
-// __CertifyScorecardsInput is used internally by genqlient
-type __CertifyScorecardsInput struct {
-	Filter CertifyScorecardSpec `json:"filter"`
-}
-
-// GetFilter returns __CertifyScorecardsInput.Filter, and is useful for accessing the field via an interface.
-func (v *__CertifyScorecardsInput) GetFilter() CertifyScorecardSpec { return v.Filter }
 
 // __DependenciesInput is used internally by genqlient
 type __DependenciesInput struct {
@@ -23746,6 +23738,14 @@ func (v *__PathInput) GetMaxPathLength() int { return v.MaxPathLength }
 // GetUsingOnly returns __PathInput.UsingOnly, and is useful for accessing the field via an interface.
 func (v *__PathInput) GetUsingOnly() []Edge { return v.UsingOnly }
 
+// __ScorecardsInput is used internally by genqlient
+type __ScorecardsInput struct {
+	Filter CertifyScorecardSpec `json:"filter"`
+}
+
+// GetFilter returns __ScorecardsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ScorecardsInput) GetFilter() CertifyScorecardSpec { return v.Filter }
+
 // __SourcesInput is used internally by genqlient
 type __SourcesInput struct {
 	Filter SourceSpec `json:"filter"`
@@ -23986,73 +23986,6 @@ func CertifyLegals(
 	var err_ error
 
 	var data_ CertifyLegalsResponse
-	resp_ := &graphql.Response{Data: &data_}
-
-	err_ = client_.MakeRequest(
-		ctx_,
-		req_,
-		resp_,
-	)
-
-	return &data_, err_
-}
-
-// The query or mutation executed by CertifyScorecards.
-const CertifyScorecards_Operation = `
-query CertifyScorecards ($filter: CertifyScorecardSpec!) {
-	scorecards(scorecardSpec: $filter) {
-		... AllCertifyScorecard
-	}
-}
-fragment AllCertifyScorecard on CertifyScorecard {
-	id
-	source {
-		... AllSourceTree
-	}
-	scorecard {
-		timeScanned
-		aggregateScore
-		checks {
-			check
-			score
-		}
-		scorecardVersion
-		scorecardCommit
-		origin
-		collector
-	}
-}
-fragment AllSourceTree on Source {
-	id
-	type
-	namespaces {
-		id
-		namespace
-		names {
-			id
-			name
-			tag
-			commit
-		}
-	}
-}
-`
-
-func CertifyScorecards(
-	ctx_ context.Context,
-	client_ graphql.Client,
-	filter CertifyScorecardSpec,
-) (*CertifyScorecardsResponse, error) {
-	req_ := &graphql.Request{
-		OpName: "CertifyScorecards",
-		Query:  CertifyScorecards_Operation,
-		Variables: &__CertifyScorecardsInput{
-			Filter: filter,
-		},
-	}
-	var err_ error
-
-	var data_ CertifyScorecardsResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -29072,6 +29005,73 @@ func Path(
 	var err_ error
 
 	var data_ PathResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by Scorecards.
+const Scorecards_Operation = `
+query Scorecards ($filter: CertifyScorecardSpec!) {
+	scorecards(scorecardSpec: $filter) {
+		... AllCertifyScorecard
+	}
+}
+fragment AllCertifyScorecard on CertifyScorecard {
+	id
+	source {
+		... AllSourceTree
+	}
+	scorecard {
+		timeScanned
+		aggregateScore
+		checks {
+			check
+			score
+		}
+		scorecardVersion
+		scorecardCommit
+		origin
+		collector
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func Scorecards(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyScorecardSpec,
+) (*ScorecardsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "Scorecards",
+		Query:  Scorecards_Operation,
+		Variables: &__ScorecardsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ ScorecardsResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
