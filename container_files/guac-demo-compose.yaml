@@ -56,7 +56,7 @@ services:
 
   guac-rest:
     image: $GUAC_IMAGE
-    command: "/opt/guac/guacrest --gql-addr=http://graphql:8080/query"
+    command: "/opt/guac/guacrest --rest-api-server-port=8081 --gql-addr=http://graphql:8080/query"
     working_dir: /guac
     restart: on-failure
     ports:

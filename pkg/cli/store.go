@@ -77,7 +77,7 @@ func init() {
 
 	set.String("gql-addr", "http://localhost:8080/query", "endpoint used to connect to graphQL server")
 
-	set.Int("rest-api-server-port", 8081, "port to serve the REST API from")
+	set.String("rest-api-server-port", "8081", "port to serve the REST API from")
 	set.String("rest-api-tls-cert-file", "", "path to the TLS certificate in PEM format for rest api server")
 	set.String("rest-api-tls-key-file", "", "path to the TLS key in PEM format for rest api server")
 
