@@ -14,10 +14,10 @@ type Error struct {
 	Message string `json:"Message"`
 }
 
-// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
-type PaginationInfo struct {
-	NextCursor *string `json:"NextCursor,omitempty"`
-	TotalCount *int    `json:"TotalCount,omitempty"`
+// PackageName defines model for PackageName.
+type PackageName struct {
+	DependentCount int    `json:"DependentCount"`
+	Name           string `json:"Name"`
 }
 
 // Purl defines model for Purl.
@@ -38,12 +38,11 @@ type BadRequest = Error
 // InternalServerError defines model for InternalServerError.
 type InternalServerError = Error
 
+// PackageNameList defines model for PackageNameList.
+type PackageNameList = []PackageName
+
 // PurlList defines model for PurlList.
-type PurlList struct {
-	// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
-	PaginationInfo PaginationInfo `json:"PaginationInfo"`
-	PurlList       []Purl         `json:"PurlList"`
-}
+type PurlList = []Purl
 
 // AnalyzeDependenciesParams defines parameters for AnalyzeDependencies.
 type AnalyzeDependenciesParams struct {
