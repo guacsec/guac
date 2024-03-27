@@ -32,3 +32,9 @@ mutation IngestCertifyScorecards(
 ) {
   ingestScorecards(sources: $sources, scorecards: $scorecards)
 }
+
+query CertifyScorecards($filter: CertifyScorecardSpec!) {
+  scorecards(scorecardSpec: $filter) {
+    ...AllCertifyScorecard
+  }
+}
