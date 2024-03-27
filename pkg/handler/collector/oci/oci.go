@@ -87,20 +87,20 @@ func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSo
 
 // RetrieveArtifacts get the artifacts from the collector source based on polling or one time
 func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
-	repoTags := map[string][]string{}
+	repoRefs := map[string][]ref.Ref{}
 
 	if o.poll {
 		for {
-			if err := o.populateRepoTags(ctx, repoTags); err != nil {
-				return fmt.Errorf("unable to populate repotags: %w", err)
+			if err := o.populateRepoRefs(ctx, repoRefs); err != nil {
+				return fmt.Errorf("unable to populate reporefs: %w", err)
 			}
-			for repo, tags := range repoTags {
+			for repo, imageRefs := range repoRefs {
 				// when polling if tags are specified, it will never get any new tags
 				// that might be added after the fact. Defeating the point of the polling
-				if len(tags) > 0 {
-					return errors.New("image tag should not specified when using polling")
+				if len(imageRefs) > 0 {
+					return errors.New("image identifiers (tag or digest) should not be specified when using polling")
 				}
-				if err := o.getTagsAndFetch(ctx, repo, tags, docChannel); err != nil {
+				if err := o.getRefsAndFetch(ctx, repo, imageRefs, docChannel); err != nil {
 					return err
 				}
 			}
@@ -111,11 +111,11 @@ func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 			}
 		}
 	} else {
-		if err := o.populateRepoTags(ctx, repoTags); err != nil {
-			return fmt.Errorf("unable to populate repotags: %w", err)
+		if err := o.populateRepoRefs(ctx, repoRefs); err != nil {
+			return fmt.Errorf("unable to populate reporefs: %w", err)
 		}
-		for repo, tags := range repoTags {
-			if err := o.getTagsAndFetch(ctx, repo, tags, docChannel); err != nil {
+		for repo, imageRefs := range repoRefs {
+			if err := o.getRefsAndFetch(ctx, repo, imageRefs, docChannel); err != nil {
 				return err
 			}
 		}
@@ -124,7 +124,7 @@ func (o *ociCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<- 
 	return nil
 }
 
-func (o *ociCollector) populateRepoTags(ctx context.Context, repoTags map[string][]string) error {
+func (o *ociCollector) populateRepoRefs(ctx context.Context, repoRefs map[string][]ref.Ref) error {
 	logger := logging.FromContext(ctx)
 	ds, err := o.collectDataSource.GetDataSources(ctx)
 	if err != nil {
@@ -139,14 +139,15 @@ func (o *ociCollector) populateRepoTags(ctx context.Context, repoTags map[string
 		}
 		imagePath := fmt.Sprintf("%s/%s", imageRef.Registry, imageRef.Repository)
 
-		// If a image reference has no tag, then it is considered as getting all tags
-		if hasNoTag(imageRef) {
-			repoTags[imagePath] = []string{}
+		// If an image reference has no identifier (tag or digest), then
+		// it is considered as getting all tags
+		if hasNoIdentifier(imageRef) {
+			repoRefs[imagePath] = []ref.Ref{}
 		} else {
 			// if the list is equal to the empty list, it is already looking for
 			// all tags
-			if repoTags[imagePath] == nil || len(repoTags[imagePath]) > 0 {
-				repoTags[imagePath] = append(repoTags[imagePath], imageRef.Tag)
+			if repoRefs[imagePath] == nil || len(repoRefs[imagePath]) > 0 {
+				repoRefs[imagePath] = append(repoRefs[imagePath], imageRef)
 			}
 
 		}
@@ -154,21 +155,16 @@ func (o *ociCollector) populateRepoTags(ctx context.Context, repoTags map[string
 	return nil
 }
 
-func (o *ociCollector) getTagsAndFetch(ctx context.Context, repo string, tags []string, docChannel chan<- *processor.Document) error {
+func (o *ociCollector) getRefsAndFetch(ctx context.Context, repo string, imageRefs []ref.Ref, docChannel chan<- *processor.Document) error {
 	rcOpts := []regclient.Opt{}
 	rcOpts = append(rcOpts, regclient.WithDockerCreds())
 	rcOpts = append(rcOpts, regclient.WithDockerCerts())
 	rcOpts = append(rcOpts, regclient.WithUserAgent(version.UserAgent))
 
-	if len(tags) > 0 {
-		for _, tag := range tags {
-			if tag == "" {
-				return errors.New("image tag not specified to fetch")
-			}
-			imageTag := fmt.Sprintf("%v:%v", repo, tag)
-			r, err := ref.New(imageTag)
-			if err != nil {
-				return err
+	if len(imageRefs) > 0 {
+		for _, r := range imageRefs {
+			if hasNoIdentifier(r) {
+				return errors.New("image identifier not specified to fetch")
 			}
 
 			rc := regclient.New(rcOpts...)
@@ -509,5 +505,16 @@ func hasNoTag(r ref.Ref) bool {
 	// the reference parsing automatically sets the tag to latest if there is no tag
 	// specified, thus we need to check the reference to see if the latest tag was actually
 	// included.
-	return r.Tag == "latest" && r.Digest == "" && !strings.HasSuffix(r.Reference, "latest")
+	return r.Tag == "" || (r.Tag == "latest" && !strings.HasSuffix(r.Reference, ":latest"))
+}
+
+// hasNoDigest determines if an OCI string passed in had no digest
+func hasNoDigest(r ref.Ref) bool {
+	return r.Digest == ""
+}
+
+// hasNoIdentifier determines if an OCI string passed in had no identifier (tag
+// or digest)
+func hasNoIdentifier(r ref.Ref) bool {
+	return hasNoTag(r) && hasNoDigest(r)
 }
