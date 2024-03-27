@@ -33,6 +33,7 @@ package vuln
 import (
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 	"strings"
 
 	jsoniter "github.com/json-iterator/go"
@@ -57,7 +58,7 @@ type parser struct {
 var noVulnInput *generated.VulnerabilityInputSpec = &generated.VulnerabilityInputSpec{Type: "noVuln", VulnerabilityID: ""}
 
 // NewVulnCertificationParser initializes the parser
-func NewVulnCertificationParser() common.DocumentParser {
+func NewVulnCertificationParser(gqlClient graphql.Client) common.DocumentParser {
 	return &parser{}
 }
 

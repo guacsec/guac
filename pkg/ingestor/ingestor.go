@@ -35,10 +35,13 @@ import (
 
 // Synchronously ingest document using GraphQL endpoint
 func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
+	httpClient := http.Client{}
+	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
+
 	logger := logging.FromContext(ctx)
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
-	ingestorFunc := GetIngestor(ctx)
+	ingestorFunc := GetIngestor(ctx, gqlclient)
 	collectSubEmitFunc := GetCollectSubEmit(ctx, csubClient)
 	assemblerFunc := GetAssembler(ctx, graphqlEndpoint)
 
@@ -70,10 +73,13 @@ func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, 
 }
 
 func MergedIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
+	httpClient := http.Client{}
+	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
+
 	logger := logging.FromContext(ctx)
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
-	ingestorFunc := GetIngestor(ctx)
+	ingestorFunc := GetIngestor(ctx, gqlclient)
 	collectSubEmitFunc := GetCollectSubEmit(ctx, csubClient)
 	assemblerFunc := GetAssembler(ctx, graphqlEndpoint)
 
@@ -146,9 +152,9 @@ func GetProcessor(ctx context.Context) func(*processor.Document) (processor.Docu
 	}
 }
 
-func GetIngestor(ctx context.Context) func(processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
+func GetIngestor(ctx context.Context, gqlClient graphql.Client) func(processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
 	return func(doc processor.DocumentTree) ([]assembler.IngestPredicates, []*parser_common.IdentifierStrings, error) {
-		return parser.ParseDocumentTree(ctx, doc)
+		return parser.ParseDocumentTree(ctx, doc, gqlClient)
 	}
 }
 

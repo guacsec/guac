@@ -18,6 +18,7 @@ package csaf
 import (
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 	"strconv"
 
 	jsoniter "github.com/json-iterator/go"
@@ -68,7 +69,7 @@ type visitedProductRef struct {
 	category    string
 }
 
-func NewCsafParser() common.DocumentParser {
+func NewCsafParser(gqlClient graphql.Client) common.DocumentParser {
 	return &csafParser{
 		identifierStrings: &common.IdentifierStrings{},
 	}

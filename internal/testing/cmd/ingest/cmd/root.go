@@ -18,6 +18,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
+	"net/http"
 	"os"
 	"strings"
 
@@ -85,7 +87,9 @@ var rootCmd = &cobra.Command{
 	Use:   "ingest",
 	Short: "example ingestor for ingesting a set of example documents and populating a graph for GUAC",
 	Run: func(cmd *cobra.Command, args []string) {
-		ingestExample(cmd, args)
+		httpClient := http.Client{}
+		gqlClient := graphql.NewClient(flags.graphqlEndpoint, &httpClient)
+		ingestExample(cmd, args, gqlClient)
 	},
 }
 

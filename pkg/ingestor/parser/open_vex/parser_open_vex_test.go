@@ -48,7 +48,7 @@ func Test_openVEXParser_Parse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			newParser := NewOpenVEXParser()
+			newParser := NewOpenVEXParser(nil)
 			if err := newParser.Parse(tt.args.ctx, tt.args.doc); (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -113,7 +113,7 @@ func Test_openVEXParser_GetPredicates(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewOpenVEXParser()
+			c := NewOpenVEXParser(nil)
 
 			err := c.Parse(tt.args.ctx, tt.fields.doc)
 			if err != nil {
@@ -187,7 +187,7 @@ func Test_openVEXParser_GetIdentifiers(t *testing.T) {
 		},
 	}
 
-	c := NewOpenVEXParser()
+	c := NewOpenVEXParser(nil)
 
 	err := c.Parse(test.ctx, test.fields.doc)
 	if err != nil {
