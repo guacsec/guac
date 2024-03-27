@@ -21,3 +21,6 @@ use-csub: true
 # certifier polling
 poll: true
 interval: 5m
+
+# REST API setup
+rest-api-server-port: 8081
