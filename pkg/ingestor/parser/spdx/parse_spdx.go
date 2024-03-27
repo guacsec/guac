@@ -30,10 +30,15 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
+	intoto "github.com/in-toto/in-toto-golang/in_toto"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/spdx/tools-golang/json"
 	spdx "github.com/spdx/tools-golang/spdx"
 	spdx_common "github.com/spdx/tools-golang/spdx/v2/common"
+	"github.com/spdx/tools-golang/spdx/v2/v2_3"
 )
+
+var sjson = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type spdxParser struct {
 	// TODO: Add hasSBOMInputSpec when its created
@@ -48,6 +53,13 @@ type spdxParser struct {
 	spdxDoc             *spdx.Document
 	topLevelIsHeuristic bool
 	timeScanned         time.Time
+}
+
+// ITESPDX is a struct that contains SPDX SBOM in in-toto attestation format.
+type ITESPDX struct {
+	intoto.StatementHeader
+	// Predicate contains type specific metadata.
+	Predicate *spdx.Document `json:"predicate"`
 }
 
 func NewSpdxParser() common.DocumentParser {
@@ -65,10 +77,23 @@ func NewSpdxParser() common.DocumentParser {
 
 func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 	s.doc = doc
-	spdxDoc, err := parseSpdxBlob(doc.Blob)
-	if err != nil {
-		return fmt.Errorf("failed to parse SPDX document: %w", err)
+	var spdxDoc *v2_3.Document
+	if doc.Type == processor.DocumentITE6SPDX {
+		var err error
+		itespdx, err := parseITESPDXBlob(doc.Blob)
+		if err != nil {
+			return fmt.Errorf("failed to parse ITE6 SPDX document: %w", err)
+		}
+		// TODO(harshthakur): validate its a valid spdx doc
+		spdxDoc = itespdx.Predicate
+	} else {
+		var err error
+		spdxDoc, err = parseSpdxBlob(doc.Blob)
+		if err != nil {
+			return fmt.Errorf("failed to parse SPDX document: %w", err)
+		}
 	}
+
 	s.spdxDoc = spdxDoc
 	if spdxDoc.CreationInfo == nil {
 		return fmt.Errorf("SPDC documentd missing required \"creationInfo\" section.")
@@ -210,6 +235,15 @@ func (s *spdxParser) getFiles() error {
 
 func parseSpdxBlob(p []byte) (*spdx.Document, error) {
 	return json.Read(bytes.NewReader(p))
+}
+
+func parseITESPDXBlob(p []byte) (*ITESPDX,
+	error) {
+	predicate := ITESPDX{}
+	if err := sjson.Unmarshal(p, &predicate); err != nil {
+		return nil, err
+	}
+	return &predicate, nil
 }
 
 func (s *spdxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
