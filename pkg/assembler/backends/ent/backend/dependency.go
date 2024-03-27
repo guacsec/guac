@@ -294,7 +294,8 @@ func isDependencyQuery(filter *model.IsDependencySpec) predicate.Dependency {
 		optionalPredicate(filter.Collector, dependency.Collector),
 	}
 	if filter.DependencyPackage != nil {
-		if filter.DependencyPackage.Version == nil {
+		if filter.DependencyPackage.Version == nil && filter.DependencyPackage.Subpath == nil &&
+			filter.DependencyPackage.Qualifiers == nil && filter.DependencyPackage.MatchOnlyEmptyQualifiers == nil {
 			predicates = append(predicates,
 				dependency.Or(
 					dependency.HasDependentPackageNameWith(packageNameQuery(filter.DependencyPackage)),

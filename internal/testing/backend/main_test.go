@@ -37,12 +37,10 @@ const (
 var skipMatrix = map[string]map[string]bool{
 	// arango fails IncludedOccurrences_-_Valid_Included_ID and IncludedDependencies_-_Valid_Included_ID
 	"TestHasSBOM": {arango: true},
-	// ent: dep pkg querying subpath not working
 	// keyvalue: failing on dep package querying
-	"TestIsDependency": {ent: true, memmap: true, redis: true, tikv: true},
+	"TestIsDependency": {memmap: true, redis: true, tikv: true},
 	// arango errors when ID is not found
-	// ent errors when ID is not found
-	"TestOccurrence": {ent: true, arango: true},
+	"TestOccurrence": {arango: true},
 	// ent: Path/Nodes/Neighbors not implemented
 	// keyvalue: path: input: No path found up to specified length
 	// neighbors: sorting not done, testdata is only in order for arango
@@ -52,24 +50,18 @@ var skipMatrix = map[string]map[string]bool{
 	// ent: Query_on_both_pkgs fails
 	// keyvalue: query on both packages fail
 	"TestPkgEqual": {ent: true, memmap: true, redis: true, tikv: true},
-	// failed to execute IngestPointOfContact :: get PointOfContact: ent: point_of_contact not singular
-	"TestPointOfContact": {ent: true},
-	// input: IngestBulkPointOfContact failed with element #0 with err: failed to execute IngestPointOfContact :: get PointOfContact: ent: point_of_contact not singular
-	"TestIngestPointOfContacts": {ent: true},
 	// ent: Query_on_vulnerability_IDs fails
 	// keyvalue: Query_on_OSV_and_novuln_(return_nothing_as_not_valid) fails
 	// arango: errors when ID is not found
 	"TestVulnEqual": {memmap: true, redis: true, tikv: true, arango: true},
 	// arango: errors when ID is not found
 	// ent: query by novuln fails, query by ID fails
-	"TestVulnerability": {arango: true, ent: true},
+	"TestVulnerability": {arango: true},
 	// redis order issues
 	"TestVEX": {redis: true},
 	// redis order issues
 	"TestVEXBulkIngest": {redis: true},
-	// ent: query by id fails, Query_greater_than_-_no_score_value fails
-	"TestIngestVulnMetadata": {ent: true},
-	"TestFindSoftware":       {ent: true, redis: true, arango: true},
+	"TestFindSoftware":  {ent: true, redis: true, arango: true},
 }
 
 type backend interface {

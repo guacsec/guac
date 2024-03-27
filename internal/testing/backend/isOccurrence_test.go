@@ -376,7 +376,7 @@ func TestOccurrence(t *testing.T) {
 				},
 			},
 			Query: &model.IsOccurrenceSpec{
-				ID: ptrfrom.String("12345"),
+				ID: ptrfrom.String("bbcc0454-d1ca-484c-b26f-e7b6576ef04e"),
 			},
 			ExpOcc: nil,
 			//ExpQueryErr: true,

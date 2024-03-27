@@ -240,20 +240,12 @@ func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 	equalPkgs := []*ent.PackageVersion{record.Edges.PackageA, record.Edges.PackageB}
 	packages := collect(equalPkgs, backReferencePackageVersion)
 
-	// packages := []*ent.PackageVersion{
-	// 	record.Edges.Package,
-	// 	record.Edges.DependantPackage,
-	// }
-
 	return &model.PkgEqual{
 		ID:            record.ID.String(),
 		Origin:        record.Origin,
 		Collector:     record.Collector,
 		Justification: record.Justification,
 		Packages:      collect(packages, toModelPackage),
-		// Packages: collect(packages, func(record *ent.PackageVersion) *model.Package {
-		// 	return toModelPackage(backReferencePackageVersion(record))
-		// }),
 	}
 }
 

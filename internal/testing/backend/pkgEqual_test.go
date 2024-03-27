@@ -538,6 +538,9 @@ func TestPkgEqual(t *testing.T) {
 				}
 			}
 			for _, o := range test.Calls {
+				if test.Name == "Query on both pkgs" {
+					fmt.Print("here")
+				}
 				peID, err := b.IngestPkgEqual(ctx, model.IDorPkgInput{PackageInput: o.P1}, model.IDorPkgInput{PackageInput: o.P2}, *o.HE)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
@@ -570,7 +573,6 @@ func TestPkgEqual(t *testing.T) {
 					}
 				}
 			}
-			fmt.Println(test.Query)
 			got, err := b.PkgEqual(ctx, test.Query)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
