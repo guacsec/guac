@@ -50,18 +50,16 @@ var skipMatrix = map[string]map[string]bool{
 	// ent: Query_on_both_pkgs fails
 	// keyvalue: query on both packages fail
 	"TestPkgEqual": {ent: true, memmap: true, redis: true, tikv: true},
-	// ent: Query_on_vulnerability_IDs fails
 	// keyvalue: Query_on_OSV_and_novuln_(return_nothing_as_not_valid) fails
 	// arango: errors when ID is not found
 	"TestVulnEqual": {memmap: true, redis: true, tikv: true, arango: true},
 	// arango: errors when ID is not found
-	// ent: query by novuln fails, query by ID fails
 	"TestVulnerability": {arango: true},
 	// redis order issues
 	"TestVEX": {redis: true},
 	// redis order issues
 	"TestVEXBulkIngest": {redis: true},
-	"TestFindSoftware":  {ent: true, redis: true, arango: true},
+	"TestFindSoftware":  {redis: true, arango: true},
 }
 
 type backend interface {

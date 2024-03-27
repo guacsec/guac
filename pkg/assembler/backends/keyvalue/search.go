@@ -18,8 +18,9 @@ package keyvalue
 import (
 	"context"
 	"fmt"
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"strings"
+
+	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
@@ -59,7 +60,7 @@ func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]mod
 	}
 
 	for _, p := range packagesWithSearchText {
-		res = append(res, *p)
+		res = append(res, p)
 	}
 
 	sourcesWithSearchText, err := c.searchSources(ctx, searchText)
@@ -68,7 +69,7 @@ func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]mod
 	}
 
 	for _, s := range sourcesWithSearchText {
-		res = append(res, *s)
+		res = append(res, s)
 	}
 
 	return res, nil
