@@ -112,11 +112,11 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		return "", Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *sbomId, nil
+	return toGlobalID(ent.TypeBillOfMaterials, *sbomId), nil
 }
 
 func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
-	var modelHasSboms []string
+	var sbomIDs []string
 	for i, hasSbom := range hasSBOMs {
 		var subject model.PackageOrArtifactInput
 		if len(subjects.Artifacts) > 0 {
@@ -124,13 +124,13 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 		} else {
 			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
 		}
-		modelHasSbom, err := b.IngestHasSbom(ctx, subject, *hasSbom, *includes[i])
+		id, err := b.IngestHasSbom(ctx, subject, *hasSbom, *includes[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
 		}
-		modelHasSboms = append(modelHasSboms, modelHasSbom)
+		sbomIDs = append(sbomIDs, id)
 	}
-	return modelHasSboms, nil
+	return toGlobalIDs(ent.TypeBillOfMaterials, sbomIDs), nil
 }
 
 func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includes *model.HasSBOMIncludesInputSpec, hasSBOM *model.HasSBOMInputSpec) (*string, error) {

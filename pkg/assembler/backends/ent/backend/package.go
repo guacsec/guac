@@ -184,10 +184,10 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 	var collectedPkgIDs []model.PackageIDs
 	for i := range pkgVersionIDs {
 		collectedPkgIDs = append(collectedPkgIDs, model.PackageIDs{
-			PackageTypeID:      fmt.Sprintf("%s:%s", pkgTypeString, pkgNameIDs[i]),
-			PackageNamespaceID: fmt.Sprintf("%s:%s", pkgNamespaceString, pkgNameIDs[i]),
-			PackageNameID:      pkgNameIDs[i],
-			PackageVersionID:   pkgVersionIDs[i]})
+			PackageTypeID:      toGlobalID(pkgTypeString, pkgNameIDs[i]),
+			PackageNamespaceID: toGlobalID(pkgNamespaceString, pkgNameIDs[i]),
+			PackageNameID:      toGlobalID(ent.TypePackageName, pkgNameIDs[i]),
+			PackageVersionID:   toGlobalID(ent.TypePackageVersion, pkgVersionIDs[i])})
 	}
 
 	return &collectedPkgIDs, nil
@@ -229,10 +229,10 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 	}
 
 	return &model.PackageIDs{
-		PackageTypeID:      fmt.Sprintf("%s:%s", pkgTypeString, pkgNameID.String()),
-		PackageNamespaceID: fmt.Sprintf("%s:%s", pkgNamespaceString, pkgNameID.String()),
-		PackageNameID:      pkgNameID.String(),
-		PackageVersionID:   pkgVersionID.String()}, nil
+		PackageTypeID:      toGlobalID(pkgTypeString, pkgNameID.String()),
+		PackageNamespaceID: toGlobalID(pkgNamespaceString, pkgNameID.String()),
+		PackageNameID:      toGlobalID(ent.TypePackageName, pkgNameID.String()),
+		PackageVersionID:   toGlobalID(ent.TypePackageVersion, pkgVersionID.String())}, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {

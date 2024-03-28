@@ -89,7 +89,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 		return "", txErr
 	}
 
-	return *recordID, nil
+	return toGlobalID(ent.TypeCertifyVex, *recordID), nil
 }
 
 func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
@@ -106,7 +106,7 @@ func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.Pac
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(ent.TypeCertifyVex, *ids), nil
 }
 
 func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, vuln *model.IDorVulnerabilityInput, vexStatement *model.VexStatementInputSpec) (*ent.CertifyVexCreate, error) {

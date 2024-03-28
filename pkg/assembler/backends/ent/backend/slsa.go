@@ -80,7 +80,7 @@ func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactI
 		return "", txErr
 	}
 
-	return *id, nil
+	return toGlobalID(ent.TypeSLSAAttestation, *id), nil
 }
 
 func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) ([]string, error) {
@@ -97,7 +97,7 @@ func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArti
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(ent.TypeSLSAAttestation, *ids), nil
 }
 
 func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) (*[]string, error) {

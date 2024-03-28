@@ -116,7 +116,7 @@ func (b *EntBackend) IngestVulnEquals(ctx context.Context, vulnerabilities []*mo
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(ent.TypeVulnEqual, *ids), nil
 }
 
 func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec) (string, error) {
@@ -129,7 +129,7 @@ func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.ID
 		return "", txErr
 	}
 
-	return *id, nil
+	return toGlobalID(ent.TypeVulnEqual, *id), nil
 }
 
 func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) (*[]string, error) {

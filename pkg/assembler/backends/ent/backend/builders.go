@@ -68,7 +68,7 @@ func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.IDorBuilder
 	if txErr != nil {
 		return "", errors.Wrap(txErr, funcName)
 	}
-	return *id, nil
+	return toGlobalID(ent.TypeBuilder, *id), nil
 }
 
 func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorBuilderInput) ([]string, error) {
@@ -85,7 +85,7 @@ func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorB
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(ent.TypeBuilder, *ids), nil
 }
 
 func upsertBulkBuilder(ctx context.Context, tx *ent.Tx, buildInputs []*model.IDorBuilderInput) (*[]string, error) {

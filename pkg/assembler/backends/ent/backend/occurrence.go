@@ -68,7 +68,7 @@ func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.Packa
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(ent.TypeOccurrence, *ids), nil
 }
 
 func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) (*[]string, error) {
@@ -284,7 +284,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		return "", gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *recordID, nil
+	return toGlobalID(ent.TypeOccurrence, *recordID), nil
 }
 
 func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {

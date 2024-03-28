@@ -55,7 +55,7 @@ func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.Pac
 		return "", fmt.Errorf("failed to execute IngestPointOfContact :: %s", txErr)
 	}
 
-	return *recordID, nil
+	return toGlobalID(ent.TypePointOfContact, *recordID), nil
 }
 
 func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) ([]string, error) {
@@ -72,7 +72,7 @@ func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.P
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(ent.TypePointOfContact, *ids), nil
 }
 
 func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOfContact {

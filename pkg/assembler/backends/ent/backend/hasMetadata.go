@@ -55,7 +55,7 @@ func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.Packag
 		return "", fmt.Errorf("failed to execute IngestHasMetadata :: %s", txErr)
 	}
 
-	return *recordID, nil
+	return toGlobalID(ent.TypeHasMetadata, *recordID), nil
 }
 
 func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
@@ -72,7 +72,7 @@ func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(ent.TypeHasMetadata, *ids), nil
 }
 
 func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {

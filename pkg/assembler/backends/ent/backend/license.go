@@ -45,7 +45,7 @@ func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.IDorL
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(ent.TypeLicense, *ids), nil
 }
 
 func (b *EntBackend) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
@@ -62,7 +62,7 @@ func (b *EntBackend) IngestLicense(ctx context.Context, license *model.IDorLicen
 		return "", txErr
 	}
 
-	return *record, nil
+	return toGlobalID(ent.TypeLicense, *record), nil
 }
 
 func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([]*model.License, error) {

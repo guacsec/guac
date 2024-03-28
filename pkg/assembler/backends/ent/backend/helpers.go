@@ -23,8 +23,34 @@ import (
 	"github.com/google/uuid"
 )
 
+type globalID struct {
+	nodeType string
+	ID       string
+}
+
+func toGlobalID(nodeType string, id string) string {
+	return strings.Join([]string{nodeType, id}, ":")
+}
+
+func toGlobalIDs(nodeType string, ids []string) []string {
+	var globalID []string
+	for _, id := range ids {
+		globalID = append(globalID, strings.Join([]string{nodeType, id}, ":"))
+	}
+	return globalID
+}
+
+func fromGlobalID(gID string) globalID {
+	idSplit := strings.Split(gID, ":")
+	return globalID{
+		nodeType: idSplit[0],
+		ID:       idSplit[1],
+	}
+}
+
 func IDEQ(id string) func(*sql.Selector) {
-	return sql.FieldEQ("id", id)
+	filterGlobaID := fromGlobalID(id)
+	return sql.FieldEQ("id", filterGlobaID.ID)
 }
 
 func NoOpSelector() func(*sql.Selector) {
