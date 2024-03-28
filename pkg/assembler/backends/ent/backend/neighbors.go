@@ -21,6 +21,7 @@ import (
 	"log"
 
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -28,6 +29,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
+
+func (b *EntBackend) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
+	return nil, fmt.Errorf("not implemented: Path")
+}
 
 func (b *EntBackend) Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error) {
 	return nil, nil
@@ -43,41 +48,6 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 	if err != nil {
 		return nil, err
 	}
-
-	// switch idSplit[0] {
-	// case certifyLegalsStr:
-	// 	return c.buildCertifyLegalByID(ctx, nodeID, nil)
-	// case scorecardStr:
-	// 	return c.buildCertifyScorecardByID(ctx, nodeID, nil)
-	// case certifyVEXsStr:
-	// 	return c.buildCertifyVexByID(ctx, nodeID, nil)
-	// case certifyVulnsStr:
-	// 	return c.buildCertifyVulnByID(ctx, nodeID, nil)
-	// case hashEqualsStr:
-	// 	return c.buildHashEqualByID(ctx, nodeID, nil)
-	// case hasMetadataStr:
-	// 	return c.buildHasMetadataByID(ctx, nodeID, nil)
-	// case hasSBOMsStr:
-	// 	return c.buildHasSbomByID(ctx, nodeID, nil)
-	// case hasSLSAsStr:
-	// 	return c.buildHasSlsaByID(ctx, nodeID, nil)
-	// case hasSourceAtsStr:
-	// 	return c.buildHasSourceAtByID(ctx, nodeID, nil)
-	// case isDependenciesStr:
-	// 	return c.buildIsDependencyByID(ctx, nodeID, nil)
-	// case isOccurrencesStr:
-	// 	return c.buildIsOccurrenceByID(ctx, nodeID, nil)
-	// case pkgEqualsStr:
-	// 	return c.buildPkgEqualByID(ctx, nodeID, nil)
-	// case pointOfContactStr:
-	// 	return c.buildPointOfContactByID(ctx, nodeID, nil)
-	// case vulnEqualsStr:
-	// 	return c.buildVulnEqualByID(ctx, nodeID, nil)
-	// case vulnMetadataStr:
-	// 	return c.buildVulnerabilityMetadataByID(ctx, nodeID, nil)
-	// default:
-	// 	return nil, fmt.Errorf("unknown ID for node query: %s", nodeID)
-	// }
 
 	switch v := record.(type) {
 	case *ent.Artifact:
@@ -126,26 +96,143 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 			return toModelCertifyGood(cert), nil
 		}
 	case *ent.CertifyLegal:
-		cert, err := b.client.Certification.Query().
-			Where(certification.ID(v.ID)).
-			Limit(MaxPageSize).
-			WithSource(withSourceNameTreeQuery()).
-			WithArtifact().
-			WithPackageVersion(withPackageVersionTree()).
-			WithAllVersions(withPackageNameTree()).
-			Only(ctx)
+		legals, err := b.CertifyLegal(ctx, &model.CertifyLegalSpec{ID: ptrfrom.String(v.ID.String())})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to query for CertifyLegal via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if cert.Type == certification.TypeBAD {
-			return toModelCertifyBad(cert), nil
-		} else {
-			return toModelCertifyGood(cert), nil
+		if len(legals) == 1 {
+			return nil, fmt.Errorf("ID returned multiple CertifyLegal nodes %s", v.ID.String())
 		}
+		return legals[0], nil
+	case *ent.CertifyScorecard:
+		scores, err := b.Scorecards(ctx, &model.CertifyScorecardSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for scorecard via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(scores) == 1 {
+			return nil, fmt.Errorf("ID returned multiple scorecard nodes %s", v.ID.String())
+		}
+		return scores[0], nil
+	case *ent.CertifyVex:
+		vexs, err := b.CertifyVEXStatement(ctx, &model.CertifyVEXStatementSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for CertifyVEXStatement via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(vexs) == 1 {
+			return nil, fmt.Errorf("ID returned multiple CertifyVEXStatement nodes %s", v.ID.String())
+		}
+		return vexs[0], nil
+	case *ent.CertifyVuln:
+		vulns, err := b.CertifyVuln(ctx, &model.CertifyVulnSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for CertifyVuln via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(vulns) == 1 {
+			return nil, fmt.Errorf("ID returned multiple CertifyVuln nodes %s", v.ID.String())
+		}
+		return vulns[0], nil
+	case *ent.HashEqual:
+		hes, err := b.HashEqual(ctx, &model.HashEqualSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for HashEqual via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(hes) == 1 {
+			return nil, fmt.Errorf("ID returned multiple HashEqual nodes %s", v.ID.String())
+		}
+		return hes[0], nil
+	case *ent.HasMetadata:
+		hms, err := b.HasMetadata(ctx, &model.HasMetadataSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for HasMetadata via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(hms) == 1 {
+			return nil, fmt.Errorf("ID returned multiple HasMetadata nodes %s", v.ID.String())
+		}
+		return hms[0], nil
+	case *ent.BillOfMaterials:
+		hbs, err := b.HasSBOM(ctx, &model.HasSBOMSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for HasSBOM via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(hbs) == 1 {
+			return nil, fmt.Errorf("ID returned multiple HasSBOM nodes %s", v.ID.String())
+		}
+		return hbs[0], nil
+	case *ent.SLSAAttestation:
+		slsas, err := b.HasSlsa(ctx, &model.HasSLSASpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for HasSlsa via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(slsas) == 1 {
+			return nil, fmt.Errorf("ID returned multiple HasSlsa nodes %s", v.ID.String())
+		}
+		return slsas[0], nil
+	case *ent.HasSourceAt:
+		hsas, err := b.HasSourceAt(ctx, &model.HasSourceAtSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for HasSourceAt via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(hsas) == 1 {
+			return nil, fmt.Errorf("ID returned multiple HasSourceAt nodes %s", v.ID.String())
+		}
+		return hsas[0], nil
+	case *ent.Dependency:
+		deps, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for IsDependency via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(deps) == 1 {
+			return nil, fmt.Errorf("ID returned multiple IsDependency nodes %s", v.ID.String())
+		}
+		return deps[0], nil
+	case *ent.Occurrence:
+		occurs, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for IsOccurrence via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(occurs) == 1 {
+			return nil, fmt.Errorf("ID returned multiple IsOccurrence nodes %s", v.ID.String())
+		}
+		return occurs[0], nil
+	case *ent.PkgEqual:
+		pes, err := b.PkgEqual(ctx, &model.PkgEqualSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for PkgEqual via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(pes) == 1 {
+			return nil, fmt.Errorf("ID returned multiple PkgEqual nodes %s", v.ID.String())
+		}
+		return pes[0], nil
+	case *ent.PointOfContact:
+		pocs, err := b.PointOfContact(ctx, &model.PointOfContactSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for PointOfContact via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(pocs) == 1 {
+			return nil, fmt.Errorf("ID returned multiple PointOfContact nodes %s", v.ID.String())
+		}
+		return pocs[0], nil
+	case *ent.VulnEqual:
+		ves, err := b.VulnEqual(ctx, &model.VulnEqualSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for VulnEqual via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(ves) == 1 {
+			return nil, fmt.Errorf("ID returned multiple VulnEqual nodes %s", v.ID.String())
+		}
+		return ves[0], nil
+	case *ent.VulnerabilityMetadata:
+		vms, err := b.VulnerabilityMetadata(ctx, &model.VulnerabilityMetadataSpec{ID: ptrfrom.String(v.ID.String())})
+		if err != nil {
+			return nil, fmt.Errorf("failed to query for VulnerabilityMetadata via ID: %s, with error: %w", v.ID.String(), err)
+		}
+		if len(vms) == 1 {
+			return nil, fmt.Errorf("ID returned multiple VulnerabilityMetadata nodes %s", v.ID.String())
+		}
+		return vms[0], nil
 	default:
 		log.Printf("Unknown node type: %T", v)
 	}
-
 	return nil, nil
 }
 

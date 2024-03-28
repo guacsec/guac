@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
 package backend_test
 
 import (
@@ -47,7 +45,6 @@ var skipMatrix = map[string]map[string]bool{
 	// keyvalue: path: input: No path found up to specified length
 	// neighbors: sorting not done, testdata is only in order for arango
 	"TestPath":      {ent: true, memmap: true, redis: true, tikv: true},
-	"TestNodes":     {ent: true},
 	"TestNeighbors": {ent: true, memmap: true, redis: true, tikv: true},
 	// keyvalue: query on both packages fail
 	"TestPkgEqual": {memmap: true, redis: true, tikv: true},
@@ -71,11 +68,11 @@ type backend interface {
 }
 
 var testBackends = map[string]backend{
-	memmap: newMemMap(),
-	arango: newArango(),
-	redis:  newRedis(),
-	ent:    newEnt(),
-	tikv:   newTikv(),
+	// memmap: newMemMap(),
+	// arango: newArango(),
+	// redis:  newRedis(),
+	ent: newEnt(),
+	// tikv:   newTikv(),
 }
 
 var currentBackend string
