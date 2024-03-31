@@ -58,7 +58,7 @@ func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerabil
 		return "", fmt.Errorf("failed to execute IngestVulnerabilityMetadata :: %s", txErr)
 	}
 
-	return toGlobalID(ent.TypeVulnerabilityMetadata, *recordID), nil
+	return toGlobalID(vulnerabilitymetadata.Table, *recordID), nil
 }
 
 func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
@@ -75,7 +75,7 @@ func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulner
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypeVulnerabilityMetadata, *ids), nil
+	return toGlobalIDs(vulnerabilitymetadata.Table, *ids), nil
 }
 
 func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) (predicate.VulnerabilityMetadata, error) {

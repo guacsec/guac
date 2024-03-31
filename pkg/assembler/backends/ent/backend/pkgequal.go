@@ -59,7 +59,7 @@ func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput,
 		return "", txErr
 	}
 
-	return toGlobalID(ent.TypePkgEqual, *id), nil
+	return toGlobalID(pkgequal.Table, *id), nil
 }
 
 func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
@@ -76,7 +76,7 @@ func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgI
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypePkgEqual, *ids), nil
+	return toGlobalIDs(pkgequal.Table, *ids), nil
 }
 
 func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) (*[]string, error) {

@@ -39,17 +39,17 @@ func (b *EntBackend) Neighbors(ctx context.Context, node string, usingOnly []mod
 }
 
 func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) {
+	foundGlobalID, err := parseGlobalIDFromInput(node)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse globalID %s with error: %w", node, err)
+	}
 	// return uuid if valid, else error
-	nodeID, err := uuid.Parse(node)
+	nodeID, err := uuid.Parse(foundGlobalID.ID)
 	if err != nil {
 		return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
 	}
 
-	nodeTypeFromGlobalID := func(ctx context.Context, gID uuid.UUID) (string, error) {
-		return nodeTypeFromGlobalID(ctx, gID.String())
-	}
-
-	record, err := b.client.Noder(ctx, nodeID, ent.WithNodeType(nodeTypeFromGlobalID))
+	record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for CertifyLegal via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(legals) == 1 {
+		if len(legals) != 1 {
 			return nil, fmt.Errorf("ID returned multiple CertifyLegal nodes %s", v.ID.String())
 		}
 		return legals[0], nil
@@ -114,7 +114,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for scorecard via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(scores) == 1 {
+		if len(scores) != 1 {
 			return nil, fmt.Errorf("ID returned multiple scorecard nodes %s", v.ID.String())
 		}
 		return scores[0], nil
@@ -123,7 +123,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for CertifyVEXStatement via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(vexs) == 1 {
+		if len(vexs) != 1 {
 			return nil, fmt.Errorf("ID returned multiple CertifyVEXStatement nodes %s", v.ID.String())
 		}
 		return vexs[0], nil
@@ -132,7 +132,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for CertifyVuln via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(vulns) == 1 {
+		if len(vulns) != 1 {
 			return nil, fmt.Errorf("ID returned multiple CertifyVuln nodes %s", v.ID.String())
 		}
 		return vulns[0], nil
@@ -141,7 +141,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for HashEqual via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(hes) == 1 {
+		if len(hes) != 1 {
 			return nil, fmt.Errorf("ID returned multiple HashEqual nodes %s", v.ID.String())
 		}
 		return hes[0], nil
@@ -150,7 +150,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for HasMetadata via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(hms) == 1 {
+		if len(hms) != 1 {
 			return nil, fmt.Errorf("ID returned multiple HasMetadata nodes %s", v.ID.String())
 		}
 		return hms[0], nil
@@ -159,7 +159,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for HasSBOM via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(hbs) == 1 {
+		if len(hbs) != 1 {
 			return nil, fmt.Errorf("ID returned multiple HasSBOM nodes %s", v.ID.String())
 		}
 		return hbs[0], nil
@@ -168,7 +168,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for HasSlsa via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(slsas) == 1 {
+		if len(slsas) != 1 {
 			return nil, fmt.Errorf("ID returned multiple HasSlsa nodes %s", v.ID.String())
 		}
 		return slsas[0], nil
@@ -177,7 +177,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for HasSourceAt via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(hsas) == 1 {
+		if len(hsas) != 1 {
 			return nil, fmt.Errorf("ID returned multiple HasSourceAt nodes %s", v.ID.String())
 		}
 		return hsas[0], nil
@@ -186,7 +186,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for IsDependency via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(deps) == 1 {
+		if len(deps) != 1 {
 			return nil, fmt.Errorf("ID returned multiple IsDependency nodes %s", v.ID.String())
 		}
 		return deps[0], nil
@@ -195,7 +195,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for IsOccurrence via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(occurs) == 1 {
+		if len(occurs) != 1 {
 			return nil, fmt.Errorf("ID returned multiple IsOccurrence nodes %s", v.ID.String())
 		}
 		return occurs[0], nil
@@ -204,7 +204,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for PkgEqual via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(pes) == 1 {
+		if len(pes) != 1 {
 			return nil, fmt.Errorf("ID returned multiple PkgEqual nodes %s", v.ID.String())
 		}
 		return pes[0], nil
@@ -213,7 +213,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for PointOfContact via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(pocs) == 1 {
+		if len(pocs) != 1 {
 			return nil, fmt.Errorf("ID returned multiple PointOfContact nodes %s", v.ID.String())
 		}
 		return pocs[0], nil
@@ -222,7 +222,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for VulnEqual via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(ves) == 1 {
+		if len(ves) != 1 {
 			return nil, fmt.Errorf("ID returned multiple VulnEqual nodes %s", v.ID.String())
 		}
 		return ves[0], nil
@@ -231,7 +231,7 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		if err != nil {
 			return nil, fmt.Errorf("failed to query for VulnerabilityMetadata via ID: %s, with error: %w", v.ID.String(), err)
 		}
-		if len(vms) == 1 {
+		if len(vms) != 1 {
 			return nil, fmt.Errorf("ID returned multiple VulnerabilityMetadata nodes %s", v.ID.String())
 		}
 		return vms[0], nil

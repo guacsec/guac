@@ -112,7 +112,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		return "", Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalID(ent.TypeBillOfMaterials, *sbomId), nil
+	return toGlobalID(billofmaterials.Table, *sbomId), nil
 }
 
 func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
@@ -130,7 +130,7 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 		}
 		sbomIDs = append(sbomIDs, id)
 	}
-	return toGlobalIDs(ent.TypeBillOfMaterials, sbomIDs), nil
+	return toGlobalIDs(billofmaterials.Table, sbomIDs), nil
 }
 
 func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includes *model.HasSBOMIncludesInputSpec, hasSBOM *model.HasSBOMInputSpec) (*string, error) {

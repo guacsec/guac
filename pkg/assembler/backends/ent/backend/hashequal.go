@@ -84,7 +84,7 @@ func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.IDorArt
 		return "", txErr
 	}
 
-	return toGlobalID(ent.TypeHashEqual, *record), nil
+	return toGlobalID(hashequal.Table, *record), nil
 }
 
 func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
@@ -101,7 +101,7 @@ func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.ID
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypeHashEqual, *ids), nil
+	return toGlobalIDs(hashequal.Table, *ids), nil
 }
 
 func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) (*[]string, error) {

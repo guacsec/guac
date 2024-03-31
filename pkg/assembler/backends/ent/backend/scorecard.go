@@ -97,7 +97,7 @@ func (b *EntBackend) IngestScorecard(ctx context.Context, source model.IDorSourc
 	if txErr != nil {
 		return "", txErr
 	}
-	return toGlobalID(ent.TypeCertifyScorecard, *cscID), nil
+	return toGlobalID(certifyscorecard.Table, *cscID), nil
 }
 
 func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
@@ -114,7 +114,7 @@ func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDor
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypeCertifyScorecard, *ids), nil
+	return toGlobalIDs(certifyscorecard.Table, *ids), nil
 }
 
 func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSourceInput, scorecard *model.ScorecardInputSpec) (*ent.CertifyScorecardCreate, error) {

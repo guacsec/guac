@@ -73,7 +73,7 @@ func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.IDo
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypeArtifact, *ids), nil
+	return toGlobalIDs(artifact.Table, *ids), nil
 }
 
 func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifactInput) (string, error) {
@@ -84,7 +84,7 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifact
 	if txErr != nil {
 		return "", txErr
 	}
-	return toGlobalID(ent.TypeArtifact, *id), nil
+	return toGlobalID(artifact.Table, *id), nil
 }
 
 func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDorArtifactInput) (*[]string, error) {

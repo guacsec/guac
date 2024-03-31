@@ -82,7 +82,7 @@ func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInp
 		return "", txErr
 	}
 
-	return toGlobalID(ent.TypeHasSourceAt, *record), nil
+	return toGlobalID(hassourceat.Table, *record), nil
 }
 
 func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
@@ -99,7 +99,7 @@ func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorP
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypeHasSourceAt, *ids), nil
+	return toGlobalIDs(hassourceat.Table, *ids), nil
 }
 
 func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) (*[]string, error) {
@@ -341,7 +341,7 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 		collectedSrcIDs = append(collectedSrcIDs, model.SourceIDs{
 			SourceTypeID:      toGlobalID(srcTypeString, srcNameIDs[i]),
 			SourceNamespaceID: toGlobalID(srcNamespaceString, srcNameIDs[i]),
-			SourceNameID:      toGlobalID(ent.TypeSourceName, srcNameIDs[i])})
+			SourceNameID:      toGlobalID(sourcename.Table, srcNameIDs[i])})
 	}
 
 	return &collectedSrcIDs, nil
@@ -383,7 +383,7 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 	return &model.SourceIDs{
 		SourceTypeID:      toGlobalID(srcTypeString, srcNameID.String()),
 		SourceNamespaceID: toGlobalID(srcNamespaceString, srcNameID.String()),
-		SourceNameID:      toGlobalID(ent.TypeSourceName, srcNameID.String())}, nil
+		SourceNameID:      toGlobalID(sourcename.Table, srcNameID.String())}, nil
 }
 
 func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {

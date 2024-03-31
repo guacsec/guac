@@ -64,7 +64,7 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 		return "", txErr
 	}
 
-	return toGlobalID(ent.TypeCertification, *certRecord), nil
+	return toGlobalID(certification.Table, *certRecord), nil
 }
 
 func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
@@ -81,7 +81,7 @@ func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.Packa
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypeCertification, *ids), nil
+	return toGlobalIDs(certification.Table, *ids), nil
 }
 
 func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (string, error) {
@@ -92,7 +92,7 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 		return "", txErr
 	}
 
-	return toGlobalID(ent.TypeCertification, *certRecord), nil
+	return toGlobalID(certification.Table, *certRecord), nil
 }
 
 func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
@@ -109,7 +109,7 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypeCertification, *ids), nil
+	return toGlobalIDs(certification.Table, *ids), nil
 }
 
 func queryCertifications(ctx context.Context, client *ent.Client, typ certification.Type, filter *model.CertifyBadSpec) ([]*ent.Certification, error) {

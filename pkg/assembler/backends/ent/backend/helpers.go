@@ -16,7 +16,6 @@
 package backend
 
 import (
-	"context"
 	"crypto/sha256"
 	"fmt"
 	"strings"
@@ -35,33 +34,42 @@ func toGlobalID(nodeType string, id string) string {
 }
 
 func toGlobalIDs(nodeType string, ids []string) []string {
-	var globalID []string
+	var globalIDs []string
 	for _, id := range ids {
-		globalID = append(globalID, strings.Join([]string{nodeType, id}, ":"))
+		globalIDs = append(globalIDs, strings.Join([]string{nodeType, id}, ":"))
 	}
-	return globalID
+	return globalIDs
 }
 
-func fromGlobalID(gID string) globalID {
-	idSplit := strings.Split(gID, ":")
-	return globalID{
-		nodeType: idSplit[0],
-		ID:       idSplit[1],
-	}
-}
-
-func nodeTypeFromGlobalID(ctx context.Context, gID string) (string, error) {
-	idSplit := strings.Split(gID, ":")
+func fromGlobalID(gID string) *globalID {
+	idSplit := strings.Split(string(gID), ":")
 	if len(idSplit) == 2 {
-		return idSplit[0], nil
+		return &globalID{
+			nodeType: idSplit[0],
+			ID:       idSplit[1],
+		}
 	} else {
-		return "", fmt.Errorf("invalid global ID: %s", gID)
+		return &globalID{
+			ID: idSplit[0],
+		}
+	}
+}
+
+func parseGlobalIDFromInput(gID string) (*globalID, error) {
+	idSplit := strings.Split(string(gID), ":")
+	if len(idSplit) == 2 {
+		return &globalID{
+			nodeType: idSplit[0],
+			ID:       idSplit[1],
+		}, nil
+	} else {
+		return nil, fmt.Errorf("invalid global ID: %s", gID)
 	}
 }
 
 func IDEQ(id string) func(*sql.Selector) {
-	filterGlobaID := fromGlobalID(id)
-	return sql.FieldEQ("id", filterGlobaID.ID)
+	filterGlobalID := fromGlobalID(id)
+	return sql.FieldEQ("id", filterGlobalID.ID)
 }
 
 func NoOpSelector() func(*sql.Selector) {

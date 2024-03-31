@@ -68,7 +68,7 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypeCertifyLegal, *ids), nil
+	return toGlobalIDs(certifylegal.Table, *ids), nil
 }
 
 func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, spec *model.CertifyLegalInputSpec) (string, error) {
@@ -127,7 +127,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 		return "", gqlerror.Errorf("IngestCertifyLegal :: %s", txErr)
 	}
 
-	return toGlobalID(ent.TypeCertifyLegal, *recordID), nil
+	return toGlobalID(certifylegal.Table, *recordID), nil
 }
 
 func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg *model.IDorPkgInput, src *model.IDorSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput) (*ent.CertifyLegalCreate, error) {

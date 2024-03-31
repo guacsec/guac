@@ -231,8 +231,8 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 	return &model.PackageIDs{
 		PackageTypeID:      toGlobalID(pkgTypeString, pkgNameID.String()),
 		PackageNamespaceID: toGlobalID(pkgNamespaceString, pkgNameID.String()),
-		PackageNameID:      toGlobalID(ent.TypePackageName, pkgNameID.String()),
-		PackageVersionID:   toGlobalID(ent.TypePackageVersion, pkgVersionID.String())}, nil
+		PackageNameID:      toGlobalID(packagename.Table, pkgNameID.String()),
+		PackageVersionID:   toGlobalID(packageversion.Table, pkgVersionID.String())}, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {

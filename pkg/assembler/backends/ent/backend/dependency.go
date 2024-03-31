@@ -65,7 +65,7 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorP
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(ent.TypeDependency, *ids), nil
+	return toGlobalIDs(dependency.Table, *ids), nil
 }
 
 func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) (*[]string, error) {
@@ -267,7 +267,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 		return "", errors.Wrap(txErr, funcName)
 	}
 
-	return toGlobalID(ent.TypeDependency, *recordID), nil
+	return toGlobalID(dependency.Table, *recordID), nil
 }
 
 func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
