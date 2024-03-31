@@ -16,7 +16,9 @@
 package backend
 
 import (
+	"context"
 	"crypto/sha256"
+	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
@@ -45,6 +47,15 @@ func fromGlobalID(gID string) globalID {
 	return globalID{
 		nodeType: idSplit[0],
 		ID:       idSplit[1],
+	}
+}
+
+func nodeTypeFromGlobalID(ctx context.Context, gID string) (string, error) {
+	idSplit := strings.Split(gID, ":")
+	if len(idSplit) == 2 {
+		return idSplit[0], nil
+	} else {
+		return "", fmt.Errorf("invalid global ID: %s", gID)
 	}
 }
 

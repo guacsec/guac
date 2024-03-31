@@ -39,12 +39,17 @@ func (b *EntBackend) Neighbors(ctx context.Context, node string, usingOnly []mod
 }
 
 func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) {
+	// return uuid if valid, else error
 	nodeID, err := uuid.Parse(node)
 	if err != nil {
 		return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
 	}
 
-	record, err := b.client.Noder(ctx, nodeID, ent.WithNodeType())
+	nodeTypeFromGlobalID := func(ctx context.Context, gID uuid.UUID) (string, error) {
+		return nodeTypeFromGlobalID(ctx, gID.String())
+	}
+
+	record, err := b.client.Noder(ctx, nodeID, ent.WithNodeType(nodeTypeFromGlobalID))
 	if err != nil {
 		return nil, err
 	}
