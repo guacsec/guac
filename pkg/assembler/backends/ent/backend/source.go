@@ -82,7 +82,7 @@ func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInp
 		return "", txErr
 	}
 
-	return *record, nil
+	return toGlobalID(ent.TypeHasSourceAt, *record), nil
 }
 
 func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
@@ -99,7 +99,7 @@ func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorP
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(ent.TypeHasSourceAt, *ids), nil
 }
 
 func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) (*[]string, error) {
@@ -339,9 +339,9 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 	var collectedSrcIDs []model.SourceIDs
 	for i := range srcNameIDs {
 		collectedSrcIDs = append(collectedSrcIDs, model.SourceIDs{
-			SourceTypeID:      fmt.Sprintf("%s:%s", srcTypeString, srcNameIDs[i]),
-			SourceNamespaceID: fmt.Sprintf("%s:%s", srcNamespaceString, srcNameIDs[i]),
-			SourceNameID:      srcNameIDs[i]})
+			SourceTypeID:      toGlobalID(srcTypeString, srcNameIDs[i]),
+			SourceNamespaceID: toGlobalID(srcNamespaceString, srcNameIDs[i]),
+			SourceNameID:      toGlobalID(ent.TypeSourceName, srcNameIDs[i])})
 	}
 
 	return &collectedSrcIDs, nil
@@ -381,9 +381,9 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 	}
 
 	return &model.SourceIDs{
-		SourceTypeID:      fmt.Sprintf("%s:%s", srcTypeString, srcNameID.String()),
-		SourceNamespaceID: fmt.Sprintf("%s:%s", srcNamespaceString, srcNameID.String()),
-		SourceNameID:      srcNameID.String()}, nil
+		SourceTypeID:      toGlobalID(srcTypeString, srcNameID.String()),
+		SourceNamespaceID: toGlobalID(srcNamespaceString, srcNameID.String()),
+		SourceNameID:      toGlobalID(ent.TypeSourceName, srcNameID.String())}, nil
 }
 
 func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
