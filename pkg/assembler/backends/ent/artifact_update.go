@@ -13,8 +13,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
@@ -133,6 +137,66 @@ func (au *ArtifactUpdate) AddHashEqualArtB(h ...*HashEqual) *ArtifactUpdate {
 		ids[i] = h[i].ID
 	}
 	return au.AddHashEqualArtBIDs(ids...)
+}
+
+// AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
+func (au *ArtifactUpdate) AddVexIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.AddVexIDs(ids...)
+	return au
+}
+
+// AddVex adds the "vex" edges to the CertifyVex entity.
+func (au *ArtifactUpdate) AddVex(c ...*CertifyVex) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return au.AddVexIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (au *ArtifactUpdate) AddCertificationIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.AddCertificationIDs(ids...)
+	return au
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (au *ArtifactUpdate) AddCertification(c ...*Certification) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return au.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (au *ArtifactUpdate) AddMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.AddMetadatumIDs(ids...)
+	return au
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (au *ArtifactUpdate) AddMetadata(h ...*HasMetadata) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return au.AddMetadatumIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (au *ArtifactUpdate) AddPocIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.AddPocIDs(ids...)
+	return au
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (au *ArtifactUpdate) AddPoc(p ...*PointOfContact) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return au.AddPocIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
@@ -258,6 +322,90 @@ func (au *ArtifactUpdate) RemoveHashEqualArtB(h ...*HashEqual) *ArtifactUpdate {
 		ids[i] = h[i].ID
 	}
 	return au.RemoveHashEqualArtBIDs(ids...)
+}
+
+// ClearVex clears all "vex" edges to the CertifyVex entity.
+func (au *ArtifactUpdate) ClearVex() *ArtifactUpdate {
+	au.mutation.ClearVex()
+	return au
+}
+
+// RemoveVexIDs removes the "vex" edge to CertifyVex entities by IDs.
+func (au *ArtifactUpdate) RemoveVexIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.RemoveVexIDs(ids...)
+	return au
+}
+
+// RemoveVex removes "vex" edges to CertifyVex entities.
+func (au *ArtifactUpdate) RemoveVex(c ...*CertifyVex) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return au.RemoveVexIDs(ids...)
+}
+
+// ClearCertification clears all "certification" edges to the Certification entity.
+func (au *ArtifactUpdate) ClearCertification() *ArtifactUpdate {
+	au.mutation.ClearCertification()
+	return au
+}
+
+// RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
+func (au *ArtifactUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.RemoveCertificationIDs(ids...)
+	return au
+}
+
+// RemoveCertification removes "certification" edges to Certification entities.
+func (au *ArtifactUpdate) RemoveCertification(c ...*Certification) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return au.RemoveCertificationIDs(ids...)
+}
+
+// ClearMetadata clears all "metadata" edges to the HasMetadata entity.
+func (au *ArtifactUpdate) ClearMetadata() *ArtifactUpdate {
+	au.mutation.ClearMetadata()
+	return au
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
+func (au *ArtifactUpdate) RemoveMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.RemoveMetadatumIDs(ids...)
+	return au
+}
+
+// RemoveMetadata removes "metadata" edges to HasMetadata entities.
+func (au *ArtifactUpdate) RemoveMetadata(h ...*HasMetadata) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return au.RemoveMetadatumIDs(ids...)
+}
+
+// ClearPoc clears all "poc" edges to the PointOfContact entity.
+func (au *ArtifactUpdate) ClearPoc() *ArtifactUpdate {
+	au.mutation.ClearPoc()
+	return au
+}
+
+// RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
+func (au *ArtifactUpdate) RemovePocIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.RemovePocIDs(ids...)
+	return au
+}
+
+// RemovePoc removes "poc" edges to PointOfContact entities.
+func (au *ArtifactUpdate) RemovePoc(p ...*PointOfContact) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return au.RemovePocIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
@@ -548,6 +696,186 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if au.mutation.VexCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.VexTable,
+			Columns: []string{artifact.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedVexIDs(); len(nodes) > 0 && !au.mutation.VexCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.VexTable,
+			Columns: []string{artifact.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.VexIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.VexTable,
+			Columns: []string{artifact.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if au.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.CertificationTable,
+			Columns: []string{artifact.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !au.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.CertificationTable,
+			Columns: []string{artifact.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.CertificationTable,
+			Columns: []string{artifact.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if au.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.MetadataTable,
+			Columns: []string{artifact.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !au.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.MetadataTable,
+			Columns: []string{artifact.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.MetadataTable,
+			Columns: []string{artifact.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if au.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.PocTable,
+			Columns: []string{artifact.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedPocIDs(); len(nodes) > 0 && !au.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.PocTable,
+			Columns: []string{artifact.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.PocTable,
+			Columns: []string{artifact.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if au.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -716,6 +1044,66 @@ func (auo *ArtifactUpdateOne) AddHashEqualArtB(h ...*HashEqual) *ArtifactUpdateO
 	return auo.AddHashEqualArtBIDs(ids...)
 }
 
+// AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
+func (auo *ArtifactUpdateOne) AddVexIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.AddVexIDs(ids...)
+	return auo
+}
+
+// AddVex adds the "vex" edges to the CertifyVex entity.
+func (auo *ArtifactUpdateOne) AddVex(c ...*CertifyVex) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return auo.AddVexIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (auo *ArtifactUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.AddCertificationIDs(ids...)
+	return auo
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (auo *ArtifactUpdateOne) AddCertification(c ...*Certification) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return auo.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (auo *ArtifactUpdateOne) AddMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.AddMetadatumIDs(ids...)
+	return auo
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (auo *ArtifactUpdateOne) AddMetadata(h ...*HasMetadata) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return auo.AddMetadatumIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (auo *ArtifactUpdateOne) AddPocIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.AddPocIDs(ids...)
+	return auo
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (auo *ArtifactUpdateOne) AddPoc(p ...*PointOfContact) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return auo.AddPocIDs(ids...)
+}
+
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
 func (auo *ArtifactUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.AddIncludedInSbomIDs(ids...)
@@ -839,6 +1227,90 @@ func (auo *ArtifactUpdateOne) RemoveHashEqualArtB(h ...*HashEqual) *ArtifactUpda
 		ids[i] = h[i].ID
 	}
 	return auo.RemoveHashEqualArtBIDs(ids...)
+}
+
+// ClearVex clears all "vex" edges to the CertifyVex entity.
+func (auo *ArtifactUpdateOne) ClearVex() *ArtifactUpdateOne {
+	auo.mutation.ClearVex()
+	return auo
+}
+
+// RemoveVexIDs removes the "vex" edge to CertifyVex entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveVexIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.RemoveVexIDs(ids...)
+	return auo
+}
+
+// RemoveVex removes "vex" edges to CertifyVex entities.
+func (auo *ArtifactUpdateOne) RemoveVex(c ...*CertifyVex) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return auo.RemoveVexIDs(ids...)
+}
+
+// ClearCertification clears all "certification" edges to the Certification entity.
+func (auo *ArtifactUpdateOne) ClearCertification() *ArtifactUpdateOne {
+	auo.mutation.ClearCertification()
+	return auo
+}
+
+// RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.RemoveCertificationIDs(ids...)
+	return auo
+}
+
+// RemoveCertification removes "certification" edges to Certification entities.
+func (auo *ArtifactUpdateOne) RemoveCertification(c ...*Certification) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return auo.RemoveCertificationIDs(ids...)
+}
+
+// ClearMetadata clears all "metadata" edges to the HasMetadata entity.
+func (auo *ArtifactUpdateOne) ClearMetadata() *ArtifactUpdateOne {
+	auo.mutation.ClearMetadata()
+	return auo
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveMetadatumIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.RemoveMetadatumIDs(ids...)
+	return auo
+}
+
+// RemoveMetadata removes "metadata" edges to HasMetadata entities.
+func (auo *ArtifactUpdateOne) RemoveMetadata(h ...*HasMetadata) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return auo.RemoveMetadatumIDs(ids...)
+}
+
+// ClearPoc clears all "poc" edges to the PointOfContact entity.
+func (auo *ArtifactUpdateOne) ClearPoc() *ArtifactUpdateOne {
+	auo.mutation.ClearPoc()
+	return auo
+}
+
+// RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
+func (auo *ArtifactUpdateOne) RemovePocIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.RemovePocIDs(ids...)
+	return auo
+}
+
+// RemovePoc removes "poc" edges to PointOfContact entities.
+func (auo *ArtifactUpdateOne) RemovePoc(p ...*PointOfContact) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return auo.RemovePocIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
@@ -1152,6 +1624,186 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.VexCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.VexTable,
+			Columns: []string{artifact.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedVexIDs(); len(nodes) > 0 && !auo.mutation.VexCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.VexTable,
+			Columns: []string{artifact.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.VexIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.VexTable,
+			Columns: []string{artifact.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.CertificationTable,
+			Columns: []string{artifact.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !auo.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.CertificationTable,
+			Columns: []string{artifact.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.CertificationTable,
+			Columns: []string{artifact.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.MetadataTable,
+			Columns: []string{artifact.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !auo.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.MetadataTable,
+			Columns: []string{artifact.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.MetadataTable,
+			Columns: []string{artifact.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.PocTable,
+			Columns: []string{artifact.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedPocIDs(); len(nodes) > 0 && !auo.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.PocTable,
+			Columns: []string{artifact.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.PocTable,
+			Columns: []string{artifact.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

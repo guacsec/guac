@@ -29,6 +29,8 @@ const (
 	EdgeOccurrences = "occurrences"
 	// EdgeSbom holds the string denoting the sbom edge name in mutations.
 	EdgeSbom = "sbom"
+	// EdgeVexPackage holds the string denoting the vex_package edge name in mutations.
+	EdgeVexPackage = "vex_package"
 	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
 	EdgeIncludedInSboms = "included_in_sboms"
 	// EdgePkgEqualPkgA holds the string denoting the pkg_equal_pkg_a edge name in mutations.
@@ -58,6 +60,13 @@ const (
 	SbomInverseTable = "bill_of_materials"
 	// SbomColumn is the table column denoting the sbom relation/edge.
 	SbomColumn = "package_id"
+	// VexPackageTable is the table that holds the vex_package relation/edge.
+	VexPackageTable = "certify_vexes"
+	// VexPackageInverseTable is the table name for the CertifyVex entity.
+	// It exists in this package in order to avoid circular dependency with the "certifyvex" package.
+	VexPackageInverseTable = "certify_vexes"
+	// VexPackageColumn is the table column denoting the vex_package relation/edge.
+	VexPackageColumn = "package_id"
 	// IncludedInSbomsTable is the table that holds the included_in_sboms relation/edge. The primary key declared below.
 	IncludedInSbomsTable = "bill_of_materials_included_software_packages"
 	// IncludedInSbomsInverseTable is the table name for the BillOfMaterials entity.
@@ -177,6 +186,20 @@ func BySbom(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByVexPackageCount orders the results by vex_package count.
+func ByVexPackageCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVexPackageStep(), opts...)
+	}
+}
+
+// ByVexPackage orders the results by vex_package terms.
+func ByVexPackage(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVexPackageStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByIncludedInSbomsCount orders the results by included_in_sboms count.
 func ByIncludedInSbomsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -237,6 +260,13 @@ func newSbomStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SbomInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, SbomTable, SbomColumn),
+	)
+}
+func newVexPackageStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VexPackageInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, VexPackageTable, VexPackageColumn),
 	)
 }
 func newIncludedInSbomsStep() *sqlgraph.Step {

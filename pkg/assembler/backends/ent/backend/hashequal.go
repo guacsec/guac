@@ -251,7 +251,7 @@ func toModelHashEqual(record *ent.HashEqual) *model.HashEqual {
 	artifacts := []*ent.Artifact{record.Edges.ArtifactA, record.Edges.ArtifactB}
 
 	return &model.HashEqual{
-		ID:            record.ID.String(),
+		ID:            toGlobalID(hashequal.Table, record.ID.String()),
 		Artifacts:     collect(artifacts, toModelArtifact),
 		Justification: record.Justification,
 		Collector:     record.Collector,

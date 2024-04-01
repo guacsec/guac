@@ -27,6 +27,14 @@ const (
 	EdgeHashEqualArtA = "hash_equal_art_a"
 	// EdgeHashEqualArtB holds the string denoting the hash_equal_art_b edge name in mutations.
 	EdgeHashEqualArtB = "hash_equal_art_b"
+	// EdgeVex holds the string denoting the vex edge name in mutations.
+	EdgeVex = "vex"
+	// EdgeCertification holds the string denoting the certification edge name in mutations.
+	EdgeCertification = "certification"
+	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
+	EdgeMetadata = "metadata"
+	// EdgePoc holds the string denoting the poc edge name in mutations.
+	EdgePoc = "poc"
 	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
 	EdgeIncludedInSboms = "included_in_sboms"
 	// Table holds the table name of the artifact in the database.
@@ -64,6 +72,34 @@ const (
 	HashEqualArtBInverseTable = "hash_equals"
 	// HashEqualArtBColumn is the table column denoting the hash_equal_art_b relation/edge.
 	HashEqualArtBColumn = "equal_art_id"
+	// VexTable is the table that holds the vex relation/edge.
+	VexTable = "certify_vexes"
+	// VexInverseTable is the table name for the CertifyVex entity.
+	// It exists in this package in order to avoid circular dependency with the "certifyvex" package.
+	VexInverseTable = "certify_vexes"
+	// VexColumn is the table column denoting the vex relation/edge.
+	VexColumn = "artifact_id"
+	// CertificationTable is the table that holds the certification relation/edge.
+	CertificationTable = "certifications"
+	// CertificationInverseTable is the table name for the Certification entity.
+	// It exists in this package in order to avoid circular dependency with the "certification" package.
+	CertificationInverseTable = "certifications"
+	// CertificationColumn is the table column denoting the certification relation/edge.
+	CertificationColumn = "artifact_id"
+	// MetadataTable is the table that holds the metadata relation/edge.
+	MetadataTable = "has_metadata"
+	// MetadataInverseTable is the table name for the HasMetadata entity.
+	// It exists in this package in order to avoid circular dependency with the "hasmetadata" package.
+	MetadataInverseTable = "has_metadata"
+	// MetadataColumn is the table column denoting the metadata relation/edge.
+	MetadataColumn = "artifact_id"
+	// PocTable is the table that holds the poc relation/edge.
+	PocTable = "point_of_contacts"
+	// PocInverseTable is the table name for the PointOfContact entity.
+	// It exists in this package in order to avoid circular dependency with the "pointofcontact" package.
+	PocInverseTable = "point_of_contacts"
+	// PocColumn is the table column denoting the poc relation/edge.
+	PocColumn = "artifact_id"
 	// IncludedInSbomsTable is the table that holds the included_in_sboms relation/edge. The primary key declared below.
 	IncludedInSbomsTable = "bill_of_materials_included_software_artifacts"
 	// IncludedInSbomsInverseTable is the table name for the BillOfMaterials entity.
@@ -190,6 +226,62 @@ func ByHashEqualArtB(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByVexCount orders the results by vex count.
+func ByVexCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVexStep(), opts...)
+	}
+}
+
+// ByVex orders the results by vex terms.
+func ByVex(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVexStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCertificationCount orders the results by certification count.
+func ByCertificationCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCertificationStep(), opts...)
+	}
+}
+
+// ByCertification orders the results by certification terms.
+func ByCertification(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCertificationStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByMetadataCount orders the results by metadata count.
+func ByMetadataCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMetadataStep(), opts...)
+	}
+}
+
+// ByMetadata orders the results by metadata terms.
+func ByMetadata(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMetadataStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPocCount orders the results by poc count.
+func ByPocCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPocStep(), opts...)
+	}
+}
+
+// ByPoc orders the results by poc terms.
+func ByPoc(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPocStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByIncludedInSbomsCount orders the results by included_in_sboms count.
 func ByIncludedInSbomsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -236,6 +328,34 @@ func newHashEqualArtBStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(HashEqualArtBInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, HashEqualArtBTable, HashEqualArtBColumn),
+	)
+}
+func newVexStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VexInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, VexTable, VexColumn),
+	)
+}
+func newCertificationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CertificationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, CertificationTable, CertificationColumn),
+	)
+}
+func newMetadataStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MetadataInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, MetadataTable, MetadataColumn),
+	)
+}
+func newPocStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PocInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, PocTable, PocColumn),
 	)
 }
 func newIncludedInSbomsStep() *sqlgraph.Step {

@@ -241,7 +241,7 @@ func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 	packages := collect(equalPkgs, backReferencePackageVersion)
 
 	return &model.PkgEqual{
-		ID:            record.ID.String(),
+		ID:            toGlobalID(pkgequal.Table, record.ID.String()),
 		Origin:        record.Origin,
 		Collector:     record.Collector,
 		Justification: record.Justification,

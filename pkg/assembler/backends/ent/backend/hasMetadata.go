@@ -371,7 +371,7 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 	}
 
 	return &model.HasMetadata{
-		ID:            v.ID.String(),
+		ID:            toGlobalID(hasmetadata.Table, v.ID.String()),
 		Subject:       sub,
 		Key:           v.Key,
 		Value:         v.Value,

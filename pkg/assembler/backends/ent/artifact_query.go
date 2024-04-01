@@ -14,8 +14,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
@@ -32,6 +36,10 @@ type ArtifactQuery struct {
 	withAttestations         *SLSAAttestationQuery
 	withHashEqualArtA        *HashEqualQuery
 	withHashEqualArtB        *HashEqualQuery
+	withVex                  *CertifyVexQuery
+	withCertification        *CertificationQuery
+	withMetadata             *HasMetadataQuery
+	withPoc                  *PointOfContactQuery
 	withIncludedInSboms      *BillOfMaterialsQuery
 	modifiers                []func(*sql.Selector)
 	loadTotal                []func(context.Context, []*Artifact) error
@@ -40,6 +48,10 @@ type ArtifactQuery struct {
 	withNamedAttestations    map[string]*SLSAAttestationQuery
 	withNamedHashEqualArtA   map[string]*HashEqualQuery
 	withNamedHashEqualArtB   map[string]*HashEqualQuery
+	withNamedVex             map[string]*CertifyVexQuery
+	withNamedCertification   map[string]*CertificationQuery
+	withNamedMetadata        map[string]*HasMetadataQuery
+	withNamedPoc             map[string]*PointOfContactQuery
 	withNamedIncludedInSboms map[string]*BillOfMaterialsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -180,6 +192,94 @@ func (aq *ArtifactQuery) QueryHashEqualArtB() *HashEqualQuery {
 			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
 			sqlgraph.To(hashequal.Table, hashequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, artifact.HashEqualArtBTable, artifact.HashEqualArtBColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVex chains the current query on the "vex" edge.
+func (aq *ArtifactQuery) QueryVex() *CertifyVexQuery {
+	query := (&CertifyVexClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(certifyvex.Table, certifyvex.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.VexTable, artifact.VexColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCertification chains the current query on the "certification" edge.
+func (aq *ArtifactQuery) QueryCertification() *CertificationQuery {
+	query := (&CertificationClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(certification.Table, certification.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.CertificationTable, artifact.CertificationColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMetadata chains the current query on the "metadata" edge.
+func (aq *ArtifactQuery) QueryMetadata() *HasMetadataQuery {
+	query := (&HasMetadataClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.MetadataTable, artifact.MetadataColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPoc chains the current query on the "poc" edge.
+func (aq *ArtifactQuery) QueryPoc() *PointOfContactQuery {
+	query := (&PointOfContactClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.PocTable, artifact.PocColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -406,6 +506,10 @@ func (aq *ArtifactQuery) Clone() *ArtifactQuery {
 		withAttestations:    aq.withAttestations.Clone(),
 		withHashEqualArtA:   aq.withHashEqualArtA.Clone(),
 		withHashEqualArtB:   aq.withHashEqualArtB.Clone(),
+		withVex:             aq.withVex.Clone(),
+		withCertification:   aq.withCertification.Clone(),
+		withMetadata:        aq.withMetadata.Clone(),
+		withPoc:             aq.withPoc.Clone(),
 		withIncludedInSboms: aq.withIncludedInSboms.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
@@ -465,6 +569,50 @@ func (aq *ArtifactQuery) WithHashEqualArtB(opts ...func(*HashEqualQuery)) *Artif
 		opt(query)
 	}
 	aq.withHashEqualArtB = query
+	return aq
+}
+
+// WithVex tells the query-builder to eager-load the nodes that are connected to
+// the "vex" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithVex(opts ...func(*CertifyVexQuery)) *ArtifactQuery {
+	query := (&CertifyVexClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withVex = query
+	return aq
+}
+
+// WithCertification tells the query-builder to eager-load the nodes that are connected to
+// the "certification" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithCertification(opts ...func(*CertificationQuery)) *ArtifactQuery {
+	query := (&CertificationClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withCertification = query
+	return aq
+}
+
+// WithMetadata tells the query-builder to eager-load the nodes that are connected to
+// the "metadata" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithMetadata(opts ...func(*HasMetadataQuery)) *ArtifactQuery {
+	query := (&HasMetadataClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withMetadata = query
+	return aq
+}
+
+// WithPoc tells the query-builder to eager-load the nodes that are connected to
+// the "poc" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithPoc(opts ...func(*PointOfContactQuery)) *ArtifactQuery {
+	query := (&PointOfContactClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withPoc = query
 	return aq
 }
 
@@ -557,12 +705,16 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	var (
 		nodes       = []*Artifact{}
 		_spec       = aq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [10]bool{
 			aq.withOccurrences != nil,
 			aq.withSbom != nil,
 			aq.withAttestations != nil,
 			aq.withHashEqualArtA != nil,
 			aq.withHashEqualArtB != nil,
+			aq.withVex != nil,
+			aq.withCertification != nil,
+			aq.withMetadata != nil,
+			aq.withPoc != nil,
 			aq.withIncludedInSboms != nil,
 		}
 	)
@@ -622,6 +774,34 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 			return nil, err
 		}
 	}
+	if query := aq.withVex; query != nil {
+		if err := aq.loadVex(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.Vex = []*CertifyVex{} },
+			func(n *Artifact, e *CertifyVex) { n.Edges.Vex = append(n.Edges.Vex, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withCertification; query != nil {
+		if err := aq.loadCertification(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.Certification = []*Certification{} },
+			func(n *Artifact, e *Certification) { n.Edges.Certification = append(n.Edges.Certification, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withMetadata; query != nil {
+		if err := aq.loadMetadata(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.Metadata = []*HasMetadata{} },
+			func(n *Artifact, e *HasMetadata) { n.Edges.Metadata = append(n.Edges.Metadata, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withPoc; query != nil {
+		if err := aq.loadPoc(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.Poc = []*PointOfContact{} },
+			func(n *Artifact, e *PointOfContact) { n.Edges.Poc = append(n.Edges.Poc, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := aq.withIncludedInSboms; query != nil {
 		if err := aq.loadIncludedInSboms(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.IncludedInSboms = []*BillOfMaterials{} },
@@ -661,6 +841,34 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 		if err := aq.loadHashEqualArtB(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedHashEqualArtB(name) },
 			func(n *Artifact, e *HashEqual) { n.appendNamedHashEqualArtB(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedVex {
+		if err := aq.loadVex(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedVex(name) },
+			func(n *Artifact, e *CertifyVex) { n.appendNamedVex(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedCertification {
+		if err := aq.loadCertification(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedCertification(name) },
+			func(n *Artifact, e *Certification) { n.appendNamedCertification(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedMetadata {
+		if err := aq.loadMetadata(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedMetadata(name) },
+			func(n *Artifact, e *HasMetadata) { n.appendNamedMetadata(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedPoc {
+		if err := aq.loadPoc(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedPoc(name) },
+			func(n *Artifact, e *PointOfContact) { n.appendNamedPoc(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -858,6 +1066,138 @@ func (aq *ArtifactQuery) loadHashEqualArtB(ctx context.Context, query *HashEqual
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "equal_art_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (aq *ArtifactQuery) loadVex(ctx context.Context, query *CertifyVexQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *CertifyVex)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Artifact)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(certifyvex.FieldArtifactID)
+	}
+	query.Where(predicate.CertifyVex(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(artifact.VexColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ArtifactID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "artifact_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "artifact_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (aq *ArtifactQuery) loadCertification(ctx context.Context, query *CertificationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *Certification)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Artifact)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(certification.FieldArtifactID)
+	}
+	query.Where(predicate.Certification(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(artifact.CertificationColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ArtifactID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "artifact_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "artifact_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (aq *ArtifactQuery) loadMetadata(ctx context.Context, query *HasMetadataQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *HasMetadata)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Artifact)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(hasmetadata.FieldArtifactID)
+	}
+	query.Where(predicate.HasMetadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(artifact.MetadataColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ArtifactID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "artifact_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "artifact_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (aq *ArtifactQuery) loadPoc(ctx context.Context, query *PointOfContactQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *PointOfContact)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Artifact)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pointofcontact.FieldArtifactID)
+	}
+	query.Where(predicate.PointOfContact(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(artifact.PocColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ArtifactID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "artifact_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "artifact_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1076,6 +1416,62 @@ func (aq *ArtifactQuery) WithNamedHashEqualArtB(name string, opts ...func(*HashE
 		aq.withNamedHashEqualArtB = make(map[string]*HashEqualQuery)
 	}
 	aq.withNamedHashEqualArtB[name] = query
+	return aq
+}
+
+// WithNamedVex tells the query-builder to eager-load the nodes that are connected to the "vex"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedVex(name string, opts ...func(*CertifyVexQuery)) *ArtifactQuery {
+	query := (&CertifyVexClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedVex == nil {
+		aq.withNamedVex = make(map[string]*CertifyVexQuery)
+	}
+	aq.withNamedVex[name] = query
+	return aq
+}
+
+// WithNamedCertification tells the query-builder to eager-load the nodes that are connected to the "certification"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedCertification(name string, opts ...func(*CertificationQuery)) *ArtifactQuery {
+	query := (&CertificationClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedCertification == nil {
+		aq.withNamedCertification = make(map[string]*CertificationQuery)
+	}
+	aq.withNamedCertification[name] = query
+	return aq
+}
+
+// WithNamedMetadata tells the query-builder to eager-load the nodes that are connected to the "metadata"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedMetadata(name string, opts ...func(*HasMetadataQuery)) *ArtifactQuery {
+	query := (&HasMetadataClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedMetadata == nil {
+		aq.withNamedMetadata = make(map[string]*HasMetadataQuery)
+	}
+	aq.withNamedMetadata[name] = query
+	return aq
+}
+
+// WithNamedPoc tells the query-builder to eager-load the nodes that are connected to the "poc"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedPoc(name string, opts ...func(*PointOfContactQuery)) *ArtifactQuery {
+	query := (&PointOfContactClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedPoc == nil {
+		aq.withNamedPoc = make(map[string]*PointOfContactQuery)
+	}
+	aq.withNamedPoc[name] = query
 	return aq
 }
 

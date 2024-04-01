@@ -291,7 +291,7 @@ func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
 	vulnerabilities := []*ent.VulnerabilityID{record.Edges.VulnerabilityA, record.Edges.VulnerabilityB}
 
 	return &model.VulnEqual{
-		ID:              record.ID.String(),
+		ID:              toGlobalID(vulnequal.Table, record.ID.String()),
 		Vulnerabilities: collect(vulnerabilities, toModelVulnerabilityFromVulnerabilityID),
 		Justification:   record.Justification,
 		Origin:          record.Origin,
@@ -301,7 +301,7 @@ func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
 
 func toModelVulnerabilityFromVulnerabilityID(vulnID *ent.VulnerabilityID) *model.Vulnerability {
 	return &model.Vulnerability{
-		ID:               fmt.Sprintf("%s:%s", vulnTypeString, vulnID.ID.String()),
+		ID:               toGlobalID(vulnTypeString, vulnID.ID.String()),
 		Type:             vulnID.Type,
 		VulnerabilityIDs: []*model.VulnerabilityID{toModelVulnerabilityID(vulnID)},
 	}

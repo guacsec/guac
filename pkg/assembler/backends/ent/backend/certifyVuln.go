@@ -260,7 +260,7 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 
 func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 	return &model.CertifyVuln{
-		ID:            record.ID.String(),
+		ID:            toGlobalID(certifyvuln.Table, record.ID.String()),
 		Package:       toModelPackage(backReferencePackageVersion(record.Edges.Package)),
 		Vulnerability: toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		Metadata: &model.ScanMetadata{

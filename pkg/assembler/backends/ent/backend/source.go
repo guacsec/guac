@@ -426,7 +426,7 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 	return &model.HasSourceAt{
 		Source:        toModelSourceName(record.Edges.Source),
 		Package:       pkg,
-		ID:            record.ID.String(),
+		ID:            toGlobalID(hassourceat.Table, record.ID.String()),
 		KnownSince:    record.KnownSince,
 		Justification: record.Justification,
 		Origin:        record.Origin,
@@ -444,7 +444,7 @@ func toModelSource(s *ent.SourceName) *model.Source {
 	}
 
 	sourceName := &model.SourceName{
-		ID:   s.ID.String(),
+		ID:   toGlobalID(sourcename.Table, s.ID.String()),
 		Name: s.Name,
 	}
 
@@ -456,10 +456,10 @@ func toModelSource(s *ent.SourceName) *model.Source {
 	}
 
 	return &model.Source{
-		ID:   fmt.Sprintf("%s:%s", srcTypeString, s.ID.String()),
+		ID:   toGlobalID(srcTypeString, s.ID.String()),
 		Type: s.Type,
 		Namespaces: []*model.SourceNamespace{{
-			ID:        fmt.Sprintf("%s:%s", srcNamespaceString, s.ID.String()),
+			ID:        toGlobalID(srcNamespaceString, s.ID.String()),
 			Namespace: s.Namespace,
 			Names:     []*model.SourceName{sourceName},
 		}},

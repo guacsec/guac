@@ -44,6 +44,8 @@ type PackageVersionEdges struct {
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// Sbom holds the value of the sbom edge.
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
+	// VexPackage holds the value of the vex_package edge.
+	VexPackage []*CertifyVex `json:"vex_package,omitempty"`
 	// IncludedInSboms holds the value of the included_in_sboms edge.
 	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// PkgEqualPkgA holds the value of the pkg_equal_pkg_a edge.
@@ -52,12 +54,13 @@ type PackageVersionEdges struct {
 	PkgEqualPkgB []*PkgEqual `json:"pkg_equal_pkg_b,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 	// totalCount holds the count of the edges above.
-	totalCount [6]map[string]int
+	totalCount [7]map[string]int
 
 	namedOccurrences     map[string][]*Occurrence
 	namedSbom            map[string][]*BillOfMaterials
+	namedVexPackage      map[string][]*CertifyVex
 	namedIncludedInSboms map[string][]*BillOfMaterials
 	namedPkgEqualPkgA    map[string][]*PkgEqual
 	namedPkgEqualPkgB    map[string][]*PkgEqual
@@ -94,10 +97,19 @@ func (e PackageVersionEdges) SbomOrErr() ([]*BillOfMaterials, error) {
 	return nil, &NotLoadedError{edge: "sbom"}
 }
 
+// VexPackageOrErr returns the VexPackage value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) VexPackageOrErr() ([]*CertifyVex, error) {
+	if e.loadedTypes[3] {
+		return e.VexPackage, nil
+	}
+	return nil, &NotLoadedError{edge: "vex_package"}
+}
+
 // IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
 // was not loaded in eager-loading.
 func (e PackageVersionEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.IncludedInSboms, nil
 	}
 	return nil, &NotLoadedError{edge: "included_in_sboms"}
@@ -106,7 +118,7 @@ func (e PackageVersionEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) 
 // PkgEqualPkgAOrErr returns the PkgEqualPkgA value or an error if the edge
 // was not loaded in eager-loading.
 func (e PackageVersionEdges) PkgEqualPkgAOrErr() ([]*PkgEqual, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.PkgEqualPkgA, nil
 	}
 	return nil, &NotLoadedError{edge: "pkg_equal_pkg_a"}
@@ -115,7 +127,7 @@ func (e PackageVersionEdges) PkgEqualPkgAOrErr() ([]*PkgEqual, error) {
 // PkgEqualPkgBOrErr returns the PkgEqualPkgB value or an error if the edge
 // was not loaded in eager-loading.
 func (e PackageVersionEdges) PkgEqualPkgBOrErr() ([]*PkgEqual, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.PkgEqualPkgB, nil
 	}
 	return nil, &NotLoadedError{edge: "pkg_equal_pkg_b"}
@@ -211,6 +223,11 @@ func (pv *PackageVersion) QueryOccurrences() *OccurrenceQuery {
 // QuerySbom queries the "sbom" edge of the PackageVersion entity.
 func (pv *PackageVersion) QuerySbom() *BillOfMaterialsQuery {
 	return NewPackageVersionClient(pv.config).QuerySbom(pv)
+}
+
+// QueryVexPackage queries the "vex_package" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryVexPackage() *CertifyVexQuery {
+	return NewPackageVersionClient(pv.config).QueryVexPackage(pv)
 }
 
 // QueryIncludedInSboms queries the "included_in_sboms" edge of the PackageVersion entity.
@@ -314,6 +331,30 @@ func (pv *PackageVersion) appendNamedSbom(name string, edges ...*BillOfMaterials
 		pv.Edges.namedSbom[name] = []*BillOfMaterials{}
 	} else {
 		pv.Edges.namedSbom[name] = append(pv.Edges.namedSbom[name], edges...)
+	}
+}
+
+// NamedVexPackage returns the VexPackage named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedVexPackage(name string) ([]*CertifyVex, error) {
+	if pv.Edges.namedVexPackage == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedVexPackage[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedVexPackage(name string, edges ...*CertifyVex) {
+	if pv.Edges.namedVexPackage == nil {
+		pv.Edges.namedVexPackage = make(map[string][]*CertifyVex)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedVexPackage[name] = []*CertifyVex{}
+	} else {
+		pv.Edges.namedVexPackage[name] = append(pv.Edges.namedVexPackage[name], edges...)
 	}
 }
 

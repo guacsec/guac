@@ -309,6 +309,98 @@ func HasHashEqualArtBWith(preds ...predicate.HashEqual) predicate.Artifact {
 	})
 }
 
+// HasVex applies the HasEdge predicate on the "vex" edge.
+func HasVex() predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, VexTable, VexColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVexWith applies the HasEdge predicate on the "vex" edge with a given conditions (other predicates).
+func HasVexWith(preds ...predicate.CertifyVex) predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := newVexStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCertification applies the HasEdge predicate on the "certification" edge.
+func HasCertification() predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, CertificationTable, CertificationColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCertificationWith applies the HasEdge predicate on the "certification" edge with a given conditions (other predicates).
+func HasCertificationWith(preds ...predicate.Certification) predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := newCertificationStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMetadata applies the HasEdge predicate on the "metadata" edge.
+func HasMetadata() predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, MetadataTable, MetadataColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMetadataWith applies the HasEdge predicate on the "metadata" edge with a given conditions (other predicates).
+func HasMetadataWith(preds ...predicate.HasMetadata) predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := newMetadataStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPoc applies the HasEdge predicate on the "poc" edge.
+func HasPoc() predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, PocTable, PocColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPocWith applies the HasEdge predicate on the "poc" edge with a given conditions (other predicates).
+func HasPocWith(preds ...predicate.PointOfContact) predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := newPocStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasIncludedInSboms applies the HasEdge predicate on the "included_in_sboms" edge.
 func HasIncludedInSboms() predicate.Artifact {
 	return predicate.Artifact(func(s *sql.Selector) {

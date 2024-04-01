@@ -97,6 +97,18 @@ type ArtifactMutation struct {
 	hash_equal_art_b         map[uuid.UUID]struct{}
 	removedhash_equal_art_b  map[uuid.UUID]struct{}
 	clearedhash_equal_art_b  bool
+	vex                      map[uuid.UUID]struct{}
+	removedvex               map[uuid.UUID]struct{}
+	clearedvex               bool
+	certification            map[uuid.UUID]struct{}
+	removedcertification     map[uuid.UUID]struct{}
+	clearedcertification     bool
+	metadata                 map[uuid.UUID]struct{}
+	removedmetadata          map[uuid.UUID]struct{}
+	clearedmetadata          bool
+	poc                      map[uuid.UUID]struct{}
+	removedpoc               map[uuid.UUID]struct{}
+	clearedpoc               bool
 	included_in_sboms        map[uuid.UUID]struct{}
 	removedincluded_in_sboms map[uuid.UUID]struct{}
 	clearedincluded_in_sboms bool
@@ -551,6 +563,222 @@ func (m *ArtifactMutation) ResetHashEqualArtB() {
 	m.removedhash_equal_art_b = nil
 }
 
+// AddVexIDs adds the "vex" edge to the CertifyVex entity by ids.
+func (m *ArtifactMutation) AddVexIDs(ids ...uuid.UUID) {
+	if m.vex == nil {
+		m.vex = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.vex[ids[i]] = struct{}{}
+	}
+}
+
+// ClearVex clears the "vex" edge to the CertifyVex entity.
+func (m *ArtifactMutation) ClearVex() {
+	m.clearedvex = true
+}
+
+// VexCleared reports if the "vex" edge to the CertifyVex entity was cleared.
+func (m *ArtifactMutation) VexCleared() bool {
+	return m.clearedvex
+}
+
+// RemoveVexIDs removes the "vex" edge to the CertifyVex entity by IDs.
+func (m *ArtifactMutation) RemoveVexIDs(ids ...uuid.UUID) {
+	if m.removedvex == nil {
+		m.removedvex = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.vex, ids[i])
+		m.removedvex[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedVex returns the removed IDs of the "vex" edge to the CertifyVex entity.
+func (m *ArtifactMutation) RemovedVexIDs() (ids []uuid.UUID) {
+	for id := range m.removedvex {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// VexIDs returns the "vex" edge IDs in the mutation.
+func (m *ArtifactMutation) VexIDs() (ids []uuid.UUID) {
+	for id := range m.vex {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetVex resets all changes to the "vex" edge.
+func (m *ArtifactMutation) ResetVex() {
+	m.vex = nil
+	m.clearedvex = false
+	m.removedvex = nil
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by ids.
+func (m *ArtifactMutation) AddCertificationIDs(ids ...uuid.UUID) {
+	if m.certification == nil {
+		m.certification = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.certification[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCertification clears the "certification" edge to the Certification entity.
+func (m *ArtifactMutation) ClearCertification() {
+	m.clearedcertification = true
+}
+
+// CertificationCleared reports if the "certification" edge to the Certification entity was cleared.
+func (m *ArtifactMutation) CertificationCleared() bool {
+	return m.clearedcertification
+}
+
+// RemoveCertificationIDs removes the "certification" edge to the Certification entity by IDs.
+func (m *ArtifactMutation) RemoveCertificationIDs(ids ...uuid.UUID) {
+	if m.removedcertification == nil {
+		m.removedcertification = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.certification, ids[i])
+		m.removedcertification[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCertification returns the removed IDs of the "certification" edge to the Certification entity.
+func (m *ArtifactMutation) RemovedCertificationIDs() (ids []uuid.UUID) {
+	for id := range m.removedcertification {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CertificationIDs returns the "certification" edge IDs in the mutation.
+func (m *ArtifactMutation) CertificationIDs() (ids []uuid.UUID) {
+	for id := range m.certification {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCertification resets all changes to the "certification" edge.
+func (m *ArtifactMutation) ResetCertification() {
+	m.certification = nil
+	m.clearedcertification = false
+	m.removedcertification = nil
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by ids.
+func (m *ArtifactMutation) AddMetadatumIDs(ids ...uuid.UUID) {
+	if m.metadata == nil {
+		m.metadata = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.metadata[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMetadata clears the "metadata" edge to the HasMetadata entity.
+func (m *ArtifactMutation) ClearMetadata() {
+	m.clearedmetadata = true
+}
+
+// MetadataCleared reports if the "metadata" edge to the HasMetadata entity was cleared.
+func (m *ArtifactMutation) MetadataCleared() bool {
+	return m.clearedmetadata
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to the HasMetadata entity by IDs.
+func (m *ArtifactMutation) RemoveMetadatumIDs(ids ...uuid.UUID) {
+	if m.removedmetadata == nil {
+		m.removedmetadata = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.metadata, ids[i])
+		m.removedmetadata[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMetadata returns the removed IDs of the "metadata" edge to the HasMetadata entity.
+func (m *ArtifactMutation) RemovedMetadataIDs() (ids []uuid.UUID) {
+	for id := range m.removedmetadata {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MetadataIDs returns the "metadata" edge IDs in the mutation.
+func (m *ArtifactMutation) MetadataIDs() (ids []uuid.UUID) {
+	for id := range m.metadata {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMetadata resets all changes to the "metadata" edge.
+func (m *ArtifactMutation) ResetMetadata() {
+	m.metadata = nil
+	m.clearedmetadata = false
+	m.removedmetadata = nil
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by ids.
+func (m *ArtifactMutation) AddPocIDs(ids ...uuid.UUID) {
+	if m.poc == nil {
+		m.poc = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.poc[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPoc clears the "poc" edge to the PointOfContact entity.
+func (m *ArtifactMutation) ClearPoc() {
+	m.clearedpoc = true
+}
+
+// PocCleared reports if the "poc" edge to the PointOfContact entity was cleared.
+func (m *ArtifactMutation) PocCleared() bool {
+	return m.clearedpoc
+}
+
+// RemovePocIDs removes the "poc" edge to the PointOfContact entity by IDs.
+func (m *ArtifactMutation) RemovePocIDs(ids ...uuid.UUID) {
+	if m.removedpoc == nil {
+		m.removedpoc = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.poc, ids[i])
+		m.removedpoc[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPoc returns the removed IDs of the "poc" edge to the PointOfContact entity.
+func (m *ArtifactMutation) RemovedPocIDs() (ids []uuid.UUID) {
+	for id := range m.removedpoc {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PocIDs returns the "poc" edge IDs in the mutation.
+func (m *ArtifactMutation) PocIDs() (ids []uuid.UUID) {
+	for id := range m.poc {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPoc resets all changes to the "poc" edge.
+func (m *ArtifactMutation) ResetPoc() {
+	m.poc = nil
+	m.clearedpoc = false
+	m.removedpoc = nil
+}
+
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
 func (m *ArtifactMutation) AddIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.included_in_sboms == nil {
@@ -755,7 +983,7 @@ func (m *ArtifactMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ArtifactMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 10)
 	if m.occurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -770,6 +998,18 @@ func (m *ArtifactMutation) AddedEdges() []string {
 	}
 	if m.hash_equal_art_b != nil {
 		edges = append(edges, artifact.EdgeHashEqualArtB)
+	}
+	if m.vex != nil {
+		edges = append(edges, artifact.EdgeVex)
+	}
+	if m.certification != nil {
+		edges = append(edges, artifact.EdgeCertification)
+	}
+	if m.metadata != nil {
+		edges = append(edges, artifact.EdgeMetadata)
+	}
+	if m.poc != nil {
+		edges = append(edges, artifact.EdgePoc)
 	}
 	if m.included_in_sboms != nil {
 		edges = append(edges, artifact.EdgeIncludedInSboms)
@@ -811,6 +1051,30 @@ func (m *ArtifactMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case artifact.EdgeVex:
+		ids := make([]ent.Value, 0, len(m.vex))
+		for id := range m.vex {
+			ids = append(ids, id)
+		}
+		return ids
+	case artifact.EdgeCertification:
+		ids := make([]ent.Value, 0, len(m.certification))
+		for id := range m.certification {
+			ids = append(ids, id)
+		}
+		return ids
+	case artifact.EdgeMetadata:
+		ids := make([]ent.Value, 0, len(m.metadata))
+		for id := range m.metadata {
+			ids = append(ids, id)
+		}
+		return ids
+	case artifact.EdgePoc:
+		ids := make([]ent.Value, 0, len(m.poc))
+		for id := range m.poc {
+			ids = append(ids, id)
+		}
+		return ids
 	case artifact.EdgeIncludedInSboms:
 		ids := make([]ent.Value, 0, len(m.included_in_sboms))
 		for id := range m.included_in_sboms {
@@ -823,7 +1087,7 @@ func (m *ArtifactMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ArtifactMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 10)
 	if m.removedoccurrences != nil {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -838,6 +1102,18 @@ func (m *ArtifactMutation) RemovedEdges() []string {
 	}
 	if m.removedhash_equal_art_b != nil {
 		edges = append(edges, artifact.EdgeHashEqualArtB)
+	}
+	if m.removedvex != nil {
+		edges = append(edges, artifact.EdgeVex)
+	}
+	if m.removedcertification != nil {
+		edges = append(edges, artifact.EdgeCertification)
+	}
+	if m.removedmetadata != nil {
+		edges = append(edges, artifact.EdgeMetadata)
+	}
+	if m.removedpoc != nil {
+		edges = append(edges, artifact.EdgePoc)
 	}
 	if m.removedincluded_in_sboms != nil {
 		edges = append(edges, artifact.EdgeIncludedInSboms)
@@ -879,6 +1155,30 @@ func (m *ArtifactMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case artifact.EdgeVex:
+		ids := make([]ent.Value, 0, len(m.removedvex))
+		for id := range m.removedvex {
+			ids = append(ids, id)
+		}
+		return ids
+	case artifact.EdgeCertification:
+		ids := make([]ent.Value, 0, len(m.removedcertification))
+		for id := range m.removedcertification {
+			ids = append(ids, id)
+		}
+		return ids
+	case artifact.EdgeMetadata:
+		ids := make([]ent.Value, 0, len(m.removedmetadata))
+		for id := range m.removedmetadata {
+			ids = append(ids, id)
+		}
+		return ids
+	case artifact.EdgePoc:
+		ids := make([]ent.Value, 0, len(m.removedpoc))
+		for id := range m.removedpoc {
+			ids = append(ids, id)
+		}
+		return ids
 	case artifact.EdgeIncludedInSboms:
 		ids := make([]ent.Value, 0, len(m.removedincluded_in_sboms))
 		for id := range m.removedincluded_in_sboms {
@@ -891,7 +1191,7 @@ func (m *ArtifactMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ArtifactMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 10)
 	if m.clearedoccurrences {
 		edges = append(edges, artifact.EdgeOccurrences)
 	}
@@ -906,6 +1206,18 @@ func (m *ArtifactMutation) ClearedEdges() []string {
 	}
 	if m.clearedhash_equal_art_b {
 		edges = append(edges, artifact.EdgeHashEqualArtB)
+	}
+	if m.clearedvex {
+		edges = append(edges, artifact.EdgeVex)
+	}
+	if m.clearedcertification {
+		edges = append(edges, artifact.EdgeCertification)
+	}
+	if m.clearedmetadata {
+		edges = append(edges, artifact.EdgeMetadata)
+	}
+	if m.clearedpoc {
+		edges = append(edges, artifact.EdgePoc)
 	}
 	if m.clearedincluded_in_sboms {
 		edges = append(edges, artifact.EdgeIncludedInSboms)
@@ -927,6 +1239,14 @@ func (m *ArtifactMutation) EdgeCleared(name string) bool {
 		return m.clearedhash_equal_art_a
 	case artifact.EdgeHashEqualArtB:
 		return m.clearedhash_equal_art_b
+	case artifact.EdgeVex:
+		return m.clearedvex
+	case artifact.EdgeCertification:
+		return m.clearedcertification
+	case artifact.EdgeMetadata:
+		return m.clearedmetadata
+	case artifact.EdgePoc:
+		return m.clearedpoc
 	case artifact.EdgeIncludedInSboms:
 		return m.clearedincluded_in_sboms
 	}
@@ -959,6 +1279,18 @@ func (m *ArtifactMutation) ResetEdge(name string) error {
 		return nil
 	case artifact.EdgeHashEqualArtB:
 		m.ResetHashEqualArtB()
+		return nil
+	case artifact.EdgeVex:
+		m.ResetVex()
+		return nil
+	case artifact.EdgeCertification:
+		m.ResetCertification()
+		return nil
+	case artifact.EdgeMetadata:
+		m.ResetMetadata()
+		return nil
+	case artifact.EdgePoc:
+		m.ResetPoc()
 		return nil
 	case artifact.EdgeIncludedInSboms:
 		m.ResetIncludedInSboms()
@@ -13567,6 +13899,9 @@ type PackageVersionMutation struct {
 	sbom                     map[uuid.UUID]struct{}
 	removedsbom              map[uuid.UUID]struct{}
 	clearedsbom              bool
+	vex_package              map[uuid.UUID]struct{}
+	removedvex_package       map[uuid.UUID]struct{}
+	clearedvex_package       bool
 	included_in_sboms        map[uuid.UUID]struct{}
 	removedincluded_in_sboms map[uuid.UUID]struct{}
 	clearedincluded_in_sboms bool
@@ -14029,6 +14364,60 @@ func (m *PackageVersionMutation) ResetSbom() {
 	m.removedsbom = nil
 }
 
+// AddVexPackageIDs adds the "vex_package" edge to the CertifyVex entity by ids.
+func (m *PackageVersionMutation) AddVexPackageIDs(ids ...uuid.UUID) {
+	if m.vex_package == nil {
+		m.vex_package = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.vex_package[ids[i]] = struct{}{}
+	}
+}
+
+// ClearVexPackage clears the "vex_package" edge to the CertifyVex entity.
+func (m *PackageVersionMutation) ClearVexPackage() {
+	m.clearedvex_package = true
+}
+
+// VexPackageCleared reports if the "vex_package" edge to the CertifyVex entity was cleared.
+func (m *PackageVersionMutation) VexPackageCleared() bool {
+	return m.clearedvex_package
+}
+
+// RemoveVexPackageIDs removes the "vex_package" edge to the CertifyVex entity by IDs.
+func (m *PackageVersionMutation) RemoveVexPackageIDs(ids ...uuid.UUID) {
+	if m.removedvex_package == nil {
+		m.removedvex_package = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.vex_package, ids[i])
+		m.removedvex_package[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedVexPackage returns the removed IDs of the "vex_package" edge to the CertifyVex entity.
+func (m *PackageVersionMutation) RemovedVexPackageIDs() (ids []uuid.UUID) {
+	for id := range m.removedvex_package {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// VexPackageIDs returns the "vex_package" edge IDs in the mutation.
+func (m *PackageVersionMutation) VexPackageIDs() (ids []uuid.UUID) {
+	for id := range m.vex_package {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetVexPackage resets all changes to the "vex_package" edge.
+func (m *PackageVersionMutation) ResetVexPackage() {
+	m.vex_package = nil
+	m.clearedvex_package = false
+	m.removedvex_package = nil
+}
+
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by ids.
 func (m *PackageVersionMutation) AddIncludedInSbomIDs(ids ...uuid.UUID) {
 	if m.included_in_sboms == nil {
@@ -14401,7 +14790,7 @@ func (m *PackageVersionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PackageVersionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.name != nil {
 		edges = append(edges, packageversion.EdgeName)
 	}
@@ -14410,6 +14799,9 @@ func (m *PackageVersionMutation) AddedEdges() []string {
 	}
 	if m.sbom != nil {
 		edges = append(edges, packageversion.EdgeSbom)
+	}
+	if m.vex_package != nil {
+		edges = append(edges, packageversion.EdgeVexPackage)
 	}
 	if m.included_in_sboms != nil {
 		edges = append(edges, packageversion.EdgeIncludedInSboms)
@@ -14443,6 +14835,12 @@ func (m *PackageVersionMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case packageversion.EdgeVexPackage:
+		ids := make([]ent.Value, 0, len(m.vex_package))
+		for id := range m.vex_package {
+			ids = append(ids, id)
+		}
+		return ids
 	case packageversion.EdgeIncludedInSboms:
 		ids := make([]ent.Value, 0, len(m.included_in_sboms))
 		for id := range m.included_in_sboms {
@@ -14467,12 +14865,15 @@ func (m *PackageVersionMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PackageVersionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.removedoccurrences != nil {
 		edges = append(edges, packageversion.EdgeOccurrences)
 	}
 	if m.removedsbom != nil {
 		edges = append(edges, packageversion.EdgeSbom)
+	}
+	if m.removedvex_package != nil {
+		edges = append(edges, packageversion.EdgeVexPackage)
 	}
 	if m.removedincluded_in_sboms != nil {
 		edges = append(edges, packageversion.EdgeIncludedInSboms)
@@ -14502,6 +14903,12 @@ func (m *PackageVersionMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case packageversion.EdgeVexPackage:
+		ids := make([]ent.Value, 0, len(m.removedvex_package))
+		for id := range m.removedvex_package {
+			ids = append(ids, id)
+		}
+		return ids
 	case packageversion.EdgeIncludedInSboms:
 		ids := make([]ent.Value, 0, len(m.removedincluded_in_sboms))
 		for id := range m.removedincluded_in_sboms {
@@ -14526,7 +14933,7 @@ func (m *PackageVersionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PackageVersionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.clearedname {
 		edges = append(edges, packageversion.EdgeName)
 	}
@@ -14535,6 +14942,9 @@ func (m *PackageVersionMutation) ClearedEdges() []string {
 	}
 	if m.clearedsbom {
 		edges = append(edges, packageversion.EdgeSbom)
+	}
+	if m.clearedvex_package {
+		edges = append(edges, packageversion.EdgeVexPackage)
 	}
 	if m.clearedincluded_in_sboms {
 		edges = append(edges, packageversion.EdgeIncludedInSboms)
@@ -14558,6 +14968,8 @@ func (m *PackageVersionMutation) EdgeCleared(name string) bool {
 		return m.clearedoccurrences
 	case packageversion.EdgeSbom:
 		return m.clearedsbom
+	case packageversion.EdgeVexPackage:
+		return m.clearedvex_package
 	case packageversion.EdgeIncludedInSboms:
 		return m.clearedincluded_in_sboms
 	case packageversion.EdgePkgEqualPkgA:
@@ -14591,6 +15003,9 @@ func (m *PackageVersionMutation) ResetEdge(name string) error {
 		return nil
 	case packageversion.EdgeSbom:
 		m.ResetSbom()
+		return nil
+	case packageversion.EdgeVexPackage:
+		m.ResetVexPackage()
 		return nil
 	case packageversion.EdgeIncludedInSboms:
 		m.ResetIncludedInSboms()
@@ -18905,6 +19320,9 @@ type VulnerabilityIDMutation struct {
 	vulnerability_metadata        map[uuid.UUID]struct{}
 	removedvulnerability_metadata map[uuid.UUID]struct{}
 	clearedvulnerability_metadata bool
+	vex_package                   map[uuid.UUID]struct{}
+	removedvex_package            map[uuid.UUID]struct{}
+	clearedvex_package            bool
 	done                          bool
 	oldValue                      func(context.Context) (*VulnerabilityID, error)
 	predicates                    []predicate.VulnerabilityID
@@ -19248,6 +19666,60 @@ func (m *VulnerabilityIDMutation) ResetVulnerabilityMetadata() {
 	m.removedvulnerability_metadata = nil
 }
 
+// AddVexPackageIDs adds the "vex_package" edge to the CertifyVex entity by ids.
+func (m *VulnerabilityIDMutation) AddVexPackageIDs(ids ...uuid.UUID) {
+	if m.vex_package == nil {
+		m.vex_package = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.vex_package[ids[i]] = struct{}{}
+	}
+}
+
+// ClearVexPackage clears the "vex_package" edge to the CertifyVex entity.
+func (m *VulnerabilityIDMutation) ClearVexPackage() {
+	m.clearedvex_package = true
+}
+
+// VexPackageCleared reports if the "vex_package" edge to the CertifyVex entity was cleared.
+func (m *VulnerabilityIDMutation) VexPackageCleared() bool {
+	return m.clearedvex_package
+}
+
+// RemoveVexPackageIDs removes the "vex_package" edge to the CertifyVex entity by IDs.
+func (m *VulnerabilityIDMutation) RemoveVexPackageIDs(ids ...uuid.UUID) {
+	if m.removedvex_package == nil {
+		m.removedvex_package = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.vex_package, ids[i])
+		m.removedvex_package[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedVexPackage returns the removed IDs of the "vex_package" edge to the CertifyVex entity.
+func (m *VulnerabilityIDMutation) RemovedVexPackageIDs() (ids []uuid.UUID) {
+	for id := range m.removedvex_package {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// VexPackageIDs returns the "vex_package" edge IDs in the mutation.
+func (m *VulnerabilityIDMutation) VexPackageIDs() (ids []uuid.UUID) {
+	for id := range m.vex_package {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetVexPackage resets all changes to the "vex_package" edge.
+func (m *VulnerabilityIDMutation) ResetVexPackage() {
+	m.vex_package = nil
+	m.clearedvex_package = false
+	m.removedvex_package = nil
+}
+
 // Where appends a list predicates to the VulnerabilityIDMutation builder.
 func (m *VulnerabilityIDMutation) Where(ps ...predicate.VulnerabilityID) {
 	m.predicates = append(m.predicates, ps...)
@@ -19398,7 +19870,7 @@ func (m *VulnerabilityIDMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *VulnerabilityIDMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.vuln_equal_vuln_a != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnA)
 	}
@@ -19407,6 +19879,9 @@ func (m *VulnerabilityIDMutation) AddedEdges() []string {
 	}
 	if m.vulnerability_metadata != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnerabilityMetadata)
+	}
+	if m.vex_package != nil {
+		edges = append(edges, vulnerabilityid.EdgeVexPackage)
 	}
 	return edges
 }
@@ -19433,13 +19908,19 @@ func (m *VulnerabilityIDMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case vulnerabilityid.EdgeVexPackage:
+		ids := make([]ent.Value, 0, len(m.vex_package))
+		for id := range m.vex_package {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *VulnerabilityIDMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedvuln_equal_vuln_a != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnA)
 	}
@@ -19448,6 +19929,9 @@ func (m *VulnerabilityIDMutation) RemovedEdges() []string {
 	}
 	if m.removedvulnerability_metadata != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnerabilityMetadata)
+	}
+	if m.removedvex_package != nil {
+		edges = append(edges, vulnerabilityid.EdgeVexPackage)
 	}
 	return edges
 }
@@ -19474,13 +19958,19 @@ func (m *VulnerabilityIDMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case vulnerabilityid.EdgeVexPackage:
+		ids := make([]ent.Value, 0, len(m.removedvex_package))
+		for id := range m.removedvex_package {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *VulnerabilityIDMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedvuln_equal_vuln_a {
 		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnA)
 	}
@@ -19489,6 +19979,9 @@ func (m *VulnerabilityIDMutation) ClearedEdges() []string {
 	}
 	if m.clearedvulnerability_metadata {
 		edges = append(edges, vulnerabilityid.EdgeVulnerabilityMetadata)
+	}
+	if m.clearedvex_package {
+		edges = append(edges, vulnerabilityid.EdgeVexPackage)
 	}
 	return edges
 }
@@ -19503,6 +19996,8 @@ func (m *VulnerabilityIDMutation) EdgeCleared(name string) bool {
 		return m.clearedvuln_equal_vuln_b
 	case vulnerabilityid.EdgeVulnerabilityMetadata:
 		return m.clearedvulnerability_metadata
+	case vulnerabilityid.EdgeVexPackage:
+		return m.clearedvex_package
 	}
 	return false
 }
@@ -19527,6 +20022,9 @@ func (m *VulnerabilityIDMutation) ResetEdge(name string) error {
 		return nil
 	case vulnerabilityid.EdgeVulnerabilityMetadata:
 		m.ResetVulnerabilityMetadata()
+		return nil
+	case vulnerabilityid.EdgeVexPackage:
+		m.ResetVexPackage()
 		return nil
 	}
 	return fmt.Errorf("unknown VulnerabilityID edge %s", name)

@@ -241,21 +241,12 @@ func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability 
 
 func toModelVulnerabilityMetadata(v *ent.VulnerabilityMetadata) *model.VulnerabilityMetadata {
 	return &model.VulnerabilityMetadata{
-		ID: v.ID.String(),
-		Vulnerability: &model.Vulnerability{
-			ID:   fmt.Sprintf("%s:%s", vulnTypeString, v.Edges.VulnerabilityID.ID.String()),
-			Type: v.Edges.VulnerabilityID.Type,
-			VulnerabilityIDs: []*model.VulnerabilityID{
-				{
-					ID:              v.Edges.VulnerabilityID.ID.String(),
-					VulnerabilityID: v.Edges.VulnerabilityID.VulnerabilityID,
-				},
-			},
-		},
-		ScoreType:  model.VulnerabilityScoreType(v.ScoreType),
-		ScoreValue: v.ScoreValue,
-		Timestamp:  v.Timestamp,
-		Origin:     v.Origin,
-		Collector:  v.Collector,
+		ID:            toGlobalID(vulnerabilitymetadata.Table, v.ID.String()),
+		Vulnerability: toModelVulnerabilityFromVulnerabilityID(v.Edges.VulnerabilityID),
+		ScoreType:     model.VulnerabilityScoreType(v.ScoreType),
+		ScoreValue:    v.ScoreValue,
+		Timestamp:     v.Timestamp,
+		Origin:        v.Origin,
+		Collector:     v.Collector,
 	}
 }

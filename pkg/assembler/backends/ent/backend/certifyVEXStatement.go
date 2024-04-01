@@ -279,7 +279,7 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.Certif
 
 func toModelCertifyVEXStatement(record *ent.CertifyVex) *model.CertifyVEXStatement {
 	return &model.CertifyVEXStatement{
-		ID:               record.ID.String(),
+		ID:               toGlobalID(certifyvex.Table, record.ID.String()),
 		Subject:          toPackageOrArtifact(record.Edges.Package, record.Edges.Artifact),
 		Vulnerability:    toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		KnownSince:       record.KnownSince,

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -121,6 +122,21 @@ func (pvc *PackageVersionCreate) AddSbom(b ...*BillOfMaterials) *PackageVersionC
 		ids[i] = b[i].ID
 	}
 	return pvc.AddSbomIDs(ids...)
+}
+
+// AddVexPackageIDs adds the "vex_package" edge to the CertifyVex entity by IDs.
+func (pvc *PackageVersionCreate) AddVexPackageIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddVexPackageIDs(ids...)
+	return pvc
+}
+
+// AddVexPackage adds the "vex_package" edges to the CertifyVex entity.
+func (pvc *PackageVersionCreate) AddVexPackage(c ...*CertifyVex) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvc.AddVexPackageIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
@@ -328,6 +344,22 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.VexPackageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexPackageTable,
+			Columns: []string{packageversion.VexPackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

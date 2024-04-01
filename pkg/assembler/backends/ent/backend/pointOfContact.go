@@ -366,7 +366,7 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 	}
 
 	return &model.PointOfContact{
-		ID:            v.ID.String(),
+		ID:            toGlobalID(pointofcontact.Table, v.ID.String()),
 		Subject:       sub,
 		Email:         v.Email,
 		Info:          v.Info,

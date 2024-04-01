@@ -368,6 +368,29 @@ func HasSbomWith(preds ...predicate.BillOfMaterials) predicate.PackageVersion {
 	})
 }
 
+// HasVexPackage applies the HasEdge predicate on the "vex_package" edge.
+func HasVexPackage() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, VexPackageTable, VexPackageColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVexPackageWith applies the HasEdge predicate on the "vex_package" edge with a given conditions (other predicates).
+func HasVexPackageWith(preds ...predicate.CertifyVex) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newVexPackageStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasIncludedInSboms applies the HasEdge predicate on the "included_in_sboms" edge.
 func HasIncludedInSboms() predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {

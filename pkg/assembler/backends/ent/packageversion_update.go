@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -143,6 +144,21 @@ func (pvu *PackageVersionUpdate) AddSbom(b ...*BillOfMaterials) *PackageVersionU
 	return pvu.AddSbomIDs(ids...)
 }
 
+// AddVexPackageIDs adds the "vex_package" edge to the CertifyVex entity by IDs.
+func (pvu *PackageVersionUpdate) AddVexPackageIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddVexPackageIDs(ids...)
+	return pvu
+}
+
+// AddVexPackage adds the "vex_package" edges to the CertifyVex entity.
+func (pvu *PackageVersionUpdate) AddVexPackage(c ...*CertifyVex) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.AddVexPackageIDs(ids...)
+}
+
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
 func (pvu *PackageVersionUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.AddIncludedInSbomIDs(ids...)
@@ -239,6 +255,27 @@ func (pvu *PackageVersionUpdate) RemoveSbom(b ...*BillOfMaterials) *PackageVersi
 		ids[i] = b[i].ID
 	}
 	return pvu.RemoveSbomIDs(ids...)
+}
+
+// ClearVexPackage clears all "vex_package" edges to the CertifyVex entity.
+func (pvu *PackageVersionUpdate) ClearVexPackage() *PackageVersionUpdate {
+	pvu.mutation.ClearVexPackage()
+	return pvu
+}
+
+// RemoveVexPackageIDs removes the "vex_package" edge to CertifyVex entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveVexPackageIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemoveVexPackageIDs(ids...)
+	return pvu
+}
+
+// RemoveVexPackage removes "vex_package" edges to CertifyVex entities.
+func (pvu *PackageVersionUpdate) RemoveVexPackage(c ...*CertifyVex) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.RemoveVexPackageIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
@@ -483,6 +520,51 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.VexPackageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexPackageTable,
+			Columns: []string{packageversion.VexPackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedVexPackageIDs(); len(nodes) > 0 && !pvu.mutation.VexPackageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexPackageTable,
+			Columns: []string{packageversion.VexPackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.VexPackageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexPackageTable,
+			Columns: []string{packageversion.VexPackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -754,6 +836,21 @@ func (pvuo *PackageVersionUpdateOne) AddSbom(b ...*BillOfMaterials) *PackageVers
 	return pvuo.AddSbomIDs(ids...)
 }
 
+// AddVexPackageIDs adds the "vex_package" edge to the CertifyVex entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddVexPackageIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddVexPackageIDs(ids...)
+	return pvuo
+}
+
+// AddVexPackage adds the "vex_package" edges to the CertifyVex entity.
+func (pvuo *PackageVersionUpdateOne) AddVexPackage(c ...*CertifyVex) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.AddVexPackageIDs(ids...)
+}
+
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
 func (pvuo *PackageVersionUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.AddIncludedInSbomIDs(ids...)
@@ -850,6 +947,27 @@ func (pvuo *PackageVersionUpdateOne) RemoveSbom(b ...*BillOfMaterials) *PackageV
 		ids[i] = b[i].ID
 	}
 	return pvuo.RemoveSbomIDs(ids...)
+}
+
+// ClearVexPackage clears all "vex_package" edges to the CertifyVex entity.
+func (pvuo *PackageVersionUpdateOne) ClearVexPackage() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearVexPackage()
+	return pvuo
+}
+
+// RemoveVexPackageIDs removes the "vex_package" edge to CertifyVex entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveVexPackageIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveVexPackageIDs(ids...)
+	return pvuo
+}
+
+// RemoveVexPackage removes "vex_package" edges to CertifyVex entities.
+func (pvuo *PackageVersionUpdateOne) RemoveVexPackage(c ...*CertifyVex) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.RemoveVexPackageIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
@@ -1124,6 +1242,51 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(billofmaterials.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.VexPackageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexPackageTable,
+			Columns: []string{packageversion.VexPackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedVexPackageIDs(); len(nodes) > 0 && !pvuo.mutation.VexPackageCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexPackageTable,
+			Columns: []string{packageversion.VexPackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.VexPackageIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexPackageTable,
+			Columns: []string{packageversion.VexPackageColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -308,7 +308,7 @@ func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 	}
 
 	return &model.HasSlsa{
-		ID:      att.ID.String(),
+		ID:      toGlobalID(slsaattestation.Table, att.ID.String()),
 		Subject: toModelArtifact(att.Edges.Subject),
 		Slsa:    slsa,
 	}

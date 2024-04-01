@@ -68,6 +68,54 @@ func (a *Artifact) HashEqualArtB(ctx context.Context) (result []*HashEqual, err 
 	return result, err
 }
 
+func (a *Artifact) Vex(ctx context.Context) (result []*CertifyVex, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = a.NamedVex(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = a.Edges.VexOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = a.QueryVex().All(ctx)
+	}
+	return result, err
+}
+
+func (a *Artifact) Certification(ctx context.Context) (result []*Certification, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = a.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = a.Edges.CertificationOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = a.QueryCertification().All(ctx)
+	}
+	return result, err
+}
+
+func (a *Artifact) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = a.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = a.Edges.MetadataOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = a.QueryMetadata().All(ctx)
+	}
+	return result, err
+}
+
+func (a *Artifact) Poc(ctx context.Context) (result []*PointOfContact, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = a.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = a.Edges.PocOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = a.QueryPoc().All(ctx)
+	}
+	return result, err
+}
+
 func (a *Artifact) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = a.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
@@ -488,6 +536,18 @@ func (pv *PackageVersion) Sbom(ctx context.Context) (result []*BillOfMaterials, 
 	return result, err
 }
 
+func (pv *PackageVersion) VexPackage(ctx context.Context) (result []*CertifyVex, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedVexPackage(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.VexPackageOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryVexPackage().All(ctx)
+	}
+	return result, err
+}
+
 func (pv *PackageVersion) IncludedInSboms(ctx context.Context) (result []*BillOfMaterials, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = pv.NamedIncludedInSboms(graphql.GetFieldContext(ctx).Field.Alias)
@@ -660,6 +720,18 @@ func (vi *VulnerabilityID) VulnerabilityMetadata(ctx context.Context) (result []
 	}
 	if IsNotLoaded(err) {
 		result, err = vi.QueryVulnerabilityMetadata().All(ctx)
+	}
+	return result, err
+}
+
+func (vi *VulnerabilityID) VexPackage(ctx context.Context) (result []*CertifyVex, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = vi.NamedVexPackage(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = vi.Edges.VexPackageOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = vi.QueryVexPackage().All(ctx)
 	}
 	return result, err
 }

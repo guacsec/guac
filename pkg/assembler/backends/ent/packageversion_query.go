@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
@@ -30,6 +31,7 @@ type PackageVersionQuery struct {
 	withName                 *PackageNameQuery
 	withOccurrences          *OccurrenceQuery
 	withSbom                 *BillOfMaterialsQuery
+	withVexPackage           *CertifyVexQuery
 	withIncludedInSboms      *BillOfMaterialsQuery
 	withPkgEqualPkgA         *PkgEqualQuery
 	withPkgEqualPkgB         *PkgEqualQuery
@@ -37,6 +39,7 @@ type PackageVersionQuery struct {
 	loadTotal                []func(context.Context, []*PackageVersion) error
 	withNamedOccurrences     map[string]*OccurrenceQuery
 	withNamedSbom            map[string]*BillOfMaterialsQuery
+	withNamedVexPackage      map[string]*CertifyVexQuery
 	withNamedIncludedInSboms map[string]*BillOfMaterialsQuery
 	withNamedPkgEqualPkgA    map[string]*PkgEqualQuery
 	withNamedPkgEqualPkgB    map[string]*PkgEqualQuery
@@ -135,6 +138,28 @@ func (pvq *PackageVersionQuery) QuerySbom() *BillOfMaterialsQuery {
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
 			sqlgraph.To(billofmaterials.Table, billofmaterials.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.SbomTable, packageversion.SbomColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVexPackage chains the current query on the "vex_package" edge.
+func (pvq *PackageVersionQuery) QueryVexPackage() *CertifyVexQuery {
+	query := (&CertifyVexClient{config: pvq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pvq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pvq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, selector),
+			sqlgraph.To(certifyvex.Table, certifyvex.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.VexPackageTable, packageversion.VexPackageColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pvq.driver.Dialect(), step)
 		return fromU, nil
@@ -403,6 +428,7 @@ func (pvq *PackageVersionQuery) Clone() *PackageVersionQuery {
 		withName:            pvq.withName.Clone(),
 		withOccurrences:     pvq.withOccurrences.Clone(),
 		withSbom:            pvq.withSbom.Clone(),
+		withVexPackage:      pvq.withVexPackage.Clone(),
 		withIncludedInSboms: pvq.withIncludedInSboms.Clone(),
 		withPkgEqualPkgA:    pvq.withPkgEqualPkgA.Clone(),
 		withPkgEqualPkgB:    pvq.withPkgEqualPkgB.Clone(),
@@ -442,6 +468,17 @@ func (pvq *PackageVersionQuery) WithSbom(opts ...func(*BillOfMaterialsQuery)) *P
 		opt(query)
 	}
 	pvq.withSbom = query
+	return pvq
+}
+
+// WithVexPackage tells the query-builder to eager-load the nodes that are connected to
+// the "vex_package" edge. The optional arguments are used to configure the query builder of the edge.
+func (pvq *PackageVersionQuery) WithVexPackage(opts ...func(*CertifyVexQuery)) *PackageVersionQuery {
+	query := (&CertifyVexClient{config: pvq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pvq.withVexPackage = query
 	return pvq
 }
 
@@ -556,10 +593,11 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	var (
 		nodes       = []*PackageVersion{}
 		_spec       = pvq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			pvq.withName != nil,
 			pvq.withOccurrences != nil,
 			pvq.withSbom != nil,
+			pvq.withVexPackage != nil,
 			pvq.withIncludedInSboms != nil,
 			pvq.withPkgEqualPkgA != nil,
 			pvq.withPkgEqualPkgB != nil,
@@ -606,6 +644,13 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 			return nil, err
 		}
 	}
+	if query := pvq.withVexPackage; query != nil {
+		if err := pvq.loadVexPackage(ctx, query, nodes,
+			func(n *PackageVersion) { n.Edges.VexPackage = []*CertifyVex{} },
+			func(n *PackageVersion, e *CertifyVex) { n.Edges.VexPackage = append(n.Edges.VexPackage, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := pvq.withIncludedInSboms; query != nil {
 		if err := pvq.loadIncludedInSboms(ctx, query, nodes,
 			func(n *PackageVersion) { n.Edges.IncludedInSboms = []*BillOfMaterials{} },
@@ -640,6 +685,13 @@ func (pvq *PackageVersionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		if err := pvq.loadSbom(ctx, query, nodes,
 			func(n *PackageVersion) { n.appendNamedSbom(name) },
 			func(n *PackageVersion, e *BillOfMaterials) { n.appendNamedSbom(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pvq.withNamedVexPackage {
+		if err := pvq.loadVexPackage(ctx, query, nodes,
+			func(n *PackageVersion) { n.appendNamedVexPackage(name) },
+			func(n *PackageVersion, e *CertifyVex) { n.appendNamedVexPackage(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -749,6 +801,39 @@ func (pvq *PackageVersionQuery) loadSbom(ctx context.Context, query *BillOfMater
 	}
 	query.Where(predicate.BillOfMaterials(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(packageversion.SbomColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PackageID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "package_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "package_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pvq *PackageVersionQuery) loadVexPackage(ctx context.Context, query *CertifyVexQuery, nodes []*PackageVersion, init func(*PackageVersion), assign func(*PackageVersion, *CertifyVex)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*PackageVersion)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(certifyvex.FieldPackageID)
+	}
+	query.Where(predicate.CertifyVex(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packageversion.VexPackageColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -1001,6 +1086,20 @@ func (pvq *PackageVersionQuery) WithNamedSbom(name string, opts ...func(*BillOfM
 		pvq.withNamedSbom = make(map[string]*BillOfMaterialsQuery)
 	}
 	pvq.withNamedSbom[name] = query
+	return pvq
+}
+
+// WithNamedVexPackage tells the query-builder to eager-load the nodes that are connected to the "vex_package"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pvq *PackageVersionQuery) WithNamedVexPackage(name string, opts ...func(*CertifyVexQuery)) *PackageVersionQuery {
+	query := (&CertifyVexClient{config: pvq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pvq.withNamedVexPackage == nil {
+		pvq.withNamedVexPackage = make(map[string]*CertifyVexQuery)
+	}
+	pvq.withNamedVexPackage[name] = query
 	return pvq
 }
 

@@ -245,6 +245,7 @@ func hashSortedScorecardChecks(checks []*model.ScorecardCheck) string {
 
 func toModelCertifyScorecard(record *ent.CertifyScorecard) *model.CertifyScorecard {
 	return &model.CertifyScorecard{
+		ID:        toGlobalID(certifyscorecard.Table, record.ID.String()),
 		Source:    toModelSource(record.Edges.Source),
 		Scorecard: toModelScorecard(record),
 	}

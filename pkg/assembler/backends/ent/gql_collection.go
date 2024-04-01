@@ -113,6 +113,54 @@ func (a *ArtifactQuery) collectField(ctx context.Context, opCtx *graphql.Operati
 			a.WithNamedHashEqualArtB(alias, func(wq *HashEqualQuery) {
 				*wq = *query
 			})
+		case "vex":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVexClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.WithNamedVex(alias, func(wq *CertifyVexQuery) {
+				*wq = *query
+			})
+		case "certification":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertificationClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.WithNamedCertification(alias, func(wq *CertificationQuery) {
+				*wq = *query
+			})
+		case "metadata":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasMetadataClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.WithNamedMetadata(alias, func(wq *HasMetadataQuery) {
+				*wq = *query
+			})
+		case "poc":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PointOfContactClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.WithNamedPoc(alias, func(wq *PointOfContactQuery) {
+				*wq = *query
+			})
 		case "includedInSboms":
 			var (
 				alias = field.Alias
@@ -2133,6 +2181,18 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 			pv.WithNamedSbom(alias, func(wq *BillOfMaterialsQuery) {
 				*wq = *query
 			})
+		case "vexPackage":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVexClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedVexPackage(alias, func(wq *CertifyVexQuery) {
+				*wq = *query
+			})
 		case "includedInSboms":
 			var (
 				alias = field.Alias
@@ -2931,6 +2991,18 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 				return err
 			}
 			vi.WithNamedVulnerabilityMetadata(alias, func(wq *VulnerabilityMetadataQuery) {
+				*wq = *query
+			})
+		case "vexPackage":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVexClient{config: vi.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			vi.WithNamedVexPackage(alias, func(wq *CertifyVexQuery) {
 				*wq = *query
 			})
 		case "vulnerabilityID":
