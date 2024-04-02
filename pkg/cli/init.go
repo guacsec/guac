@@ -22,7 +22,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
@@ -71,39 +70,18 @@ func InitConfig() {
 	}
 }
 
-// SetupPrometheus sets up the prometheus server
+// SetupPrometheus sets up the Prometheus server, registering its handler on http.DefaultServeMux
 func SetupPrometheus(ctx context.Context, logger *zap.SugaredLogger, name string) (metrics.MetricCollector, error) {
-	if name == "" {
-		return nil, errors.New("name cannot be empty")
-	}
-	m := metrics.FromContext(ctx, name)
 	enablePrometheus := viper.GetBool("enable-prometheus")
-	prometheusPort := viper.GetInt("prometheus-addr")
 	if !enablePrometheus {
 		return nil, nil
 	}
 
-	go func() {
-		http.Handle("/metrics", m.MetricsHandler())
-		logger.Infof("Prometheus server is listening on: %d", prometheusPort)
-		server := &http.Server{Addr: fmt.Sprintf(":%d", prometheusPort)}
+	if name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
 
-		// Start server in a goroutine so that it doesn't block
-		go func() {
-			if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				logger.Fatalf("Error starting HTTP server: %v", err)
-			}
-		}()
-
-		// Listen for the cancellation signal
-		<-ctx.Done()
-
-		// Shutdown the server when cancellation signal is received
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := server.Shutdown(shutdownCtx); err != nil {
-			logger.Errorf("Error shutting down server: %v", err)
-		}
-	}()
+	m := metrics.FromContext(ctx, name)
+	http.Handle("/metrics", m.MetricsHandler())
 	return m, nil
 }
