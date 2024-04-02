@@ -61,7 +61,7 @@ func toModelNamespace(n *ent.PackageName) *model.PackageNamespace {
 		return nil
 	}
 	return &model.PackageNamespace{
-		ID:        toGlobalID(pkgTypeString, n.ID.String()),
+		ID:        toGlobalID(pkgNamespaceString, n.ID.String()),
 		Namespace: n.Namespace,
 		Names:     collect([]*ent.PackageName{n}, toModelPackageName),
 	}
