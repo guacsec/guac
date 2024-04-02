@@ -130,58 +130,27 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 					continue
 				}
 
-				// First we need to find all the packages that have pkgName as a dependent
+				// First, we need to find all the packages that have pkgName as a dependency.
+				// Note that we are only searching of packages with pkgName as a dependency from the packages that have scanned so far.
 
-				// Initialize a visited map and a queue for BFS to find all packages that have pkgName as a dependent.
-				visited := make(map[string]bool)
-				queue := []string{depPkgId}
-
-				// Perform BFS to mark visited nodes.
-				for len(queue) > 0 {
-					n := len(queue)
-
-					for i := 0; i < n; i++ {
-						node := queue[0]
-						queue = queue[1:]
-
-						if _, ok := visited[node]; ok {
-							continue
-						}
-						visited[node] = true
-
-						// Add dependency nodes of node to the queue.
-						queue = append(queue, dependencyEdges[node]...)
-					}
-				}
+				// This dependencyPackages map finds all packages that have pkgName as a dependent out of our pre-scanned packages.
+				dependencyPackages := reachableNodesOf(depPkgId, dependencyEdges)
 
 				// Next we want to find all the packages that are dependencies of pkgName.
-				// We need to add them all to the dependencies of all nodes that have pkgName as a dependency.
+				// We need to add them all to the dependencies of all nodes that have pkgName as a dependent.
+				// Note that we are only searching for dependencies of pkgName from the packages that have scanned so far
 
-				// Reset the queue to find all packages that are dependencies of pkgName.
-				queue = []string{pkgId}
+				dependentPackages := reachableNodesOf(pkgId, dependentEdges)
 
-				// Perform BFS to add pkgName and dependencies of it to all nodes that have pkgName as a dependency.
-				for len(queue) > 0 {
-					n := len(queue)
+				for depPkgNodeId := range dependencyPackages {
+					depPkgNode := idToName[depPkgNodeId]
+					if _, ok := packages[depPkgNode]; !ok {
+						packages[depPkgNode] = dependencyNode{dependents: make(map[string]bool)}
+					}
 
-					for i := 0; i < n; i++ { // go through the entire row
-						nodeId := queue[0]
-						queue = queue[1:]
-
-						node := idToName[nodeId]
-
-						for depPkgNodeId := range visited {
-							depPkgNode := idToName[depPkgNodeId]
-							if _, ok := packages[depPkgNode]; !ok {
-								packages[depPkgNode] = dependencyNode{dependents: make(map[string]bool)}
-							}
-
-							// Mark the node as a dependent.
-							packages[depPkgNode].dependents[node] = true
-						}
-
-						// Add dependent nodes to the queue.
-						queue = append(queue, dependentEdges[nodeId]...)
+					for node := range dependentPackages {
+						// Mark the node as a dependent.
+						packages[depPkgNode].dependents[node] = true
 					}
 				}
 
@@ -193,6 +162,30 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 	}
 
 	return packages, nil
+}
+
+func reachableNodesOf(startNode string, edges map[string][]string) map[string]bool {
+	visited := make(map[string]bool)
+	queue := []string{startNode}
+
+	// Perform BFS to mark visited nodes.
+	for len(queue) > 0 {
+		n := len(queue)
+
+		for i := 0; i < n; i++ {
+			node := queue[0]
+			queue = queue[1:]
+
+			if _, ok := visited[node]; ok {
+				continue
+			}
+			visited[node] = true
+
+			queue = append(queue, edges[node]...)
+		}
+	}
+
+	return visited
 }
 
 // FindDepPkgVersionIDs queries for packages matching the specified filters (type, namespace, name) and version range.

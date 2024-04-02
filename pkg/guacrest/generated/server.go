@@ -302,7 +302,11 @@ type InternalServerErrorJSONResponse Error
 
 type PackageNameListJSONResponse []PackageName
 
-type PurlListJSONResponse []Purl
+type PurlListJSONResponse struct {
+	// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
+	PaginationInfo PaginationInfo `json:"PaginationInfo"`
+	PurlList       []Purl         `json:"PurlList"`
+}
 
 type AnalyzeDependenciesRequestObject struct {
 	Params AnalyzeDependenciesParams

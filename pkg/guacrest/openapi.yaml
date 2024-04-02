@@ -155,9 +155,17 @@ components:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/Purl"
+            type: object
+            required:
+              - PaginationInfo
+              - PurlList
+            properties:
+              PaginationInfo:
+                $ref: "#/components/schemas/PaginationInfo"
+              PurlList:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Purl"
     PackageNameList:
       description: A list of package names with their dependent counts
       content:
