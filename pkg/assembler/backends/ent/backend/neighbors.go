@@ -23,9 +23,28 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -36,7 +55,7 @@ func (b *EntBackend) Path(ctx context.Context, subject string, target string, ma
 }
 
 func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []model.Edge) ([]model.Node, error) {
-	var neighborsID []string
+	var neighbors []model.Node
 	var err error
 
 	foundGlobalID, err := parseGlobalIDFromInput(nodeID)
@@ -45,154 +64,154 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 	}
 	switch foundGlobalID.nodeType {
 	// case pkgVersionsStr:
-	// 	neighborsID, err = c.packageVersionNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.packageVersionNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case pkgNamesStr:
-	// 	neighborsID, err = c.packageNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.packageNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case pkgNamespacesStr:
-	// 	neighborsID, err = c.packageNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.packageNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case pkgTypesStr:
-	// 	neighborsID, err = c.packageTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.packageTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case srcNamesStr:
-	// 	neighborsID, err = c.srcNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.srcNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case srcNamespacesStr:
-	// 	neighborsID, err = c.srcNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.srcNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case srcTypesStr:
-	// 	neighborsID, err = c.srcTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.srcTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case vulnerabilitiesStr:
-	// 	neighborsID, err = c.vulnIdNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.vulnIdNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case vulnTypesStr:
-	// 	neighborsID, err = c.vulnTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.vulnTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case buildersStr:
-	// 	neighborsID, err = c.builderNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.builderNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	case artifact.Table:
-		neighborsID, err = b.artifactNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		neighbors, err = b.artifactNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get artifact neighbors for node with id: %s with error: %w", nodeID, err)
 		}
 	// case licensesStr:
-	// 	neighborsID, err = c.licenseNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.licenseNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case certifyBadsStr:
-	// 	neighborsID, err = c.certifyBadNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.certifyBadNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case certifyGoodsStr:
-	// 	neighborsID, err = c.certifyGoodNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.certifyGoodNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case certifyLegalsStr:
-	// 	neighborsID, err = c.certifyLegalNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.certifyLegalNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case scorecardStr:
-	// 	neighborsID, err = c.certifyScorecardNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.certifyScorecardNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case certifyVEXsStr:
-	// 	neighborsID, err = c.certifyVexNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.certifyVexNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case certifyVulnsStr:
-	// 	neighborsID, err = c.certifyVulnNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.certifyVulnNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case hashEqualsStr:
-	// 	neighborsID, err = c.hashEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.hashEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case hasMetadataStr:
-	// 	neighborsID, err = c.hasMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.hasMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case hasSBOMsStr:
-	// 	neighborsID, err = c.hasSbomNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.hasSbomNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case hasSLSAsStr:
-	// 	neighborsID, err = c.hasSlsaNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.hasSlsaNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case hasSourceAtsStr:
-	// 	neighborsID, err = c.hasSourceAtNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.hasSourceAtNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case isDependenciesStr:
-	// 	neighborsID, err = c.isDependencyNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.isDependencyNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case isOccurrencesStr:
-	// 	neighborsID, err = c.isOccurrenceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.isOccurrenceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case pkgEqualsStr:
-	// 	neighborsID, err = c.pkgEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.pkgEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case pointOfContactStr:
-	// 	neighborsID, err = c.pointOfContactNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.pointOfContactNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case vulnEqualsStr:
-	// 	neighborsID, err = c.vulnEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.vulnEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	// case vulnMetadataStr:
-	// 	neighborsID, err = c.vulnMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+	// 	neighbors, err = c.vulnMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
 	default:
 		return nil, fmt.Errorf("unknown ID for neighbors query: %s", nodeID)
 	}
-	return b.Nodes(ctx, neighborsID)
+	return neighbors, nil
 }
 
 func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) {
@@ -206,43 +225,83 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
 	}
 
-	record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
-	if err != nil {
-		return nil, err
-	}
+	switch foundGlobalID.nodeType {
+	case artifact.Table:
+		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		if err != nil {
+			return nil, err
+		}
 
-	switch v := record.(type) {
-	case *ent.Artifact:
-		return toModelArtifact(v), nil
-	case *ent.PackageVersion:
+		if art, ok := record.(*ent.Artifact); ok {
+			return toModelArtifact(art), nil
+		} else {
+			return nil, fmt.Errorf("failed to assert type of artifact")
+		}
+	case packageversion.Table:
 		pv, err := b.client.PackageVersion.Query().
-			Where(packageversion.ID(v.ID)).
+			Where(packageversion.ID(nodeID)).
 			WithName(func(q *ent.PackageNameQuery) {}).
 			Only(ctx)
 		if err != nil {
 			return nil, err
 		}
 		return toModelPackage(backReferencePackageVersion(pv)), nil
-	case *ent.PackageName:
+	case packagename.Table:
 		pn, err := b.client.PackageName.Query().
-			Where(packagename.ID(v.ID)).
+			Where(packagename.ID(nodeID)).
 			WithVersions().
 			Only(ctx)
 		if err != nil {
 			return nil, err
 		}
 		return toModelPackage(backReferencePackageName(pn)), nil
-	case *ent.SourceName:
-		return toModelSourceName(v), nil
-	case *ent.Builder:
-		return toModelBuilder(v), nil
-	case *ent.License:
-		return toModelLicense(v), nil
-	case *ent.VulnerabilityID:
-		return toModelVulnerabilityFromVulnerabilityID(v), nil
-	case *ent.Certification:
+	case sourcename.Table:
+		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		if err != nil {
+			return nil, err
+		}
+
+		if sn, ok := record.(*ent.SourceName); ok {
+			return toModelSourceName(sn), nil
+		} else {
+			return nil, fmt.Errorf("failed to assert type of SourceName")
+		}
+	case builder.Table:
+		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		if err != nil {
+			return nil, err
+		}
+
+		if b, ok := record.(*ent.Builder); ok {
+			return toModelBuilder(b), nil
+		} else {
+			return nil, fmt.Errorf("failed to assert type of Builder")
+		}
+	case license.Table:
+		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		if err != nil {
+			return nil, err
+		}
+
+		if lic, ok := record.(*ent.License); ok {
+			return toModelLicense(lic), nil
+		} else {
+			return nil, fmt.Errorf("failed to assert type of License")
+		}
+	case vulnerabilityid.Table:
+		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		if err != nil {
+			return nil, err
+		}
+
+		if v, ok := record.(*ent.VulnerabilityID); ok {
+			return toModelVulnerabilityFromVulnerabilityID(v), nil
+		} else {
+			return nil, fmt.Errorf("failed to assert type of VulnerabilityID")
+		}
+	case certification.Table:
 		cert, err := b.client.Certification.Query().
-			Where(certification.ID(v.ID)).
+			Where(certification.ID(nodeID)).
 			Limit(MaxPageSize).
 			WithSource(withSourceNameTreeQuery()).
 			WithArtifact().
@@ -257,143 +316,143 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		} else {
 			return toModelCertifyGood(cert), nil
 		}
-	case *ent.CertifyLegal:
-		legals, err := b.CertifyLegal(ctx, &model.CertifyLegalSpec{ID: ptrfrom.String(v.ID.String())})
+	case certifylegal.Table:
+		legals, err := b.CertifyLegal(ctx, &model.CertifyLegalSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for CertifyLegal via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for CertifyLegal via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(legals) != 1 {
-			return nil, fmt.Errorf("ID returned multiple CertifyLegal nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple CertifyLegal nodes %s", nodeID.String())
 		}
 		return legals[0], nil
-	case *ent.CertifyScorecard:
-		scores, err := b.Scorecards(ctx, &model.CertifyScorecardSpec{ID: ptrfrom.String(v.ID.String())})
+	case certifyscorecard.Table:
+		scores, err := b.Scorecards(ctx, &model.CertifyScorecardSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for scorecard via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for scorecard via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(scores) != 1 {
-			return nil, fmt.Errorf("ID returned multiple scorecard nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple scorecard nodes %s", nodeID.String())
 		}
 		return scores[0], nil
-	case *ent.CertifyVex:
-		vexs, err := b.CertifyVEXStatement(ctx, &model.CertifyVEXStatementSpec{ID: ptrfrom.String(v.ID.String())})
+	case certifyvex.Table:
+		vexs, err := b.CertifyVEXStatement(ctx, &model.CertifyVEXStatementSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for CertifyVEXStatement via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for CertifyVEXStatement via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(vexs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple CertifyVEXStatement nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple CertifyVEXStatement nodes %s", nodeID.String())
 		}
 		return vexs[0], nil
-	case *ent.CertifyVuln:
-		vulns, err := b.CertifyVuln(ctx, &model.CertifyVulnSpec{ID: ptrfrom.String(v.ID.String())})
+	case certifyvuln.Table:
+		vulns, err := b.CertifyVuln(ctx, &model.CertifyVulnSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for CertifyVuln via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for CertifyVuln via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(vulns) != 1 {
-			return nil, fmt.Errorf("ID returned multiple CertifyVuln nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple CertifyVuln nodes %s", nodeID.String())
 		}
 		return vulns[0], nil
-	case *ent.HashEqual:
-		hes, err := b.HashEqual(ctx, &model.HashEqualSpec{ID: ptrfrom.String(v.ID.String())})
+	case hashequal.Table:
+		hes, err := b.HashEqual(ctx, &model.HashEqualSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HashEqual via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for HashEqual via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(hes) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HashEqual nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple HashEqual nodes %s", nodeID.String())
 		}
 		return hes[0], nil
-	case *ent.HasMetadata:
-		hms, err := b.HasMetadata(ctx, &model.HasMetadataSpec{ID: ptrfrom.String(v.ID.String())})
+	case hasmetadata.Table:
+		hms, err := b.HasMetadata(ctx, &model.HasMetadataSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HasMetadata via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for HasMetadata via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(hms) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HasMetadata nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple HasMetadata nodes %s", nodeID.String())
 		}
 		return hms[0], nil
-	case *ent.BillOfMaterials:
-		hbs, err := b.HasSBOM(ctx, &model.HasSBOMSpec{ID: ptrfrom.String(v.ID.String())})
+	case billofmaterials.Table:
+		hbs, err := b.HasSBOM(ctx, &model.HasSBOMSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HasSBOM via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for HasSBOM via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(hbs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HasSBOM nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple HasSBOM nodes %s", nodeID.String())
 		}
 		return hbs[0], nil
-	case *ent.SLSAAttestation:
-		slsas, err := b.HasSlsa(ctx, &model.HasSLSASpec{ID: ptrfrom.String(v.ID.String())})
+	case slsaattestation.Table:
+		slsas, err := b.HasSlsa(ctx, &model.HasSLSASpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HasSlsa via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for HasSlsa via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(slsas) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HasSlsa nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple HasSlsa nodes %s", nodeID.String())
 		}
 		return slsas[0], nil
-	case *ent.HasSourceAt:
-		hsas, err := b.HasSourceAt(ctx, &model.HasSourceAtSpec{ID: ptrfrom.String(v.ID.String())})
+	case hassourceat.Table:
+		hsas, err := b.HasSourceAt(ctx, &model.HasSourceAtSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for HasSourceAt via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for HasSourceAt via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(hsas) != 1 {
-			return nil, fmt.Errorf("ID returned multiple HasSourceAt nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple HasSourceAt nodes %s", nodeID.String())
 		}
 		return hsas[0], nil
-	case *ent.Dependency:
-		deps, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: ptrfrom.String(v.ID.String())})
+	case dependency.Table:
+		deps, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for IsDependency via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for IsDependency via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(deps) != 1 {
-			return nil, fmt.Errorf("ID returned multiple IsDependency nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple IsDependency nodes %s", nodeID.String())
 		}
 		return deps[0], nil
-	case *ent.Occurrence:
-		occurs, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: ptrfrom.String(v.ID.String())})
+	case occurrence.Table:
+		occurs, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for IsOccurrence via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for IsOccurrence via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(occurs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple IsOccurrence nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple IsOccurrence nodes %s", nodeID.String())
 		}
 		return occurs[0], nil
-	case *ent.PkgEqual:
-		pes, err := b.PkgEqual(ctx, &model.PkgEqualSpec{ID: ptrfrom.String(v.ID.String())})
+	case pkgequal.Table:
+		pes, err := b.PkgEqual(ctx, &model.PkgEqualSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for PkgEqual via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for PkgEqual via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(pes) != 1 {
-			return nil, fmt.Errorf("ID returned multiple PkgEqual nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple PkgEqual nodes %s", nodeID.String())
 		}
 		return pes[0], nil
-	case *ent.PointOfContact:
-		pocs, err := b.PointOfContact(ctx, &model.PointOfContactSpec{ID: ptrfrom.String(v.ID.String())})
+	case pointofcontact.Table:
+		pocs, err := b.PointOfContact(ctx, &model.PointOfContactSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for PointOfContact via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for PointOfContact via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(pocs) != 1 {
-			return nil, fmt.Errorf("ID returned multiple PointOfContact nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple PointOfContact nodes %s", nodeID.String())
 		}
 		return pocs[0], nil
-	case *ent.VulnEqual:
-		ves, err := b.VulnEqual(ctx, &model.VulnEqualSpec{ID: ptrfrom.String(v.ID.String())})
+	case vulnequal.Table:
+		ves, err := b.VulnEqual(ctx, &model.VulnEqualSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for VulnEqual via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for VulnEqual via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(ves) != 1 {
-			return nil, fmt.Errorf("ID returned multiple VulnEqual nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple VulnEqual nodes %s", nodeID.String())
 		}
 		return ves[0], nil
-	case *ent.VulnerabilityMetadata:
-		vms, err := b.VulnerabilityMetadata(ctx, &model.VulnerabilityMetadataSpec{ID: ptrfrom.String(v.ID.String())})
+	case vulnerabilitymetadata.Table:
+		vms, err := b.VulnerabilityMetadata(ctx, &model.VulnerabilityMetadataSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, fmt.Errorf("failed to query for VulnerabilityMetadata via ID: %s, with error: %w", v.ID.String(), err)
+			return nil, fmt.Errorf("failed to query for VulnerabilityMetadata via ID: %s, with error: %w", nodeID.String(), err)
 		}
 		if len(vms) != 1 {
-			return nil, fmt.Errorf("ID returned multiple VulnerabilityMetadata nodes %s", v.ID.String())
+			return nil, fmt.Errorf("ID returned multiple VulnerabilityMetadata nodes %s", nodeID.String())
 		}
 		return vms[0], nil
 	default:
-		log.Printf("Unknown node type: %T", v)
+		log.Printf("Unknown node type: %s", foundGlobalID.nodeType)
 	}
 	return nil, nil
 }

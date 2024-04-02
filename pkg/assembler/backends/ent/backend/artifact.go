@@ -148,7 +148,7 @@ func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInpu
 	return ptrfrom.String(artifactID.String()), nil
 }
 
-func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]string, error) {
+func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	out := []string{}
 	if allowedEdges[model.EdgeArtifactHashEqual] {
 		// hashEqualSubjectArtEdgesStr collection query
