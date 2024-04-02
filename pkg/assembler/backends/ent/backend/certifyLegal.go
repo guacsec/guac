@@ -37,14 +37,10 @@ import (
 
 func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
 
-	records, err := b.client.CertifyLegal.Query().
-		Where(certifyLegalQuery(*spec)).
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {})
-		}).
-		WithSource(func(q *ent.SourceNameQuery) {}).
-		WithDeclaredLicenses().
-		WithDiscoveredLicenses().
+	certLegalQuery := b.client.CertifyLegal.Query().
+		Where(certifyLegalQuery(*spec))
+
+	records, err := getCertifyLegalObject(certLegalQuery).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -52,6 +48,17 @@ func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalS
 	}
 
 	return collect(records, toModelCertifyLegal), nil
+}
+
+// getCertifyLegalObject is used recreate the certifyLegal object be eager loading the edges
+func getCertifyLegalObject(q *ent.CertifyLegalQuery) *ent.CertifyLegalQuery {
+	return q.
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).
+		WithSource(func(q *ent.SourceNameQuery) {}).
+		WithDeclaredLicenses().
+		WithDiscoveredLicenses()
 }
 
 func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {

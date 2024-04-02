@@ -108,21 +108,21 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
 	// 	}
-	// case buildersStr:
-	// 	neighbors, err = c.builderNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
+	case builder.Table:
+		neighbors, err = b.builderNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get builder neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case artifact.Table:
 		neighbors, err = b.artifactNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get artifact neighbors for node with id: %s with error: %w", nodeID, err)
 		}
-	// case licensesStr:
-	// 	neighbors, err = c.licenseNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
+	case license.Table:
+		neighbors, err = b.licenseNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	// case certifyBadsStr:
 	// 	neighbors, err = c.certifyBadNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {

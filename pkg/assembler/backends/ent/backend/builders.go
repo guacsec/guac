@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -139,4 +140,32 @@ func upsertBuilder(ctx context.Context, tx *ent.Tx, spec *model.BuilderInputSpec
 	}
 
 	return ptrfrom.String(builderID.String()), nil
+}
+
+func (b *EntBackend) builderNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+	if allowedEdges[model.EdgeBuilderHasSlsa] {
+		query := b.client.Builder.Query().
+			Where(builderQueryPredicate(&model.BuilderSpec{ID: &nodeID})).
+			WithSlsaAttestations(func(q *ent.SLSAAttestationQuery) {
+				getSLSAObject(q)
+			}).
+			Limit(MaxPageSize)
+
+		builders, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, foundBuilder := range builders {
+			slsas, err := foundBuilder.SlsaAttestations(ctx)
+			if err != nil {
+				return []model.Node{}, fmt.Errorf("failed to get hasSLSA neighbors for node ID: %s with error: %w", nodeID, err)
+			}
+			for _, foundSLSA := range slsas {
+				out = append(out, toModelHasSLSA(foundSLSA))
+			}
+		}
+	}
+	return out, nil
 }
