@@ -287,6 +287,29 @@ func HasVersionsWith(preds ...predicate.PackageVersion) predicate.PackageName {
 	})
 }
 
+// HasHasSourceAt applies the HasEdge predicate on the "has_source_at" edge.
+func HasHasSourceAt() predicate.PackageName {
+	return predicate.PackageName(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, HasSourceAtTable, HasSourceAtColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasHasSourceAtWith applies the HasEdge predicate on the "has_source_at" edge with a given conditions (other predicates).
+func HasHasSourceAtWith(preds ...predicate.HasSourceAt) predicate.PackageName {
+	return predicate.PackageName(func(s *sql.Selector) {
+		step := newHasSourceAtStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.PackageName) predicate.PackageName {
 	return predicate.PackageName(sql.AndPredicates(predicates...))

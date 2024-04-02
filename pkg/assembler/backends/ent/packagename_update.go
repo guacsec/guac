@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -86,6 +87,21 @@ func (pnu *PackageNameUpdate) AddVersions(p ...*PackageVersion) *PackageNameUpda
 	return pnu.AddVersionIDs(ids...)
 }
 
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (pnu *PackageNameUpdate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.AddHasSourceAtIDs(ids...)
+	return pnu
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (pnu *PackageNameUpdate) AddHasSourceAt(h ...*HasSourceAt) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnu.AddHasSourceAtIDs(ids...)
+}
+
 // Mutation returns the PackageNameMutation object of the builder.
 func (pnu *PackageNameUpdate) Mutation() *PackageNameMutation {
 	return pnu.mutation
@@ -110,6 +126,27 @@ func (pnu *PackageNameUpdate) RemoveVersions(p ...*PackageVersion) *PackageNameU
 		ids[i] = p[i].ID
 	}
 	return pnu.RemoveVersionIDs(ids...)
+}
+
+// ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
+func (pnu *PackageNameUpdate) ClearHasSourceAt() *PackageNameUpdate {
+	pnu.mutation.ClearHasSourceAt()
+	return pnu
+}
+
+// RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
+func (pnu *PackageNameUpdate) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.RemoveHasSourceAtIDs(ids...)
+	return pnu
+}
+
+// RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
+func (pnu *PackageNameUpdate) RemoveHasSourceAt(h ...*HasSourceAt) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnu.RemoveHasSourceAtIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -220,6 +257,51 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pnu.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !pnu.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pnu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{packagename.Label}
@@ -297,6 +379,21 @@ func (pnuo *PackageNameUpdateOne) AddVersions(p ...*PackageVersion) *PackageName
 	return pnuo.AddVersionIDs(ids...)
 }
 
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (pnuo *PackageNameUpdateOne) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.AddHasSourceAtIDs(ids...)
+	return pnuo
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (pnuo *PackageNameUpdateOne) AddHasSourceAt(h ...*HasSourceAt) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnuo.AddHasSourceAtIDs(ids...)
+}
+
 // Mutation returns the PackageNameMutation object of the builder.
 func (pnuo *PackageNameUpdateOne) Mutation() *PackageNameMutation {
 	return pnuo.mutation
@@ -321,6 +418,27 @@ func (pnuo *PackageNameUpdateOne) RemoveVersions(p ...*PackageVersion) *PackageN
 		ids[i] = p[i].ID
 	}
 	return pnuo.RemoveVersionIDs(ids...)
+}
+
+// ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
+func (pnuo *PackageNameUpdateOne) ClearHasSourceAt() *PackageNameUpdateOne {
+	pnuo.mutation.ClearHasSourceAt()
+	return pnuo
+}
+
+// RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
+func (pnuo *PackageNameUpdateOne) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.RemoveHasSourceAtIDs(ids...)
+	return pnuo
+}
+
+// RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
+func (pnuo *PackageNameUpdateOne) RemoveHasSourceAt(h ...*HasSourceAt) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnuo.RemoveHasSourceAtIDs(ids...)
 }
 
 // Where appends a list predicates to the PackageNameUpdate builder.
@@ -454,6 +572,51 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnuo.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !pnuo.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

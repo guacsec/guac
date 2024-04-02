@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -20,14 +21,16 @@ import (
 // PackageNameQuery is the builder for querying PackageName entities.
 type PackageNameQuery struct {
 	config
-	ctx               *QueryContext
-	order             []packagename.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.PackageName
-	withVersions      *PackageVersionQuery
-	modifiers         []func(*sql.Selector)
-	loadTotal         []func(context.Context, []*PackageName) error
-	withNamedVersions map[string]*PackageVersionQuery
+	ctx                  *QueryContext
+	order                []packagename.OrderOption
+	inters               []Interceptor
+	predicates           []predicate.PackageName
+	withVersions         *PackageVersionQuery
+	withHasSourceAt      *HasSourceAtQuery
+	modifiers            []func(*sql.Selector)
+	loadTotal            []func(context.Context, []*PackageName) error
+	withNamedVersions    map[string]*PackageVersionQuery
+	withNamedHasSourceAt map[string]*HasSourceAtQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,6 +82,28 @@ func (pnq *PackageNameQuery) QueryVersions() *PackageVersionQuery {
 			sqlgraph.From(packagename.Table, packagename.FieldID, selector),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, packagename.VersionsTable, packagename.VersionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryHasSourceAt chains the current query on the "has_source_at" edge.
+func (pnq *PackageNameQuery) QueryHasSourceAt() *HasSourceAtQuery {
+	query := (&HasSourceAtClient{config: pnq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pnq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pnq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, selector),
+			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.HasSourceAtTable, packagename.HasSourceAtColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
 		return fromU, nil
@@ -273,12 +298,13 @@ func (pnq *PackageNameQuery) Clone() *PackageNameQuery {
 		return nil
 	}
 	return &PackageNameQuery{
-		config:       pnq.config,
-		ctx:          pnq.ctx.Clone(),
-		order:        append([]packagename.OrderOption{}, pnq.order...),
-		inters:       append([]Interceptor{}, pnq.inters...),
-		predicates:   append([]predicate.PackageName{}, pnq.predicates...),
-		withVersions: pnq.withVersions.Clone(),
+		config:          pnq.config,
+		ctx:             pnq.ctx.Clone(),
+		order:           append([]packagename.OrderOption{}, pnq.order...),
+		inters:          append([]Interceptor{}, pnq.inters...),
+		predicates:      append([]predicate.PackageName{}, pnq.predicates...),
+		withVersions:    pnq.withVersions.Clone(),
+		withHasSourceAt: pnq.withHasSourceAt.Clone(),
 		// clone intermediate query.
 		sql:  pnq.sql.Clone(),
 		path: pnq.path,
@@ -293,6 +319,17 @@ func (pnq *PackageNameQuery) WithVersions(opts ...func(*PackageVersionQuery)) *P
 		opt(query)
 	}
 	pnq.withVersions = query
+	return pnq
+}
+
+// WithHasSourceAt tells the query-builder to eager-load the nodes that are connected to
+// the "has_source_at" edge. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithHasSourceAt(opts ...func(*HasSourceAtQuery)) *PackageNameQuery {
+	query := (&HasSourceAtClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pnq.withHasSourceAt = query
 	return pnq
 }
 
@@ -374,8 +411,9 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	var (
 		nodes       = []*PackageName{}
 		_spec       = pnq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			pnq.withVersions != nil,
+			pnq.withHasSourceAt != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -406,10 +444,24 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 			return nil, err
 		}
 	}
+	if query := pnq.withHasSourceAt; query != nil {
+		if err := pnq.loadHasSourceAt(ctx, query, nodes,
+			func(n *PackageName) { n.Edges.HasSourceAt = []*HasSourceAt{} },
+			func(n *PackageName, e *HasSourceAt) { n.Edges.HasSourceAt = append(n.Edges.HasSourceAt, e) }); err != nil {
+			return nil, err
+		}
+	}
 	for name, query := range pnq.withNamedVersions {
 		if err := pnq.loadVersions(ctx, query, nodes,
 			func(n *PackageName) { n.appendNamedVersions(name) },
 			func(n *PackageName, e *PackageVersion) { n.appendNamedVersions(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pnq.withNamedHasSourceAt {
+		if err := pnq.loadHasSourceAt(ctx, query, nodes,
+			func(n *PackageName) { n.appendNamedHasSourceAt(name) },
+			func(n *PackageName, e *HasSourceAt) { n.appendNamedHasSourceAt(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -446,6 +498,39 @@ func (pnq *PackageNameQuery) loadVersions(ctx context.Context, query *PackageVer
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "name_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pnq *PackageNameQuery) loadHasSourceAt(ctx context.Context, query *HasSourceAtQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *HasSourceAt)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*PackageName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(hassourceat.FieldPackageNameID)
+	}
+	query.Where(predicate.HasSourceAt(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packagename.HasSourceAtColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PackageNameID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "package_name_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "package_name_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -547,6 +632,20 @@ func (pnq *PackageNameQuery) WithNamedVersions(name string, opts ...func(*Packag
 		pnq.withNamedVersions = make(map[string]*PackageVersionQuery)
 	}
 	pnq.withNamedVersions[name] = query
+	return pnq
+}
+
+// WithNamedHasSourceAt tells the query-builder to eager-load the nodes that are connected to the "has_source_at"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithNamedHasSourceAt(name string, opts ...func(*HasSourceAtQuery)) *PackageNameQuery {
+	query := (&HasSourceAtClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pnq.withNamedHasSourceAt == nil {
+		pnq.withNamedHasSourceAt = make(map[string]*HasSourceAtQuery)
+	}
+	pnq.withNamedHasSourceAt[name] = query
 	return pnq
 }
 

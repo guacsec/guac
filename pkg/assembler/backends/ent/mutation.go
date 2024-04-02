@@ -13349,19 +13349,22 @@ func (m *OccurrenceMutation) ResetEdge(name string) error {
 // PackageNameMutation represents an operation that mutates the PackageName nodes in the graph.
 type PackageNameMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *uuid.UUID
-	_type           *string
-	namespace       *string
-	name            *string
-	clearedFields   map[string]struct{}
-	versions        map[uuid.UUID]struct{}
-	removedversions map[uuid.UUID]struct{}
-	clearedversions bool
-	done            bool
-	oldValue        func(context.Context) (*PackageName, error)
-	predicates      []predicate.PackageName
+	op                   Op
+	typ                  string
+	id                   *uuid.UUID
+	_type                *string
+	namespace            *string
+	name                 *string
+	clearedFields        map[string]struct{}
+	versions             map[uuid.UUID]struct{}
+	removedversions      map[uuid.UUID]struct{}
+	clearedversions      bool
+	has_source_at        map[uuid.UUID]struct{}
+	removedhas_source_at map[uuid.UUID]struct{}
+	clearedhas_source_at bool
+	done                 bool
+	oldValue             func(context.Context) (*PackageName, error)
+	predicates           []predicate.PackageName
 }
 
 var _ ent.Mutation = (*PackageNameMutation)(nil)
@@ -13630,6 +13633,60 @@ func (m *PackageNameMutation) ResetVersions() {
 	m.removedversions = nil
 }
 
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by ids.
+func (m *PackageNameMutation) AddHasSourceAtIDs(ids ...uuid.UUID) {
+	if m.has_source_at == nil {
+		m.has_source_at = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.has_source_at[ids[i]] = struct{}{}
+	}
+}
+
+// ClearHasSourceAt clears the "has_source_at" edge to the HasSourceAt entity.
+func (m *PackageNameMutation) ClearHasSourceAt() {
+	m.clearedhas_source_at = true
+}
+
+// HasSourceAtCleared reports if the "has_source_at" edge to the HasSourceAt entity was cleared.
+func (m *PackageNameMutation) HasSourceAtCleared() bool {
+	return m.clearedhas_source_at
+}
+
+// RemoveHasSourceAtIDs removes the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (m *PackageNameMutation) RemoveHasSourceAtIDs(ids ...uuid.UUID) {
+	if m.removedhas_source_at == nil {
+		m.removedhas_source_at = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.has_source_at, ids[i])
+		m.removedhas_source_at[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedHasSourceAt returns the removed IDs of the "has_source_at" edge to the HasSourceAt entity.
+func (m *PackageNameMutation) RemovedHasSourceAtIDs() (ids []uuid.UUID) {
+	for id := range m.removedhas_source_at {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// HasSourceAtIDs returns the "has_source_at" edge IDs in the mutation.
+func (m *PackageNameMutation) HasSourceAtIDs() (ids []uuid.UUID) {
+	for id := range m.has_source_at {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetHasSourceAt resets all changes to the "has_source_at" edge.
+func (m *PackageNameMutation) ResetHasSourceAt() {
+	m.has_source_at = nil
+	m.clearedhas_source_at = false
+	m.removedhas_source_at = nil
+}
+
 // Where appends a list predicates to the PackageNameMutation builder.
 func (m *PackageNameMutation) Where(ps ...predicate.PackageName) {
 	m.predicates = append(m.predicates, ps...)
@@ -13797,9 +13854,12 @@ func (m *PackageNameMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PackageNameMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.versions != nil {
 		edges = append(edges, packagename.EdgeVersions)
+	}
+	if m.has_source_at != nil {
+		edges = append(edges, packagename.EdgeHasSourceAt)
 	}
 	return edges
 }
@@ -13814,15 +13874,24 @@ func (m *PackageNameMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case packagename.EdgeHasSourceAt:
+		ids := make([]ent.Value, 0, len(m.has_source_at))
+		for id := range m.has_source_at {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PackageNameMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedversions != nil {
 		edges = append(edges, packagename.EdgeVersions)
+	}
+	if m.removedhas_source_at != nil {
+		edges = append(edges, packagename.EdgeHasSourceAt)
 	}
 	return edges
 }
@@ -13837,15 +13906,24 @@ func (m *PackageNameMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case packagename.EdgeHasSourceAt:
+		ids := make([]ent.Value, 0, len(m.removedhas_source_at))
+		for id := range m.removedhas_source_at {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PackageNameMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedversions {
 		edges = append(edges, packagename.EdgeVersions)
+	}
+	if m.clearedhas_source_at {
+		edges = append(edges, packagename.EdgeHasSourceAt)
 	}
 	return edges
 }
@@ -13856,6 +13934,8 @@ func (m *PackageNameMutation) EdgeCleared(name string) bool {
 	switch name {
 	case packagename.EdgeVersions:
 		return m.clearedversions
+	case packagename.EdgeHasSourceAt:
+		return m.clearedhas_source_at
 	}
 	return false
 }
@@ -13874,6 +13954,9 @@ func (m *PackageNameMutation) ResetEdge(name string) error {
 	switch name {
 	case packagename.EdgeVersions:
 		m.ResetVersions()
+		return nil
+	case packagename.EdgeHasSourceAt:
+		m.ResetHasSourceAt()
 		return nil
 	}
 	return fmt.Errorf("unknown PackageName edge %s", name)

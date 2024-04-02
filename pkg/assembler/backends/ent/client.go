@@ -3176,6 +3176,22 @@ func (c *PackageNameClient) QueryVersions(pn *PackageName) *PackageVersionQuery 
 	return query
 }
 
+// QueryHasSourceAt queries the has_source_at edge of a PackageName.
+func (c *PackageNameClient) QueryHasSourceAt(pn *PackageName) *HasSourceAtQuery {
+	query := (&HasSourceAtClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, id),
+			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.HasSourceAtTable, packagename.HasSourceAtColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PackageNameClient) Hooks() []Hook {
 	return c.hooks.PackageName

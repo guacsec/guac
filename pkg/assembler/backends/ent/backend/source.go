@@ -60,11 +60,10 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		query = append(query, hassourceat.HasSourceWith(sourceQuery(filter.Source)))
 	}
 
-	records, err := b.client.HasSourceAt.Query().
-		Where(query...).
-		WithAllVersions(withPackageNameTree()).
-		WithPackageVersion(withPackageVersionTree()).
-		WithSource(withSourceNameTreeQuery()).
+	hasSourceAtQuery := b.client.HasSourceAt.Query().
+		Where(query...)
+
+	records, err := getHasSourceAtObject(hasSourceAtQuery).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -72,6 +71,14 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	}
 
 	return collect(records, toModelHasSourceAt), nil
+}
+
+// getHasSourceAtObject is used recreate the HasSourceAt object be eager loading the edges
+func getHasSourceAtObject(q *ent.HasSourceAtQuery) *ent.HasSourceAtQuery {
+	return q.
+		WithAllVersions(withPackageNameTree()).
+		WithPackageVersion(withPackageVersionTree()).
+		WithSource(withSourceNameTreeQuery())
 }
 
 func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, hasSourceAt model.HasSourceAtInputSpec) (string, error) {

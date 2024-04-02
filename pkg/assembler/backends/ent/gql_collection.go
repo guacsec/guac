@@ -2069,6 +2069,18 @@ func (pn *PackageNameQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 			pn.WithNamedVersions(alias, func(wq *PackageVersionQuery) {
 				*wq = *query
 			})
+		case "hasSourceAt":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasSourceAtClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pn.WithNamedHasSourceAt(alias, func(wq *HasSourceAtQuery) {
+				*wq = *query
+			})
 		case "type":
 			if _, ok := fieldSeen[packagename.FieldType]; !ok {
 				selectedFields = append(selectedFields, packagename.FieldType)

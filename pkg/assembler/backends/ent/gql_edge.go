@@ -504,6 +504,18 @@ func (pn *PackageName) Versions(ctx context.Context) (result []*PackageVersion, 
 	return result, err
 }
 
+func (pn *PackageName) HasSourceAt(ctx context.Context) (result []*HasSourceAt, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pn.NamedHasSourceAt(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pn.Edges.HasSourceAtOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pn.QueryHasSourceAt().All(ctx)
+	}
+	return result, err
+}
+
 func (pv *PackageVersion) Name(ctx context.Context) (*PackageName, error) {
 	result, err := pv.Edges.NameOrErr()
 	if IsNotLoaded(err) {

@@ -21,6 +21,8 @@ const (
 	FieldName = "name"
 	// EdgeVersions holds the string denoting the versions edge name in mutations.
 	EdgeVersions = "versions"
+	// EdgeHasSourceAt holds the string denoting the has_source_at edge name in mutations.
+	EdgeHasSourceAt = "has_source_at"
 	// Table holds the table name of the packagename in the database.
 	Table = "package_names"
 	// VersionsTable is the table that holds the versions relation/edge.
@@ -30,6 +32,13 @@ const (
 	VersionsInverseTable = "package_versions"
 	// VersionsColumn is the table column denoting the versions relation/edge.
 	VersionsColumn = "name_id"
+	// HasSourceAtTable is the table that holds the has_source_at relation/edge.
+	HasSourceAtTable = "has_source_ats"
+	// HasSourceAtInverseTable is the table name for the HasSourceAt entity.
+	// It exists in this package in order to avoid circular dependency with the "hassourceat" package.
+	HasSourceAtInverseTable = "has_source_ats"
+	// HasSourceAtColumn is the table column denoting the has_source_at relation/edge.
+	HasSourceAtColumn = "package_name_id"
 )
 
 // Columns holds all SQL columns for packagename fields.
@@ -95,10 +104,31 @@ func ByVersions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newVersionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByHasSourceAtCount orders the results by has_source_at count.
+func ByHasSourceAtCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newHasSourceAtStep(), opts...)
+	}
+}
+
+// ByHasSourceAt orders the results by has_source_at terms.
+func ByHasSourceAt(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newHasSourceAtStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newVersionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(VersionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, VersionsTable, VersionsColumn),
+	)
+}
+func newHasSourceAtStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(HasSourceAtInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, HasSourceAtTable, HasSourceAtColumn),
 	)
 }

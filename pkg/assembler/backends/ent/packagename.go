@@ -33,13 +33,16 @@ type PackageName struct {
 type PackageNameEdges struct {
 	// Versions holds the value of the versions edge.
 	Versions []*PackageVersion `json:"versions,omitempty"`
+	// HasSourceAt holds the value of the has_source_at edge.
+	HasSourceAt []*HasSourceAt `json:"has_source_at,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
+	totalCount [2]map[string]int
 
-	namedVersions map[string][]*PackageVersion
+	namedVersions    map[string][]*PackageVersion
+	namedHasSourceAt map[string][]*HasSourceAt
 }
 
 // VersionsOrErr returns the Versions value or an error if the edge
@@ -49,6 +52,15 @@ func (e PackageNameEdges) VersionsOrErr() ([]*PackageVersion, error) {
 		return e.Versions, nil
 	}
 	return nil, &NotLoadedError{edge: "versions"}
+}
+
+// HasSourceAtOrErr returns the HasSourceAt value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageNameEdges) HasSourceAtOrErr() ([]*HasSourceAt, error) {
+	if e.loadedTypes[1] {
+		return e.HasSourceAt, nil
+	}
+	return nil, &NotLoadedError{edge: "has_source_at"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -117,6 +129,11 @@ func (pn *PackageName) QueryVersions() *PackageVersionQuery {
 	return NewPackageNameClient(pn.config).QueryVersions(pn)
 }
 
+// QueryHasSourceAt queries the "has_source_at" edge of the PackageName entity.
+func (pn *PackageName) QueryHasSourceAt() *HasSourceAtQuery {
+	return NewPackageNameClient(pn.config).QueryHasSourceAt(pn)
+}
+
 // Update returns a builder for updating this PackageName.
 // Note that you need to call PackageName.Unwrap() before calling this method if this PackageName
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -173,6 +190,30 @@ func (pn *PackageName) appendNamedVersions(name string, edges ...*PackageVersion
 		pn.Edges.namedVersions[name] = []*PackageVersion{}
 	} else {
 		pn.Edges.namedVersions[name] = append(pn.Edges.namedVersions[name], edges...)
+	}
+}
+
+// NamedHasSourceAt returns the HasSourceAt named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pn *PackageName) NamedHasSourceAt(name string) ([]*HasSourceAt, error) {
+	if pn.Edges.namedHasSourceAt == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pn.Edges.namedHasSourceAt[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pn *PackageName) appendNamedHasSourceAt(name string, edges ...*HasSourceAt) {
+	if pn.Edges.namedHasSourceAt == nil {
+		pn.Edges.namedHasSourceAt = make(map[string][]*HasSourceAt)
+	}
+	if len(edges) == 0 {
+		pn.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
+	} else {
+		pn.Edges.namedHasSourceAt[name] = append(pn.Edges.namedHasSourceAt[name], edges...)
 	}
 }
 

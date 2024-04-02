@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 )
@@ -69,6 +70,21 @@ func (pnc *PackageNameCreate) AddVersions(p ...*PackageVersion) *PackageNameCrea
 		ids[i] = p[i].ID
 	}
 	return pnc.AddVersionIDs(ids...)
+}
+
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (pnc *PackageNameCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameCreate {
+	pnc.mutation.AddHasSourceAtIDs(ids...)
+	return pnc
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (pnc *PackageNameCreate) AddHasSourceAt(h ...*HasSourceAt) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnc.AddHasSourceAtIDs(ids...)
 }
 
 // Mutation returns the PackageNameMutation object of the builder.
@@ -190,6 +206,22 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pnc.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
