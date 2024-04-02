@@ -33,14 +33,10 @@ import (
 )
 
 func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+	occurQuery := b.client.Occurrence.Query().
+		Where(isOccurrenceQuery(query))
 
-	records, err := b.client.Occurrence.Query().
-		Where(isOccurrenceQuery(query)).
-		WithArtifact().
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {})
-		}).
-		WithSource(func(q *ent.SourceNameQuery) {}).
+	records, err := getOccurrenceObject(occurQuery).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -52,6 +48,16 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 	}
 
 	return models, nil
+}
+
+// getOccurrenceObject is used recreate the occurrence object be eager loading the edges
+func getOccurrenceObject(q *ent.OccurrenceQuery) *ent.OccurrenceQuery {
+	return q.
+		WithArtifact().
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).
+		WithSource(func(q *ent.SourceNameQuery) {})
 }
 
 func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {

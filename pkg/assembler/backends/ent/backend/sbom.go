@@ -69,8 +69,22 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 		predicates = append(predicates, billofmaterials.HasIncludedOccurrencesWith(isOccurrenceQuery(spec.IncludedOccurrences[i])))
 	}
 
-	records, err := b.client.BillOfMaterials.Query().
-		Where(predicates...).
+	sbomQuery := b.client.BillOfMaterials.Query().
+		Where(predicates...)
+
+	records, err := getSBOMObject(sbomQuery).
+		Limit(MaxPageSize).
+		All(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, funcName)
+	}
+
+	return collect(records, toModelHasSBOM), nil
+}
+
+// getSBOMObject is used recreate the hasSBOM object be eager loading the edges
+func getSBOMObject(q *ent.BillOfMaterialsQuery) *ent.BillOfMaterialsQuery {
+	return q.
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
@@ -86,14 +100,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 			q.WithArtifact().
 				WithPackage(withPackageVersionTree()).
 				WithSource(withSourceNameTreeQuery())
-		}).
-		Limit(MaxPageSize).
-		All(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, funcName)
-	}
-
-	return collect(records, toModelHasSBOM), nil
+		})
 }
 
 func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {

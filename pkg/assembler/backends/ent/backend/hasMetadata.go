@@ -31,20 +31,27 @@ import (
 )
 
 func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
-	records, err := b.client.HasMetadata.Query().
-		Where(hasMetadataPredicate(filter)).
-		Limit(MaxPageSize).
-		WithSource(withSourceNameTreeQuery()).
-		WithArtifact().
-		WithPackageVersion(withPackageVersionTree()).
-		WithAllVersions(withPackageNameTree()).
-		All(ctx)
 
+	hmQuery := b.client.HasMetadata.Query().
+		Where(hasMetadataPredicate(filter))
+
+	records, err := getHasMetadataObject(hmQuery).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve HasMetadata :: %s", err)
 	}
 
 	return collect(records, toModelHasMetadata), nil
+}
+
+// getHasMetadataObject is used recreate the hasMetadata object be eager loading the edges
+func getHasMetadataObject(q *ent.HasMetadataQuery) *ent.HasMetadataQuery {
+	return q.
+		WithSource(withSourceNameTreeQuery()).
+		WithArtifact().
+		WithPackageVersion(withPackageVersionTree()).
+		WithAllVersions(withPackageNameTree())
 }
 
 func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {

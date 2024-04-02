@@ -42,16 +42,23 @@ func (b *EntBackend) HashEqual(ctx context.Context, spec *model.HashEqualSpec) (
 		return nil, fmt.Errorf("too many artifacts specified in hash equal filter")
 	}
 
-	records, err := b.client.HashEqual.Query().
-		Where(hashEqualQueryPredicates(spec)).
-		WithArtifactA().
-		WithArtifactB().
+	heQuery := b.client.HashEqual.Query().
+		Where(hashEqualQueryPredicates(spec))
+
+	records, err := getHashEqualObject(heQuery).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return collect(records, toModelHashEqual), nil
+}
+
+// getHashEqualObject is used recreate the hashEqual object be eager loading the edges
+func getHashEqualObject(q *ent.HashEqualQuery) *ent.HashEqualQuery {
+	return q.
+		WithArtifactA().
+		WithArtifactB()
 }
 
 func hashEqualQueryPredicates(spec *model.HashEqualSpec) predicate.HashEqual {

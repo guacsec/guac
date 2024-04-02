@@ -31,20 +31,27 @@ import (
 )
 
 func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
-	records, err := b.client.PointOfContact.Query().
-		Where(pointOfContactPredicate(filter)).
-		Limit(MaxPageSize).
-		WithSource(withSourceNameTreeQuery()).
-		WithArtifact().
-		WithPackageVersion(withPackageVersionTree()).
-		WithAllVersions(withPackageNameTree()).
-		All(ctx)
 
+	pocQuery := b.client.PointOfContact.Query().
+		Where(pointOfContactPredicate(filter))
+
+	records, err := getPointOfContactObject(pocQuery).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve PointOfContact :: %s", err)
 	}
 
 	return collect(records, toModelPointOfContact), nil
+}
+
+// getPointOfContactObject is used recreate the PointOfContact object be eager loading the edges
+func getPointOfContactObject(q *ent.PointOfContactQuery) *ent.PointOfContactQuery {
+	return q.
+		WithSource(withSourceNameTreeQuery()).
+		WithArtifact().
+		WithPackageVersion(withPackageVersionTree()).
+		WithAllVersions(withPackageNameTree())
 }
 
 func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {

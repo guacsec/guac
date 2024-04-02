@@ -259,15 +259,10 @@ func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArti
 func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	funcName := "CertifyVEXStatement"
 
-	query := b.client.CertifyVex.Query()
-	records, err := query.
-		Where(certifyVexPredicate(*spec)).
-		WithVulnerability(func(q *ent.VulnerabilityIDQuery) {
-		}).
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {})
-		}).
-		WithArtifact().
+	vexQuery := b.client.CertifyVex.Query().
+		Where(certifyVexPredicate(*spec))
+
+	records, err := getVEXObject(vexQuery).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -275,6 +270,17 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.Certif
 	}
 
 	return collect(records, toModelCertifyVEXStatement), nil
+}
+
+// getVEXObject is used recreate the VEX object be eager loading the edges
+func getVEXObject(q *ent.CertifyVexQuery) *ent.CertifyVexQuery {
+	return q.
+		WithVulnerability(func(q *ent.VulnerabilityIDQuery) {
+		}).
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).
+		WithArtifact()
 }
 
 func toModelCertifyVEXStatement(record *ent.CertifyVex) *model.CertifyVEXStatement {

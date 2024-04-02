@@ -58,11 +58,10 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 		query = append(query, slsaattestation.HasBuiltFromWith(artifactQueryPredicates(art)))
 	}
 
-	records, err := b.client.SLSAAttestation.Query().
-		Where(query...).
-		WithSubject().
-		WithBuiltBy().
-		WithBuiltFrom().
+	slsaQuery := b.client.SLSAAttestation.Query().
+		Where(query...)
+
+	records, err := getSLSAObject(slsaQuery).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -70,6 +69,14 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 	}
 
 	return collect(records, toModelHasSLSA), nil
+}
+
+// getSLSAObject is used recreate the hasSLSA object be eager loading the edges
+func getSLSAObject(q *ent.SLSAAttestationQuery) *ent.SLSAAttestationQuery {
+	return q.
+		WithSubject().
+		WithBuiltBy().
+		WithBuiltFrom()
 }
 
 func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (string, error) {

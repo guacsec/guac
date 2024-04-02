@@ -56,6 +56,47 @@ func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 	return collect(records, toModelCertifyGood), nil
 }
 
+// getCertificationObject is used recreate the certifyGood/certifyBad object be eager loading the edges
+func getCertificationObject(q *ent.CertificationQuery) *ent.CertificationQuery {
+	return q.
+		WithSource(withSourceNameTreeQuery()).
+		WithArtifact().
+		WithPackageVersion(withPackageVersionTree()).
+		WithAllVersions(withPackageNameTree())
+}
+
+func queryCertifications(ctx context.Context, client *ent.Client, typ certification.Type, filter *model.CertifyBadSpec) ([]*ent.Certification, error) {
+	query := []predicate.Certification{
+		certification.TypeEQ(typ),
+		optionalPredicate(filter.ID, IDEQ),
+		optionalPredicate(filter.Collector, certification.CollectorEQ),
+		optionalPredicate(filter.Origin, certification.OriginEQ),
+		optionalPredicate(filter.Justification, certification.JustificationEQ),
+		optionalPredicate(filter.KnownSince, certification.KnownSinceEQ),
+	}
+
+	if filter.Subject != nil {
+		switch {
+		case filter.Subject.Artifact != nil:
+			query = append(query, certification.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
+		case filter.Subject.Package != nil:
+			query = append(query, certification.Or(
+				certification.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
+				certification.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
+			))
+		case filter.Subject.Source != nil:
+			query = append(query, certification.HasSourceWith(sourceQuery(filter.Subject.Source)))
+		}
+	}
+
+	certQuery := client.Certification.Query().
+		Where(query...)
+
+	return getCertificationObject(certQuery).
+		Limit(MaxPageSize).
+		All(ctx)
+}
+
 func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (string, error) {
 	certRecord, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		return upsertCertification(ctx, ent.TxFromContext(ctx), subject, pkgMatchType, spec)
@@ -110,40 +151,6 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 	}
 
 	return toGlobalIDs(certification.Table, *ids), nil
-}
-
-func queryCertifications(ctx context.Context, client *ent.Client, typ certification.Type, filter *model.CertifyBadSpec) ([]*ent.Certification, error) {
-	query := []predicate.Certification{
-		certification.TypeEQ(typ),
-		optionalPredicate(filter.ID, IDEQ),
-		optionalPredicate(filter.Collector, certification.CollectorEQ),
-		optionalPredicate(filter.Origin, certification.OriginEQ),
-		optionalPredicate(filter.Justification, certification.JustificationEQ),
-		optionalPredicate(filter.KnownSince, certification.KnownSinceEQ),
-	}
-
-	if filter.Subject != nil {
-		switch {
-		case filter.Subject.Artifact != nil:
-			query = append(query, certification.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
-		case filter.Subject.Package != nil:
-			query = append(query, certification.Or(
-				certification.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
-				certification.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
-			))
-		case filter.Subject.Source != nil:
-			query = append(query, certification.HasSourceWith(sourceQuery(filter.Subject.Source)))
-		}
-	}
-
-	return client.Certification.Query().
-		Where(query...).
-		Limit(MaxPageSize).
-		WithSource(withSourceNameTreeQuery()).
-		WithArtifact().
-		WithPackageVersion(withPackageVersionTree()).
-		WithAllVersions(withPackageNameTree()).
-		All(ctx)
 }
 
 func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*string, error) {
