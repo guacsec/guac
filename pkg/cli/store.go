@@ -129,6 +129,9 @@ func init() {
 	set.String("github-sbom", "", "name of sbom file to look for in github release.")
 	set.String("github-workflow-file", "", "name of workflow file to look for in github workflow. \nThis will be the name of the actual file, not the workflow name (i.e. ci.yaml).")
 
+	// Files collector options
+	set.Bool("use-blob-path", false, "use blob path for origin instead of source path")
+
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f
 	})

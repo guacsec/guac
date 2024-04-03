@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -35,13 +36,15 @@ type fileCollector struct {
 	lastChecked time.Time
 	poll        bool
 	interval    time.Duration
+	useBlobPath bool
 }
 
-func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration) *fileCollector {
+func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration, useBlobPath bool) *fileCollector {
 	return &fileCollector{
-		path:     path,
-		poll:     poll,
-		interval: interval,
+		path:        path,
+		poll:        poll,
+		interval:    interval,
+		useBlobPath: useBlobPath,
 	}
 }
 
@@ -87,13 +90,18 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			return fmt.Errorf("error reading file: %s, err: %w", path, err)
 		}
 
+		source := fmt.Sprintf("file:///%s", path)
+		if f.useBlobPath {
+			source = events.GetKey(blob) // this is the blob store path
+		}
+
 		doc := &processor.Document{
 			Blob:   blob,
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
 				Collector: string(FileCollector),
-				Source:    fmt.Sprintf("file:///%s", path),
+				Source:    source,
 			},
 		}
 
