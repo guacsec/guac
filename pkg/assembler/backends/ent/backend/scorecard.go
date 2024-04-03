@@ -39,15 +39,23 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 		return nil, nil
 	}
 
-	records, err := b.client.CertifyScorecard.Query().
-		Where(certifyScorecardQuery(filter)).
-		WithSource(func(q *ent.SourceNameQuery) {}).
+	scorecardQuery := b.client.CertifyScorecard.Query().
+		Where(certifyScorecardQuery(filter))
+
+	records, err := getScorecardObject(scorecardQuery).
+		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return collect(records, toModelCertifyScorecard), nil
+}
+
+// getPkgEqualObject is used recreate the pkgEqual object be eager loading the edges
+func getScorecardObject(q *ent.CertifyScorecardQuery) *ent.CertifyScorecardQuery {
+	return q.
+		WithSource(func(q *ent.SourceNameQuery) {})
 }
 
 func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.CertifyScorecard {
@@ -132,7 +140,8 @@ func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSou
 	var sourceID uuid.UUID
 	if src.SourceNameID != nil {
 		var err error
-		sourceID, err = uuid.Parse(*src.SourceNameID)
+		srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+		sourceID, err = uuid.Parse(srcNameGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 		}

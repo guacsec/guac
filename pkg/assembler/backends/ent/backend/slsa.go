@@ -176,7 +176,8 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 	var buildID uuid.UUID
 	if builtBy.BuilderID != nil {
 		var err error
-		buildID, err = uuid.Parse(*builtBy.BuilderID)
+		builtGlobalID := fromGlobalID(*builtBy.BuilderID)
+		buildID, err = uuid.Parse(builtGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from BuilderID failed with error: %w", err)
 		}
@@ -192,7 +193,8 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 	var subjectArtifactID uuid.UUID
 	if subject.ArtifactID != nil {
 		var err error
-		subjectArtifactID, err = uuid.Parse(*subject.ArtifactID)
+		artGlobalID := fromGlobalID(*subject.ArtifactID)
+		subjectArtifactID, err = uuid.Parse(artGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
@@ -211,7 +213,8 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 	if len(builtFrom) > 0 {
 		for _, bf := range builtFrom {
 			if bf.ArtifactID != nil {
-				builtFromIDs = append(builtFromIDs, *bf.ArtifactID)
+				artGlobalID := fromGlobalID(*bf.ArtifactID)
+				builtFromIDs = append(builtFromIDs, artGlobalID.id)
 			} else {
 				foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*bf.ArtifactInput)).Only(ctx)
 				if err != nil {

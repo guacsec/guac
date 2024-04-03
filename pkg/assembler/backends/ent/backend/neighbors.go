@@ -58,31 +58,31 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 	var neighbors []model.Node
 	var err error
 
-	foundGlobalID, err := parseGlobalIDFromInput(nodeID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse globalID %s with error: %w", nodeID, err)
+	foundGlobalID := fromGlobalID(nodeID)
+	if foundGlobalID.nodeType == "" {
+		return nil, fmt.Errorf("failed to parse globalID %s. Missing Node Type", nodeID)
 	}
 	switch foundGlobalID.nodeType {
-	// case pkgVersionsStr:
-	// 	neighbors, err = c.packageVersionNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
-	// case pkgNamesStr:
-	// 	neighbors, err = c.packageNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
-	// case pkgNamespacesStr:
-	// 	neighbors, err = c.packageNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
-	// case pkgTypesStr:
-	// 	neighbors, err = c.packageTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
+	case packageversion.Table:
+		neighbors, err = b.packageVersionNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get pkgVersion neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case packagename.Table:
+		neighbors, err = b.packageNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get pkgName neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case pkgNamespaceString:
+		neighbors, err = b.packageNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get pkgNamespace neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case pkgTypeString:
+		neighbors, err = b.packageTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get pkgType neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	// case srcNamesStr:
 	// 	neighbors, err = c.srcNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
@@ -215,12 +215,12 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 }
 
 func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) {
-	foundGlobalID, err := parseGlobalIDFromInput(node)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse globalID %s with error: %w", node, err)
+	foundGlobalID := fromGlobalID(node)
+	if foundGlobalID.nodeType == "" {
+		return nil, fmt.Errorf("failed to parse globalID %s. Missing Node Type", node)
 	}
 	// return uuid if valid, else error
-	nodeID, err := uuid.Parse(foundGlobalID.ID)
+	nodeID, err := uuid.Parse(foundGlobalID.id)
 	if err != nil {
 		return nil, fmt.Errorf("uuid conversion from string failed with error: %w", err)
 	}

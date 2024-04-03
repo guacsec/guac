@@ -1264,8 +1264,8 @@ func TestNeighbors(t *testing.T) {
 		},
 		queryPkgNameID: true,
 		want: []model.Node{
-			testdata.P2out,
 			testdata.P1out,
+			testdata.P2out,
 			&model.Package{
 				Type: "pypi",
 				Namespaces: []*model.PackageNamespace{{
@@ -1430,8 +1430,8 @@ func TestNeighbors(t *testing.T) {
 		},
 		queryPkgNameID: true,
 		want: []model.Node{
-			testdata.P2out,
 			testdata.P1out,
+			testdata.P2out,
 			&model.Package{
 				Type: "pypi",
 				Namespaces: []*model.PackageNamespace{{
@@ -2075,8 +2075,8 @@ func TestNeighbors(t *testing.T) {
 		},
 		queryPkgNameID: true,
 		want: []model.Node{
-			testdata.P2out,
 			testdata.P1out,
+			testdata.P2out,
 			&model.Package{
 				Type: "pypi",
 				Namespaces: []*model.PackageNamespace{{
@@ -2422,8 +2422,8 @@ func TestNeighbors(t *testing.T) {
 		},
 		queryPkgNameID: true,
 		want: []model.Node{
-			testdata.P2out,
 			testdata.P1out,
+			testdata.P2out,
 			&model.Package{
 				Type: "pypi",
 				Namespaces: []*model.PackageNamespace{{
@@ -2544,8 +2544,8 @@ func TestNeighbors(t *testing.T) {
 		},
 		queryPkgNameID: true,
 		want: []model.Node{
-			testdata.P2out,
 			testdata.P1out,
+			testdata.P2out,
 			&model.Package{
 				Type: "pypi",
 				Namespaces: []*model.PackageNamespace{{
@@ -2822,8 +2822,8 @@ func TestNeighbors(t *testing.T) {
 		},
 		queryPkgNameID: true,
 		want: []model.Node{
-			testdata.P2out,
 			testdata.P1out,
+			testdata.P2out,
 			&model.Package{
 				Type: "pypi",
 				Namespaces: []*model.PackageNamespace{{

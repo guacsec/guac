@@ -37,17 +37,24 @@ func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate vulnerabilityMetadataPredicate :: %w", err)
 	}
-	records, err := b.client.VulnerabilityMetadata.Query().
-		Where(vulnMetadataPred).
-		Limit(MaxPageSize).
-		WithVulnerabilityID(func(q *ent.VulnerabilityIDQuery) {}).
-		All(ctx)
 
+	veQuery := b.client.VulnerabilityMetadata.Query().
+		Where(vulnMetadataPred)
+
+	records, err := getVulnMetadataObject(veQuery).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve VulnerabilityMetadata :: %w", err)
 	}
 
 	return collect(records, toModelVulnerabilityMetadata), nil
+}
+
+// getVulnEqualObject is used recreate the vulnEqual object be eager loading the edges
+func getVulnMetadataObject(q *ent.VulnerabilityMetadataQuery) *ent.VulnerabilityMetadataQuery {
+	return q.
+		WithVulnerabilityID(func(q *ent.VulnerabilityIDQuery) {})
 }
 
 func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
@@ -183,7 +190,8 @@ func generateVulnMetadataCreate(ctx context.Context, tx *ent.Tx, vuln *model.IDo
 	var vulnID uuid.UUID
 	if vuln.VulnerabilityNodeID != nil {
 		var err error
-		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
+		vulnID, err = uuid.Parse(vulnGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}

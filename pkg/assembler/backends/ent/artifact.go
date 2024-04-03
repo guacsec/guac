@@ -35,6 +35,8 @@ type ArtifactEdges struct {
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
 	// Attestations holds the value of the attestations edge.
 	Attestations []*SLSAAttestation `json:"attestations,omitempty"`
+	// AttestationsSubject holds the value of the attestations_subject edge.
+	AttestationsSubject []*SLSAAttestation `json:"attestations_subject,omitempty"`
 	// HashEqualArtA holds the value of the hash_equal_art_a edge.
 	HashEqualArtA []*HashEqual `json:"hash_equal_art_a,omitempty"`
 	// HashEqualArtB holds the value of the hash_equal_art_b edge.
@@ -51,20 +53,21 @@ type ArtifactEdges struct {
 	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [10]bool
+	loadedTypes [11]bool
 	// totalCount holds the count of the edges above.
-	totalCount [10]map[string]int
+	totalCount [11]map[string]int
 
-	namedOccurrences     map[string][]*Occurrence
-	namedSbom            map[string][]*BillOfMaterials
-	namedAttestations    map[string][]*SLSAAttestation
-	namedHashEqualArtA   map[string][]*HashEqual
-	namedHashEqualArtB   map[string][]*HashEqual
-	namedVex             map[string][]*CertifyVex
-	namedCertification   map[string][]*Certification
-	namedMetadata        map[string][]*HasMetadata
-	namedPoc             map[string][]*PointOfContact
-	namedIncludedInSboms map[string][]*BillOfMaterials
+	namedOccurrences         map[string][]*Occurrence
+	namedSbom                map[string][]*BillOfMaterials
+	namedAttestations        map[string][]*SLSAAttestation
+	namedAttestationsSubject map[string][]*SLSAAttestation
+	namedHashEqualArtA       map[string][]*HashEqual
+	namedHashEqualArtB       map[string][]*HashEqual
+	namedVex                 map[string][]*CertifyVex
+	namedCertification       map[string][]*Certification
+	namedMetadata            map[string][]*HasMetadata
+	namedPoc                 map[string][]*PointOfContact
+	namedIncludedInSboms     map[string][]*BillOfMaterials
 }
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
@@ -94,10 +97,19 @@ func (e ArtifactEdges) AttestationsOrErr() ([]*SLSAAttestation, error) {
 	return nil, &NotLoadedError{edge: "attestations"}
 }
 
+// AttestationsSubjectOrErr returns the AttestationsSubject value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) AttestationsSubjectOrErr() ([]*SLSAAttestation, error) {
+	if e.loadedTypes[3] {
+		return e.AttestationsSubject, nil
+	}
+	return nil, &NotLoadedError{edge: "attestations_subject"}
+}
+
 // HashEqualArtAOrErr returns the HashEqualArtA value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) HashEqualArtAOrErr() ([]*HashEqual, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.HashEqualArtA, nil
 	}
 	return nil, &NotLoadedError{edge: "hash_equal_art_a"}
@@ -106,7 +118,7 @@ func (e ArtifactEdges) HashEqualArtAOrErr() ([]*HashEqual, error) {
 // HashEqualArtBOrErr returns the HashEqualArtB value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) HashEqualArtBOrErr() ([]*HashEqual, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.HashEqualArtB, nil
 	}
 	return nil, &NotLoadedError{edge: "hash_equal_art_b"}
@@ -115,7 +127,7 @@ func (e ArtifactEdges) HashEqualArtBOrErr() ([]*HashEqual, error) {
 // VexOrErr returns the Vex value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) VexOrErr() ([]*CertifyVex, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.Vex, nil
 	}
 	return nil, &NotLoadedError{edge: "vex"}
@@ -124,7 +136,7 @@ func (e ArtifactEdges) VexOrErr() ([]*CertifyVex, error) {
 // CertificationOrErr returns the Certification value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) CertificationOrErr() ([]*Certification, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.Certification, nil
 	}
 	return nil, &NotLoadedError{edge: "certification"}
@@ -133,7 +145,7 @@ func (e ArtifactEdges) CertificationOrErr() ([]*Certification, error) {
 // MetadataOrErr returns the Metadata value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) MetadataOrErr() ([]*HasMetadata, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.Metadata, nil
 	}
 	return nil, &NotLoadedError{edge: "metadata"}
@@ -142,7 +154,7 @@ func (e ArtifactEdges) MetadataOrErr() ([]*HasMetadata, error) {
 // PocOrErr returns the Poc value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) PocOrErr() ([]*PointOfContact, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[9] {
 		return e.Poc, nil
 	}
 	return nil, &NotLoadedError{edge: "poc"}
@@ -151,7 +163,7 @@ func (e ArtifactEdges) PocOrErr() ([]*PointOfContact, error) {
 // IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
-	if e.loadedTypes[9] {
+	if e.loadedTypes[10] {
 		return e.IncludedInSboms, nil
 	}
 	return nil, &NotLoadedError{edge: "included_in_sboms"}
@@ -225,6 +237,11 @@ func (a *Artifact) QuerySbom() *BillOfMaterialsQuery {
 // QueryAttestations queries the "attestations" edge of the Artifact entity.
 func (a *Artifact) QueryAttestations() *SLSAAttestationQuery {
 	return NewArtifactClient(a.config).QueryAttestations(a)
+}
+
+// QueryAttestationsSubject queries the "attestations_subject" edge of the Artifact entity.
+func (a *Artifact) QueryAttestationsSubject() *SLSAAttestationQuery {
+	return NewArtifactClient(a.config).QueryAttestationsSubject(a)
 }
 
 // QueryHashEqualArtA queries the "hash_equal_art_a" edge of the Artifact entity.
@@ -363,6 +380,30 @@ func (a *Artifact) appendNamedAttestations(name string, edges ...*SLSAAttestatio
 		a.Edges.namedAttestations[name] = []*SLSAAttestation{}
 	} else {
 		a.Edges.namedAttestations[name] = append(a.Edges.namedAttestations[name], edges...)
+	}
+}
+
+// NamedAttestationsSubject returns the AttestationsSubject named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedAttestationsSubject(name string) ([]*SLSAAttestation, error) {
+	if a.Edges.namedAttestationsSubject == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedAttestationsSubject[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedAttestationsSubject(name string, edges ...*SLSAAttestation) {
+	if a.Edges.namedAttestationsSubject == nil {
+		a.Edges.namedAttestationsSubject = make(map[string][]*SLSAAttestation)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedAttestationsSubject[name] = []*SLSAAttestation{}
+	} else {
+		a.Edges.namedAttestationsSubject[name] = append(a.Edges.namedAttestationsSubject[name], edges...)
 	}
 }
 

@@ -17,7 +17,6 @@ package backend
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
@@ -26,7 +25,7 @@ import (
 
 type globalID struct {
 	nodeType string
-	ID       string
+	id       string
 }
 
 func toGlobalID(nodeType string, id string) string {
@@ -46,30 +45,19 @@ func fromGlobalID(gID string) *globalID {
 	if len(idSplit) == 2 {
 		return &globalID{
 			nodeType: idSplit[0],
-			ID:       idSplit[1],
+			id:       idSplit[1],
 		}
 	} else {
 		return &globalID{
-			ID: idSplit[0],
+			id:       idSplit[0],
+			nodeType: "",
 		}
-	}
-}
-
-func parseGlobalIDFromInput(gID string) (*globalID, error) {
-	idSplit := strings.Split(string(gID), ":")
-	if len(idSplit) == 2 {
-		return &globalID{
-			nodeType: idSplit[0],
-			ID:       idSplit[1],
-		}, nil
-	} else {
-		return nil, fmt.Errorf("invalid global ID: %s", gID)
 	}
 }
 
 func IDEQ(id string) func(*sql.Selector) {
 	filterGlobalID := fromGlobalID(id)
-	return sql.FieldEQ("id", filterGlobalID.ID)
+	return sql.FieldEQ("id", filterGlobalID.id)
 }
 
 func NoOpSelector() func(*sql.Selector) {

@@ -27,32 +27,34 @@ import (
 // ArtifactQuery is the builder for querying Artifact entities.
 type ArtifactQuery struct {
 	config
-	ctx                      *QueryContext
-	order                    []artifact.OrderOption
-	inters                   []Interceptor
-	predicates               []predicate.Artifact
-	withOccurrences          *OccurrenceQuery
-	withSbom                 *BillOfMaterialsQuery
-	withAttestations         *SLSAAttestationQuery
-	withHashEqualArtA        *HashEqualQuery
-	withHashEqualArtB        *HashEqualQuery
-	withVex                  *CertifyVexQuery
-	withCertification        *CertificationQuery
-	withMetadata             *HasMetadataQuery
-	withPoc                  *PointOfContactQuery
-	withIncludedInSboms      *BillOfMaterialsQuery
-	modifiers                []func(*sql.Selector)
-	loadTotal                []func(context.Context, []*Artifact) error
-	withNamedOccurrences     map[string]*OccurrenceQuery
-	withNamedSbom            map[string]*BillOfMaterialsQuery
-	withNamedAttestations    map[string]*SLSAAttestationQuery
-	withNamedHashEqualArtA   map[string]*HashEqualQuery
-	withNamedHashEqualArtB   map[string]*HashEqualQuery
-	withNamedVex             map[string]*CertifyVexQuery
-	withNamedCertification   map[string]*CertificationQuery
-	withNamedMetadata        map[string]*HasMetadataQuery
-	withNamedPoc             map[string]*PointOfContactQuery
-	withNamedIncludedInSboms map[string]*BillOfMaterialsQuery
+	ctx                          *QueryContext
+	order                        []artifact.OrderOption
+	inters                       []Interceptor
+	predicates                   []predicate.Artifact
+	withOccurrences              *OccurrenceQuery
+	withSbom                     *BillOfMaterialsQuery
+	withAttestations             *SLSAAttestationQuery
+	withAttestationsSubject      *SLSAAttestationQuery
+	withHashEqualArtA            *HashEqualQuery
+	withHashEqualArtB            *HashEqualQuery
+	withVex                      *CertifyVexQuery
+	withCertification            *CertificationQuery
+	withMetadata                 *HasMetadataQuery
+	withPoc                      *PointOfContactQuery
+	withIncludedInSboms          *BillOfMaterialsQuery
+	modifiers                    []func(*sql.Selector)
+	loadTotal                    []func(context.Context, []*Artifact) error
+	withNamedOccurrences         map[string]*OccurrenceQuery
+	withNamedSbom                map[string]*BillOfMaterialsQuery
+	withNamedAttestations        map[string]*SLSAAttestationQuery
+	withNamedAttestationsSubject map[string]*SLSAAttestationQuery
+	withNamedHashEqualArtA       map[string]*HashEqualQuery
+	withNamedHashEqualArtB       map[string]*HashEqualQuery
+	withNamedVex                 map[string]*CertifyVexQuery
+	withNamedCertification       map[string]*CertificationQuery
+	withNamedMetadata            map[string]*HasMetadataQuery
+	withNamedPoc                 map[string]*PointOfContactQuery
+	withNamedIncludedInSboms     map[string]*BillOfMaterialsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -148,6 +150,28 @@ func (aq *ArtifactQuery) QueryAttestations() *SLSAAttestationQuery {
 			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
 			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, artifact.AttestationsTable, artifact.AttestationsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAttestationsSubject chains the current query on the "attestations_subject" edge.
+func (aq *ArtifactQuery) QueryAttestationsSubject() *SLSAAttestationQuery {
+	query := (&SLSAAttestationClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, selector),
+			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.AttestationsSubjectTable, artifact.AttestationsSubjectColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -496,21 +520,22 @@ func (aq *ArtifactQuery) Clone() *ArtifactQuery {
 		return nil
 	}
 	return &ArtifactQuery{
-		config:              aq.config,
-		ctx:                 aq.ctx.Clone(),
-		order:               append([]artifact.OrderOption{}, aq.order...),
-		inters:              append([]Interceptor{}, aq.inters...),
-		predicates:          append([]predicate.Artifact{}, aq.predicates...),
-		withOccurrences:     aq.withOccurrences.Clone(),
-		withSbom:            aq.withSbom.Clone(),
-		withAttestations:    aq.withAttestations.Clone(),
-		withHashEqualArtA:   aq.withHashEqualArtA.Clone(),
-		withHashEqualArtB:   aq.withHashEqualArtB.Clone(),
-		withVex:             aq.withVex.Clone(),
-		withCertification:   aq.withCertification.Clone(),
-		withMetadata:        aq.withMetadata.Clone(),
-		withPoc:             aq.withPoc.Clone(),
-		withIncludedInSboms: aq.withIncludedInSboms.Clone(),
+		config:                  aq.config,
+		ctx:                     aq.ctx.Clone(),
+		order:                   append([]artifact.OrderOption{}, aq.order...),
+		inters:                  append([]Interceptor{}, aq.inters...),
+		predicates:              append([]predicate.Artifact{}, aq.predicates...),
+		withOccurrences:         aq.withOccurrences.Clone(),
+		withSbom:                aq.withSbom.Clone(),
+		withAttestations:        aq.withAttestations.Clone(),
+		withAttestationsSubject: aq.withAttestationsSubject.Clone(),
+		withHashEqualArtA:       aq.withHashEqualArtA.Clone(),
+		withHashEqualArtB:       aq.withHashEqualArtB.Clone(),
+		withVex:                 aq.withVex.Clone(),
+		withCertification:       aq.withCertification.Clone(),
+		withMetadata:            aq.withMetadata.Clone(),
+		withPoc:                 aq.withPoc.Clone(),
+		withIncludedInSboms:     aq.withIncludedInSboms.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -547,6 +572,17 @@ func (aq *ArtifactQuery) WithAttestations(opts ...func(*SLSAAttestationQuery)) *
 		opt(query)
 	}
 	aq.withAttestations = query
+	return aq
+}
+
+// WithAttestationsSubject tells the query-builder to eager-load the nodes that are connected to
+// the "attestations_subject" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithAttestationsSubject(opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
+	query := (&SLSAAttestationClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withAttestationsSubject = query
 	return aq
 }
 
@@ -705,10 +741,11 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 	var (
 		nodes       = []*Artifact{}
 		_spec       = aq.querySpec()
-		loadedTypes = [10]bool{
+		loadedTypes = [11]bool{
 			aq.withOccurrences != nil,
 			aq.withSbom != nil,
 			aq.withAttestations != nil,
+			aq.withAttestationsSubject != nil,
 			aq.withHashEqualArtA != nil,
 			aq.withHashEqualArtB != nil,
 			aq.withVex != nil,
@@ -757,6 +794,15 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 		if err := aq.loadAttestations(ctx, query, nodes,
 			func(n *Artifact) { n.Edges.Attestations = []*SLSAAttestation{} },
 			func(n *Artifact, e *SLSAAttestation) { n.Edges.Attestations = append(n.Edges.Attestations, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withAttestationsSubject; query != nil {
+		if err := aq.loadAttestationsSubject(ctx, query, nodes,
+			func(n *Artifact) { n.Edges.AttestationsSubject = []*SLSAAttestation{} },
+			func(n *Artifact, e *SLSAAttestation) {
+				n.Edges.AttestationsSubject = append(n.Edges.AttestationsSubject, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -827,6 +873,13 @@ func (aq *ArtifactQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Art
 		if err := aq.loadAttestations(ctx, query, nodes,
 			func(n *Artifact) { n.appendNamedAttestations(name) },
 			func(n *Artifact, e *SLSAAttestation) { n.appendNamedAttestations(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedAttestationsSubject {
+		if err := aq.loadAttestationsSubject(ctx, query, nodes,
+			func(n *Artifact) { n.appendNamedAttestationsSubject(name) },
+			func(n *Artifact, e *SLSAAttestation) { n.appendNamedAttestationsSubject(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1008,6 +1061,36 @@ func (aq *ArtifactQuery) loadAttestations(ctx context.Context, query *SLSAAttest
 		for kn := range nodes {
 			assign(kn, n)
 		}
+	}
+	return nil
+}
+func (aq *ArtifactQuery) loadAttestationsSubject(ctx context.Context, query *SLSAAttestationQuery, nodes []*Artifact, init func(*Artifact), assign func(*Artifact, *SLSAAttestation)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Artifact)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(slsaattestation.FieldSubjectID)
+	}
+	query.Where(predicate.SLSAAttestation(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(artifact.AttestationsSubjectColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SubjectID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "subject_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }
@@ -1388,6 +1471,20 @@ func (aq *ArtifactQuery) WithNamedAttestations(name string, opts ...func(*SLSAAt
 		aq.withNamedAttestations = make(map[string]*SLSAAttestationQuery)
 	}
 	aq.withNamedAttestations[name] = query
+	return aq
+}
+
+// WithNamedAttestationsSubject tells the query-builder to eager-load the nodes that are connected to the "attestations_subject"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArtifactQuery) WithNamedAttestationsSubject(name string, opts ...func(*SLSAAttestationQuery)) *ArtifactQuery {
+	query := (&SLSAAttestationClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedAttestationsSubject == nil {
+		aq.withNamedAttestationsSubject = make(map[string]*SLSAAttestationQuery)
+	}
+	aq.withNamedAttestationsSubject[name] = query
 	return aq
 }
 

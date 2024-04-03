@@ -102,6 +102,21 @@ func (ac *ArtifactCreate) AddAttestations(s ...*SLSAAttestation) *ArtifactCreate
 	return ac.AddAttestationIDs(ids...)
 }
 
+// AddAttestationsSubjectIDs adds the "attestations_subject" edge to the SLSAAttestation entity by IDs.
+func (ac *ArtifactCreate) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactCreate {
+	ac.mutation.AddAttestationsSubjectIDs(ids...)
+	return ac
+}
+
+// AddAttestationsSubject adds the "attestations_subject" edges to the SLSAAttestation entity.
+func (ac *ArtifactCreate) AddAttestationsSubject(s ...*SLSAAttestation) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return ac.AddAttestationsSubjectIDs(ids...)
+}
+
 // AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
 func (ac *ArtifactCreate) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactCreate {
 	ac.mutation.AddHashEqualArtAIDs(ids...)
@@ -338,6 +353,22 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Inverse: true,
 			Table:   artifact.AttestationsTable,
 			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.AttestationsSubjectTable,
+			Columns: []string{artifact.AttestationsSubjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),

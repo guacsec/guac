@@ -44,6 +44,18 @@ func (a *Artifact) Attestations(ctx context.Context) (result []*SLSAAttestation,
 	return result, err
 }
 
+func (a *Artifact) AttestationsSubject(ctx context.Context) (result []*SLSAAttestation, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = a.NamedAttestationsSubject(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = a.Edges.AttestationsSubjectOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = a.QueryAttestationsSubject().All(ctx)
+	}
+	return result, err
+}
+
 func (a *Artifact) HashEqualArtA(ctx context.Context) (result []*HashEqual, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = a.NamedHashEqualArtA(graphql.GetFieldContext(ctx).Field.Alias)
@@ -516,6 +528,54 @@ func (pn *PackageName) HasSourceAt(ctx context.Context) (result []*HasSourceAt, 
 	return result, err
 }
 
+func (pn *PackageName) Dependency(ctx context.Context) (result []*Dependency, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pn.NamedDependency(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pn.Edges.DependencyOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pn.QueryDependency().All(ctx)
+	}
+	return result, err
+}
+
+func (pn *PackageName) Certification(ctx context.Context) (result []*Certification, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pn.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pn.Edges.CertificationOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pn.QueryCertification().All(ctx)
+	}
+	return result, err
+}
+
+func (pn *PackageName) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pn.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pn.Edges.MetadataOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pn.QueryMetadata().All(ctx)
+	}
+	return result, err
+}
+
+func (pn *PackageName) Poc(ctx context.Context) (result []*PointOfContact, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pn.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pn.Edges.PocOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pn.QueryPoc().All(ctx)
+	}
+	return result, err
+}
+
 func (pv *PackageVersion) Name(ctx context.Context) (*PackageName, error) {
 	result, err := pv.Edges.NameOrErr()
 	if IsNotLoaded(err) {
@@ -548,14 +608,86 @@ func (pv *PackageVersion) Sbom(ctx context.Context) (result []*BillOfMaterials, 
 	return result, err
 }
 
-func (pv *PackageVersion) VexPackage(ctx context.Context) (result []*CertifyVex, err error) {
+func (pv *PackageVersion) Vuln(ctx context.Context) (result []*CertifyVuln, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = pv.NamedVexPackage(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = pv.NamedVuln(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = pv.Edges.VexPackageOrErr()
+		result, err = pv.Edges.VulnOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = pv.QueryVexPackage().All(ctx)
+		result, err = pv.QueryVuln().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) Vex(ctx context.Context) (result []*CertifyVex, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedVex(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.VexOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryVex().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) HasSourceAt(ctx context.Context) (result []*HasSourceAt, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedHasSourceAt(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.HasSourceAtOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryHasSourceAt().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) Certification(ctx context.Context) (result []*Certification, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedCertification(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.CertificationOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryCertification().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) Metadata(ctx context.Context) (result []*HasMetadata, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.MetadataOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryMetadata().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) Dependency(ctx context.Context) (result []*Dependency, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedDependency(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.DependencyOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryDependency().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) DependencySubject(ctx context.Context) (result []*Dependency, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedDependencySubject(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.DependencySubjectOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryDependencySubject().All(ctx)
 	}
 	return result, err
 }
@@ -592,6 +724,30 @@ func (pv *PackageVersion) PkgEqualPkgB(ctx context.Context) (result []*PkgEqual,
 	}
 	if IsNotLoaded(err) {
 		result, err = pv.QueryPkgEqualPkgB().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) Poc(ctx context.Context) (result []*PointOfContact, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedPoc(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.PocOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryPoc().All(ctx)
+	}
+	return result, err
+}
+
+func (pv *PackageVersion) CertifyLegal(ctx context.Context) (result []*CertifyLegal, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = pv.NamedCertifyLegal(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = pv.Edges.CertifyLegalOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = pv.QueryCertifyLegal().All(ctx)
 	}
 	return result, err
 }

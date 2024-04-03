@@ -40,16 +40,24 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 		return nil, fmt.Errorf("too many vulnerability specified in vuln equal filter")
 	}
 
-	query := b.client.VulnEqual.Query().
-		Where(vulnEqualQuery(filter)).
-		WithVulnerabilityA(func(query *ent.VulnerabilityIDQuery) {}).
-		WithVulnerabilityB(func(query *ent.VulnerabilityIDQuery) {})
-	results, err := query.Limit(MaxPageSize).All(ctx)
+	veQuery := b.client.VulnEqual.Query().
+		Where(vulnEqualQuery(filter))
+
+	query, err := getVulnEqualObject(veQuery).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return collect(results, toModelVulnEqual), nil
+	return collect(query, toModelVulnEqual), nil
+}
+
+// getVulnEqualObject is used recreate the vulnEqual object be eager loading the edges
+func getVulnEqualObject(q *ent.VulnEqualQuery) *ent.VulnEqualQuery {
+	return q.
+		WithVulnerabilityA(func(query *ent.VulnerabilityIDQuery) {}).
+		WithVulnerabilityB(func(query *ent.VulnerabilityIDQuery) {})
 }
 
 func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
@@ -197,7 +205,7 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if err != nil {
 			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
 		}
-		vulnerability.VulnerabilityNodeID = ptrfrom.String(foundVulnID.String())
+		vulnerability.VulnerabilityNodeID = ptrfrom.String(toGlobalID(vulnerabilityid.Table, foundVulnID.String()))
 	}
 
 	if otherVulnerability.VulnerabilityNodeID == nil {
@@ -210,7 +218,7 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if err != nil {
 			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
 		}
-		otherVulnerability.VulnerabilityNodeID = ptrfrom.String(foundVulnID.String())
+		otherVulnerability.VulnerabilityNodeID = ptrfrom.String(toGlobalID(vulnerabilityid.Table, foundVulnID.String()))
 	}
 
 	sortedVulns := []model.IDorVulnerabilityInput{*vulnerability, *otherVulnerability}
@@ -222,7 +230,8 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if vuln.VulnerabilityNodeID == nil {
 			return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
 		}
-		vulnID, err := uuid.Parse(*vuln.VulnerabilityNodeID)
+		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
+		vulnID, err := uuid.Parse(vulnGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}

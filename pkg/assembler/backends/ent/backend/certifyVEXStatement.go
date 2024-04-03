@@ -121,7 +121,8 @@ func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput,
 	var vulnID uuid.UUID
 	if vuln.VulnerabilityNodeID != nil {
 		var err error
-		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
+		vulnID, err = uuid.Parse(vulnGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
@@ -144,7 +145,8 @@ func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput,
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
 			var err error
-			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+			pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -161,7 +163,8 @@ func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput,
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}

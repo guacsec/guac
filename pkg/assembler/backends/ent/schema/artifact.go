@@ -55,15 +55,13 @@ func (Artifact) Edges() []ent.Edge {
 		edge.From("occurrences", Occurrence.Type).Ref("artifact").Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From("sbom", BillOfMaterials.Type).Ref("artifact"),
 		edge.From("attestations", SLSAAttestation.Type).Ref("built_from"),
+		edge.From("attestations_subject", SLSAAttestation.Type).Ref("subject"),
 		edge.From("hash_equal_art_a", HashEqual.Type).Ref("artifact_a"),
 		edge.From("hash_equal_art_b", HashEqual.Type).Ref("artifact_b"),
 		edge.From("vex", CertifyVex.Type).Ref("artifact"),
 		edge.From("certification", Certification.Type).Ref("artifact"),
 		edge.From("metadata", HasMetadata.Type).Ref("artifact"),
 		edge.From("poc", PointOfContact.Type).Ref("artifact"),
-		// edge.To("dependency", Artifact.Type).Annotations(entsql.OnDelete(entsql.Cascade)).From("dependents"),
-		// edge.From("source_occurrences", SourceOccurrence.Type).Ref("artifact"),
-		// edge.To("sources", Source.Type).Through("source_occurrences", SourceOccurrence.Type),
 		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_software_artifacts"),
 	}
 }

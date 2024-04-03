@@ -89,6 +89,18 @@ func (a *ArtifactQuery) collectField(ctx context.Context, opCtx *graphql.Operati
 			a.WithNamedAttestations(alias, func(wq *SLSAAttestationQuery) {
 				*wq = *query
 			})
+		case "attestationsSubject":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&SLSAAttestationClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.WithNamedAttestationsSubject(alias, func(wq *SLSAAttestationQuery) {
+				*wq = *query
+			})
 		case "hashEqualArtA":
 			var (
 				alias = field.Alias
@@ -2081,6 +2093,54 @@ func (pn *PackageNameQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 			pn.WithNamedHasSourceAt(alias, func(wq *HasSourceAtQuery) {
 				*wq = *query
 			})
+		case "dependency":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&DependencyClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pn.WithNamedDependency(alias, func(wq *DependencyQuery) {
+				*wq = *query
+			})
+		case "certification":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertificationClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pn.WithNamedCertification(alias, func(wq *CertificationQuery) {
+				*wq = *query
+			})
+		case "metadata":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasMetadataClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pn.WithNamedMetadata(alias, func(wq *HasMetadataQuery) {
+				*wq = *query
+			})
+		case "poc":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PointOfContactClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pn.WithNamedPoc(alias, func(wq *PointOfContactQuery) {
+				*wq = *query
+			})
 		case "type":
 			if _, ok := fieldSeen[packagename.FieldType]; !ok {
 				selectedFields = append(selectedFields, packagename.FieldType)
@@ -2193,7 +2253,19 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 			pv.WithNamedSbom(alias, func(wq *BillOfMaterialsQuery) {
 				*wq = *query
 			})
-		case "vexPackage":
+		case "vuln":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVulnClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedVuln(alias, func(wq *CertifyVulnQuery) {
+				*wq = *query
+			})
+		case "vex":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -2202,7 +2274,67 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			pv.WithNamedVexPackage(alias, func(wq *CertifyVexQuery) {
+			pv.WithNamedVex(alias, func(wq *CertifyVexQuery) {
+				*wq = *query
+			})
+		case "hasSourceAt":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasSourceAtClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedHasSourceAt(alias, func(wq *HasSourceAtQuery) {
+				*wq = *query
+			})
+		case "certification":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertificationClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedCertification(alias, func(wq *CertificationQuery) {
+				*wq = *query
+			})
+		case "metadata":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasMetadataClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedMetadata(alias, func(wq *HasMetadataQuery) {
+				*wq = *query
+			})
+		case "dependency":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&DependencyClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedDependency(alias, func(wq *DependencyQuery) {
+				*wq = *query
+			})
+		case "dependencySubject":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&DependencyClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedDependencySubject(alias, func(wq *DependencyQuery) {
 				*wq = *query
 			})
 		case "includedInSboms":
@@ -2239,6 +2371,30 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 				return err
 			}
 			pv.WithNamedPkgEqualPkgB(alias, func(wq *PkgEqualQuery) {
+				*wq = *query
+			})
+		case "poc":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PointOfContactClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedPoc(alias, func(wq *PointOfContactQuery) {
+				*wq = *query
+			})
+		case "certifyLegal":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyLegalClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			pv.WithNamedCertifyLegal(alias, func(wq *CertifyLegalQuery) {
 				*wq = *query
 			})
 		case "nameID":

@@ -109,6 +109,21 @@ func (au *ArtifactUpdate) AddAttestations(s ...*SLSAAttestation) *ArtifactUpdate
 	return au.AddAttestationIDs(ids...)
 }
 
+// AddAttestationsSubjectIDs adds the "attestations_subject" edge to the SLSAAttestation entity by IDs.
+func (au *ArtifactUpdate) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.AddAttestationsSubjectIDs(ids...)
+	return au
+}
+
+// AddAttestationsSubject adds the "attestations_subject" edges to the SLSAAttestation entity.
+func (au *ArtifactUpdate) AddAttestationsSubject(s ...*SLSAAttestation) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return au.AddAttestationsSubjectIDs(ids...)
+}
+
 // AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
 func (au *ArtifactUpdate) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdate {
 	au.mutation.AddHashEqualArtAIDs(ids...)
@@ -280,6 +295,27 @@ func (au *ArtifactUpdate) RemoveAttestations(s ...*SLSAAttestation) *ArtifactUpd
 		ids[i] = s[i].ID
 	}
 	return au.RemoveAttestationIDs(ids...)
+}
+
+// ClearAttestationsSubject clears all "attestations_subject" edges to the SLSAAttestation entity.
+func (au *ArtifactUpdate) ClearAttestationsSubject() *ArtifactUpdate {
+	au.mutation.ClearAttestationsSubject()
+	return au
+}
+
+// RemoveAttestationsSubjectIDs removes the "attestations_subject" edge to SLSAAttestation entities by IDs.
+func (au *ArtifactUpdate) RemoveAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdate {
+	au.mutation.RemoveAttestationsSubjectIDs(ids...)
+	return au
+}
+
+// RemoveAttestationsSubject removes "attestations_subject" edges to SLSAAttestation entities.
+func (au *ArtifactUpdate) RemoveAttestationsSubject(s ...*SLSAAttestation) *ArtifactUpdate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return au.RemoveAttestationsSubjectIDs(ids...)
 }
 
 // ClearHashEqualArtA clears all "hash_equal_art_a" edges to the HashEqual entity.
@@ -596,6 +632,51 @@ func (au *ArtifactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Inverse: true,
 			Table:   artifact.AttestationsTable,
 			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if au.mutation.AttestationsSubjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.AttestationsSubjectTable,
+			Columns: []string{artifact.AttestationsSubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedAttestationsSubjectIDs(); len(nodes) > 0 && !au.mutation.AttestationsSubjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.AttestationsSubjectTable,
+			Columns: []string{artifact.AttestationsSubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.AttestationsSubjectTable,
+			Columns: []string{artifact.AttestationsSubjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
@@ -1014,6 +1095,21 @@ func (auo *ArtifactUpdateOne) AddAttestations(s ...*SLSAAttestation) *ArtifactUp
 	return auo.AddAttestationIDs(ids...)
 }
 
+// AddAttestationsSubjectIDs adds the "attestations_subject" edge to the SLSAAttestation entity by IDs.
+func (auo *ArtifactUpdateOne) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.AddAttestationsSubjectIDs(ids...)
+	return auo
+}
+
+// AddAttestationsSubject adds the "attestations_subject" edges to the SLSAAttestation entity.
+func (auo *ArtifactUpdateOne) AddAttestationsSubject(s ...*SLSAAttestation) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return auo.AddAttestationsSubjectIDs(ids...)
+}
+
 // AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
 func (auo *ArtifactUpdateOne) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
 	auo.mutation.AddHashEqualArtAIDs(ids...)
@@ -1185,6 +1281,27 @@ func (auo *ArtifactUpdateOne) RemoveAttestations(s ...*SLSAAttestation) *Artifac
 		ids[i] = s[i].ID
 	}
 	return auo.RemoveAttestationIDs(ids...)
+}
+
+// ClearAttestationsSubject clears all "attestations_subject" edges to the SLSAAttestation entity.
+func (auo *ArtifactUpdateOne) ClearAttestationsSubject() *ArtifactUpdateOne {
+	auo.mutation.ClearAttestationsSubject()
+	return auo
+}
+
+// RemoveAttestationsSubjectIDs removes the "attestations_subject" edge to SLSAAttestation entities by IDs.
+func (auo *ArtifactUpdateOne) RemoveAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactUpdateOne {
+	auo.mutation.RemoveAttestationsSubjectIDs(ids...)
+	return auo
+}
+
+// RemoveAttestationsSubject removes "attestations_subject" edges to SLSAAttestation entities.
+func (auo *ArtifactUpdateOne) RemoveAttestationsSubject(s ...*SLSAAttestation) *ArtifactUpdateOne {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return auo.RemoveAttestationsSubjectIDs(ids...)
 }
 
 // ClearHashEqualArtA clears all "hash_equal_art_a" edges to the HashEqual entity.
@@ -1531,6 +1648,51 @@ func (auo *ArtifactUpdateOne) sqlSave(ctx context.Context) (_node *Artifact, err
 			Inverse: true,
 			Table:   artifact.AttestationsTable,
 			Columns: artifact.AttestationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.AttestationsSubjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.AttestationsSubjectTable,
+			Columns: []string{artifact.AttestationsSubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedAttestationsSubjectIDs(); len(nodes) > 0 && !auo.mutation.AttestationsSubjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.AttestationsSubjectTable,
+			Columns: []string{artifact.AttestationsSubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.AttestationsSubjectTable,
+			Columns: []string{artifact.AttestationsSubjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),

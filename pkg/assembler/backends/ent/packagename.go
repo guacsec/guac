@@ -35,14 +35,26 @@ type PackageNameEdges struct {
 	Versions []*PackageVersion `json:"versions,omitempty"`
 	// HasSourceAt holds the value of the has_source_at edge.
 	HasSourceAt []*HasSourceAt `json:"has_source_at,omitempty"`
+	// Dependency holds the value of the dependency edge.
+	Dependency []*Dependency `json:"dependency,omitempty"`
+	// Certification holds the value of the certification edge.
+	Certification []*Certification `json:"certification,omitempty"`
+	// Metadata holds the value of the metadata edge.
+	Metadata []*HasMetadata `json:"metadata,omitempty"`
+	// Poc holds the value of the poc edge.
+	Poc []*PointOfContact `json:"poc,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [6]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]map[string]int
+	totalCount [6]map[string]int
 
-	namedVersions    map[string][]*PackageVersion
-	namedHasSourceAt map[string][]*HasSourceAt
+	namedVersions      map[string][]*PackageVersion
+	namedHasSourceAt   map[string][]*HasSourceAt
+	namedDependency    map[string][]*Dependency
+	namedCertification map[string][]*Certification
+	namedMetadata      map[string][]*HasMetadata
+	namedPoc           map[string][]*PointOfContact
 }
 
 // VersionsOrErr returns the Versions value or an error if the edge
@@ -61,6 +73,42 @@ func (e PackageNameEdges) HasSourceAtOrErr() ([]*HasSourceAt, error) {
 		return e.HasSourceAt, nil
 	}
 	return nil, &NotLoadedError{edge: "has_source_at"}
+}
+
+// DependencyOrErr returns the Dependency value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageNameEdges) DependencyOrErr() ([]*Dependency, error) {
+	if e.loadedTypes[2] {
+		return e.Dependency, nil
+	}
+	return nil, &NotLoadedError{edge: "dependency"}
+}
+
+// CertificationOrErr returns the Certification value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageNameEdges) CertificationOrErr() ([]*Certification, error) {
+	if e.loadedTypes[3] {
+		return e.Certification, nil
+	}
+	return nil, &NotLoadedError{edge: "certification"}
+}
+
+// MetadataOrErr returns the Metadata value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageNameEdges) MetadataOrErr() ([]*HasMetadata, error) {
+	if e.loadedTypes[4] {
+		return e.Metadata, nil
+	}
+	return nil, &NotLoadedError{edge: "metadata"}
+}
+
+// PocOrErr returns the Poc value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageNameEdges) PocOrErr() ([]*PointOfContact, error) {
+	if e.loadedTypes[5] {
+		return e.Poc, nil
+	}
+	return nil, &NotLoadedError{edge: "poc"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -132,6 +180,26 @@ func (pn *PackageName) QueryVersions() *PackageVersionQuery {
 // QueryHasSourceAt queries the "has_source_at" edge of the PackageName entity.
 func (pn *PackageName) QueryHasSourceAt() *HasSourceAtQuery {
 	return NewPackageNameClient(pn.config).QueryHasSourceAt(pn)
+}
+
+// QueryDependency queries the "dependency" edge of the PackageName entity.
+func (pn *PackageName) QueryDependency() *DependencyQuery {
+	return NewPackageNameClient(pn.config).QueryDependency(pn)
+}
+
+// QueryCertification queries the "certification" edge of the PackageName entity.
+func (pn *PackageName) QueryCertification() *CertificationQuery {
+	return NewPackageNameClient(pn.config).QueryCertification(pn)
+}
+
+// QueryMetadata queries the "metadata" edge of the PackageName entity.
+func (pn *PackageName) QueryMetadata() *HasMetadataQuery {
+	return NewPackageNameClient(pn.config).QueryMetadata(pn)
+}
+
+// QueryPoc queries the "poc" edge of the PackageName entity.
+func (pn *PackageName) QueryPoc() *PointOfContactQuery {
+	return NewPackageNameClient(pn.config).QueryPoc(pn)
 }
 
 // Update returns a builder for updating this PackageName.
@@ -214,6 +282,102 @@ func (pn *PackageName) appendNamedHasSourceAt(name string, edges ...*HasSourceAt
 		pn.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
 	} else {
 		pn.Edges.namedHasSourceAt[name] = append(pn.Edges.namedHasSourceAt[name], edges...)
+	}
+}
+
+// NamedDependency returns the Dependency named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pn *PackageName) NamedDependency(name string) ([]*Dependency, error) {
+	if pn.Edges.namedDependency == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pn.Edges.namedDependency[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pn *PackageName) appendNamedDependency(name string, edges ...*Dependency) {
+	if pn.Edges.namedDependency == nil {
+		pn.Edges.namedDependency = make(map[string][]*Dependency)
+	}
+	if len(edges) == 0 {
+		pn.Edges.namedDependency[name] = []*Dependency{}
+	} else {
+		pn.Edges.namedDependency[name] = append(pn.Edges.namedDependency[name], edges...)
+	}
+}
+
+// NamedCertification returns the Certification named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pn *PackageName) NamedCertification(name string) ([]*Certification, error) {
+	if pn.Edges.namedCertification == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pn.Edges.namedCertification[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pn *PackageName) appendNamedCertification(name string, edges ...*Certification) {
+	if pn.Edges.namedCertification == nil {
+		pn.Edges.namedCertification = make(map[string][]*Certification)
+	}
+	if len(edges) == 0 {
+		pn.Edges.namedCertification[name] = []*Certification{}
+	} else {
+		pn.Edges.namedCertification[name] = append(pn.Edges.namedCertification[name], edges...)
+	}
+}
+
+// NamedMetadata returns the Metadata named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pn *PackageName) NamedMetadata(name string) ([]*HasMetadata, error) {
+	if pn.Edges.namedMetadata == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pn.Edges.namedMetadata[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pn *PackageName) appendNamedMetadata(name string, edges ...*HasMetadata) {
+	if pn.Edges.namedMetadata == nil {
+		pn.Edges.namedMetadata = make(map[string][]*HasMetadata)
+	}
+	if len(edges) == 0 {
+		pn.Edges.namedMetadata[name] = []*HasMetadata{}
+	} else {
+		pn.Edges.namedMetadata[name] = append(pn.Edges.namedMetadata[name], edges...)
+	}
+}
+
+// NamedPoc returns the Poc named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pn *PackageName) NamedPoc(name string) ([]*PointOfContact, error) {
+	if pn.Edges.namedPoc == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pn.Edges.namedPoc[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pn *PackageName) appendNamedPoc(name string, edges ...*PointOfContact) {
+	if pn.Edges.namedPoc == nil {
+		pn.Edges.namedPoc = make(map[string][]*PointOfContact)
+	}
+	if len(edges) == 0 {
+		pn.Edges.namedPoc[name] = []*PointOfContact{}
+	} else {
+		pn.Edges.namedPoc[name] = append(pn.Edges.namedPoc[name], edges...)
 	}
 }
 

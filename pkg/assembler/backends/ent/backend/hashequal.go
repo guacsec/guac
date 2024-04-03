@@ -26,6 +26,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -170,7 +171,7 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		if err != nil {
 			return nil, err
 		}
-		artifactA.ArtifactID = ptrfrom.String(foundArt.ID.String())
+		artifactA.ArtifactID = ptrfrom.String(toGlobalID(artifact.Table, foundArt.ID.String()))
 	}
 
 	if artifactB.ArtifactID == nil {
@@ -178,7 +179,7 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		if err != nil {
 			return nil, err
 		}
-		artifactB.ArtifactID = ptrfrom.String(foundArt.ID.String())
+		artifactB.ArtifactID = ptrfrom.String(toGlobalID(artifact.Table, foundArt.ID.String()))
 	}
 
 	sortedArtifacts := []model.IDorArtifactInput{*artifactA, *artifactB}
@@ -190,7 +191,8 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		if art.ArtifactID == nil {
 			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
 		}
-		artID, err := uuid.Parse(*art.ArtifactID)
+		artGlobalID := fromGlobalID(*art.ArtifactID)
+		artID, err := uuid.Parse(artGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}

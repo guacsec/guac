@@ -198,7 +198,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 
 	if len(sortedPkgIDs) > 0 {
 		for _, pkgID := range sortedPkgIDs {
-			pkgIncludesID, err := uuid.Parse(pkgID)
+			pkgGlobalID := fromGlobalID(pkgID)
+			pkgIncludesID, err := uuid.Parse(pkgGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -213,7 +214,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 
 	if len(sortedArtIDs) > 0 {
 		for _, artID := range sortedArtIDs {
-			artIncludesID, err := uuid.Parse(artID)
+			artGlobalID := fromGlobalID(artID)
+			artIncludesID, err := uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -229,7 +231,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 
 	if len(sortedDependencyIDs) > 0 {
 		for _, isDependencyID := range sortedDependencyIDs {
-			isDepIncludesID, err := uuid.Parse(isDependencyID)
+			depGlobalID := fromGlobalID(isDependencyID)
+			isDepIncludesID, err := uuid.Parse(depGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
 			}
@@ -245,7 +248,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 
 	if len(sortedOccurrenceIDs) > 0 {
 		for _, isOccurrenceID := range sortedOccurrenceIDs {
-			isOccurIncludesID, err := uuid.Parse(isOccurrenceID)
+			occurGlobalID := fromGlobalID(isOccurrenceID)
+			isOccurIncludesID, err := uuid.Parse(occurGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
 			}
@@ -265,7 +269,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
 			var err error
-			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+			pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -287,7 +292,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}

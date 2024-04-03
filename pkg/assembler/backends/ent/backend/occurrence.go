@@ -42,12 +42,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 		return nil, err
 	}
 
-	models := make([]*model.IsOccurrence, len(records))
-	for i, record := range records {
-		models[i] = toModelIsOccurrenceWithSubject(record)
-	}
-
-	return models, nil
+	return collect(records, toModelIsOccurrenceWithSubject), nil
 }
 
 // getOccurrenceObject is used recreate the occurrence object be eager loading the edges
@@ -162,7 +157,8 @@ func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 	var artID uuid.UUID
 	if art.ArtifactID != nil {
 		var err error
-		artID, err = uuid.Parse(*art.ArtifactID)
+		artGlobalID := fromGlobalID(*art.ArtifactID)
+		artID, err = uuid.Parse(artGlobalID.id)
 		if err != nil {
 			return nil, nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
@@ -185,7 +181,8 @@ func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
 			var err error
-			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+			pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
 				return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -208,7 +205,8 @@ func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}

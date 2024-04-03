@@ -263,6 +263,29 @@ func HasAttestationsWith(preds ...predicate.SLSAAttestation) predicate.Artifact 
 	})
 }
 
+// HasAttestationsSubject applies the HasEdge predicate on the "attestations_subject" edge.
+func HasAttestationsSubject() predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, AttestationsSubjectTable, AttestationsSubjectColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAttestationsSubjectWith applies the HasEdge predicate on the "attestations_subject" edge with a given conditions (other predicates).
+func HasAttestationsSubjectWith(preds ...predicate.SLSAAttestation) predicate.Artifact {
+	return predicate.Artifact(func(s *sql.Selector) {
+		step := newAttestationsSubjectStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasHashEqualArtA applies the HasEdge predicate on the "hash_equal_art_a" edge.
 func HasHashEqualArtA() predicate.Artifact {
 	return predicate.Artifact(func(s *sql.Selector) {

@@ -144,7 +144,6 @@ func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInpu
 func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
 	if allowedEdges[model.EdgeArtifactHashEqual] {
-		// hashEqualSubjectArtEdgesStr collection query
 		query := b.client.Artifact.Query().
 			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
 			WithHashEqualArtA(func(q *ent.HashEqualQuery) {
@@ -157,22 +156,14 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 
 		artifacts, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get hashEqual neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundArt := range artifacts {
-			hashEqualAs, err := foundArt.HashEqualArtA(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get hashEqual neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, hashEqualA := range hashEqualAs {
+			for _, hashEqualA := range foundArt.Edges.HashEqualArtA {
 				out = append(out, toModelHashEqual(hashEqualA))
 			}
-			hashEqualBs, err := foundArt.HashEqualArtB(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get hashEqual neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, hashEqualB := range hashEqualBs {
+			for _, hashEqualB := range foundArt.Edges.HashEqualArtB {
 				out = append(out, toModelHashEqual(hashEqualB))
 			}
 		}
@@ -187,15 +178,11 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 
 		artifacts, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get occurrence neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundArt := range artifacts {
-			occurs, err := foundArt.Occurrences(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get occurrence neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundOccur := range occurs {
+			for _, foundOccur := range foundArt.Edges.Occurrences {
 				out = append(out, toModelIsOccurrenceWithSubject(foundOccur))
 			}
 		}
@@ -210,15 +197,11 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 
 		artifacts, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get hasSBOM neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundArt := range artifacts {
-			sboms, err := foundArt.Sbom(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get hasSBOM neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundSBOM := range sboms {
+			for _, foundSBOM := range foundArt.Edges.Sbom {
 				out = append(out, toModelHasSBOM(foundSBOM))
 			}
 		}
@@ -229,19 +212,21 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 			WithAttestations(func(q *ent.SLSAAttestationQuery) {
 				getSLSAObject(q)
 			}).
+			WithAttestationsSubject(func(q *ent.SLSAAttestationQuery) {
+				getSLSAObject(q)
+			}).
 			Limit(MaxPageSize)
 
 		artifacts, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get hasSLSA neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundArt := range artifacts {
-			slsas, err := foundArt.Attestations(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get hasSLSA neighbors for node ID: %s with error: %w", nodeID, err)
+			for _, foundSLSA := range foundArt.Edges.Attestations {
+				out = append(out, toModelHasSLSA(foundSLSA))
 			}
-			for _, foundSLSA := range slsas {
+			for _, foundSLSA := range foundArt.Edges.AttestationsSubject {
 				out = append(out, toModelHasSLSA(foundSLSA))
 			}
 		}
@@ -256,15 +241,11 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 
 		artifacts, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get VEX neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundArt := range artifacts {
-			vexs, err := foundArt.Vex(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get VEX neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundVex := range vexs {
+			for _, foundVex := range foundArt.Edges.Vex {
 				out = append(out, toModelCertifyVEXStatement(foundVex))
 			}
 		}
@@ -279,15 +260,11 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 
 		artifacts, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get certifyBad neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundArt := range artifacts {
-			certs, err := foundArt.Certification(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get certifyBad neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundCert := range certs {
+			for _, foundCert := range foundArt.Edges.Certification {
 				if foundCert.Type == certification.TypeBAD {
 					out = append(out, toModelCertifyBad(foundCert))
 				}
@@ -304,15 +281,11 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 
 		artifacts, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get certifyGood neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundArt := range artifacts {
-			certs, err := foundArt.Certification(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get certifyGood neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundCert := range certs {
+			for _, foundCert := range foundArt.Edges.Certification {
 				if foundCert.Type == certification.TypeGOOD {
 					out = append(out, toModelCertifyGood(foundCert))
 				}
@@ -329,15 +302,11 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 
 		artifacts, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get hasMetadata neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundArt := range artifacts {
-			metas, err := foundArt.Metadata(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get hasMetadata neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundMeta := range metas {
+			for _, foundMeta := range foundArt.Edges.Metadata {
 				out = append(out, toModelHasMetadata(foundMeta))
 			}
 		}
@@ -352,15 +321,11 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 
 		artifacts, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get point of contact neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundArt := range artifacts {
-			pocs, err := foundArt.Poc(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get point of contact neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundPOC := range pocs {
+			for _, foundPOC := range foundArt.Edges.Poc {
 				out = append(out, toModelPointOfContact(foundPOC))
 			}
 		}

@@ -101,7 +101,8 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 	var vulnID uuid.UUID
 	if vuln.VulnerabilityNodeID != nil {
 		var err error
-		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
+		vulnID, err = uuid.Parse(vulnGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
@@ -126,7 +127,8 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 	var pkgVersionID uuid.UUID
 	if pkg.PackageVersionID != nil {
 		var err error
-		pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+		pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+		pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
@@ -244,18 +246,26 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 		}
 	}
 
-	records, err := b.client.CertifyVuln.Query().
-		Where(predicates...).
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {})
-		}).
-		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
+	certVulnQuery := b.client.CertifyVuln.Query().
+		Where(predicates...)
+
+	records, err := getCertVulnObject(certVulnQuery).
+		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return collect(records, toModelCertifyVulnerability), nil
+}
+
+// getCertVulnObject is used recreate the CertifyVuln object be eager loading the edges
+func getCertVulnObject(q *ent.CertifyVulnQuery) *ent.CertifyVulnQuery {
+	return q.
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).
+		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {})
 }
 
 func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {

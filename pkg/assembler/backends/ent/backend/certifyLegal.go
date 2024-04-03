@@ -154,7 +154,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		var declaredLicenseIDs []string
 		for _, decLic := range declaredLicenses {
 			if decLic.LicenseID != nil {
-				declaredLicenseIDs = append(declaredLicenseIDs, *decLic.LicenseID)
+				decLicGlobalID := fromGlobalID(*decLic.LicenseID)
+				declaredLicenseIDs = append(declaredLicenseIDs, decLicGlobalID.id)
 			} else {
 				licenseID, err := getLicenseID(ctx, tx.Client(), *decLic.LicenseInput)
 				if err != nil {
@@ -183,7 +184,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		var discoveredLicenseIDs []string
 		for _, disLic := range discoveredLicenses {
 			if disLic.LicenseID != nil {
-				discoveredLicenseIDs = append(discoveredLicenseIDs, *disLic.LicenseID)
+				disLicGlobalID := fromGlobalID(*disLic.LicenseID)
+				discoveredLicenseIDs = append(discoveredLicenseIDs, disLicGlobalID.id)
 			} else {
 				licenseID, err := getLicenseID(ctx, tx.Client(), *disLic.LicenseInput)
 				if err != nil {
@@ -212,7 +214,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
 			var err error
-			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+			pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -233,7 +236,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}

@@ -546,6 +546,22 @@ func (c *ArtifactClient) QueryAttestations(a *Artifact) *SLSAAttestationQuery {
 	return query
 }
 
+// QueryAttestationsSubject queries the attestations_subject edge of a Artifact.
+func (c *ArtifactClient) QueryAttestationsSubject(a *Artifact) *SLSAAttestationQuery {
+	query := (&SLSAAttestationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(artifact.Table, artifact.FieldID, id),
+			sqlgraph.To(slsaattestation.Table, slsaattestation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, artifact.AttestationsSubjectTable, artifact.AttestationsSubjectColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryHashEqualArtA queries the hash_equal_art_a edge of a Artifact.
 func (c *ArtifactClient) QueryHashEqualArtA(a *Artifact) *HashEqualQuery {
 	query := (&HashEqualClient{config: c.config}).Query()
@@ -3192,6 +3208,70 @@ func (c *PackageNameClient) QueryHasSourceAt(pn *PackageName) *HasSourceAtQuery 
 	return query
 }
 
+// QueryDependency queries the dependency edge of a PackageName.
+func (c *PackageNameClient) QueryDependency(pn *PackageName) *DependencyQuery {
+	query := (&DependencyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, id),
+			sqlgraph.To(dependency.Table, dependency.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.DependencyTable, packagename.DependencyColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCertification queries the certification edge of a PackageName.
+func (c *PackageNameClient) QueryCertification(pn *PackageName) *CertificationQuery {
+	query := (&CertificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, id),
+			sqlgraph.To(certification.Table, certification.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.CertificationTable, packagename.CertificationColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMetadata queries the metadata edge of a PackageName.
+func (c *PackageNameClient) QueryMetadata(pn *PackageName) *HasMetadataQuery {
+	query := (&HasMetadataClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, id),
+			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.MetadataTable, packagename.MetadataColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPoc queries the poc edge of a PackageName.
+func (c *PackageNameClient) QueryPoc(pn *PackageName) *PointOfContactQuery {
+	query := (&PointOfContactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, id),
+			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.PocTable, packagename.PocColumn),
+		)
+		fromV = sqlgraph.Neighbors(pn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PackageNameClient) Hooks() []Hook {
 	return c.hooks.PackageName
@@ -3373,15 +3453,111 @@ func (c *PackageVersionClient) QuerySbom(pv *PackageVersion) *BillOfMaterialsQue
 	return query
 }
 
-// QueryVexPackage queries the vex_package edge of a PackageVersion.
-func (c *PackageVersionClient) QueryVexPackage(pv *PackageVersion) *CertifyVexQuery {
+// QueryVuln queries the vuln edge of a PackageVersion.
+func (c *PackageVersionClient) QueryVuln(pv *PackageVersion) *CertifyVulnQuery {
+	query := (&CertifyVulnClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(certifyvuln.Table, certifyvuln.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.VulnTable, packageversion.VulnColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVex queries the vex edge of a PackageVersion.
+func (c *PackageVersionClient) QueryVex(pv *PackageVersion) *CertifyVexQuery {
 	query := (&CertifyVexClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pv.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(certifyvex.Table, certifyvex.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.VexPackageTable, packageversion.VexPackageColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.VexTable, packageversion.VexColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryHasSourceAt queries the has_source_at edge of a PackageVersion.
+func (c *PackageVersionClient) QueryHasSourceAt(pv *PackageVersion) *HasSourceAtQuery {
+	query := (&HasSourceAtClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.HasSourceAtTable, packageversion.HasSourceAtColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCertification queries the certification edge of a PackageVersion.
+func (c *PackageVersionClient) QueryCertification(pv *PackageVersion) *CertificationQuery {
+	query := (&CertificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(certification.Table, certification.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.CertificationTable, packageversion.CertificationColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMetadata queries the metadata edge of a PackageVersion.
+func (c *PackageVersionClient) QueryMetadata(pv *PackageVersion) *HasMetadataQuery {
+	query := (&HasMetadataClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.MetadataTable, packageversion.MetadataColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDependency queries the dependency edge of a PackageVersion.
+func (c *PackageVersionClient) QueryDependency(pv *PackageVersion) *DependencyQuery {
+	query := (&DependencyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(dependency.Table, dependency.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.DependencyTable, packageversion.DependencyColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDependencySubject queries the dependency_subject edge of a PackageVersion.
+func (c *PackageVersionClient) QueryDependencySubject(pv *PackageVersion) *DependencyQuery {
+	query := (&DependencyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(dependency.Table, dependency.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.DependencySubjectTable, packageversion.DependencySubjectColumn),
 		)
 		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
 		return fromV, nil
@@ -3430,6 +3606,38 @@ func (c *PackageVersionClient) QueryPkgEqualPkgB(pv *PackageVersion) *PkgEqualQu
 			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
 			sqlgraph.To(pkgequal.Table, pkgequal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PkgEqualPkgBTable, packageversion.PkgEqualPkgBColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPoc queries the poc edge of a PackageVersion.
+func (c *PackageVersionClient) QueryPoc(pv *PackageVersion) *PointOfContactQuery {
+	query := (&PointOfContactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.PocTable, packageversion.PocColumn),
+		)
+		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCertifyLegal queries the certify_legal edge of a PackageVersion.
+func (c *PackageVersionClient) QueryCertifyLegal(pv *PackageVersion) *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packageversion.Table, packageversion.FieldID, id),
+			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packageversion.CertifyLegalTable, packageversion.CertifyLegalColumn),
 		)
 		fromV = sqlgraph.Neighbors(pv.driver.Dialect(), step)
 		return fromV, nil

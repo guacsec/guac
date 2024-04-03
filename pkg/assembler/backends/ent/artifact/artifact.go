@@ -23,6 +23,8 @@ const (
 	EdgeSbom = "sbom"
 	// EdgeAttestations holds the string denoting the attestations edge name in mutations.
 	EdgeAttestations = "attestations"
+	// EdgeAttestationsSubject holds the string denoting the attestations_subject edge name in mutations.
+	EdgeAttestationsSubject = "attestations_subject"
 	// EdgeHashEqualArtA holds the string denoting the hash_equal_art_a edge name in mutations.
 	EdgeHashEqualArtA = "hash_equal_art_a"
 	// EdgeHashEqualArtB holds the string denoting the hash_equal_art_b edge name in mutations.
@@ -58,6 +60,13 @@ const (
 	// AttestationsInverseTable is the table name for the SLSAAttestation entity.
 	// It exists in this package in order to avoid circular dependency with the "slsaattestation" package.
 	AttestationsInverseTable = "slsa_attestations"
+	// AttestationsSubjectTable is the table that holds the attestations_subject relation/edge.
+	AttestationsSubjectTable = "slsa_attestations"
+	// AttestationsSubjectInverseTable is the table name for the SLSAAttestation entity.
+	// It exists in this package in order to avoid circular dependency with the "slsaattestation" package.
+	AttestationsSubjectInverseTable = "slsa_attestations"
+	// AttestationsSubjectColumn is the table column denoting the attestations_subject relation/edge.
+	AttestationsSubjectColumn = "subject_id"
 	// HashEqualArtATable is the table that holds the hash_equal_art_a relation/edge.
 	HashEqualArtATable = "hash_equals"
 	// HashEqualArtAInverseTable is the table name for the HashEqual entity.
@@ -198,6 +207,20 @@ func ByAttestations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByAttestationsSubjectCount orders the results by attestations_subject count.
+func ByAttestationsSubjectCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAttestationsSubjectStep(), opts...)
+	}
+}
+
+// ByAttestationsSubject orders the results by attestations_subject terms.
+func ByAttestationsSubject(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAttestationsSubjectStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByHashEqualArtACount orders the results by hash_equal_art_a count.
 func ByHashEqualArtACount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -314,6 +337,13 @@ func newAttestationsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AttestationsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, AttestationsTable, AttestationsPrimaryKey...),
+	)
+}
+func newAttestationsSubjectStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AttestationsSubjectInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, AttestationsSubjectTable, AttestationsSubjectColumn),
 	)
 }
 func newHashEqualArtAStep() *sqlgraph.Step {

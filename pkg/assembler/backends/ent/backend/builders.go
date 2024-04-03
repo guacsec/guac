@@ -154,15 +154,11 @@ func (b *EntBackend) builderNeighbors(ctx context.Context, nodeID string, allowe
 
 		builders, err := query.All(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get hasSLSA neighbors for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundBuilder := range builders {
-			slsas, err := foundBuilder.SlsaAttestations(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get hasSLSA neighbors for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundSLSA := range slsas {
+			for _, foundSLSA := range foundBuilder.Edges.SlsaAttestations {
 				out = append(out, toModelHasSLSA(foundSLSA))
 			}
 		}

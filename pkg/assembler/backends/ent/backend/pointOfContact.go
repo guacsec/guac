@@ -221,7 +221,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -238,7 +239,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 			var pkgVersionID uuid.UUID
 			if pkg.PackageVersionID != nil {
 				var err error
-				pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+				pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+				pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 				}
@@ -254,7 +256,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 			var pkgNameID uuid.UUID
 			if pkg.PackageNameID != nil {
 				var err error
-				pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+				pkgNameGlobalID := fromGlobalID(*pkg.PackageNameID)
+				pkgNameID, err = uuid.Parse(pkgNameGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 				}
@@ -271,7 +274,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
