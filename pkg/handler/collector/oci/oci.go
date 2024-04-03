@@ -29,7 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/version"
 	"github.com/pkg/errors"
 	"github.com/regclient/regclient"
-	"github.com/regclient/regclient/types"
+	"github.com/regclient/regclient/types/descriptor"
 	"github.com/regclient/regclient/types/manifest"
 	"github.com/regclient/regclient/types/platform"
 	"github.com/regclient/regclient/types/ref"
@@ -355,7 +355,7 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 	for _, referrerDesc := range referrerList.Descriptors {
 		// Increment the WaitGroup counter
 		wg.Add(1)
-		go func(referrerDesc types.Descriptor) {
+		go func(referrerDesc descriptor.Descriptor) {
 			defer wg.Done() // Decrement the WaitGroup counter when done
 			if _, ok := wellKnownOCIArtifactTypes[referrerDesc.ArtifactType]; ok {
 				referrerDescDigest := referrerDesc.Digest.String()
