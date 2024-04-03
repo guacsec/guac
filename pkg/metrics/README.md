@@ -21,7 +21,7 @@ To use this metrics package in your application, you need to do the following:
 To scrape the metrics from Prometheus, you can use the following example:
 
 ```bash
-curl http://localhost:9091/metrics
+curl http://localhost:8080/metrics
 ```
 
 This will return a plain text page with a series of lines like this:
