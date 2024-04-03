@@ -32,6 +32,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 		lastChecked time.Time
 		poll        bool
 		interval    time.Duration
+		useBlobPath bool
 	}
 	tests := []struct {
 		name    string
@@ -67,6 +68,25 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 		},
 		wantErr: false,
 	}, {
+		name: "found file with useBlobPath",
+		fields: fields{
+			path:        "./testdata",
+			lastChecked: time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
+			poll:        false,
+			interval:    0,
+			useBlobPath: true,
+		},
+		want: []*processor.Document{{
+			Blob:   []byte("hello\n"),
+			Type:   processor.DocumentUnknown,
+			Format: processor.FormatUnknown,
+			SourceInformation: processor.SourceInformation{
+				Collector: string(FileCollector),
+				Source:    "sha256:5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+			}},
+		},
+		wantErr: false,
+	}, {
 		name: "with canceled poll",
 		fields: fields{
 			path:        "./testdata",
@@ -92,6 +112,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 				lastChecked: tt.fields.lastChecked,
 				poll:        tt.fields.poll,
 				interval:    tt.fields.interval,
+				useBlobPath: tt.fields.useBlobPath,
 			}
 			// NOTE: Below is one of the simplest ways to validate the context getting canceled()
 			// This is still brittle if a test for some reason takes longer than a second.
