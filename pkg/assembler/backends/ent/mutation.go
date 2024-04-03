@@ -19057,21 +19057,39 @@ func (m *SLSAAttestationMutation) ResetEdge(name string) error {
 // SourceNameMutation represents an operation that mutates the SourceName nodes in the graph.
 type SourceNameMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	_type              *string
-	namespace          *string
-	name               *string
-	commit             *string
-	tag                *string
-	clearedFields      map[string]struct{}
-	occurrences        map[uuid.UUID]struct{}
-	removedoccurrences map[uuid.UUID]struct{}
-	clearedoccurrences bool
-	done               bool
-	oldValue           func(context.Context) (*SourceName, error)
-	predicates         []predicate.SourceName
+	op                   Op
+	typ                  string
+	id                   *uuid.UUID
+	_type                *string
+	namespace            *string
+	name                 *string
+	commit               *string
+	tag                  *string
+	clearedFields        map[string]struct{}
+	occurrences          map[uuid.UUID]struct{}
+	removedoccurrences   map[uuid.UUID]struct{}
+	clearedoccurrences   bool
+	has_source_at        map[uuid.UUID]struct{}
+	removedhas_source_at map[uuid.UUID]struct{}
+	clearedhas_source_at bool
+	scorecard            map[uuid.UUID]struct{}
+	removedscorecard     map[uuid.UUID]struct{}
+	clearedscorecard     bool
+	certification        map[uuid.UUID]struct{}
+	removedcertification map[uuid.UUID]struct{}
+	clearedcertification bool
+	metadata             map[uuid.UUID]struct{}
+	removedmetadata      map[uuid.UUID]struct{}
+	clearedmetadata      bool
+	poc                  map[uuid.UUID]struct{}
+	removedpoc           map[uuid.UUID]struct{}
+	clearedpoc           bool
+	certify_legal        map[uuid.UUID]struct{}
+	removedcertify_legal map[uuid.UUID]struct{}
+	clearedcertify_legal bool
+	done                 bool
+	oldValue             func(context.Context) (*SourceName, error)
+	predicates           []predicate.SourceName
 }
 
 var _ ent.Mutation = (*SourceNameMutation)(nil)
@@ -19438,6 +19456,330 @@ func (m *SourceNameMutation) ResetOccurrences() {
 	m.removedoccurrences = nil
 }
 
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by ids.
+func (m *SourceNameMutation) AddHasSourceAtIDs(ids ...uuid.UUID) {
+	if m.has_source_at == nil {
+		m.has_source_at = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.has_source_at[ids[i]] = struct{}{}
+	}
+}
+
+// ClearHasSourceAt clears the "has_source_at" edge to the HasSourceAt entity.
+func (m *SourceNameMutation) ClearHasSourceAt() {
+	m.clearedhas_source_at = true
+}
+
+// HasSourceAtCleared reports if the "has_source_at" edge to the HasSourceAt entity was cleared.
+func (m *SourceNameMutation) HasSourceAtCleared() bool {
+	return m.clearedhas_source_at
+}
+
+// RemoveHasSourceAtIDs removes the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (m *SourceNameMutation) RemoveHasSourceAtIDs(ids ...uuid.UUID) {
+	if m.removedhas_source_at == nil {
+		m.removedhas_source_at = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.has_source_at, ids[i])
+		m.removedhas_source_at[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedHasSourceAt returns the removed IDs of the "has_source_at" edge to the HasSourceAt entity.
+func (m *SourceNameMutation) RemovedHasSourceAtIDs() (ids []uuid.UUID) {
+	for id := range m.removedhas_source_at {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// HasSourceAtIDs returns the "has_source_at" edge IDs in the mutation.
+func (m *SourceNameMutation) HasSourceAtIDs() (ids []uuid.UUID) {
+	for id := range m.has_source_at {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetHasSourceAt resets all changes to the "has_source_at" edge.
+func (m *SourceNameMutation) ResetHasSourceAt() {
+	m.has_source_at = nil
+	m.clearedhas_source_at = false
+	m.removedhas_source_at = nil
+}
+
+// AddScorecardIDs adds the "scorecard" edge to the CertifyScorecard entity by ids.
+func (m *SourceNameMutation) AddScorecardIDs(ids ...uuid.UUID) {
+	if m.scorecard == nil {
+		m.scorecard = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.scorecard[ids[i]] = struct{}{}
+	}
+}
+
+// ClearScorecard clears the "scorecard" edge to the CertifyScorecard entity.
+func (m *SourceNameMutation) ClearScorecard() {
+	m.clearedscorecard = true
+}
+
+// ScorecardCleared reports if the "scorecard" edge to the CertifyScorecard entity was cleared.
+func (m *SourceNameMutation) ScorecardCleared() bool {
+	return m.clearedscorecard
+}
+
+// RemoveScorecardIDs removes the "scorecard" edge to the CertifyScorecard entity by IDs.
+func (m *SourceNameMutation) RemoveScorecardIDs(ids ...uuid.UUID) {
+	if m.removedscorecard == nil {
+		m.removedscorecard = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.scorecard, ids[i])
+		m.removedscorecard[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedScorecard returns the removed IDs of the "scorecard" edge to the CertifyScorecard entity.
+func (m *SourceNameMutation) RemovedScorecardIDs() (ids []uuid.UUID) {
+	for id := range m.removedscorecard {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ScorecardIDs returns the "scorecard" edge IDs in the mutation.
+func (m *SourceNameMutation) ScorecardIDs() (ids []uuid.UUID) {
+	for id := range m.scorecard {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetScorecard resets all changes to the "scorecard" edge.
+func (m *SourceNameMutation) ResetScorecard() {
+	m.scorecard = nil
+	m.clearedscorecard = false
+	m.removedscorecard = nil
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by ids.
+func (m *SourceNameMutation) AddCertificationIDs(ids ...uuid.UUID) {
+	if m.certification == nil {
+		m.certification = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.certification[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCertification clears the "certification" edge to the Certification entity.
+func (m *SourceNameMutation) ClearCertification() {
+	m.clearedcertification = true
+}
+
+// CertificationCleared reports if the "certification" edge to the Certification entity was cleared.
+func (m *SourceNameMutation) CertificationCleared() bool {
+	return m.clearedcertification
+}
+
+// RemoveCertificationIDs removes the "certification" edge to the Certification entity by IDs.
+func (m *SourceNameMutation) RemoveCertificationIDs(ids ...uuid.UUID) {
+	if m.removedcertification == nil {
+		m.removedcertification = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.certification, ids[i])
+		m.removedcertification[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCertification returns the removed IDs of the "certification" edge to the Certification entity.
+func (m *SourceNameMutation) RemovedCertificationIDs() (ids []uuid.UUID) {
+	for id := range m.removedcertification {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CertificationIDs returns the "certification" edge IDs in the mutation.
+func (m *SourceNameMutation) CertificationIDs() (ids []uuid.UUID) {
+	for id := range m.certification {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCertification resets all changes to the "certification" edge.
+func (m *SourceNameMutation) ResetCertification() {
+	m.certification = nil
+	m.clearedcertification = false
+	m.removedcertification = nil
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by ids.
+func (m *SourceNameMutation) AddMetadatumIDs(ids ...uuid.UUID) {
+	if m.metadata == nil {
+		m.metadata = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.metadata[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMetadata clears the "metadata" edge to the HasMetadata entity.
+func (m *SourceNameMutation) ClearMetadata() {
+	m.clearedmetadata = true
+}
+
+// MetadataCleared reports if the "metadata" edge to the HasMetadata entity was cleared.
+func (m *SourceNameMutation) MetadataCleared() bool {
+	return m.clearedmetadata
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to the HasMetadata entity by IDs.
+func (m *SourceNameMutation) RemoveMetadatumIDs(ids ...uuid.UUID) {
+	if m.removedmetadata == nil {
+		m.removedmetadata = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.metadata, ids[i])
+		m.removedmetadata[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMetadata returns the removed IDs of the "metadata" edge to the HasMetadata entity.
+func (m *SourceNameMutation) RemovedMetadataIDs() (ids []uuid.UUID) {
+	for id := range m.removedmetadata {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MetadataIDs returns the "metadata" edge IDs in the mutation.
+func (m *SourceNameMutation) MetadataIDs() (ids []uuid.UUID) {
+	for id := range m.metadata {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMetadata resets all changes to the "metadata" edge.
+func (m *SourceNameMutation) ResetMetadata() {
+	m.metadata = nil
+	m.clearedmetadata = false
+	m.removedmetadata = nil
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by ids.
+func (m *SourceNameMutation) AddPocIDs(ids ...uuid.UUID) {
+	if m.poc == nil {
+		m.poc = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.poc[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPoc clears the "poc" edge to the PointOfContact entity.
+func (m *SourceNameMutation) ClearPoc() {
+	m.clearedpoc = true
+}
+
+// PocCleared reports if the "poc" edge to the PointOfContact entity was cleared.
+func (m *SourceNameMutation) PocCleared() bool {
+	return m.clearedpoc
+}
+
+// RemovePocIDs removes the "poc" edge to the PointOfContact entity by IDs.
+func (m *SourceNameMutation) RemovePocIDs(ids ...uuid.UUID) {
+	if m.removedpoc == nil {
+		m.removedpoc = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.poc, ids[i])
+		m.removedpoc[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPoc returns the removed IDs of the "poc" edge to the PointOfContact entity.
+func (m *SourceNameMutation) RemovedPocIDs() (ids []uuid.UUID) {
+	for id := range m.removedpoc {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PocIDs returns the "poc" edge IDs in the mutation.
+func (m *SourceNameMutation) PocIDs() (ids []uuid.UUID) {
+	for id := range m.poc {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPoc resets all changes to the "poc" edge.
+func (m *SourceNameMutation) ResetPoc() {
+	m.poc = nil
+	m.clearedpoc = false
+	m.removedpoc = nil
+}
+
+// AddCertifyLegalIDs adds the "certify_legal" edge to the CertifyLegal entity by ids.
+func (m *SourceNameMutation) AddCertifyLegalIDs(ids ...uuid.UUID) {
+	if m.certify_legal == nil {
+		m.certify_legal = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.certify_legal[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCertifyLegal clears the "certify_legal" edge to the CertifyLegal entity.
+func (m *SourceNameMutation) ClearCertifyLegal() {
+	m.clearedcertify_legal = true
+}
+
+// CertifyLegalCleared reports if the "certify_legal" edge to the CertifyLegal entity was cleared.
+func (m *SourceNameMutation) CertifyLegalCleared() bool {
+	return m.clearedcertify_legal
+}
+
+// RemoveCertifyLegalIDs removes the "certify_legal" edge to the CertifyLegal entity by IDs.
+func (m *SourceNameMutation) RemoveCertifyLegalIDs(ids ...uuid.UUID) {
+	if m.removedcertify_legal == nil {
+		m.removedcertify_legal = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.certify_legal, ids[i])
+		m.removedcertify_legal[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCertifyLegal returns the removed IDs of the "certify_legal" edge to the CertifyLegal entity.
+func (m *SourceNameMutation) RemovedCertifyLegalIDs() (ids []uuid.UUID) {
+	for id := range m.removedcertify_legal {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CertifyLegalIDs returns the "certify_legal" edge IDs in the mutation.
+func (m *SourceNameMutation) CertifyLegalIDs() (ids []uuid.UUID) {
+	for id := range m.certify_legal {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCertifyLegal resets all changes to the "certify_legal" edge.
+func (m *SourceNameMutation) ResetCertifyLegal() {
+	m.certify_legal = nil
+	m.clearedcertify_legal = false
+	m.removedcertify_legal = nil
+}
+
 // Where appends a list predicates to the SourceNameMutation builder.
 func (m *SourceNameMutation) Where(ps ...predicate.SourceName) {
 	m.predicates = append(m.predicates, ps...)
@@ -19654,9 +19996,27 @@ func (m *SourceNameMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SourceNameMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 7)
 	if m.occurrences != nil {
 		edges = append(edges, sourcename.EdgeOccurrences)
+	}
+	if m.has_source_at != nil {
+		edges = append(edges, sourcename.EdgeHasSourceAt)
+	}
+	if m.scorecard != nil {
+		edges = append(edges, sourcename.EdgeScorecard)
+	}
+	if m.certification != nil {
+		edges = append(edges, sourcename.EdgeCertification)
+	}
+	if m.metadata != nil {
+		edges = append(edges, sourcename.EdgeMetadata)
+	}
+	if m.poc != nil {
+		edges = append(edges, sourcename.EdgePoc)
+	}
+	if m.certify_legal != nil {
+		edges = append(edges, sourcename.EdgeCertifyLegal)
 	}
 	return edges
 }
@@ -19671,15 +20031,69 @@ func (m *SourceNameMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case sourcename.EdgeHasSourceAt:
+		ids := make([]ent.Value, 0, len(m.has_source_at))
+		for id := range m.has_source_at {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgeScorecard:
+		ids := make([]ent.Value, 0, len(m.scorecard))
+		for id := range m.scorecard {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgeCertification:
+		ids := make([]ent.Value, 0, len(m.certification))
+		for id := range m.certification {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgeMetadata:
+		ids := make([]ent.Value, 0, len(m.metadata))
+		for id := range m.metadata {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgePoc:
+		ids := make([]ent.Value, 0, len(m.poc))
+		for id := range m.poc {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgeCertifyLegal:
+		ids := make([]ent.Value, 0, len(m.certify_legal))
+		for id := range m.certify_legal {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SourceNameMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 7)
 	if m.removedoccurrences != nil {
 		edges = append(edges, sourcename.EdgeOccurrences)
+	}
+	if m.removedhas_source_at != nil {
+		edges = append(edges, sourcename.EdgeHasSourceAt)
+	}
+	if m.removedscorecard != nil {
+		edges = append(edges, sourcename.EdgeScorecard)
+	}
+	if m.removedcertification != nil {
+		edges = append(edges, sourcename.EdgeCertification)
+	}
+	if m.removedmetadata != nil {
+		edges = append(edges, sourcename.EdgeMetadata)
+	}
+	if m.removedpoc != nil {
+		edges = append(edges, sourcename.EdgePoc)
+	}
+	if m.removedcertify_legal != nil {
+		edges = append(edges, sourcename.EdgeCertifyLegal)
 	}
 	return edges
 }
@@ -19694,15 +20108,69 @@ func (m *SourceNameMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case sourcename.EdgeHasSourceAt:
+		ids := make([]ent.Value, 0, len(m.removedhas_source_at))
+		for id := range m.removedhas_source_at {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgeScorecard:
+		ids := make([]ent.Value, 0, len(m.removedscorecard))
+		for id := range m.removedscorecard {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgeCertification:
+		ids := make([]ent.Value, 0, len(m.removedcertification))
+		for id := range m.removedcertification {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgeMetadata:
+		ids := make([]ent.Value, 0, len(m.removedmetadata))
+		for id := range m.removedmetadata {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgePoc:
+		ids := make([]ent.Value, 0, len(m.removedpoc))
+		for id := range m.removedpoc {
+			ids = append(ids, id)
+		}
+		return ids
+	case sourcename.EdgeCertifyLegal:
+		ids := make([]ent.Value, 0, len(m.removedcertify_legal))
+		for id := range m.removedcertify_legal {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SourceNameMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 7)
 	if m.clearedoccurrences {
 		edges = append(edges, sourcename.EdgeOccurrences)
+	}
+	if m.clearedhas_source_at {
+		edges = append(edges, sourcename.EdgeHasSourceAt)
+	}
+	if m.clearedscorecard {
+		edges = append(edges, sourcename.EdgeScorecard)
+	}
+	if m.clearedcertification {
+		edges = append(edges, sourcename.EdgeCertification)
+	}
+	if m.clearedmetadata {
+		edges = append(edges, sourcename.EdgeMetadata)
+	}
+	if m.clearedpoc {
+		edges = append(edges, sourcename.EdgePoc)
+	}
+	if m.clearedcertify_legal {
+		edges = append(edges, sourcename.EdgeCertifyLegal)
 	}
 	return edges
 }
@@ -19713,6 +20181,18 @@ func (m *SourceNameMutation) EdgeCleared(name string) bool {
 	switch name {
 	case sourcename.EdgeOccurrences:
 		return m.clearedoccurrences
+	case sourcename.EdgeHasSourceAt:
+		return m.clearedhas_source_at
+	case sourcename.EdgeScorecard:
+		return m.clearedscorecard
+	case sourcename.EdgeCertification:
+		return m.clearedcertification
+	case sourcename.EdgeMetadata:
+		return m.clearedmetadata
+	case sourcename.EdgePoc:
+		return m.clearedpoc
+	case sourcename.EdgeCertifyLegal:
+		return m.clearedcertify_legal
 	}
 	return false
 }
@@ -19731,6 +20211,24 @@ func (m *SourceNameMutation) ResetEdge(name string) error {
 	switch name {
 	case sourcename.EdgeOccurrences:
 		m.ResetOccurrences()
+		return nil
+	case sourcename.EdgeHasSourceAt:
+		m.ResetHasSourceAt()
+		return nil
+	case sourcename.EdgeScorecard:
+		m.ResetScorecard()
+		return nil
+	case sourcename.EdgeCertification:
+		m.ResetCertification()
+		return nil
+	case sourcename.EdgeMetadata:
+		m.ResetMetadata()
+		return nil
+	case sourcename.EdgePoc:
+		m.ResetPoc()
+		return nil
+	case sourcename.EdgeCertifyLegal:
+		m.ResetCertifyLegal()
 		return nil
 	}
 	return fmt.Errorf("unknown SourceName edge %s", name)

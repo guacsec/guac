@@ -83,21 +83,21 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get pkgType neighbors for node with id: %s with error: %w", nodeID, err)
 		}
-	// case srcNamesStr:
-	// 	neighbors, err = c.srcNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
-	// case srcNamespacesStr:
-	// 	neighbors, err = c.srcNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
-	// case srcTypesStr:
-	// 	neighbors, err = c.srcTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
+	case sourcename.Table:
+		neighbors, err = b.srcNameNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get source name neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case srcNamespaceString:
+		neighbors, err = b.srcNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get source namespace neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case srcTypeString:
+		neighbors, err = b.srcTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get source type neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	// case vulnerabilitiesStr:
 	// 	neighbors, err = c.vulnIdNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {

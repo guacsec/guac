@@ -2481,13 +2481,14 @@ func TestNeighbors(t *testing.T) {
 				}},
 			},
 			&model.HasSourceAt{
-				Package: testdata.P2out,
+				Package: testdata.P2outName,
 				Source:  testdata.S1out,
 			},
 			&model.HasSourceAt{
-				Package: testdata.P2outName,
+				Package: testdata.P2out,
 				Source:  testdata.S1out,
-			}},
+			},
+		},
 	}, {
 		name:  "hasSourceAt - hasSourceAtID - pkgName",
 		inPkg: []*model.PkgInputSpec{testdata.P2},

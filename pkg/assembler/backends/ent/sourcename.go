@@ -37,13 +37,31 @@ type SourceName struct {
 type SourceNameEdges struct {
 	// Occurrences holds the value of the occurrences edge.
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
+	// HasSourceAt holds the value of the has_source_at edge.
+	HasSourceAt []*HasSourceAt `json:"has_source_at,omitempty"`
+	// Scorecard holds the value of the scorecard edge.
+	Scorecard []*CertifyScorecard `json:"scorecard,omitempty"`
+	// Certification holds the value of the certification edge.
+	Certification []*Certification `json:"certification,omitempty"`
+	// Metadata holds the value of the metadata edge.
+	Metadata []*HasMetadata `json:"metadata,omitempty"`
+	// Poc holds the value of the poc edge.
+	Poc []*PointOfContact `json:"poc,omitempty"`
+	// CertifyLegal holds the value of the certify_legal edge.
+	CertifyLegal []*CertifyLegal `json:"certify_legal,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [7]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
+	totalCount [7]map[string]int
 
-	namedOccurrences map[string][]*Occurrence
+	namedOccurrences   map[string][]*Occurrence
+	namedHasSourceAt   map[string][]*HasSourceAt
+	namedScorecard     map[string][]*CertifyScorecard
+	namedCertification map[string][]*Certification
+	namedMetadata      map[string][]*HasMetadata
+	namedPoc           map[string][]*PointOfContact
+	namedCertifyLegal  map[string][]*CertifyLegal
 }
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
@@ -53,6 +71,60 @@ func (e SourceNameEdges) OccurrencesOrErr() ([]*Occurrence, error) {
 		return e.Occurrences, nil
 	}
 	return nil, &NotLoadedError{edge: "occurrences"}
+}
+
+// HasSourceAtOrErr returns the HasSourceAt value or an error if the edge
+// was not loaded in eager-loading.
+func (e SourceNameEdges) HasSourceAtOrErr() ([]*HasSourceAt, error) {
+	if e.loadedTypes[1] {
+		return e.HasSourceAt, nil
+	}
+	return nil, &NotLoadedError{edge: "has_source_at"}
+}
+
+// ScorecardOrErr returns the Scorecard value or an error if the edge
+// was not loaded in eager-loading.
+func (e SourceNameEdges) ScorecardOrErr() ([]*CertifyScorecard, error) {
+	if e.loadedTypes[2] {
+		return e.Scorecard, nil
+	}
+	return nil, &NotLoadedError{edge: "scorecard"}
+}
+
+// CertificationOrErr returns the Certification value or an error if the edge
+// was not loaded in eager-loading.
+func (e SourceNameEdges) CertificationOrErr() ([]*Certification, error) {
+	if e.loadedTypes[3] {
+		return e.Certification, nil
+	}
+	return nil, &NotLoadedError{edge: "certification"}
+}
+
+// MetadataOrErr returns the Metadata value or an error if the edge
+// was not loaded in eager-loading.
+func (e SourceNameEdges) MetadataOrErr() ([]*HasMetadata, error) {
+	if e.loadedTypes[4] {
+		return e.Metadata, nil
+	}
+	return nil, &NotLoadedError{edge: "metadata"}
+}
+
+// PocOrErr returns the Poc value or an error if the edge
+// was not loaded in eager-loading.
+func (e SourceNameEdges) PocOrErr() ([]*PointOfContact, error) {
+	if e.loadedTypes[5] {
+		return e.Poc, nil
+	}
+	return nil, &NotLoadedError{edge: "poc"}
+}
+
+// CertifyLegalOrErr returns the CertifyLegal value or an error if the edge
+// was not loaded in eager-loading.
+func (e SourceNameEdges) CertifyLegalOrErr() ([]*CertifyLegal, error) {
+	if e.loadedTypes[6] {
+		return e.CertifyLegal, nil
+	}
+	return nil, &NotLoadedError{edge: "certify_legal"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -133,6 +205,36 @@ func (sn *SourceName) QueryOccurrences() *OccurrenceQuery {
 	return NewSourceNameClient(sn.config).QueryOccurrences(sn)
 }
 
+// QueryHasSourceAt queries the "has_source_at" edge of the SourceName entity.
+func (sn *SourceName) QueryHasSourceAt() *HasSourceAtQuery {
+	return NewSourceNameClient(sn.config).QueryHasSourceAt(sn)
+}
+
+// QueryScorecard queries the "scorecard" edge of the SourceName entity.
+func (sn *SourceName) QueryScorecard() *CertifyScorecardQuery {
+	return NewSourceNameClient(sn.config).QueryScorecard(sn)
+}
+
+// QueryCertification queries the "certification" edge of the SourceName entity.
+func (sn *SourceName) QueryCertification() *CertificationQuery {
+	return NewSourceNameClient(sn.config).QueryCertification(sn)
+}
+
+// QueryMetadata queries the "metadata" edge of the SourceName entity.
+func (sn *SourceName) QueryMetadata() *HasMetadataQuery {
+	return NewSourceNameClient(sn.config).QueryMetadata(sn)
+}
+
+// QueryPoc queries the "poc" edge of the SourceName entity.
+func (sn *SourceName) QueryPoc() *PointOfContactQuery {
+	return NewSourceNameClient(sn.config).QueryPoc(sn)
+}
+
+// QueryCertifyLegal queries the "certify_legal" edge of the SourceName entity.
+func (sn *SourceName) QueryCertifyLegal() *CertifyLegalQuery {
+	return NewSourceNameClient(sn.config).QueryCertifyLegal(sn)
+}
+
 // Update returns a builder for updating this SourceName.
 // Note that you need to call SourceName.Unwrap() before calling this method if this SourceName
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -195,6 +297,150 @@ func (sn *SourceName) appendNamedOccurrences(name string, edges ...*Occurrence) 
 		sn.Edges.namedOccurrences[name] = []*Occurrence{}
 	} else {
 		sn.Edges.namedOccurrences[name] = append(sn.Edges.namedOccurrences[name], edges...)
+	}
+}
+
+// NamedHasSourceAt returns the HasSourceAt named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (sn *SourceName) NamedHasSourceAt(name string) ([]*HasSourceAt, error) {
+	if sn.Edges.namedHasSourceAt == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := sn.Edges.namedHasSourceAt[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (sn *SourceName) appendNamedHasSourceAt(name string, edges ...*HasSourceAt) {
+	if sn.Edges.namedHasSourceAt == nil {
+		sn.Edges.namedHasSourceAt = make(map[string][]*HasSourceAt)
+	}
+	if len(edges) == 0 {
+		sn.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
+	} else {
+		sn.Edges.namedHasSourceAt[name] = append(sn.Edges.namedHasSourceAt[name], edges...)
+	}
+}
+
+// NamedScorecard returns the Scorecard named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (sn *SourceName) NamedScorecard(name string) ([]*CertifyScorecard, error) {
+	if sn.Edges.namedScorecard == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := sn.Edges.namedScorecard[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (sn *SourceName) appendNamedScorecard(name string, edges ...*CertifyScorecard) {
+	if sn.Edges.namedScorecard == nil {
+		sn.Edges.namedScorecard = make(map[string][]*CertifyScorecard)
+	}
+	if len(edges) == 0 {
+		sn.Edges.namedScorecard[name] = []*CertifyScorecard{}
+	} else {
+		sn.Edges.namedScorecard[name] = append(sn.Edges.namedScorecard[name], edges...)
+	}
+}
+
+// NamedCertification returns the Certification named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (sn *SourceName) NamedCertification(name string) ([]*Certification, error) {
+	if sn.Edges.namedCertification == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := sn.Edges.namedCertification[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (sn *SourceName) appendNamedCertification(name string, edges ...*Certification) {
+	if sn.Edges.namedCertification == nil {
+		sn.Edges.namedCertification = make(map[string][]*Certification)
+	}
+	if len(edges) == 0 {
+		sn.Edges.namedCertification[name] = []*Certification{}
+	} else {
+		sn.Edges.namedCertification[name] = append(sn.Edges.namedCertification[name], edges...)
+	}
+}
+
+// NamedMetadata returns the Metadata named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (sn *SourceName) NamedMetadata(name string) ([]*HasMetadata, error) {
+	if sn.Edges.namedMetadata == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := sn.Edges.namedMetadata[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (sn *SourceName) appendNamedMetadata(name string, edges ...*HasMetadata) {
+	if sn.Edges.namedMetadata == nil {
+		sn.Edges.namedMetadata = make(map[string][]*HasMetadata)
+	}
+	if len(edges) == 0 {
+		sn.Edges.namedMetadata[name] = []*HasMetadata{}
+	} else {
+		sn.Edges.namedMetadata[name] = append(sn.Edges.namedMetadata[name], edges...)
+	}
+}
+
+// NamedPoc returns the Poc named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (sn *SourceName) NamedPoc(name string) ([]*PointOfContact, error) {
+	if sn.Edges.namedPoc == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := sn.Edges.namedPoc[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (sn *SourceName) appendNamedPoc(name string, edges ...*PointOfContact) {
+	if sn.Edges.namedPoc == nil {
+		sn.Edges.namedPoc = make(map[string][]*PointOfContact)
+	}
+	if len(edges) == 0 {
+		sn.Edges.namedPoc[name] = []*PointOfContact{}
+	} else {
+		sn.Edges.namedPoc[name] = append(sn.Edges.namedPoc[name], edges...)
+	}
+}
+
+// NamedCertifyLegal returns the CertifyLegal named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (sn *SourceName) NamedCertifyLegal(name string) ([]*CertifyLegal, error) {
+	if sn.Edges.namedCertifyLegal == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := sn.Edges.namedCertifyLegal[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (sn *SourceName) appendNamedCertifyLegal(name string, edges ...*CertifyLegal) {
+	if sn.Edges.namedCertifyLegal == nil {
+		sn.Edges.namedCertifyLegal = make(map[string][]*CertifyLegal)
+	}
+	if len(edges) == 0 {
+		sn.Edges.namedCertifyLegal[name] = []*CertifyLegal{}
+	} else {
+		sn.Edges.namedCertifyLegal[name] = append(sn.Edges.namedCertifyLegal[name], edges...)
 	}
 }
 

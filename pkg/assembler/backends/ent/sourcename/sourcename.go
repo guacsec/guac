@@ -25,6 +25,18 @@ const (
 	FieldTag = "tag"
 	// EdgeOccurrences holds the string denoting the occurrences edge name in mutations.
 	EdgeOccurrences = "occurrences"
+	// EdgeHasSourceAt holds the string denoting the has_source_at edge name in mutations.
+	EdgeHasSourceAt = "has_source_at"
+	// EdgeScorecard holds the string denoting the scorecard edge name in mutations.
+	EdgeScorecard = "scorecard"
+	// EdgeCertification holds the string denoting the certification edge name in mutations.
+	EdgeCertification = "certification"
+	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
+	EdgeMetadata = "metadata"
+	// EdgePoc holds the string denoting the poc edge name in mutations.
+	EdgePoc = "poc"
+	// EdgeCertifyLegal holds the string denoting the certify_legal edge name in mutations.
+	EdgeCertifyLegal = "certify_legal"
 	// Table holds the table name of the sourcename in the database.
 	Table = "source_names"
 	// OccurrencesTable is the table that holds the occurrences relation/edge.
@@ -34,6 +46,48 @@ const (
 	OccurrencesInverseTable = "occurrences"
 	// OccurrencesColumn is the table column denoting the occurrences relation/edge.
 	OccurrencesColumn = "source_id"
+	// HasSourceAtTable is the table that holds the has_source_at relation/edge.
+	HasSourceAtTable = "has_source_ats"
+	// HasSourceAtInverseTable is the table name for the HasSourceAt entity.
+	// It exists in this package in order to avoid circular dependency with the "hassourceat" package.
+	HasSourceAtInverseTable = "has_source_ats"
+	// HasSourceAtColumn is the table column denoting the has_source_at relation/edge.
+	HasSourceAtColumn = "source_id"
+	// ScorecardTable is the table that holds the scorecard relation/edge.
+	ScorecardTable = "certify_scorecards"
+	// ScorecardInverseTable is the table name for the CertifyScorecard entity.
+	// It exists in this package in order to avoid circular dependency with the "certifyscorecard" package.
+	ScorecardInverseTable = "certify_scorecards"
+	// ScorecardColumn is the table column denoting the scorecard relation/edge.
+	ScorecardColumn = "source_id"
+	// CertificationTable is the table that holds the certification relation/edge.
+	CertificationTable = "certifications"
+	// CertificationInverseTable is the table name for the Certification entity.
+	// It exists in this package in order to avoid circular dependency with the "certification" package.
+	CertificationInverseTable = "certifications"
+	// CertificationColumn is the table column denoting the certification relation/edge.
+	CertificationColumn = "source_id"
+	// MetadataTable is the table that holds the metadata relation/edge.
+	MetadataTable = "has_metadata"
+	// MetadataInverseTable is the table name for the HasMetadata entity.
+	// It exists in this package in order to avoid circular dependency with the "hasmetadata" package.
+	MetadataInverseTable = "has_metadata"
+	// MetadataColumn is the table column denoting the metadata relation/edge.
+	MetadataColumn = "source_id"
+	// PocTable is the table that holds the poc relation/edge.
+	PocTable = "point_of_contacts"
+	// PocInverseTable is the table name for the PointOfContact entity.
+	// It exists in this package in order to avoid circular dependency with the "pointofcontact" package.
+	PocInverseTable = "point_of_contacts"
+	// PocColumn is the table column denoting the poc relation/edge.
+	PocColumn = "source_id"
+	// CertifyLegalTable is the table that holds the certify_legal relation/edge.
+	CertifyLegalTable = "certify_legals"
+	// CertifyLegalInverseTable is the table name for the CertifyLegal entity.
+	// It exists in this package in order to avoid circular dependency with the "certifylegal" package.
+	CertifyLegalInverseTable = "certify_legals"
+	// CertifyLegalColumn is the table column denoting the certify_legal relation/edge.
+	CertifyLegalColumn = "source_id"
 )
 
 // Columns holds all SQL columns for sourcename fields.
@@ -107,10 +161,136 @@ func ByOccurrences(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newOccurrencesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByHasSourceAtCount orders the results by has_source_at count.
+func ByHasSourceAtCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newHasSourceAtStep(), opts...)
+	}
+}
+
+// ByHasSourceAt orders the results by has_source_at terms.
+func ByHasSourceAt(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newHasSourceAtStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByScorecardCount orders the results by scorecard count.
+func ByScorecardCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newScorecardStep(), opts...)
+	}
+}
+
+// ByScorecard orders the results by scorecard terms.
+func ByScorecard(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newScorecardStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCertificationCount orders the results by certification count.
+func ByCertificationCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCertificationStep(), opts...)
+	}
+}
+
+// ByCertification orders the results by certification terms.
+func ByCertification(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCertificationStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByMetadataCount orders the results by metadata count.
+func ByMetadataCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMetadataStep(), opts...)
+	}
+}
+
+// ByMetadata orders the results by metadata terms.
+func ByMetadata(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMetadataStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPocCount orders the results by poc count.
+func ByPocCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPocStep(), opts...)
+	}
+}
+
+// ByPoc orders the results by poc terms.
+func ByPoc(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPocStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCertifyLegalCount orders the results by certify_legal count.
+func ByCertifyLegalCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCertifyLegalStep(), opts...)
+	}
+}
+
+// ByCertifyLegal orders the results by certify_legal terms.
+func ByCertifyLegal(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCertifyLegalStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newOccurrencesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(OccurrencesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, OccurrencesTable, OccurrencesColumn),
+	)
+}
+func newHasSourceAtStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(HasSourceAtInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, HasSourceAtTable, HasSourceAtColumn),
+	)
+}
+func newScorecardStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ScorecardInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, ScorecardTable, ScorecardColumn),
+	)
+}
+func newCertificationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CertificationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, CertificationTable, CertificationColumn),
+	)
+}
+func newMetadataStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MetadataInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, MetadataTable, MetadataColumn),
+	)
+}
+func newPocStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PocInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, PocTable, PocColumn),
+	)
+}
+func newCertifyLegalStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CertifyLegalInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, CertifyLegalTable, CertifyLegalColumn),
 	)
 }

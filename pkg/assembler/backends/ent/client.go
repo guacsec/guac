@@ -4337,6 +4337,102 @@ func (c *SourceNameClient) QueryOccurrences(sn *SourceName) *OccurrenceQuery {
 	return query
 }
 
+// QueryHasSourceAt queries the has_source_at edge of a SourceName.
+func (c *SourceNameClient) QueryHasSourceAt(sn *SourceName) *HasSourceAtQuery {
+	query := (&HasSourceAtClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
+			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.HasSourceAtTable, sourcename.HasSourceAtColumn),
+		)
+		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryScorecard queries the scorecard edge of a SourceName.
+func (c *SourceNameClient) QueryScorecard(sn *SourceName) *CertifyScorecardQuery {
+	query := (&CertifyScorecardClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
+			sqlgraph.To(certifyscorecard.Table, certifyscorecard.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.ScorecardTable, sourcename.ScorecardColumn),
+		)
+		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCertification queries the certification edge of a SourceName.
+func (c *SourceNameClient) QueryCertification(sn *SourceName) *CertificationQuery {
+	query := (&CertificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
+			sqlgraph.To(certification.Table, certification.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.CertificationTable, sourcename.CertificationColumn),
+		)
+		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMetadata queries the metadata edge of a SourceName.
+func (c *SourceNameClient) QueryMetadata(sn *SourceName) *HasMetadataQuery {
+	query := (&HasMetadataClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
+			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.MetadataTable, sourcename.MetadataColumn),
+		)
+		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPoc queries the poc edge of a SourceName.
+func (c *SourceNameClient) QueryPoc(sn *SourceName) *PointOfContactQuery {
+	query := (&PointOfContactClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
+			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.PocTable, sourcename.PocColumn),
+		)
+		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCertifyLegal queries the certify_legal edge of a SourceName.
+func (c *SourceNameClient) QueryCertifyLegal(sn *SourceName) *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, id),
+			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.CertifyLegalTable, sourcename.CertifyLegalColumn),
+		)
+		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *SourceNameClient) Hooks() []Hook {
 	return c.hooks.SourceName
