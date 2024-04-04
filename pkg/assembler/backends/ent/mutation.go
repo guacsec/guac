@@ -20965,27 +20965,30 @@ func (m *VulnEqualMutation) ResetEdge(name string) error {
 // VulnerabilityIDMutation represents an operation that mutates the VulnerabilityID nodes in the graph.
 type VulnerabilityIDMutation struct {
 	config
-	op                            Op
-	typ                           string
-	id                            *uuid.UUID
-	vulnerability_id              *string
-	_type                         *string
-	clearedFields                 map[string]struct{}
-	vuln_equal_vuln_a             map[uuid.UUID]struct{}
-	removedvuln_equal_vuln_a      map[uuid.UUID]struct{}
-	clearedvuln_equal_vuln_a      bool
-	vuln_equal_vuln_b             map[uuid.UUID]struct{}
-	removedvuln_equal_vuln_b      map[uuid.UUID]struct{}
-	clearedvuln_equal_vuln_b      bool
-	vulnerability_metadata        map[uuid.UUID]struct{}
-	removedvulnerability_metadata map[uuid.UUID]struct{}
-	clearedvulnerability_metadata bool
-	vex_package                   map[uuid.UUID]struct{}
-	removedvex_package            map[uuid.UUID]struct{}
-	clearedvex_package            bool
-	done                          bool
-	oldValue                      func(context.Context) (*VulnerabilityID, error)
-	predicates                    []predicate.VulnerabilityID
+	op                       Op
+	typ                      string
+	id                       *uuid.UUID
+	vulnerability_id         *string
+	_type                    *string
+	clearedFields            map[string]struct{}
+	vuln_equal_vuln_a        map[uuid.UUID]struct{}
+	removedvuln_equal_vuln_a map[uuid.UUID]struct{}
+	clearedvuln_equal_vuln_a bool
+	vuln_equal_vuln_b        map[uuid.UUID]struct{}
+	removedvuln_equal_vuln_b map[uuid.UUID]struct{}
+	clearedvuln_equal_vuln_b bool
+	metadata                 map[uuid.UUID]struct{}
+	removedmetadata          map[uuid.UUID]struct{}
+	clearedmetadata          bool
+	certify_vuln             map[uuid.UUID]struct{}
+	removedcertify_vuln      map[uuid.UUID]struct{}
+	clearedcertify_vuln      bool
+	vex                      map[uuid.UUID]struct{}
+	removedvex               map[uuid.UUID]struct{}
+	clearedvex               bool
+	done                     bool
+	oldValue                 func(context.Context) (*VulnerabilityID, error)
+	predicates               []predicate.VulnerabilityID
 }
 
 var _ ent.Mutation = (*VulnerabilityIDMutation)(nil)
@@ -21272,112 +21275,166 @@ func (m *VulnerabilityIDMutation) ResetVulnEqualVulnB() {
 	m.removedvuln_equal_vuln_b = nil
 }
 
-// AddVulnerabilityMetadatumIDs adds the "vulnerability_metadata" edge to the VulnerabilityMetadata entity by ids.
-func (m *VulnerabilityIDMutation) AddVulnerabilityMetadatumIDs(ids ...uuid.UUID) {
-	if m.vulnerability_metadata == nil {
-		m.vulnerability_metadata = make(map[uuid.UUID]struct{})
+// AddMetadatumIDs adds the "metadata" edge to the VulnerabilityMetadata entity by ids.
+func (m *VulnerabilityIDMutation) AddMetadatumIDs(ids ...uuid.UUID) {
+	if m.metadata == nil {
+		m.metadata = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.vulnerability_metadata[ids[i]] = struct{}{}
+		m.metadata[ids[i]] = struct{}{}
 	}
 }
 
-// ClearVulnerabilityMetadata clears the "vulnerability_metadata" edge to the VulnerabilityMetadata entity.
-func (m *VulnerabilityIDMutation) ClearVulnerabilityMetadata() {
-	m.clearedvulnerability_metadata = true
+// ClearMetadata clears the "metadata" edge to the VulnerabilityMetadata entity.
+func (m *VulnerabilityIDMutation) ClearMetadata() {
+	m.clearedmetadata = true
 }
 
-// VulnerabilityMetadataCleared reports if the "vulnerability_metadata" edge to the VulnerabilityMetadata entity was cleared.
-func (m *VulnerabilityIDMutation) VulnerabilityMetadataCleared() bool {
-	return m.clearedvulnerability_metadata
+// MetadataCleared reports if the "metadata" edge to the VulnerabilityMetadata entity was cleared.
+func (m *VulnerabilityIDMutation) MetadataCleared() bool {
+	return m.clearedmetadata
 }
 
-// RemoveVulnerabilityMetadatumIDs removes the "vulnerability_metadata" edge to the VulnerabilityMetadata entity by IDs.
-func (m *VulnerabilityIDMutation) RemoveVulnerabilityMetadatumIDs(ids ...uuid.UUID) {
-	if m.removedvulnerability_metadata == nil {
-		m.removedvulnerability_metadata = make(map[uuid.UUID]struct{})
+// RemoveMetadatumIDs removes the "metadata" edge to the VulnerabilityMetadata entity by IDs.
+func (m *VulnerabilityIDMutation) RemoveMetadatumIDs(ids ...uuid.UUID) {
+	if m.removedmetadata == nil {
+		m.removedmetadata = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.vulnerability_metadata, ids[i])
-		m.removedvulnerability_metadata[ids[i]] = struct{}{}
+		delete(m.metadata, ids[i])
+		m.removedmetadata[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedVulnerabilityMetadata returns the removed IDs of the "vulnerability_metadata" edge to the VulnerabilityMetadata entity.
-func (m *VulnerabilityIDMutation) RemovedVulnerabilityMetadataIDs() (ids []uuid.UUID) {
-	for id := range m.removedvulnerability_metadata {
+// RemovedMetadata returns the removed IDs of the "metadata" edge to the VulnerabilityMetadata entity.
+func (m *VulnerabilityIDMutation) RemovedMetadataIDs() (ids []uuid.UUID) {
+	for id := range m.removedmetadata {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// VulnerabilityMetadataIDs returns the "vulnerability_metadata" edge IDs in the mutation.
-func (m *VulnerabilityIDMutation) VulnerabilityMetadataIDs() (ids []uuid.UUID) {
-	for id := range m.vulnerability_metadata {
+// MetadataIDs returns the "metadata" edge IDs in the mutation.
+func (m *VulnerabilityIDMutation) MetadataIDs() (ids []uuid.UUID) {
+	for id := range m.metadata {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetVulnerabilityMetadata resets all changes to the "vulnerability_metadata" edge.
-func (m *VulnerabilityIDMutation) ResetVulnerabilityMetadata() {
-	m.vulnerability_metadata = nil
-	m.clearedvulnerability_metadata = false
-	m.removedvulnerability_metadata = nil
+// ResetMetadata resets all changes to the "metadata" edge.
+func (m *VulnerabilityIDMutation) ResetMetadata() {
+	m.metadata = nil
+	m.clearedmetadata = false
+	m.removedmetadata = nil
 }
 
-// AddVexPackageIDs adds the "vex_package" edge to the CertifyVex entity by ids.
-func (m *VulnerabilityIDMutation) AddVexPackageIDs(ids ...uuid.UUID) {
-	if m.vex_package == nil {
-		m.vex_package = make(map[uuid.UUID]struct{})
+// AddCertifyVulnIDs adds the "certify_vuln" edge to the CertifyVuln entity by ids.
+func (m *VulnerabilityIDMutation) AddCertifyVulnIDs(ids ...uuid.UUID) {
+	if m.certify_vuln == nil {
+		m.certify_vuln = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.vex_package[ids[i]] = struct{}{}
+		m.certify_vuln[ids[i]] = struct{}{}
 	}
 }
 
-// ClearVexPackage clears the "vex_package" edge to the CertifyVex entity.
-func (m *VulnerabilityIDMutation) ClearVexPackage() {
-	m.clearedvex_package = true
+// ClearCertifyVuln clears the "certify_vuln" edge to the CertifyVuln entity.
+func (m *VulnerabilityIDMutation) ClearCertifyVuln() {
+	m.clearedcertify_vuln = true
 }
 
-// VexPackageCleared reports if the "vex_package" edge to the CertifyVex entity was cleared.
-func (m *VulnerabilityIDMutation) VexPackageCleared() bool {
-	return m.clearedvex_package
+// CertifyVulnCleared reports if the "certify_vuln" edge to the CertifyVuln entity was cleared.
+func (m *VulnerabilityIDMutation) CertifyVulnCleared() bool {
+	return m.clearedcertify_vuln
 }
 
-// RemoveVexPackageIDs removes the "vex_package" edge to the CertifyVex entity by IDs.
-func (m *VulnerabilityIDMutation) RemoveVexPackageIDs(ids ...uuid.UUID) {
-	if m.removedvex_package == nil {
-		m.removedvex_package = make(map[uuid.UUID]struct{})
+// RemoveCertifyVulnIDs removes the "certify_vuln" edge to the CertifyVuln entity by IDs.
+func (m *VulnerabilityIDMutation) RemoveCertifyVulnIDs(ids ...uuid.UUID) {
+	if m.removedcertify_vuln == nil {
+		m.removedcertify_vuln = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.vex_package, ids[i])
-		m.removedvex_package[ids[i]] = struct{}{}
+		delete(m.certify_vuln, ids[i])
+		m.removedcertify_vuln[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedVexPackage returns the removed IDs of the "vex_package" edge to the CertifyVex entity.
-func (m *VulnerabilityIDMutation) RemovedVexPackageIDs() (ids []uuid.UUID) {
-	for id := range m.removedvex_package {
+// RemovedCertifyVuln returns the removed IDs of the "certify_vuln" edge to the CertifyVuln entity.
+func (m *VulnerabilityIDMutation) RemovedCertifyVulnIDs() (ids []uuid.UUID) {
+	for id := range m.removedcertify_vuln {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// VexPackageIDs returns the "vex_package" edge IDs in the mutation.
-func (m *VulnerabilityIDMutation) VexPackageIDs() (ids []uuid.UUID) {
-	for id := range m.vex_package {
+// CertifyVulnIDs returns the "certify_vuln" edge IDs in the mutation.
+func (m *VulnerabilityIDMutation) CertifyVulnIDs() (ids []uuid.UUID) {
+	for id := range m.certify_vuln {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetVexPackage resets all changes to the "vex_package" edge.
-func (m *VulnerabilityIDMutation) ResetVexPackage() {
-	m.vex_package = nil
-	m.clearedvex_package = false
-	m.removedvex_package = nil
+// ResetCertifyVuln resets all changes to the "certify_vuln" edge.
+func (m *VulnerabilityIDMutation) ResetCertifyVuln() {
+	m.certify_vuln = nil
+	m.clearedcertify_vuln = false
+	m.removedcertify_vuln = nil
+}
+
+// AddVexIDs adds the "vex" edge to the CertifyVex entity by ids.
+func (m *VulnerabilityIDMutation) AddVexIDs(ids ...uuid.UUID) {
+	if m.vex == nil {
+		m.vex = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.vex[ids[i]] = struct{}{}
+	}
+}
+
+// ClearVex clears the "vex" edge to the CertifyVex entity.
+func (m *VulnerabilityIDMutation) ClearVex() {
+	m.clearedvex = true
+}
+
+// VexCleared reports if the "vex" edge to the CertifyVex entity was cleared.
+func (m *VulnerabilityIDMutation) VexCleared() bool {
+	return m.clearedvex
+}
+
+// RemoveVexIDs removes the "vex" edge to the CertifyVex entity by IDs.
+func (m *VulnerabilityIDMutation) RemoveVexIDs(ids ...uuid.UUID) {
+	if m.removedvex == nil {
+		m.removedvex = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.vex, ids[i])
+		m.removedvex[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedVex returns the removed IDs of the "vex" edge to the CertifyVex entity.
+func (m *VulnerabilityIDMutation) RemovedVexIDs() (ids []uuid.UUID) {
+	for id := range m.removedvex {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// VexIDs returns the "vex" edge IDs in the mutation.
+func (m *VulnerabilityIDMutation) VexIDs() (ids []uuid.UUID) {
+	for id := range m.vex {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetVex resets all changes to the "vex" edge.
+func (m *VulnerabilityIDMutation) ResetVex() {
+	m.vex = nil
+	m.clearedvex = false
+	m.removedvex = nil
 }
 
 // Where appends a list predicates to the VulnerabilityIDMutation builder.
@@ -21530,18 +21587,21 @@ func (m *VulnerabilityIDMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *VulnerabilityIDMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.vuln_equal_vuln_a != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnA)
 	}
 	if m.vuln_equal_vuln_b != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnB)
 	}
-	if m.vulnerability_metadata != nil {
-		edges = append(edges, vulnerabilityid.EdgeVulnerabilityMetadata)
+	if m.metadata != nil {
+		edges = append(edges, vulnerabilityid.EdgeMetadata)
 	}
-	if m.vex_package != nil {
-		edges = append(edges, vulnerabilityid.EdgeVexPackage)
+	if m.certify_vuln != nil {
+		edges = append(edges, vulnerabilityid.EdgeCertifyVuln)
+	}
+	if m.vex != nil {
+		edges = append(edges, vulnerabilityid.EdgeVex)
 	}
 	return edges
 }
@@ -21562,15 +21622,21 @@ func (m *VulnerabilityIDMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case vulnerabilityid.EdgeVulnerabilityMetadata:
-		ids := make([]ent.Value, 0, len(m.vulnerability_metadata))
-		for id := range m.vulnerability_metadata {
+	case vulnerabilityid.EdgeMetadata:
+		ids := make([]ent.Value, 0, len(m.metadata))
+		for id := range m.metadata {
 			ids = append(ids, id)
 		}
 		return ids
-	case vulnerabilityid.EdgeVexPackage:
-		ids := make([]ent.Value, 0, len(m.vex_package))
-		for id := range m.vex_package {
+	case vulnerabilityid.EdgeCertifyVuln:
+		ids := make([]ent.Value, 0, len(m.certify_vuln))
+		for id := range m.certify_vuln {
+			ids = append(ids, id)
+		}
+		return ids
+	case vulnerabilityid.EdgeVex:
+		ids := make([]ent.Value, 0, len(m.vex))
+		for id := range m.vex {
 			ids = append(ids, id)
 		}
 		return ids
@@ -21580,18 +21646,21 @@ func (m *VulnerabilityIDMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *VulnerabilityIDMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedvuln_equal_vuln_a != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnA)
 	}
 	if m.removedvuln_equal_vuln_b != nil {
 		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnB)
 	}
-	if m.removedvulnerability_metadata != nil {
-		edges = append(edges, vulnerabilityid.EdgeVulnerabilityMetadata)
+	if m.removedmetadata != nil {
+		edges = append(edges, vulnerabilityid.EdgeMetadata)
 	}
-	if m.removedvex_package != nil {
-		edges = append(edges, vulnerabilityid.EdgeVexPackage)
+	if m.removedcertify_vuln != nil {
+		edges = append(edges, vulnerabilityid.EdgeCertifyVuln)
+	}
+	if m.removedvex != nil {
+		edges = append(edges, vulnerabilityid.EdgeVex)
 	}
 	return edges
 }
@@ -21612,15 +21681,21 @@ func (m *VulnerabilityIDMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case vulnerabilityid.EdgeVulnerabilityMetadata:
-		ids := make([]ent.Value, 0, len(m.removedvulnerability_metadata))
-		for id := range m.removedvulnerability_metadata {
+	case vulnerabilityid.EdgeMetadata:
+		ids := make([]ent.Value, 0, len(m.removedmetadata))
+		for id := range m.removedmetadata {
 			ids = append(ids, id)
 		}
 		return ids
-	case vulnerabilityid.EdgeVexPackage:
-		ids := make([]ent.Value, 0, len(m.removedvex_package))
-		for id := range m.removedvex_package {
+	case vulnerabilityid.EdgeCertifyVuln:
+		ids := make([]ent.Value, 0, len(m.removedcertify_vuln))
+		for id := range m.removedcertify_vuln {
+			ids = append(ids, id)
+		}
+		return ids
+	case vulnerabilityid.EdgeVex:
+		ids := make([]ent.Value, 0, len(m.removedvex))
+		for id := range m.removedvex {
 			ids = append(ids, id)
 		}
 		return ids
@@ -21630,18 +21705,21 @@ func (m *VulnerabilityIDMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *VulnerabilityIDMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedvuln_equal_vuln_a {
 		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnA)
 	}
 	if m.clearedvuln_equal_vuln_b {
 		edges = append(edges, vulnerabilityid.EdgeVulnEqualVulnB)
 	}
-	if m.clearedvulnerability_metadata {
-		edges = append(edges, vulnerabilityid.EdgeVulnerabilityMetadata)
+	if m.clearedmetadata {
+		edges = append(edges, vulnerabilityid.EdgeMetadata)
 	}
-	if m.clearedvex_package {
-		edges = append(edges, vulnerabilityid.EdgeVexPackage)
+	if m.clearedcertify_vuln {
+		edges = append(edges, vulnerabilityid.EdgeCertifyVuln)
+	}
+	if m.clearedvex {
+		edges = append(edges, vulnerabilityid.EdgeVex)
 	}
 	return edges
 }
@@ -21654,10 +21732,12 @@ func (m *VulnerabilityIDMutation) EdgeCleared(name string) bool {
 		return m.clearedvuln_equal_vuln_a
 	case vulnerabilityid.EdgeVulnEqualVulnB:
 		return m.clearedvuln_equal_vuln_b
-	case vulnerabilityid.EdgeVulnerabilityMetadata:
-		return m.clearedvulnerability_metadata
-	case vulnerabilityid.EdgeVexPackage:
-		return m.clearedvex_package
+	case vulnerabilityid.EdgeMetadata:
+		return m.clearedmetadata
+	case vulnerabilityid.EdgeCertifyVuln:
+		return m.clearedcertify_vuln
+	case vulnerabilityid.EdgeVex:
+		return m.clearedvex
 	}
 	return false
 }
@@ -21680,11 +21760,14 @@ func (m *VulnerabilityIDMutation) ResetEdge(name string) error {
 	case vulnerabilityid.EdgeVulnEqualVulnB:
 		m.ResetVulnEqualVulnB()
 		return nil
-	case vulnerabilityid.EdgeVulnerabilityMetadata:
-		m.ResetVulnerabilityMetadata()
+	case vulnerabilityid.EdgeMetadata:
+		m.ResetMetadata()
 		return nil
-	case vulnerabilityid.EdgeVexPackage:
-		m.ResetVexPackage()
+	case vulnerabilityid.EdgeCertifyVuln:
+		m.ResetCertifyVuln()
+		return nil
+	case vulnerabilityid.EdgeVex:
+		m.ResetVex()
 		return nil
 	}
 	return fmt.Errorf("unknown VulnerabilityID edge %s", name)

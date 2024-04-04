@@ -3221,7 +3221,7 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 			vi.WithNamedVulnEqualVulnB(alias, func(wq *VulnEqualQuery) {
 				*wq = *query
 			})
-		case "vulnerabilityMetadata":
+		case "metadata":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -3230,10 +3230,22 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			vi.WithNamedVulnerabilityMetadata(alias, func(wq *VulnerabilityMetadataQuery) {
+			vi.WithNamedMetadata(alias, func(wq *VulnerabilityMetadataQuery) {
 				*wq = *query
 			})
-		case "vexPackage":
+		case "certifyVuln":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVulnClient{config: vi.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			vi.WithNamedCertifyVuln(alias, func(wq *CertifyVulnQuery) {
+				*wq = *query
+			})
+		case "vex":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
@@ -3242,7 +3254,7 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
-			vi.WithNamedVexPackage(alias, func(wq *CertifyVexQuery) {
+			vi.WithNamedVex(alias, func(wq *CertifyVexQuery) {
 				*wq = *query
 			})
 		case "vulnerabilityID":

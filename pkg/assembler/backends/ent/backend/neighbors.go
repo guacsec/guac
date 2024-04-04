@@ -98,16 +98,16 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get source type neighbors for node with id: %s with error: %w", nodeID, err)
 		}
-	// case vulnerabilitiesStr:
-	// 	neighbors, err = c.vulnIdNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
-	// case vulnTypesStr:
-	// 	neighbors, err = c.vulnTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors for node with id: %s with error: %w", nodeID, err)
-	// 	}
+	case vulnerabilityid.Table:
+		neighbors, err = b.vulnIdNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get vulnID neighbors for node with id: %s with error: %w", nodeID, err)
+		}
+	case vulnTypeString:
+		neighbors, err = b.vulnTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get vuln type neighbors for node with id: %s with error: %w", nodeID, err)
+		}
 	case builder.Table:
 		neighbors, err = b.builderNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {

@@ -4763,15 +4763,15 @@ func (c *VulnerabilityIDClient) QueryVulnEqualVulnB(vi *VulnerabilityID) *VulnEq
 	return query
 }
 
-// QueryVulnerabilityMetadata queries the vulnerability_metadata edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryVulnerabilityMetadata(vi *VulnerabilityID) *VulnerabilityMetadataQuery {
+// QueryMetadata queries the metadata edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryMetadata(vi *VulnerabilityID) *VulnerabilityMetadataQuery {
 	query := (&VulnerabilityMetadataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := vi.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(vulnerabilitymetadata.Table, vulnerabilitymetadata.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VulnerabilityMetadataTable, vulnerabilityid.VulnerabilityMetadataColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.MetadataTable, vulnerabilityid.MetadataColumn),
 		)
 		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
 		return fromV, nil
@@ -4779,15 +4779,31 @@ func (c *VulnerabilityIDClient) QueryVulnerabilityMetadata(vi *VulnerabilityID) 
 	return query
 }
 
-// QueryVexPackage queries the vex_package edge of a VulnerabilityID.
-func (c *VulnerabilityIDClient) QueryVexPackage(vi *VulnerabilityID) *CertifyVexQuery {
+// QueryCertifyVuln queries the certify_vuln edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryCertifyVuln(vi *VulnerabilityID) *CertifyVulnQuery {
+	query := (&CertifyVulnClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := vi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
+			sqlgraph.To(certifyvuln.Table, certifyvuln.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.CertifyVulnTable, vulnerabilityid.CertifyVulnColumn),
+		)
+		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVex queries the vex edge of a VulnerabilityID.
+func (c *VulnerabilityIDClient) QueryVex(vi *VulnerabilityID) *CertifyVexQuery {
 	query := (&CertifyVexClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := vi.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(vulnerabilityid.Table, vulnerabilityid.FieldID, id),
 			sqlgraph.To(certifyvex.Table, certifyvex.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VexPackageTable, vulnerabilityid.VexPackageColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, vulnerabilityid.VexTable, vulnerabilityid.VexColumn),
 		)
 		fromV = sqlgraph.Neighbors(vi.driver.Dialect(), step)
 		return fromV, nil

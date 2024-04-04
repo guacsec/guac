@@ -952,26 +952,38 @@ func (vi *VulnerabilityID) VulnEqualVulnB(ctx context.Context) (result []*VulnEq
 	return result, err
 }
 
-func (vi *VulnerabilityID) VulnerabilityMetadata(ctx context.Context) (result []*VulnerabilityMetadata, err error) {
+func (vi *VulnerabilityID) Metadata(ctx context.Context) (result []*VulnerabilityMetadata, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = vi.NamedVulnerabilityMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = vi.NamedMetadata(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = vi.Edges.VulnerabilityMetadataOrErr()
+		result, err = vi.Edges.MetadataOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = vi.QueryVulnerabilityMetadata().All(ctx)
+		result, err = vi.QueryMetadata().All(ctx)
 	}
 	return result, err
 }
 
-func (vi *VulnerabilityID) VexPackage(ctx context.Context) (result []*CertifyVex, err error) {
+func (vi *VulnerabilityID) CertifyVuln(ctx context.Context) (result []*CertifyVuln, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
-		result, err = vi.NamedVexPackage(graphql.GetFieldContext(ctx).Field.Alias)
+		result, err = vi.NamedCertifyVuln(graphql.GetFieldContext(ctx).Field.Alias)
 	} else {
-		result, err = vi.Edges.VexPackageOrErr()
+		result, err = vi.Edges.CertifyVulnOrErr()
 	}
 	if IsNotLoaded(err) {
-		result, err = vi.QueryVexPackage().All(ctx)
+		result, err = vi.QueryCertifyVuln().All(ctx)
+	}
+	return result, err
+}
+
+func (vi *VulnerabilityID) Vex(ctx context.Context) (result []*CertifyVex, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = vi.NamedVex(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = vi.Edges.VexOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = vi.QueryVex().All(ctx)
 	}
 	return result, err
 }
