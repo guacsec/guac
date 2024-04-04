@@ -45,8 +45,8 @@ type filesOptions struct {
 	blobAddr string
 	// poll location
 	poll bool
-	// use blob path for origin instead of source path
-	useBlobPath bool
+	// use blob URL for origin instead of source URL
+	useBlobURL bool
 }
 
 var filesCmd = &cobra.Command{
@@ -73,7 +73,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
 			viper.GetBool("service-poll"),
-			viper.GetBool("use-blob-path"),
+			viper.GetBool("use-blob-url"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -85,7 +85,7 @@ you have access to read and write to the respective blob store.`,
 		logger := logging.FromContext(ctx)
 
 		// Register collector
-		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, 30*time.Second, opts.useBlobPath)
+		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, 30*time.Second, opts.useBlobURL)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
 		if err != nil {
 			logger.Fatalf("unable to register file collector: %v", err)
@@ -95,13 +95,13 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateFilesFlags(pubsubAddr string, blobAddr string, poll bool, useBlobPath bool, args []string) (filesOptions, error) {
+func validateFilesFlags(pubsubAddr, blobAddr string, poll, useBlobURL bool, args []string) (filesOptions, error) {
 	var opts filesOptions
 
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
-	opts.useBlobPath = useBlobPath
+	opts.useBlobURL = useBlobURL
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")
@@ -191,7 +191,7 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"use-blob-path"})
+	set, err := cli.BuildFlags([]string{"use-blob-url"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
