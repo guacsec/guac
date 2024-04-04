@@ -157,11 +157,11 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
 		}
-	// case hasMetadataStr:
-	// 	neighbors, err = c.hasMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case hasmetadata.Table:
+		neighbors, err = b.hasMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+		}
 	// case hasSBOMsStr:
 	// 	neighbors, err = c.hasSbomNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
