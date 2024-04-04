@@ -359,3 +359,60 @@ func guacOccurrenceKey(pkgVersionID *string, srcNameID *string, artID *string, o
 	occurID := generateUUIDKey([]byte(occurIDString))
 	return &occurID, nil
 }
+
+func (b *EntBackend) isOccurrenceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+	if allowedEdges[model.EdgeIsOccurrencePackage] {
+		query := b.client.Occurrence.Query().
+			Where(isOccurrenceQuery(&model.IsOccurrenceSpec{ID: &nodeID})).
+			WithPackage(withPackageVersionTree()).
+			Limit(MaxPageSize)
+
+		occurs, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, o := range occurs {
+			if o.Edges.Package != nil {
+				out = append(out, toModelPackage(backReferencePackageVersion(o.Edges.Package)))
+			}
+		}
+	}
+	if allowedEdges[model.EdgeIsOccurrenceSource] {
+		query := b.client.Occurrence.Query().
+			Where(isOccurrenceQuery(&model.IsOccurrenceSpec{ID: &nodeID})).
+			WithSource().
+			Limit(MaxPageSize)
+
+		occurs, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get source for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, o := range occurs {
+			if o.Edges.Source != nil {
+				out = append(out, toModelSource(o.Edges.Source))
+			}
+		}
+	}
+	if allowedEdges[model.EdgeIsOccurrenceArtifact] {
+		query := b.client.Occurrence.Query().
+			Where(isOccurrenceQuery(&model.IsOccurrenceSpec{ID: &nodeID})).
+			WithArtifact().
+			Limit(MaxPageSize)
+
+		occurs, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get artifact for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, o := range occurs {
+			if o.Edges.Artifact != nil {
+				out = append(out, toModelArtifact(o.Edges.Artifact))
+			}
+		}
+	}
+
+	return out, nil
+}

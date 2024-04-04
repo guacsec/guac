@@ -182,11 +182,11 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
 		}
-	// case isOccurrencesStr:
-	// 	neighbors, err = c.isOccurrenceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case occurrence.Table:
+		neighbors, err = b.isOccurrenceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+		}
 	// case pkgEqualsStr:
 	// 	neighbors, err = c.pkgEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
