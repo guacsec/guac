@@ -84,7 +84,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("retrieve-dependencies"),
 			args,
 			viper.GetBool("enable-prometheus"),
-			viper.GetInt("prometheus-addr"),
+			viper.GetInt("prometheus-port"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -159,7 +159,7 @@ func validateDepsDevFlags(pubsubAddr string, blobAddr string, csubAddr string, c
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"retrieve-dependencies"})
+	set, err := cli.BuildFlags([]string{"retrieve-dependencies", "prometheus-port"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
