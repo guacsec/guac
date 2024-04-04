@@ -289,3 +289,29 @@ func guacPkgEqualKey(sortedPkgHash string, peInput *model.PkgEqualInputSpec) (*u
 	peID := generateUUIDKey([]byte(peIDString))
 	return &peID, nil
 }
+
+func (b *EntBackend) pkgEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+	if allowedEdges[model.EdgePkgEqualPackage] {
+		query := b.client.PkgEqual.Query().
+			Where(pkgEqualQueryPredicates(&model.PkgEqualSpec{ID: &nodeID})).
+			WithPackageA(withPackageVersionTree()).
+			WithPackageB(withPackageVersionTree()).
+			Limit(MaxPageSize)
+
+		pkgEquals, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get artifacts for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, pe := range pkgEquals {
+			if pe.Edges.PackageB != nil {
+				out = append(out, toModelPackage(backReferencePackageVersion(pe.Edges.PackageB)))
+			}
+			if pe.Edges.PackageA != nil {
+				out = append(out, toModelPackage(backReferencePackageVersion(pe.Edges.PackageA)))
+			}
+		}
+	}
+	return out, nil
+}

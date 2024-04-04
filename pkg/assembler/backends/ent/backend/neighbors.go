@@ -187,11 +187,11 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
 		}
-	// case pkgEqualsStr:
-	// 	neighbors, err = c.pkgEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case pkgequal.Table:
+		neighbors, err = b.pkgEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+		}
 	// case pointOfContactStr:
 	// 	neighbors, err = c.pointOfContactNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
