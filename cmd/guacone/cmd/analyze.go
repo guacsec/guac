@@ -24,7 +24,7 @@ import (
   "github.com/guacsec/guac/pkg/logging"
   "github.com/spf13/cobra"
   "github.com/spf13/viper"
-  analysis "github.com/guacsec/guac/pkg/guacanalyze"
+  analysis "github.com/guacsec/guac/pkg/analyzer"
 )
 
 const PRINT_MAX = 20

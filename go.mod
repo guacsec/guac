@@ -283,6 +283,7 @@ require (
 	github.com/cdevents/sdk-go v0.3.2
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/deepmap/oapi-codegen/v2 v2.1.0
+	github.com/dominikbraun/graph v0.23.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/getkin/kin-openapi v0.123.0
 	github.com/go-chi/chi v4.1.2+incompatible
@@ -326,4 +327,5 @@ require (
 	gocloud.dev/pubsub/rabbitpubsub v0.36.0
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
 	gopkg.in/yaml.v3 v3.0.1
+	k8s.io/apimachinery v0.29.3
 )
