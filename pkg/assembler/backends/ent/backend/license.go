@@ -171,37 +171,42 @@ func getLicenseID(ctx context.Context, client *ent.Client, license model.License
 
 func (b *EntBackend) licenseNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.License.Query().
+		Where(licenseQuery(model.LicenseSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeLicenseCertifyLegal] {
-		query := b.client.License.Query().
-			Where(licenseQuery(model.LicenseSpec{ID: &nodeID})).
+		query.
 			WithDeclaredInCertifyLegals(func(q *ent.CertifyLegalQuery) {
 				getCertifyLegalObject(q)
 			}).
 			WithDiscoveredInCertifyLegals(func(q *ent.CertifyLegalQuery) {
 				getCertifyLegalObject(q)
-			}).
-			Limit(MaxPageSize)
+			})
+	}
 
-		licenses, err := query.All(ctx)
+	query.
+		Limit(MaxPageSize)
+
+	licenses, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for license with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundLicense := range licenses {
+		declaredCLs, err := foundLicense.DeclaredInCertifyLegals(ctx)
 		if err != nil {
-			return nil, err
+			return []model.Node{}, fmt.Errorf("failed to get declared license certifyLegal for node ID: %s with error: %w", nodeID, err)
 		}
-
-		for _, foundLicense := range licenses {
-			declaredCLs, err := foundLicense.DeclaredInCertifyLegals(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get declared license certifyLegal for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundDeclared := range declaredCLs {
-				out = append(out, toModelCertifyLegal(foundDeclared))
-			}
-			disCLs, err := foundLicense.DiscoveredInCertifyLegals(ctx)
-			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get discovered license certifyLegal for node ID: %s with error: %w", nodeID, err)
-			}
-			for _, foundDis := range disCLs {
-				out = append(out, toModelCertifyLegal(foundDis))
-			}
+		for _, foundDeclared := range declaredCLs {
+			out = append(out, toModelCertifyLegal(foundDeclared))
+		}
+		disCLs, err := foundLicense.DiscoveredInCertifyLegals(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get discovered license certifyLegal for node ID: %s with error: %w", nodeID, err)
+		}
+		for _, foundDis := range disCLs {
+			out = append(out, toModelCertifyLegal(foundDis))
 		}
 	}
 

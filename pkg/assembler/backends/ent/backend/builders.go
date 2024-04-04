@@ -147,24 +147,30 @@ func upsertBuilder(ctx context.Context, tx *ent.Tx, spec *model.BuilderInputSpec
 
 func (b *EntBackend) builderNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.Builder.Query().
+		Where(builderQueryPredicate(&model.BuilderSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeBuilderHasSlsa] {
-		query := b.client.Builder.Query().
-			Where(builderQueryPredicate(&model.BuilderSpec{ID: &nodeID})).
+		query.
 			WithSlsaAttestations(func(q *ent.SLSAAttestationQuery) {
 				getSLSAObject(q)
-			}).
-			Limit(MaxPageSize)
+			})
+	}
 
-		builders, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSLSA for node ID: %s with error: %w", nodeID, err)
-		}
+	query.
+		Limit(MaxPageSize)
 
-		for _, foundBuilder := range builders {
-			for _, foundSLSA := range foundBuilder.Edges.SlsaAttestations {
-				out = append(out, toModelHasSLSA(foundSLSA))
-			}
+	builders, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed query builder with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundBuilder := range builders {
+		for _, foundSLSA := range foundBuilder.Edges.SlsaAttestations {
+			out = append(out, toModelHasSLSA(foundSLSA))
 		}
 	}
+
 	return out, nil
 }

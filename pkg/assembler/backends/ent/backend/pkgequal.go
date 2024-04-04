@@ -292,26 +292,32 @@ func guacPkgEqualKey(sortedPkgHash string, peInput *model.PkgEqualInputSpec) (*u
 
 func (b *EntBackend) pkgEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.PkgEqual.Query().
+		Where(pkgEqualQueryPredicates(&model.PkgEqualSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgePkgEqualPackage] {
-		query := b.client.PkgEqual.Query().
-			Where(pkgEqualQueryPredicates(&model.PkgEqualSpec{ID: &nodeID})).
+		query.
 			WithPackageA(withPackageVersionTree()).
-			WithPackageB(withPackageVersionTree()).
-			Limit(MaxPageSize)
+			WithPackageB(withPackageVersionTree())
+	}
 
-		pkgEquals, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get packages for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	pkgEquals, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for pkgEquals with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, pe := range pkgEquals {
+		if pe.Edges.PackageB != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(pe.Edges.PackageB)))
 		}
-
-		for _, pe := range pkgEquals {
-			if pe.Edges.PackageB != nil {
-				out = append(out, toModelPackage(backReferencePackageVersion(pe.Edges.PackageB)))
-			}
-			if pe.Edges.PackageA != nil {
-				out = append(out, toModelPackage(backReferencePackageVersion(pe.Edges.PackageA)))
-			}
+		if pe.Edges.PackageA != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(pe.Edges.PackageA)))
 		}
 	}
+
 	return out, nil
 }

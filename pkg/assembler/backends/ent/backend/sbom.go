@@ -38,6 +38,21 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 	if spec == nil {
 		spec = &model.HasSBOMSpec{}
 	}
+
+	sbomQuery := b.client.BillOfMaterials.Query().
+		Where(hasSBOMQuery(*spec))
+
+	records, err := getSBOMObject(sbomQuery).
+		Limit(MaxPageSize).
+		All(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, funcName)
+	}
+
+	return collect(records, toModelHasSBOM), nil
+}
+
+func hasSBOMQuery(spec model.HasSBOMSpec) predicate.BillOfMaterials {
 	predicates := []predicate.BillOfMaterials{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(toLowerPtr(spec.Algorithm), billofmaterials.AlgorithmEQ),
@@ -71,18 +86,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 	for i := range spec.IncludedOccurrences {
 		predicates = append(predicates, billofmaterials.HasIncludedOccurrencesWith(isOccurrenceQuery(spec.IncludedOccurrences[i])))
 	}
-
-	sbomQuery := b.client.BillOfMaterials.Query().
-		Where(predicates...)
-
-	records, err := getSBOMObject(sbomQuery).
-		Limit(MaxPageSize).
-		All(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, funcName)
-	}
-
-	return collect(records, toModelHasSBOM), nil
+	return billofmaterials.And(predicates...)
 }
 
 // getSBOMObject is used recreate the hasSBOM object be eager loading the edges
@@ -434,4 +438,77 @@ func guacHasSBOMKey(pkgVersionID *string, artID *string, includedPkgHash, includ
 
 	hsID := generateUUIDKey([]byte(hsIDString))
 	return &hsID, nil
+}
+
+func (b *EntBackend) hasSbomNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.BillOfMaterials.Query().
+		Where(hasSBOMQuery(model.HasSBOMSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeHasSbomPackage] {
+		query.
+			WithPackage(withPackageVersionTree())
+	}
+	if allowedEdges[model.EdgeHasSbomArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgeHasSbomIncludedSoftware] {
+		query.
+			WithIncludedSoftwarePackages(withPackageVersionTree()).
+			WithIncludedSoftwareArtifacts()
+	}
+
+	if allowedEdges[model.EdgeHasSbomIncludedDependencies] {
+		query.
+			WithIncludedDependencies(func(q *ent.DependencyQuery) {
+				getIsDepObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeHasSbomIncludedOccurrences] {
+		query.
+			WithIncludedOccurrences(func(q *ent.OccurrenceQuery) {
+				getOccurrenceObject(q)
+			})
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	bills, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed query hasSBOM with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, bill := range bills {
+		if bill.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(bill.Edges.Package)))
+		}
+		if bill.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(bill.Edges.Artifact))
+		}
+		if len(bill.Edges.IncludedSoftwareArtifacts) > 0 {
+			for _, includedArt := range bill.Edges.IncludedSoftwareArtifacts {
+				out = append(out, toModelArtifact(includedArt))
+			}
+		}
+		if len(bill.Edges.IncludedSoftwarePackages) > 0 {
+			for _, includedPkg := range bill.Edges.IncludedSoftwarePackages {
+				out = append(out, toModelPackage(backReferencePackageVersion(includedPkg)))
+			}
+		}
+		if len(bill.Edges.IncludedDependencies) > 0 {
+			for _, includedDep := range bill.Edges.IncludedDependencies {
+				out = append(out, toModelIsDependencyWithBackrefs(includedDep))
+			}
+		}
+		if len(bill.Edges.IncludedOccurrences) > 0 {
+			for _, includedOccur := range bill.Edges.IncludedOccurrences {
+				out = append(out, toModelIsOccurrenceWithSubject(includedOccur))
+			}
+		}
+	}
+
+	return out, nil
 }

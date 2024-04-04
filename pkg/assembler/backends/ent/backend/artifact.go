@@ -146,191 +146,118 @@ func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInpu
 
 func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.Artifact.Query().
+		Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeArtifactHashEqual] {
-		query := b.client.Artifact.Query().
-			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
+		query.
 			WithHashEqualArtA(func(q *ent.HashEqualQuery) {
 				getHashEqualObject(q)
 			}).
 			WithHashEqualArtB(func(q *ent.HashEqualQuery) {
 				getHashEqualObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		artifacts, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hashEqual for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundArt := range artifacts {
-			for _, hashEqualA := range foundArt.Edges.HashEqualArtA {
-				out = append(out, toModelHashEqual(hashEqualA))
-			}
-			for _, hashEqualB := range foundArt.Edges.HashEqualArtB {
-				out = append(out, toModelHashEqual(hashEqualB))
-			}
-		}
+			})
 	}
 	if allowedEdges[model.EdgeArtifactIsOccurrence] {
-		query := b.client.Artifact.Query().
-			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
+		query.
 			WithOccurrences(func(q *ent.OccurrenceQuery) {
 				getOccurrenceObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		artifacts, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get occurrence for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundArt := range artifacts {
-			for _, foundOccur := range foundArt.Edges.Occurrences {
-				out = append(out, toModelIsOccurrenceWithSubject(foundOccur))
-			}
-		}
+			})
 	}
 	if allowedEdges[model.EdgeArtifactHasSbom] {
-		query := b.client.Artifact.Query().
-			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
+		query.
 			WithSbom(func(q *ent.BillOfMaterialsQuery) {
 				getSBOMObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		artifacts, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSBOM for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundArt := range artifacts {
-			for _, foundSBOM := range foundArt.Edges.Sbom {
-				out = append(out, toModelHasSBOM(foundSBOM))
-			}
-		}
+			})
 	}
 	if allowedEdges[model.EdgeArtifactHasSlsa] {
-		query := b.client.Artifact.Query().
-			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
+		query.
 			WithAttestations(func(q *ent.SLSAAttestationQuery) {
 				getSLSAObject(q)
 			}).
 			WithAttestationsSubject(func(q *ent.SLSAAttestationQuery) {
 				getSLSAObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		artifacts, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSLSA for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundArt := range artifacts {
-			for _, foundSLSA := range foundArt.Edges.Attestations {
-				out = append(out, toModelHasSLSA(foundSLSA))
-			}
-			for _, foundSLSA := range foundArt.Edges.AttestationsSubject {
-				out = append(out, toModelHasSLSA(foundSLSA))
-			}
-		}
+			})
 	}
 	if allowedEdges[model.EdgeArtifactCertifyVexStatement] {
-		query := b.client.Artifact.Query().
-			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
+		query.
 			WithVex(func(q *ent.CertifyVexQuery) {
 				getVEXObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		artifacts, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get VEX for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundArt := range artifacts {
-			for _, foundVex := range foundArt.Edges.Vex {
-				out = append(out, toModelCertifyVEXStatement(foundVex))
-			}
-		}
+			})
 	}
 	if allowedEdges[model.EdgeArtifactCertifyBad] {
-		query := b.client.Artifact.Query().
-			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
+		query.
 			WithCertification(func(q *ent.CertificationQuery) {
 				getCertificationObject(q)
-			}).
-			Limit(MaxPageSize)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactCertifyGood] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactHasMetadata] {
+		query.
+			WithMetadata(func(q *ent.HasMetadataQuery) {
+				getHasMetadataObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactPointOfContact] {
+		query.
+			WithPoc(func(q *ent.PointOfContactQuery) {
+				getPointOfContactObject(q)
+			})
+	}
 
-		artifacts, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyBad for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	artifacts, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed query artifact with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundArt := range artifacts {
+		for _, hashEqualA := range foundArt.Edges.HashEqualArtA {
+			out = append(out, toModelHashEqual(hashEqualA))
 		}
-
-		for _, foundArt := range artifacts {
-			for _, foundCert := range foundArt.Edges.Certification {
+		for _, hashEqualB := range foundArt.Edges.HashEqualArtB {
+			out = append(out, toModelHashEqual(hashEqualB))
+		}
+		for _, foundOccur := range foundArt.Edges.Occurrences {
+			out = append(out, toModelIsOccurrenceWithSubject(foundOccur))
+		}
+		for _, foundSBOM := range foundArt.Edges.Sbom {
+			out = append(out, toModelHasSBOM(foundSBOM))
+		}
+		for _, foundSLSA := range foundArt.Edges.Attestations {
+			out = append(out, toModelHasSLSA(foundSLSA))
+		}
+		for _, foundSLSA := range foundArt.Edges.AttestationsSubject {
+			out = append(out, toModelHasSLSA(foundSLSA))
+		}
+		for _, foundVex := range foundArt.Edges.Vex {
+			out = append(out, toModelCertifyVEXStatement(foundVex))
+		}
+		for _, foundCert := range foundArt.Edges.Certification {
+			if allowedEdges[model.EdgeArtifactCertifyBad] {
 				if foundCert.Type == certification.TypeBAD {
 					out = append(out, toModelCertifyBad(foundCert))
 				}
 			}
-		}
-	}
-	if allowedEdges[model.EdgeArtifactCertifyGood] {
-		query := b.client.Artifact.Query().
-			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
-			WithCertification(func(q *ent.CertificationQuery) {
-				getCertificationObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		artifacts, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyGood for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundArt := range artifacts {
-			for _, foundCert := range foundArt.Edges.Certification {
+			if allowedEdges[model.EdgeArtifactCertifyGood] {
 				if foundCert.Type == certification.TypeGOOD {
 					out = append(out, toModelCertifyGood(foundCert))
 				}
 			}
 		}
-	}
-	if allowedEdges[model.EdgeArtifactHasMetadata] {
-		query := b.client.Artifact.Query().
-			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
-			WithMetadata(func(q *ent.HasMetadataQuery) {
-				getHasMetadataObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		artifacts, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasMetadata for node ID: %s with error: %w", nodeID, err)
+		for _, foundMeta := range foundArt.Edges.Metadata {
+			out = append(out, toModelHasMetadata(foundMeta))
 		}
-
-		for _, foundArt := range artifacts {
-			for _, foundMeta := range foundArt.Edges.Metadata {
-				out = append(out, toModelHasMetadata(foundMeta))
-			}
-		}
-	}
-	if allowedEdges[model.EdgeArtifactPointOfContact] {
-		query := b.client.Artifact.Query().
-			Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID})).
-			WithPoc(func(q *ent.PointOfContactQuery) {
-				getPointOfContactObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		artifacts, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get point of contact for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundArt := range artifacts {
-			for _, foundPOC := range foundArt.Edges.Poc {
-				out = append(out, toModelPointOfContact(foundPOC))
-			}
+		for _, foundPOC := range foundArt.Edges.Poc {
+			out = append(out, toModelPointOfContact(foundPOC))
 		}
 	}
 

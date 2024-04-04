@@ -541,120 +541,89 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 func (b *EntBackend) certifyBadNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
 
+	query := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeBAD, &model.CertifyBadSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeCertifyBadPackage] {
-		query := b.client.Certification.Query().
-			Where(queryCertifications(certification.TypeBAD, &model.CertifyBadSpec{ID: &nodeID})).
+		query.
 			WithPackageVersion(withPackageVersionTree()).
-			WithAllVersions().
-			Limit(MaxPageSize)
-
-		certifications, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundCert := range certifications {
-			if foundCert.Edges.PackageVersion != nil {
-				out = append(out, toModelPackage(backReferencePackageVersion(foundCert.Edges.PackageVersion)))
-			}
-			if foundCert.Edges.AllVersions != nil {
-				out = append(out, toModelPackage(foundCert.Edges.AllVersions))
-			}
-		}
+			WithAllVersions()
 	}
 	if allowedEdges[model.EdgeCertifyBadArtifact] {
-		query := b.client.Certification.Query().
-			Where(queryCertifications(certification.TypeBAD, &model.CertifyBadSpec{ID: &nodeID})).
-			WithArtifact().
-			Limit(MaxPageSize)
-
-		certifications, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get artifact for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundCert := range certifications {
-			if foundCert.Edges.Artifact != nil {
-				out = append(out, toModelArtifact(foundCert.Edges.Artifact))
-			}
-		}
+		query.
+			WithArtifact()
 	}
 	if allowedEdges[model.EdgeCertifyBadSource] {
-		query := b.client.Certification.Query().
-			Where(queryCertifications(certification.TypeBAD, &model.CertifyBadSpec{ID: &nodeID})).
-			WithSource().
-			Limit(MaxPageSize)
+		query.
+			WithSource()
+	}
 
-		certifications, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get source for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	certifications, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyBad with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundCert := range certifications {
+		if foundCert.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundCert.Edges.PackageVersion)))
 		}
-
-		for _, foundCert := range certifications {
-			if foundCert.Edges.Source != nil {
-				out = append(out, toModelSource(foundCert.Edges.Source))
-			}
+		if foundCert.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(foundCert.Edges.AllVersions))
+		}
+		if foundCert.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(foundCert.Edges.Artifact))
+		}
+		if foundCert.Edges.Source != nil {
+			out = append(out, toModelSource(foundCert.Edges.Source))
 		}
 	}
+
 	return out, nil
 }
 
 func (b *EntBackend) certifyGoodNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
 
+	query := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeGOOD, &model.CertifyBadSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeCertifyGoodPackage] {
-		query := b.client.Certification.Query().
-			Where(queryCertifications(certification.TypeGOOD, &model.CertifyBadSpec{ID: &nodeID})).
+		query.
 			WithPackageVersion(withPackageVersionTree()).
-			WithAllVersions().
-			Limit(MaxPageSize)
-
-		certifications, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundCert := range certifications {
-			if foundCert.Edges.PackageVersion != nil {
-				out = append(out, toModelPackage(backReferencePackageVersion(foundCert.Edges.PackageVersion)))
-			}
-			if foundCert.Edges.AllVersions != nil {
-				out = append(out, toModelPackage(foundCert.Edges.AllVersions))
-			}
-		}
+			WithAllVersions()
 	}
 	if allowedEdges[model.EdgeCertifyGoodArtifact] {
-		query := b.client.Certification.Query().
-			Where(queryCertifications(certification.TypeGOOD, &model.CertifyBadSpec{ID: &nodeID})).
-			WithArtifact().
-			Limit(MaxPageSize)
-
-		certifications, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get artifact for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundCert := range certifications {
-			if foundCert.Edges.Artifact != nil {
-				out = append(out, toModelArtifact(foundCert.Edges.Artifact))
-			}
-		}
+		query.
+			WithArtifact()
 	}
 	if allowedEdges[model.EdgeCertifyGoodSource] {
-		query := b.client.Certification.Query().
-			Where(queryCertifications(certification.TypeGOOD, &model.CertifyBadSpec{ID: &nodeID})).
-			WithSource().
-			Limit(MaxPageSize)
+		query.
+			WithSource()
+	}
 
-		certifications, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get source for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	certifications, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyGood with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundCert := range certifications {
+		if foundCert.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundCert.Edges.PackageVersion)))
 		}
-
-		for _, foundCert := range certifications {
-			if foundCert.Edges.Source != nil {
-				out = append(out, toModelSource(foundCert.Edges.Source))
-			}
+		if foundCert.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(foundCert.Edges.AllVersions))
+		}
+		if foundCert.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(foundCert.Edges.Artifact))
+		}
+		if foundCert.Edges.Source != nil {
+			out = append(out, toModelSource(foundCert.Edges.Source))
 		}
 	}
 	return out, nil

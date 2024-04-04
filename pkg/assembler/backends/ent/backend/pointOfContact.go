@@ -393,60 +393,45 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 func (b *EntBackend) pointOfContactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
 
+	query := b.client.PointOfContact.Query().
+		Where(pointOfContactPredicate(&model.PointOfContactSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgePointOfContactPackage] {
-		query := b.client.PointOfContact.Query().
-			Where(pointOfContactPredicate(&model.PointOfContactSpec{ID: &nodeID})).
+		query.
 			WithPackageVersion(withPackageVersionTree()).
-			WithAllVersions().
-			Limit(MaxPageSize)
-
-		pocs, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, poc := range pocs {
-			if poc.Edges.PackageVersion != nil {
-				out = append(out, toModelPackage(backReferencePackageVersion(poc.Edges.PackageVersion)))
-			}
-			if poc.Edges.AllVersions != nil {
-				out = append(out, toModelPackage(poc.Edges.AllVersions))
-			}
-		}
+			WithAllVersions()
 	}
 	if allowedEdges[model.EdgePointOfContactArtifact] {
-		query := b.client.PointOfContact.Query().
-			Where(pointOfContactPredicate(&model.PointOfContactSpec{ID: &nodeID})).
-			WithArtifact().
-			Limit(MaxPageSize)
-
-		pocs, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get artifact for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, poc := range pocs {
-			if poc.Edges.Artifact != nil {
-				out = append(out, toModelArtifact(poc.Edges.Artifact))
-			}
-		}
+		query.
+			WithArtifact()
 	}
 	if allowedEdges[model.EdgePointOfContactSource] {
-		query := b.client.PointOfContact.Query().
-			Where(pointOfContactPredicate(&model.PointOfContactSpec{ID: &nodeID})).
-			WithSource().
-			Limit(MaxPageSize)
+		query.
+			WithSource()
+	}
 
-		pocs, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get source for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	pocs, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for point of contact with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, poc := range pocs {
+		if poc.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(poc.Edges.PackageVersion)))
 		}
-
-		for _, poc := range pocs {
-			if poc.Edges.Source != nil {
-				out = append(out, toModelSource(poc.Edges.Source))
-			}
+		if poc.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(poc.Edges.AllVersions))
+		}
+		if poc.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(poc.Edges.Artifact))
+		}
+		if poc.Edges.Source != nil {
+			out = append(out, toModelSource(poc.Edges.Source))
 		}
 	}
+
 	return out, nil
 }

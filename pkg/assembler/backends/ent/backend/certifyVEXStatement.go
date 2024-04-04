@@ -349,56 +349,42 @@ func certifyVexPredicate(filter model.CertifyVEXStatementSpec) predicate.Certify
 
 func (b *EntBackend) certifyVexNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.CertifyVex.Query().
+		Where(certifyVexPredicate(model.CertifyVEXStatementSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeCertifyVexStatementPackage] {
-		query := b.client.CertifyVex.Query().
-			Where(certifyVexPredicate(model.CertifyVEXStatementSpec{ID: &nodeID})).
-			WithPackage(withPackageVersionTree()).
-			Limit(MaxPageSize)
-
-		certVexs, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundVex := range certVexs {
-			if foundVex.Edges.Package != nil {
-				out = append(out, toModelPackage(backReferencePackageVersion(foundVex.Edges.Package)))
-			}
-		}
+		query.
+			WithPackage(withPackageVersionTree())
 	}
 	if allowedEdges[model.EdgeCertifyVexStatementArtifact] {
-		query := b.client.CertifyVex.Query().
-			Where(certifyVexPredicate(model.CertifyVEXStatementSpec{ID: &nodeID})).
-			WithArtifact().
-			Limit(MaxPageSize)
-
-		certVexs, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get artifact for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundVex := range certVexs {
-			if foundVex.Edges.Artifact != nil {
-				out = append(out, toModelArtifact(foundVex.Edges.Artifact))
-			}
-		}
+		query.
+			WithArtifact()
 	}
 	if allowedEdges[model.EdgeCertifyVexStatementVulnerability] {
-		query := b.client.CertifyVex.Query().
-			Where(certifyVexPredicate(model.CertifyVEXStatementSpec{ID: &nodeID})).
-			WithVulnerability().
-			Limit(MaxPageSize)
+		query.
+			WithVulnerability()
+	}
 
-		certVexs, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get vulnerability for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	certVexs, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyVex with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundVex := range certVexs {
+		if foundVex.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundVex.Edges.Package)))
 		}
-
-		for _, foundVex := range certVexs {
-			if foundVex.Edges.Vulnerability != nil {
-				out = append(out, toModelVulnerabilityFromVulnerabilityID(foundVex.Edges.Vulnerability))
-			}
+		if foundVex.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(foundVex.Edges.Artifact))
+		}
+		if foundVex.Edges.Vulnerability != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(foundVex.Edges.Vulnerability))
 		}
 	}
+
 	return out, nil
 }

@@ -271,3 +271,31 @@ func toModelScorecard(record *ent.CertifyScorecard) *model.Scorecard {
 		Collector:        record.Collector,
 	}
 }
+
+func (b *EntBackend) certifyScorecardNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.CertifyScorecard.Query().
+		Where(certifyScorecardQuery(&model.CertifyScorecardSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyScorecardSource] {
+		query.
+			WithSource()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	scorecards, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for scorecard with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, s := range scorecards {
+		if s.Edges.Source != nil {
+			out = append(out, toModelSource(s.Edges.Source))
+		}
+	}
+
+	return out, nil
+}

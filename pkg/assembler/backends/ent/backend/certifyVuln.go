@@ -294,38 +294,33 @@ func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 
 func (b *EntBackend) certifyVulnNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.CertifyVuln.Query().
+		Where(certifyVulnPredicate(model.CertifyVulnSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeCertifyVulnPackage] {
-		query := b.client.CertifyVuln.Query().
-			Where(certifyVulnPredicate(model.CertifyVulnSpec{ID: &nodeID})).
-			WithPackage(withPackageVersionTree()).
-			Limit(MaxPageSize)
-
-		certVulns, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundVuln := range certVulns {
-			if foundVuln.Edges.Package != nil {
-				out = append(out, toModelPackage(backReferencePackageVersion(foundVuln.Edges.Package)))
-			}
-		}
+		query.
+			WithPackage(withPackageVersionTree())
 	}
 	if allowedEdges[model.EdgeCertifyVulnVulnerability] {
-		query := b.client.CertifyVuln.Query().
-			Where(certifyVulnPredicate(model.CertifyVulnSpec{ID: &nodeID})).
-			WithVulnerability().
-			Limit(MaxPageSize)
+		query.
+			WithVulnerability()
+	}
 
-		certVulns, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get vulnerability for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	certVulns, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyVuln with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundVuln := range certVulns {
+		if foundVuln.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundVuln.Edges.Package)))
 		}
-
-		for _, foundVuln := range certVulns {
-			if foundVuln.Edges.Vulnerability != nil {
-				out = append(out, toModelVulnerabilityFromVulnerabilityID(foundVuln.Edges.Vulnerability))
-			}
+		if foundVuln.Edges.Vulnerability != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(foundVuln.Edges.Vulnerability))
 		}
 	}
 

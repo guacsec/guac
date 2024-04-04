@@ -137,11 +137,11 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get certifyLegal neighbors with id: %s with error: %w", nodeID, err)
 		}
-	// case scorecardStr:
-	// 	neighbors, err = c.certifyScorecardNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case certifyscorecard.Table:
+		neighbors, err = b.certifyScorecardNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+		}
 	case certifyvex.Table:
 		neighbors, err = b.certifyVexNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
@@ -162,11 +162,11 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
 		}
-	// case hasSBOMsStr:
-	// 	neighbors, err = c.hasSbomNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case billofmaterials.Table:
+		neighbors, err = b.hasSbomNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+		}
 	// case hasSLSAsStr:
 	// 	neighbors, err = c.hasSlsaNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {

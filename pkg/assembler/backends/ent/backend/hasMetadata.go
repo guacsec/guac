@@ -397,60 +397,46 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 
 func (b *EntBackend) hasMetadataNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.HasMetadata.Query().
+		Where(hasMetadataPredicate(&model.HasMetadataSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeHasMetadataPackage] {
-		query := b.client.HasMetadata.Query().
-			Where(hasMetadataPredicate(&model.HasMetadataSpec{ID: &nodeID})).
+		query.
 			WithPackageVersion(withPackageVersionTree()).
-			WithAllVersions().
-			Limit(MaxPageSize)
-
-		hasMetas, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, hm := range hasMetas {
-			if hm.Edges.PackageVersion != nil {
-				out = append(out, toModelPackage(backReferencePackageVersion(hm.Edges.PackageVersion)))
-			}
-			if hm.Edges.AllVersions != nil {
-				out = append(out, toModelPackage(hm.Edges.AllVersions))
-			}
-		}
+			WithAllVersions()
 	}
 	if allowedEdges[model.EdgeHasMetadataArtifact] {
-		query := b.client.HasMetadata.Query().
-			Where(hasMetadataPredicate(&model.HasMetadataSpec{ID: &nodeID})).
-			WithArtifact().
-			Limit(MaxPageSize)
-
-		hasMetas, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get artifact for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, hm := range hasMetas {
-			if hm.Edges.Artifact != nil {
-				out = append(out, toModelArtifact(hm.Edges.Artifact))
-			}
-		}
+		query.
+			WithArtifact()
 	}
 	if allowedEdges[model.EdgeHasMetadataSource] {
-		query := b.client.HasMetadata.Query().
-			Where(hasMetadataPredicate(&model.HasMetadataSpec{ID: &nodeID})).
-			WithSource().
-			Limit(MaxPageSize)
+		query.
+			WithSource()
+	}
 
-		hasMetas, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get source for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	hasMetas, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for hasMetadata with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, hm := range hasMetas {
+		if hm.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(hm.Edges.PackageVersion)))
 		}
-
-		for _, hm := range hasMetas {
-			if hm.Edges.Source != nil {
-				out = append(out, toModelSource(hm.Edges.Source))
-			}
+		if hm.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(hm.Edges.AllVersions))
+		}
+		if hm.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(hm.Edges.Artifact))
+		}
+		if hm.Edges.Source != nil {
+			out = append(out, toModelSource(hm.Edges.Source))
 		}
 	}
+
 	return out, nil
 }

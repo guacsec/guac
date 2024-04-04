@@ -430,59 +430,44 @@ func guacCertifyLegalKey(pkgVersionID *string, srcNameID *string, declaredLicens
 
 func (b *EntBackend) certifyLegalNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.CertifyLegal.Query().
+		Where(certifyLegalQuery(model.CertifyLegalSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeCertifyLegalPackage] {
-		query := b.client.CertifyLegal.Query().
-			Where(certifyLegalQuery(model.CertifyLegalSpec{ID: &nodeID})).
-			WithPackage(withPackageVersionTree()).
-			Limit(MaxPageSize)
-
-		certLegals, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundLegal := range certLegals {
-			if foundLegal.Edges.Package != nil {
-				out = append(out, toModelPackage(backReferencePackageVersion(foundLegal.Edges.Package)))
-			}
-		}
+		query.
+			WithPackage(withPackageVersionTree())
 	}
 	if allowedEdges[model.EdgeCertifyLegalSource] {
-		query := b.client.CertifyLegal.Query().
-			Where(certifyLegalQuery(model.CertifyLegalSpec{ID: &nodeID})).
-			WithSource().
-			Limit(MaxPageSize)
-
-		certLegals, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get source for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundLegal := range certLegals {
-			if foundLegal.Edges.Source != nil {
-				out = append(out, toModelSource(foundLegal.Edges.Source))
-			}
-		}
+		query.
+			WithSource()
 	}
 	if allowedEdges[model.EdgeCertifyLegalLicense] {
-		query := b.client.CertifyLegal.Query().
-			Where(certifyLegalQuery(model.CertifyLegalSpec{ID: &nodeID})).
+		query.
 			WithDeclaredLicenses().
-			WithDiscoveredLicenses().
-			Limit(MaxPageSize)
+			WithDiscoveredLicenses()
+	}
 
-		certLegals, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get licenses for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	certLegals, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyLegal with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundLegal := range certLegals {
+		if foundLegal.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundLegal.Edges.Package)))
 		}
-
-		for _, foundLegal := range certLegals {
-			for _, collectedDecLicense := range foundLegal.Edges.DeclaredLicenses {
-				out = append(out, toModelLicense(collectedDecLicense))
-			}
-			for _, collectedDisLicense := range foundLegal.Edges.DiscoveredLicenses {
-				out = append(out, toModelLicense(collectedDisLicense))
-			}
+		if foundLegal.Edges.Source != nil {
+			out = append(out, toModelSource(foundLegal.Edges.Source))
+		}
+		for _, collectedDecLicense := range foundLegal.Edges.DeclaredLicenses {
+			out = append(out, toModelLicense(collectedDecLicense))
+		}
+		for _, collectedDisLicense := range foundLegal.Edges.DiscoveredLicenses {
+			out = append(out, toModelLicense(collectedDisLicense))
 		}
 	}
 

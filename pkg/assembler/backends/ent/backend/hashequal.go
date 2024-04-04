@@ -285,26 +285,32 @@ func guacHashEqualKey(sortedArtHash string, heInput *model.HashEqualInputSpec) (
 
 func (b *EntBackend) hashEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.HashEqual.Query().
+		Where(hashEqualQueryPredicates(&model.HashEqualSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgeHashEqualArtifact] {
-		query := b.client.HashEqual.Query().
-			Where(hashEqualQueryPredicates(&model.HashEqualSpec{ID: &nodeID})).
+		query.
 			WithArtifactA().
-			WithArtifactB().
-			Limit(MaxPageSize)
+			WithArtifactB()
+	}
 
-		hasEquals, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get artifacts for node ID: %s with error: %w", nodeID, err)
+	query.
+		Limit(MaxPageSize)
+
+	hasEquals, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for hashEqual with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundHe := range hasEquals {
+		if foundHe.Edges.ArtifactA != nil {
+			out = append(out, toModelArtifact(foundHe.Edges.ArtifactA))
 		}
-
-		for _, foundHe := range hasEquals {
-			if foundHe.Edges.ArtifactA != nil {
-				out = append(out, toModelArtifact(foundHe.Edges.ArtifactA))
-			}
-			if foundHe.Edges.ArtifactB != nil {
-				out = append(out, toModelArtifact(foundHe.Edges.ArtifactB))
-			}
+		if foundHe.Edges.ArtifactB != nil {
+			out = append(out, toModelArtifact(foundHe.Edges.ArtifactB))
 		}
 	}
+
 	return out, nil
 }

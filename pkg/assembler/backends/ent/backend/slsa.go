@@ -39,7 +39,22 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 	if spec == nil {
 		spec = &model.HasSLSASpec{}
 	}
-	query := []predicate.SLSAAttestation{
+
+	slsaQuery := b.client.SLSAAttestation.Query().
+		Where(hasSLSAQuery(*spec))
+
+	records, err := getSLSAObject(slsaQuery).
+		Limit(MaxPageSize).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return collect(records, toModelHasSLSA), nil
+}
+
+func hasSLSAQuery(spec model.HasSLSASpec) predicate.SLSAAttestation {
+	predicates := []predicate.SLSAAttestation{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.BuildType, slsaattestation.BuildTypeEQ),
 		optionalPredicate(spec.SlsaVersion, slsaattestation.SlsaVersionEQ),
@@ -50,28 +65,17 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 	}
 
 	if spec.BuiltBy != nil {
-		query = append(query, slsaattestation.HasBuiltByWith(builderQueryPredicate(spec.BuiltBy)))
+		predicates = append(predicates, slsaattestation.HasBuiltByWith(builderQueryPredicate(spec.BuiltBy)))
 	}
 
 	if spec.Subject != nil {
-		query = append(query, slsaattestation.HasSubjectWith(artifactQueryPredicates(spec.Subject)))
+		predicates = append(predicates, slsaattestation.HasSubjectWith(artifactQueryPredicates(spec.Subject)))
 	}
 
 	for _, art := range spec.BuiltFrom {
-		query = append(query, slsaattestation.HasBuiltFromWith(artifactQueryPredicates(art)))
+		predicates = append(predicates, slsaattestation.HasBuiltFromWith(artifactQueryPredicates(art)))
 	}
-
-	slsaQuery := b.client.SLSAAttestation.Query().
-		Where(query...)
-
-	records, err := getSLSAObject(slsaQuery).
-		Limit(MaxPageSize).
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return collect(records, toModelHasSLSA), nil
+	return slsaattestation.And(predicates...)
 }
 
 // getSLSAObject is used recreate the hasSLSA object be eager loading the edges
@@ -392,3 +396,77 @@ func guacSLSAKey(subjectID *string, builtFromHash string, builderID *string, sls
 	depID := generateUUIDKey([]byte(depIDString))
 	return &depID, nil
 }
+
+// func (b *EntBackend) hasSlsaNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+// 	var out []model.Node
+
+// 	query := b.client.SLSAAttestation.Query().
+// 		Where(hasSLSAQuery(model.HasSLSASpec{ID: &nodeID}))
+
+// 	if allowedEdges[model.EdgeHasSlsaSubject] {
+// 		values := map[string]any{}
+// 		arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
+// 		setHasSLSAMatchValues(arangoQueryBuilder, &model.HasSLSASpec{ID: &nodeID}, values)
+// 		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSLSA.subjectID }")
+
+// 		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSlsaNeighbors - artifact")
+// 		if err != nil {
+// 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+// 		}
+// 		out = append(out, foundIDs...)
+// 	}
+// 	if allowedEdges[model.EdgeHasSlsaBuiltBy] {
+// 		values := map[string]any{}
+// 		arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
+// 		setHasSLSAMatchValues(arangoQueryBuilder, &model.HasSLSASpec{ID: &nodeID}, values)
+// 		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSLSA.builtByID }")
+
+// 		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSlsaNeighbors - builder")
+// 		if err != nil {
+// 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
+// 		}
+// 		out = append(out, foundIDs...)
+// 	}
+// 	if allowedEdges[model.EdgeHasSlsaMaterials] {
+// 		values := map[string]any{}
+// 		arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
+// 		setHasSLSAMatchValues(arangoQueryBuilder, &model.HasSLSASpec{ID: &nodeID}, values)
+// 		arangoQueryBuilder.query.WriteString("\nRETURN { builtFrom:  hasSLSA.builtFrom }")
+
+// 		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "getNeighborIDFromCursor - hasSlsaNeighbors")
+// 		if err != nil {
+// 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hasSlsaNeighbors", err)
+// 		}
+// 		defer cursor.Close()
+
+// 		type dbSlsaMaterialsNeighbor struct {
+// 			BuiltFrom []string `json:"builtFrom"`
+// 		}
+
+// 		var foundSlsaMaterialNeighbors []dbSlsaMaterialsNeighbor
+// 		for {
+// 			var doc dbSlsaMaterialsNeighbor
+// 			_, err := cursor.ReadDocument(ctx, &doc)
+// 			if err != nil {
+// 				if driver.IsNoMoreDocuments(err) {
+// 					break
+// 				} else {
+// 					return nil, fmt.Errorf("failed to get neighbor id from cursor for %s with error: %w", "hasSlsaNeighbors", err)
+// 				}
+// 			} else {
+// 				foundSlsaMaterialNeighbors = append(foundSlsaMaterialNeighbors, doc)
+// 			}
+// 		}
+
+// 		var foundIDs []string
+// 		for _, foundMaterial := range foundSlsaMaterialNeighbors {
+// 			if foundMaterial.BuiltFrom != nil {
+// 				foundIDs = append(foundIDs, foundMaterial.BuiltFrom...)
+// 			}
+// 		}
+
+// 		out = append(out, foundIDs...)
+// 	}
+
+// 	return out, nil
+// }

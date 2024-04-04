@@ -407,7 +407,7 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgNamespace for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get pkgType for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -429,18 +429,19 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 
 func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.PackageName.Query().
+		Where([]predicate.PackageName{
+			optionalPredicate(&nodeID, IDEQ),
+		}...).
+		Limit(MaxPageSize)
+
+	pkgNames, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to get packageNamespace for node ID: %s with error: %w", nodeID, err)
+	}
+
 	if allowedEdges[model.EdgePackageNamespacePackageName] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
-			Limit(MaxPageSize)
-
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgName for node ID: %s with error: %w", nodeID, err)
-		}
-
 		for _, foundPkgName := range pkgNames {
 			out = append(out, &model.Package{
 				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
@@ -459,18 +460,8 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 			})
 		}
 	}
+
 	if allowedEdges[model.EdgePackageNamespacePackageType] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
-			Limit(MaxPageSize)
-
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgType for node ID: %s with error: %w", nodeID, err)
-		}
-
 		for _, foundPkgName := range pkgNames {
 			out = append(out, &model.Package{
 				ID:         toGlobalID(pkgTypeString, foundPkgName.ID.String()),
@@ -479,26 +470,74 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 			})
 		}
 	}
+
 	return out, nil
 }
 
 func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.PackageName.Query().
+		Where([]predicate.PackageName{
+			optionalPredicate(&nodeID, IDEQ),
+		}...)
+
 	if allowedEdges[model.EdgePackageNamePackageVersion] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
+		query.
 			WithVersions(func(q *ent.PackageVersionQuery) {
 				q.WithName()
-			}).
+			})
+	}
+	if allowedEdges[model.EdgePackageNamePackageNamespace] {
+		query.
 			Limit(MaxPageSize)
+	}
+	if allowedEdges[model.EdgePackageHasSourceAt] {
+		query.
+			WithHasSourceAt(func(q *ent.HasSourceAtQuery) {
+				getHasSourceAtObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageIsDependency] {
+		query.
+			WithDependency(func(q *ent.DependencyQuery) {
+				getIsDepObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyBad] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyGood] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageHasMetadata] {
+		query.
+			WithMetadata(func(q *ent.HasMetadataQuery) {
+				getHasMetadataObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackagePointOfContact] {
+		query.
+			WithPoc(func(q *ent.PointOfContactQuery) {
+				getPointOfContactObject(q)
+			})
+	}
 
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgVersion for node ID: %s with error: %w", nodeID, err)
-		}
+	query.
+		Limit(MaxPageSize)
 
+	pkgNames, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for pkgName with node ID: %s with error: %w", nodeID, err)
+	}
+
+	if allowedEdges[model.EdgePackageNamePackageVersion] {
 		// sort out the pkgNames so that they each contain one pkg Version edge to output in proper format
 		var sortedPkgNames []*ent.PackageName
 		for _, collectedPkgName := range pkgNames {
@@ -511,17 +550,6 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 		}
 	}
 	if allowedEdges[model.EdgePackageNamePackageNamespace] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
-			Limit(MaxPageSize)
-
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgNamespace for node ID: %s with error: %w", nodeID, err)
-		}
-
 		for _, foundPkgName := range pkgNames {
 			out = append(out, &model.Package{
 				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
@@ -536,156 +564,137 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 			})
 		}
 	}
-	if allowedEdges[model.EdgePackageHasSourceAt] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
-			WithHasSourceAt(func(q *ent.HasSourceAtQuery) {
-				getHasSourceAtObject(q)
-			}).
-			Limit(MaxPageSize)
 
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt for node ID: %s with error: %w", nodeID, err)
+	for _, foundPkgName := range pkgNames {
+		for _, hasAt := range foundPkgName.Edges.HasSourceAt {
+			out = append(out, toModelHasSourceAt(hasAt))
 		}
-
-		for _, foundPkgName := range pkgNames {
-			for _, hasAt := range foundPkgName.Edges.HasSourceAt {
-				out = append(out, toModelHasSourceAt(hasAt))
-			}
+		for _, dep := range foundPkgName.Edges.Dependency {
+			out = append(out, toModelIsDependencyWithBackrefs(dep))
 		}
-	}
-	if allowedEdges[model.EdgePackageIsDependency] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
-			WithDependency(func(q *ent.DependencyQuery) {
-				getIsDepObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get isDependency for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgName := range pkgNames {
-			for _, dep := range foundPkgName.Edges.Dependency {
-				out = append(out, toModelIsDependencyWithBackrefs(dep))
-			}
-		}
-	}
-	if allowedEdges[model.EdgePackageCertifyBad] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
-			WithCertification(func(q *ent.CertificationQuery) {
-				getCertificationObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyBad for node ID: %s with error: %w", nodeID, err)
-
-		}
-
-		for _, foundPkgName := range pkgNames {
-			for _, cert := range foundPkgName.Edges.Certification {
+		for _, cert := range foundPkgName.Edges.Certification {
+			if allowedEdges[model.EdgePackageCertifyBad] {
 				if cert.Type == certification.TypeBAD {
 					out = append(out, toModelCertifyBad(cert))
 				}
 			}
-		}
-	}
-	if allowedEdges[model.EdgePackageCertifyGood] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
-			WithCertification(func(q *ent.CertificationQuery) {
-				getCertificationObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyGood for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgName := range pkgNames {
-			for _, cert := range foundPkgName.Edges.Certification {
+			if allowedEdges[model.EdgePackageCertifyGood] {
 				if cert.Type == certification.TypeGOOD {
 					out = append(out, toModelCertifyGood(cert))
 				}
 			}
 		}
-	}
-	if allowedEdges[model.EdgePackageHasMetadata] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
-			WithMetadata(func(q *ent.HasMetadataQuery) {
-				getHasMetadataObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasMetadata for node ID: %s with error: %w", nodeID, err)
+		for _, meta := range foundPkgName.Edges.Metadata {
+			out = append(out, toModelHasMetadata(meta))
 		}
-
-		for _, foundPkgName := range pkgNames {
-			for _, meta := range foundPkgName.Edges.Metadata {
-				out = append(out, toModelHasMetadata(meta))
-			}
+		for _, foundPOC := range foundPkgName.Edges.Poc {
+			out = append(out, toModelPointOfContact(foundPOC))
 		}
 	}
-	if allowedEdges[model.EdgePackagePointOfContact] {
-		query := b.client.PackageName.Query().
-			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
-			}...).
-			WithPoc(func(q *ent.PointOfContactQuery) {
-				getPointOfContactObject(q)
-			}).
-			Limit(MaxPageSize)
 
-		pkgNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get point of contact for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgName := range pkgNames {
-			for _, foundPOC := range foundPkgName.Edges.Poc {
-				out = append(out, toModelPointOfContact(foundPOC))
-			}
-		}
-	}
 	return out, nil
 }
 
 func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+	query := b.client.PackageVersion.Query().
+		Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID}))
+
 	if allowedEdges[model.EdgePackageVersionPackageName] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithName(func(q *ent.PackageNameQuery) {}).
-			Limit(MaxPageSize)
+		query.
+			WithName(func(q *ent.PackageNameQuery) {})
+	}
+	if allowedEdges[model.EdgePackageHasSourceAt] {
+		query.
+			WithHasSourceAt(func(q *ent.HasSourceAtQuery) {
+				getHasSourceAtObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageIsDependency] {
+		query.
+			WithDependency(func(q *ent.DependencyQuery) {
+				getIsDepObject(q)
+			}).
+			WithDependencySubject(func(q *ent.DependencyQuery) {
+				getIsDepObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageIsOccurrence] {
+		query.
+			WithOccurrences(func(q *ent.OccurrenceQuery) {
+				getOccurrenceObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyVuln] {
+		query.
+			WithVuln(func(q *ent.CertifyVulnQuery) {
+				getCertVulnObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageHasSbom] {
+		query.
+			WithSbom(func(q *ent.BillOfMaterialsQuery) {
+				getSBOMObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyVexStatement] {
+		query.
+			WithVex(func(q *ent.CertifyVexQuery) {
+				getVEXObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyBad] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyGood] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackagePkgEqual] {
+		query.
+			WithPkgEqualPkgA(func(q *ent.PkgEqualQuery) {
+				getPkgEqualObject(q)
+			}).
+			WithPkgEqualPkgB(func(q *ent.PkgEqualQuery) {
+				getPkgEqualObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageHasMetadata] {
+		query.
+			WithMetadata(func(q *ent.HasMetadataQuery) {
+				getHasMetadataObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackagePointOfContact] {
+		query.
+			WithPoc(func(q *ent.PointOfContactQuery) {
+				getPointOfContactObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyLegal] {
+		query.
+			WithCertifyLegal(func(q *ent.CertifyLegalQuery) {
+				getCertifyLegalObject(q)
+			})
+	}
 
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
+	query.
+		Limit(MaxPageSize)
 
-		var pkgNames []*ent.PackageName
-		for _, collectedPkgVersion := range pkgVersions {
-			pkgNames = append(pkgNames, backReferencePackageVersion(collectedPkgVersion))
+	pkgVersions, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for packageVersion with node ID: %s with error: %w", nodeID, err)
+	}
+
+	var pkgNames []*ent.PackageName
+	for _, foundPkgVersion := range pkgVersions {
+		if allowedEdges[model.EdgePackageVersionPackageName] {
+			pkgNames = append(pkgNames, backReferencePackageVersion(foundPkgVersion))
 			for _, foundPkgName := range pkgNames {
 				out = append(out, &model.Package{
 					ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
@@ -704,250 +713,55 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 				})
 			}
 		}
-	}
-	if allowedEdges[model.EdgePackageHasSourceAt] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithHasSourceAt(func(q *ent.HasSourceAtQuery) {
-				getHasSourceAtObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt for node ID: %s with error: %w", nodeID, err)
+		for _, foundHasAt := range foundPkgVersion.Edges.HasSourceAt {
+			out = append(out, toModelHasSourceAt(foundHasAt))
 		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundHasAt := range foundPkgVersion.Edges.HasSourceAt {
-				out = append(out, toModelHasSourceAt(foundHasAt))
-			}
+		for _, dep := range foundPkgVersion.Edges.Dependency {
+			out = append(out, toModelIsDependencyWithBackrefs(dep))
 		}
-	}
-	if allowedEdges[model.EdgePackageIsDependency] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithDependency(func(q *ent.DependencyQuery) {
-				getIsDepObject(q)
-			}).
-			WithDependencySubject(func(q *ent.DependencyQuery) {
-				getIsDepObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get isDependency for node ID: %s with error: %w", nodeID, err)
+		for _, depSub := range foundPkgVersion.Edges.DependencySubject {
+			out = append(out, toModelIsDependencyWithBackrefs(depSub))
 		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, dep := range foundPkgVersion.Edges.Dependency {
-				out = append(out, toModelIsDependencyWithBackrefs(dep))
-			}
-			for _, depSub := range foundPkgVersion.Edges.DependencySubject {
-				out = append(out, toModelIsDependencyWithBackrefs(depSub))
-			}
+		for _, foundOccur := range foundPkgVersion.Edges.Occurrences {
+			out = append(out, toModelIsOccurrenceWithSubject(foundOccur))
 		}
-	}
-	if allowedEdges[model.EdgePackageIsOccurrence] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithOccurrences(func(q *ent.OccurrenceQuery) {
-				getOccurrenceObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get isOccurrence for node ID: %s with error: %w", nodeID, err)
+		for _, foundVuln := range foundPkgVersion.Edges.Vuln {
+			out = append(out, toModelCertifyVulnerability(foundVuln))
 		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundOccur := range foundPkgVersion.Edges.Occurrences {
-				out = append(out, toModelIsOccurrenceWithSubject(foundOccur))
-			}
+		for _, foundSBOM := range foundPkgVersion.Edges.Sbom {
+			out = append(out, toModelHasSBOM(foundSBOM))
 		}
-	}
-	if allowedEdges[model.EdgePackageCertifyVuln] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithVuln(func(q *ent.CertifyVulnQuery) {
-				getCertVulnObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyVuln for node ID: %s with error: %w", nodeID, err)
+		for _, foundVex := range foundPkgVersion.Edges.Vex {
+			out = append(out, toModelCertifyVEXStatement(foundVex))
 		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundVuln := range foundPkgVersion.Edges.Vuln {
-				out = append(out, toModelCertifyVulnerability(foundVuln))
-			}
-		}
-	}
-	if allowedEdges[model.EdgePackageHasSbom] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithSbom(func(q *ent.BillOfMaterialsQuery) {
-				getSBOMObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSBOM for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundSBOM := range foundPkgVersion.Edges.Sbom {
-				out = append(out, toModelHasSBOM(foundSBOM))
-			}
-		}
-	}
-	if allowedEdges[model.EdgePackageCertifyVexStatement] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithVex(func(q *ent.CertifyVexQuery) {
-				getVEXObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyVex for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundVex := range foundPkgVersion.Edges.Vex {
-				out = append(out, toModelCertifyVEXStatement(foundVex))
-			}
-		}
-	}
-	if allowedEdges[model.EdgePackageCertifyBad] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithCertification(func(q *ent.CertificationQuery) {
-				getCertificationObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyBad for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundCert := range foundPkgVersion.Edges.Certification {
+		for _, foundCert := range foundPkgVersion.Edges.Certification {
+			if allowedEdges[model.EdgePackageCertifyBad] {
 				if foundCert.Type == certification.TypeBAD {
 					out = append(out, toModelCertifyBad(foundCert))
 				}
 			}
-		}
-	}
-	if allowedEdges[model.EdgePackageCertifyGood] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithCertification(func(q *ent.CertificationQuery) {
-				getCertificationObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyGood for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundCert := range foundPkgVersion.Edges.Certification {
+			if allowedEdges[model.EdgePackageCertifyGood] {
 				if foundCert.Type == certification.TypeGOOD {
 					out = append(out, toModelCertifyGood(foundCert))
 				}
 			}
 		}
-	}
-	if allowedEdges[model.EdgePackagePkgEqual] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithPkgEqualPkgA(func(q *ent.PkgEqualQuery) {
-				getPkgEqualObject(q)
-			}).
-			WithPkgEqualPkgB(func(q *ent.PkgEqualQuery) {
-				getPkgEqualObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgEqual for node ID: %s with error: %w", nodeID, err)
+		for _, pkgEqualA := range foundPkgVersion.Edges.PkgEqualPkgA {
+			out = append(out, toModelPkgEqual(pkgEqualA))
 		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, pkgEqualA := range foundPkgVersion.Edges.PkgEqualPkgA {
-				out = append(out, toModelPkgEqual(pkgEqualA))
-			}
-			for _, pkgEqualB := range foundPkgVersion.Edges.PkgEqualPkgB {
-				out = append(out, toModelPkgEqual(pkgEqualB))
-			}
+		for _, pkgEqualB := range foundPkgVersion.Edges.PkgEqualPkgB {
+			out = append(out, toModelPkgEqual(pkgEqualB))
+		}
+		for _, foundMeta := range foundPkgVersion.Edges.Metadata {
+			out = append(out, toModelHasMetadata(foundMeta))
+		}
+		for _, foundPOC := range foundPkgVersion.Edges.Poc {
+			out = append(out, toModelPointOfContact(foundPOC))
+		}
+		for _, foundLegal := range foundPkgVersion.Edges.CertifyLegal {
+			out = append(out, toModelCertifyLegal(foundLegal))
 		}
 	}
-	if allowedEdges[model.EdgePackageHasMetadata] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithMetadata(func(q *ent.HasMetadataQuery) {
-				getHasMetadataObject(q)
-			}).
-			Limit(MaxPageSize)
 
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasMetadata for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundMeta := range foundPkgVersion.Edges.Metadata {
-				out = append(out, toModelHasMetadata(foundMeta))
-			}
-		}
-	}
-	if allowedEdges[model.EdgePackagePointOfContact] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithPoc(func(q *ent.PointOfContactQuery) {
-				getPointOfContactObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get point of contact for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundPOC := range foundPkgVersion.Edges.Poc {
-				out = append(out, toModelPointOfContact(foundPOC))
-			}
-		}
-	}
-	if allowedEdges[model.EdgePackageCertifyLegal] {
-		query := b.client.PackageVersion.Query().
-			Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID})).
-			WithCertifyLegal(func(q *ent.CertifyLegalQuery) {
-				getCertifyLegalObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		pkgVersions, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyLegal for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundPkgVersion := range pkgVersions {
-			for _, foundLegal := range foundPkgVersion.Edges.CertifyLegal {
-				out = append(out, toModelCertifyLegal(foundLegal))
-			}
-		}
-	}
 	return out, nil
 }
