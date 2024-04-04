@@ -73,7 +73,7 @@ var (
 			{
 				Name:    "sbom_unique_package",
 				Unique:  true,
-				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[8], BillOfMaterialsColumns[9], BillOfMaterialsColumns[10], BillOfMaterialsColumns[11], BillOfMaterialsColumns[12]},
+				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[8], BillOfMaterialsColumns[9], BillOfMaterialsColumns[10], BillOfMaterialsColumns[11], BillOfMaterialsColumns[5], BillOfMaterialsColumns[6], BillOfMaterialsColumns[12]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NOT NULL AND artifact_id IS NULL",
 				},
@@ -81,7 +81,7 @@ var (
 			{
 				Name:    "sbom_unique_artifact",
 				Unique:  true,
-				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[8], BillOfMaterialsColumns[9], BillOfMaterialsColumns[10], BillOfMaterialsColumns[11], BillOfMaterialsColumns[13]},
+				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[7], BillOfMaterialsColumns[8], BillOfMaterialsColumns[9], BillOfMaterialsColumns[10], BillOfMaterialsColumns[11], BillOfMaterialsColumns[5], BillOfMaterialsColumns[6], BillOfMaterialsColumns[13]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "package_id IS NULL AND artifact_id IS NOT NULL",
 				},

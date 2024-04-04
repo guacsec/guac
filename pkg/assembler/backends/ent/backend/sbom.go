@@ -160,6 +160,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		billofmaterials.FieldIncludedArtifactsHash,
 		billofmaterials.FieldIncludedDependenciesHash,
 		billofmaterials.FieldIncludedOccurrencesHash,
+		billofmaterials.FieldCollector,
+		billofmaterials.FieldOrigin,
 	}
 
 	var conflictWhere *sql.Predicate

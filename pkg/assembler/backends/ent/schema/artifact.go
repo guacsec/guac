@@ -17,7 +17,6 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -52,7 +51,7 @@ func (Artifact) Fields() []ent.Field {
 // Edges of the Artifact.
 func (Artifact) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("occurrences", Occurrence.Type).Ref("artifact").Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.From("occurrences", Occurrence.Type).Ref("artifact"),
 		edge.From("sbom", BillOfMaterials.Type).Ref("artifact"),
 		edge.From("attestations", SLSAAttestation.Type).Ref("built_from"),
 		edge.From("attestations_subject", SLSAAttestation.Type).Ref("subject"),
