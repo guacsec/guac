@@ -50,7 +50,82 @@ import (
 )
 
 func (b *EntBackend) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
-	return nil, fmt.Errorf("not implemented: Path")
+	return b.bfs(ctx, subject, target, maxPathLength, usingOnly)
+}
+
+func (b *EntBackend) bfs(ctx context.Context, from, to string, maxLength int, usingOnly []model.Edge) ([]model.Node, error) {
+	queue := make([]string, 0) // the queue of nodes in bfs
+	type dfsNode struct {
+		expanded bool // true once all node neighbors are added to queue
+		parent   string
+		depth    int
+	}
+	nodeMap := map[string]dfsNode{}
+
+	nodeMap[from] = dfsNode{}
+	queue = append(queue, from)
+
+	found := false
+	for len(queue) > 0 {
+		now := queue[0]
+		queue = queue[1:]
+		nowNode := nodeMap[now]
+
+		if now == to {
+			found = true
+			break
+		}
+
+		if nowNode.depth >= maxLength {
+			break
+		}
+
+		neighbors, err := b.Neighbors(ctx, now, usingOnly)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, next := range neighbors {
+			nextID, err := getIDfromNode(next)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert model.Node to a specific type with error: %w", err)
+			}
+			dfsN, seen := nodeMap[nextID]
+			if !seen {
+				dfsN = dfsNode{
+					parent: now,
+					depth:  nowNode.depth + 1,
+				}
+				nodeMap[nextID] = dfsN
+			}
+			if !dfsN.expanded {
+				queue = append(queue, nextID)
+			}
+		}
+
+		nowNode.expanded = true
+		nodeMap[now] = nowNode
+	}
+
+	if !found {
+		return nil, nil
+	}
+
+	reversedPath := []string{}
+	now := to
+	for now != from {
+		reversedPath = append(reversedPath, now)
+		now = nodeMap[now].parent
+	}
+	reversedPath = append(reversedPath, now)
+
+	// reverse path
+	path := make([]string, len(reversedPath))
+	for i, x := range reversedPath {
+		path[len(reversedPath)-i-1] = x
+	}
+
+	return b.Nodes(ctx, path)
 }
 
 func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []model.Edge) ([]model.Node, error) {

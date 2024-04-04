@@ -43,6 +43,7 @@ var ignoreID = cmp.FilterPath(func(p cmp.Path) bool {
 var commonOpts = cmp.Options{
 	ignoreID,
 	cmpopts.EquateEmpty(),
+	//cmpopts.SortSlices(lessPackage),
 	cmpopts.SortSlices(certifyVulnLess),
 	cmpopts.SortSlices(certifyVexLess),
 	cmpopts.SortSlices(vulnerabilityLess),
@@ -578,6 +579,10 @@ func lessSLSAPred(a, b *model.SLSAPredicate) bool {
 		return d < 0
 	}
 	return false
+}
+
+func lessPackage(a, b *model.Package) bool {
+	return cmpPkg(a, b) < 0
 }
 
 func lessPackageOrArtifact(a, b model.PackageOrArtifact) bool {

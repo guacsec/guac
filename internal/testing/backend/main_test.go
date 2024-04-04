@@ -44,7 +44,7 @@ var skipMatrix = map[string]map[string]bool{
 	// ent: Path/Nodes/Neighbors not implemented
 	// keyvalue: path: input: No path found up to specified length
 	// neighbors: sorting not done, testdata is only in order for arango
-	"TestPath":      {ent: true, memmap: true, redis: true, tikv: true},
+	"TestPath":      {memmap: true, redis: true, tikv: true},
 	"TestNeighbors": {memmap: true, redis: true, tikv: true},
 	// keyvalue: query on both packages fail
 	"TestPkgEqual": {memmap: true, redis: true, tikv: true},

@@ -50,7 +50,7 @@ func TestPath(t *testing.T) {
 		isDepCall              *isDepCall
 		edges                  []model.Edge
 		want                   []model.Node
-		wantErr                bool
+		wantPathErr            bool
 	}{
 		{
 			name:   "certifyVuln - edges not provided",
@@ -87,10 +87,10 @@ func TestPath(t *testing.T) {
 			},
 		},
 		{
-			name:   "certifyVuln - edges not provided 2",
+			name:   "certifyVuln - edges provided",
 			inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 			inPkg:  []*model.PkgInputSpec{testdata.P2},
-			edges:  []model.Edge{model.EdgePackageCertifyVuln, model.EdgeVulnerabilityCertifyVuln},
+			edges:  []model.Edge{model.EdgePackageCertifyVuln, model.EdgeCertifyVulnVulnerability},
 			certifyVulnCall: &certifyVulnCall{
 				Pkg:  testdata.P2,
 				Vuln: testdata.G1,
@@ -124,7 +124,7 @@ func TestPath(t *testing.T) {
 			name:   "certifyVuln - two packages (one vulnerable)",
 			inVuln: []*model.VulnerabilityInputSpec{testdata.G1},
 			inPkg:  []*model.PkgInputSpec{testdata.P2, testdata.P3},
-			edges:  []model.Edge{model.EdgePackageCertifyVuln, model.EdgeVulnerabilityCertifyVuln},
+			edges:  []model.Edge{model.EdgePackageCertifyVuln, model.EdgeCertifyVulnVulnerability},
 			certifyVulnTwoPkgsCall: &certifyVulnCall{
 				Pkg:  testdata.P2,
 				Vuln: testdata.G1,
@@ -174,8 +174,8 @@ func TestPath(t *testing.T) {
 					nonVulnPkgID = pkg.PackageVersionID
 				}
 				cvID, err := b.IngestCertifyVuln(ctx, model.IDorPkgInput{PackageInput: tt.certifyVulnTwoPkgsCall.Pkg}, model.IDorVulnerabilityInput{VulnerabilityInput: tt.certifyVulnTwoPkgsCall.Vuln}, *tt.certifyVulnTwoPkgsCall.CertifyVuln)
-				if (err != nil) != tt.wantErr {
-					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				if err != nil {
+					t.Fatalf("did not get expected ingest error, got: %v", err)
 				}
 				if err != nil {
 					return
@@ -199,8 +199,8 @@ func TestPath(t *testing.T) {
 					}
 				}
 				_, err := b.IngestCertifyVuln(ctx, model.IDorPkgInput{PackageInput: tt.certifyVulnCall.Pkg}, model.IDorVulnerabilityInput{VulnerabilityInput: tt.certifyVulnCall.Vuln}, *tt.certifyVulnCall.CertifyVuln)
-				if (err != nil) != tt.wantErr {
-					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				if err != nil {
+					t.Fatalf("did not get expected ingest error, got: %v", err)
 				}
 				if err != nil {
 					return
@@ -213,8 +213,8 @@ func TestPath(t *testing.T) {
 					}
 				}
 				dID, err := b.IngestDependency(ctx, model.IDorPkgInput{PackageInput: tt.isDepCall.P1}, model.IDorPkgInput{PackageInput: tt.isDepCall.P2}, tt.isDepCall.MF, *tt.isDepCall.ID)
-				if (err != nil) != tt.wantErr {
-					t.Fatalf("did not get expected ingest error, want: %v, got: %v", tt.wantErr, err)
+				if err != nil {
+					t.Fatalf("did not get expected ingest error, got: %v", err)
 				}
 				if err != nil {
 					return
@@ -227,8 +227,8 @@ func TestPath(t *testing.T) {
 				stopID = found[0].DependencyPackage.Namespaces[0].Names[0].ID
 			}
 			got, err := b.Path(ctx, startID, stopID, 5, tt.edges)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("node query error = %v, wantErr %v", err, tt.wantErr)
+			if (err != nil) != tt.wantPathErr {
+				t.Errorf("node query error = %v, wantErr %v", err, tt.wantPathErr)
 				return
 			}
 			if diff := cmp.Diff(tt.want, got, commonOpts); diff != "" {
