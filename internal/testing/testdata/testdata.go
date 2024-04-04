@@ -1378,7 +1378,12 @@ var (
 			"scanner": {
 				"uri": "osv.dev",
 				"version": "0.0.14",
-				"db": {}
+				"db": {},
+				"result": [
+					{
+						"vulnerability_id": "GHSA-9ph3-v2vh-3qx7"
+					}
+				]
 			},
 			"metadata": {
 				"scannedOn": "2023-02-15T11:10:08.986506-08:00"
