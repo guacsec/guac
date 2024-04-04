@@ -322,7 +322,7 @@ func HasSBOMToGraph(cmd *cobra.Command, ctx context.Context, gqlclient graphql.C
       os.Exit(1)
     }
   } else if purl {
-    hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[0], "", ctx, gqlclient)
+    hasSBOMResponseOne, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[0], "", ctx, gqlclient)
     if err != nil {
       fmt.Println("(purl)failed to lookup sbom:", sboms[0], err)
       os.Exit(1)
@@ -333,7 +333,7 @@ func HasSBOMToGraph(cmd *cobra.Command, ctx context.Context, gqlclient graphql.C
       os.Exit(1)
     }
   } else if id {
-    hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", "", sboms[0], ctx, gqlclient)
+    hasSBOMResponseOne, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", "", sboms[0], ctx, gqlclient)
     if err != nil {
       fmt.Println("(id)failed to lookup sbom:", sboms[0], err)
       os.Exit(1)
@@ -428,7 +428,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
   case 0:
     var diffList HighlightedDiff
     //check nodes and their data
-    for bigNodeId, _ := range(bigNodes){
+    for bigNodeId := range(bigNodes){
       if _, err = small.Vertex(bigNodeId); err == nil {
         nodeBig, _ := big.Vertex(bigNodeId)
         nodeSmall, _ := small.Vertex(bigNodeId)
