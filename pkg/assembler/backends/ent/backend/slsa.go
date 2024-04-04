@@ -397,76 +397,45 @@ func guacSLSAKey(subjectID *string, builtFromHash string, builderID *string, sls
 	return &depID, nil
 }
 
-// func (b *EntBackend) hasSlsaNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
-// 	var out []model.Node
+func (b *EntBackend) hasSlsaNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
 
-// 	query := b.client.SLSAAttestation.Query().
-// 		Where(hasSLSAQuery(model.HasSLSASpec{ID: &nodeID}))
+	query := b.client.SLSAAttestation.Query().
+		Where(hasSLSAQuery(model.HasSLSASpec{ID: &nodeID}))
 
-// 	if allowedEdges[model.EdgeHasSlsaSubject] {
-// 		values := map[string]any{}
-// 		arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
-// 		setHasSLSAMatchValues(arangoQueryBuilder, &model.HasSLSASpec{ID: &nodeID}, values)
-// 		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSLSA.subjectID }")
+	if allowedEdges[model.EdgeHasSlsaSubject] {
+		query.
+			WithSubject()
+	}
+	if allowedEdges[model.EdgeHasSlsaBuiltBy] {
+		query.
+			WithBuiltBy()
+	}
+	if allowedEdges[model.EdgeHasSlsaMaterials] {
+		query.
+			WithBuiltFrom()
+	}
 
-// 		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSlsaNeighbors - artifact")
-// 		if err != nil {
-// 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
-// 		}
-// 		out = append(out, foundIDs...)
-// 	}
-// 	if allowedEdges[model.EdgeHasSlsaBuiltBy] {
-// 		values := map[string]any{}
-// 		arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
-// 		setHasSLSAMatchValues(arangoQueryBuilder, &model.HasSLSASpec{ID: &nodeID}, values)
-// 		arangoQueryBuilder.query.WriteString("\nRETURN { neighbor:  hasSLSA.builtByID }")
+	query.
+		Limit(MaxPageSize)
 
-// 		foundIDs, err := c.getNeighborIDFromCursor(ctx, arangoQueryBuilder, values, "hasSlsaNeighbors - builder")
-// 		if err != nil {
-// 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
-// 		}
-// 		out = append(out, foundIDs...)
-// 	}
-// 	if allowedEdges[model.EdgeHasSlsaMaterials] {
-// 		values := map[string]any{}
-// 		arangoQueryBuilder := newForQuery(hasSLSAsStr, "hasSLSA")
-// 		setHasSLSAMatchValues(arangoQueryBuilder, &model.HasSLSASpec{ID: &nodeID}, values)
-// 		arangoQueryBuilder.query.WriteString("\nRETURN { builtFrom:  hasSLSA.builtFrom }")
+	slsaAtts, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for hasSLSA with node ID: %s with error: %w", nodeID, err)
+	}
 
-// 		cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "getNeighborIDFromCursor - hasSlsaNeighbors")
-// 		if err != nil {
-// 			return nil, fmt.Errorf("failed to query for Neighbors for %s with error: %w", "hasSlsaNeighbors", err)
-// 		}
-// 		defer cursor.Close()
-
-// 		type dbSlsaMaterialsNeighbor struct {
-// 			BuiltFrom []string `json:"builtFrom"`
-// 		}
-
-// 		var foundSlsaMaterialNeighbors []dbSlsaMaterialsNeighbor
-// 		for {
-// 			var doc dbSlsaMaterialsNeighbor
-// 			_, err := cursor.ReadDocument(ctx, &doc)
-// 			if err != nil {
-// 				if driver.IsNoMoreDocuments(err) {
-// 					break
-// 				} else {
-// 					return nil, fmt.Errorf("failed to get neighbor id from cursor for %s with error: %w", "hasSlsaNeighbors", err)
-// 				}
-// 			} else {
-// 				foundSlsaMaterialNeighbors = append(foundSlsaMaterialNeighbors, doc)
-// 			}
-// 		}
-
-// 		var foundIDs []string
-// 		for _, foundMaterial := range foundSlsaMaterialNeighbors {
-// 			if foundMaterial.BuiltFrom != nil {
-// 				foundIDs = append(foundIDs, foundMaterial.BuiltFrom...)
-// 			}
-// 		}
-
-// 		out = append(out, foundIDs...)
-// 	}
-
-// 	return out, nil
-// }
+	for _, s := range slsaAtts {
+		if s.Edges.Subject != nil {
+			out = append(out, toModelArtifact(s.Edges.Subject))
+		}
+		if s.Edges.BuiltBy != nil {
+			out = append(out, toModelBuilder(s.Edges.BuiltBy))
+		}
+		if len(s.Edges.BuiltFrom) > 0 {
+			for _, bf := range s.Edges.BuiltFrom {
+				out = append(out, toModelArtifact(bf))
+			}
+		}
+	}
+	return out, nil
+}

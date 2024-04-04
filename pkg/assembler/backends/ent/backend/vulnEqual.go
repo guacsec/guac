@@ -332,3 +332,35 @@ func guacVulnEqualKey(sortedVulnHash string, veInput *model.VulnEqualInputSpec) 
 	veID := generateUUIDKey([]byte(veIDString))
 	return &veID, nil
 }
+
+func (b *EntBackend) vulnEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.VulnEqual.Query().
+		Where(vulnEqualQuery(&model.VulnEqualSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeVulnEqualVulnerability] {
+		query.
+			WithVulnerabilityA().
+			WithVulnerabilityB()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	vulnEquals, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for vulnEquals with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, ve := range vulnEquals {
+		if ve.Edges.VulnerabilityA != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(ve.Edges.VulnerabilityA))
+		}
+		if ve.Edges.VulnerabilityB != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(ve.Edges.VulnerabilityB))
+		}
+	}
+
+	return out, nil
+}

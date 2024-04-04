@@ -43,29 +43,9 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	if filter == nil {
 		filter = &model.HasSourceAtSpec{}
 	}
-	query := []predicate.HasSourceAt{
-		optionalPredicate(filter.ID, IDEQ),
-		optionalPredicate(filter.Collector, hassourceat.CollectorEQ),
-		optionalPredicate(filter.Origin, hassourceat.OriginEQ),
-		optionalPredicate(filter.Justification, hassourceat.JustificationEQ),
-		optionalPredicate(filter.KnownSince, hassourceat.KnownSinceEQ),
-	}
-
-	if filter.Package != nil {
-		query = append(query,
-			hassourceat.Or(
-				hassourceat.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Package))),
-				hassourceat.HasPackageVersionWith(packageVersionQuery(filter.Package)),
-			),
-		)
-	}
-
-	if filter.Source != nil {
-		query = append(query, hassourceat.HasSourceWith(sourceQuery(filter.Source)))
-	}
 
 	hasSourceAtQuery := b.client.HasSourceAt.Query().
-		Where(query...)
+		Where(hasSourceAtQuery(*filter))
 
 	records, err := getHasSourceAtObject(hasSourceAtQuery).
 		Limit(MaxPageSize).
@@ -75,6 +55,30 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 	}
 
 	return collect(records, toModelHasSourceAt), nil
+}
+
+func hasSourceAtQuery(filter model.HasSourceAtSpec) predicate.HasSourceAt {
+	predicates := []predicate.HasSourceAt{
+		optionalPredicate(filter.ID, IDEQ),
+		optionalPredicate(filter.Collector, hassourceat.CollectorEQ),
+		optionalPredicate(filter.Origin, hassourceat.OriginEQ),
+		optionalPredicate(filter.Justification, hassourceat.JustificationEQ),
+		optionalPredicate(filter.KnownSince, hassourceat.KnownSinceEQ),
+	}
+
+	if filter.Package != nil {
+		predicates = append(predicates,
+			hassourceat.Or(
+				hassourceat.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Package))),
+				hassourceat.HasPackageVersionWith(packageVersionQuery(filter.Package)),
+			),
+		)
+	}
+
+	if filter.Source != nil {
+		predicates = append(predicates, hassourceat.HasSourceWith(sourceQuery(filter.Source)))
+	}
+	return hassourceat.And(predicates...)
 }
 
 // getHasSourceAtObject is used recreate the HasSourceAt object be eager loading the edges
@@ -270,6 +274,45 @@ func upsertHasSourceAt(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput, 
 	}
 
 	return ptrfrom.String(id.String()), nil
+}
+
+func (b *EntBackend) hasSourceAtNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.HasSourceAt.Query().
+		Where(hasSourceAtQuery(model.HasSourceAtSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeHasSourceAtPackage] {
+		query.
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions()
+	}
+	if allowedEdges[model.EdgeHasSourceAtSource] {
+		query.
+			WithSource()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	hasSourceAts, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for hasSourceAt with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, hs := range hasSourceAts {
+		if hs.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(hs.Edges.PackageVersion)))
+		}
+		if hs.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(hs.Edges.AllVersions))
+		}
+		if hs.Edges.Source != nil {
+			out = append(out, toModelSource(hs.Edges.Source))
+		}
+	}
+
+	return out, nil
 }
 
 func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
@@ -496,7 +539,7 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get srcNamespace for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get sourceType for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -518,16 +561,17 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 
 func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
+
+	query := b.client.SourceName.Query().
+		Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
+		Limit(MaxPageSize)
+
+	srcNames, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for sourceNamespace with node ID: %s with error: %w", nodeID, err)
+	}
+
 	if allowedEdges[model.EdgeSourceNamespaceSourceName] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get srcNames for node ID: %s with error: %w", nodeID, err)
-		}
-
 		for _, foundSrcName := range srcNames {
 			out = append(out, &model.Source{
 				ID:   toGlobalID(srcTypeString, foundSrcName.ID.String()),
@@ -548,15 +592,6 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 		}
 	}
 	if allowedEdges[model.EdgeSourceNamespaceSourceType] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get srcNamespace for node ID: %s with error: %w", nodeID, err)
-		}
-
 		for _, foundSrcName := range srcNames {
 			out = append(out, &model.Source{
 				ID:         toGlobalID(srcTypeString, foundSrcName.ID.String()),
@@ -570,17 +605,69 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 
 func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
-	if allowedEdges[model.EdgeSourceNameSourceNamespace] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			Limit(MaxPageSize)
 
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get srcNamespace for node ID: %s with error: %w", nodeID, err)
-		}
+	query := b.client.SourceName.Query().
+		Where(sourceQuery(&model.SourceSpec{ID: &nodeID}))
 
-		for _, foundSrcName := range srcNames {
+	if allowedEdges[model.EdgeSourceHasSourceAt] {
+		query.
+			WithHasSourceAt(func(q *ent.HasSourceAtQuery) {
+				getHasSourceAtObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeSourceCertifyScorecard] {
+		query.
+			WithScorecard(func(q *ent.CertifyScorecardQuery) {
+				getScorecardObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeSourceIsOccurrence] {
+		query.
+			WithOccurrences(func(q *ent.OccurrenceQuery) {
+				getOccurrenceObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeSourceCertifyBad] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeSourceCertifyGood] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeSourceHasMetadata] {
+		query.
+			WithMetadata(func(q *ent.HasMetadataQuery) {
+				getHasMetadataObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeSourcePointOfContact] {
+		query.
+			WithPoc(func(q *ent.PointOfContactQuery) {
+				getPointOfContactObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeSourceCertifyLegal] {
+		query.
+			WithCertifyLegal(func(q *ent.CertifyLegalQuery) {
+				getCertifyLegalObject(q)
+			})
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	srcNames, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to get source Name for node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundSrcName := range srcNames {
+		if allowedEdges[model.EdgeSourceNameSourceNamespace] {
 			out = append(out, &model.Source{
 				ID:   toGlobalID(srcTypeString, foundSrcName.ID.String()),
 				Type: foundSrcName.Type,
@@ -593,161 +680,35 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 				},
 			})
 		}
-	}
-	if allowedEdges[model.EdgeSourceHasSourceAt] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			WithHasSourceAt(func(q *ent.HasSourceAtQuery) {
-				getHasSourceAtObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt for node ID: %s with error: %w", nodeID, err)
+		for _, hsat := range foundSrcName.Edges.HasSourceAt {
+			out = append(out, toModelHasSourceAt(hsat))
 		}
-
-		for _, foundSrcName := range srcNames {
-			for _, hsat := range foundSrcName.Edges.HasSourceAt {
-				out = append(out, toModelHasSourceAt(hsat))
-			}
+		for _, scorecard := range foundSrcName.Edges.Scorecard {
+			out = append(out, toModelCertifyScorecard(scorecard))
 		}
-	}
-	if allowedEdges[model.EdgeSourceCertifyScorecard] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			WithScorecard(func(q *ent.CertifyScorecardQuery) {
-				getScorecardObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get scorecard for node ID: %s with error: %w", nodeID, err)
+		for _, occur := range foundSrcName.Edges.Occurrences {
+			out = append(out, toModelIsOccurrenceWithSubject(occur))
 		}
-
-		for _, foundSrcName := range srcNames {
-			for _, scorecard := range foundSrcName.Edges.Scorecard {
-				out = append(out, toModelCertifyScorecard(scorecard))
-			}
-		}
-	}
-	if allowedEdges[model.EdgeSourceIsOccurrence] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			WithOccurrences(func(q *ent.OccurrenceQuery) {
-				getOccurrenceObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get occurrence for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundSrcName := range srcNames {
-			for _, occur := range foundSrcName.Edges.Occurrences {
-				out = append(out, toModelIsOccurrenceWithSubject(occur))
-			}
-		}
-	}
-	if allowedEdges[model.EdgeSourceCertifyBad] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			WithCertification(func(q *ent.CertificationQuery) {
-				getCertificationObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyBad for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundSrcName := range srcNames {
-			for _, cert := range foundSrcName.Edges.Certification {
+		for _, cert := range foundSrcName.Edges.Certification {
+			if allowedEdges[model.EdgeSourceCertifyBad] {
 				if cert.Type == certification.TypeBAD {
 					out = append(out, toModelCertifyBad(cert))
 				}
 			}
-		}
-	}
-	if allowedEdges[model.EdgeSourceCertifyGood] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			WithCertification(func(q *ent.CertificationQuery) {
-				getCertificationObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyGood for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundSrcName := range srcNames {
-			for _, cert := range foundSrcName.Edges.Certification {
+			if allowedEdges[model.EdgeSourceCertifyGood] {
 				if cert.Type == certification.TypeGOOD {
 					out = append(out, toModelCertifyGood(cert))
 				}
 			}
 		}
-	}
-	if allowedEdges[model.EdgeSourceHasMetadata] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			WithMetadata(func(q *ent.HasMetadataQuery) {
-				getHasMetadataObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasMetadata for node ID: %s with error: %w", nodeID, err)
+		for _, meta := range foundSrcName.Edges.Metadata {
+			out = append(out, toModelHasMetadata(meta))
 		}
-
-		for _, foundSrcName := range srcNames {
-			for _, meta := range foundSrcName.Edges.Metadata {
-				out = append(out, toModelHasMetadata(meta))
-			}
+		for _, poc := range foundSrcName.Edges.Poc {
+			out = append(out, toModelPointOfContact(poc))
 		}
-	}
-	if allowedEdges[model.EdgeSourcePointOfContact] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			WithPoc(func(q *ent.PointOfContactQuery) {
-				getPointOfContactObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get point of contact for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundSrcName := range srcNames {
-			for _, poc := range foundSrcName.Edges.Poc {
-				out = append(out, toModelPointOfContact(poc))
-			}
-		}
-	}
-	if allowedEdges[model.EdgeSourceCertifyLegal] {
-		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
-			WithCertifyLegal(func(q *ent.CertifyLegalQuery) {
-				getCertifyLegalObject(q)
-			}).
-			Limit(MaxPageSize)
-
-		srcNames, err := query.All(ctx)
-		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyLegal for node ID: %s with error: %w", nodeID, err)
-		}
-
-		for _, foundSrcName := range srcNames {
-			for _, cl := range foundSrcName.Edges.CertifyLegal {
-				out = append(out, toModelCertifyLegal(cl))
-			}
+		for _, cl := range foundSrcName.Edges.CertifyLegal {
+			out = append(out, toModelCertifyLegal(cl))
 		}
 	}
 

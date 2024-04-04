@@ -260,3 +260,36 @@ func toModelVulnerabilityMetadata(v *ent.VulnerabilityMetadata) *model.Vulnerabi
 		Collector:     v.Collector,
 	}
 }
+
+func (b *EntBackend) vulnMetadataNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	vulnMetadataPred, err := vulnerabilityMetadataPredicate(&model.VulnerabilityMetadataSpec{ID: &nodeID})
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate vulnerabilityMetadataPredicate :: %w", err)
+	}
+
+	query := b.client.VulnerabilityMetadata.Query().
+		Where(vulnMetadataPred)
+
+	if allowedEdges[model.EdgeVulnMetadataVulnerability] {
+		query.
+			WithVulnerabilityID()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	vulnMetas, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for vulnerability Metadata with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, vm := range vulnMetas {
+		if vm.Edges.VulnerabilityID != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(vm.Edges.VulnerabilityID))
+		}
+	}
+
+	return out, nil
+}

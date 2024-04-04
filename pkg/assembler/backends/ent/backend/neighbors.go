@@ -140,7 +140,7 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 	case certifyscorecard.Table:
 		neighbors, err = b.certifyScorecardNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get scorecard neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case certifyvex.Table:
 		neighbors, err = b.certifyVexNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
@@ -150,63 +150,63 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 	case certifyvuln.Table:
 		neighbors, err = b.certifyVulnNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyVuln neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case hashequal.Table:
 		neighbors, err = b.hashEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hashEqual neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case hasmetadata.Table:
 		neighbors, err = b.hasMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasMetadata neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case billofmaterials.Table:
 		neighbors, err = b.hasSbomNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasSBOM neighbors with id: %s with error: %w", nodeID, err)
 		}
-	// case hasSLSAsStr:
-	// 	neighbors, err = c.hasSlsaNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
-	// case hasSourceAtsStr:
-	// 	neighbors, err = c.hasSourceAtNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case slsaattestation.Table:
+		neighbors, err = b.hasSlsaNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get slsa neighbors with id: %s with error: %w", nodeID, err)
+		}
+	case hassourceat.Table:
+		neighbors, err = b.hasSourceAtNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt neighbors with id: %s with error: %w", nodeID, err)
+		}
 	case dependency.Table:
 		neighbors, err = b.isDependencyNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get dependency neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case occurrence.Table:
 		neighbors, err = b.isOccurrenceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get occurrence neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case pkgequal.Table:
 		neighbors, err = b.pkgEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get pkgEqual neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case pointofcontact.Table:
 		neighbors, err = b.pointOfContactNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get Point of Contact neighbors with id: %s with error: %w", nodeID, err)
+		}
+	case vulnequal.Table:
+		neighbors, err = b.vulnEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
 		}
-	// case vulnEqualsStr:
-	// 	neighbors, err = c.vulnEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
-	// case vulnMetadataStr:
-	// 	neighbors, err = c.vulnMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case vulnerabilitymetadata.Table:
+		neighbors, err = b.vulnMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+		}
 	default:
 		return nil, fmt.Errorf("unknown ID for neighbors query: %s", nodeID)
 	}

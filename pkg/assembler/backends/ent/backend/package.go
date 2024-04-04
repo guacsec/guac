@@ -441,8 +441,8 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 		return []model.Node{}, fmt.Errorf("failed to get packageNamespace for node ID: %s with error: %w", nodeID, err)
 	}
 
-	if allowedEdges[model.EdgePackageNamespacePackageName] {
-		for _, foundPkgName := range pkgNames {
+	for _, foundPkgName := range pkgNames {
+		if allowedEdges[model.EdgePackageNamespacePackageName] {
 			out = append(out, &model.Package{
 				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
 				Type: foundPkgName.Type,
@@ -459,10 +459,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 				},
 			})
 		}
-	}
-
-	if allowedEdges[model.EdgePackageNamespacePackageType] {
-		for _, foundPkgName := range pkgNames {
+		if allowedEdges[model.EdgePackageNamespacePackageType] {
 			out = append(out, &model.Package{
 				ID:         toGlobalID(pkgTypeString, foundPkgName.ID.String()),
 				Type:       foundPkgName.Type,
@@ -549,8 +546,9 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 			out = append(out, toModelPackage(sortedPkgName))
 		}
 	}
-	if allowedEdges[model.EdgePackageNamePackageNamespace] {
-		for _, foundPkgName := range pkgNames {
+
+	for _, foundPkgName := range pkgNames {
+		if allowedEdges[model.EdgePackageNamePackageNamespace] {
 			out = append(out, &model.Package{
 				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
 				Type: foundPkgName.Type,
@@ -563,9 +561,6 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 				},
 			})
 		}
-	}
-
-	for _, foundPkgName := range pkgNames {
 		for _, hasAt := range foundPkgName.Edges.HasSourceAt {
 			out = append(out, toModelHasSourceAt(hasAt))
 		}
