@@ -40,6 +40,9 @@ const (
 )
 
 func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
+	if filter == nil {
+		filter = &model.HasSourceAtSpec{}
+	}
 	query := []predicate.HasSourceAt{
 		optionalPredicate(filter.ID, IDEQ),
 		optionalPredicate(filter.Collector, hassourceat.CollectorEQ),
@@ -270,6 +273,9 @@ func upsertHasSourceAt(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput, 
 }
 
 func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
+	if filter == nil {
+		filter = &model.SourceSpec{}
+	}
 	records, err := b.client.SourceName.Query().
 		Where(sourceQuery(filter)).
 		Limit(MaxPageSize).
@@ -490,7 +496,7 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get srcNamespace neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get srcNamespace for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -519,7 +525,7 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get srcNames neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get srcNames for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -548,7 +554,7 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get srcNamespace neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get srcNamespace for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -571,7 +577,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get srcNamespace neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get srcNamespace for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -598,7 +604,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -617,7 +623,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get scorecard neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get scorecard for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -636,7 +642,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get occurrence neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get occurrence for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -655,7 +661,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyBad neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyBad for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -676,7 +682,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyGood neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyGood for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -697,7 +703,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasMetadata neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasMetadata for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -716,7 +722,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get point of contact neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get point of contact for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {
@@ -735,7 +741,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyLegal neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyLegal for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundSrcName := range srcNames {

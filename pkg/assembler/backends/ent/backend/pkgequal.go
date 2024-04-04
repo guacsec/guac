@@ -35,7 +35,9 @@ import (
 )
 
 func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
-
+	if spec == nil {
+		spec = &model.PkgEqualSpec{}
+	}
 	if len(spec.Packages) > 2 {
 		return nil, fmt.Errorf("too many packages specified in pkg equal filter")
 	}

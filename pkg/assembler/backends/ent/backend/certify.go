@@ -41,7 +41,7 @@ type certificationInputSpec interface {
 
 func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
 	if filter == nil {
-		return nil, nil
+		filter = &model.CertifyBadSpec{}
 	}
 
 	certQuery := b.client.Certification.Query().
@@ -59,7 +59,7 @@ func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 
 func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
 	if filter == nil {
-		return nil, nil
+		filter = &model.CertifyGoodSpec{}
 	}
 
 	certQuery := b.client.Certification.Query().
@@ -550,7 +550,7 @@ func (b *EntBackend) certifyBadNeighbors(ctx context.Context, nodeID string, all
 
 		certifications, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundCert := range certifications {
@@ -570,7 +570,7 @@ func (b *EntBackend) certifyBadNeighbors(ctx context.Context, nodeID string, all
 
 		certifications, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get artifact neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get artifact for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundCert := range certifications {
@@ -587,7 +587,7 @@ func (b *EntBackend) certifyBadNeighbors(ctx context.Context, nodeID string, all
 
 		certifications, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get source neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get source for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundCert := range certifications {
@@ -611,7 +611,7 @@ func (b *EntBackend) certifyGoodNeighbors(ctx context.Context, nodeID string, al
 
 		certifications, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundCert := range certifications {
@@ -631,7 +631,7 @@ func (b *EntBackend) certifyGoodNeighbors(ctx context.Context, nodeID string, al
 
 		certifications, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get artifact neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get artifact for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundCert := range certifications {
@@ -648,7 +648,7 @@ func (b *EntBackend) certifyGoodNeighbors(ctx context.Context, nodeID string, al
 
 		certifications, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get source neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get source for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundCert := range certifications {

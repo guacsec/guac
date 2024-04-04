@@ -67,6 +67,9 @@ func (b *EntBackend) IngestLicense(ctx context.Context, licenseInput *model.IDor
 }
 
 func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([]*model.License, error) {
+	if filter == nil {
+		filter = &model.LicenseSpec{}
+	}
 	records, err := getLicenses(ctx, b.client, *filter)
 	if err != nil {
 		return nil, err
@@ -187,14 +190,14 @@ func (b *EntBackend) licenseNeighbors(ctx context.Context, nodeID string, allowe
 		for _, foundLicense := range licenses {
 			declaredCLs, err := foundLicense.DeclaredInCertifyLegals(ctx)
 			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get declared license certifyLegal neighbors for node ID: %s with error: %w", nodeID, err)
+				return []model.Node{}, fmt.Errorf("failed to get declared license certifyLegal for node ID: %s with error: %w", nodeID, err)
 			}
 			for _, foundDeclared := range declaredCLs {
 				out = append(out, toModelCertifyLegal(foundDeclared))
 			}
 			disCLs, err := foundLicense.DiscoveredInCertifyLegals(ctx)
 			if err != nil {
-				return []model.Node{}, fmt.Errorf("failed to get discovered license certifyLegal neighbors for node ID: %s with error: %w", nodeID, err)
+				return []model.Node{}, fmt.Errorf("failed to get discovered license certifyLegal for node ID: %s with error: %w", nodeID, err)
 			}
 			for _, foundDis := range disCLs {
 				out = append(out, toModelCertifyLegal(foundDis))

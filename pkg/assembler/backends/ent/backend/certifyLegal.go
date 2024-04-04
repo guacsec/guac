@@ -36,7 +36,9 @@ import (
 )
 
 func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
-
+	if spec == nil {
+		spec = &model.CertifyLegalSpec{}
+	}
 	certLegalQuery := b.client.CertifyLegal.Query().
 		Where(certifyLegalQuery(*spec))
 
@@ -426,29 +428,63 @@ func guacCertifyLegalKey(pkgVersionID *string, srcNameID *string, declaredLicens
 	return &clID, nil
 }
 
-// func certifyLegalInputQuery(subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, filter model.CertifyLegalInputSpec) predicate.CertifyLegal {
-// 	var subjectSpec *model.PackageOrSourceSpec
-// 	if subject.Package != nil {
-// 		subjectSpec = &model.PackageOrSourceSpec{
-// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-// 		}
-// 	} else {
-// 		subjectSpec = &model.PackageOrSourceSpec{
-// 			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
-// 		}
-// 	}
-// 	declaredLicenseSpecs := collect(declaredLicenses, helper.ConvertLicenseInputSpecToLicenseSpec)
-// 	discoveredLicenseSpecs := collect(discoveredLicenses, helper.ConvertLicenseInputSpecToLicenseSpec)
-// 	return certifyLegalQuery(model.CertifyLegalSpec{
-// 		Subject:            subjectSpec,
-// 		DeclaredLicense:    &filter.DeclaredLicense,
-// 		DeclaredLicenses:   declaredLicenseSpecs,
-// 		DiscoveredLicense:  &filter.DiscoveredLicense,
-// 		DiscoveredLicenses: discoveredLicenseSpecs,
-// 		Attribution:        &filter.Attribution,
-// 		Justification:      &filter.Justification,
-// 		TimeScanned:        &filter.TimeScanned,
-// 		Origin:             &filter.Origin,
-// 		Collector:          &filter.Collector,
-// 	})
-// }
+func (b *EntBackend) certifyLegalNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+	if allowedEdges[model.EdgeCertifyLegalPackage] {
+		query := b.client.CertifyLegal.Query().
+			Where(certifyLegalQuery(model.CertifyLegalSpec{ID: &nodeID})).
+			WithPackage(withPackageVersionTree()).
+			Limit(MaxPageSize)
+
+		certLegals, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, foundLegal := range certLegals {
+			if foundLegal.Edges.Package != nil {
+				out = append(out, toModelPackage(backReferencePackageVersion(foundLegal.Edges.Package)))
+			}
+		}
+	}
+	if allowedEdges[model.EdgeCertifyLegalSource] {
+		query := b.client.CertifyLegal.Query().
+			Where(certifyLegalQuery(model.CertifyLegalSpec{ID: &nodeID})).
+			WithSource().
+			Limit(MaxPageSize)
+
+		certLegals, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get source for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, foundLegal := range certLegals {
+			if foundLegal.Edges.Source != nil {
+				out = append(out, toModelSource(foundLegal.Edges.Source))
+			}
+		}
+	}
+	if allowedEdges[model.EdgeCertifyLegalLicense] {
+		query := b.client.CertifyLegal.Query().
+			Where(certifyLegalQuery(model.CertifyLegalSpec{ID: &nodeID})).
+			WithDeclaredLicenses().
+			WithDiscoveredLicenses().
+			Limit(MaxPageSize)
+
+		certLegals, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get licenses for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, foundLegal := range certLegals {
+			for _, collectedDecLicense := range foundLegal.Edges.DeclaredLicenses {
+				out = append(out, toModelLicense(collectedDecLicense))
+			}
+			for _, collectedDisLicense := range foundLegal.Edges.DiscoveredLicenses {
+				out = append(out, toModelLicense(collectedDisLicense))
+			}
+		}
+	}
+
+	return out, nil
+}

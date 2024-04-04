@@ -36,7 +36,7 @@ import (
 
 func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	if filter == nil {
-		return nil, nil
+		filter = &model.CertifyScorecardSpec{}
 	}
 
 	scorecardQuery := b.client.CertifyScorecard.Query().

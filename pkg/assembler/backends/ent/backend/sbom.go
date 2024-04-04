@@ -35,6 +35,9 @@ import (
 
 func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 	funcName := "HasSBOM"
+	if spec == nil {
+		spec = &model.HasSBOMSpec{}
+	}
 	predicates := []predicate.BillOfMaterials{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(toLowerPtr(spec.Algorithm), billofmaterials.AlgorithmEQ),

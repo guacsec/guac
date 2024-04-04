@@ -36,7 +36,7 @@ import (
 
 func (b *EntBackend) HashEqual(ctx context.Context, spec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	if spec == nil {
-		return nil, nil
+		spec = &model.HashEqualSpec{}
 	}
 
 	if len(spec.Artifacts) > 2 {

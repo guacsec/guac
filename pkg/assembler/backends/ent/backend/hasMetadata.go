@@ -31,7 +31,9 @@ import (
 )
 
 func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
-
+	if filter == nil {
+		filter = &model.HasMetadataSpec{}
+	}
 	hmQuery := b.client.HasMetadata.Query().
 		Where(hasMetadataPredicate(filter))
 

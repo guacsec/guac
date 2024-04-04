@@ -407,7 +407,7 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgNamespace neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get pkgNamespace for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -438,7 +438,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgName neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get pkgName for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -468,7 +468,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgType neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get pkgType for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -496,7 +496,7 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgVersion neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get pkgVersion for node ID: %s with error: %w", nodeID, err)
 		}
 
 		// sort out the pkgNames so that they each contain one pkg Version edge to output in proper format
@@ -519,7 +519,7 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgNamespace neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get pkgNamespace for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -548,7 +548,7 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -569,7 +569,7 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get isDependency neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get isDependency for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -590,7 +590,7 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyBad neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyBad for node ID: %s with error: %w", nodeID, err)
 
 		}
 
@@ -614,7 +614,7 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyGood neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyGood for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -637,7 +637,7 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasMetadata neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasMetadata for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -658,7 +658,7 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get point of contact neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get point of contact for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgName := range pkgNames {
@@ -715,7 +715,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasSourceAt for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -737,7 +737,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get isDependency neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get isDependency for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -759,7 +759,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get isOccurrence neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get isOccurrence for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -778,7 +778,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyVuln neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyVuln for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -797,7 +797,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSBOM neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasSBOM for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -816,7 +816,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyVex neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyVex for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -835,7 +835,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyBad neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyBad for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -856,7 +856,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyGood neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyGood for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -880,7 +880,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get pkgEqual neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get pkgEqual for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -902,7 +902,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasMetadata neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasMetadata for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -921,7 +921,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get point of contact neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get point of contact for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {
@@ -940,7 +940,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 
 		pkgVersions, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get certifyLegal neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get certifyLegal for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundPkgVersion := range pkgVersions {

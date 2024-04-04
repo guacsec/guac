@@ -36,6 +36,9 @@ import (
 )
 
 func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
+	if spec == nil {
+		spec = &model.HasSLSASpec{}
+	}
 	query := []predicate.SLSAAttestation{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.BuildType, slsaattestation.BuildTypeEQ),

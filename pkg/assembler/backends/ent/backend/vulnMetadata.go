@@ -32,7 +32,9 @@ import (
 )
 
 func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
-
+	if filter == nil {
+		filter = &model.VulnerabilityMetadataSpec{}
+	}
 	vulnMetadataPred, err := vulnerabilityMetadataPredicate(filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate vulnerabilityMetadataPredicate :: %w", err)

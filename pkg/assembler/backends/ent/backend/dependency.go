@@ -33,7 +33,7 @@ import (
 func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	funcName := "IsDependency"
 	if spec == nil {
-		return nil, nil
+		spec = &model.IsDependencySpec{}
 	}
 
 	isDepQuery := b.client.Dependency.Query().
@@ -354,4 +354,35 @@ func guacDependencyKey(pkgVersionID *string, depPkgNameID *string, depPkgVersion
 
 	depID := generateUUIDKey([]byte(depIDString))
 	return &depID, nil
+}
+
+func (b *EntBackend) isDependencyNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+	if allowedEdges[model.EdgeIsDependencyPackage] {
+		query := b.client.Dependency.Query().
+			Where(isDependencyQuery(&model.IsDependencySpec{ID: &nodeID})).
+			WithPackage(withPackageVersionTree()).
+			WithDependentPackageVersion(withPackageVersionTree()).
+			WithDependentPackageName().
+			Limit(MaxPageSize)
+
+		deps, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, foundDep := range deps {
+			if foundDep.Edges.Package != nil {
+				out = append(out, toModelPackage(backReferencePackageVersion(foundDep.Edges.Package)))
+			}
+			if foundDep.Edges.DependentPackageVersion != nil {
+				out = append(out, toModelPackage(backReferencePackageVersion(foundDep.Edges.DependentPackageVersion)))
+			}
+			if foundDep.Edges.DependentPackageName != nil {
+				out = append(out, toModelPackage(foundDep.Edges.DependentPackageName))
+			}
+		}
+	}
+
+	return out, nil
 }

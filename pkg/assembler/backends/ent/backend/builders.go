@@ -32,6 +32,9 @@ import (
 )
 
 func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
+	if builderSpec == nil {
+		builderSpec = &model.BuilderSpec{}
+	}
 	query := b.client.Builder.Query().
 		Where(builderQueryPredicate(builderSpec))
 
@@ -154,7 +157,7 @@ func (b *EntBackend) builderNeighbors(ctx context.Context, nodeID string, allowe
 
 		builders, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get hasSLSA neighbors for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get hasSLSA for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundBuilder := range builders {

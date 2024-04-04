@@ -132,26 +132,26 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get certifyGood neighbors with id: %s with error: %w", nodeID, err)
 		}
-	// case certifyLegalsStr:
-	// 	neighbors, err = c.certifyLegalNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case certifylegal.Table:
+		neighbors, err = b.certifyLegalNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get certifyLegal neighbors with id: %s with error: %w", nodeID, err)
+		}
 	// case scorecardStr:
 	// 	neighbors, err = c.certifyScorecardNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
 	// 	}
-	// case certifyVEXsStr:
-	// 	neighbors, err = c.certifyVexNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
-	// case certifyVulnsStr:
-	// 	neighbors, err = c.certifyVulnNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case certifyvex.Table:
+		neighbors, err = b.certifyVexNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get certifyVex neighbors with id: %s with error: %w", nodeID, err)
+		}
+	case certifyvuln.Table:
+		neighbors, err = b.certifyVulnNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+		}
 	// case hashEqualsStr:
 	// 	neighbors, err = c.hashEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {
@@ -177,11 +177,11 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 	// 	if err != nil {
 	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
 	// 	}
-	// case isDependenciesStr:
-	// 	neighbors, err = c.isDependencyNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case dependency.Table:
+		neighbors, err = b.isDependencyNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+		}
 	// case isOccurrencesStr:
 	// 	neighbors, err = c.isOccurrenceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {

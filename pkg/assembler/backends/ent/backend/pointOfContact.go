@@ -31,7 +31,9 @@ import (
 )
 
 func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
-
+	if filter == nil {
+		filter = &model.PointOfContactSpec{}
+	}
 	pocQuery := b.client.PointOfContact.Query().
 		Where(pointOfContactPredicate(filter))
 

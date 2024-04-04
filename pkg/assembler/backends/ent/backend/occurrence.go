@@ -33,6 +33,9 @@ import (
 )
 
 func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+	if query == nil {
+		query = &model.IsOccurrenceSpec{}
+	}
 	occurQuery := b.client.Occurrence.Query().
 		Where(isOccurrenceQuery(query))
 

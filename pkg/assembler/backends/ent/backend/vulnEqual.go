@@ -35,7 +35,9 @@ import (
 )
 
 func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
-
+	if filter == nil {
+		filter = &model.VulnEqualSpec{}
+	}
 	if len(filter.Vulnerabilities) > 2 {
 		return nil, fmt.Errorf("too many vulnerability specified in vuln equal filter")
 	}
