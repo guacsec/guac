@@ -433,10 +433,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
         nodeBig, _ := big.Vertex(bigNodeId)
         nodeSmall, _ := small.Vertex(bigNodeId)
         //TODO: if nodes are not equal we need to highlight which attribute is different 
-        if (len(nodeBig.Attributes) != len(nodeSmall.Attributes)) {
-          //TODO: change color of node here
-        } 
-        for key, _ := range nodeBig.Attributes {
+        for key := range nodeBig.Attributes {
           if key != "InclSoft"{
             overlay, ok1 := nodeBig.Attributes[key].(string) 
             g, ok2 := nodeSmall.Attributes[key].(string) 
@@ -450,11 +447,8 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
             g, ok2 := nodeSmall.Attributes[key].(map[string]bool) 
             if ok1 && ok2 {
               //compare here
-              if len(overlay)!= len(g) {
-                //TODO: change color of node here
-              }
 
-              for _key, _ := range overlay {
+              for _key := range overlay {
                 _, _ok1 := g[_key]
                 _, _ok2 :=  overlay[_key]
                 if !(_ok1 && _ok2) {
@@ -503,20 +497,24 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
       _, err := big.Edge(edge.Source, edge.Target)
       if err != nil { 
 
-        small.RemoveEdge(edge.Source, edge.Target)
+        if small.RemoveEdge(edge.Source, edge.Target) != nil {
+			continue
+		}
       }else {
         analysisList.MissingAddedRemovedLinks = append(analysisList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
       }
     }
 
     //remove nodes present in small but not in big
-    for smallNodeId, _ := range(smallNodes){
+    for smallNodeId := range(smallNodes){
       if smallNodeId == "HasSBOM" {
         continue
       }
       if _, err = big.Vertex(smallNodeId); err != nil {
 
-        small.RemoveVertex(smallNodeId)
+       if  small.RemoveVertex(smallNodeId) != nil {
+		continue
+	   }
 
       }else{
         analysisList.MissingAddedRemovedNodes = append(analysisList.MissingAddedRemovedNodes, smallNodeId)
@@ -527,7 +525,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
     //union
 
     //check if nodes are present in small but not in big
-    for smallNodeId, _ := range(smallNodes){
+    for smallNodeId := range(smallNodes){
       if _, err = big.Vertex(smallNodeId); err != nil {
         addGraphNode(big, smallNodeId, "red") //change color to red
         analysisList.MissingAddedRemovedNodes = append(analysisList.MissingAddedRemovedNodes, smallNodeId)
@@ -660,6 +658,9 @@ func addGraphEdge(g graph.Graph[string, *Node], from, to, color string){
   if err == nil {
     return
   }
-  g.AddEdge(from, to, graph.EdgeAttribute("color", color)) 
+  if g.AddEdge(from, to, graph.EdgeAttribute("color", color)) != nil {
+	return
+  }
+
 }
 
