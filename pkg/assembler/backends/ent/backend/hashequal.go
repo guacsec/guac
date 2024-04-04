@@ -282,3 +282,29 @@ func guacHashEqualKey(sortedArtHash string, heInput *model.HashEqualInputSpec) (
 	heID := generateUUIDKey([]byte(heIDString))
 	return &heID, nil
 }
+
+func (b *EntBackend) hashEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+	if allowedEdges[model.EdgeHashEqualArtifact] {
+		query := b.client.HashEqual.Query().
+			Where(hashEqualQueryPredicates(&model.HashEqualSpec{ID: &nodeID})).
+			WithArtifactA().
+			WithArtifactB().
+			Limit(MaxPageSize)
+
+		hasEquals, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get artifacts for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, foundHe := range hasEquals {
+			if foundHe.Edges.ArtifactA != nil {
+				out = append(out, toModelArtifact(foundHe.Edges.ArtifactA))
+			}
+			if foundHe.Edges.ArtifactB != nil {
+				out = append(out, toModelArtifact(foundHe.Edges.ArtifactB))
+			}
+		}
+	}
+	return out, nil
+}

@@ -152,11 +152,11 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
 		}
-	// case hashEqualsStr:
-	// 	neighbors, err = c.hashEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
-	// 	if err != nil {
-	// 		return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
-	// 	}
+	case hashequal.Table:
+		neighbors, err = b.hashEqualNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get neighbors with id: %s with error: %w", nodeID, err)
+		}
 	// case hasMetadataStr:
 	// 	neighbors, err = c.hasMetadataNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
 	// 	if err != nil {

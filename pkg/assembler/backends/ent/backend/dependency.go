@@ -368,7 +368,7 @@ func (b *EntBackend) isDependencyNeighbors(ctx context.Context, nodeID string, a
 
 		deps, err := query.All(ctx)
 		if err != nil {
-			return []model.Node{}, fmt.Errorf("failed to get package for node ID: %s with error: %w", nodeID, err)
+			return []model.Node{}, fmt.Errorf("failed to get packages for node ID: %s with error: %w", nodeID, err)
 		}
 
 		for _, foundDep := range deps {
