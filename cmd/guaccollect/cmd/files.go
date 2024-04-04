@@ -45,7 +45,7 @@ type filesOptions struct {
 	blobAddr string
 	// poll location
 	poll bool
-	// use blob URL for origin instead of source URL
+	// use blob URL for origin instead of source URL (useful if the blob store is persistent and we want to store the blob source location)
 	useBlobURL bool
 }
 
