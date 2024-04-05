@@ -504,12 +504,14 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 	if allowedEdges[model.EdgePackageCertifyBad] {
 		query.
 			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeBAD))
 				getCertificationObject(q)
 			})
 	}
 	if allowedEdges[model.EdgePackageCertifyGood] {
 		query.
 			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeGOOD))
 				getCertificationObject(q)
 			})
 	}
@@ -568,15 +570,11 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 			out = append(out, toModelIsDependencyWithBackrefs(dep))
 		}
 		for _, cert := range foundPkgName.Edges.Certification {
-			if allowedEdges[model.EdgePackageCertifyBad] {
-				if cert.Type == certification.TypeBAD {
-					out = append(out, toModelCertifyBad(cert))
-				}
+			if cert.Type == certification.TypeBAD {
+				out = append(out, toModelCertifyBad(cert))
 			}
-			if allowedEdges[model.EdgePackageCertifyGood] {
-				if cert.Type == certification.TypeGOOD {
-					out = append(out, toModelCertifyGood(cert))
-				}
+			if cert.Type == certification.TypeGOOD {
+				out = append(out, toModelCertifyGood(cert))
 			}
 		}
 		for _, meta := range foundPkgName.Edges.Metadata {
@@ -641,12 +639,14 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 	if allowedEdges[model.EdgePackageCertifyBad] {
 		query.
 			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeBAD))
 				getCertificationObject(q)
 			})
 	}
 	if allowedEdges[model.EdgePackageCertifyGood] {
 		query.
 			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeGOOD))
 				getCertificationObject(q)
 			})
 	}
@@ -730,15 +730,11 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 			out = append(out, toModelCertifyVEXStatement(foundVex))
 		}
 		for _, foundCert := range foundPkgVersion.Edges.Certification {
-			if allowedEdges[model.EdgePackageCertifyBad] {
-				if foundCert.Type == certification.TypeBAD {
-					out = append(out, toModelCertifyBad(foundCert))
-				}
+			if foundCert.Type == certification.TypeBAD {
+				out = append(out, toModelCertifyBad(foundCert))
 			}
-			if allowedEdges[model.EdgePackageCertifyGood] {
-				if foundCert.Type == certification.TypeGOOD {
-					out = append(out, toModelCertifyGood(foundCert))
-				}
+			if foundCert.Type == certification.TypeGOOD {
+				out = append(out, toModelCertifyGood(foundCert))
 			}
 		}
 		for _, pkgEqualA := range foundPkgVersion.Edges.PkgEqualPkgA {

@@ -189,12 +189,14 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 	if allowedEdges[model.EdgeArtifactCertifyBad] {
 		query.
 			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeBAD))
 				getCertificationObject(q)
 			})
 	}
 	if allowedEdges[model.EdgeArtifactCertifyGood] {
 		query.
 			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeGOOD))
 				getCertificationObject(q)
 			})
 	}
@@ -242,15 +244,11 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 			out = append(out, toModelCertifyVEXStatement(foundVex))
 		}
 		for _, foundCert := range foundArt.Edges.Certification {
-			if allowedEdges[model.EdgeArtifactCertifyBad] {
-				if foundCert.Type == certification.TypeBAD {
-					out = append(out, toModelCertifyBad(foundCert))
-				}
+			if foundCert.Type == certification.TypeBAD {
+				out = append(out, toModelCertifyBad(foundCert))
 			}
-			if allowedEdges[model.EdgeArtifactCertifyGood] {
-				if foundCert.Type == certification.TypeGOOD {
-					out = append(out, toModelCertifyGood(foundCert))
-				}
+			if foundCert.Type == certification.TypeGOOD {
+				out = append(out, toModelCertifyGood(foundCert))
 			}
 		}
 		for _, foundMeta := range foundArt.Edges.Metadata {

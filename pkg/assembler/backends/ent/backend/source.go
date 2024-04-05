@@ -630,12 +630,14 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 	if allowedEdges[model.EdgeSourceCertifyBad] {
 		query.
 			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeBAD))
 				getCertificationObject(q)
 			})
 	}
 	if allowedEdges[model.EdgeSourceCertifyGood] {
 		query.
 			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeGOOD))
 				getCertificationObject(q)
 			})
 	}
@@ -690,15 +692,11 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 			out = append(out, toModelIsOccurrenceWithSubject(occur))
 		}
 		for _, cert := range foundSrcName.Edges.Certification {
-			if allowedEdges[model.EdgeSourceCertifyBad] {
-				if cert.Type == certification.TypeBAD {
-					out = append(out, toModelCertifyBad(cert))
-				}
+			if cert.Type == certification.TypeBAD {
+				out = append(out, toModelCertifyBad(cert))
 			}
-			if allowedEdges[model.EdgeSourceCertifyGood] {
-				if cert.Type == certification.TypeGOOD {
-					out = append(out, toModelCertifyGood(cert))
-				}
+			if cert.Type == certification.TypeGOOD {
+				out = append(out, toModelCertifyGood(cert))
 			}
 		}
 		for _, meta := range foundSrcName.Edges.Metadata {
