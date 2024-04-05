@@ -18,6 +18,7 @@ package arangodb
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -838,6 +839,7 @@ func (c *arangoClient) srcNameNeighbors(ctx context.Context, nodeID string, allo
 		if err != nil {
 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}
+		sort.Strings(foundIDs)
 		out = append(out, foundIDs...)
 	}
 	if allowedEdges[model.EdgeSourceCertifyScorecard] {
