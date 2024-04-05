@@ -7,7 +7,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/gcs"
@@ -22,7 +21,7 @@ type gcsOptions struct {
 	pubSubAddr        string
 	blobAddr          string
 	graphqlEndpoint   string
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions csub_client.CsubClientOptions
 	bucket            string
 	// use blob URL for origin instead of source URL (useful if the blob store is persistent and we want to store the blob source location)
 	useBlobURL bool
@@ -112,7 +111,7 @@ func validateGCSFlags(
 		useBlobURL:      useBlobURL,
 	}
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
