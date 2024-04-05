@@ -21,6 +21,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/bucket"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -46,6 +47,7 @@ type S3CollectorConfig struct {
 	MpBuilder               messaging.MessageProviderBuilder // optional
 	BucketBuilder           bucket.BuildBucket               // optional
 	Poll                    bool
+	StoreBlobURL            bool
 }
 
 func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
@@ -57,15 +59,15 @@ func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
 
 func (s *S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	if s.config.Poll {
-		retrieveWithPoll(*s, ctx, docChannel)
+		s.retrieveWithPoll(ctx, docChannel)
 	} else {
-		return retrieve(*s, ctx, docChannel)
+		return s.retrieve(ctx, docChannel)
 	}
 
 	return nil
 }
 
-func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.Document) error {
+func (s S3Collector) retrieve(ctx context.Context, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	downloader := getDownloader(s)
 
@@ -89,8 +91,9 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 			Format:   processor.FormatUnknown,
 			Encoding: bucket.ExtractEncoding(enc, item),
 			SourceInformation: processor.SourceInformation{
-				Collector: S3CollectorType,
-				Source:    "S3",
+				Collector:   S3CollectorType,
+				Source:      "S3",
+				DocumentRef: s.getDocRef(blob),
 			},
 		}
 		docChannel <- doc
@@ -124,8 +127,9 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 					Format:   processor.FormatUnknown,
 					Encoding: bucket.ExtractEncoding(enc, item),
 					SourceInformation: processor.SourceInformation{
-						Collector: S3CollectorType,
-						Source:    "S3",
+						Collector:   S3CollectorType,
+						Source:      "S3",
+						DocumentRef: s.getDocRef(blob),
 					},
 				}
 				docChannel <- doc
@@ -142,7 +146,7 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 	return nil
 }
 
-func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *processor.Document) {
+func (s S3Collector) retrieveWithPoll(ctx context.Context, docChannel chan<- *processor.Document) {
 	logger := logging.FromContext(ctx)
 	downloader := getDownloader(s)
 	queues := strings.Split(s.config.Queues, ",")
@@ -214,8 +218,9 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 						Format:   processor.FormatUnknown,
 						Encoding: bucket.ExtractEncoding(enc, item),
 						SourceInformation: processor.SourceInformation{
-							Collector: S3CollectorType,
-							Source:    "S3",
+							Collector:   S3CollectorType,
+							Source:      "S3",
+							DocumentRef: s.getDocRef(blob),
 						},
 					}
 					select {
@@ -231,6 +236,14 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 	}
 
 	wg.Wait()
+}
+
+func (s S3Collector) getDocRef(blob []byte) string {
+	if s.config.StoreBlobURL {
+		return events.GetKey(blob) // this is the blob store URL
+	}
+
+	return ""
 }
 
 func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider, error) {

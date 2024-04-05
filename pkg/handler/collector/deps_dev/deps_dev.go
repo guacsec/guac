@@ -27,6 +27,7 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/metrics"
@@ -77,11 +78,12 @@ type depsCollector struct {
 	projectInfoMap       map[string]*pb.Project
 	versions             map[string]*pb.Version
 	dependencies         map[string]*pb.Dependencies
+	storeBlobURL         bool
 }
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll bool, retrieveDependencies bool, interval time.Duration) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies, storeBlobURL bool, interval time.Duration) (*depsCollector, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
@@ -118,6 +120,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		versions:             map[string]*pb.Version{},
 		dependencies:         map[string]*pb.Dependencies{},
 		Metrics:              metricsCollector,
+		storeBlobURL:         storeBlobURL,
 	}, nil
 }
 
@@ -282,8 +285,9 @@ func (d *depsCollector) collectMetadata(ctx context.Context, docChannel chan<- *
 			Type:   processor.DocumentDepsDev,
 			Format: processor.FormatJSON,
 			SourceInformation: processor.SourceInformation{
-				Collector: DepsCollector,
-				Source:    DepsCollector,
+				Collector:   DepsCollector,
+				Source:      DepsCollector,
+				DocumentRef: d.getDocRef(blob),
 			},
 		}
 		docChannel <- doc
@@ -517,13 +521,22 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		Type:   processor.DocumentDepsDev,
 		Format: processor.FormatJSON,
 		SourceInformation: processor.SourceInformation{
-			Collector: DepsCollector,
-			Source:    DepsCollector,
+			Collector:   DepsCollector,
+			Source:      DepsCollector,
+			DocumentRef: d.getDocRef(blob),
 		},
 	}
 	docChannel <- doc
 
 	return nil
+}
+
+func (d *depsCollector) getDocRef(blob []byte) string {
+	if d.storeBlobURL {
+		return events.GetKey(blob) // this is the blob store URL
+	}
+
+	return ""
 }
 
 func (d *depsCollector) collectAdditionalMetadata(ctx context.Context, pkgType string, namespace *string, name string, version *string, pkgComponent *PackageComponent) error {

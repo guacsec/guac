@@ -353,7 +353,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, tt.fields.interval)
+			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, false, tt.fields.interval)
 
 			var cancel context.CancelFunc
 			if tt.fields.poll {

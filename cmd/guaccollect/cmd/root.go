@@ -36,7 +36,7 @@ func init() {
 		"use-csub",
 		"service-poll",
 		"enable-prometheus",
-		"use-blob-url",
+		"store-blob-url",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)

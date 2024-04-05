@@ -25,6 +25,7 @@ import (
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -36,6 +37,7 @@ type gcs struct {
 	lastDownload time.Time
 	poll         bool
 	interval     time.Duration
+	storeBlobURL bool
 }
 
 const CollectorGCS = "GCS"
@@ -80,6 +82,12 @@ func WithClient(client *storage.Client) Opt {
 func WithBucket(bucket string) Opt {
 	return func(g *gcs) {
 		g.bucket = bucket
+	}
+}
+
+func WithStoreBlobURL(storeBlobURL bool) Opt {
+	return func(g *gcs) {
+		g.storeBlobURL = storeBlobURL
 	}
 }
 
@@ -177,13 +185,19 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 				continue
 			}
 
+			docRef := ""
+			if g.storeBlobURL {
+				docRef = events.GetKey(payload) // this is the blob store URL
+			}
+
 			doc := &processor.Document{
 				Blob:   payload,
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
-					Collector: string(CollectorGCS),
-					Source:    g.bucket + "/" + attrs.Name,
+					Collector:   string(CollectorGCS),
+					Source:      g.bucket + "/" + attrs.Name,
+					DocumentRef: docRef,
 				},
 			}
 			docChannel <- doc

@@ -47,7 +47,7 @@ func TestNewDepsCollector(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second)
+			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, false, 5*time.Second)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -226,7 +226,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval)
+			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, false, tt.interval)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -343,7 +343,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 		ctx = context.Background()
 	}
 
-	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval)
+	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, false, tests.interval)
 	if err != nil {
 		t.Errorf("NewDepsCollector() error = %v", err)
 		return

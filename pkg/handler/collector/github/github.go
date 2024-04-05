@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/internal/client/githubclient"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -55,6 +56,7 @@ type githubCollector struct {
 	owner             string
 	repo              string
 	lastIngestedRun   int64
+	storeBlobURL      bool
 }
 
 type Config struct {
@@ -159,6 +161,12 @@ func WithAssetSuffixes(assetSuffixes []string) Opt {
 func WithCollectDataSource(collectDataSource datasource.CollectSource) Opt {
 	return func(g *githubCollector) {
 		g.collectDataSource = collectDataSource
+	}
+}
+
+func WithStoreBlobURL(storeBlobURL bool) Opt {
+	return func(g *githubCollector) {
+		g.storeBlobURL = storeBlobURL
 	}
 }
 
@@ -286,8 +294,9 @@ func (g *githubCollector) collectAssetsForRelease(ctx context.Context, release c
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
-					Collector: GithubCollector,
-					Source:    asset.URL,
+					Collector:   GithubCollector,
+					Source:      asset.URL,
+					DocumentRef: g.getDocRef(content.Bytes),
 				},
 			}
 			docChannel <- doc
@@ -336,8 +345,9 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
-					Collector: GithubCollector,
-					Source:    artifact.Name,
+					Collector:   GithubCollector,
+					Source:      artifact.Name,
+					DocumentRef: g.getDocRef(artifact.Bytes),
 				},
 			}
 
@@ -346,6 +356,14 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 
 		g.lastIngestedRun = run.RunId
 	}
+}
+
+func (g *githubCollector) getDocRef(blob []byte) string {
+	if g.storeBlobURL {
+		return events.GetKey(blob) // this is the blob store URL
+	}
+
+	return ""
 }
 
 func checkSuffixes(name string, suffixes []string) bool {

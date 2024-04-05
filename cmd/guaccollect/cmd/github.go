@@ -60,8 +60,8 @@ type githubOptions struct {
 	workflowFileName string
 	// the owner/repo name to use for the collector
 	ownerRepoName string
-	// use blob URL for origin instead of source URL (useful if the blob store is persistent and we want to store the blob source location)
-	useBlobURL bool
+	// store blob URL in origin (useful if the blob store is persistent)
+	storeBlobURL bool
 }
 
 var githubCmd = &cobra.Command{
@@ -101,7 +101,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
-			viper.GetBool("use-blob-url"),
+			viper.GetBool("store-blob-url"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -126,6 +126,7 @@ you have access to read and write to the respective blob store.`,
 			github.WithMode(opts.githubMode),
 			github.WithSbomName(opts.sbomName),
 			github.WithWorkflowName(opts.workflowFileName),
+			github.WithStoreBlobURL(opts.storeBlobURL),
 		}
 		if opts.poll {
 			collectorOpts = append(collectorOpts, github.WithPolling(30*time.Second))
@@ -168,7 +169,7 @@ func validateGithubFlags(
 	csubTlsSkipVerify,
 	useCsub,
 	poll,
-	useBlobURL bool,
+	storeBlobURL bool,
 	args []string,
 ) (githubOptions, error) {
 	var opts githubOptions
@@ -178,7 +179,7 @@ func validateGithubFlags(
 	opts.githubMode = githubMode
 	opts.sbomName = sbomName
 	opts.workflowFileName = workflowFileName
-	opts.useBlobURL = useBlobURL
+	opts.storeBlobURL = storeBlobURL
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
