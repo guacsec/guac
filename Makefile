@@ -126,7 +126,7 @@ build_local_container:
 	GITHUB_REPOSITORY=$(GITHUB_REPOSITORY) \
 	GORELEASER_CURRENT_TAG=$(GORELEASER_CURRENT_TAG) \
 	DOCKER_CONTEXT=$(shell docker context ls | grep '*' | awk '{print $$1}') \
-	goreleaser release --clean --snapshot --skip-sign --skip-sbom
+	goreleaser release --clean --snapshot --skip=sign --skip=sbom
 
 # Build and package a guac container for local testing
 # Separate build_container as its own target to ensure (workaround) goreleaser finish writing dist/artifacts.json
