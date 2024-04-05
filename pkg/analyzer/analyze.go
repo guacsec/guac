@@ -116,7 +116,7 @@ func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl 
   return pkgResponse, nil
 }
 
-func findHasSBOMBy(filter model.HasSBOMSpec, uri, purl, id string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
+func FindHasSBOMBy(filter model.HasSBOMSpec, uri, purl, id string, ctx context.Context, gqlclient graphql.Client) (*model.HasSBOMsResponse, error) {
   var foundHasSBOMPkg *model.HasSBOMsResponse
   var err error
   if purl != "" {
@@ -310,35 +310,35 @@ func HasSBOMToGraph(cmd *cobra.Command, ctx context.Context, gqlclient graphql.C
   var err error
 
   if uri {
-    hasSBOMResponseOne, err = findHasSBOMBy(model.HasSBOMSpec{} ,sboms[0],"", "", ctx, gqlclient)
+    hasSBOMResponseOne, err = FindHasSBOMBy(model.HasSBOMSpec{} ,sboms[0],"", "", ctx, gqlclient)
     if err != nil {
       fmt.Println("(uri)failed to lookup sbom:", sboms[0], err)
       os.Exit(1)
     }
 
-    hasSBOMResponseTwo, err = findHasSBOMBy(model.HasSBOMSpec{},  sboms[1],"", "", ctx, gqlclient)
+    hasSBOMResponseTwo, err = FindHasSBOMBy(model.HasSBOMSpec{},  sboms[1],"", "", ctx, gqlclient)
     if err != nil {
       fmt.Println("(uri)failed to lookup sbom:", sboms[1], err)
       os.Exit(1)
     }
   } else if purl {
-    hasSBOMResponseOne, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[0], "", ctx, gqlclient)
+    hasSBOMResponseOne, err = FindHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[0], "", ctx, gqlclient)
     if err != nil {
       fmt.Println("(purl)failed to lookup sbom:", sboms[0], err)
       os.Exit(1)
     }
-    hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[1],"", ctx, gqlclient)
+    hasSBOMResponseTwo, err = FindHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[1],"", ctx, gqlclient)
     if err != nil {
       fmt.Println("(purl)failed to lookup sbom:", sboms[1], err)
       os.Exit(1)
     }
   } else if id {
-    hasSBOMResponseOne, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", "", sboms[0], ctx, gqlclient)
+    hasSBOMResponseOne, err = FindHasSBOMBy( model.HasSBOMSpec{} ,"", "", sboms[0], ctx, gqlclient)
     if err != nil {
       fmt.Println("(id)failed to lookup sbom:", sboms[0], err)
       os.Exit(1)
     }
-    hasSBOMResponseTwo, err = findHasSBOMBy( model.HasSBOMSpec{} ,"", "", sboms[1] ,ctx, gqlclient)
+    hasSBOMResponseTwo, err = FindHasSBOMBy( model.HasSBOMSpec{} ,"", "", sboms[1] ,ctx, gqlclient)
     if err != nil {
       fmt.Println("(id)failed to lookup sbom:", sboms[1], err)
       os.Exit(1)
@@ -361,8 +361,8 @@ func HasSBOMToGraph(cmd *cobra.Command, ctx context.Context, gqlclient graphql.C
 
 
   //create graphs
-  gOne := makeGraph(hasSBOMOne, metadata, inclSoft, inclDeps, inclOccur, namespaces)
-  gTwo := makeGraph(hasSBOMTwo, metadata, inclSoft, inclDeps, inclOccur, namespaces)
+  gOne := MakeGraph(hasSBOMOne, metadata, inclSoft, inclDeps, inclOccur, namespaces)
+  gTwo := MakeGraph(hasSBOMTwo, metadata, inclSoft, inclDeps, inclOccur, namespaces)
 
   return []graph.Graph[string, *Node] {
     gOne,
@@ -551,7 +551,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
   return   nil, HighlightedDiff{}
 }
 
-func makeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, inclOccur, namespaces bool) graph.Graph[string, *Node] {
+func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, inclOccur, namespaces bool) graph.Graph[string, *Node] {
 
   g := graph.New(NodeHash, graph.Directed())
 
