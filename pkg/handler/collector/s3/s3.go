@@ -253,9 +253,6 @@ func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider,
 		mpBuilder = s.config.MpBuilder
 	} else {
 		mpBuilder = messaging.GetDefaultMessageProviderBuilder()
-		if err != nil {
-			return nil, fmt.Errorf("error getting message provider: %w", err)
-		}
 	}
 
 	mp, err := mpBuilder.GetMessageProvider(messaging.MessageProviderConfig{
