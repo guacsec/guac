@@ -42,6 +42,8 @@ type ociOptions struct {
 	blobAddr string
 	// run as poll collector
 	poll bool
+	// use blob URL for origin instead of source URL (useful if the blob store is persistent and we want to store the blob source location)
+	useBlobURL bool
 }
 
 var ociCmd = &cobra.Command{
@@ -74,6 +76,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
+			viper.GetBool("use-blob-url"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -95,11 +98,22 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateOCIFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (ociOptions, error) {
+func validateOCIFlags(
+	pubsubAddr,
+	blobAddr,
+	csubAddr string,
+	csubTls,
+	csubTlsSkipVerify,
+	useCsub,
+	poll,
+	useBlobURL bool,
+	args []string,
+) (ociOptions, error) {
 	var opts ociOptions
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
+	opts.useBlobURL = useBlobURL
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

@@ -3,6 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/guacsec/guac/pkg/cli"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
@@ -10,9 +14,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 // s3Options flags for configuring the command
@@ -29,6 +30,8 @@ type s3Options struct {
 	poll              bool                          // polling or non-polling behaviour? (defaults to non-polling)
 	graphqlEndpoint   string                        // endpoint for the graphql server
 	csubClientOptions csub_client.CsubClientOptions // options for the collectsub client
+	// use blob URL for origin instead of source URL (useful if the blob store is persistent and we want to store the blob source location)
+	useBlobURL bool
 }
 
 var s3Cmd = &cobra.Command{
@@ -65,8 +68,6 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetString("blob-addr"),
 			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
-			viper.GetBool("csub-tls"),
-			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetString("s3-url"),
 			viper.GetString("s3-bucket"),
 			viper.GetString("s3-region"),
@@ -74,7 +75,10 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetString("s3-mp"),
 			viper.GetString("s3-mp-endpoint"),
 			viper.GetString("s3-queues"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
+			viper.GetBool("use-blob-url"),
 		)
 		if err != nil {
 			fmt.Printf("failed to validate flags: %v\n", err)
@@ -112,7 +116,23 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 	},
 }
 
-func validateS3Opts(pubSubAddr, blobAddr, graphqlEndpoint, csubAddr string, csubTls, csubTlsSkipVerify bool, s3url, s3bucket, region, s3item, mp, mpEndpoint, queues string, poll bool) (s3Options, error) {
+func validateS3Opts(
+	pubSubAddr,
+	blobAddr,
+	graphqlEndpoint,
+	csubAddr,
+	s3url,
+	s3bucket,
+	region,
+	s3item,
+	mp,
+	mpEndpoint,
+	queues string,
+	csubTls,
+	csubTlsSkipVerify,
+	poll,
+	useBlobURL bool,
+) (s3Options, error) {
 	var opts s3Options
 
 	if poll {
@@ -148,6 +168,7 @@ func validateS3Opts(pubSubAddr, blobAddr, graphqlEndpoint, csubAddr string, csub
 		poll:              poll,
 		graphqlEndpoint:   graphqlEndpoint,
 		csubClientOptions: csubClientOptions,
+		useBlobURL:        useBlobURL,
 	}
 
 	return opts, nil

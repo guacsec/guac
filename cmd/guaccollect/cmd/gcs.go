@@ -1,9 +1,11 @@
 package cmd
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
+	"os"
+
+	"cloud.google.com/go/storage"
 	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
@@ -14,7 +16,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/api/option"
-	"os"
 )
 
 type gcsOptions struct {
@@ -23,6 +24,8 @@ type gcsOptions struct {
 	graphqlEndpoint   string
 	csubClientOptions client.CsubClientOptions
 	bucket            string
+	// use blob URL for origin instead of source URL (useful if the blob store is persistent and we want to store the blob source location)
+	useBlobURL bool
 }
 
 const gcsCredentialsPathFlag = "gcp-credentials-path"
@@ -41,9 +44,10 @@ var gcsCmd = &cobra.Command{
 			viper.GetString("blob-addr"),
 			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
+			viper.GetString(gcsCredentialsPathFlag),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
-			viper.GetString(gcsCredentialsPathFlag),
+			viper.GetBool("use-blob-url"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -90,11 +94,22 @@ var gcsCmd = &cobra.Command{
 	},
 }
 
-func validateGCSFlags(pubSubAddr, blobAddr, gqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, credentialsPath string, args []string) (gcsOptions, error) {
+func validateGCSFlags(
+	pubSubAddr,
+	blobAddr,
+	gqlEndpoint,
+	csubAddr,
+	credentialsPath string,
+	csubTls,
+	csubTlsSkipVerify,
+	useBlobURL bool,
+	args []string,
+) (gcsOptions, error) {
 	opts := gcsOptions{
 		pubSubAddr:      pubSubAddr,
 		blobAddr:        blobAddr,
 		graphqlEndpoint: gqlEndpoint,
+		useBlobURL:      useBlobURL,
 	}
 
 	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

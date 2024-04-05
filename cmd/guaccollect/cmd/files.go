@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/blob"
-	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/file"
@@ -193,15 +192,5 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"use-blob-url"})
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
-		os.Exit(1)
-	}
-	filesCmd.PersistentFlags().AddFlagSet(set)
-	if err := viper.BindPFlags(filesCmd.PersistentFlags()); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
-		os.Exit(1)
-	}
 	rootCmd.AddCommand(filesCmd)
 }

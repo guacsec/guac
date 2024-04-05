@@ -49,6 +49,8 @@ type depsDevOptions struct {
 	enablePrometheus bool
 	// prometheus address
 	prometheusPort int
+	// use blob URL for origin instead of source URL (useful if the blob store is persistent and we want to store the blob source location)
+	useBlobURL bool
 }
 
 var depsDevCmd = &cobra.Command{
@@ -82,9 +84,10 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("retrieve-dependencies"),
-			args,
 			viper.GetBool("enable-prometheus"),
+			viper.GetBool("use-blob-url"),
 			viper.GetInt("prometheus-port"),
+			args,
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -114,8 +117,19 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateDepsDevFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, retrieveDependencies bool, args []string,
-	enablePrometheus bool, prometheusPort int,
+func validateDepsDevFlags(
+	pubsubAddr,
+	blobAddr,
+	csubAddr string,
+	csubTls,
+	csubTlsSkipVerify,
+	useCsub,
+	poll,
+	retrieveDependencies,
+	enablePrometheus,
+	useBlobURL bool,
+	prometheusPort int,
+	args []string,
 ) (depsDevOptions, error) {
 	var opts depsDevOptions
 	opts.pubsubAddr = pubsubAddr
@@ -123,6 +137,7 @@ func validateDepsDevFlags(pubsubAddr string, blobAddr string, csubAddr string, c
 	opts.poll = poll
 	opts.retrieveDependencies = retrieveDependencies
 	opts.enablePrometheus = enablePrometheus
+	opts.useBlobURL = useBlobURL
 	opts.prometheusPort = prometheusPort
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
