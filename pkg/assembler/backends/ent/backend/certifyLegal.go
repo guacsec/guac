@@ -36,15 +36,13 @@ import (
 )
 
 func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
+	if spec == nil {
+		spec = &model.CertifyLegalSpec{}
+	}
+	certLegalQuery := b.client.CertifyLegal.Query().
+		Where(certifyLegalQuery(*spec))
 
-	records, err := b.client.CertifyLegal.Query().
-		Where(certifyLegalQuery(*spec)).
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {})
-		}).
-		WithSource(func(q *ent.SourceNameQuery) {}).
-		WithDeclaredLicenses().
-		WithDiscoveredLicenses().
+	records, err := getCertifyLegalObject(certLegalQuery).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -52,6 +50,17 @@ func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalS
 	}
 
 	return collect(records, toModelCertifyLegal), nil
+}
+
+// getCertifyLegalObject is used recreate the certifyLegal object be eager loading the edges
+func getCertifyLegalObject(q *ent.CertifyLegalQuery) *ent.CertifyLegalQuery {
+	return q.
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).
+		WithSource(func(q *ent.SourceNameQuery) {}).
+		WithDeclaredLicenses().
+		WithDiscoveredLicenses()
 }
 
 func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) ([]string, error) {
@@ -68,7 +77,7 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(certifylegal.Table, *ids), nil
 }
 
 func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, spec *model.CertifyLegalInputSpec) (string, error) {
@@ -127,7 +136,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 		return "", gqlerror.Errorf("IngestCertifyLegal :: %s", txErr)
 	}
 
-	return *recordID, nil
+	return toGlobalID(certifylegal.Table, *recordID), nil
 }
 
 func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg *model.IDorPkgInput, src *model.IDorSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput) (*ent.CertifyLegalCreate, error) {
@@ -147,7 +156,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		var declaredLicenseIDs []string
 		for _, decLic := range declaredLicenses {
 			if decLic.LicenseID != nil {
-				declaredLicenseIDs = append(declaredLicenseIDs, *decLic.LicenseID)
+				decLicGlobalID := fromGlobalID(*decLic.LicenseID)
+				declaredLicenseIDs = append(declaredLicenseIDs, decLicGlobalID.id)
 			} else {
 				licenseID, err := getLicenseID(ctx, tx.Client(), *decLic.LicenseInput)
 				if err != nil {
@@ -176,7 +186,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		var discoveredLicenseIDs []string
 		for _, disLic := range discoveredLicenses {
 			if disLic.LicenseID != nil {
-				discoveredLicenseIDs = append(discoveredLicenseIDs, *disLic.LicenseID)
+				disLicGlobalID := fromGlobalID(*disLic.LicenseID)
+				discoveredLicenseIDs = append(discoveredLicenseIDs, disLicGlobalID.id)
 			} else {
 				licenseID, err := getLicenseID(ctx, tx.Client(), *disLic.LicenseInput)
 				if err != nil {
@@ -205,7 +216,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
 			var err error
-			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+			pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -226,7 +238,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
@@ -415,29 +428,48 @@ func guacCertifyLegalKey(pkgVersionID *string, srcNameID *string, declaredLicens
 	return &clID, nil
 }
 
-// func certifyLegalInputQuery(subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, filter model.CertifyLegalInputSpec) predicate.CertifyLegal {
-// 	var subjectSpec *model.PackageOrSourceSpec
-// 	if subject.Package != nil {
-// 		subjectSpec = &model.PackageOrSourceSpec{
-// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-// 		}
-// 	} else {
-// 		subjectSpec = &model.PackageOrSourceSpec{
-// 			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
-// 		}
-// 	}
-// 	declaredLicenseSpecs := collect(declaredLicenses, helper.ConvertLicenseInputSpecToLicenseSpec)
-// 	discoveredLicenseSpecs := collect(discoveredLicenses, helper.ConvertLicenseInputSpecToLicenseSpec)
-// 	return certifyLegalQuery(model.CertifyLegalSpec{
-// 		Subject:            subjectSpec,
-// 		DeclaredLicense:    &filter.DeclaredLicense,
-// 		DeclaredLicenses:   declaredLicenseSpecs,
-// 		DiscoveredLicense:  &filter.DiscoveredLicense,
-// 		DiscoveredLicenses: discoveredLicenseSpecs,
-// 		Attribution:        &filter.Attribution,
-// 		Justification:      &filter.Justification,
-// 		TimeScanned:        &filter.TimeScanned,
-// 		Origin:             &filter.Origin,
-// 		Collector:          &filter.Collector,
-// 	})
-// }
+func (b *EntBackend) certifyLegalNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.CertifyLegal.Query().
+		Where(certifyLegalQuery(model.CertifyLegalSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyLegalPackage] {
+		query.
+			WithPackage(withPackageVersionTree())
+	}
+	if allowedEdges[model.EdgeCertifyLegalSource] {
+		query.
+			WithSource()
+	}
+	if allowedEdges[model.EdgeCertifyLegalLicense] {
+		query.
+			WithDeclaredLicenses().
+			WithDiscoveredLicenses()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	certLegals, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyLegal with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundLegal := range certLegals {
+		if foundLegal.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundLegal.Edges.Package)))
+		}
+		if foundLegal.Edges.Source != nil {
+			out = append(out, toModelSource(foundLegal.Edges.Source))
+		}
+		for _, collectedDecLicense := range foundLegal.Edges.DeclaredLicenses {
+			out = append(out, toModelLicense(collectedDecLicense))
+		}
+		for _, collectedDisLicense := range foundLegal.Edges.DiscoveredLicenses {
+			out = append(out, toModelLicense(collectedDisLicense))
+		}
+	}
+
+	return out, nil
+}

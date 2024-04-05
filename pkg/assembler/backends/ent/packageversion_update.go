@@ -13,10 +13,18 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -143,6 +151,111 @@ func (pvu *PackageVersionUpdate) AddSbom(b ...*BillOfMaterials) *PackageVersionU
 	return pvu.AddSbomIDs(ids...)
 }
 
+// AddVulnIDs adds the "vuln" edge to the CertifyVuln entity by IDs.
+func (pvu *PackageVersionUpdate) AddVulnIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddVulnIDs(ids...)
+	return pvu
+}
+
+// AddVuln adds the "vuln" edges to the CertifyVuln entity.
+func (pvu *PackageVersionUpdate) AddVuln(c ...*CertifyVuln) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.AddVulnIDs(ids...)
+}
+
+// AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
+func (pvu *PackageVersionUpdate) AddVexIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddVexIDs(ids...)
+	return pvu
+}
+
+// AddVex adds the "vex" edges to the CertifyVex entity.
+func (pvu *PackageVersionUpdate) AddVex(c ...*CertifyVex) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.AddVexIDs(ids...)
+}
+
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (pvu *PackageVersionUpdate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddHasSourceAtIDs(ids...)
+	return pvu
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (pvu *PackageVersionUpdate) AddHasSourceAt(h ...*HasSourceAt) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvu.AddHasSourceAtIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (pvu *PackageVersionUpdate) AddCertificationIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddCertificationIDs(ids...)
+	return pvu
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (pvu *PackageVersionUpdate) AddCertification(c ...*Certification) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (pvu *PackageVersionUpdate) AddMetadatumIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddMetadatumIDs(ids...)
+	return pvu
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (pvu *PackageVersionUpdate) AddMetadata(h ...*HasMetadata) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvu.AddMetadatumIDs(ids...)
+}
+
+// AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
+func (pvu *PackageVersionUpdate) AddDependencyIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddDependencyIDs(ids...)
+	return pvu
+}
+
+// AddDependency adds the "dependency" edges to the Dependency entity.
+func (pvu *PackageVersionUpdate) AddDependency(d ...*Dependency) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvu.AddDependencyIDs(ids...)
+}
+
+// AddDependencySubjectIDs adds the "dependency_subject" edge to the Dependency entity by IDs.
+func (pvu *PackageVersionUpdate) AddDependencySubjectIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddDependencySubjectIDs(ids...)
+	return pvu
+}
+
+// AddDependencySubject adds the "dependency_subject" edges to the Dependency entity.
+func (pvu *PackageVersionUpdate) AddDependencySubject(d ...*Dependency) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvu.AddDependencySubjectIDs(ids...)
+}
+
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
 func (pvu *PackageVersionUpdate) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdate {
 	pvu.mutation.AddIncludedInSbomIDs(ids...)
@@ -186,6 +299,36 @@ func (pvu *PackageVersionUpdate) AddPkgEqualPkgB(p ...*PkgEqual) *PackageVersion
 		ids[i] = p[i].ID
 	}
 	return pvu.AddPkgEqualPkgBIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (pvu *PackageVersionUpdate) AddPocIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddPocIDs(ids...)
+	return pvu
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (pvu *PackageVersionUpdate) AddPoc(p ...*PointOfContact) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.AddPocIDs(ids...)
+}
+
+// AddCertifyLegalIDs adds the "certify_legal" edge to the CertifyLegal entity by IDs.
+func (pvu *PackageVersionUpdate) AddCertifyLegalIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.AddCertifyLegalIDs(ids...)
+	return pvu
+}
+
+// AddCertifyLegal adds the "certify_legal" edges to the CertifyLegal entity.
+func (pvu *PackageVersionUpdate) AddCertifyLegal(c ...*CertifyLegal) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.AddCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -239,6 +382,153 @@ func (pvu *PackageVersionUpdate) RemoveSbom(b ...*BillOfMaterials) *PackageVersi
 		ids[i] = b[i].ID
 	}
 	return pvu.RemoveSbomIDs(ids...)
+}
+
+// ClearVuln clears all "vuln" edges to the CertifyVuln entity.
+func (pvu *PackageVersionUpdate) ClearVuln() *PackageVersionUpdate {
+	pvu.mutation.ClearVuln()
+	return pvu
+}
+
+// RemoveVulnIDs removes the "vuln" edge to CertifyVuln entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveVulnIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemoveVulnIDs(ids...)
+	return pvu
+}
+
+// RemoveVuln removes "vuln" edges to CertifyVuln entities.
+func (pvu *PackageVersionUpdate) RemoveVuln(c ...*CertifyVuln) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.RemoveVulnIDs(ids...)
+}
+
+// ClearVex clears all "vex" edges to the CertifyVex entity.
+func (pvu *PackageVersionUpdate) ClearVex() *PackageVersionUpdate {
+	pvu.mutation.ClearVex()
+	return pvu
+}
+
+// RemoveVexIDs removes the "vex" edge to CertifyVex entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveVexIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemoveVexIDs(ids...)
+	return pvu
+}
+
+// RemoveVex removes "vex" edges to CertifyVex entities.
+func (pvu *PackageVersionUpdate) RemoveVex(c ...*CertifyVex) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.RemoveVexIDs(ids...)
+}
+
+// ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
+func (pvu *PackageVersionUpdate) ClearHasSourceAt() *PackageVersionUpdate {
+	pvu.mutation.ClearHasSourceAt()
+	return pvu
+}
+
+// RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemoveHasSourceAtIDs(ids...)
+	return pvu
+}
+
+// RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
+func (pvu *PackageVersionUpdate) RemoveHasSourceAt(h ...*HasSourceAt) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvu.RemoveHasSourceAtIDs(ids...)
+}
+
+// ClearCertification clears all "certification" edges to the Certification entity.
+func (pvu *PackageVersionUpdate) ClearCertification() *PackageVersionUpdate {
+	pvu.mutation.ClearCertification()
+	return pvu
+}
+
+// RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemoveCertificationIDs(ids...)
+	return pvu
+}
+
+// RemoveCertification removes "certification" edges to Certification entities.
+func (pvu *PackageVersionUpdate) RemoveCertification(c ...*Certification) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.RemoveCertificationIDs(ids...)
+}
+
+// ClearMetadata clears all "metadata" edges to the HasMetadata entity.
+func (pvu *PackageVersionUpdate) ClearMetadata() *PackageVersionUpdate {
+	pvu.mutation.ClearMetadata()
+	return pvu
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveMetadatumIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemoveMetadatumIDs(ids...)
+	return pvu
+}
+
+// RemoveMetadata removes "metadata" edges to HasMetadata entities.
+func (pvu *PackageVersionUpdate) RemoveMetadata(h ...*HasMetadata) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvu.RemoveMetadatumIDs(ids...)
+}
+
+// ClearDependency clears all "dependency" edges to the Dependency entity.
+func (pvu *PackageVersionUpdate) ClearDependency() *PackageVersionUpdate {
+	pvu.mutation.ClearDependency()
+	return pvu
+}
+
+// RemoveDependencyIDs removes the "dependency" edge to Dependency entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveDependencyIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemoveDependencyIDs(ids...)
+	return pvu
+}
+
+// RemoveDependency removes "dependency" edges to Dependency entities.
+func (pvu *PackageVersionUpdate) RemoveDependency(d ...*Dependency) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvu.RemoveDependencyIDs(ids...)
+}
+
+// ClearDependencySubject clears all "dependency_subject" edges to the Dependency entity.
+func (pvu *PackageVersionUpdate) ClearDependencySubject() *PackageVersionUpdate {
+	pvu.mutation.ClearDependencySubject()
+	return pvu
+}
+
+// RemoveDependencySubjectIDs removes the "dependency_subject" edge to Dependency entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveDependencySubjectIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemoveDependencySubjectIDs(ids...)
+	return pvu
+}
+
+// RemoveDependencySubject removes "dependency_subject" edges to Dependency entities.
+func (pvu *PackageVersionUpdate) RemoveDependencySubject(d ...*Dependency) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvu.RemoveDependencySubjectIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
@@ -302,6 +592,48 @@ func (pvu *PackageVersionUpdate) RemovePkgEqualPkgB(p ...*PkgEqual) *PackageVers
 		ids[i] = p[i].ID
 	}
 	return pvu.RemovePkgEqualPkgBIDs(ids...)
+}
+
+// ClearPoc clears all "poc" edges to the PointOfContact entity.
+func (pvu *PackageVersionUpdate) ClearPoc() *PackageVersionUpdate {
+	pvu.mutation.ClearPoc()
+	return pvu
+}
+
+// RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
+func (pvu *PackageVersionUpdate) RemovePocIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemovePocIDs(ids...)
+	return pvu
+}
+
+// RemovePoc removes "poc" edges to PointOfContact entities.
+func (pvu *PackageVersionUpdate) RemovePoc(p ...*PointOfContact) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvu.RemovePocIDs(ids...)
+}
+
+// ClearCertifyLegal clears all "certify_legal" edges to the CertifyLegal entity.
+func (pvu *PackageVersionUpdate) ClearCertifyLegal() *PackageVersionUpdate {
+	pvu.mutation.ClearCertifyLegal()
+	return pvu
+}
+
+// RemoveCertifyLegalIDs removes the "certify_legal" edge to CertifyLegal entities by IDs.
+func (pvu *PackageVersionUpdate) RemoveCertifyLegalIDs(ids ...uuid.UUID) *PackageVersionUpdate {
+	pvu.mutation.RemoveCertifyLegalIDs(ids...)
+	return pvu
+}
+
+// RemoveCertifyLegal removes "certify_legal" edges to CertifyLegal entities.
+func (pvu *PackageVersionUpdate) RemoveCertifyLegal(c ...*CertifyLegal) *PackageVersionUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvu.RemoveCertifyLegalIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -490,6 +822,321 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pvu.mutation.VulnCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VulnTable,
+			Columns: []string{packageversion.VulnColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedVulnIDs(); len(nodes) > 0 && !pvu.mutation.VulnCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VulnTable,
+			Columns: []string{packageversion.VulnColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.VulnIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VulnTable,
+			Columns: []string{packageversion.VulnColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.VexCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexTable,
+			Columns: []string{packageversion.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedVexIDs(); len(nodes) > 0 && !pvu.mutation.VexCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexTable,
+			Columns: []string{packageversion.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.VexIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexTable,
+			Columns: []string{packageversion.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.HasSourceAtTable,
+			Columns: []string{packageversion.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !pvu.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.HasSourceAtTable,
+			Columns: []string{packageversion.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.HasSourceAtTable,
+			Columns: []string{packageversion.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertificationTable,
+			Columns: []string{packageversion.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !pvu.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertificationTable,
+			Columns: []string{packageversion.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertificationTable,
+			Columns: []string{packageversion.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.MetadataTable,
+			Columns: []string{packageversion.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !pvu.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.MetadataTable,
+			Columns: []string{packageversion.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.MetadataTable,
+			Columns: []string{packageversion.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.DependencyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencyTable,
+			Columns: []string{packageversion.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedDependencyIDs(); len(nodes) > 0 && !pvu.mutation.DependencyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencyTable,
+			Columns: []string{packageversion.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.DependencyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencyTable,
+			Columns: []string{packageversion.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.DependencySubjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencySubjectTable,
+			Columns: []string{packageversion.DependencySubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedDependencySubjectIDs(); len(nodes) > 0 && !pvu.mutation.DependencySubjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencySubjectTable,
+			Columns: []string{packageversion.DependencySubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.DependencySubjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencySubjectTable,
+			Columns: []string{packageversion.DependencySubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if pvu.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -618,6 +1265,96 @@ func (pvu *PackageVersionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PocTable,
+			Columns: []string{packageversion.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedPocIDs(); len(nodes) > 0 && !pvu.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PocTable,
+			Columns: []string{packageversion.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PocTable,
+			Columns: []string{packageversion.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvu.mutation.CertifyLegalCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertifyLegalTable,
+			Columns: []string{packageversion.CertifyLegalColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.RemovedCertifyLegalIDs(); len(nodes) > 0 && !pvu.mutation.CertifyLegalCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertifyLegalTable,
+			Columns: []string{packageversion.CertifyLegalColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvu.mutation.CertifyLegalIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertifyLegalTable,
+			Columns: []string{packageversion.CertifyLegalColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -754,6 +1491,111 @@ func (pvuo *PackageVersionUpdateOne) AddSbom(b ...*BillOfMaterials) *PackageVers
 	return pvuo.AddSbomIDs(ids...)
 }
 
+// AddVulnIDs adds the "vuln" edge to the CertifyVuln entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddVulnIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddVulnIDs(ids...)
+	return pvuo
+}
+
+// AddVuln adds the "vuln" edges to the CertifyVuln entity.
+func (pvuo *PackageVersionUpdateOne) AddVuln(c ...*CertifyVuln) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.AddVulnIDs(ids...)
+}
+
+// AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddVexIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddVexIDs(ids...)
+	return pvuo
+}
+
+// AddVex adds the "vex" edges to the CertifyVex entity.
+func (pvuo *PackageVersionUpdateOne) AddVex(c ...*CertifyVex) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.AddVexIDs(ids...)
+}
+
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddHasSourceAtIDs(ids...)
+	return pvuo
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (pvuo *PackageVersionUpdateOne) AddHasSourceAt(h ...*HasSourceAt) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvuo.AddHasSourceAtIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddCertificationIDs(ids...)
+	return pvuo
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (pvuo *PackageVersionUpdateOne) AddCertification(c ...*Certification) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddMetadatumIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddMetadatumIDs(ids...)
+	return pvuo
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (pvuo *PackageVersionUpdateOne) AddMetadata(h ...*HasMetadata) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvuo.AddMetadatumIDs(ids...)
+}
+
+// AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddDependencyIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddDependencyIDs(ids...)
+	return pvuo
+}
+
+// AddDependency adds the "dependency" edges to the Dependency entity.
+func (pvuo *PackageVersionUpdateOne) AddDependency(d ...*Dependency) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvuo.AddDependencyIDs(ids...)
+}
+
+// AddDependencySubjectIDs adds the "dependency_subject" edge to the Dependency entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddDependencySubjectIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddDependencySubjectIDs(ids...)
+	return pvuo
+}
+
+// AddDependencySubject adds the "dependency_subject" edges to the Dependency entity.
+func (pvuo *PackageVersionUpdateOne) AddDependencySubject(d ...*Dependency) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvuo.AddDependencySubjectIDs(ids...)
+}
+
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
 func (pvuo *PackageVersionUpdateOne) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
 	pvuo.mutation.AddIncludedInSbomIDs(ids...)
@@ -797,6 +1639,36 @@ func (pvuo *PackageVersionUpdateOne) AddPkgEqualPkgB(p ...*PkgEqual) *PackageVer
 		ids[i] = p[i].ID
 	}
 	return pvuo.AddPkgEqualPkgBIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddPocIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddPocIDs(ids...)
+	return pvuo
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (pvuo *PackageVersionUpdateOne) AddPoc(p ...*PointOfContact) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.AddPocIDs(ids...)
+}
+
+// AddCertifyLegalIDs adds the "certify_legal" edge to the CertifyLegal entity by IDs.
+func (pvuo *PackageVersionUpdateOne) AddCertifyLegalIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.AddCertifyLegalIDs(ids...)
+	return pvuo
+}
+
+// AddCertifyLegal adds the "certify_legal" edges to the CertifyLegal entity.
+func (pvuo *PackageVersionUpdateOne) AddCertifyLegal(c ...*CertifyLegal) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.AddCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -850,6 +1722,153 @@ func (pvuo *PackageVersionUpdateOne) RemoveSbom(b ...*BillOfMaterials) *PackageV
 		ids[i] = b[i].ID
 	}
 	return pvuo.RemoveSbomIDs(ids...)
+}
+
+// ClearVuln clears all "vuln" edges to the CertifyVuln entity.
+func (pvuo *PackageVersionUpdateOne) ClearVuln() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearVuln()
+	return pvuo
+}
+
+// RemoveVulnIDs removes the "vuln" edge to CertifyVuln entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveVulnIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveVulnIDs(ids...)
+	return pvuo
+}
+
+// RemoveVuln removes "vuln" edges to CertifyVuln entities.
+func (pvuo *PackageVersionUpdateOne) RemoveVuln(c ...*CertifyVuln) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.RemoveVulnIDs(ids...)
+}
+
+// ClearVex clears all "vex" edges to the CertifyVex entity.
+func (pvuo *PackageVersionUpdateOne) ClearVex() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearVex()
+	return pvuo
+}
+
+// RemoveVexIDs removes the "vex" edge to CertifyVex entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveVexIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveVexIDs(ids...)
+	return pvuo
+}
+
+// RemoveVex removes "vex" edges to CertifyVex entities.
+func (pvuo *PackageVersionUpdateOne) RemoveVex(c ...*CertifyVex) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.RemoveVexIDs(ids...)
+}
+
+// ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
+func (pvuo *PackageVersionUpdateOne) ClearHasSourceAt() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearHasSourceAt()
+	return pvuo
+}
+
+// RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveHasSourceAtIDs(ids...)
+	return pvuo
+}
+
+// RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
+func (pvuo *PackageVersionUpdateOne) RemoveHasSourceAt(h ...*HasSourceAt) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvuo.RemoveHasSourceAtIDs(ids...)
+}
+
+// ClearCertification clears all "certification" edges to the Certification entity.
+func (pvuo *PackageVersionUpdateOne) ClearCertification() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearCertification()
+	return pvuo
+}
+
+// RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveCertificationIDs(ids...)
+	return pvuo
+}
+
+// RemoveCertification removes "certification" edges to Certification entities.
+func (pvuo *PackageVersionUpdateOne) RemoveCertification(c ...*Certification) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.RemoveCertificationIDs(ids...)
+}
+
+// ClearMetadata clears all "metadata" edges to the HasMetadata entity.
+func (pvuo *PackageVersionUpdateOne) ClearMetadata() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearMetadata()
+	return pvuo
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveMetadatumIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveMetadatumIDs(ids...)
+	return pvuo
+}
+
+// RemoveMetadata removes "metadata" edges to HasMetadata entities.
+func (pvuo *PackageVersionUpdateOne) RemoveMetadata(h ...*HasMetadata) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvuo.RemoveMetadatumIDs(ids...)
+}
+
+// ClearDependency clears all "dependency" edges to the Dependency entity.
+func (pvuo *PackageVersionUpdateOne) ClearDependency() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearDependency()
+	return pvuo
+}
+
+// RemoveDependencyIDs removes the "dependency" edge to Dependency entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveDependencyIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveDependencyIDs(ids...)
+	return pvuo
+}
+
+// RemoveDependency removes "dependency" edges to Dependency entities.
+func (pvuo *PackageVersionUpdateOne) RemoveDependency(d ...*Dependency) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvuo.RemoveDependencyIDs(ids...)
+}
+
+// ClearDependencySubject clears all "dependency_subject" edges to the Dependency entity.
+func (pvuo *PackageVersionUpdateOne) ClearDependencySubject() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearDependencySubject()
+	return pvuo
+}
+
+// RemoveDependencySubjectIDs removes the "dependency_subject" edge to Dependency entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveDependencySubjectIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveDependencySubjectIDs(ids...)
+	return pvuo
+}
+
+// RemoveDependencySubject removes "dependency_subject" edges to Dependency entities.
+func (pvuo *PackageVersionUpdateOne) RemoveDependencySubject(d ...*Dependency) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvuo.RemoveDependencySubjectIDs(ids...)
 }
 
 // ClearIncludedInSboms clears all "included_in_sboms" edges to the BillOfMaterials entity.
@@ -913,6 +1932,48 @@ func (pvuo *PackageVersionUpdateOne) RemovePkgEqualPkgB(p ...*PkgEqual) *Package
 		ids[i] = p[i].ID
 	}
 	return pvuo.RemovePkgEqualPkgBIDs(ids...)
+}
+
+// ClearPoc clears all "poc" edges to the PointOfContact entity.
+func (pvuo *PackageVersionUpdateOne) ClearPoc() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearPoc()
+	return pvuo
+}
+
+// RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemovePocIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemovePocIDs(ids...)
+	return pvuo
+}
+
+// RemovePoc removes "poc" edges to PointOfContact entities.
+func (pvuo *PackageVersionUpdateOne) RemovePoc(p ...*PointOfContact) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvuo.RemovePocIDs(ids...)
+}
+
+// ClearCertifyLegal clears all "certify_legal" edges to the CertifyLegal entity.
+func (pvuo *PackageVersionUpdateOne) ClearCertifyLegal() *PackageVersionUpdateOne {
+	pvuo.mutation.ClearCertifyLegal()
+	return pvuo
+}
+
+// RemoveCertifyLegalIDs removes the "certify_legal" edge to CertifyLegal entities by IDs.
+func (pvuo *PackageVersionUpdateOne) RemoveCertifyLegalIDs(ids ...uuid.UUID) *PackageVersionUpdateOne {
+	pvuo.mutation.RemoveCertifyLegalIDs(ids...)
+	return pvuo
+}
+
+// RemoveCertifyLegal removes "certify_legal" edges to CertifyLegal entities.
+func (pvuo *PackageVersionUpdateOne) RemoveCertifyLegal(c ...*CertifyLegal) *PackageVersionUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvuo.RemoveCertifyLegalIDs(ids...)
 }
 
 // Where appends a list predicates to the PackageVersionUpdate builder.
@@ -1131,6 +2192,321 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pvuo.mutation.VulnCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VulnTable,
+			Columns: []string{packageversion.VulnColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedVulnIDs(); len(nodes) > 0 && !pvuo.mutation.VulnCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VulnTable,
+			Columns: []string{packageversion.VulnColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.VulnIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VulnTable,
+			Columns: []string{packageversion.VulnColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.VexCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexTable,
+			Columns: []string{packageversion.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedVexIDs(); len(nodes) > 0 && !pvuo.mutation.VexCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexTable,
+			Columns: []string{packageversion.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.VexIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexTable,
+			Columns: []string{packageversion.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.HasSourceAtTable,
+			Columns: []string{packageversion.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !pvuo.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.HasSourceAtTable,
+			Columns: []string{packageversion.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.HasSourceAtTable,
+			Columns: []string{packageversion.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertificationTable,
+			Columns: []string{packageversion.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !pvuo.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertificationTable,
+			Columns: []string{packageversion.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertificationTable,
+			Columns: []string{packageversion.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.MetadataTable,
+			Columns: []string{packageversion.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !pvuo.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.MetadataTable,
+			Columns: []string{packageversion.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.MetadataTable,
+			Columns: []string{packageversion.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.DependencyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencyTable,
+			Columns: []string{packageversion.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedDependencyIDs(); len(nodes) > 0 && !pvuo.mutation.DependencyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencyTable,
+			Columns: []string{packageversion.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.DependencyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencyTable,
+			Columns: []string{packageversion.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.DependencySubjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencySubjectTable,
+			Columns: []string{packageversion.DependencySubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedDependencySubjectIDs(); len(nodes) > 0 && !pvuo.mutation.DependencySubjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencySubjectTable,
+			Columns: []string{packageversion.DependencySubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.DependencySubjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencySubjectTable,
+			Columns: []string{packageversion.DependencySubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if pvuo.mutation.IncludedInSbomsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -1259,6 +2635,96 @@ func (pvuo *PackageVersionUpdateOne) sqlSave(ctx context.Context) (_node *Packag
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PocTable,
+			Columns: []string{packageversion.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedPocIDs(); len(nodes) > 0 && !pvuo.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PocTable,
+			Columns: []string{packageversion.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PocTable,
+			Columns: []string{packageversion.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pvuo.mutation.CertifyLegalCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertifyLegalTable,
+			Columns: []string{packageversion.CertifyLegalColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.RemovedCertifyLegalIDs(); len(nodes) > 0 && !pvuo.mutation.CertifyLegalCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertifyLegalTable,
+			Columns: []string{packageversion.CertifyLegalColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pvuo.mutation.CertifyLegalIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertifyLegalTable,
+			Columns: []string{packageversion.CertifyLegalColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

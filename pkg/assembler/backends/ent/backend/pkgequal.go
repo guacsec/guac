@@ -26,6 +26,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -34,21 +35,31 @@ import (
 )
 
 func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
-
+	if spec == nil {
+		spec = &model.PkgEqualSpec{}
+	}
 	if len(spec.Packages) > 2 {
 		return nil, fmt.Errorf("too many packages specified in pkg equal filter")
 	}
 
-	records, err := b.client.PkgEqual.Query().
-		Where(pkgEqualQueryPredicates(spec)).
-		WithPackageA(withPackageVersionTree()).
-		WithPackageB(withPackageVersionTree()).
+	peQuery := b.client.PkgEqual.Query().
+		Where(pkgEqualQueryPredicates(spec))
+
+	records, err := getPkgEqualObject(peQuery).
+		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return collect(records, toModelPkgEqual), nil
+}
+
+// getPkgEqualObject is used recreate the pkgEqual object be eager loading the edges
+func getPkgEqualObject(q *ent.PkgEqualQuery) *ent.PkgEqualQuery {
+	return q.
+		WithPackageA(withPackageVersionTree()).
+		WithPackageB(withPackageVersionTree())
 }
 
 func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput, depPkg model.IDorPkgInput, pkgEqual model.PkgEqualInputSpec) (string, error) {
@@ -59,7 +70,7 @@ func (b *EntBackend) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInput,
 		return "", txErr
 	}
 
-	return *id, nil
+	return toGlobalID(pkgequal.Table, *id), nil
 }
 
 func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) ([]string, error) {
@@ -76,7 +87,7 @@ func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgI
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(pkgequal.Table, *ids), nil
 }
 
 func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) (*[]string, error) {
@@ -139,7 +150,7 @@ func generatePkgEqualCreate(ctx context.Context, tx *ent.Tx, pkgA *model.IDorPkg
 		if err != nil {
 			return nil, fmt.Errorf("getPkgVersion :: %w", err)
 		}
-		pkgA.PackageVersionID = ptrfrom.String(pv.ID.String())
+		pkgA.PackageVersionID = ptrfrom.String(toGlobalID(packageversion.Table, pv.ID.String()))
 	}
 
 	if pkgB.PackageVersionID == nil {
@@ -147,7 +158,7 @@ func generatePkgEqualCreate(ctx context.Context, tx *ent.Tx, pkgA *model.IDorPkg
 		if err != nil {
 			return nil, fmt.Errorf("getPkgVersion :: %w", err)
 		}
-		pkgB.PackageVersionID = ptrfrom.String(pv.ID.String())
+		pkgB.PackageVersionID = ptrfrom.String(toGlobalID(packageversion.Table, pv.ID.String()))
 	}
 
 	sortedPkgs := []model.IDorPkgInput{*pkgA, *pkgB}
@@ -159,7 +170,8 @@ func generatePkgEqualCreate(ctx context.Context, tx *ent.Tx, pkgA *model.IDorPkg
 		if pkg.PackageVersionID == nil {
 			return nil, fmt.Errorf("PackageVersionID not specified in IDorPkgInput")
 		}
-		pkgID, err := uuid.Parse(*pkg.PackageVersionID)
+		pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+		pkgID, err := uuid.Parse(pkgVersionGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from PackageVersionID failed with error: %w", err)
 		}
@@ -241,7 +253,7 @@ func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 	packages := collect(equalPkgs, backReferencePackageVersion)
 
 	return &model.PkgEqual{
-		ID:            record.ID.String(),
+		ID:            toGlobalID(pkgequal.Table, record.ID.String()),
 		Origin:        record.Origin,
 		Collector:     record.Collector,
 		Justification: record.Justification,
@@ -276,4 +288,36 @@ func guacPkgEqualKey(sortedPkgHash string, peInput *model.PkgEqualInputSpec) (*u
 
 	peID := generateUUIDKey([]byte(peIDString))
 	return &peID, nil
+}
+
+func (b *EntBackend) pkgEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.PkgEqual.Query().
+		Where(pkgEqualQueryPredicates(&model.PkgEqualSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgePkgEqualPackage] {
+		query.
+			WithPackageA(withPackageVersionTree()).
+			WithPackageB(withPackageVersionTree())
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	pkgEquals, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for pkgEquals with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, pe := range pkgEquals {
+		if pe.Edges.PackageB != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(pe.Edges.PackageB)))
+		}
+		if pe.Edges.PackageA != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(pe.Edges.PackageA)))
+		}
+	}
+
+	return out, nil
 }

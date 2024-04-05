@@ -70,7 +70,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 		return "", txErr
 	}
 
-	return *record, nil
+	return toGlobalID(certifyvuln.Table, *record), nil
 }
 
 func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
@@ -87,7 +87,7 @@ func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorP
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(certifyvuln.Table, *ids), nil
 }
 
 func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput) (*ent.CertifyVulnCreate, error) {
@@ -101,7 +101,8 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 	var vulnID uuid.UUID
 	if vuln.VulnerabilityNodeID != nil {
 		var err error
-		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
+		vulnID, err = uuid.Parse(vulnGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
@@ -126,7 +127,8 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 	var pkgVersionID uuid.UUID
 	if pkg.PackageVersionID != nil {
 		var err error
-		pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+		pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+		pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
@@ -196,6 +198,23 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 }
 
 func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
+	if spec == nil {
+		spec = &model.CertifyVulnSpec{}
+	}
+	certVulnQuery := b.client.CertifyVuln.Query().
+		Where(certifyVulnPredicate(*spec))
+
+	records, err := getCertVulnObject(certVulnQuery).
+		Limit(MaxPageSize).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return collect(records, toModelCertifyVulnerability), nil
+}
+
+func certifyVulnPredicate(spec model.CertifyVulnSpec) predicate.CertifyVuln {
 	predicates := []predicate.CertifyVuln{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.Collector, certifyvuln.CollectorEQ),
@@ -243,24 +262,21 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 			)
 		}
 	}
+	return certifyvuln.And(predicates...)
+}
 
-	records, err := b.client.CertifyVuln.Query().
-		Where(predicates...).
+// getCertVulnObject is used recreate the CertifyVuln object be eager loading the edges
+func getCertVulnObject(q *ent.CertifyVulnQuery) *ent.CertifyVulnQuery {
+	return q.
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
-		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return collect(records, toModelCertifyVulnerability), nil
+		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {})
 }
 
 func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 	return &model.CertifyVuln{
-		ID:            record.ID.String(),
+		ID:            toGlobalID(certifyvuln.Table, record.ID.String()),
 		Package:       toModelPackage(backReferencePackageVersion(record.Edges.Package)),
 		Vulnerability: toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		Metadata: &model.ScanMetadata{
@@ -274,4 +290,39 @@ func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 		},
 	}
 
+}
+
+func (b *EntBackend) certifyVulnNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.CertifyVuln.Query().
+		Where(certifyVulnPredicate(model.CertifyVulnSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyVulnPackage] {
+		query.
+			WithPackage(withPackageVersionTree())
+	}
+	if allowedEdges[model.EdgeCertifyVulnVulnerability] {
+		query.
+			WithVulnerability()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	certVulns, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyVuln with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundVuln := range certVulns {
+		if foundVuln.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundVuln.Edges.Package)))
+		}
+		if foundVuln.Edges.Vulnerability != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(foundVuln.Edges.Vulnerability))
+		}
+	}
+
+	return out, nil
 }

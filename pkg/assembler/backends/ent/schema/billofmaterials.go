@@ -68,10 +68,10 @@ func (BillOfMaterials) Edges() []ent.Edge {
 func (BillOfMaterials) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("algorithm", "digest", "uri", "download_location", "known_since", "included_packages_hash",
-			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash").Edges("package").Unique().
+			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash", "origin", "collector").Edges("package").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND artifact_id IS NULL")).StorageKey("sbom_unique_package"),
 		index.Fields("algorithm", "digest", "uri", "download_location", "known_since", "included_packages_hash",
-			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash").Edges("artifact").Unique().
+			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash", "origin", "collector").Edges("artifact").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND artifact_id IS NOT NULL")).StorageKey("sbom_unique_artifact"),
 	}
 }

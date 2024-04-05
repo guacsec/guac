@@ -89,7 +89,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 		return "", txErr
 	}
 
-	return *recordID, nil
+	return toGlobalID(certifyvex.Table, *recordID), nil
 }
 
 func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
@@ -106,7 +106,7 @@ func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.Pac
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(certifyvex.Table, *ids), nil
 }
 
 func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, vuln *model.IDorVulnerabilityInput, vexStatement *model.VexStatementInputSpec) (*ent.CertifyVexCreate, error) {
@@ -121,7 +121,8 @@ func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput,
 	var vulnID uuid.UUID
 	if vuln.VulnerabilityNodeID != nil {
 		var err error
-		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
+		vulnID, err = uuid.Parse(vulnGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
@@ -144,7 +145,8 @@ func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput,
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
 			var err error
-			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+			pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -161,7 +163,8 @@ func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput,
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -257,17 +260,15 @@ func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArti
 }
 
 func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
+	if spec == nil {
+		spec = &model.CertifyVEXStatementSpec{}
+	}
 	funcName := "CertifyVEXStatement"
 
-	query := b.client.CertifyVex.Query()
-	records, err := query.
-		Where(certifyVexPredicate(*spec)).
-		WithVulnerability(func(q *ent.VulnerabilityIDQuery) {
-		}).
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {})
-		}).
-		WithArtifact().
+	vexQuery := b.client.CertifyVex.Query().
+		Where(certifyVexPredicate(*spec))
+
+	records, err := getVEXObject(vexQuery).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -277,9 +278,20 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.Certif
 	return collect(records, toModelCertifyVEXStatement), nil
 }
 
+// getVEXObject is used recreate the VEX object be eager loading the edges
+func getVEXObject(q *ent.CertifyVexQuery) *ent.CertifyVexQuery {
+	return q.
+		WithVulnerability(func(q *ent.VulnerabilityIDQuery) {
+		}).
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).
+		WithArtifact()
+}
+
 func toModelCertifyVEXStatement(record *ent.CertifyVex) *model.CertifyVEXStatement {
 	return &model.CertifyVEXStatement{
-		ID:               record.ID.String(),
+		ID:               toGlobalID(certifyvex.Table, record.ID.String()),
 		Subject:          toPackageOrArtifact(record.Edges.Package, record.Edges.Artifact),
 		Vulnerability:    toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		KnownSince:       record.KnownSince,
@@ -335,29 +347,44 @@ func certifyVexPredicate(filter model.CertifyVEXStatementSpec) predicate.Certify
 	return certifyvex.And(predicates...)
 }
 
-// func vexStatementInputPredicate(subject model.PackageOrArtifactInput, vulnerability model.VulnerabilityInputSpec, vexStatement model.VexStatementInputSpec) predicate.CertifyVex {
-// 	var sub *model.PackageOrArtifactSpec
-// 	if subject.Package != nil {
-// 		sub = &model.PackageOrArtifactSpec{
-// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-// 		}
-// 	} else {
-// 		sub = &model.PackageOrArtifactSpec{
-// 			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
-// 		}
-// 	}
-// 	return certifyVexPredicate(model.CertifyVEXStatementSpec{
-// 		Subject: sub,
-// 		Vulnerability: &model.VulnerabilitySpec{
-// 			Type:            &vulnerability.Type,
-// 			VulnerabilityID: &vulnerability.VulnerabilityID,
-// 		},
-// 		Status:           &vexStatement.Status,
-// 		VexJustification: &vexStatement.VexJustification,
-// 		Statement:        &vexStatement.Statement,
-// 		StatusNotes:      &vexStatement.StatusNotes,
-// 		KnownSince:       &vexStatement.KnownSince,
-// 		Origin:           &vexStatement.Origin,
-// 		Collector:        &vexStatement.Collector,
-// 	})
-// }
+func (b *EntBackend) certifyVexNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.CertifyVex.Query().
+		Where(certifyVexPredicate(model.CertifyVEXStatementSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyVexStatementPackage] {
+		query.
+			WithPackage(withPackageVersionTree())
+	}
+	if allowedEdges[model.EdgeCertifyVexStatementArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgeCertifyVexStatementVulnerability] {
+		query.
+			WithVulnerability()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	certVexs, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyVex with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundVex := range certVexs {
+		if foundVex.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundVex.Edges.Package)))
+		}
+		if foundVex.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(foundVex.Edges.Artifact))
+		}
+		if foundVex.Edges.Vulnerability != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(foundVex.Edges.Vulnerability))
+		}
+	}
+
+	return out, nil
+}

@@ -16,17 +16,23 @@
 package backend
 
 import (
-	"fmt"
-
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
 func toModelArtifact(a *ent.Artifact) *model.Artifact {
 	return &model.Artifact{
-		ID:        a.ID.String(),
+		ID:        toGlobalID(artifact.Table, a.ID.String()),
 		Algorithm: a.Algorithm,
 		Digest:    a.Digest,
 	}
@@ -34,7 +40,7 @@ func toModelArtifact(a *ent.Artifact) *model.Artifact {
 
 func toModelBuilder(b *ent.Builder) *model.Builder {
 	return &model.Builder{
-		ID:  b.ID.String(),
+		ID:  toGlobalID(builder.Table, b.ID.String()),
 		URI: b.URI,
 	}
 }
@@ -44,7 +50,7 @@ func toModelPackage(p *ent.PackageName) *model.Package {
 		return nil
 	}
 	return &model.Package{
-		ID:         fmt.Sprintf("%s:%s", pkgTypeString, p.ID.String()),
+		ID:         toGlobalID(pkgTypeString, p.ID.String()),
 		Type:       p.Type,
 		Namespaces: collect([]*ent.PackageName{p}, toModelNamespace),
 	}
@@ -55,7 +61,7 @@ func toModelNamespace(n *ent.PackageName) *model.PackageNamespace {
 		return nil
 	}
 	return &model.PackageNamespace{
-		ID:        fmt.Sprintf("%s:%s", pkgNamespaceString, n.ID.String()),
+		ID:        toGlobalID(pkgNamespaceString, n.ID.String()),
 		Namespace: n.Namespace,
 		Names:     collect([]*ent.PackageName{n}, toModelPackageName),
 	}
@@ -66,7 +72,7 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 		return nil
 	}
 	return &model.PackageName{
-		ID:       n.ID.String(),
+		ID:       toGlobalID(packagename.Table, n.ID.String()),
 		Name:     n.Name,
 		Versions: collect(n.Edges.Versions, toModelPackageVersion),
 	}
@@ -75,7 +81,7 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 func toModelPackageVersion(v *ent.PackageVersion) *model.PackageVersion {
 
 	return &model.PackageVersion{
-		ID:         v.ID.String(),
+		ID:         toGlobalID(packageversion.Table, v.ID.String()),
 		Version:    v.Version,
 		Qualifiers: toPtrSlice(v.Qualifiers),
 		Subpath:    v.Subpath,
@@ -115,7 +121,7 @@ func valueOrDefault[T any](v *T, def T) T {
 
 func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
 	return &model.IsOccurrence{
-		ID:            o.ID.String(),
+		ID:            toGlobalID(occurrence.Table, o.ID.String()),
 		Subject:       toModelPackageOrSource(o.Edges.Package, o.Edges.Source),
 		Artifact:      toModelArtifact(o.Edges.Artifact),
 		Justification: o.Justification,
@@ -181,7 +187,7 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 	}
 
 	return &model.IsDependency{
-		ID:                id.ID.String(),
+		ID:                toGlobalID(dependency.Table, id.ID.String()),
 		Package:           pkg,
 		DependencyPackage: depPkg,
 		VersionRange:      id.VersionRange,
@@ -205,7 +211,7 @@ func dependencyTypeFromEnum(t dependency.DependencyType) model.DependencyType {
 
 func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 	return &model.HasSbom{
-		ID:                   sbom.ID.String(),
+		ID:                   toGlobalID(billofmaterials.Table, sbom.ID.String()),
 		Subject:              toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
 		URI:                  sbom.URI,
 		Algorithm:            sbom.Algorithm,
@@ -240,20 +246,20 @@ func toIncludedSoftware(pkgs []*ent.PackageVersion, artifacts []*ent.Artifact) [
 	return result
 }
 
-func toModelLicense(license *ent.License) *model.License {
+func toModelLicense(entLicense *ent.License) *model.License {
 
 	var dbInLine *string
-	if license.Inline != "" {
-		dbInLine = ptrfrom.String(license.Inline)
+	if entLicense.Inline != "" {
+		dbInLine = ptrfrom.String(entLicense.Inline)
 	}
 	var dbListVersion *string
-	if license.ListVersion != "" {
-		dbListVersion = ptrfrom.String(license.ListVersion)
+	if entLicense.ListVersion != "" {
+		dbListVersion = ptrfrom.String(entLicense.ListVersion)
 	}
 
 	return &model.License{
-		ID:          license.ID.String(),
-		Name:        license.Name,
+		ID:          toGlobalID(license.Table, entLicense.ID.String()),
+		Name:        entLicense.Name,
 		Inline:      dbInLine,
 		ListVersion: dbListVersion,
 	}
@@ -261,7 +267,7 @@ func toModelLicense(license *ent.License) *model.License {
 
 func toModelCertifyLegal(cl *ent.CertifyLegal) *model.CertifyLegal {
 	return &model.CertifyLegal{
-		ID:                 cl.ID.String(),
+		ID:                 toGlobalID(certifylegal.Table, cl.ID.String()),
 		Subject:            toModelPackageOrSource(cl.Edges.Package, cl.Edges.Source),
 		DeclaredLicense:    cl.DeclaredLicense,
 		DeclaredLicenses:   collect(cl.Edges.DeclaredLicenses, toModelLicense),

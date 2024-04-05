@@ -11,8 +11,13 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
@@ -86,6 +91,81 @@ func (pnu *PackageNameUpdate) AddVersions(p ...*PackageVersion) *PackageNameUpda
 	return pnu.AddVersionIDs(ids...)
 }
 
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (pnu *PackageNameUpdate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.AddHasSourceAtIDs(ids...)
+	return pnu
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (pnu *PackageNameUpdate) AddHasSourceAt(h ...*HasSourceAt) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnu.AddHasSourceAtIDs(ids...)
+}
+
+// AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
+func (pnu *PackageNameUpdate) AddDependencyIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.AddDependencyIDs(ids...)
+	return pnu
+}
+
+// AddDependency adds the "dependency" edges to the Dependency entity.
+func (pnu *PackageNameUpdate) AddDependency(d ...*Dependency) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pnu.AddDependencyIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (pnu *PackageNameUpdate) AddCertificationIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.AddCertificationIDs(ids...)
+	return pnu
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (pnu *PackageNameUpdate) AddCertification(c ...*Certification) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pnu.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (pnu *PackageNameUpdate) AddMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.AddMetadatumIDs(ids...)
+	return pnu
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (pnu *PackageNameUpdate) AddMetadata(h ...*HasMetadata) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnu.AddMetadatumIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (pnu *PackageNameUpdate) AddPocIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.AddPocIDs(ids...)
+	return pnu
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (pnu *PackageNameUpdate) AddPoc(p ...*PointOfContact) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pnu.AddPocIDs(ids...)
+}
+
 // Mutation returns the PackageNameMutation object of the builder.
 func (pnu *PackageNameUpdate) Mutation() *PackageNameMutation {
 	return pnu.mutation
@@ -110,6 +190,111 @@ func (pnu *PackageNameUpdate) RemoveVersions(p ...*PackageVersion) *PackageNameU
 		ids[i] = p[i].ID
 	}
 	return pnu.RemoveVersionIDs(ids...)
+}
+
+// ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
+func (pnu *PackageNameUpdate) ClearHasSourceAt() *PackageNameUpdate {
+	pnu.mutation.ClearHasSourceAt()
+	return pnu
+}
+
+// RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
+func (pnu *PackageNameUpdate) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.RemoveHasSourceAtIDs(ids...)
+	return pnu
+}
+
+// RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
+func (pnu *PackageNameUpdate) RemoveHasSourceAt(h ...*HasSourceAt) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnu.RemoveHasSourceAtIDs(ids...)
+}
+
+// ClearDependency clears all "dependency" edges to the Dependency entity.
+func (pnu *PackageNameUpdate) ClearDependency() *PackageNameUpdate {
+	pnu.mutation.ClearDependency()
+	return pnu
+}
+
+// RemoveDependencyIDs removes the "dependency" edge to Dependency entities by IDs.
+func (pnu *PackageNameUpdate) RemoveDependencyIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.RemoveDependencyIDs(ids...)
+	return pnu
+}
+
+// RemoveDependency removes "dependency" edges to Dependency entities.
+func (pnu *PackageNameUpdate) RemoveDependency(d ...*Dependency) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pnu.RemoveDependencyIDs(ids...)
+}
+
+// ClearCertification clears all "certification" edges to the Certification entity.
+func (pnu *PackageNameUpdate) ClearCertification() *PackageNameUpdate {
+	pnu.mutation.ClearCertification()
+	return pnu
+}
+
+// RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
+func (pnu *PackageNameUpdate) RemoveCertificationIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.RemoveCertificationIDs(ids...)
+	return pnu
+}
+
+// RemoveCertification removes "certification" edges to Certification entities.
+func (pnu *PackageNameUpdate) RemoveCertification(c ...*Certification) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pnu.RemoveCertificationIDs(ids...)
+}
+
+// ClearMetadata clears all "metadata" edges to the HasMetadata entity.
+func (pnu *PackageNameUpdate) ClearMetadata() *PackageNameUpdate {
+	pnu.mutation.ClearMetadata()
+	return pnu
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
+func (pnu *PackageNameUpdate) RemoveMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.RemoveMetadatumIDs(ids...)
+	return pnu
+}
+
+// RemoveMetadata removes "metadata" edges to HasMetadata entities.
+func (pnu *PackageNameUpdate) RemoveMetadata(h ...*HasMetadata) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnu.RemoveMetadatumIDs(ids...)
+}
+
+// ClearPoc clears all "poc" edges to the PointOfContact entity.
+func (pnu *PackageNameUpdate) ClearPoc() *PackageNameUpdate {
+	pnu.mutation.ClearPoc()
+	return pnu
+}
+
+// RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
+func (pnu *PackageNameUpdate) RemovePocIDs(ids ...uuid.UUID) *PackageNameUpdate {
+	pnu.mutation.RemovePocIDs(ids...)
+	return pnu
+}
+
+// RemovePoc removes "poc" edges to PointOfContact entities.
+func (pnu *PackageNameUpdate) RemovePoc(p ...*PointOfContact) *PackageNameUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pnu.RemovePocIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -220,6 +405,231 @@ func (pnu *PackageNameUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pnu.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !pnu.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnu.mutation.DependencyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.DependencyTable,
+			Columns: []string{packagename.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.RemovedDependencyIDs(); len(nodes) > 0 && !pnu.mutation.DependencyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.DependencyTable,
+			Columns: []string{packagename.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.DependencyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.DependencyTable,
+			Columns: []string{packagename.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnu.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.CertificationTable,
+			Columns: []string{packagename.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !pnu.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.CertificationTable,
+			Columns: []string{packagename.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.CertificationTable,
+			Columns: []string{packagename.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnu.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.MetadataTable,
+			Columns: []string{packagename.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !pnu.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.MetadataTable,
+			Columns: []string{packagename.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.MetadataTable,
+			Columns: []string{packagename.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnu.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.PocTable,
+			Columns: []string{packagename.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.RemovedPocIDs(); len(nodes) > 0 && !pnu.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.PocTable,
+			Columns: []string{packagename.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnu.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.PocTable,
+			Columns: []string{packagename.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pnu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{packagename.Label}
@@ -297,6 +707,81 @@ func (pnuo *PackageNameUpdateOne) AddVersions(p ...*PackageVersion) *PackageName
 	return pnuo.AddVersionIDs(ids...)
 }
 
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (pnuo *PackageNameUpdateOne) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.AddHasSourceAtIDs(ids...)
+	return pnuo
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (pnuo *PackageNameUpdateOne) AddHasSourceAt(h ...*HasSourceAt) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnuo.AddHasSourceAtIDs(ids...)
+}
+
+// AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
+func (pnuo *PackageNameUpdateOne) AddDependencyIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.AddDependencyIDs(ids...)
+	return pnuo
+}
+
+// AddDependency adds the "dependency" edges to the Dependency entity.
+func (pnuo *PackageNameUpdateOne) AddDependency(d ...*Dependency) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pnuo.AddDependencyIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (pnuo *PackageNameUpdateOne) AddCertificationIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.AddCertificationIDs(ids...)
+	return pnuo
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (pnuo *PackageNameUpdateOne) AddCertification(c ...*Certification) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pnuo.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (pnuo *PackageNameUpdateOne) AddMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.AddMetadatumIDs(ids...)
+	return pnuo
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (pnuo *PackageNameUpdateOne) AddMetadata(h ...*HasMetadata) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnuo.AddMetadatumIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (pnuo *PackageNameUpdateOne) AddPocIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.AddPocIDs(ids...)
+	return pnuo
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (pnuo *PackageNameUpdateOne) AddPoc(p ...*PointOfContact) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pnuo.AddPocIDs(ids...)
+}
+
 // Mutation returns the PackageNameMutation object of the builder.
 func (pnuo *PackageNameUpdateOne) Mutation() *PackageNameMutation {
 	return pnuo.mutation
@@ -321,6 +806,111 @@ func (pnuo *PackageNameUpdateOne) RemoveVersions(p ...*PackageVersion) *PackageN
 		ids[i] = p[i].ID
 	}
 	return pnuo.RemoveVersionIDs(ids...)
+}
+
+// ClearHasSourceAt clears all "has_source_at" edges to the HasSourceAt entity.
+func (pnuo *PackageNameUpdateOne) ClearHasSourceAt() *PackageNameUpdateOne {
+	pnuo.mutation.ClearHasSourceAt()
+	return pnuo
+}
+
+// RemoveHasSourceAtIDs removes the "has_source_at" edge to HasSourceAt entities by IDs.
+func (pnuo *PackageNameUpdateOne) RemoveHasSourceAtIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.RemoveHasSourceAtIDs(ids...)
+	return pnuo
+}
+
+// RemoveHasSourceAt removes "has_source_at" edges to HasSourceAt entities.
+func (pnuo *PackageNameUpdateOne) RemoveHasSourceAt(h ...*HasSourceAt) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnuo.RemoveHasSourceAtIDs(ids...)
+}
+
+// ClearDependency clears all "dependency" edges to the Dependency entity.
+func (pnuo *PackageNameUpdateOne) ClearDependency() *PackageNameUpdateOne {
+	pnuo.mutation.ClearDependency()
+	return pnuo
+}
+
+// RemoveDependencyIDs removes the "dependency" edge to Dependency entities by IDs.
+func (pnuo *PackageNameUpdateOne) RemoveDependencyIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.RemoveDependencyIDs(ids...)
+	return pnuo
+}
+
+// RemoveDependency removes "dependency" edges to Dependency entities.
+func (pnuo *PackageNameUpdateOne) RemoveDependency(d ...*Dependency) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pnuo.RemoveDependencyIDs(ids...)
+}
+
+// ClearCertification clears all "certification" edges to the Certification entity.
+func (pnuo *PackageNameUpdateOne) ClearCertification() *PackageNameUpdateOne {
+	pnuo.mutation.ClearCertification()
+	return pnuo
+}
+
+// RemoveCertificationIDs removes the "certification" edge to Certification entities by IDs.
+func (pnuo *PackageNameUpdateOne) RemoveCertificationIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.RemoveCertificationIDs(ids...)
+	return pnuo
+}
+
+// RemoveCertification removes "certification" edges to Certification entities.
+func (pnuo *PackageNameUpdateOne) RemoveCertification(c ...*Certification) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pnuo.RemoveCertificationIDs(ids...)
+}
+
+// ClearMetadata clears all "metadata" edges to the HasMetadata entity.
+func (pnuo *PackageNameUpdateOne) ClearMetadata() *PackageNameUpdateOne {
+	pnuo.mutation.ClearMetadata()
+	return pnuo
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to HasMetadata entities by IDs.
+func (pnuo *PackageNameUpdateOne) RemoveMetadatumIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.RemoveMetadatumIDs(ids...)
+	return pnuo
+}
+
+// RemoveMetadata removes "metadata" edges to HasMetadata entities.
+func (pnuo *PackageNameUpdateOne) RemoveMetadata(h ...*HasMetadata) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnuo.RemoveMetadatumIDs(ids...)
+}
+
+// ClearPoc clears all "poc" edges to the PointOfContact entity.
+func (pnuo *PackageNameUpdateOne) ClearPoc() *PackageNameUpdateOne {
+	pnuo.mutation.ClearPoc()
+	return pnuo
+}
+
+// RemovePocIDs removes the "poc" edge to PointOfContact entities by IDs.
+func (pnuo *PackageNameUpdateOne) RemovePocIDs(ids ...uuid.UUID) *PackageNameUpdateOne {
+	pnuo.mutation.RemovePocIDs(ids...)
+	return pnuo
+}
+
+// RemovePoc removes "poc" edges to PointOfContact entities.
+func (pnuo *PackageNameUpdateOne) RemovePoc(p ...*PointOfContact) *PackageNameUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pnuo.RemovePocIDs(ids...)
 }
 
 // Where appends a list predicates to the PackageNameUpdate builder.
@@ -454,6 +1044,231 @@ func (pnuo *PackageNameUpdateOne) sqlSave(ctx context.Context) (_node *PackageNa
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnuo.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.RemovedHasSourceAtIDs(); len(nodes) > 0 && !pnuo.mutation.HasSourceAtCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnuo.mutation.DependencyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.DependencyTable,
+			Columns: []string{packagename.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.RemovedDependencyIDs(); len(nodes) > 0 && !pnuo.mutation.DependencyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.DependencyTable,
+			Columns: []string{packagename.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.DependencyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.DependencyTable,
+			Columns: []string{packagename.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnuo.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.CertificationTable,
+			Columns: []string{packagename.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.RemovedCertificationIDs(); len(nodes) > 0 && !pnuo.mutation.CertificationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.CertificationTable,
+			Columns: []string{packagename.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.CertificationTable,
+			Columns: []string{packagename.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnuo.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.MetadataTable,
+			Columns: []string{packagename.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.RemovedMetadataIDs(); len(nodes) > 0 && !pnuo.mutation.MetadataCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.MetadataTable,
+			Columns: []string{packagename.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.MetadataTable,
+			Columns: []string{packagename.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pnuo.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.PocTable,
+			Columns: []string{packagename.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.RemovedPocIDs(); len(nodes) > 0 && !pnuo.mutation.PocCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.PocTable,
+			Columns: []string{packagename.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pnuo.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.PocTable,
+			Columns: []string{packagename.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

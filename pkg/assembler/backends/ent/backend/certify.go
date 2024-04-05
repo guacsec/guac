@@ -30,12 +30,26 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+const (
+	certifyBadString  = "certifyBad"
+	certifyGoodString = "certifyGood"
+)
+
 type certificationInputSpec interface {
 	model.CertifyGoodInputSpec | model.CertifyBadInputSpec
 }
 
 func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	records, err := queryCertifications(ctx, b.client, certification.TypeBAD, filter)
+	if filter == nil {
+		filter = &model.CertifyBadSpec{}
+	}
+
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeBAD, filter))
+
+	records, err := getCertificationObject(certQuery).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -45,15 +59,56 @@ func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 
 func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
 	if filter == nil {
-		return nil, nil
+		filter = &model.CertifyGoodSpec{}
 	}
 
-	records, err := queryCertifications(ctx, b.client, certification.TypeGOOD, (*model.CertifyBadSpec)(filter))
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeGOOD, (*model.CertifyBadSpec)(filter)))
+
+	records, err := getCertificationObject(certQuery).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return collect(records, toModelCertifyGood), nil
+}
+
+// getCertificationObject is used recreate the certifyGood/certifyBad object be eager loading the edges
+func getCertificationObject(q *ent.CertificationQuery) *ent.CertificationQuery {
+	return q.
+		WithSource(withSourceNameTreeQuery()).
+		WithArtifact().
+		WithPackageVersion(withPackageVersionTree()).
+		WithAllVersions(withPackageNameTree())
+}
+
+func queryCertifications(typ certification.Type, filter *model.CertifyBadSpec) predicate.Certification {
+	predicates := []predicate.Certification{
+		certification.TypeEQ(typ),
+		optionalPredicate(filter.ID, IDEQ),
+		optionalPredicate(filter.Collector, certification.CollectorEQ),
+		optionalPredicate(filter.Origin, certification.OriginEQ),
+		optionalPredicate(filter.Justification, certification.JustificationEQ),
+		optionalPredicate(filter.KnownSince, certification.KnownSinceEQ),
+	}
+
+	if filter.Subject != nil {
+		switch {
+		case filter.Subject.Artifact != nil:
+			predicates = append(predicates, certification.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
+		case filter.Subject.Package != nil:
+			predicates = append(predicates, certification.Or(
+				certification.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
+				certification.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
+			))
+		case filter.Subject.Source != nil:
+			predicates = append(predicates, certification.HasSourceWith(sourceQuery(filter.Subject.Source)))
+		}
+	}
+
+	return certification.And(predicates...)
 }
 
 func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (string, error) {
@@ -64,8 +119,7 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 		return "", txErr
 	}
 
-	//TODO optimize for only returning ID
-	return *certRecord, nil
+	return toGlobalID(certifyBadString, *certRecord), nil
 }
 
 func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
@@ -82,7 +136,7 @@ func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.Packa
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(certifyBadString, *ids), nil
 }
 
 func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (string, error) {
@@ -93,8 +147,7 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 		return "", txErr
 	}
 
-	//TODO optimize for only returning ID
-	return *certRecord, nil
+	return toGlobalID(certifyGoodString, *certRecord), nil
 }
 
 func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
@@ -111,42 +164,7 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
-}
-
-func queryCertifications(ctx context.Context, client *ent.Client, typ certification.Type, filter *model.CertifyBadSpec) ([]*ent.Certification, error) {
-
-	query := []predicate.Certification{
-		certification.TypeEQ(typ),
-		optionalPredicate(filter.ID, IDEQ),
-		optionalPredicate(filter.Collector, certification.CollectorEQ),
-		optionalPredicate(filter.Origin, certification.OriginEQ),
-		optionalPredicate(filter.Justification, certification.JustificationEQ),
-		optionalPredicate(filter.KnownSince, certification.KnownSinceEQ),
-	}
-
-	if filter.Subject != nil {
-		switch {
-		case filter.Subject.Artifact != nil:
-			query = append(query, certification.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
-		case filter.Subject.Package != nil:
-			query = append(query, certification.Or(
-				certification.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
-				certification.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
-			))
-		case filter.Subject.Source != nil:
-			query = append(query, certification.HasSourceWith(sourceQuery(filter.Subject.Source)))
-		}
-	}
-
-	return client.Certification.Query().
-		Where(query...).
-		Limit(MaxPageSize).
-		WithSource(withSourceNameTreeQuery()).
-		WithArtifact().
-		WithPackageVersion(withPackageVersionTree()).
-		WithAllVersions(withPackageNameTree()).
-		All(ctx)
+	return toGlobalIDs(certifyGoodString, *ids), nil
 }
 
 func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*string, error) {
@@ -257,7 +275,8 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -274,7 +293,8 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 			var pkgVersionID uuid.UUID
 			if pkg.PackageVersionID != nil {
 				var err error
-				pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+				pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+				pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 				}
@@ -290,7 +310,8 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 			var pkgNameID uuid.UUID
 			if pkg.PackageNameID != nil {
 				var err error
-				pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+				pkgNameGlobalID := fromGlobalID(*pkg.PackageNameID)
+				pkgNameID, err = uuid.Parse(pkgNameGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 				}
@@ -307,7 +328,8 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
@@ -514,4 +536,95 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 		Subject:       sub,
 		KnownSince:    v.KnownSince,
 	}
+}
+
+func (b *EntBackend) certifyBadNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeBAD, &model.CertifyBadSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyBadPackage] {
+		query.
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions()
+	}
+	if allowedEdges[model.EdgeCertifyBadArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgeCertifyBadSource] {
+		query.
+			WithSource()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	certifications, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyBad with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundCert := range certifications {
+		if foundCert.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundCert.Edges.PackageVersion)))
+		}
+		if foundCert.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(foundCert.Edges.AllVersions))
+		}
+		if foundCert.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(foundCert.Edges.Artifact))
+		}
+		if foundCert.Edges.Source != nil {
+			out = append(out, toModelSource(foundCert.Edges.Source))
+		}
+	}
+
+	return out, nil
+}
+
+func (b *EntBackend) certifyGoodNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeGOOD, &model.CertifyBadSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyGoodPackage] {
+		query.
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions()
+	}
+	if allowedEdges[model.EdgeCertifyGoodArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgeCertifyGoodSource] {
+		query.
+			WithSource()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	certifications, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyGood with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundCert := range certifications {
+		if foundCert.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundCert.Edges.PackageVersion)))
+		}
+		if foundCert.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(foundCert.Edges.AllVersions))
+		}
+		if foundCert.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(foundCert.Edges.Artifact))
+		}
+		if foundCert.Edges.Source != nil {
+			out = append(out, toModelSource(foundCert.Edges.Source))
+		}
+	}
+	return out, nil
 }

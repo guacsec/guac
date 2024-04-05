@@ -31,20 +31,29 @@ import (
 )
 
 func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
-	records, err := b.client.HasMetadata.Query().
-		Where(hasMetadataPredicate(filter)).
-		Limit(MaxPageSize).
-		WithSource(withSourceNameTreeQuery()).
-		WithArtifact().
-		WithPackageVersion(withPackageVersionTree()).
-		WithAllVersions(withPackageNameTree()).
-		All(ctx)
+	if filter == nil {
+		filter = &model.HasMetadataSpec{}
+	}
+	hmQuery := b.client.HasMetadata.Query().
+		Where(hasMetadataPredicate(filter))
 
+	records, err := getHasMetadataObject(hmQuery).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve HasMetadata :: %s", err)
 	}
 
 	return collect(records, toModelHasMetadata), nil
+}
+
+// getHasMetadataObject is used recreate the hasMetadata object be eager loading the edges
+func getHasMetadataObject(q *ent.HasMetadataQuery) *ent.HasMetadataQuery {
+	return q.
+		WithSource(withSourceNameTreeQuery()).
+		WithArtifact().
+		WithPackageVersion(withPackageVersionTree()).
+		WithAllVersions(withPackageNameTree())
 }
 
 func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
@@ -55,7 +64,7 @@ func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.Packag
 		return "", fmt.Errorf("failed to execute IngestHasMetadata :: %s", txErr)
 	}
 
-	return *recordID, nil
+	return toGlobalID(hasmetadata.Table, *recordID), nil
 }
 
 func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
@@ -72,7 +81,7 @@ func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(hasmetadata.Table, *ids), nil
 }
 
 func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {
@@ -192,7 +201,8 @@ func generateHasMetadataCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -209,7 +219,8 @@ func generateHasMetadataCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 			var pkgVersionID uuid.UUID
 			if pkg.PackageVersionID != nil {
 				var err error
-				pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+				pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+				pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 				}
@@ -225,7 +236,8 @@ func generateHasMetadataCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 			var pkgNameID uuid.UUID
 			if pkg.PackageNameID != nil {
 				var err error
-				pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+				pkgNameGlobalID := fromGlobalID(*pkg.PackageNameID)
+				pkgNameID, err = uuid.Parse(pkgNameGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 				}
@@ -242,7 +254,8 @@ func generateHasMetadataCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
@@ -371,7 +384,7 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 	}
 
 	return &model.HasMetadata{
-		ID:            v.ID.String(),
+		ID:            toGlobalID(hasmetadata.Table, v.ID.String()),
 		Subject:       sub,
 		Key:           v.Key,
 		Value:         v.Value,
@@ -382,30 +395,48 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 	}
 }
 
-// func hasMetadataInputPredicate(subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, filter model.HasMetadataInputSpec) predicate.HasMetadata {
-// 	var subjectSpec *model.PackageSourceOrArtifactSpec
-// 	if subject.Package != nil {
-// 		if pkgMatchType != nil && pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-// 			subject.Package.PackageInput.Version = nil
-// 		}
-// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-// 		}
-// 	} else if subject.Artifact != nil {
-// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-// 			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
-// 		}
-// 	} else {
-// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-// 			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
-// 		}
-// 	}
-// 	return hasMetadataPredicate(&model.HasMetadataSpec{
-// 		Subject:       subjectSpec,
-// 		Key:           &filter.Key,
-// 		Value:         &filter.Value,
-// 		Justification: &filter.Justification,
-// 		Origin:        &filter.Origin,
-// 		Collector:     &filter.Collector,
-// 	})
-// }
+func (b *EntBackend) hasMetadataNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.HasMetadata.Query().
+		Where(hasMetadataPredicate(&model.HasMetadataSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeHasMetadataPackage] {
+		query.
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions()
+	}
+	if allowedEdges[model.EdgeHasMetadataArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgeHasMetadataSource] {
+		query.
+			WithSource()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	hasMetas, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for hasMetadata with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, hm := range hasMetas {
+		if hm.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(hm.Edges.PackageVersion)))
+		}
+		if hm.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(hm.Edges.AllVersions))
+		}
+		if hm.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(hm.Edges.Artifact))
+		}
+		if hm.Edges.Source != nil {
+			out = append(out, toModelSource(hm.Edges.Source))
+		}
+	}
+
+	return out, nil
+}

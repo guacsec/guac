@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
+	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
@@ -25,6 +26,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
@@ -33,6 +35,9 @@ import (
 )
 
 func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
+	if artifactSpec == nil {
+		artifactSpec = &model.ArtifactSpec{}
+	}
 	query := b.client.Artifact.Query().
 		Where(artifactQueryPredicates(artifactSpec)).
 		Limit(MaxPageSize)
@@ -73,7 +78,7 @@ func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.IDo
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(artifact.Table, *ids), nil
 }
 
 func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifactInput) (string, error) {
@@ -84,7 +89,7 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifact
 	if txErr != nil {
 		return "", txErr
 	}
-	return *id, nil
+	return toGlobalID(artifact.Table, *id), nil
 }
 
 func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDorArtifactInput) (*[]string, error) {
@@ -137,4 +142,122 @@ func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInpu
 		}
 	}
 	return ptrfrom.String(artifactID.String()), nil
+}
+
+func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.Artifact.Query().
+		Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeArtifactHashEqual] {
+		query.
+			WithHashEqualArtA(func(q *ent.HashEqualQuery) {
+				getHashEqualObject(q)
+			}).
+			WithHashEqualArtB(func(q *ent.HashEqualQuery) {
+				getHashEqualObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactIsOccurrence] {
+		query.
+			WithOccurrences(func(q *ent.OccurrenceQuery) {
+				getOccurrenceObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactHasSbom] {
+		query.
+			WithSbom(func(q *ent.BillOfMaterialsQuery) {
+				getSBOMObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactHasSlsa] {
+		query.
+			WithAttestations(func(q *ent.SLSAAttestationQuery) {
+				getSLSAObject(q)
+			}).
+			WithAttestationsSubject(func(q *ent.SLSAAttestationQuery) {
+				getSLSAObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactCertifyVexStatement] {
+		query.
+			WithVex(func(q *ent.CertifyVexQuery) {
+				getVEXObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactCertifyBad] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeBAD))
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactCertifyGood] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeGOOD))
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactHasMetadata] {
+		query.
+			WithMetadata(func(q *ent.HasMetadataQuery) {
+				getHasMetadataObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactPointOfContact] {
+		query.
+			WithPoc(func(q *ent.PointOfContactQuery) {
+				getPointOfContactObject(q)
+			})
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	artifacts, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed query artifact with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundArt := range artifacts {
+		for _, hashEqualA := range foundArt.Edges.HashEqualArtA {
+			out = append(out, toModelHashEqual(hashEqualA))
+		}
+		for _, hashEqualB := range foundArt.Edges.HashEqualArtB {
+			out = append(out, toModelHashEqual(hashEqualB))
+		}
+		for _, foundOccur := range foundArt.Edges.Occurrences {
+			out = append(out, toModelIsOccurrenceWithSubject(foundOccur))
+		}
+		for _, foundSBOM := range foundArt.Edges.Sbom {
+			out = append(out, toModelHasSBOM(foundSBOM))
+		}
+		for _, foundSLSA := range foundArt.Edges.Attestations {
+			out = append(out, toModelHasSLSA(foundSLSA))
+		}
+		for _, foundSLSA := range foundArt.Edges.AttestationsSubject {
+			out = append(out, toModelHasSLSA(foundSLSA))
+		}
+		for _, foundVex := range foundArt.Edges.Vex {
+			out = append(out, toModelCertifyVEXStatement(foundVex))
+		}
+		for _, foundCert := range foundArt.Edges.Certification {
+			if foundCert.Type == certification.TypeBAD {
+				out = append(out, toModelCertifyBad(foundCert))
+			}
+			if foundCert.Type == certification.TypeGOOD {
+				out = append(out, toModelCertifyGood(foundCert))
+			}
+		}
+		for _, foundMeta := range foundArt.Edges.Metadata {
+			out = append(out, toModelHasMetadata(foundMeta))
+		}
+		for _, foundPOC := range foundArt.Edges.Poc {
+			out = append(out, toModelPointOfContact(foundPOC))
+		}
+	}
+
+	return out, nil
 }

@@ -36,18 +36,26 @@ import (
 
 func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	if filter == nil {
-		return nil, nil
+		filter = &model.CertifyScorecardSpec{}
 	}
 
-	records, err := b.client.CertifyScorecard.Query().
-		Where(certifyScorecardQuery(filter)).
-		WithSource(func(q *ent.SourceNameQuery) {}).
+	scorecardQuery := b.client.CertifyScorecard.Query().
+		Where(certifyScorecardQuery(filter))
+
+	records, err := getScorecardObject(scorecardQuery).
+		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return collect(records, toModelCertifyScorecard), nil
+}
+
+// getPkgEqualObject is used recreate the pkgEqual object be eager loading the edges
+func getScorecardObject(q *ent.CertifyScorecardQuery) *ent.CertifyScorecardQuery {
+	return q.
+		WithSource(func(q *ent.SourceNameQuery) {})
 }
 
 func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.CertifyScorecard {
@@ -97,7 +105,7 @@ func (b *EntBackend) IngestScorecard(ctx context.Context, source model.IDorSourc
 	if txErr != nil {
 		return "", txErr
 	}
-	return *cscID, nil
+	return toGlobalID(certifyscorecard.Table, *cscID), nil
 }
 
 func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
@@ -114,7 +122,7 @@ func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDor
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(certifyscorecard.Table, *ids), nil
 }
 
 func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSourceInput, scorecard *model.ScorecardInputSpec) (*ent.CertifyScorecardCreate, error) {
@@ -132,7 +140,8 @@ func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSou
 	var sourceID uuid.UUID
 	if src.SourceNameID != nil {
 		var err error
-		sourceID, err = uuid.Parse(*src.SourceNameID)
+		srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+		sourceID, err = uuid.Parse(srcNameGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 		}
@@ -245,6 +254,7 @@ func hashSortedScorecardChecks(checks []*model.ScorecardCheck) string {
 
 func toModelCertifyScorecard(record *ent.CertifyScorecard) *model.CertifyScorecard {
 	return &model.CertifyScorecard{
+		ID:        toGlobalID(certifyscorecard.Table, record.ID.String()),
 		Source:    toModelSource(record.Edges.Source),
 		Scorecard: toModelScorecard(record),
 	}
@@ -260,4 +270,32 @@ func toModelScorecard(record *ent.CertifyScorecard) *model.Scorecard {
 		Origin:           record.Origin,
 		Collector:        record.Collector,
 	}
+}
+
+func (b *EntBackend) certifyScorecardNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.CertifyScorecard.Query().
+		Where(certifyScorecardQuery(&model.CertifyScorecardSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyScorecardSource] {
+		query.
+			WithSource()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	scorecards, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for scorecard with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, s := range scorecards {
+		if s.Edges.Source != nil {
+			out = append(out, toModelSource(s.Edges.Source))
+		}
+	}
+
+	return out, nil
 }

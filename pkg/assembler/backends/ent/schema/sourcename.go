@@ -47,6 +47,12 @@ func (SourceName) Fields() []ent.Field {
 func (SourceName) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("occurrences", Occurrence.Type).Ref("source"),
+		edge.From("has_source_at", HasSourceAt.Type).Ref("source"),
+		edge.From("scorecard", CertifyScorecard.Type).Ref("source"),
+		edge.From("certification", Certification.Type).Ref("source"),
+		edge.From("metadata", HasMetadata.Type).Ref("source"),
+		edge.From("poc", PointOfContact.Type).Ref("source"),
+		edge.From("certify_legal", CertifyLegal.Type).Ref("source"),
 	}
 }
 

@@ -1167,6 +1167,7 @@ func (c *arangoClient) packageNameNeighbors(ctx context.Context, nodeID string, 
 		if err != nil {
 			return out, fmt.Errorf("failed to get neighbors for node ID: %s from arango cursor with error: %w", nodeID, err)
 		}
+		sort.Strings(foundIDs)
 		out = append(out, foundIDs...)
 	}
 	if allowedEdges[model.EdgePackageNamePackageNamespace] {

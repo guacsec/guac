@@ -32,22 +32,31 @@ import (
 )
 
 func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
-
+	if filter == nil {
+		filter = &model.VulnerabilityMetadataSpec{}
+	}
 	vulnMetadataPred, err := vulnerabilityMetadataPredicate(filter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate vulnerabilityMetadataPredicate :: %w", err)
 	}
-	records, err := b.client.VulnerabilityMetadata.Query().
-		Where(vulnMetadataPred).
-		Limit(MaxPageSize).
-		WithVulnerabilityID(func(q *ent.VulnerabilityIDQuery) {}).
-		All(ctx)
 
+	veQuery := b.client.VulnerabilityMetadata.Query().
+		Where(vulnMetadataPred)
+
+	records, err := getVulnMetadataObject(veQuery).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve VulnerabilityMetadata :: %w", err)
 	}
 
 	return collect(records, toModelVulnerabilityMetadata), nil
+}
+
+// getVulnEqualObject is used recreate the vulnEqual object be eager loading the edges
+func getVulnMetadataObject(q *ent.VulnerabilityMetadataQuery) *ent.VulnerabilityMetadataQuery {
+	return q.
+		WithVulnerabilityID(func(q *ent.VulnerabilityIDQuery) {})
 }
 
 func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
@@ -58,7 +67,7 @@ func (b *EntBackend) IngestVulnerabilityMetadata(ctx context.Context, vulnerabil
 		return "", fmt.Errorf("failed to execute IngestVulnerabilityMetadata :: %s", txErr)
 	}
 
-	return *recordID, nil
+	return toGlobalID(vulnerabilitymetadata.Table, *recordID), nil
 }
 
 func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) ([]string, error) {
@@ -75,7 +84,7 @@ func (b *EntBackend) IngestBulkVulnerabilityMetadata(ctx context.Context, vulner
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(vulnerabilitymetadata.Table, *ids), nil
 }
 
 func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) (predicate.VulnerabilityMetadata, error) {
@@ -183,7 +192,8 @@ func generateVulnMetadataCreate(ctx context.Context, tx *ent.Tx, vuln *model.IDo
 	var vulnID uuid.UUID
 	if vuln.VulnerabilityNodeID != nil {
 		var err error
-		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
+		vulnID, err = uuid.Parse(vulnGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
@@ -241,21 +251,45 @@ func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability 
 
 func toModelVulnerabilityMetadata(v *ent.VulnerabilityMetadata) *model.VulnerabilityMetadata {
 	return &model.VulnerabilityMetadata{
-		ID: v.ID.String(),
-		Vulnerability: &model.Vulnerability{
-			ID:   fmt.Sprintf("%s:%s", vulnTypeString, v.Edges.VulnerabilityID.ID.String()),
-			Type: v.Edges.VulnerabilityID.Type,
-			VulnerabilityIDs: []*model.VulnerabilityID{
-				{
-					ID:              v.Edges.VulnerabilityID.ID.String(),
-					VulnerabilityID: v.Edges.VulnerabilityID.VulnerabilityID,
-				},
-			},
-		},
-		ScoreType:  model.VulnerabilityScoreType(v.ScoreType),
-		ScoreValue: v.ScoreValue,
-		Timestamp:  v.Timestamp,
-		Origin:     v.Origin,
-		Collector:  v.Collector,
+		ID:            toGlobalID(vulnerabilitymetadata.Table, v.ID.String()),
+		Vulnerability: toModelVulnerabilityFromVulnerabilityID(v.Edges.VulnerabilityID),
+		ScoreType:     model.VulnerabilityScoreType(v.ScoreType),
+		ScoreValue:    v.ScoreValue,
+		Timestamp:     v.Timestamp,
+		Origin:        v.Origin,
+		Collector:     v.Collector,
 	}
+}
+
+func (b *EntBackend) vulnMetadataNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	vulnMetadataPred, err := vulnerabilityMetadataPredicate(&model.VulnerabilityMetadataSpec{ID: &nodeID})
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate vulnerabilityMetadataPredicate :: %w", err)
+	}
+
+	query := b.client.VulnerabilityMetadata.Query().
+		Where(vulnMetadataPred)
+
+	if allowedEdges[model.EdgeVulnMetadataVulnerability] {
+		query.
+			WithVulnerabilityID()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	vulnMetas, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for vulnerability Metadata with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, vm := range vulnMetas {
+		if vm.Edges.VulnerabilityID != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(vm.Edges.VulnerabilityID))
+		}
+	}
+
+	return out, nil
 }

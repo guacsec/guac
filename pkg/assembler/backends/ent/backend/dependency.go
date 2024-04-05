@@ -33,15 +33,13 @@ import (
 func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	funcName := "IsDependency"
 	if spec == nil {
-		return nil, nil
+		spec = &model.IsDependencySpec{}
 	}
 
-	deps, err := b.client.Dependency.Query().
-		Where(isDependencyQuery(spec)).
-		WithPackage(withPackageVersionTree()).
-		WithDependentPackageName(withPackageNameTree()).
-		WithDependentPackageVersion(withPackageVersionTree()).
-		Order(ent.Asc(dependency.FieldID)).
+	isDepQuery := b.client.Dependency.Query().
+		Where(isDependencyQuery(spec))
+
+	deps, err := getIsDepObject(isDepQuery).
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
@@ -49,6 +47,15 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 	}
 
 	return collect(deps, toModelIsDependencyWithBackrefs), nil
+}
+
+// getIsDepObject is used recreate the isDependency object be eager loading the edges
+func getIsDepObject(q *ent.DependencyQuery) *ent.DependencyQuery {
+	return q.
+		WithPackage(withPackageVersionTree()).
+		WithDependentPackageName(withPackageNameTree()).
+		WithDependentPackageVersion(withPackageVersionTree()).
+		Order(ent.Asc(dependency.FieldID))
 }
 
 func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) ([]string, error) {
@@ -65,7 +72,7 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorP
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(dependency.Table, *ids), nil
 }
 
 func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) (*[]string, error) {
@@ -143,7 +150,8 @@ func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 	var pkgVersionID uuid.UUID
 	if pkg.PackageVersionID != nil {
 		var err error
-		pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+		pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+		pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 		if err != nil {
 			return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
@@ -168,7 +176,8 @@ func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 		var depPkgNameID uuid.UUID
 		if depPkg.PackageNameID != nil {
 			var err error
-			depPkgNameID, err = uuid.Parse(*depPkg.PackageNameID)
+			pkgNameGlobalID := fromGlobalID(*depPkg.PackageNameID)
+			depPkgNameID, err = uuid.Parse(pkgNameGlobalID.id)
 			if err != nil {
 				return nil, nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 			}
@@ -191,7 +200,8 @@ func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 		var depPkgVersionID uuid.UUID
 		if depPkg.PackageVersionID != nil {
 			var err error
-			depPkgVersionID, err = uuid.Parse(*depPkg.PackageVersionID)
+			pkgVersionGlobalID := fromGlobalID(*depPkg.PackageVersionID)
+			depPkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
 				return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -267,7 +277,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 		return "", errors.Wrap(txErr, funcName)
 	}
 
-	return *recordID, nil
+	return toGlobalID(dependency.Table, *recordID), nil
 }
 
 func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
@@ -344,4 +354,39 @@ func guacDependencyKey(pkgVersionID *string, depPkgNameID *string, depPkgVersion
 
 	depID := generateUUIDKey([]byte(depIDString))
 	return &depID, nil
+}
+
+func (b *EntBackend) isDependencyNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.Dependency.Query().
+		Where(isDependencyQuery(&model.IsDependencySpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeIsDependencyPackage] {
+		query.
+			WithPackage(withPackageVersionTree()).
+			WithDependentPackageVersion(withPackageVersionTree()).
+			WithDependentPackageName()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	deps, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for isDep with node ID: %s with error: %w", nodeID, err)
+	}
+	for _, foundDep := range deps {
+		if foundDep.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundDep.Edges.Package)))
+		}
+		if foundDep.Edges.DependentPackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundDep.Edges.DependentPackageVersion)))
+		}
+		if foundDep.Edges.DependentPackageName != nil {
+			out = append(out, toModelPackage(foundDep.Edges.DependentPackageName))
+		}
+	}
+
+	return out, nil
 }

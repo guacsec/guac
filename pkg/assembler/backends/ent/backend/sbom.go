@@ -35,6 +35,24 @@ import (
 
 func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 	funcName := "HasSBOM"
+	if spec == nil {
+		spec = &model.HasSBOMSpec{}
+	}
+
+	sbomQuery := b.client.BillOfMaterials.Query().
+		Where(hasSBOMQuery(*spec))
+
+	records, err := getSBOMObject(sbomQuery).
+		Limit(MaxPageSize).
+		All(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, funcName)
+	}
+
+	return collect(records, toModelHasSBOM), nil
+}
+
+func hasSBOMQuery(spec model.HasSBOMSpec) predicate.BillOfMaterials {
 	predicates := []predicate.BillOfMaterials{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(toLowerPtr(spec.Algorithm), billofmaterials.AlgorithmEQ),
@@ -68,9 +86,12 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 	for i := range spec.IncludedOccurrences {
 		predicates = append(predicates, billofmaterials.HasIncludedOccurrencesWith(isOccurrenceQuery(spec.IncludedOccurrences[i])))
 	}
+	return billofmaterials.And(predicates...)
+}
 
-	records, err := b.client.BillOfMaterials.Query().
-		Where(predicates...).
+// getSBOMObject is used recreate the hasSBOM object be eager loading the edges
+func getSBOMObject(q *ent.BillOfMaterialsQuery) *ent.BillOfMaterialsQuery {
+	return q.
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
@@ -86,14 +107,7 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 			q.WithArtifact().
 				WithPackage(withPackageVersionTree()).
 				WithSource(withSourceNameTreeQuery())
-		}).
-		Limit(MaxPageSize).
-		All(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, funcName)
-	}
-
-	return collect(records, toModelHasSBOM), nil
+		})
 }
 
 func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (string, error) {
@@ -112,11 +126,11 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		return "", Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *sbomId, nil
+	return toGlobalID(billofmaterials.Table, *sbomId), nil
 }
 
 func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
-	var modelHasSboms []string
+	var sbomIDs []string
 	for i, hasSbom := range hasSBOMs {
 		var subject model.PackageOrArtifactInput
 		if len(subjects.Artifacts) > 0 {
@@ -124,13 +138,13 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 		} else {
 			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
 		}
-		modelHasSbom, err := b.IngestHasSbom(ctx, subject, *hasSbom, *includes[i])
+		id, err := b.IngestHasSbom(ctx, subject, *hasSbom, *includes[i])
 		if err != nil {
 			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
 		}
-		modelHasSboms = append(modelHasSboms, modelHasSbom)
+		sbomIDs = append(sbomIDs, id)
 	}
-	return modelHasSboms, nil
+	return toGlobalIDs(billofmaterials.Table, sbomIDs), nil
 }
 
 func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includes *model.HasSBOMIncludesInputSpec, hasSBOM *model.HasSBOMInputSpec) (*string, error) {
@@ -146,6 +160,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		billofmaterials.FieldIncludedArtifactsHash,
 		billofmaterials.FieldIncludedDependenciesHash,
 		billofmaterials.FieldIncludedOccurrencesHash,
+		billofmaterials.FieldCollector,
+		billofmaterials.FieldOrigin,
 	}
 
 	var conflictWhere *sql.Predicate
@@ -191,7 +207,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 
 	if len(sortedPkgIDs) > 0 {
 		for _, pkgID := range sortedPkgIDs {
-			pkgIncludesID, err := uuid.Parse(pkgID)
+			pkgGlobalID := fromGlobalID(pkgID)
+			pkgIncludesID, err := uuid.Parse(pkgGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -206,7 +223,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 
 	if len(sortedArtIDs) > 0 {
 		for _, artID := range sortedArtIDs {
-			artIncludesID, err := uuid.Parse(artID)
+			artGlobalID := fromGlobalID(artID)
+			artIncludesID, err := uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -222,7 +240,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 
 	if len(sortedDependencyIDs) > 0 {
 		for _, isDependencyID := range sortedDependencyIDs {
-			isDepIncludesID, err := uuid.Parse(isDependencyID)
+			depGlobalID := fromGlobalID(isDependencyID)
+			isDepIncludesID, err := uuid.Parse(depGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
 			}
@@ -238,7 +257,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 
 	if len(sortedOccurrenceIDs) > 0 {
 		for _, isOccurrenceID := range sortedOccurrenceIDs {
-			isOccurIncludesID, err := uuid.Parse(isOccurrenceID)
+			occurGlobalID := fromGlobalID(isOccurrenceID)
+			isOccurIncludesID, err := uuid.Parse(occurGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
 			}
@@ -258,7 +278,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
 			var err error
-			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+			pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -280,7 +301,8 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -418,4 +440,77 @@ func guacHasSBOMKey(pkgVersionID *string, artID *string, includedPkgHash, includ
 
 	hsID := generateUUIDKey([]byte(hsIDString))
 	return &hsID, nil
+}
+
+func (b *EntBackend) hasSbomNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.BillOfMaterials.Query().
+		Where(hasSBOMQuery(model.HasSBOMSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeHasSbomPackage] {
+		query.
+			WithPackage(withPackageVersionTree())
+	}
+	if allowedEdges[model.EdgeHasSbomArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgeHasSbomIncludedSoftware] {
+		query.
+			WithIncludedSoftwarePackages(withPackageVersionTree()).
+			WithIncludedSoftwareArtifacts()
+	}
+
+	if allowedEdges[model.EdgeHasSbomIncludedDependencies] {
+		query.
+			WithIncludedDependencies(func(q *ent.DependencyQuery) {
+				getIsDepObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeHasSbomIncludedOccurrences] {
+		query.
+			WithIncludedOccurrences(func(q *ent.OccurrenceQuery) {
+				getOccurrenceObject(q)
+			})
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	bills, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed query hasSBOM with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, bill := range bills {
+		if bill.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(bill.Edges.Package)))
+		}
+		if bill.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(bill.Edges.Artifact))
+		}
+		if len(bill.Edges.IncludedSoftwareArtifacts) > 0 {
+			for _, includedArt := range bill.Edges.IncludedSoftwareArtifacts {
+				out = append(out, toModelArtifact(includedArt))
+			}
+		}
+		if len(bill.Edges.IncludedSoftwarePackages) > 0 {
+			for _, includedPkg := range bill.Edges.IncludedSoftwarePackages {
+				out = append(out, toModelPackage(backReferencePackageVersion(includedPkg)))
+			}
+		}
+		if len(bill.Edges.IncludedDependencies) > 0 {
+			for _, includedDep := range bill.Edges.IncludedDependencies {
+				out = append(out, toModelIsDependencyWithBackrefs(includedDep))
+			}
+		}
+		if len(bill.Edges.IncludedOccurrences) > 0 {
+			for _, includedOccur := range bill.Edges.IncludedOccurrences {
+				out = append(out, toModelIsOccurrenceWithSubject(includedOccur))
+			}
+		}
+	}
+
+	return out, nil
 }

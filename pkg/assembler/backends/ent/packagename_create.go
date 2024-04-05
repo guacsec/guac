@@ -12,8 +12,13 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 )
 
 // PackageNameCreate is the builder for creating a PackageName entity.
@@ -69,6 +74,81 @@ func (pnc *PackageNameCreate) AddVersions(p ...*PackageVersion) *PackageNameCrea
 		ids[i] = p[i].ID
 	}
 	return pnc.AddVersionIDs(ids...)
+}
+
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (pnc *PackageNameCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageNameCreate {
+	pnc.mutation.AddHasSourceAtIDs(ids...)
+	return pnc
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (pnc *PackageNameCreate) AddHasSourceAt(h ...*HasSourceAt) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnc.AddHasSourceAtIDs(ids...)
+}
+
+// AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
+func (pnc *PackageNameCreate) AddDependencyIDs(ids ...uuid.UUID) *PackageNameCreate {
+	pnc.mutation.AddDependencyIDs(ids...)
+	return pnc
+}
+
+// AddDependency adds the "dependency" edges to the Dependency entity.
+func (pnc *PackageNameCreate) AddDependency(d ...*Dependency) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pnc.AddDependencyIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (pnc *PackageNameCreate) AddCertificationIDs(ids ...uuid.UUID) *PackageNameCreate {
+	pnc.mutation.AddCertificationIDs(ids...)
+	return pnc
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (pnc *PackageNameCreate) AddCertification(c ...*Certification) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pnc.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (pnc *PackageNameCreate) AddMetadatumIDs(ids ...uuid.UUID) *PackageNameCreate {
+	pnc.mutation.AddMetadatumIDs(ids...)
+	return pnc
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (pnc *PackageNameCreate) AddMetadata(h ...*HasMetadata) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pnc.AddMetadatumIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (pnc *PackageNameCreate) AddPocIDs(ids ...uuid.UUID) *PackageNameCreate {
+	pnc.mutation.AddPocIDs(ids...)
+	return pnc
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (pnc *PackageNameCreate) AddPoc(p ...*PointOfContact) *PackageNameCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pnc.AddPocIDs(ids...)
 }
 
 // Mutation returns the PackageNameMutation object of the builder.
@@ -190,6 +270,86 @@ func (pnc *PackageNameCreate) createSpec() (*PackageName, *sqlgraph.CreateSpec) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(packageversion.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pnc.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.HasSourceAtTable,
+			Columns: []string{packagename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pnc.mutation.DependencyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.DependencyTable,
+			Columns: []string{packagename.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pnc.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.CertificationTable,
+			Columns: []string{packagename.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pnc.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.MetadataTable,
+			Columns: []string{packagename.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pnc.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packagename.PocTable,
+			Columns: []string{packagename.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -26,6 +26,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -35,23 +36,30 @@ import (
 
 func (b *EntBackend) HashEqual(ctx context.Context, spec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	if spec == nil {
-		return nil, nil
+		spec = &model.HashEqualSpec{}
 	}
 
 	if len(spec.Artifacts) > 2 {
 		return nil, fmt.Errorf("too many artifacts specified in hash equal filter")
 	}
 
-	records, err := b.client.HashEqual.Query().
-		Where(hashEqualQueryPredicates(spec)).
-		WithArtifactA().
-		WithArtifactB().
+	heQuery := b.client.HashEqual.Query().
+		Where(hashEqualQueryPredicates(spec))
+
+	records, err := getHashEqualObject(heQuery).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return collect(records, toModelHashEqual), nil
+}
+
+// getHashEqualObject is used recreate the hashEqual object be eager loading the edges
+func getHashEqualObject(q *ent.HashEqualQuery) *ent.HashEqualQuery {
+	return q.
+		WithArtifactA().
+		WithArtifactB()
 }
 
 func hashEqualQueryPredicates(spec *model.HashEqualSpec) predicate.HashEqual {
@@ -84,7 +92,7 @@ func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.IDorArt
 		return "", txErr
 	}
 
-	return *record, nil
+	return toGlobalID(hashequal.Table, *record), nil
 }
 
 func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
@@ -101,7 +109,7 @@ func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.ID
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(hashequal.Table, *ids), nil
 }
 
 func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) (*[]string, error) {
@@ -163,7 +171,7 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		if err != nil {
 			return nil, err
 		}
-		artifactA.ArtifactID = ptrfrom.String(foundArt.ID.String())
+		artifactA.ArtifactID = ptrfrom.String(toGlobalID(artifact.Table, foundArt.ID.String()))
 	}
 
 	if artifactB.ArtifactID == nil {
@@ -171,7 +179,7 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		if err != nil {
 			return nil, err
 		}
-		artifactB.ArtifactID = ptrfrom.String(foundArt.ID.String())
+		artifactB.ArtifactID = ptrfrom.String(toGlobalID(artifact.Table, foundArt.ID.String()))
 	}
 
 	sortedArtifacts := []model.IDorArtifactInput{*artifactA, *artifactB}
@@ -183,7 +191,8 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		if art.ArtifactID == nil {
 			return nil, fmt.Errorf("artifact ID not specified in IDorArtifactInput")
 		}
-		artID, err := uuid.Parse(*art.ArtifactID)
+		artGlobalID := fromGlobalID(*art.ArtifactID)
+		artID, err := uuid.Parse(artGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
@@ -251,7 +260,7 @@ func toModelHashEqual(record *ent.HashEqual) *model.HashEqual {
 	artifacts := []*ent.Artifact{record.Edges.ArtifactA, record.Edges.ArtifactB}
 
 	return &model.HashEqual{
-		ID:            record.ID.String(),
+		ID:            toGlobalID(hashequal.Table, record.ID.String()),
 		Artifacts:     collect(artifacts, toModelArtifact),
 		Justification: record.Justification,
 		Collector:     record.Collector,
@@ -272,4 +281,36 @@ func guacHashEqualKey(sortedArtHash string, heInput *model.HashEqualInputSpec) (
 
 	heID := generateUUIDKey([]byte(heIDString))
 	return &heID, nil
+}
+
+func (b *EntBackend) hashEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.HashEqual.Query().
+		Where(hashEqualQueryPredicates(&model.HashEqualSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeHashEqualArtifact] {
+		query.
+			WithArtifactA().
+			WithArtifactB()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	hasEquals, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for hashEqual with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundHe := range hasEquals {
+		if foundHe.Edges.ArtifactA != nil {
+			out = append(out, toModelArtifact(foundHe.Edges.ArtifactA))
+		}
+		if foundHe.Edges.ArtifactB != nil {
+			out = append(out, toModelArtifact(foundHe.Edges.ArtifactB))
+		}
+	}
+
+	return out, nil
 }

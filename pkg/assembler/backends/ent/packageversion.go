@@ -44,23 +44,50 @@ type PackageVersionEdges struct {
 	Occurrences []*Occurrence `json:"occurrences,omitempty"`
 	// Sbom holds the value of the sbom edge.
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
+	// Vuln holds the value of the vuln edge.
+	Vuln []*CertifyVuln `json:"vuln,omitempty"`
+	// Vex holds the value of the vex edge.
+	Vex []*CertifyVex `json:"vex,omitempty"`
+	// HasSourceAt holds the value of the has_source_at edge.
+	HasSourceAt []*HasSourceAt `json:"has_source_at,omitempty"`
+	// Certification holds the value of the certification edge.
+	Certification []*Certification `json:"certification,omitempty"`
+	// Metadata holds the value of the metadata edge.
+	Metadata []*HasMetadata `json:"metadata,omitempty"`
+	// Dependency holds the value of the dependency edge.
+	Dependency []*Dependency `json:"dependency,omitempty"`
+	// DependencySubject holds the value of the dependency_subject edge.
+	DependencySubject []*Dependency `json:"dependency_subject,omitempty"`
 	// IncludedInSboms holds the value of the included_in_sboms edge.
 	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// PkgEqualPkgA holds the value of the pkg_equal_pkg_a edge.
 	PkgEqualPkgA []*PkgEqual `json:"pkg_equal_pkg_a,omitempty"`
 	// PkgEqualPkgB holds the value of the pkg_equal_pkg_b edge.
 	PkgEqualPkgB []*PkgEqual `json:"pkg_equal_pkg_b,omitempty"`
+	// Poc holds the value of the poc edge.
+	Poc []*PointOfContact `json:"poc,omitempty"`
+	// CertifyLegal holds the value of the certify_legal edge.
+	CertifyLegal []*CertifyLegal `json:"certify_legal,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [15]bool
 	// totalCount holds the count of the edges above.
-	totalCount [6]map[string]int
+	totalCount [15]map[string]int
 
-	namedOccurrences     map[string][]*Occurrence
-	namedSbom            map[string][]*BillOfMaterials
-	namedIncludedInSboms map[string][]*BillOfMaterials
-	namedPkgEqualPkgA    map[string][]*PkgEqual
-	namedPkgEqualPkgB    map[string][]*PkgEqual
+	namedOccurrences       map[string][]*Occurrence
+	namedSbom              map[string][]*BillOfMaterials
+	namedVuln              map[string][]*CertifyVuln
+	namedVex               map[string][]*CertifyVex
+	namedHasSourceAt       map[string][]*HasSourceAt
+	namedCertification     map[string][]*Certification
+	namedMetadata          map[string][]*HasMetadata
+	namedDependency        map[string][]*Dependency
+	namedDependencySubject map[string][]*Dependency
+	namedIncludedInSboms   map[string][]*BillOfMaterials
+	namedPkgEqualPkgA      map[string][]*PkgEqual
+	namedPkgEqualPkgB      map[string][]*PkgEqual
+	namedPoc               map[string][]*PointOfContact
+	namedCertifyLegal      map[string][]*CertifyLegal
 }
 
 // NameOrErr returns the Name value or an error if the edge
@@ -94,10 +121,73 @@ func (e PackageVersionEdges) SbomOrErr() ([]*BillOfMaterials, error) {
 	return nil, &NotLoadedError{edge: "sbom"}
 }
 
+// VulnOrErr returns the Vuln value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) VulnOrErr() ([]*CertifyVuln, error) {
+	if e.loadedTypes[3] {
+		return e.Vuln, nil
+	}
+	return nil, &NotLoadedError{edge: "vuln"}
+}
+
+// VexOrErr returns the Vex value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) VexOrErr() ([]*CertifyVex, error) {
+	if e.loadedTypes[4] {
+		return e.Vex, nil
+	}
+	return nil, &NotLoadedError{edge: "vex"}
+}
+
+// HasSourceAtOrErr returns the HasSourceAt value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) HasSourceAtOrErr() ([]*HasSourceAt, error) {
+	if e.loadedTypes[5] {
+		return e.HasSourceAt, nil
+	}
+	return nil, &NotLoadedError{edge: "has_source_at"}
+}
+
+// CertificationOrErr returns the Certification value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) CertificationOrErr() ([]*Certification, error) {
+	if e.loadedTypes[6] {
+		return e.Certification, nil
+	}
+	return nil, &NotLoadedError{edge: "certification"}
+}
+
+// MetadataOrErr returns the Metadata value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) MetadataOrErr() ([]*HasMetadata, error) {
+	if e.loadedTypes[7] {
+		return e.Metadata, nil
+	}
+	return nil, &NotLoadedError{edge: "metadata"}
+}
+
+// DependencyOrErr returns the Dependency value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) DependencyOrErr() ([]*Dependency, error) {
+	if e.loadedTypes[8] {
+		return e.Dependency, nil
+	}
+	return nil, &NotLoadedError{edge: "dependency"}
+}
+
+// DependencySubjectOrErr returns the DependencySubject value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) DependencySubjectOrErr() ([]*Dependency, error) {
+	if e.loadedTypes[9] {
+		return e.DependencySubject, nil
+	}
+	return nil, &NotLoadedError{edge: "dependency_subject"}
+}
+
 // IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
 // was not loaded in eager-loading.
 func (e PackageVersionEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[10] {
 		return e.IncludedInSboms, nil
 	}
 	return nil, &NotLoadedError{edge: "included_in_sboms"}
@@ -106,7 +196,7 @@ func (e PackageVersionEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) 
 // PkgEqualPkgAOrErr returns the PkgEqualPkgA value or an error if the edge
 // was not loaded in eager-loading.
 func (e PackageVersionEdges) PkgEqualPkgAOrErr() ([]*PkgEqual, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[11] {
 		return e.PkgEqualPkgA, nil
 	}
 	return nil, &NotLoadedError{edge: "pkg_equal_pkg_a"}
@@ -115,10 +205,28 @@ func (e PackageVersionEdges) PkgEqualPkgAOrErr() ([]*PkgEqual, error) {
 // PkgEqualPkgBOrErr returns the PkgEqualPkgB value or an error if the edge
 // was not loaded in eager-loading.
 func (e PackageVersionEdges) PkgEqualPkgBOrErr() ([]*PkgEqual, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[12] {
 		return e.PkgEqualPkgB, nil
 	}
 	return nil, &NotLoadedError{edge: "pkg_equal_pkg_b"}
+}
+
+// PocOrErr returns the Poc value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) PocOrErr() ([]*PointOfContact, error) {
+	if e.loadedTypes[13] {
+		return e.Poc, nil
+	}
+	return nil, &NotLoadedError{edge: "poc"}
+}
+
+// CertifyLegalOrErr returns the CertifyLegal value or an error if the edge
+// was not loaded in eager-loading.
+func (e PackageVersionEdges) CertifyLegalOrErr() ([]*CertifyLegal, error) {
+	if e.loadedTypes[14] {
+		return e.CertifyLegal, nil
+	}
+	return nil, &NotLoadedError{edge: "certify_legal"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -213,6 +321,41 @@ func (pv *PackageVersion) QuerySbom() *BillOfMaterialsQuery {
 	return NewPackageVersionClient(pv.config).QuerySbom(pv)
 }
 
+// QueryVuln queries the "vuln" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryVuln() *CertifyVulnQuery {
+	return NewPackageVersionClient(pv.config).QueryVuln(pv)
+}
+
+// QueryVex queries the "vex" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryVex() *CertifyVexQuery {
+	return NewPackageVersionClient(pv.config).QueryVex(pv)
+}
+
+// QueryHasSourceAt queries the "has_source_at" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryHasSourceAt() *HasSourceAtQuery {
+	return NewPackageVersionClient(pv.config).QueryHasSourceAt(pv)
+}
+
+// QueryCertification queries the "certification" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryCertification() *CertificationQuery {
+	return NewPackageVersionClient(pv.config).QueryCertification(pv)
+}
+
+// QueryMetadata queries the "metadata" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryMetadata() *HasMetadataQuery {
+	return NewPackageVersionClient(pv.config).QueryMetadata(pv)
+}
+
+// QueryDependency queries the "dependency" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryDependency() *DependencyQuery {
+	return NewPackageVersionClient(pv.config).QueryDependency(pv)
+}
+
+// QueryDependencySubject queries the "dependency_subject" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryDependencySubject() *DependencyQuery {
+	return NewPackageVersionClient(pv.config).QueryDependencySubject(pv)
+}
+
 // QueryIncludedInSboms queries the "included_in_sboms" edge of the PackageVersion entity.
 func (pv *PackageVersion) QueryIncludedInSboms() *BillOfMaterialsQuery {
 	return NewPackageVersionClient(pv.config).QueryIncludedInSboms(pv)
@@ -226,6 +369,16 @@ func (pv *PackageVersion) QueryPkgEqualPkgA() *PkgEqualQuery {
 // QueryPkgEqualPkgB queries the "pkg_equal_pkg_b" edge of the PackageVersion entity.
 func (pv *PackageVersion) QueryPkgEqualPkgB() *PkgEqualQuery {
 	return NewPackageVersionClient(pv.config).QueryPkgEqualPkgB(pv)
+}
+
+// QueryPoc queries the "poc" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryPoc() *PointOfContactQuery {
+	return NewPackageVersionClient(pv.config).QueryPoc(pv)
+}
+
+// QueryCertifyLegal queries the "certify_legal" edge of the PackageVersion entity.
+func (pv *PackageVersion) QueryCertifyLegal() *CertifyLegalQuery {
+	return NewPackageVersionClient(pv.config).QueryCertifyLegal(pv)
 }
 
 // Update returns a builder for updating this PackageVersion.
@@ -317,6 +470,174 @@ func (pv *PackageVersion) appendNamedSbom(name string, edges ...*BillOfMaterials
 	}
 }
 
+// NamedVuln returns the Vuln named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedVuln(name string) ([]*CertifyVuln, error) {
+	if pv.Edges.namedVuln == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedVuln[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedVuln(name string, edges ...*CertifyVuln) {
+	if pv.Edges.namedVuln == nil {
+		pv.Edges.namedVuln = make(map[string][]*CertifyVuln)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedVuln[name] = []*CertifyVuln{}
+	} else {
+		pv.Edges.namedVuln[name] = append(pv.Edges.namedVuln[name], edges...)
+	}
+}
+
+// NamedVex returns the Vex named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedVex(name string) ([]*CertifyVex, error) {
+	if pv.Edges.namedVex == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedVex[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedVex(name string, edges ...*CertifyVex) {
+	if pv.Edges.namedVex == nil {
+		pv.Edges.namedVex = make(map[string][]*CertifyVex)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedVex[name] = []*CertifyVex{}
+	} else {
+		pv.Edges.namedVex[name] = append(pv.Edges.namedVex[name], edges...)
+	}
+}
+
+// NamedHasSourceAt returns the HasSourceAt named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedHasSourceAt(name string) ([]*HasSourceAt, error) {
+	if pv.Edges.namedHasSourceAt == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedHasSourceAt[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedHasSourceAt(name string, edges ...*HasSourceAt) {
+	if pv.Edges.namedHasSourceAt == nil {
+		pv.Edges.namedHasSourceAt = make(map[string][]*HasSourceAt)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedHasSourceAt[name] = []*HasSourceAt{}
+	} else {
+		pv.Edges.namedHasSourceAt[name] = append(pv.Edges.namedHasSourceAt[name], edges...)
+	}
+}
+
+// NamedCertification returns the Certification named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedCertification(name string) ([]*Certification, error) {
+	if pv.Edges.namedCertification == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedCertification[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedCertification(name string, edges ...*Certification) {
+	if pv.Edges.namedCertification == nil {
+		pv.Edges.namedCertification = make(map[string][]*Certification)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedCertification[name] = []*Certification{}
+	} else {
+		pv.Edges.namedCertification[name] = append(pv.Edges.namedCertification[name], edges...)
+	}
+}
+
+// NamedMetadata returns the Metadata named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedMetadata(name string) ([]*HasMetadata, error) {
+	if pv.Edges.namedMetadata == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedMetadata[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedMetadata(name string, edges ...*HasMetadata) {
+	if pv.Edges.namedMetadata == nil {
+		pv.Edges.namedMetadata = make(map[string][]*HasMetadata)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedMetadata[name] = []*HasMetadata{}
+	} else {
+		pv.Edges.namedMetadata[name] = append(pv.Edges.namedMetadata[name], edges...)
+	}
+}
+
+// NamedDependency returns the Dependency named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedDependency(name string) ([]*Dependency, error) {
+	if pv.Edges.namedDependency == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedDependency[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedDependency(name string, edges ...*Dependency) {
+	if pv.Edges.namedDependency == nil {
+		pv.Edges.namedDependency = make(map[string][]*Dependency)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedDependency[name] = []*Dependency{}
+	} else {
+		pv.Edges.namedDependency[name] = append(pv.Edges.namedDependency[name], edges...)
+	}
+}
+
+// NamedDependencySubject returns the DependencySubject named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedDependencySubject(name string) ([]*Dependency, error) {
+	if pv.Edges.namedDependencySubject == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedDependencySubject[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedDependencySubject(name string, edges ...*Dependency) {
+	if pv.Edges.namedDependencySubject == nil {
+		pv.Edges.namedDependencySubject = make(map[string][]*Dependency)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedDependencySubject[name] = []*Dependency{}
+	} else {
+		pv.Edges.namedDependencySubject[name] = append(pv.Edges.namedDependencySubject[name], edges...)
+	}
+}
+
 // NamedIncludedInSboms returns the IncludedInSboms named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (pv *PackageVersion) NamedIncludedInSboms(name string) ([]*BillOfMaterials, error) {
@@ -386,6 +707,54 @@ func (pv *PackageVersion) appendNamedPkgEqualPkgB(name string, edges ...*PkgEqua
 		pv.Edges.namedPkgEqualPkgB[name] = []*PkgEqual{}
 	} else {
 		pv.Edges.namedPkgEqualPkgB[name] = append(pv.Edges.namedPkgEqualPkgB[name], edges...)
+	}
+}
+
+// NamedPoc returns the Poc named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedPoc(name string) ([]*PointOfContact, error) {
+	if pv.Edges.namedPoc == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedPoc[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedPoc(name string, edges ...*PointOfContact) {
+	if pv.Edges.namedPoc == nil {
+		pv.Edges.namedPoc = make(map[string][]*PointOfContact)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedPoc[name] = []*PointOfContact{}
+	} else {
+		pv.Edges.namedPoc[name] = append(pv.Edges.namedPoc[name], edges...)
+	}
+}
+
+// NamedCertifyLegal returns the CertifyLegal named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (pv *PackageVersion) NamedCertifyLegal(name string) ([]*CertifyLegal, error) {
+	if pv.Edges.namedCertifyLegal == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := pv.Edges.namedCertifyLegal[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (pv *PackageVersion) appendNamedCertifyLegal(name string, edges ...*CertifyLegal) {
+	if pv.Edges.namedCertifyLegal == nil {
+		pv.Edges.namedCertifyLegal = make(map[string][]*CertifyLegal)
+	}
+	if len(edges) == 0 {
+		pv.Edges.namedCertifyLegal[name] = []*CertifyLegal{}
+	} else {
+		pv.Edges.namedCertifyLegal[name] = append(pv.Edges.namedCertifyLegal[name], edges...)
 	}
 }
 

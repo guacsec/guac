@@ -29,12 +29,30 @@ const (
 	EdgeOccurrences = "occurrences"
 	// EdgeSbom holds the string denoting the sbom edge name in mutations.
 	EdgeSbom = "sbom"
+	// EdgeVuln holds the string denoting the vuln edge name in mutations.
+	EdgeVuln = "vuln"
+	// EdgeVex holds the string denoting the vex edge name in mutations.
+	EdgeVex = "vex"
+	// EdgeHasSourceAt holds the string denoting the has_source_at edge name in mutations.
+	EdgeHasSourceAt = "has_source_at"
+	// EdgeCertification holds the string denoting the certification edge name in mutations.
+	EdgeCertification = "certification"
+	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
+	EdgeMetadata = "metadata"
+	// EdgeDependency holds the string denoting the dependency edge name in mutations.
+	EdgeDependency = "dependency"
+	// EdgeDependencySubject holds the string denoting the dependency_subject edge name in mutations.
+	EdgeDependencySubject = "dependency_subject"
 	// EdgeIncludedInSboms holds the string denoting the included_in_sboms edge name in mutations.
 	EdgeIncludedInSboms = "included_in_sboms"
 	// EdgePkgEqualPkgA holds the string denoting the pkg_equal_pkg_a edge name in mutations.
 	EdgePkgEqualPkgA = "pkg_equal_pkg_a"
 	// EdgePkgEqualPkgB holds the string denoting the pkg_equal_pkg_b edge name in mutations.
 	EdgePkgEqualPkgB = "pkg_equal_pkg_b"
+	// EdgePoc holds the string denoting the poc edge name in mutations.
+	EdgePoc = "poc"
+	// EdgeCertifyLegal holds the string denoting the certify_legal edge name in mutations.
+	EdgeCertifyLegal = "certify_legal"
 	// Table holds the table name of the packageversion in the database.
 	Table = "package_versions"
 	// NameTable is the table that holds the name relation/edge.
@@ -58,6 +76,55 @@ const (
 	SbomInverseTable = "bill_of_materials"
 	// SbomColumn is the table column denoting the sbom relation/edge.
 	SbomColumn = "package_id"
+	// VulnTable is the table that holds the vuln relation/edge.
+	VulnTable = "certify_vulns"
+	// VulnInverseTable is the table name for the CertifyVuln entity.
+	// It exists in this package in order to avoid circular dependency with the "certifyvuln" package.
+	VulnInverseTable = "certify_vulns"
+	// VulnColumn is the table column denoting the vuln relation/edge.
+	VulnColumn = "package_id"
+	// VexTable is the table that holds the vex relation/edge.
+	VexTable = "certify_vexes"
+	// VexInverseTable is the table name for the CertifyVex entity.
+	// It exists in this package in order to avoid circular dependency with the "certifyvex" package.
+	VexInverseTable = "certify_vexes"
+	// VexColumn is the table column denoting the vex relation/edge.
+	VexColumn = "package_id"
+	// HasSourceAtTable is the table that holds the has_source_at relation/edge.
+	HasSourceAtTable = "has_source_ats"
+	// HasSourceAtInverseTable is the table name for the HasSourceAt entity.
+	// It exists in this package in order to avoid circular dependency with the "hassourceat" package.
+	HasSourceAtInverseTable = "has_source_ats"
+	// HasSourceAtColumn is the table column denoting the has_source_at relation/edge.
+	HasSourceAtColumn = "package_version_id"
+	// CertificationTable is the table that holds the certification relation/edge.
+	CertificationTable = "certifications"
+	// CertificationInverseTable is the table name for the Certification entity.
+	// It exists in this package in order to avoid circular dependency with the "certification" package.
+	CertificationInverseTable = "certifications"
+	// CertificationColumn is the table column denoting the certification relation/edge.
+	CertificationColumn = "package_version_id"
+	// MetadataTable is the table that holds the metadata relation/edge.
+	MetadataTable = "has_metadata"
+	// MetadataInverseTable is the table name for the HasMetadata entity.
+	// It exists in this package in order to avoid circular dependency with the "hasmetadata" package.
+	MetadataInverseTable = "has_metadata"
+	// MetadataColumn is the table column denoting the metadata relation/edge.
+	MetadataColumn = "package_version_id"
+	// DependencyTable is the table that holds the dependency relation/edge.
+	DependencyTable = "dependencies"
+	// DependencyInverseTable is the table name for the Dependency entity.
+	// It exists in this package in order to avoid circular dependency with the "dependency" package.
+	DependencyInverseTable = "dependencies"
+	// DependencyColumn is the table column denoting the dependency relation/edge.
+	DependencyColumn = "dependent_package_version_id"
+	// DependencySubjectTable is the table that holds the dependency_subject relation/edge.
+	DependencySubjectTable = "dependencies"
+	// DependencySubjectInverseTable is the table name for the Dependency entity.
+	// It exists in this package in order to avoid circular dependency with the "dependency" package.
+	DependencySubjectInverseTable = "dependencies"
+	// DependencySubjectColumn is the table column denoting the dependency_subject relation/edge.
+	DependencySubjectColumn = "package_id"
 	// IncludedInSbomsTable is the table that holds the included_in_sboms relation/edge. The primary key declared below.
 	IncludedInSbomsTable = "bill_of_materials_included_software_packages"
 	// IncludedInSbomsInverseTable is the table name for the BillOfMaterials entity.
@@ -77,6 +144,20 @@ const (
 	PkgEqualPkgBInverseTable = "pkg_equals"
 	// PkgEqualPkgBColumn is the table column denoting the pkg_equal_pkg_b relation/edge.
 	PkgEqualPkgBColumn = "equal_pkg_id"
+	// PocTable is the table that holds the poc relation/edge.
+	PocTable = "point_of_contacts"
+	// PocInverseTable is the table name for the PointOfContact entity.
+	// It exists in this package in order to avoid circular dependency with the "pointofcontact" package.
+	PocInverseTable = "point_of_contacts"
+	// PocColumn is the table column denoting the poc relation/edge.
+	PocColumn = "package_version_id"
+	// CertifyLegalTable is the table that holds the certify_legal relation/edge.
+	CertifyLegalTable = "certify_legals"
+	// CertifyLegalInverseTable is the table name for the CertifyLegal entity.
+	// It exists in this package in order to avoid circular dependency with the "certifylegal" package.
+	CertifyLegalInverseTable = "certify_legals"
+	// CertifyLegalColumn is the table column denoting the certify_legal relation/edge.
+	CertifyLegalColumn = "package_id"
 )
 
 // Columns holds all SQL columns for packageversion fields.
@@ -177,6 +258,104 @@ func BySbom(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByVulnCount orders the results by vuln count.
+func ByVulnCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVulnStep(), opts...)
+	}
+}
+
+// ByVuln orders the results by vuln terms.
+func ByVuln(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVulnStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByVexCount orders the results by vex count.
+func ByVexCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVexStep(), opts...)
+	}
+}
+
+// ByVex orders the results by vex terms.
+func ByVex(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVexStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByHasSourceAtCount orders the results by has_source_at count.
+func ByHasSourceAtCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newHasSourceAtStep(), opts...)
+	}
+}
+
+// ByHasSourceAt orders the results by has_source_at terms.
+func ByHasSourceAt(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newHasSourceAtStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCertificationCount orders the results by certification count.
+func ByCertificationCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCertificationStep(), opts...)
+	}
+}
+
+// ByCertification orders the results by certification terms.
+func ByCertification(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCertificationStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByMetadataCount orders the results by metadata count.
+func ByMetadataCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMetadataStep(), opts...)
+	}
+}
+
+// ByMetadata orders the results by metadata terms.
+func ByMetadata(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMetadataStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByDependencyCount orders the results by dependency count.
+func ByDependencyCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDependencyStep(), opts...)
+	}
+}
+
+// ByDependency orders the results by dependency terms.
+func ByDependency(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDependencyStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByDependencySubjectCount orders the results by dependency_subject count.
+func ByDependencySubjectCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDependencySubjectStep(), opts...)
+	}
+}
+
+// ByDependencySubject orders the results by dependency_subject terms.
+func ByDependencySubject(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDependencySubjectStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByIncludedInSbomsCount orders the results by included_in_sboms count.
 func ByIncludedInSbomsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -218,6 +397,34 @@ func ByPkgEqualPkgB(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newPkgEqualPkgBStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPocCount orders the results by poc count.
+func ByPocCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPocStep(), opts...)
+	}
+}
+
+// ByPoc orders the results by poc terms.
+func ByPoc(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPocStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCertifyLegalCount orders the results by certify_legal count.
+func ByCertifyLegalCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCertifyLegalStep(), opts...)
+	}
+}
+
+// ByCertifyLegal orders the results by certify_legal terms.
+func ByCertifyLegal(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCertifyLegalStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newNameStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -239,6 +446,55 @@ func newSbomStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, true, SbomTable, SbomColumn),
 	)
 }
+func newVulnStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VulnInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, VulnTable, VulnColumn),
+	)
+}
+func newVexStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VexInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, VexTable, VexColumn),
+	)
+}
+func newHasSourceAtStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(HasSourceAtInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, HasSourceAtTable, HasSourceAtColumn),
+	)
+}
+func newCertificationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CertificationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, CertificationTable, CertificationColumn),
+	)
+}
+func newMetadataStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MetadataInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, MetadataTable, MetadataColumn),
+	)
+}
+func newDependencyStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DependencyInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, DependencyTable, DependencyColumn),
+	)
+}
+func newDependencySubjectStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DependencySubjectInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, DependencySubjectTable, DependencySubjectColumn),
+	)
+}
 func newIncludedInSbomsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -258,5 +514,19 @@ func newPkgEqualPkgBStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PkgEqualPkgBInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, PkgEqualPkgBTable, PkgEqualPkgBColumn),
+	)
+}
+func newPocStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PocInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, PocTable, PocColumn),
+	)
+}
+func newCertifyLegalStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CertifyLegalInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, CertifyLegalTable, CertifyLegalColumn),
 	)
 }

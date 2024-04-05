@@ -14,8 +14,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 )
 
@@ -98,6 +102,21 @@ func (ac *ArtifactCreate) AddAttestations(s ...*SLSAAttestation) *ArtifactCreate
 	return ac.AddAttestationIDs(ids...)
 }
 
+// AddAttestationsSubjectIDs adds the "attestations_subject" edge to the SLSAAttestation entity by IDs.
+func (ac *ArtifactCreate) AddAttestationsSubjectIDs(ids ...uuid.UUID) *ArtifactCreate {
+	ac.mutation.AddAttestationsSubjectIDs(ids...)
+	return ac
+}
+
+// AddAttestationsSubject adds the "attestations_subject" edges to the SLSAAttestation entity.
+func (ac *ArtifactCreate) AddAttestationsSubject(s ...*SLSAAttestation) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return ac.AddAttestationsSubjectIDs(ids...)
+}
+
 // AddHashEqualArtAIDs adds the "hash_equal_art_a" edge to the HashEqual entity by IDs.
 func (ac *ArtifactCreate) AddHashEqualArtAIDs(ids ...uuid.UUID) *ArtifactCreate {
 	ac.mutation.AddHashEqualArtAIDs(ids...)
@@ -126,6 +145,66 @@ func (ac *ArtifactCreate) AddHashEqualArtB(h ...*HashEqual) *ArtifactCreate {
 		ids[i] = h[i].ID
 	}
 	return ac.AddHashEqualArtBIDs(ids...)
+}
+
+// AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
+func (ac *ArtifactCreate) AddVexIDs(ids ...uuid.UUID) *ArtifactCreate {
+	ac.mutation.AddVexIDs(ids...)
+	return ac
+}
+
+// AddVex adds the "vex" edges to the CertifyVex entity.
+func (ac *ArtifactCreate) AddVex(c ...*CertifyVex) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return ac.AddVexIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (ac *ArtifactCreate) AddCertificationIDs(ids ...uuid.UUID) *ArtifactCreate {
+	ac.mutation.AddCertificationIDs(ids...)
+	return ac
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (ac *ArtifactCreate) AddCertification(c ...*Certification) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return ac.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (ac *ArtifactCreate) AddMetadatumIDs(ids ...uuid.UUID) *ArtifactCreate {
+	ac.mutation.AddMetadatumIDs(ids...)
+	return ac
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (ac *ArtifactCreate) AddMetadata(h ...*HasMetadata) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return ac.AddMetadatumIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (ac *ArtifactCreate) AddPocIDs(ids ...uuid.UUID) *ArtifactCreate {
+	ac.mutation.AddPocIDs(ids...)
+	return ac
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (ac *ArtifactCreate) AddPoc(p ...*PointOfContact) *ArtifactCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return ac.AddPocIDs(ids...)
 }
 
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
@@ -284,6 +363,22 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := ac.mutation.AttestationsSubjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.AttestationsSubjectTable,
+			Columns: []string{artifact.AttestationsSubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(slsaattestation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := ac.mutation.HashEqualArtAIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -309,6 +404,70 @@ func (ac *ArtifactCreate) createSpec() (*Artifact, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(hashequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.VexIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.VexTable,
+			Columns: []string{artifact.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.CertificationTable,
+			Columns: []string{artifact.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.MetadataTable,
+			Columns: []string{artifact.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   artifact.PocTable,
+			Columns: []string{artifact.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

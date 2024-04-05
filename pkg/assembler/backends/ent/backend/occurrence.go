@@ -33,25 +33,29 @@ import (
 )
 
 func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
+	if query == nil {
+		query = &model.IsOccurrenceSpec{}
+	}
+	occurQuery := b.client.Occurrence.Query().
+		Where(isOccurrenceQuery(query))
 
-	records, err := b.client.Occurrence.Query().
-		Where(isOccurrenceQuery(query)).
-		WithArtifact().
-		WithPackage(func(q *ent.PackageVersionQuery) {
-			q.WithName(func(q *ent.PackageNameQuery) {})
-		}).
-		WithSource(func(q *ent.SourceNameQuery) {}).
+	records, err := getOccurrenceObject(occurQuery).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	models := make([]*model.IsOccurrence, len(records))
-	for i, record := range records {
-		models[i] = toModelIsOccurrenceWithSubject(record)
-	}
+	return collect(records, toModelIsOccurrenceWithSubject), nil
+}
 
-	return models, nil
+// getOccurrenceObject is used recreate the occurrence object be eager loading the edges
+func getOccurrenceObject(q *ent.OccurrenceQuery) *ent.OccurrenceQuery {
+	return q.
+		WithArtifact().
+		WithPackage(func(q *ent.PackageVersionQuery) {
+			q.WithName(func(q *ent.PackageNameQuery) {})
+		}).
+		WithSource(func(q *ent.SourceNameQuery) {})
 }
 
 func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) ([]string, error) {
@@ -68,7 +72,7 @@ func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.Packa
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(occurrence.Table, *ids), nil
 }
 
 func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) (*[]string, error) {
@@ -156,7 +160,8 @@ func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 	var artID uuid.UUID
 	if art.ArtifactID != nil {
 		var err error
-		artID, err = uuid.Parse(*art.ArtifactID)
+		artGlobalID := fromGlobalID(*art.ArtifactID)
+		artID, err = uuid.Parse(artGlobalID.id)
 		if err != nil {
 			return nil, nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
@@ -179,7 +184,8 @@ func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 		var pkgVersionID uuid.UUID
 		if pkg.PackageVersionID != nil {
 			var err error
-			pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+			pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+			pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 			if err != nil {
 				return nil, nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 			}
@@ -202,7 +208,8 @@ func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
@@ -284,7 +291,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		return "", gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *recordID, nil
+	return toGlobalID(occurrence.Table, *recordID), nil
 }
 
 func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
@@ -351,4 +358,46 @@ func guacOccurrenceKey(pkgVersionID *string, srcNameID *string, artID *string, o
 
 	occurID := generateUUIDKey([]byte(occurIDString))
 	return &occurID, nil
+}
+
+func (b *EntBackend) isOccurrenceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.Occurrence.Query().
+		Where(isOccurrenceQuery(&model.IsOccurrenceSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeIsOccurrencePackage] {
+		query.
+			WithPackage(withPackageVersionTree())
+	}
+	if allowedEdges[model.EdgeIsOccurrenceSource] {
+		query.
+			WithSource()
+	}
+	if allowedEdges[model.EdgeIsOccurrenceArtifact] {
+		query.
+			WithArtifact()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	occurs, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for isOccur with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, o := range occurs {
+		if o.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(o.Edges.Package)))
+		}
+		if o.Edges.Source != nil {
+			out = append(out, toModelSource(o.Edges.Source))
+		}
+		if o.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(o.Edges.Artifact))
+		}
+	}
+
+	return out, nil
 }

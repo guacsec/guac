@@ -18,6 +18,7 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -45,13 +46,13 @@ func (b *EntBackend) IngestLicenses(ctx context.Context, licenses []*model.IDorL
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(license.Table, *ids), nil
 }
 
-func (b *EntBackend) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
+func (b *EntBackend) IngestLicense(ctx context.Context, licenseInput *model.IDorLicenseInput) (string, error) {
 	record, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		client := ent.TxFromContext(ctx)
-		licenseID, err := upsertLicense(ctx, client, *license.LicenseInput)
+		licenseID, err := upsertLicense(ctx, client, *licenseInput.LicenseInput)
 		if err != nil {
 			return nil, err
 		}
@@ -62,10 +63,13 @@ func (b *EntBackend) IngestLicense(ctx context.Context, license *model.IDorLicen
 		return "", txErr
 	}
 
-	return *record, nil
+	return toGlobalID(license.Table, *record), nil
 }
 
 func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([]*model.License, error) {
+	if filter == nil {
+		filter = &model.LicenseSpec{}
+	}
 	records, err := getLicenses(ctx, b.client, *filter)
 	if err != nil {
 		return nil, err
@@ -163,4 +167,48 @@ func licenseInputQuery(filter model.LicenseInputSpec) predicate.License {
 
 func getLicenseID(ctx context.Context, client *ent.Client, license model.LicenseInputSpec) (uuid.UUID, error) {
 	return client.License.Query().Where(licenseInputQuery(license)).OnlyID(ctx)
+}
+
+func (b *EntBackend) licenseNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.License.Query().
+		Where(licenseQuery(model.LicenseSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeLicenseCertifyLegal] {
+		query.
+			WithDeclaredInCertifyLegals(func(q *ent.CertifyLegalQuery) {
+				getCertifyLegalObject(q)
+			}).
+			WithDiscoveredInCertifyLegals(func(q *ent.CertifyLegalQuery) {
+				getCertifyLegalObject(q)
+			})
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	licenses, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for license with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundLicense := range licenses {
+		declaredCLs, err := foundLicense.DeclaredInCertifyLegals(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get declared license certifyLegal for node ID: %s with error: %w", nodeID, err)
+		}
+		for _, foundDeclared := range declaredCLs {
+			out = append(out, toModelCertifyLegal(foundDeclared))
+		}
+		disCLs, err := foundLicense.DiscoveredInCertifyLegals(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get discovered license certifyLegal for node ID: %s with error: %w", nodeID, err)
+		}
+		for _, foundDis := range disCLs {
+			out = append(out, toModelCertifyLegal(foundDis))
+		}
+	}
+
+	return out, nil
 }

@@ -26,6 +26,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
@@ -46,28 +47,11 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgSpec = &model.PkgSpec{}
 	}
 
-	query := b.client.PackageVersion.Query().Limit(MaxPageSize)
-
-	// TODO: Fix preloads
-	//paths, isGQL := getPreloads(ctx)
-
-	query.Where(
-		optionalPredicate(pkgSpec.ID, IDEQ),
-		optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
-		optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
-		packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
-		packageversion.HasNameWith(
-			optionalPredicate(pkgSpec.Type, packagename.TypeEQ),
-			optionalPredicate(pkgSpec.Namespace, packagename.NamespaceEQ),
-			optionalPredicate(pkgSpec.Name, packagename.NameEQ),
-		),
-	)
-
-	// TODO: Fix preloads
-	query.WithName(func(q *ent.PackageNameQuery) {
-	})
-
-	pkgs, err := query.All(ctx)
+	pkgs, err := b.client.PackageVersion.Query().
+		Where(packageQueryPredicates(pkgSpec)).
+		WithName(func(q *ent.PackageNameQuery) {}).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -78,6 +62,20 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	}
 
 	return collect(pkgNames, toModelPackage), nil
+}
+
+func packageQueryPredicates(pkgSpec *model.PkgSpec) predicate.PackageVersion {
+	return packageversion.And(
+		optionalPredicate(pkgSpec.ID, IDEQ),
+		optionalPredicate(pkgSpec.Version, packageversion.VersionEqualFold),
+		optionalPredicate(pkgSpec.Subpath, packageversion.SubpathEqualFold),
+		packageversion.QualifiersMatch(pkgSpec.Qualifiers, ptrWithDefault(pkgSpec.MatchOnlyEmptyQualifiers, false)),
+		packageversion.HasNameWith(
+			optionalPredicate(pkgSpec.Type, packagename.TypeEQ),
+			optionalPredicate(pkgSpec.Namespace, packagename.NamespaceEQ),
+			optionalPredicate(pkgSpec.Name, packagename.NameEQ),
+		),
+	)
 }
 
 func (b *EntBackend) IngestPackages(ctx context.Context, pkgs []*model.IDorPkgInput) ([]*model.PackageIDs, error) {
@@ -184,10 +182,10 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 	var collectedPkgIDs []model.PackageIDs
 	for i := range pkgVersionIDs {
 		collectedPkgIDs = append(collectedPkgIDs, model.PackageIDs{
-			PackageTypeID:      fmt.Sprintf("%s:%s", pkgTypeString, pkgNameIDs[i]),
-			PackageNamespaceID: fmt.Sprintf("%s:%s", pkgNamespaceString, pkgNameIDs[i]),
-			PackageNameID:      pkgNameIDs[i],
-			PackageVersionID:   pkgVersionIDs[i]})
+			PackageTypeID:      toGlobalID(pkgTypeString, pkgNameIDs[i]),
+			PackageNamespaceID: toGlobalID(pkgNamespaceString, pkgNameIDs[i]),
+			PackageNameID:      toGlobalID(ent.TypePackageName, pkgNameIDs[i]),
+			PackageVersionID:   toGlobalID(ent.TypePackageVersion, pkgVersionIDs[i])})
 	}
 
 	return &collectedPkgIDs, nil
@@ -229,10 +227,10 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 	}
 
 	return &model.PackageIDs{
-		PackageTypeID:      fmt.Sprintf("%s:%s", pkgTypeString, pkgNameID.String()),
-		PackageNamespaceID: fmt.Sprintf("%s:%s", pkgNamespaceString, pkgNameID.String()),
-		PackageNameID:      pkgNameID.String(),
-		PackageVersionID:   pkgVersionID.String()}, nil
+		PackageTypeID:      toGlobalID(pkgTypeString, pkgNameID.String()),
+		PackageNamespaceID: toGlobalID(pkgNamespaceString, pkgNameID.String()),
+		PackageNameID:      toGlobalID(packagename.Table, pkgNameID.String()),
+		PackageVersionID:   toGlobalID(packageversion.Table, pkgVersionID.String())}, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {
@@ -286,45 +284,9 @@ func normalizeInputQualifiers(inputs []*model.PackageQualifierInputSpec) []model
 	return qualifiers
 }
 
-//func qualifiersToSpecQualifiers(q []*model.PackageQualifierInputSpec) []*model.PackageQualifierSpec {
-//	results := make([]*model.PackageQualifierSpec, len(q))
-//	for i, s := range q {
-//		results[i] = &model.PackageQualifierSpec{
-//			Key:   s.Key,
-//			Value: &s.Value,
-//		}
-//	}
-//	return results
-//}
-
 func packageVersionInputQuery(spec model.PkgInputSpec) predicate.PackageVersion {
 	return packageVersionQuery(helper.ConvertPkgInputSpecToPkgSpec(&spec))
-
-	// rv := []predicate.PackageVersion{
-	// 	packageversion.VersionEQ(stringOrEmpty(spec.Version)),
-	// 	packageversion.SubpathEQ(stringOrEmpty(spec.Subpath)),
-	// 	packageversion.QualifiersMatchSpec(pkgQualifierInputSpecToQuerySpec(spec.Qualifiers)),
-	// 	packageversion.HasNameWith(
-	// 		packagename.NameEQ(spec.Name),
-	// 		packagename.HasNamespaceWith(
-	// 			packagenamespace.Namespace(stringOrEmpty(spec.Namespace)),
-	// 			packagenamespace.HasPackageWith(
-	// 				packagetype.TypeEQ(spec.Type),
-	// 			),
-	// 		),
-	// 	),
-	// }
-
-	// return packageversion.And(rv...)
 }
-
-//func isPackageVersionQuery(filter *model.PkgSpec) bool {
-//	if filter == nil {
-//		return false
-//	}
-//
-//	return filter.Version != nil || filter.Subpath != nil || filter.Qualifiers != nil
-//}
 
 func packageVersionQuery(filter *model.PkgSpec) predicate.PackageVersion {
 	if filter == nil {
@@ -432,13 +394,365 @@ func getPkgName(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpe
 
 func getPkgVersion(ctx context.Context, client *ent.Client, pkgin model.PkgInputSpec) (*ent.PackageVersion, error) {
 	return client.PackageVersion.Query().Where(packageVersionInputQuery(pkgin)).Only(ctx)
-	// return client.PackageType.Query().
-	// 	Where(packagetype.Type(pkgin.Type)).
-	// 	QueryNamespaces().Where(packagenamespace.NamespaceEQ(valueOrDefault(pkgin.Namespace, ""))).
-	// 	QueryNames().Where(packagename.NameEQ(pkgin.Name)).
-	// 	QueryVersions().
-	// 	Where(
-	// 		packageVersionInputQuery(pkgin),
-	// 	).
-	// 	Only(ctx)
+}
+
+func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+	if allowedEdges[model.EdgePackageTypePackageNamespace] {
+		query := b.client.PackageName.Query().
+			Where([]predicate.PackageName{
+				optionalPredicate(&nodeID, IDEQ),
+			}...).
+			Limit(MaxPageSize)
+
+		pkgNames, err := query.All(ctx)
+		if err != nil {
+			return []model.Node{}, fmt.Errorf("failed to get pkgType for node ID: %s with error: %w", nodeID, err)
+		}
+
+		for _, foundPkgName := range pkgNames {
+			out = append(out, &model.Package{
+				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+				Type: foundPkgName.Type,
+				Namespaces: []*model.PackageNamespace{
+					{
+						ID:        toGlobalID(pkgNamespaceString, foundPkgName.ID.String()),
+						Namespace: foundPkgName.Namespace,
+						Names:     []*model.PackageName{},
+					},
+				},
+			})
+		}
+	}
+	return out, nil
+}
+
+func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.PackageName.Query().
+		Where([]predicate.PackageName{
+			optionalPredicate(&nodeID, IDEQ),
+		}...).
+		Limit(MaxPageSize)
+
+	pkgNames, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to get packageNamespace for node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundPkgName := range pkgNames {
+		if allowedEdges[model.EdgePackageNamespacePackageName] {
+			out = append(out, &model.Package{
+				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+				Type: foundPkgName.Type,
+				Namespaces: []*model.PackageNamespace{
+					{
+						ID:        toGlobalID(pkgNamespaceString, foundPkgName.ID.String()),
+						Namespace: foundPkgName.Namespace,
+						Names: []*model.PackageName{{
+							ID:       toGlobalID(packagename.Table, foundPkgName.ID.String()),
+							Name:     foundPkgName.Name,
+							Versions: []*model.PackageVersion{},
+						}},
+					},
+				},
+			})
+		}
+		if allowedEdges[model.EdgePackageNamespacePackageType] {
+			out = append(out, &model.Package{
+				ID:         toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+				Type:       foundPkgName.Type,
+				Namespaces: []*model.PackageNamespace{},
+			})
+		}
+	}
+
+	return out, nil
+}
+
+func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.PackageName.Query().
+		Where([]predicate.PackageName{
+			optionalPredicate(&nodeID, IDEQ),
+		}...)
+
+	if allowedEdges[model.EdgePackageNamePackageVersion] {
+		query.
+			WithVersions(func(q *ent.PackageVersionQuery) {
+				q.WithName()
+			})
+	}
+	if allowedEdges[model.EdgePackageNamePackageNamespace] {
+		query.
+			Limit(MaxPageSize)
+	}
+	if allowedEdges[model.EdgePackageHasSourceAt] {
+		query.
+			WithHasSourceAt(func(q *ent.HasSourceAtQuery) {
+				getHasSourceAtObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageIsDependency] {
+		query.
+			WithDependency(func(q *ent.DependencyQuery) {
+				getIsDepObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyBad] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeBAD))
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyGood] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeGOOD))
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageHasMetadata] {
+		query.
+			WithMetadata(func(q *ent.HasMetadataQuery) {
+				getHasMetadataObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackagePointOfContact] {
+		query.
+			WithPoc(func(q *ent.PointOfContactQuery) {
+				getPointOfContactObject(q)
+			})
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	pkgNames, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for pkgName with node ID: %s with error: %w", nodeID, err)
+	}
+
+	if allowedEdges[model.EdgePackageNamePackageVersion] {
+		// sort out the pkgNames so that they each contain one pkg Version edge to output in proper format
+		var sortedPkgNames []*ent.PackageName
+		for _, collectedPkgName := range pkgNames {
+			for _, collectedPkgVersion := range collectedPkgName.Edges.Versions {
+				sortedPkgNames = append(sortedPkgNames, backReferencePackageVersion(collectedPkgVersion))
+			}
+		}
+		for _, sortedPkgName := range sortedPkgNames {
+			out = append(out, toModelPackage(sortedPkgName))
+		}
+	}
+
+	for _, foundPkgName := range pkgNames {
+		if allowedEdges[model.EdgePackageNamePackageNamespace] {
+			out = append(out, &model.Package{
+				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+				Type: foundPkgName.Type,
+				Namespaces: []*model.PackageNamespace{
+					{
+						ID:        toGlobalID(pkgNamespaceString, foundPkgName.ID.String()),
+						Namespace: foundPkgName.Namespace,
+						Names:     []*model.PackageName{},
+					},
+				},
+			})
+		}
+		for _, hasAt := range foundPkgName.Edges.HasSourceAt {
+			out = append(out, toModelHasSourceAt(hasAt))
+		}
+		for _, dep := range foundPkgName.Edges.Dependency {
+			out = append(out, toModelIsDependencyWithBackrefs(dep))
+		}
+		for _, cert := range foundPkgName.Edges.Certification {
+			if cert.Type == certification.TypeBAD {
+				out = append(out, toModelCertifyBad(cert))
+			}
+			if cert.Type == certification.TypeGOOD {
+				out = append(out, toModelCertifyGood(cert))
+			}
+		}
+		for _, meta := range foundPkgName.Edges.Metadata {
+			out = append(out, toModelHasMetadata(meta))
+		}
+		for _, foundPOC := range foundPkgName.Edges.Poc {
+			out = append(out, toModelPointOfContact(foundPOC))
+		}
+	}
+
+	return out, nil
+}
+
+func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+	query := b.client.PackageVersion.Query().
+		Where(packageQueryPredicates(&model.PkgSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgePackageVersionPackageName] {
+		query.
+			WithName(func(q *ent.PackageNameQuery) {})
+	}
+	if allowedEdges[model.EdgePackageHasSourceAt] {
+		query.
+			WithHasSourceAt(func(q *ent.HasSourceAtQuery) {
+				getHasSourceAtObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageIsDependency] {
+		query.
+			WithDependency(func(q *ent.DependencyQuery) {
+				getIsDepObject(q)
+			}).
+			WithDependencySubject(func(q *ent.DependencyQuery) {
+				getIsDepObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageIsOccurrence] {
+		query.
+			WithOccurrences(func(q *ent.OccurrenceQuery) {
+				getOccurrenceObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyVuln] {
+		query.
+			WithVuln(func(q *ent.CertifyVulnQuery) {
+				getCertVulnObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageHasSbom] {
+		query.
+			WithSbom(func(q *ent.BillOfMaterialsQuery) {
+				getSBOMObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyVexStatement] {
+		query.
+			WithVex(func(q *ent.CertifyVexQuery) {
+				getVEXObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyBad] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeBAD))
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyGood] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeGOOD))
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackagePkgEqual] {
+		query.
+			WithPkgEqualPkgA(func(q *ent.PkgEqualQuery) {
+				getPkgEqualObject(q)
+			}).
+			WithPkgEqualPkgB(func(q *ent.PkgEqualQuery) {
+				getPkgEqualObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageHasMetadata] {
+		query.
+			WithMetadata(func(q *ent.HasMetadataQuery) {
+				getHasMetadataObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackagePointOfContact] {
+		query.
+			WithPoc(func(q *ent.PointOfContactQuery) {
+				getPointOfContactObject(q)
+			})
+	}
+	if allowedEdges[model.EdgePackageCertifyLegal] {
+		query.
+			WithCertifyLegal(func(q *ent.CertifyLegalQuery) {
+				getCertifyLegalObject(q)
+			})
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	pkgVersions, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for packageVersion with node ID: %s with error: %w", nodeID, err)
+	}
+
+	var pkgNames []*ent.PackageName
+	for _, foundPkgVersion := range pkgVersions {
+		if allowedEdges[model.EdgePackageVersionPackageName] {
+			pkgNames = append(pkgNames, backReferencePackageVersion(foundPkgVersion))
+			for _, foundPkgName := range pkgNames {
+				out = append(out, &model.Package{
+					ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+					Type: foundPkgName.Type,
+					Namespaces: []*model.PackageNamespace{
+						{
+							ID:        toGlobalID(pkgNamespaceString, foundPkgName.ID.String()),
+							Namespace: foundPkgName.Namespace,
+							Names: []*model.PackageName{{
+								ID:       toGlobalID(packagename.Table, foundPkgName.ID.String()),
+								Name:     foundPkgName.Name,
+								Versions: []*model.PackageVersion{},
+							}},
+						},
+					},
+				})
+			}
+		}
+		for _, foundHasAt := range foundPkgVersion.Edges.HasSourceAt {
+			out = append(out, toModelHasSourceAt(foundHasAt))
+		}
+		for _, dep := range foundPkgVersion.Edges.Dependency {
+			out = append(out, toModelIsDependencyWithBackrefs(dep))
+		}
+		for _, depSub := range foundPkgVersion.Edges.DependencySubject {
+			out = append(out, toModelIsDependencyWithBackrefs(depSub))
+		}
+		for _, foundOccur := range foundPkgVersion.Edges.Occurrences {
+			out = append(out, toModelIsOccurrenceWithSubject(foundOccur))
+		}
+		for _, foundVuln := range foundPkgVersion.Edges.Vuln {
+			out = append(out, toModelCertifyVulnerability(foundVuln))
+		}
+		for _, foundSBOM := range foundPkgVersion.Edges.Sbom {
+			out = append(out, toModelHasSBOM(foundSBOM))
+		}
+		for _, foundVex := range foundPkgVersion.Edges.Vex {
+			out = append(out, toModelCertifyVEXStatement(foundVex))
+		}
+		for _, foundCert := range foundPkgVersion.Edges.Certification {
+			if foundCert.Type == certification.TypeBAD {
+				out = append(out, toModelCertifyBad(foundCert))
+			}
+			if foundCert.Type == certification.TypeGOOD {
+				out = append(out, toModelCertifyGood(foundCert))
+			}
+		}
+		for _, pkgEqualA := range foundPkgVersion.Edges.PkgEqualPkgA {
+			out = append(out, toModelPkgEqual(pkgEqualA))
+		}
+		for _, pkgEqualB := range foundPkgVersion.Edges.PkgEqualPkgB {
+			out = append(out, toModelPkgEqual(pkgEqualB))
+		}
+		for _, foundMeta := range foundPkgVersion.Edges.Metadata {
+			out = append(out, toModelHasMetadata(foundMeta))
+		}
+		for _, foundPOC := range foundPkgVersion.Edges.Poc {
+			out = append(out, toModelPointOfContact(foundPOC))
+		}
+		for _, foundLegal := range foundPkgVersion.Edges.CertifyLegal {
+			out = append(out, toModelCertifyLegal(foundLegal))
+		}
+	}
+
+	return out, nil
 }

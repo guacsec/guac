@@ -31,20 +31,29 @@ import (
 )
 
 func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
-	records, err := b.client.PointOfContact.Query().
-		Where(pointOfContactPredicate(filter)).
-		Limit(MaxPageSize).
-		WithSource(withSourceNameTreeQuery()).
-		WithArtifact().
-		WithPackageVersion(withPackageVersionTree()).
-		WithAllVersions(withPackageNameTree()).
-		All(ctx)
+	if filter == nil {
+		filter = &model.PointOfContactSpec{}
+	}
+	pocQuery := b.client.PointOfContact.Query().
+		Where(pointOfContactPredicate(filter))
 
+	records, err := getPointOfContactObject(pocQuery).
+		Limit(MaxPageSize).
+		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve PointOfContact :: %s", err)
 	}
 
 	return collect(records, toModelPointOfContact), nil
+}
+
+// getPointOfContactObject is used recreate the PointOfContact object be eager loading the edges
+func getPointOfContactObject(q *ent.PointOfContactQuery) *ent.PointOfContactQuery {
+	return q.
+		WithSource(withSourceNameTreeQuery()).
+		WithArtifact().
+		WithPackageVersion(withPackageVersionTree()).
+		WithAllVersions(withPackageNameTree())
 }
 
 func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
@@ -55,7 +64,7 @@ func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.Pac
 		return "", fmt.Errorf("failed to execute IngestPointOfContact :: %s", txErr)
 	}
 
-	return *recordID, nil
+	return toGlobalID(pointofcontact.Table, *recordID), nil
 }
 
 func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) ([]string, error) {
@@ -72,7 +81,7 @@ func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.P
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return toGlobalIDs(pointofcontact.Table, *ids), nil
 }
 
 func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOfContact {
@@ -214,7 +223,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -231,7 +241,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 			var pkgVersionID uuid.UUID
 			if pkg.PackageVersionID != nil {
 				var err error
-				pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+				pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+				pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 				}
@@ -247,7 +258,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 			var pkgNameID uuid.UUID
 			if pkg.PackageNameID != nil {
 				var err error
-				pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+				pkgNameGlobalID := fromGlobalID(*pkg.PackageNameID)
+				pkgNameID, err = uuid.Parse(pkgNameGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 				}
@@ -264,7 +276,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
@@ -366,7 +379,7 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 	}
 
 	return &model.PointOfContact{
-		ID:            v.ID.String(),
+		ID:            toGlobalID(pointofcontact.Table, v.ID.String()),
 		Subject:       sub,
 		Email:         v.Email,
 		Info:          v.Info,
@@ -377,31 +390,48 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 	}
 }
 
-// func pointOfContactInputPredicate(subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, filter model.PointOfContactInputSpec) predicate.PointOfContact {
-// 	var subjectSpec *model.PackageSourceOrArtifactSpec
-// 	if subject.Package != nil {
-// 		if pkgMatchType != nil && pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-// 			subject.Package.PackageInput.Version = nil
-// 		}
-// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-// 		}
-// 	} else if subject.Artifact != nil {
-// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-// 			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
-// 		}
-// 	} else {
-// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-// 			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
-// 		}
-// 	}
-// 	return pointOfContactPredicate(&model.PointOfContactSpec{
-// 		Subject:       subjectSpec,
-// 		Email:         &filter.Email,
-// 		Info:          &filter.Info,
-// 		Since:         &filter.Since,
-// 		Justification: &filter.Justification,
-// 		Origin:        &filter.Origin,
-// 		Collector:     &filter.Collector,
-// 	})
-// }
+func (b *EntBackend) pointOfContactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.PointOfContact.Query().
+		Where(pointOfContactPredicate(&model.PointOfContactSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgePointOfContactPackage] {
+		query.
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions()
+	}
+	if allowedEdges[model.EdgePointOfContactArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgePointOfContactSource] {
+		query.
+			WithSource()
+	}
+
+	query.
+		Limit(MaxPageSize)
+
+	pocs, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for point of contact with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, poc := range pocs {
+		if poc.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(poc.Edges.PackageVersion)))
+		}
+		if poc.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(poc.Edges.AllVersions))
+		}
+		if poc.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(poc.Edges.Artifact))
+		}
+		if poc.Edges.Source != nil {
+			out = append(out, toModelSource(poc.Edges.Source))
+		}
+	}
+
+	return out, nil
+}

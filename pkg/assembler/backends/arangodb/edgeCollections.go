@@ -216,7 +216,7 @@ var mapEdgeToArangoEdgeCollection = map[model.Edge][]string{
 	model.EdgeCertifyVexStatementPackage:       {certifyVexPkgEdgesStr},
 	model.EdgeCertifyVexStatementVulnerability: {certifyVexVulnEdgesStr},
 	model.EdgeCertifyVulnPackage:               {certifyVulnPkgEdgesStr},
-	model.EdgeCertifyVulnVulnerability:         {certifyVulnsStr},
+	model.EdgeCertifyVulnVulnerability:         {certifyVulnEdgesStr},
 	model.EdgeHashEqualArtifact:                {hashEqualArtEdgesStr},
 	model.EdgeHasMetadataArtifact:              {hasMetadataArtEdgesStr},
 	model.EdgeHasMetadataPackage:               {hasMetadataPkgVersionEdgesStr, hasMetadataPkgNameEdgesStr},

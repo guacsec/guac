@@ -35,24 +35,39 @@ type ArtifactEdges struct {
 	Sbom []*BillOfMaterials `json:"sbom,omitempty"`
 	// Attestations holds the value of the attestations edge.
 	Attestations []*SLSAAttestation `json:"attestations,omitempty"`
+	// AttestationsSubject holds the value of the attestations_subject edge.
+	AttestationsSubject []*SLSAAttestation `json:"attestations_subject,omitempty"`
 	// HashEqualArtA holds the value of the hash_equal_art_a edge.
 	HashEqualArtA []*HashEqual `json:"hash_equal_art_a,omitempty"`
 	// HashEqualArtB holds the value of the hash_equal_art_b edge.
 	HashEqualArtB []*HashEqual `json:"hash_equal_art_b,omitempty"`
+	// Vex holds the value of the vex edge.
+	Vex []*CertifyVex `json:"vex,omitempty"`
+	// Certification holds the value of the certification edge.
+	Certification []*Certification `json:"certification,omitempty"`
+	// Metadata holds the value of the metadata edge.
+	Metadata []*HasMetadata `json:"metadata,omitempty"`
+	// Poc holds the value of the poc edge.
+	Poc []*PointOfContact `json:"poc,omitempty"`
 	// IncludedInSboms holds the value of the included_in_sboms edge.
 	IncludedInSboms []*BillOfMaterials `json:"included_in_sboms,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [11]bool
 	// totalCount holds the count of the edges above.
-	totalCount [6]map[string]int
+	totalCount [11]map[string]int
 
-	namedOccurrences     map[string][]*Occurrence
-	namedSbom            map[string][]*BillOfMaterials
-	namedAttestations    map[string][]*SLSAAttestation
-	namedHashEqualArtA   map[string][]*HashEqual
-	namedHashEqualArtB   map[string][]*HashEqual
-	namedIncludedInSboms map[string][]*BillOfMaterials
+	namedOccurrences         map[string][]*Occurrence
+	namedSbom                map[string][]*BillOfMaterials
+	namedAttestations        map[string][]*SLSAAttestation
+	namedAttestationsSubject map[string][]*SLSAAttestation
+	namedHashEqualArtA       map[string][]*HashEqual
+	namedHashEqualArtB       map[string][]*HashEqual
+	namedVex                 map[string][]*CertifyVex
+	namedCertification       map[string][]*Certification
+	namedMetadata            map[string][]*HasMetadata
+	namedPoc                 map[string][]*PointOfContact
+	namedIncludedInSboms     map[string][]*BillOfMaterials
 }
 
 // OccurrencesOrErr returns the Occurrences value or an error if the edge
@@ -82,10 +97,19 @@ func (e ArtifactEdges) AttestationsOrErr() ([]*SLSAAttestation, error) {
 	return nil, &NotLoadedError{edge: "attestations"}
 }
 
+// AttestationsSubjectOrErr returns the AttestationsSubject value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) AttestationsSubjectOrErr() ([]*SLSAAttestation, error) {
+	if e.loadedTypes[3] {
+		return e.AttestationsSubject, nil
+	}
+	return nil, &NotLoadedError{edge: "attestations_subject"}
+}
+
 // HashEqualArtAOrErr returns the HashEqualArtA value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) HashEqualArtAOrErr() ([]*HashEqual, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.HashEqualArtA, nil
 	}
 	return nil, &NotLoadedError{edge: "hash_equal_art_a"}
@@ -94,16 +118,52 @@ func (e ArtifactEdges) HashEqualArtAOrErr() ([]*HashEqual, error) {
 // HashEqualArtBOrErr returns the HashEqualArtB value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) HashEqualArtBOrErr() ([]*HashEqual, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.HashEqualArtB, nil
 	}
 	return nil, &NotLoadedError{edge: "hash_equal_art_b"}
 }
 
+// VexOrErr returns the Vex value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) VexOrErr() ([]*CertifyVex, error) {
+	if e.loadedTypes[6] {
+		return e.Vex, nil
+	}
+	return nil, &NotLoadedError{edge: "vex"}
+}
+
+// CertificationOrErr returns the Certification value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) CertificationOrErr() ([]*Certification, error) {
+	if e.loadedTypes[7] {
+		return e.Certification, nil
+	}
+	return nil, &NotLoadedError{edge: "certification"}
+}
+
+// MetadataOrErr returns the Metadata value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) MetadataOrErr() ([]*HasMetadata, error) {
+	if e.loadedTypes[8] {
+		return e.Metadata, nil
+	}
+	return nil, &NotLoadedError{edge: "metadata"}
+}
+
+// PocOrErr returns the Poc value or an error if the edge
+// was not loaded in eager-loading.
+func (e ArtifactEdges) PocOrErr() ([]*PointOfContact, error) {
+	if e.loadedTypes[9] {
+		return e.Poc, nil
+	}
+	return nil, &NotLoadedError{edge: "poc"}
+}
+
 // IncludedInSbomsOrErr returns the IncludedInSboms value or an error if the edge
 // was not loaded in eager-loading.
 func (e ArtifactEdges) IncludedInSbomsOrErr() ([]*BillOfMaterials, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[10] {
 		return e.IncludedInSboms, nil
 	}
 	return nil, &NotLoadedError{edge: "included_in_sboms"}
@@ -179,6 +239,11 @@ func (a *Artifact) QueryAttestations() *SLSAAttestationQuery {
 	return NewArtifactClient(a.config).QueryAttestations(a)
 }
 
+// QueryAttestationsSubject queries the "attestations_subject" edge of the Artifact entity.
+func (a *Artifact) QueryAttestationsSubject() *SLSAAttestationQuery {
+	return NewArtifactClient(a.config).QueryAttestationsSubject(a)
+}
+
 // QueryHashEqualArtA queries the "hash_equal_art_a" edge of the Artifact entity.
 func (a *Artifact) QueryHashEqualArtA() *HashEqualQuery {
 	return NewArtifactClient(a.config).QueryHashEqualArtA(a)
@@ -187,6 +252,26 @@ func (a *Artifact) QueryHashEqualArtA() *HashEqualQuery {
 // QueryHashEqualArtB queries the "hash_equal_art_b" edge of the Artifact entity.
 func (a *Artifact) QueryHashEqualArtB() *HashEqualQuery {
 	return NewArtifactClient(a.config).QueryHashEqualArtB(a)
+}
+
+// QueryVex queries the "vex" edge of the Artifact entity.
+func (a *Artifact) QueryVex() *CertifyVexQuery {
+	return NewArtifactClient(a.config).QueryVex(a)
+}
+
+// QueryCertification queries the "certification" edge of the Artifact entity.
+func (a *Artifact) QueryCertification() *CertificationQuery {
+	return NewArtifactClient(a.config).QueryCertification(a)
+}
+
+// QueryMetadata queries the "metadata" edge of the Artifact entity.
+func (a *Artifact) QueryMetadata() *HasMetadataQuery {
+	return NewArtifactClient(a.config).QueryMetadata(a)
+}
+
+// QueryPoc queries the "poc" edge of the Artifact entity.
+func (a *Artifact) QueryPoc() *PointOfContactQuery {
+	return NewArtifactClient(a.config).QueryPoc(a)
 }
 
 // QueryIncludedInSboms queries the "included_in_sboms" edge of the Artifact entity.
@@ -298,6 +383,30 @@ func (a *Artifact) appendNamedAttestations(name string, edges ...*SLSAAttestatio
 	}
 }
 
+// NamedAttestationsSubject returns the AttestationsSubject named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedAttestationsSubject(name string) ([]*SLSAAttestation, error) {
+	if a.Edges.namedAttestationsSubject == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedAttestationsSubject[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedAttestationsSubject(name string, edges ...*SLSAAttestation) {
+	if a.Edges.namedAttestationsSubject == nil {
+		a.Edges.namedAttestationsSubject = make(map[string][]*SLSAAttestation)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedAttestationsSubject[name] = []*SLSAAttestation{}
+	} else {
+		a.Edges.namedAttestationsSubject[name] = append(a.Edges.namedAttestationsSubject[name], edges...)
+	}
+}
+
 // NamedHashEqualArtA returns the HashEqualArtA named value or an error if the edge was not
 // loaded in eager-loading with this name.
 func (a *Artifact) NamedHashEqualArtA(name string) ([]*HashEqual, error) {
@@ -343,6 +452,102 @@ func (a *Artifact) appendNamedHashEqualArtB(name string, edges ...*HashEqual) {
 		a.Edges.namedHashEqualArtB[name] = []*HashEqual{}
 	} else {
 		a.Edges.namedHashEqualArtB[name] = append(a.Edges.namedHashEqualArtB[name], edges...)
+	}
+}
+
+// NamedVex returns the Vex named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedVex(name string) ([]*CertifyVex, error) {
+	if a.Edges.namedVex == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedVex[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedVex(name string, edges ...*CertifyVex) {
+	if a.Edges.namedVex == nil {
+		a.Edges.namedVex = make(map[string][]*CertifyVex)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedVex[name] = []*CertifyVex{}
+	} else {
+		a.Edges.namedVex[name] = append(a.Edges.namedVex[name], edges...)
+	}
+}
+
+// NamedCertification returns the Certification named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedCertification(name string) ([]*Certification, error) {
+	if a.Edges.namedCertification == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedCertification[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedCertification(name string, edges ...*Certification) {
+	if a.Edges.namedCertification == nil {
+		a.Edges.namedCertification = make(map[string][]*Certification)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedCertification[name] = []*Certification{}
+	} else {
+		a.Edges.namedCertification[name] = append(a.Edges.namedCertification[name], edges...)
+	}
+}
+
+// NamedMetadata returns the Metadata named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedMetadata(name string) ([]*HasMetadata, error) {
+	if a.Edges.namedMetadata == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedMetadata[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedMetadata(name string, edges ...*HasMetadata) {
+	if a.Edges.namedMetadata == nil {
+		a.Edges.namedMetadata = make(map[string][]*HasMetadata)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedMetadata[name] = []*HasMetadata{}
+	} else {
+		a.Edges.namedMetadata[name] = append(a.Edges.namedMetadata[name], edges...)
+	}
+}
+
+// NamedPoc returns the Poc named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Artifact) NamedPoc(name string) ([]*PointOfContact, error) {
+	if a.Edges.namedPoc == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedPoc[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Artifact) appendNamedPoc(name string, edges ...*PointOfContact) {
+	if a.Edges.namedPoc == nil {
+		a.Edges.namedPoc = make(map[string][]*PointOfContact)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedPoc[name] = []*PointOfContact{}
+	} else {
+		a.Edges.namedPoc[name] = append(a.Edges.namedPoc[name], edges...)
 	}
 }
 
