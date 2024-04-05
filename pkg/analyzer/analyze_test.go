@@ -1,15 +1,13 @@
 package guacanalyze_test
 
 import (
-	"context"
-	"net/http"
+
 	"testing"
 
-	"github.com/Khan/genqlient/graphql"
+
 	"github.com/dominikbraun/graph"
 	analyze "github.com/guacsec/guac/pkg/analyzer"
-	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/logging"
+
 )
 
 func TestSetGetNodeAttribute(t *testing.T) {
@@ -28,23 +26,21 @@ func TestSetGetNodeAttribute(t *testing.T) {
 }
 
 func TestHighlightAnalysis(t *testing.T) {
-	//both to be same sizes for testing
 	//not exhaustive, can be made better
-	ctx := logging.WithLogger(context.Background())
-    httpClient := http.Client{}
-    gqlclient := graphql.NewClient("http://localhost:8080/query", &httpClient)
-	var bomOne, bomTwo *model.HasSBOMsHasSBOM
-	bom, err := analyze.FindHasSBOMBy( model.HasSBOMSpec{} ,"", "", "", ctx, gqlclient)
-    if err != nil {
-		t.Errorf("Error finding first SBOM: %v", err)
-    }
-	bomOne = &bom.HasSBOM[0]
-	bomTwo = &bom.HasSBOM[0]
 
-	gOne := analyze.MakeGraph(*bomOne, false, false, false, false, false)
-	gTwo := analyze.MakeGraph(*bomTwo, false, false, false, false, false)
+	g := graph.New(analyze.NodeHash, graph.Directed())
 
-	_, diff := analyze.HighlightAnalysis(gOne, gTwo ,0)
+	//create HasSBOM node
+	analyze.AddGraphNode(g, "HasSBOM", "black")
+  
+	analyze.SetNodeAttribute(g, "HasSBOM", "Algorithm" , "hasSBOM.Algorithm")
+	analyze.SetNodeAttribute(g, "HasSBOM", "Collector" , "hasSBOM.Collector")
+	analyze.SetNodeAttribute(g, "HasSBOM", "Digest" , "hasSBOM.Digest")
+	analyze.SetNodeAttribute(g, "HasSBOM", "DownloadLocation" , "hasSBOM.DownloadLocation")
+	analyze.SetNodeAttribute(g, "HasSBOM", "KnownSince" , "hasSBOM.KnownSince")
+	analyze.SetNodeAttribute(g, "HasSBOM", "Origin" , "hasSBOM.Origin")
+
+	_, diff := analyze.HighlightAnalysis(g,g ,0)
 	if len(diff.MetadataMismatch) != 0 && len(diff.MissingAddedRemovedLinks) != 0 && len(diff.MissingAddedRemovedNodes) != 0 {
 		t.Errorf("Expected no diffs, got diffs %+v", diff)
 	}
