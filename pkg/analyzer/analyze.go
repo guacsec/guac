@@ -47,11 +47,11 @@ type Node struct {
   color string
 }
 
-func nodeHash(n *Node) string {
+func NodeHash(n *Node) string {
   return n.ID
 }
 
-func setNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interface{}){
+func SetNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interface{}){
   var (
     err error
     node *Node
@@ -64,7 +64,7 @@ func setNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interfa
   node.Attributes[key] = value
 }
 
-func getNodeAttribute(g graph.Graph[string, *Node],ID, key string) interface{} {
+func GetNodeAttribute(g graph.Graph[string, *Node],ID, key string) interface{} {
   var (
     err error
     node *Node
@@ -254,7 +254,7 @@ func printHighlightedAnalysis(dot bool,diffList HighlightedDiff, all bool, maxpr
 
 
     if i< len(diffList.MissingAddedRemovedNodes){
-      namespace, ok := getNodeAttribute(analysisGraph,diffList.MissingAddedRemovedNodes[i], "Namespace[0]").(string)
+      namespace, ok := GetNodeAttribute(analysisGraph,diffList.MissingAddedRemovedNodes[i], "Namespace[0]").(string)
 
       if !ok {
         fmt.Println("Error getting node namespace attribute")
@@ -266,8 +266,8 @@ func printHighlightedAnalysis(dot bool,diffList HighlightedDiff, all bool, maxpr
     }
 
     if i< len(diffList.MissingAddedRemovedLinks){
-      namespaceOne, okOne := getNodeAttribute(analysisGraph,diffList.MissingAddedRemovedLinks[i][0], "Namespace[0]").(string)
-      namespaceTwo, okTwo := getNodeAttribute(analysisGraph,diffList.MissingAddedRemovedLinks[i][1], "Namespace[0]").(string)
+      namespaceOne, okOne := GetNodeAttribute(analysisGraph,diffList.MissingAddedRemovedLinks[i][0], "Namespace[0]").(string)
+      namespaceTwo, okTwo := GetNodeAttribute(analysisGraph,diffList.MissingAddedRemovedLinks[i][1], "Namespace[0]").(string)
 
       if !okOne || !okTwo {
         fmt.Println("Error getting node namespace attribute")
@@ -459,7 +459,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
           }
         }
       }else {
-        addGraphNode(small, bigNodeId, "red") //change color to red
+        AddGraphNode(small, bigNodeId, "red") //change color to red
         diffList.MissingAddedRemovedNodes = append(diffList.MissingAddedRemovedNodes, bigNodeId)
       }
     }	
@@ -474,7 +474,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
     for _, edge := range edges {
       _, err := small.Edge(edge.Source, edge.Target)
       if err != nil { //missing edge, add with red color
-        addGraphEdge(small, edge.Source, edge.Target, "red") //hmm how to add color?
+        AddGraphEdge(small, edge.Source, edge.Target, "red") //hmm how to add color?
         diffList.MissingAddedRemovedLinks = append(diffList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
       }
     }
@@ -527,7 +527,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
     //check if nodes are present in small but not in big
     for smallNodeId := range(smallNodes){
       if _, err = big.Vertex(smallNodeId); err != nil {
-        addGraphNode(big, smallNodeId, "red") //change color to red
+        AddGraphNode(big, smallNodeId, "red") //change color to red
         analysisList.MissingAddedRemovedNodes = append(analysisList.MissingAddedRemovedNodes, smallNodeId)
       }
     }	
@@ -542,7 +542,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
     for _, edge := range edges {
       _, err := big.Edge(edge.Source, edge.Target)
       if err != nil { //missing edge, add with red color
-        addGraphEdge(big, edge.Source, edge.Target, "red") //hmm how to add color?
+        AddGraphEdge(big, edge.Source, edge.Target, "red") //hmm how to add color?
         analysisList.MissingAddedRemovedLinks = append(analysisList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
       }
     }
@@ -553,34 +553,34 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 
 func makeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, inclOccur, namespaces bool) graph.Graph[string, *Node] {
 
-  g := graph.New(nodeHash, graph.Directed())
+  g := graph.New(NodeHash, graph.Directed())
 
   //create HasSBOM node
-  addGraphNode(g, "HasSBOM", "black")
+  AddGraphNode(g, "HasSBOM", "black")
 
   compareAll := !metadata && !inclSoft && !inclDeps && !inclOccur && !namespaces
 
   if metadata || compareAll {
     //add metadata
-    setNodeAttribute(g, "HasSBOM", "Algorithm" , hasSBOM.Algorithm)
-    setNodeAttribute(g, "HasSBOM", "Collector" , hasSBOM.Collector)
-    setNodeAttribute(g, "HasSBOM", "Digest" , hasSBOM.Digest)
-    setNodeAttribute(g, "HasSBOM", "DownloadLocation" , hasSBOM.DownloadLocation)
-    setNodeAttribute(g, "HasSBOM", "KnownSince" , hasSBOM.KnownSince.String())
-    setNodeAttribute(g, "HasSBOM", "Origin" , hasSBOM.Origin)
-    setNodeAttribute(g, "HasSBOM", "Subject" , *hasSBOM.Subject.GetTypename())
+    SetNodeAttribute(g, "HasSBOM", "Algorithm" , hasSBOM.Algorithm)
+    SetNodeAttribute(g, "HasSBOM", "Collector" , hasSBOM.Collector)
+    SetNodeAttribute(g, "HasSBOM", "Digest" , hasSBOM.Digest)
+    SetNodeAttribute(g, "HasSBOM", "DownloadLocation" , hasSBOM.DownloadLocation)
+    SetNodeAttribute(g, "HasSBOM", "KnownSince" , hasSBOM.KnownSince.String())
+    SetNodeAttribute(g, "HasSBOM", "Origin" , hasSBOM.Origin)
+    SetNodeAttribute(g, "HasSBOM", "Subject" , *hasSBOM.Subject.GetTypename())
   }
 
   if inclOccur || compareAll {
     //add included occurrences
     for _, occurrence := range hasSBOM.IncludedOccurrences {
-      setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Subject", occurrence.Subject)
-      setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Id", occurrence.Artifact.Id)
-      setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Algorithm", occurrence.Artifact.Algorithm)
-      setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Digest", occurrence.Artifact.Digest)
-      setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Justification", occurrence.Justification)
-      setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Origin", occurrence.Origin)
-      setNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Collector", occurrence.Collector)
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Subject", occurrence.Subject)
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Id", occurrence.Artifact.Id)
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Algorithm", occurrence.Artifact.Algorithm)
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Digest", occurrence.Artifact.Digest)
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Justification", occurrence.Justification)
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Origin", occurrence.Origin)
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Collector", occurrence.Collector)
     }	
   }
 
@@ -592,7 +592,7 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
     for _, software := range hasSBOM.IncludedSoftware {
       inclSoftMap[*software.GetTypename()]= true
     }
-    setNodeAttribute(g, "HasSBOM", "InclSoft", inclSoftMap)
+    SetNodeAttribute(g, "HasSBOM", "InclSoft", inclSoftMap)
   }
 
 
@@ -600,31 +600,30 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
     //add included dependencies
     for _, dependency := range hasSBOM.IncludedDependencies {
       packageId := dependency.Package.Id
-      addGraphEdge(g, "HasSBOM" ,packageId,"black")
+      AddGraphEdge(g, "HasSBOM" ,packageId,"black")
       includedDepsId := dependency.Id
-      addGraphEdge(g, packageId, includedDepsId, "black")
-      setNodeAttribute(g,  packageId, "Type" , dependency.Package.Type)
+      AddGraphEdge(g, packageId, includedDepsId, "black")
+      SetNodeAttribute(g,  packageId, "Type" , dependency.Package.Type)
       if namespaces || compareAll {
         //add namespaces	
-        setNodeAttribute(g,  packageId, "Namespace[0]" , dependency.Package.Namespaces[0].Names[0].Name)
+        SetNodeAttribute(g,  packageId, "Namespace[0]" , dependency.Package.Namespaces[0].Names[0].Name)
       }
 
-
-      setNodeAttribute(g,  includedDepsId, "Justification" , dependency.Justification)
-      setNodeAttribute(g,  includedDepsId, "DependencyType" , dependency.DependencyType)
-      setNodeAttribute(g,  includedDepsId, "VersionRange" , dependency.VersionRange)
-      setNodeAttribute(g,  includedDepsId, "Origin" , dependency.Origin)
-      setNodeAttribute(g,  includedDepsId, "Collector" , dependency.Collector)
+      SetNodeAttribute(g,  includedDepsId, "Justification" , dependency.Justification)
+      SetNodeAttribute(g,  includedDepsId, "DependencyType" , dependency.DependencyType)
+      SetNodeAttribute(g,  includedDepsId, "VersionRange" , dependency.VersionRange)
+      SetNodeAttribute(g,  includedDepsId, "Origin" , dependency.Origin)
+      SetNodeAttribute(g,  includedDepsId, "Collector" , dependency.Collector)
 
 
       if dependency.DependencyPackage.Id != "" {
         dependPkgId := dependency.DependencyPackage.Id
-        addGraphEdge(g, includedDepsId, dependPkgId, "black")
-        setNodeAttribute(g,  dependPkgId, "Type" , dependency.DependencyPackage.Type)
+        AddGraphEdge(g, includedDepsId, dependPkgId, "black")
+        SetNodeAttribute(g,  dependPkgId, "Type" , dependency.DependencyPackage.Type)
 
         if namespaces  || compareAll {
           //add namespaces	
-          setNodeAttribute(g,  dependPkgId, "Namespace[0]" , dependency.DependencyPackage.Namespaces[0].Names[0].Name)
+          SetNodeAttribute(g,  dependPkgId, "Namespace[0]" , dependency.DependencyPackage.Namespaces[0].Names[0].Name)
         }
       }
     }
@@ -632,7 +631,7 @@ func makeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
   return g
 }
 
-func addGraphNode(g graph.Graph[string, *Node],_ID, color string) {
+func AddGraphNode(g graph.Graph[string, *Node],_ID, color string) {
   var err error
   if _, err = g.Vertex(_ID); err ==  nil {
     return
@@ -650,9 +649,9 @@ func addGraphNode(g graph.Graph[string, *Node],_ID, color string) {
   }
 }
 
-func addGraphEdge(g graph.Graph[string, *Node], from, to, color string){
-  addGraphNode(g, from, "black")
-  addGraphNode(g, to, "black")
+func AddGraphEdge(g graph.Graph[string, *Node], from, to, color string){
+  AddGraphNode(g, from, "black")
+  AddGraphNode(g, to, "black")
 
   _, err  := g.Edge(from, to)
   if err == nil {
