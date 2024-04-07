@@ -58,6 +58,13 @@ func identifierStringsToCollectEntry(i *parser_common.IdentifierStrings) []*pb.C
 		})
 	}
 
+	for _, v := range i.GithubReleaseStrings {
+		entries = append(entries, &pb.CollectEntry{
+			Type:  pb.CollectDataType_DATATYPE_GITHUB_RELEASE,
+			Value: v,
+		})
+	}
+
 	for _, v := range i.UnclassifiedStrings {
 		e, err := guessUnknownIdentifierString(v)
 		if err == nil {
@@ -76,6 +83,16 @@ func guessUnknownIdentifierString(s string) (*pb.CollectEntry, error) {
 		strings.HasPrefix(s, "gcr.io") {
 		return &pb.CollectEntry{
 			Type:  pb.CollectDataType_DATATYPE_OCI,
+			Value: s,
+		}, nil
+	}
+
+	urlSegments := strings.SplitAfter(s, "/")
+	if strings.HasPrefix(s, "github.com") &&
+		len(urlSegments) >= 4 &&
+		strings.HasPrefix(urlSegments[3], "releases") {
+		return &pb.CollectEntry{
+			Type:  pb.CollectDataType_DATATYPE_GITHUB_RELEASE,
 			Value: s,
 		}, nil
 	}
