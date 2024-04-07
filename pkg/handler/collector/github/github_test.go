@@ -37,11 +37,12 @@ type MockGithubClient struct {
 }
 
 const (
-	mockTag               = "mockTag"
-	mockCommit            = "mockCommit"
-	mockReleaseUrlLatest  = "https://github.com/mock/repo/releases"
-	mockReleaseUrlWithTag = "https://github.com/mock/repo/releases/v1"
-	mockAssetUrl          = "https://github.com/mock/repo/releases/releaseAsset.json"
+	mockTag                       = "mockTag"
+	mockCommit                    = "mockCommit"
+	mockReleaseUrlLatest          = "https://github.com/mock/repo/releases"
+	mockReleaseUrlWithTag         = "https://github.com/mock/repo/releases/v1"
+	mockReleaseUrlWithTagFullPath = "https://github.com/mock/repo/releases/tag/v1"
+	mockAssetUrl                  = "https://github.com/mock/repo/releases/releaseAsset.json"
 )
 
 func mockReleaseAsset() client.ReleaseAsset {
@@ -580,6 +581,20 @@ func TestParseGithubReleaseDataSource(t *testing.T) {
 			args: args{
 				source: datasource.Source{
 					Value: mockReleaseUrlWithTag,
+				},
+			},
+			want: &client.Repo{
+				Owner: "mock",
+				Repo:  "repo",
+			},
+			want1:   "v1",
+			wantErr: false,
+		},
+		{
+			name: "parse valid tag github url with full path",
+			args: args{
+				source: datasource.Source{
+					Value: mockReleaseUrlWithTagFullPath,
 				},
 			},
 			want: &client.Repo{

@@ -383,7 +383,7 @@ func ParseGithubReleaseDataSource(source datasource.Source) (*client.Repo, TagOr
 	if len(path) < 3 || len(path) > 5 {
 		return nil, "", fmt.Errorf("invalid github url path: %v invalid number of subpaths: %v", u.Path, len(path))
 	}
-	if path[2] != "releases" || (len(path) == 5 && path[3] != "tags") {
+	if path[2] != "releases" || (len(path) == 5 && path[3] != "tag") {
 		return nil, "", fmt.Errorf("invalid github path: %v", u.Path)
 	}
 	var tol TagOrLatest
