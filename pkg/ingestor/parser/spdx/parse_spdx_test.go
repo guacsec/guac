@@ -38,7 +38,7 @@ func pUrlToPkgDiscardError(pUrl string) *generated.PkgInputSpec {
 
 func Test_spdxParser(t *testing.T) {
 	packageOfns := "spdx"
-	//packageOfVersion := "sha256:a743268cd3c56f921f3fb706c"
+	packageXns := "pkg/golang.org/x"
 	depPackageOfVersion := "sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10"
 	packageOfEmptyString := ""
 	ctx := logging.WithLogger(context.Background())
@@ -1027,6 +1027,69 @@ func Test_spdxParser(t *testing.T) {
 							Attribution:     "Copyright (c) 2022 Authors of MyPackage",
 							Justification:   "Found in SPDX document.",
 							TimeScanned:     parseRfc3339("2022-09-24T17:27:55.556104Z"),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX v2.2 with an empty relationship value (see https://github.com/guacsec/guac/issues/1821)",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(generated.HasSBOMInputSpec{},
+					"KnownSince"),
+			}, doc: &processor.Document{
+				Blob: []byte(`
+				{
+					"spdxVersion": "SPDX-2.2",
+					"dataLicense": "CC0-1.0",
+					"SPDXID": "SPDXRef-DOCUMENT",
+					"creationInfo": {
+					  "created": "2020-11-24T01:12:27Z"
+					},
+					"name": "empty-relationship.spdx.json",
+					"documentNamespace": "https://example.com/for-testing",
+					"documentDescribes": [
+					  "SPDXRef-go-module-golang.org/x/text"
+					],
+					"packages": [
+					  {
+						"name": "golang.org/x/text",
+						"SPDXID": "SPDXRef-go-module-golang.org/x/text",
+						"downloadLocation": "go://golang.org/x/text@v0.0.0-20170915032832-14c0d48ead0c",
+						"filesAnalyzed": false,
+						"packageLicenseConcluded": "NOASSERTION",
+						"packageLicenseDeclared": "NOASSERTION",
+						"packageCopyrightText": "NOASSERTION"
+					  }
+					],
+					"relationships": [
+						{}
+					]
+				  }
+							  `),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: &packageXns,
+							Name:      "text",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing",
+							Algorithm:        "sha256",
+							Digest:           "f0b160c3bc9001b17b1bdc0e398bd75b80cbe8ab8df48bc7a545ec5d9802c66d",
+							DownloadLocation: "TestSource",
 						},
 					},
 				},
