@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/assembler"
-	"github.com/guacsec/guac/pkg/assembler/clients/generated"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -392,7 +391,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 				for i := range pkgInputSpecs {
 					hasMetadata := assembler.HasMetadataIngest{
 						Pkg:          pkgInputSpecs[i],
-						PkgMatchFlag: model.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 						HasMetadata:  metadataInputSpec,
 					}
 					preds.HasMetadata = append(preds.HasMetadata, hasMetadata)
@@ -404,7 +403,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	return preds
 }
 
-func fixLicense(ctx context.Context, l *generated.LicenseInputSpec, ol []*spdx.OtherLicense) (string, string) {
+func fixLicense(ctx context.Context, l *model.LicenseInputSpec, ol []*spdx.OtherLicense) (string, string) {
 	logger := logging.FromContext(ctx)
 	if !strings.HasPrefix(l.Name, "LicenseRef-") {
 		return "", ""
