@@ -70,7 +70,7 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 	}
 	s.spdxDoc = spdxDoc
 	if spdxDoc.CreationInfo == nil {
-		return fmt.Errorf("SPDC documentd missing required \"creationInfo\" section.")
+		return fmt.Errorf("SPDX document missing required \"creationInfo\" section")
 	}
 	time, err := time.Parse(time.RFC3339, spdxDoc.CreationInfo.Created)
 	if err != nil {
