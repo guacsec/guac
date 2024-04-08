@@ -93,6 +93,12 @@ func (s *spdxParser) getTopLevelPackageSpdxIds() ([]string, error) {
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
 	var spdxIds []string
 	for _, r := range s.spdxDoc.Relationships {
+		if r == nil {
+			// when the upstream parser in https://github.com/spdx/tools-golang does not
+			// include null relationships in v2.2 SBOMs, we can remove this code
+			continue
+		}
+
 		// If both sides of the relationship contain the same string,
 		// it is not a valid DESCRIBES/DESCRIBED_BY relationship.
 		if r.RefA.ElementRefID == r.RefB.ElementRefID {
@@ -259,6 +265,12 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 	}
 	for _, rel := range s.spdxDoc.Relationships {
+		if rel == nil {
+			// when the upstream parser in https://github.com/spdx/tools-golang does not
+			// include null relationships in v2.2 SBOMs, we can remove this code
+			continue
+		}
+
 		var foundId string
 		var relatedId string
 
