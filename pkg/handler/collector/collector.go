@@ -18,13 +18,14 @@ package collector
 import (
 	"context"
 	"fmt"
-
+	"github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	jsoniter "github.com/json-iterator/go"
+	"go.uber.org/zap"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -121,6 +122,23 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 // to be sent across the event stream.
 func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
 	logger := logging.FromContext(ctx)
+
+	// Generate a unique identifier for this Publish invocation
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		return fmt.Errorf("failed to get uuid with the following error: %w", err)
+	}
+	uuidString := uuid.String()
+
+	// Create a child logger with the unique identifier
+	childLogger := logger.With(zap.String("requestID", uuidString))
+
+	ctx = context.WithValue(ctx, "childLogger", childLogger)
+
+	logger = logging.FromContext(ctx)
+
+	// Use the child logger within this scope
+	logger.Debugf("starting publishing: %+v", d.SourceInformation.Source)
 
 	docByte, err := json.Marshal(d)
 	if err != nil {

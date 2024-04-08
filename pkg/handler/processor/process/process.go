@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"path/filepath"
 	"strings"
@@ -83,6 +84,17 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
+
+	childLogger := logger.With(zap.String("requestID", uuidString))
+
+	// Storing the child logger in the context
+	ctx = context.WithValue(ctx, "childLogger", childLogger)
+
+	logger = logging.FromContext(ctx)
+
+	// Use childLogger for logging within this scope
+	logger.Debug("starting publishing")
+
 	sub, err := emPubSub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)

@@ -40,6 +40,11 @@ const (
 
 type loggerKey struct{}
 
+type contextKey string
+
+// Declare a variable for the logger key using the defined type
+var ChildLoggerKey = contextKey("childLogger")
+
 // Initializes the logger with the input level, defaulting to Info if the input is invalid
 func InitLogger(level LogLevel) {
 	zapLevel, levelErr := zapcore.ParseLevel(string(level))
@@ -103,6 +108,11 @@ func WithLogger(ctx context.Context) context.Context {
 }
 
 func FromContext(ctx context.Context) *zap.SugaredLogger {
+	// First, try to retrieve the childLogger from the context as to avoid breaking the default logger
+	if childLogger, ok := ctx.Value(ChildLoggerKey).(*zap.SugaredLogger); ok {
+		return childLogger
+	}
+	// Fallback to the existing behavior if the childLogger is not found
 	if logger, ok := ctx.Value(loggerKey{}).(*zap.SugaredLogger); ok {
 		return logger
 	}
