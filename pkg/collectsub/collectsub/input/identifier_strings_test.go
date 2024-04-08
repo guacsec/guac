@@ -35,15 +35,18 @@ func Test_IdentifierStringsSliceToCollectEntries(t *testing.T) {
 		name: "simple test",
 		input: []*parser_common.IdentifierStrings{
 			{
-				OciStrings:  []string{"index.docker.io/guacsec/local-organic-guac"},
-				VcsStrings:  []string{"git+https://github.com/guacsec/guac"},
-				PurlStrings: []string{"pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?repository_url=repo.spring.io%2Frelease"},
+				OciStrings:           []string{"index.docker.io/guacsec/local-organic-guac"},
+				VcsStrings:           []string{"git+https://github.com/guacsec/guac"},
+				PurlStrings:          []string{"pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?repository_url=repo.spring.io%2Frelease"},
+				GithubReleaseStrings: []string{"https://github.com/guacsec/guac/releases", "https://github.com/grafana/grafana/releases/tag/v10.2.6"},
 			},
 		},
 		expected: []*pb.CollectEntry{
 			{Type: pb.CollectDataType_DATATYPE_OCI, Value: "index.docker.io/guacsec/local-organic-guac"},
 			{Type: pb.CollectDataType_DATATYPE_GIT, Value: "git+https://github.com/guacsec/guac"},
 			{Type: pb.CollectDataType_DATATYPE_PURL, Value: "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?repository_url=repo.spring.io%2Frelease"},
+			{Type: pb.CollectDataType_DATATYPE_GITHUB_RELEASE, Value: "https://github.com/guacsec/guac/releases"},
+			{Type: pb.CollectDataType_DATATYPE_GITHUB_RELEASE, Value: "https://github.com/grafana/grafana/releases/tag/v10.2.6"},
 		},
 	}, {
 		name: "simple unclassified string test",
@@ -54,7 +57,11 @@ func Test_IdentifierStringsSliceToCollectEntries(t *testing.T) {
 					"pkg:npm/%40angular/animation@12.3.1",
 					"https://not-oci-registry.com/guacsec/local-organic-guac",
 					"gcr.io/guacsec/local-organic-guac",
-					"pkg:golang/google.golang.org/genproto#googleapis/api/annotations"},
+					"pkg:golang/google.golang.org/genproto#googleapis/api/annotations",
+					"https://github.com/namespace/project/-/releases/permalink/latest",
+					"https://api.github.com/repos/grafana/grafana/releases/tags/v10.2.6",
+					"github.com/kubernetes/kubernetes/releases",
+					"github.com/kubernetes/kubernetes"},
 			},
 		},
 		expected: []*pb.CollectEntry{
@@ -63,6 +70,7 @@ func Test_IdentifierStringsSliceToCollectEntries(t *testing.T) {
 			{Type: pb.CollectDataType_DATATYPE_PURL, Value: "pkg:npm/%40angular/animation@12.3.1"},
 			{Type: pb.CollectDataType_DATATYPE_OCI, Value: "gcr.io/guacsec/local-organic-guac"},
 			{Type: pb.CollectDataType_DATATYPE_PURL, Value: "pkg:golang/google.golang.org/genproto#googleapis/api/annotations"},
+			{Type: pb.CollectDataType_DATATYPE_GITHUB_RELEASE, Value: "github.com/kubernetes/kubernetes/releases"},
 		},
 	}, {
 		name: "simple slice test",
