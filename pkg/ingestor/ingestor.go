@@ -54,15 +54,14 @@ func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, 
 		return fmt.Errorf("unable to ingest doc tree: %v", err)
 	}
 
-	err = collectSubEmitFunc(idstrings)
-	if err != nil {
+	if err := collectSubEmitFunc(idstrings); err != nil {
 		logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
 	}
 
-	err = assemblerFunc(predicates)
-	if err != nil {
-		return fmt.Errorf("unable to assemble graphs: %v", err)
+	if err := assemblerFunc(predicates); err != nil {
+		return fmt.Errorf("error assembling graphs for %q : %w", d.SourceInformation.Source, err)
 	}
+
 	t := time.Now()
 	elapsed := t.Sub(start)
 	logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)

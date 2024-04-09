@@ -30,6 +30,7 @@ import (
 func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]assembler.AssemblerInput) error {
 	logger := logging.FromContext(ctx)
 	return func(preds []assembler.IngestPredicates) error {
+		var rvErr error
 		for _, p := range preds {
 
 			// Ingest Packages
@@ -114,12 +115,14 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))
 			if err := ingestCertifyScorecards(ctx, gqlclient, p.CertifyScorecard, collectedIDorSrcInputs); err != nil {
 				logger.Errorf("ingestCertifyScorecards failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling IsDependency: %v", len(p.IsDependency))
 			isDependenciesIDs := make([]string, 0)
 			if ingestedIsDependenciesIDs, err := ingestIsDependencies(ctx, gqlclient, p.IsDependency, collectedIDorPkgInputs); err != nil {
 				logger.Errorf("ingestIsDependencies failed with error: %v", err)
+				rvErr = err
 			} else {
 				isDependenciesIDs = append(isDependenciesIDs, ingestedIsDependenciesIDs...)
 			}
@@ -128,6 +131,7 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			isOccurrencesIDs := make([]string, 0)
 			if ingestedIsOccurrencesIDs, err := ingestIsOccurrences(ctx, gqlclient, p.IsOccurrence, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIDorSrcInputs); err != nil {
 				logger.Errorf("ingestIsOccurrences failed with error: %v", err)
+				rvErr = err
 			} else {
 				isOccurrencesIDs = append(isOccurrencesIDs, ingestedIsOccurrencesIDs...)
 			}
@@ -135,49 +139,55 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 			logger.Infof("assembling HasSLSA: %v", len(p.HasSlsa))
 			if err := ingestHasSLSAs(ctx, gqlclient, p.HasSlsa, collectedIDorArtInputs, collectedIDorMatInputs, collectedIDorBuilderInputs); err != nil {
 				logger.Errorf("ingestHasSLSAs failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling CertifyVuln: %v", len(p.CertifyVuln))
 			if err := ingestCertifyVulns(ctx, gqlclient, p.CertifyVuln, collectedIDorPkgInputs, collectedIDorVulnInputs); err != nil {
 				logger.Errorf("ingestCertifyVulns failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling VulnMetadata: %v", len(p.VulnMetadata))
 			if err := ingestVulnMetadatas(ctx, gqlclient, p.VulnMetadata, collectedIDorVulnInputs); err != nil {
 				logger.Errorf("ingestVulnMetadatas failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling VulnEqual: %v", len(p.VulnEqual))
 			if err := ingestVulnEquals(ctx, gqlclient, p.VulnEqual, collectedIDorVulnInputs); err != nil {
 				logger.Errorf("ingestVulnEquals failed with error: %v", err)
-
+				rvErr = err
 			}
 
 			logger.Infof("assembling HasSourceAt: %v", len(p.HasSourceAt))
 			if err := ingestHasSourceAts(ctx, gqlclient, p.HasSourceAt, collectedIDorPkgInputs, collectedIDorSrcInputs); err != nil {
-				return fmt.Errorf("ingestHasSourceAts failed with error: %w", err)
+				logger.Errorf("ingestHasSourceAts failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling CertifyBad: %v", len(p.CertifyBad))
 			if err := ingestCertifyBads(ctx, gqlclient, p.CertifyBad, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIDorSrcInputs); err != nil {
 				logger.Errorf("ingestCertifyBads failed with error: %v", err)
-
+				rvErr = err
 			}
 
 			logger.Infof("assembling CertifyGood: %v", len(p.CertifyGood))
 			if err := ingestCertifyGoods(ctx, gqlclient, p.CertifyGood, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIDorSrcInputs); err != nil {
 				logger.Errorf("ingestCertifyGoods failed with error: %v", err)
-
+				rvErr = err
 			}
 
 			logger.Infof("assembling PointOfContact: %v", len(p.PointOfContact))
 			if err := ingestPointOfContacts(ctx, gqlclient, p.PointOfContact, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIDorSrcInputs); err != nil {
 				logger.Errorf("ingestPointOfContacts failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling HasMetadata: %v", len(p.HasMetadata))
 			if err := ingestBulkHasMetadata(ctx, gqlclient, p.HasMetadata, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIDorSrcInputs); err != nil {
 				logger.Errorf("ingestBulkHasMetadata failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling HasSBOM: %v", len(p.HasSBOM))
@@ -188,29 +198,34 @@ func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]asse
 				Occurrences:  isOccurrencesIDs,
 			}, collectedIDorPkgInputs, collectedIDorArtInputs); err != nil {
 				logger.Errorf("ingestHasSBOMs failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling VEX : %v", len(p.Vex))
 			if err := ingestVEXs(ctx, gqlclient, p.Vex, collectedIDorPkgInputs, collectedIDorArtInputs, collectedIDorVulnInputs); err != nil {
 				logger.Errorf("ingestVEXs failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling HashEqual : %v", len(p.HashEqual))
 			if err := ingestHashEquals(ctx, gqlclient, p.HashEqual, collectedIDorArtInputs); err != nil {
 				logger.Errorf("ingestHashEquals failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling PkgEqual : %v", len(p.PkgEqual))
 			if err := ingestPkgEquals(ctx, gqlclient, p.PkgEqual, collectedIDorPkgInputs); err != nil {
 				logger.Errorf("ingestPkgEquals failed with error: %v", err)
+				rvErr = err
 			}
 
 			logger.Infof("assembling CertifyLegal : %v", len(p.CertifyLegal))
 			if err := ingestCertifyLegals(ctx, gqlclient, p.CertifyLegal, collectedIDorPkgInputs, collectedIDorSrcInputs, collectedIDorLicenseInputs); err != nil {
 				logger.Errorf("ingestCertifyLegals failed with error: %v", err)
+				rvErr = err
 			}
 		}
-		return nil
+		return rvErr
 	}
 }
 

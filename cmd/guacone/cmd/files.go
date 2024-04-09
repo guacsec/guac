@@ -122,10 +122,9 @@ var filesCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
-
-			if err != nil {
+			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient); err != nil {
 				gotErr = true
+				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to ingest document: %w", err)
 			}
 			totalSuccess += 1
@@ -147,7 +146,8 @@ var filesCmd = &cobra.Command{
 		}
 
 		if gotErr {
-			logger.Fatalf("completed ingestion with error, %v of %v were successful - the following files did not ingest successfully:  %v", totalSuccess, totalNum, printErrors(filesWithErrors))
+			logger.Fatalf("completed ingestion with error, %v of %v were successful - the following files did not ingest successfully:  %v",
+				totalSuccess, totalNum, strings.Join(filesWithErrors, " "))
 		} else {
 			logger.Infof("completed ingesting %v documents of %v", totalSuccess, totalNum)
 		}
@@ -181,14 +181,6 @@ func validateFilesFlags(keyPath string, keyID string, graphqlEndpoint string, cs
 	opts.path = args[0]
 
 	return opts, nil
-}
-
-func printErrors(filesWithErrors []string) string {
-	var output string
-	for f := range filesWithErrors {
-		output += fmt.Sprintf("%v ", filesWithErrors[f])
-	}
-	return output
 }
 
 func init() {
