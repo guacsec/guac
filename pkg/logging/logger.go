@@ -26,24 +26,24 @@ import (
 
 var logger *zap.SugaredLogger
 
-type LogLevel string
+type (
+	LogLevel   string
+	contextKey string
+)
 
 const (
-	Debug  LogLevel = "debug"
-	Info   LogLevel = "info"
-	Warn   LogLevel = "warn"
-	Error  LogLevel = "error"
-	DPanic LogLevel = "dpanic"
-	Panic  LogLevel = "panic"
-	Fatal  LogLevel = "fatal"
+	Debug          LogLevel   = "debug"
+	Info           LogLevel   = "info"
+	Warn           LogLevel   = "warn"
+	Error          LogLevel   = "error"
+	DPanic         LogLevel   = "dpanic"
+	Panic          LogLevel   = "panic"
+	Fatal          LogLevel   = "fatal"
+	ChildLoggerKey contextKey = "childLogger"
+	DocumentHash              = "documentHash"
 )
 
 type loggerKey struct{}
-
-type contextKey string
-
-// Declare a variable for the logger key using the defined type
-var ChildLoggerKey = contextKey("childLogger")
 
 // Initializes the logger with the input level, defaulting to Info if the input is invalid
 func InitLogger(level LogLevel) {

@@ -85,16 +85,6 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 	}
 	uuidString := uuid.String()
 
-	childLogger := logger.With(zap.String("requestID", uuidString))
-
-	// Storing the child logger in the context
-	ctx = context.WithValue(ctx, "childLogger", childLogger)
-
-	logger = logging.FromContext(ctx)
-
-	// Use childLogger for logging within this scope
-	logger.Debug("starting publishing")
-
 	sub, err := emPubSub.Subscribe(ctx, uuidString)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
@@ -108,25 +98,33 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 			return nil
 		}
 
+		// start up the child logger with the hash of the document
+		// this initializes a new logger instead of re-assigning to logger so that we don't add multiple values for a single key in the logs
+		childLogger := logger.With(zap.String(logging.DocumentHash, blobStoreKey))
+
+		childLogger.Debugf("[processor: %s] starting child logger", uuidString)
+
 		documentBytes, err := blobStore.Read(ctx, blobStoreKey)
 		if err != nil {
-			logger.Errorf("[processor: %s] failed read document to blob store: %v", uuidString, err)
+			childLogger.Errorf("[processor: %s] failed read document to blob store: %v", uuidString, err)
 			return nil
 		}
 
 		doc := processor.Document{}
 		if err = json.Unmarshal(documentBytes, &doc); err != nil {
-			logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
+			childLogger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
 			return nil
 		}
 
+		doc.ChildLogger = childLogger
+
 		if err := em(&doc); err != nil {
-			logger.Error("[processor: %s] failed transportFunc: %v", uuidString, err)
+			childLogger.Error("[processor: %s] failed transportFunc: %v", uuidString, err)
 			return nil
 		}
 		// ack the message from the queue once the ingestion has occurred via the Emitter (em) function specified above
 		d.Ack()
-		logger.Infof("[processor: %s] message acknowledged in pusbub", uuidString)
+		childLogger.Infof("[processor: %s] message acknowledged in pusbub", uuidString)
 
 		return nil
 	}

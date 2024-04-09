@@ -18,7 +18,6 @@ package collector
 import (
 	"context"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/events"
@@ -95,8 +94,14 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	for collectorsDone < numCollectors {
 		select {
 		case d := <-docChan:
+			key := events.GetKey(d.Blob)
+			childLogger := logger.With(zap.String(logging.DocumentHash, key))
+			d.ChildLogger = childLogger
+
+			logger.Debugf("starting up the child logger: %+v", d.SourceInformation.Source)
+
 			if err := emitter(d); err != nil {
-				logger.Errorf("emit error: %v", err)
+				d.ChildLogger.Errorf("emit error: %v", err)
 			}
 		case err := <-errChan:
 			if !handleErr(err) {
@@ -121,52 +126,39 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 // sha256 of the collected "document"). This also fixes the issues where the "document" was too large
 // to be sent across the event stream.
 func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
-	logger := logging.FromContext(ctx)
-
-	// Generate a unique identifier for this Publish invocation
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		return fmt.Errorf("failed to get uuid with the following error: %w", err)
-	}
-	uuidString := uuid.String()
-
-	// Create a child logger with the unique identifier
-	childLogger := logger.With(zap.String("requestID", uuidString))
-
-	ctx = context.WithValue(ctx, "childLogger", childLogger)
-
-	logger = logging.FromContext(ctx)
-
-	// Use the child logger within this scope
-	logger.Debugf("starting publishing: %+v", d.SourceInformation.Source)
+	logger := d.ChildLogger
 
 	docByte, err := json.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
+	logger.Debugf("Successfully marshaled document.")
 
 	key := events.GetKey(d.Blob)
 
 	if err = blobStore.Write(ctx, key, docByte); err != nil {
 		return fmt.Errorf("failed write document to blob store: %w", err)
 	}
+	logger.Debugf("Successfully wrote document to blob store.")
 
 	cdEvent, err := events.CreateArtifactPubEvent(ctx, key)
 	if err != nil {
 		return fmt.Errorf("failed create an event: %w", err)
 	}
+	logger.Debugf("Successfully created an event.")
 
 	keyByte, err := json.Marshal(cdEvent)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document key: %w", err)
 	}
+	logger.Debugf("Successfully marshaled document key.")
 
 	if err := pubsub.Publish(ctx, keyByte); err != nil {
-		if err != nil {
-			return fmt.Errorf("failed to publish event with error: %w", err)
-		}
+		return fmt.Errorf("failed to publish event with error: %w", err)
 	}
+	logger.Debugf("Successfully published event.")
 
 	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
+
 	return nil
 }

@@ -31,7 +31,6 @@ import (
 	"github.com/guacsec/guac/pkg/ingestor/parser/slsa"
 	"github.com/guacsec/guac/pkg/ingestor/parser/spdx"
 	"github.com/guacsec/guac/pkg/ingestor/parser/vuln"
-	"github.com/guacsec/guac/pkg/logging"
 )
 
 func init() {
@@ -75,7 +74,7 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
 	assemblerInputs := []assembler.IngestPredicates{}
 	identifierStrings := []*common.IdentifierStrings{}
-	logger := logging.FromContext(ctx)
+	logger := docTree.Document.ChildLogger
 	docTreeBuilder := newDocTreeBuilder()
 
 	logger.Infof("parsing document tree with root type: %v", docTree.Document.Type)

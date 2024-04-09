@@ -100,7 +100,7 @@ services:
         condition: service_healthy
     volumes:
       - ./container_files/guac:/guac:z
-
+  
   guac-rest:
     networks: [ frontend ]
     image: $GUAC_IMAGE
@@ -133,4 +133,4 @@ networks:
     driver: bridge
 
 volumes:
-  blobstore:
+    blobstore:
