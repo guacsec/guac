@@ -301,16 +301,14 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 
 	switch foundGlobalID.nodeType {
 	case artifact.Table:
-		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		artifacts, err := b.Artifacts(ctx, &model.ArtifactSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to query for Artifacts via ID: %s, with error: %w", nodeID.String(), err)
 		}
-
-		if art, ok := record.(*ent.Artifact); ok {
-			return toModelArtifact(art), nil
-		} else {
-			return nil, fmt.Errorf("failed to assert type of artifact")
+		if len(artifacts) != 1 {
+			return nil, fmt.Errorf("ID returned multiple Artifacts nodes %s", nodeID.String())
 		}
+		return artifacts[0], nil
 	case packageversion.Table:
 		pv, err := b.client.PackageVersion.Query().
 			Where(packageversion.ID(nodeID)).
@@ -330,49 +328,41 @@ func (b *EntBackend) Node(ctx context.Context, node string) (model.Node, error) 
 		}
 		return toModelPackage(backReferencePackageName(pn)), nil
 	case sourcename.Table:
-		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		sources, err := b.Sources(ctx, &model.SourceSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to query for Sources via ID: %s, with error: %w", nodeID.String(), err)
 		}
-
-		if sn, ok := record.(*ent.SourceName); ok {
-			return toModelSourceName(sn), nil
-		} else {
-			return nil, fmt.Errorf("failed to assert type of SourceName")
+		if len(sources) != 1 {
+			return nil, fmt.Errorf("ID returned multiple Sources nodes %s", nodeID.String())
 		}
+		return sources[0], nil
 	case builder.Table:
-		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		builders, err := b.Builders(ctx, &model.BuilderSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to query for Builders via ID: %s, with error: %w", nodeID.String(), err)
 		}
-
-		if b, ok := record.(*ent.Builder); ok {
-			return toModelBuilder(b), nil
-		} else {
-			return nil, fmt.Errorf("failed to assert type of Builder")
+		if len(builders) != 1 {
+			return nil, fmt.Errorf("ID returned multiple Builders nodes %s", nodeID.String())
 		}
+		return builders[0], nil
 	case license.Table:
-		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		licenses, err := b.Licenses(ctx, &model.LicenseSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to query for Licenses via ID: %s, with error: %w", nodeID.String(), err)
 		}
-
-		if lic, ok := record.(*ent.License); ok {
-			return toModelLicense(lic), nil
-		} else {
-			return nil, fmt.Errorf("failed to assert type of License")
+		if len(licenses) != 1 {
+			return nil, fmt.Errorf("ID returned multiple Licenses nodes %s", nodeID.String())
 		}
+		return licenses[0], nil
 	case vulnerabilityid.Table:
-		record, err := b.client.Noder(ctx, nodeID, ent.WithFixedNodeType(foundGlobalID.nodeType))
+		vulnerabilities, err := b.Vulnerabilities(ctx, &model.VulnerabilitySpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to query for Vulnerabilities via ID: %s, with error: %w", nodeID.String(), err)
 		}
-
-		if v, ok := record.(*ent.VulnerabilityID); ok {
-			return toModelVulnerabilityFromVulnerabilityID(v), nil
-		} else {
-			return nil, fmt.Errorf("failed to assert type of VulnerabilityID")
+		if len(vulnerabilities) != 1 {
+			return nil, fmt.Errorf("ID returned multiple Vulnerabilities nodes %s", nodeID.String())
 		}
+		return vulnerabilities[0], nil
 	case certifyBadString:
 		certs, err := b.CertifyBad(ctx, &model.CertifyBadSpec{ID: ptrfrom.String(nodeID.String())})
 		if err != nil {
