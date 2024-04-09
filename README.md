@@ -44,7 +44,7 @@ by the following [docs github repository](https://github.com/guacsec/guac-docs).
 
 Here is an overview of the architecture of GUAC:
 
-![image](https://user-images.githubusercontent.com/3060102/235186368-995784eb-7ef2-43e6-b560-17d6014553ca.png)
+![guac_api](https://github.com/guacsec/guac/assets/88045217/997d5c8b-5024-482b-b2aa-55b650a6a130)
 
 For an in-depth view and explanation of components of the GUAC Beta, please
 refer to [how GUAC works](https://docs.guac.sh/how-guac-works/).
