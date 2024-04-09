@@ -24,6 +24,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/fsouza/fake-gcs-server/fakestorage"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -54,11 +55,16 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		},
 	}
 
+	docWithRef := new(processor.Document)
+	*docWithRef = *doc
+	docWithRef.SourceInformation.DocumentRef = events.GetKey(docWithRef.Blob)
+
 	type fields struct {
 		bucket       string
 		reader       gcsReader
 		lastDownload time.Time
 		poll         bool
+		storeBlobURL bool
 	}
 	tests := []struct {
 		name     string
@@ -77,6 +83,16 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			reader: &reader{client: client, bucket: bucketName},
 		},
 		want:     []*processor.Document{doc},
+		wantErr:  false,
+		wantDone: true,
+	}, {
+		name: "get object and storeBlobURL",
+		fields: fields{
+			bucket:       bucketName,
+			reader:       &reader{client: client, bucket: bucketName},
+			storeBlobURL: true,
+		},
+		want:     []*processor.Document{docWithRef},
 		wantErr:  false,
 		wantDone: true,
 	}, {
@@ -108,6 +124,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 				reader:       tt.fields.reader,
 				lastDownload: tt.fields.lastDownload,
 				poll:         tt.fields.poll,
+				storeBlobURL: tt.fields.storeBlobURL,
 			}
 			if err := collector.RegisterDocumentCollector(g, CollectorGCS); err != nil &&
 				!errors.Is(err, collector.ErrCollectorOverwrite) {

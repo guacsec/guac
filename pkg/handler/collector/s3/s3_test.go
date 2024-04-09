@@ -19,10 +19,12 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/bucket"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
@@ -105,16 +107,20 @@ func (td *TestBucketBuilder) GetDownloader(url string, region string) bucket.Buc
 
 func TestS3Collector(t *testing.T) {
 	ctx := context.Background()
-	testNoPolling(t, ctx)
-	testQueuesSplitPolling(t, ctx)
+
+	for _, storeBlobURL := range []bool{true, false} {
+		t.Run(fmt.Sprintf("no polling with storeBlobURL=%v", storeBlobURL), func(t *testing.T) { testNoPolling(t, ctx, storeBlobURL) })
+		t.Run(fmt.Sprintf("queues split polling with storeBlobURL=%v", storeBlobURL), func(t *testing.T) { testQueuesSplitPolling(t, ctx, storeBlobURL) })
+	}
 }
 
-func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
+func testQueuesSplitPolling(t *testing.T, ctx context.Context, storeBlobURL bool) {
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		Queues:        "q1,q2",
 		MpBuilder:     &TestMpBuilder{},
 		BucketBuilder: &TestBucketBuilder{},
 		Poll:          true,
+		StoreBlobURL:  storeBlobURL,
 	})
 
 	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
@@ -165,15 +171,18 @@ func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
 		if doc.Encoding != "UNKNOWN" {
 			t.Errorf("wrong encoding returned: %s", doc.Encoding)
 		}
+
+		assertDocRef(t, doc, storeBlobURL)
 	}
 }
 
-func testNoPolling(t *testing.T, ctx context.Context) {
+func testNoPolling(t *testing.T, ctx context.Context, storeBlobURL bool) {
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		BucketBuilder: &TestBucketBuilder{},
 		S3Bucket:      "no-poll-bucket",
 		S3Item:        "no-poll-item",
 		Poll:          false,
+		StoreBlobURL:  storeBlobURL,
 	})
 
 	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
@@ -202,5 +211,18 @@ func testNoPolling(t *testing.T, ctx context.Context) {
 
 	if s[0].Blob != nil && !bytes.Equal(s[0].Blob, []byte("{\"key\": \"value\"}")) {
 		t.Errorf("wrong item returned")
+	}
+
+	assertDocRef(t, s[0], storeBlobURL)
+}
+
+func assertDocRef(t *testing.T, doc *processor.Document, storeBlobURL bool) {
+	docRef := ""
+	if storeBlobURL {
+		docRef = events.GetKey(doc.Blob)
+	}
+
+	if doc.SourceInformation.DocumentRef != docRef {
+		t.Errorf("want DocumentRef = %s, got = %s", docRef, doc.SourceInformation.DocumentRef)
 	}
 }

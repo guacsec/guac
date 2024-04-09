@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/pkg/errors"
@@ -33,9 +34,10 @@ import (
 func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	ctx := context.Background()
 	type fields struct {
-		ociValues []string
-		poll      bool
-		interval  time.Duration
+		ociValues    []string
+		storeBlobURL bool
+		poll         bool
+		interval     time.Duration
 	}
 
 	tests := []struct {
@@ -350,10 +352,43 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			},
 		},
 		wantErr: false,
+	}, {
+		name: "reference by tag AND digest, with storeBlobURL set",
+		fields: fields{
+			ociValues: []string{
+				"ghcr.io/guacsec/guac-test-image:carrot@sha256:9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09",
+			},
+			storeBlobURL: true,
+			poll:         false,
+			interval:     0,
+		},
+		want: []*processor.Document{
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIDsseAttExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector:   string(OCICollector),
+					Source:      "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
+					DocumentRef: "placeholder - see below", // this gets overwritten in the test body,
+				},
+			},
+			{
+				Blob:   dochelper.ConsistentJsonBytes(testdata.OCISPDXExample),
+				Type:   processor.DocumentUnknown,
+				Format: processor.FormatUnknown,
+				SourceInformation: processor.SourceInformation{
+					Collector:   string(OCICollector),
+					Source:      "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
+					DocumentRef: "placeholder - see below", // this gets overwritten in the test body,
+				},
+			},
+		},
+		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, false, tt.fields.interval)
+			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, tt.fields.storeBlobURL, tt.fields.interval)
 
 			var cancel context.CancelFunc
 			if tt.fields.poll {
@@ -391,6 +426,18 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 				if collectedDoc == nil {
 					t.Errorf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
 				}
+
+				if tt.fields.storeBlobURL {
+					// Why do we do this here instead of in the test case definition?
+					//
+					// Because the blob that we input into the test is not the final blob
+					// that gets hashed to come up with the blob URL; the blob that gets
+					// hashed is different. So we run the hashing function on the final
+					// blob and then add it to our original want doc.
+
+					tt.want[i].SourceInformation.DocumentRef = events.GetKey(collectedDoc.Blob)
+				}
+
 				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDoc), dochelper.DocNode(tt.want[i]))
 				if !result {
 					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
