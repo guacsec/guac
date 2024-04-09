@@ -274,7 +274,7 @@ require (
 	github.com/CycloneDX/cyclonedx-go v0.8.0
 	github.com/Khan/genqlient v0.7.0
 	github.com/Masterminds/semver v1.5.0
-	github.com/arangodb/go-driver v1.6.1
+	github.com/arangodb/go-driver v1.6.2
 	github.com/aws/aws-sdk-go v1.51.12
 	github.com/aws/aws-sdk-go-v2 v1.26.1
 	github.com/aws/aws-sdk-go-v2/config v1.27.7
