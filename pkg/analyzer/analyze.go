@@ -25,8 +25,6 @@ import (
   "github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
-const PRINT_MAX = 20
-
 type HighlightedDiff struct {
   MissingAddedRemovedLinks [][]string
   MissingAddedRemovedNodes []string
@@ -43,35 +41,28 @@ func NodeHash(n *Node) string {
   return n.ID
 }
 
-func SetNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interface{}) error {
-  var (
-    err error
-    node *Node
-  )
-  if node, err = g.Vertex(ID); err !=  nil {
-	return fmt.Errorf("error getting node from graph: %v", err)
+func SetNodeAttribute(g graph.Graph[string, *Node],ID, key string, value interface{}) bool {
+  node, err := g.Vertex(ID)
+  if err !=  nil {
+	return false
   }
 
   node.Attributes[key] = value
-  return nil
+  return true
 }
 
 func GetNodeAttribute(g graph.Graph[string, *Node],ID, key string) (interface{}, error) {
-  var (
-    err error
-    node *Node
-  )
-  if node, err = g.Vertex(ID); err !=  nil {
+  node, err := g.Vertex(ID)
+  if err !=  nil {
 	return nil, err
   }
   val, ok := node.Attributes[key]
 
-  if  !ok {
+  if !ok {
     return ID, fmt.Errorf("node %s does not have attribute %s", ID, key)
   }
   return val, nil
 }
-
 
 func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl string) (*model.PackagesResponse, error) {
   pkgInput, err := helpers.PurlToPkg(purl)
@@ -296,7 +287,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
   return   nil, HighlightedDiff{}, nil
 }
 
-func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, inclOccur, namespaces bool) graph.Graph[string, *Node] {
+func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, inclOccur, namespaces bool) (graph.Graph[string, *Node], error) {
 
   g := graph.New(NodeHash, graph.Directed())
 
@@ -307,25 +298,30 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
   if metadata || compareAll {
     //add metadata
-    SetNodeAttribute(g, "HasSBOM", "Algorithm" , hasSBOM.Algorithm)
-    SetNodeAttribute(g, "HasSBOM", "Collector" , hasSBOM.Collector)
-    SetNodeAttribute(g, "HasSBOM", "Digest" , hasSBOM.Digest)
-    SetNodeAttribute(g, "HasSBOM", "DownloadLocation" , hasSBOM.DownloadLocation)
-    SetNodeAttribute(g, "HasSBOM", "KnownSince" , hasSBOM.KnownSince.String())
-    SetNodeAttribute(g, "HasSBOM", "Origin" , hasSBOM.Origin)
-    SetNodeAttribute(g, "HasSBOM", "Subject" , *hasSBOM.Subject.GetTypename())
+    if !(SetNodeAttribute(g, "HasSBOM", "Algorithm" , hasSBOM.Algorithm) &&
+		SetNodeAttribute(g, "HasSBOM", "Collector" , hasSBOM.Collector)&&
+		SetNodeAttribute(g, "HasSBOM", "Digest" , hasSBOM.Digest) &&
+		SetNodeAttribute(g, "HasSBOM", "DownloadLocation" , hasSBOM.DownloadLocation) && 
+		SetNodeAttribute(g, "HasSBOM", "KnownSince" , hasSBOM.KnownSince.String()) &&
+		SetNodeAttribute(g, "HasSBOM", "Origin" , hasSBOM.Origin) &&
+		SetNodeAttribute(g, "HasSBOM", "Subject" , *hasSBOM.Subject.GetTypename())) {
+			return g, fmt.Errorf( "error setting metadata attribute")
+
+	}
   }
 
   if inclOccur || compareAll {
     //add included occurrences
     for _, occurrence := range hasSBOM.IncludedOccurrences {
-      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Subject", occurrence.Subject)
-      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Id", occurrence.Artifact.Id)
-      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Algorithm", occurrence.Artifact.Algorithm)
-      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Digest", occurrence.Artifact.Digest)
-      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Justification", occurrence.Justification)
-      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Origin", occurrence.Origin)
-      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Collector", occurrence.Collector)
+      if !(SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Subject", occurrence.Subject) &&
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Id", occurrence.Artifact.Id) &&
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Algorithm", occurrence.Artifact.Algorithm) &&
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Artifact-Digest", occurrence.Artifact.Digest) &&
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Justification", occurrence.Justification) &&
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Origin", occurrence.Origin) &&
+      SetNodeAttribute(g, "HasSBOM", "InclOccur-"+ occurrence.Id + "-Collector", occurrence.Collector)) {
+		return g, fmt.Errorf("error setting occurrence attributes" + occurrence.Id)
+	  }
     }	
   }
 
@@ -337,7 +333,9 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
     for _, software := range hasSBOM.IncludedSoftware {
       inclSoftMap[*software.GetTypename()]= true
     }
-    SetNodeAttribute(g, "HasSBOM", "InclSoft", inclSoftMap)
+    if !SetNodeAttribute(g, "HasSBOM", "InclSoft", inclSoftMap) {
+		return g, fmt.Errorf("error setting included software attributes")
+	}
   }
 
 
@@ -351,14 +349,19 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
       SetNodeAttribute(g,  packageId, "Type" , dependency.Package.Type)
       if namespaces || compareAll {
         //add namespaces	
-        SetNodeAttribute(g,  packageId, "Namespace[0]" , dependency.Package.Namespaces[0].Names[0].Name)
-      }
+        if !SetNodeAttribute(g,  packageId, "Namespace[0]" , dependency.Package.Namespaces[0].Names[0].Name){
+			return g, fmt.Errorf("error setting namespace attribute")
+        	}
+	}
+      
 
-      SetNodeAttribute(g,  includedDepsId, "Justification" , dependency.Justification)
-      SetNodeAttribute(g,  includedDepsId, "DependencyType" , dependency.DependencyType)
-      SetNodeAttribute(g,  includedDepsId, "VersionRange" , dependency.VersionRange)
-      SetNodeAttribute(g,  includedDepsId, "Origin" , dependency.Origin)
-      SetNodeAttribute(g,  includedDepsId, "Collector" , dependency.Collector)
+      if !(SetNodeAttribute(g,  includedDepsId, "Justification" , dependency.Justification) &&
+      SetNodeAttribute(g,  includedDepsId, "DependencyType" , dependency.DependencyType) &&
+      SetNodeAttribute(g,  includedDepsId, "VersionRange" , dependency.VersionRange) &&
+      SetNodeAttribute(g,  includedDepsId, "Origin" , dependency.Origin) &&
+      SetNodeAttribute(g,  includedDepsId, "Collector" , dependency.Collector)) {
+		return g, fmt.Errorf("error setting dependency attributes")
+	  }
 
 
       if dependency.DependencyPackage.Id != "" {
@@ -371,10 +374,15 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
           SetNodeAttribute(g,  dependPkgId, "Namespace[0]" , dependency.DependencyPackage.Namespaces[0].Names[0].Name)
         }
       }
-    }
+
+    
   }
-  return g
 }
+  return g, nil
+}
+
+
+
 
 func AddGraphNode(g graph.Graph[string, *Node],_ID, color string) {
   var err error

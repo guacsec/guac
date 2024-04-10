@@ -27,10 +27,12 @@ import (
 func TestSetGetNodeAttribute(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
 	analyzer.AddGraphNode(g, "id", "black")
-	analyzer.SetNodeAttribute(g,"id", "key", "value")
+	if !analyzer.SetNodeAttribute(g,"id", "key", "value") {
+		t.Errorf("(set)Expected no error, got error")
+	}
 	value, err := analyzer.GetNodeAttribute(g, "id", "key")
 	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
+		t.Errorf("(get)Expected no error, got error %v", err)
 	}
 	value, ok := value.(string)
 	if !ok {
@@ -51,12 +53,15 @@ func TestHighlightAnalysis(t *testing.T) {
 	//create HasSBOM node
 	analyzer.AddGraphNode(g, "HasSBOM", "black")
   
-	analyzer.SetNodeAttribute(g, "HasSBOM", "Algorithm" , "hasSBOM.Algorithm")
-	analyzer.SetNodeAttribute(g, "HasSBOM", "Collector" , "hasSBOM.Collector")
-	analyzer.SetNodeAttribute(g, "HasSBOM", "Digest" , "hasSBOM.Digest")
-	analyzer.SetNodeAttribute(g, "HasSBOM", "DownloadLocation" , "hasSBOM.DownloadLocation")
-	analyzer.SetNodeAttribute(g, "HasSBOM", "KnownSince" , "hasSBOM.KnownSince")
-	analyzer.SetNodeAttribute(g, "HasSBOM", "Origin" , "hasSBOM.Origin")
+	if !(analyzer.SetNodeAttribute(g, "HasSBOM", "Algorithm" , "hasSBOM.Algorithm") &&
+	analyzer.SetNodeAttribute(g, "HasSBOM", "Collector" , "hasSBOM.Collector") &&
+	analyzer.SetNodeAttribute(g, "HasSBOM", "Digest" , "hasSBOM.Digest") &&
+	analyzer.SetNodeAttribute(g, "HasSBOM", "DownloadLocation" , "hasSBOM.DownloadLocation") &&
+	analyzer.SetNodeAttribute(g, "HasSBOM", "KnownSince" , "hasSBOM.KnownSince") &&
+	analyzer.SetNodeAttribute(g, "HasSBOM", "Origin" , "hasSBOM.Origin")) {
+		t.Errorf("Test Build fail, error setting metadata attribute")
+
+	}
 
 	_, diff, err := analyzer.HighlightAnalysis(g,g ,0)
 	if err !=  nil {

@@ -54,7 +54,7 @@ var analyzeCmd = &cobra.Command{
   Ingest the SBOMs to analyze:
   $ guacone collect files guac-data-main/docs/spdx/syft-spdx-k8s.gcr.io-kube-apiserver.v1.24.4.json
   $ guacone collect files guac-data-main/docs/spdx/spdx_vuln.json 
-  
+
   Difference
   $ guacone analyze --diff --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
   
@@ -271,6 +271,7 @@ func HasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 	var hasSBOMResponseOne *model.HasSBOMsResponse
 	var hasSBOMResponseTwo *model.HasSBOMsResponse
 	var err error
+	logger := logging.FromContext(ctx)
   
 	if opts.URI {
 		hasSBOMResponseOne, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{} ,sboms[0],"", "", ctx, gqlclient)
@@ -310,7 +311,6 @@ func HasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 	}
 
 	if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
-		logger := logging.FromContext(ctx)
 		logger.Infof("Multiple sboms found for given purl, id or uri. Using first one")  
 	}
 	hasSBOMOne :=  hasSBOMResponseOne.HasSBOM[0]
@@ -318,9 +318,14 @@ func HasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
   
   
 	//create graphs
-	gOne := analyzer.MakeGraph(hasSBOMOne, opts.Metadata, opts.InclSoft, opts.InclDeps, opts.InclOccur, opts.Namespaces)
-	gTwo := analyzer.MakeGraph(hasSBOMTwo, opts.Metadata, opts.InclSoft, opts.InclDeps, opts.InclOccur, opts.Namespaces)
-  
+	gOne, err := analyzer.MakeGraph( hasSBOMOne, opts.Metadata, opts.InclSoft, opts.InclDeps, opts.InclOccur, opts.Namespaces)
+	if err != nil {
+		logger.Fatalf(err.Error())
+	}
+	gTwo, err := analyzer.MakeGraph( hasSBOMTwo, opts.Metadata, opts.InclSoft, opts.InclDeps, opts.InclOccur, opts.Namespaces)
+	if err != nil {
+		logger.Fatalf(err.Error())
+	}
 	return []graph.Graph[string, *analyzer.Node] {
 	  gOne,
 	  gTwo,
