@@ -34,23 +34,23 @@ import (
 )
 
 type AnalyzeOpts struct {
-    Metadata   bool
-    InclSoft   bool
-    InclDeps   bool
-    InclOccur  bool
-    Namespaces bool
-    URI        bool
-    PURL       bool
-    ID         bool
+	Metadata   bool
+	InclSoft   bool
+	InclDeps   bool
+	InclOccur  bool
+	Namespaces bool
+	URI        bool
+	PURL       bool
+	ID         bool
 }
 
 var analyzeCmd = &cobra.Command{
-  Use:     "analyze <operation> <sboms> [flags] ",
-  Short:   "analyze is a CLI tool tailored for comparing, intersecting, and merging Software Bill of Materials (SBOMs) within GUAC",
-  Long:  `Diff Analysis: Compare two SBOMs to identify differences in their software components, versions, and dependencies.
+	Use:   "analyze <operation> <sboms> [flags] ",
+	Short: "analyze is a CLI tool tailored for comparing, intersecting, and merging Software Bill of Materials (SBOMs) within GUAC",
+	Long: `Diff Analysis: Compare two SBOMs to identify differences in their software components, versions, and dependencies.
   Intersection Analysis: Determine the intersection of two SBOMs, highlighting common software components shared between them.
   Union Analysis: Combine two SBOMs to create a unified SBOM, merging software component lists while maintaining version integrity.`,
-  Example: `
+	Example: `
   Ingest the SBOMs to analyze:
   $ guacone collect files guac-data-main/docs/spdx/syft-spdx-k8s.gcr.io-kube-apiserver.v1.24.4.json
   $ guacone collect files guac-data-main/docs/spdx/spdx_vuln.json 
@@ -64,301 +64,292 @@ var analyzeCmd = &cobra.Command{
   Intersection
   $ guacone analyze --intersect --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
   `,
-  Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 
-	if len(args) < 1 || len(args) > 1 {
-		fmt.Println("Required 1 positional arguments, got", len(args))
-		os.Exit(1)
-	}
+		if len(args) < 1 || len(args) > 1 {
+			fmt.Println("Required 1 positional arguments, got", len(args))
+			os.Exit(1)
+		}
 
-	if args[0] != "intersect" && args[0] != "union" && args[0] != "diff" {
-		fmt.Println("Invalid positional argument. Must be one of: intersect, union or diff.")
-		os.Exit(1)
-	}
+		if args[0] != "intersect" && args[0] != "union" && args[0] != "diff" {
+			fmt.Println("Invalid positional argument. Must be one of: intersect, union or diff.")
+			os.Exit(1)
+		}
 
-    ctx := logging.WithLogger(context.Background())
-	logger := logging.FromContext(ctx)
-    httpClient := http.Client{}
-    gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		httpClient := http.Client{}
+		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
 
+		//get necessary flags
+		dot, _ := cmd.Flags().GetBool("dot")
+		all, _ := cmd.Flags().GetBool("all")
+		maxprint, _ := cmd.Flags().GetInt("maxprint")
 
-    //get necessary flags
-	dot, _ := cmd.Flags().GetBool("dot")
-    all, _ := cmd.Flags().GetBool("all")
-    maxprint, _ := cmd.Flags().GetInt("maxprint")
+		slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
+		sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
+		uri, _ := cmd.Flags().GetBool("uri")
+		purl, _ := cmd.Flags().GetBool("purl")
 
-	slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
-	sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
-	uri, _ := cmd.Flags().GetBool("uri")
-	purl, _ := cmd.Flags().GetBool("purl")
-  
-	metadata, _ := cmd.Flags().GetBool("metadata")
-	inclSoft, _ := cmd.Flags().GetBool("incl-soft")
-	inclDeps, _ := cmd.Flags().GetBool("incl-deps")
-	inclOccur, _ := cmd.Flags().GetBool("incl-occur")
-	namespaces, _ := cmd.Flags().GetBool("namespaces")
-	id, _ := cmd.Flags().GetBool("id")
+		metadata, _ := cmd.Flags().GetBool("metadata")
+		inclSoft, _ := cmd.Flags().GetBool("incl-soft")
+		inclDeps, _ := cmd.Flags().GetBool("incl-deps")
+		inclOccur, _ := cmd.Flags().GetBool("incl-occur")
+		namespaces, _ := cmd.Flags().GetBool("namespaces")
+		id, _ := cmd.Flags().GetBool("id")
 
+		if err := verifyAnalyzeFlags(slsas, sboms, errSlsa, errSbom, uri, purl, id); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s", err)
+			_ = cmd.Help()
+			os.Exit(1)
+		}
 
-	if err := verifyAnalyzeFlags(slsas, sboms,  errSlsa, errSbom, uri, purl, id); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s", err)
-		_ = cmd.Help()
-		os.Exit(1)
-	}
+		//create graphs
+		graphs, err := hasSBOMToGraph(ctx, gqlclient, sboms, AnalyzeOpts{
+			Metadata: metadata, InclSoft: inclSoft, InclDeps: inclDeps, InclOccur: inclOccur, Namespaces: namespaces, URI: uri, PURL: purl, ID: id})
 
-    //create graphs
-    graphs, err := hasSBOMToGraph(ctx, gqlclient, sboms, AnalyzeOpts{
-		Metadata: metadata, InclSoft: inclSoft, InclDeps: inclDeps, InclOccur: inclOccur, Namespaces: namespaces, URI: uri, PURL: purl, ID: id})
+		if err != nil {
+			logger.Fatalf("Unable to generate graphs: %v", err)
+		}
 
-	if err != nil {
-		logger.Fatalf("Unable to generate graphs: %v", err)
-	}
-
-    if args[0] == "diff" {
-      analysisGraph, analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
-	  if err != nil {
-		logger.Fatalf("Unable to generate diff analysis: %v", err)
-	  }
-      if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 0 ,gqlclient) != nil {
-		logger.Fatalf("Unable to generate diff analysis output: %v", err)
-	  }
-    } else if args[0] ==  "intersect" {
-      analysisGraph, analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 1)
-	  if err != nil {
-		logger.Fatalf("Unable to generate intersect analysis: %v", err)
-	  }
-      if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 1,gqlclient) != nil {
-		logger.Fatalf("Unable to generate diff analysis output: %v", err)
-	  }
-    } else if args[0] == "union" {
-      analysisGraph, analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 2)
-	  if err != nil {
-		logger.Fatalf("Unable to generate union analysis: %v", err)
-	  }
-      if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 2,gqlclient) != nil {
-		logger.Fatalf("Unable to generate diff analysis output: %v", err)
-	  }
-    }
-  },
+		if args[0] == "diff" {
+			analysisGraph, analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
+			if err != nil {
+				logger.Fatalf("Unable to generate diff analysis: %v", err)
+			}
+			if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 0) != nil {
+				logger.Fatalf("Unable to generate diff analysis output: %v", err)
+			}
+		} else if args[0] == "intersect" {
+			analysisGraph, analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 1)
+			if err != nil {
+				logger.Fatalf("Unable to generate intersect analysis: %v", err)
+			}
+			if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 1) != nil {
+				logger.Fatalf("Unable to generate diff analysis output: %v", err)
+			}
+		} else if args[0] == "union" {
+			analysisGraph, analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 2)
+			if err != nil {
+				logger.Fatalf("Unable to generate union analysis: %v", err)
+			}
+			if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 2) != nil {
+				logger.Fatalf("Unable to generate diff analysis output: %v", err)
+			}
+		}
+	},
 }
 
-func createGraphDotFile(dot bool, g graph.Graph[string, *analyzer.Node]) error{
+func createGraphDotFile(dot bool, g graph.Graph[string, *analyzer.Node]) error {
 	if !dot {
-	  return nil
+		return nil
 	}
-	filename := rand.String(10)+".dot"
+	filename := rand.String(10) + ".dot"
 	file, _ := os.Create(filename)
 	err := draw.DOT(g, file)
-	if err!= nil {
-	  return fmt.Errorf("error creating dot file %v", err)
+	if err != nil {
+		return fmt.Errorf("error creating dot file %v", err)
 	}
 	fmt.Fprintf(os.Stdout, "Graph saved to %s\n", filename)
 	return nil
-  }
+}
 
 func max(nums []int) int {
 	if len(nums) == 0 {
-	  return 0
+		return 0
 	}
 	max := nums[0]
 	for _, num := range nums[1:] {
-	  if num > max {
-		max = num
-	  }
+		if num > max {
+			max = num
+		}
 	}
 	return max
 }
 
-func printHighlightedAnalysis(dot bool,diffList analyzer.HighlightedDiff, all bool, maxprint, action int,  analysisGraph graph.Graph[string, *analyzer.Node]) error{
+func printHighlightedAnalysis(dot bool, diffList analyzer.HighlightedDiff, all bool, maxprint, action int, analysisGraph graph.Graph[string, *analyzer.Node]) error {
 
 	if dot {
-	  return nil
+		return nil
 	}
 	//use action here to do different things
 	if action == 0 {
-	  metadataTable := tablewriter.NewWriter(os.Stdout)
-	  metadataTable.SetHeader([]string{ "Metadata"})
-	  for _, metadata := range diffList.MetadataMismatch {
-		if (!all && len(diffList.MetadataMismatch) == maxprint){
-		  break
+		metadataTable := tablewriter.NewWriter(os.Stdout)
+		metadataTable.SetHeader([]string{"Metadata"})
+		for _, metadata := range diffList.MetadataMismatch {
+			if !all && len(diffList.MetadataMismatch) == maxprint {
+				break
+			}
+			metadataTable.Append([]string{metadata})
 		}
-		metadataTable.Append([]string{metadata})
-	  }
-	  metadataTable.SetAlignment(tablewriter.ALIGN_LEFT)
-	  metadataTable.Render()
+		metadataTable.SetAlignment(tablewriter.ALIGN_LEFT)
+		metadataTable.Render()
 	}
-  
-  
-	table := tablewriter.NewWriter(os.Stdout)
-  
-	switch action { 
-	case 0:
-	  table.SetHeader([]string{ "Missing Nodes", "Missing Links"})
-	case 1:
-	  table.SetHeader([]string{ "Common Nodes", "Common Links"})
-	case 2:
-	  table.SetHeader([]string{ "Added Nodes", "Added Links"})
-	}
-  
-  
-	max :=  max([]int{len(diffList.MissingAddedRemovedNodes), len(diffList.MissingAddedRemovedLinks)})
-  
-	for i :=0 ; i< max; i++{
-  
-	  if (!all && i+1 == maxprint){
-		break
-	  }
-  
-	  var appendList []string
-  
-  
-	  if i< len(diffList.MissingAddedRemovedNodes){
-		value, err := analyzer.GetNodeAttribute(analysisGraph,diffList.MissingAddedRemovedNodes[i], "Namespace[0]")
-		if err != nil {
-		  fmt.Println("Error getting node namespace attribute: ", err)
-		  os.Exit(1)
-		}
-		namespace, ok := value.(string)
-  
-		if !ok {
-		  fmt.Println("Error getting node namespace attribute")
-		  os.Exit(1)
-		}
-		appendList = append(appendList,namespace)
-	  } else {
-		appendList = append(appendList, "")
-	  }
-  
-	  if i< len(diffList.MissingAddedRemovedLinks){
-		value, err := analyzer.GetNodeAttribute(analysisGraph,diffList.MissingAddedRemovedLinks[i][0], "Namespace[0]")
-		if err != nil {
-			return fmt.Errorf("error getting node namespace attribute: %w", err)
-		}
-		namespaceOne, okOne := value.(string)
 
-		value, err = analyzer.GetNodeAttribute(analysisGraph,diffList.MissingAddedRemovedLinks[i][1], "Namespace[0]")
-		if err != nil {
-			return fmt.Errorf("error getting node namespace attribute: %w", err)
-		}
-		namespaceTwo, okTwo := value.(string)
-  
-		if !okOne || !okTwo {
-		  fmt.Println("Error getting node namespace attribute")
-		  os.Exit(1)
-		}
-  
-		appendList = append(appendList, namespaceOne + "--->"+namespaceTwo)
-	  }else {
-		appendList = append(appendList, "")
-	  }
-	  table.Append(appendList)
+	table := tablewriter.NewWriter(os.Stdout)
+
+	switch action {
+	case 0:
+		table.SetHeader([]string{"Missing Nodes", "Missing Links"})
+	case 1:
+		table.SetHeader([]string{"Common Nodes", "Common Links"})
+	case 2:
+		table.SetHeader([]string{"Added Nodes", "Added Links"})
 	}
-  
-  
-  
+
+	max := max([]int{len(diffList.MissingAddedRemovedNodes), len(diffList.MissingAddedRemovedLinks)})
+
+	for i := 0; i < max; i++ {
+
+		if !all && i+1 == maxprint {
+			break
+		}
+
+		var appendList []string
+
+		if i < len(diffList.MissingAddedRemovedNodes) {
+			value, err := analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedNodes[i], "Namespace[0]")
+			if err != nil {
+				fmt.Println("Error getting node namespace attribute: ", err)
+				os.Exit(1)
+			}
+			namespace, ok := value.(string)
+
+			if !ok {
+				fmt.Println("Error getting node namespace attribute")
+				os.Exit(1)
+			}
+			appendList = append(appendList, namespace)
+		} else {
+			appendList = append(appendList, "")
+		}
+
+		if i < len(diffList.MissingAddedRemovedLinks) {
+			value, err := analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedLinks[i][0], "Namespace[0]")
+			if err != nil {
+				return fmt.Errorf("error getting node namespace attribute: %w", err)
+			}
+			namespaceOne, okOne := value.(string)
+
+			value, err = analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedLinks[i][1], "Namespace[0]")
+			if err != nil {
+				return fmt.Errorf("error getting node namespace attribute: %w", err)
+			}
+			namespaceTwo, okTwo := value.(string)
+
+			if !okOne || !okTwo {
+				fmt.Println("Error getting node namespace attribute")
+				os.Exit(1)
+			}
+
+			appendList = append(appendList, namespaceOne+"--->"+namespaceTwo)
+		} else {
+			appendList = append(appendList, "")
+		}
+		table.Append(appendList)
+	}
+
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.Render()
-	if (!all && max > maxprint){
-	  fmt.Println("Run with --all to see full list")
+	if !all && max > maxprint {
+		fmt.Println("Run with --all to see full list")
 	}
 	return nil
 }
 
-func generateAnalysisOutput(analysisGraph graph.Graph[string, *analyzer.Node], diffList analyzer.HighlightedDiff, all, dot bool, maxprint, action int, gqlclient graphql.Client) error{
+func generateAnalysisOutput(analysisGraph graph.Graph[string, *analyzer.Node], diffList analyzer.HighlightedDiff, all, dot bool, maxprint, action int) error {
 	//Create dot file
 	if createGraphDotFile(dot, analysisGraph) != nil {
 		return fmt.Errorf("error creating dot file")
 	}
 	//print to stdout
-	if printHighlightedAnalysis(dot, diffList, all, maxprint, action, analysisGraph ) != nil {
+	if printHighlightedAnalysis(dot, diffList, all, maxprint, action, analysisGraph) != nil {
 		return fmt.Errorf("error printing analysis")
 	}
 	return nil
 }
 
-func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []string,opts AnalyzeOpts) ([]graph.Graph[string, *analyzer.Node], error) {
-
+func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []string, opts AnalyzeOpts) ([]graph.Graph[string, *analyzer.Node], error) {
 
 	var hasSBOMResponseOne *model.HasSBOMsResponse
 	var hasSBOMResponseTwo *model.HasSBOMsResponse
 	var err error
 	logger := logging.FromContext(ctx)
-  
+
 	if opts.URI {
-		hasSBOMResponseOne, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{} ,sboms[0],"", "", ctx, gqlclient)
+		hasSBOMResponseOne, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{}, sboms[0], "", "", ctx, gqlclient)
 		if err != nil {
 			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(uri)failed to lookup sbom: %v %v", sboms[0], err)
 		}
-		hasSBOMResponseTwo, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{},  sboms[1],"", "", ctx, gqlclient)
+		hasSBOMResponseTwo, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{}, sboms[1], "", "", ctx, gqlclient)
 		if err != nil {
 			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(uri)failed to lookup sbom: %v %v", sboms[1], err)
 		}
 	} else if opts.PURL {
-	  hasSBOMResponseOne, err = analyzer.FindHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[0], "", ctx, gqlclient)
-	  if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(purl)failed to lookup sbom: %v %v", sboms[0], err)
-	  }
-	  hasSBOMResponseTwo, err = analyzer.FindHasSBOMBy( model.HasSBOMSpec{} ,"", sboms[1],"", ctx, gqlclient)
-	  if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(purl)failed to lookup sbom: %v %v", sboms[1], err)
-	  }
+		hasSBOMResponseOne, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{}, "", sboms[0], "", ctx, gqlclient)
+		if err != nil {
+			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(purl)failed to lookup sbom: %v %v", sboms[0], err)
+		}
+		hasSBOMResponseTwo, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{}, "", sboms[1], "", ctx, gqlclient)
+		if err != nil {
+			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(purl)failed to lookup sbom: %v %v", sboms[1], err)
+		}
 	} else if opts.ID {
-	  hasSBOMResponseOne, err = analyzer.FindHasSBOMBy( model.HasSBOMSpec{} ,"", "", sboms[0], ctx, gqlclient)
-	  if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(id)failed to lookup sbom: %v %v", sboms[0], err)
-	  }
-	  hasSBOMResponseTwo, err = analyzer.FindHasSBOMBy( model.HasSBOMSpec{} ,"", "", sboms[1] ,ctx, gqlclient)
-	  if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(id)failed to lookup sbom: %v %v", sboms[1], err)
-	  }
-  
+		hasSBOMResponseOne, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{}, "", "", sboms[0], ctx, gqlclient)
+		if err != nil {
+			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(id)failed to lookup sbom: %v %v", sboms[0], err)
+		}
+		hasSBOMResponseTwo, err = analyzer.FindHasSBOMBy(model.HasSBOMSpec{}, "", "", sboms[1], ctx, gqlclient)
+		if err != nil {
+			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(id)failed to lookup sbom: %v %v", sboms[1], err)
+		}
+
 	}
 	if hasSBOMResponseOne == nil || hasSBOMResponseTwo == nil {
-	  return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("failed to lookup sboms: nil",)
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("failed to lookup sboms: nil")
 	}
 
 	if len(hasSBOMResponseOne.HasSBOM) == 0 || len(hasSBOMResponseTwo.HasSBOM) == 0 {
-	  return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("failed to lookup sboms, one endpoint may not have sboms")
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("failed to lookup sboms, one endpoint may not have sboms")
 	}
 
 	if len(hasSBOMResponseOne.HasSBOM) != 1 || len(hasSBOMResponseTwo.HasSBOM) != 1 {
-		logger.Infof("Multiple sboms found for given purl, id or uri. Using first one")  
+		logger.Infof("Multiple sboms found for given purl, id or uri. Using first one")
 	}
-	hasSBOMOne :=  hasSBOMResponseOne.HasSBOM[0]
-	hasSBOMTwo :=  hasSBOMResponseTwo.HasSBOM[0]
-  
-  
-	//create graphs
-	gOne, err := analyzer.MakeGraph( hasSBOMOne, opts.Metadata, opts.InclSoft, opts.InclDeps, opts.InclOccur, opts.Namespaces)
-	if err != nil {
-		logger.Fatalf(err.Error())
-	}
-	gTwo, err := analyzer.MakeGraph( hasSBOMTwo, opts.Metadata, opts.InclSoft, opts.InclDeps, opts.InclOccur, opts.Namespaces)
-	if err != nil {
-		logger.Fatalf(err.Error())
-	}
-	return []graph.Graph[string, *analyzer.Node] {
-	  gOne,
-	  gTwo,
-	}, nil
-  
-}
-  
-func verifyAnalyzeFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, purl, id bool) error {
+	hasSBOMOne := hasSBOMResponseOne.HasSBOM[0]
+	hasSBOMTwo := hasSBOMResponseTwo.HasSBOM[0]
 
-	if (errSlsa != nil && errSbom != nil) || (len(slsas) ==0  && len(sboms) == 0 ){
+	//create graphs
+	gOne, err := analyzer.MakeGraph(hasSBOMOne, opts.Metadata, opts.InclSoft, opts.InclDeps, opts.InclOccur, opts.Namespaces)
+	if err != nil {
+		logger.Fatalf(err.Error())
+	}
+	gTwo, err := analyzer.MakeGraph(hasSBOMTwo, opts.Metadata, opts.InclSoft, opts.InclDeps, opts.InclOccur, opts.Namespaces)
+	if err != nil {
+		logger.Fatalf(err.Error())
+	}
+	return []graph.Graph[string, *analyzer.Node]{
+		gOne,
+		gTwo,
+	}, nil
+
+}
+
+func verifyAnalyzeFlags(slsas, sboms []string, errSlsa, errSbom error, uri, purl, id bool) error {
+
+	if (errSlsa != nil && errSbom != nil) || (len(slsas) == 0 && len(sboms) == 0) {
 		return fmt.Errorf("must specify slsa or sboms")
 	}
 
-	if len(slsas) >0  && len(sboms) >0 {
+	if len(slsas) > 0 && len(sboms) > 0 {
 		return fmt.Errorf("must either specify slsa or sbom")
 	}
 
-	if errSlsa == nil && (len(slsas) <= 1|| len(slsas) > 2) && len(sboms) == 0{
+	if errSlsa == nil && (len(slsas) <= 1 || len(slsas) > 2) && len(sboms) == 0 {
 		return fmt.Errorf("must specify exactly two slsas to analyze, specified %v", len(slsas))
 	}
 
-	if errSbom == nil && (len(sboms) <= 1|| len(sboms) > 2) && len(slsas) == 0{
+	if errSbom == nil && (len(sboms) <= 1 || len(sboms) > 2) && len(slsas) == 0 {
 		return fmt.Errorf("must specify exactly two sboms to analyze, specified %v", len(sboms))
 	}
 
@@ -370,7 +361,7 @@ func verifyAnalyzeFlags(slsas, sboms []string,  errSlsa, errSbom error, uri, pur
 		return fmt.Errorf("must provide one of --uri or --purl")
 	}
 
-	if uri && purl  || uri && id || purl && id {
+	if uri && purl || uri && id || purl && id {
 		return fmt.Errorf("must provide only one of --uri or --purl")
 	}
 
@@ -393,6 +384,6 @@ func init() {
 	analyzeCmd.PersistentFlags().Bool("all", false, " lists all")
 	analyzeCmd.PersistentFlags().Int("maxprint", 20, "max number of items to print")
 
-	rootCmd.AddCommand(analyzeCmd)	
+	rootCmd.AddCommand(analyzeCmd)
 
 }

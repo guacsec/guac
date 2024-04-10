@@ -16,18 +16,16 @@
 package analyzer_test
 
 import (
-
 	"testing"
 
 	"github.com/dominikbraun/graph"
 	analyzer "github.com/guacsec/guac/pkg/analyzer"
-
 )
 
 func TestSetGetNodeAttribute(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
 	analyzer.AddGraphNode(g, "id", "black")
-	if !analyzer.SetNodeAttribute(g,"id", "key", "value") {
+	if !analyzer.SetNodeAttribute(g, "id", "key", "value") {
 		t.Errorf("(set)Expected no error, got error")
 	}
 	value, err := analyzer.GetNodeAttribute(g, "id", "key")
@@ -36,7 +34,7 @@ func TestSetGetNodeAttribute(t *testing.T) {
 	}
 	value, ok := value.(string)
 	if !ok {
-		t.Errorf("Expected no error, got ",)
+		t.Errorf("Expected no error, got ")
 	}
 
 	if value != "value" {
@@ -52,19 +50,19 @@ func TestHighlightAnalysis(t *testing.T) {
 
 	//create HasSBOM node
 	analyzer.AddGraphNode(g, "HasSBOM", "black")
-  
-	if !(analyzer.SetNodeAttribute(g, "HasSBOM", "Algorithm" , "hasSBOM.Algorithm") &&
-	analyzer.SetNodeAttribute(g, "HasSBOM", "Collector" , "hasSBOM.Collector") &&
-	analyzer.SetNodeAttribute(g, "HasSBOM", "Digest" , "hasSBOM.Digest") &&
-	analyzer.SetNodeAttribute(g, "HasSBOM", "DownloadLocation" , "hasSBOM.DownloadLocation") &&
-	analyzer.SetNodeAttribute(g, "HasSBOM", "KnownSince" , "hasSBOM.KnownSince") &&
-	analyzer.SetNodeAttribute(g, "HasSBOM", "Origin" , "hasSBOM.Origin")) {
+
+	if !(analyzer.SetNodeAttribute(g, "HasSBOM", "Algorithm", "hasSBOM.Algorithm") &&
+		analyzer.SetNodeAttribute(g, "HasSBOM", "Collector", "hasSBOM.Collector") &&
+		analyzer.SetNodeAttribute(g, "HasSBOM", "Digest", "hasSBOM.Digest") &&
+		analyzer.SetNodeAttribute(g, "HasSBOM", "DownloadLocation", "hasSBOM.DownloadLocation") &&
+		analyzer.SetNodeAttribute(g, "HasSBOM", "KnownSince", "hasSBOM.KnownSince") &&
+		analyzer.SetNodeAttribute(g, "HasSBOM", "Origin", "hasSBOM.Origin")) {
 		t.Errorf("Test Build fail, error setting metadata attribute")
 
 	}
 
-	_, diff, err := analyzer.HighlightAnalysis(g,g ,0)
-	if err !=  nil {
+	_, diff, err := analyzer.HighlightAnalysis(g, g, 0)
+	if err != nil {
 		t.Errorf("Error running highlight analysis: %v", err)
 	}
 	if len(diff.MetadataMismatch) != 0 && len(diff.MissingAddedRemovedLinks) != 0 && len(diff.MissingAddedRemovedNodes) != 0 {
@@ -85,7 +83,7 @@ func TestAddGraphEdge(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
 	analyzer.AddGraphEdge(g, "from", "to", "black")
 
-	_, err  := g.Edge("from", "to")
+	_, err := g.Edge("from", "to")
 	if err != nil {
 		t.Errorf("Error getting edge from %s to %s: %v", "from", "to", err)
 	}
