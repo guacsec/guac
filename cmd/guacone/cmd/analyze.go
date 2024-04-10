@@ -107,7 +107,7 @@ var analyzeCmd = &cobra.Command{
 	}
 
     //create graphs
-    graphs, err := HasSBOMToGraph(ctx, gqlclient, sboms, AnalyzeOpts{
+    graphs, err := hasSBOMToGraph(ctx, gqlclient, sboms, AnalyzeOpts{
 		Metadata: metadata, InclSoft: inclSoft, InclDeps: inclDeps, InclOccur: inclOccur, Namespaces: namespaces, URI: uri, PURL: purl, ID: id})
 
 	if err != nil {
@@ -119,19 +119,25 @@ var analyzeCmd = &cobra.Command{
 	  if err != nil {
 		logger.Fatalf("Unable to generate diff analysis: %v", err)
 	  }
-      GenerateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 0 ,gqlclient)
+      if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 0 ,gqlclient) != nil {
+		logger.Fatalf("Unable to generate diff analysis output: %v", err)
+	  }
     } else if args[0] ==  "intersect" {
       analysisGraph, analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 1)
 	  if err != nil {
 		logger.Fatalf("Unable to generate intersect analysis: %v", err)
 	  }
-      GenerateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 1,gqlclient)
+      if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 1,gqlclient) != nil {
+		logger.Fatalf("Unable to generate diff analysis output: %v", err)
+	  }
     } else if args[0] == "union" {
       analysisGraph, analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 2)
 	  if err != nil {
 		logger.Fatalf("Unable to generate union analysis: %v", err)
 	  }
-      GenerateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 2,gqlclient)
+      if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 2,gqlclient) != nil {
+		logger.Fatalf("Unable to generate diff analysis output: %v", err)
+	  }
     }
   },
 }
@@ -258,14 +264,19 @@ func printHighlightedAnalysis(dot bool,diffList analyzer.HighlightedDiff, all bo
 	return nil
 }
 
-func GenerateAnalysisOutput(analysisGraph graph.Graph[string, *analyzer.Node], diffList analyzer.HighlightedDiff, all, dot bool, maxprint, action int, gqlclient graphql.Client){
+func generateAnalysisOutput(analysisGraph graph.Graph[string, *analyzer.Node], diffList analyzer.HighlightedDiff, all, dot bool, maxprint, action int, gqlclient graphql.Client) error{
 	//Create dot file
-	createGraphDotFile(dot, analysisGraph)
+	if createGraphDotFile(dot, analysisGraph) != nil {
+		return fmt.Errorf("error creating dot file")
+	}
 	//print to stdout
-	printHighlightedAnalysis(dot, diffList, all, maxprint, action, analysisGraph )
+	if printHighlightedAnalysis(dot, diffList, all, maxprint, action, analysisGraph ) != nil {
+		return fmt.Errorf("error printing analysis")
+	}
+	return nil
 }
 
-func HasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []string,opts AnalyzeOpts) ([]graph.Graph[string, *analyzer.Node], error) {
+func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []string,opts AnalyzeOpts) ([]graph.Graph[string, *analyzer.Node], error) {
 
 
 	var hasSBOMResponseOne *model.HasSBOMsResponse
