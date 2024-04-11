@@ -64,7 +64,7 @@ func init() {
 
 func initIndex(name string, fields []string, unique bool) index {
 	return index{
-		name: name,
+		name:   name,
 		fields: fields,
 		unique: unique,
 	}
@@ -514,7 +514,6 @@ func getCollectionIndexMap() map[string][]index {
 	collectionIndexMap := make(map[string][]index)
 
 	collectionIndexMap[artifactsStr] = []index{
-		initIndex("byDigest", []string{"digest"}, true),
 		initIndex("byArtAndDigest", []string{"algorithm", "digest"}, true),
 	}
 
