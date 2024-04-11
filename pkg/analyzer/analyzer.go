@@ -231,8 +231,9 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 			if edge.Source == "HasSBOM" || edge.Target == "HasSBOM" {
 				continue
 			}
-			_, err := big.Edge(edge.Source, edge.Target)
-			if err != nil {
+			_, errOne := big.Edge(edge.Source, edge.Target)
+			_, errTwo := big.Edge(edge.Source, edge.Target)
+			if errOne != nil && errTwo != nil {
 
 				if small.RemoveEdge(edge.Source, edge.Target) != nil {
 					continue
@@ -282,8 +283,9 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 			if edge.Source == "HasSBOM" || edge.Target == "HasSBOM" {
 				continue
 			}
-			_, err := big.Edge(edge.Source, edge.Target)
-			if err != nil { //missing edge, add with red color
+			_, errOne := big.Edge(edge.Source, edge.Target)
+			_, errTwo := big.Edge(edge.Target, edge.Source)
+			if errOne != nil && errTwo != nil { //missing edge, add with red color
 				AddGraphEdge(big, edge.Source, edge.Target, "red") //hmm how to add color?
 				analysisList.MissingAddedRemovedLinks = append(analysisList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
 			}
