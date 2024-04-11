@@ -55,6 +55,8 @@ type SLSA {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String
 }
 
 """
@@ -102,6 +104,7 @@ input HasSLSASpec {
   finishedOn: Time
   origin: String
   collector: String
+  documentRef: String
 }
 
 "SLSAPredicateSpec is the same as SLSAPredicate, but usable as query input."
@@ -119,6 +122,7 @@ input SLSAInputSpec {
   finishedOn: Time
   origin: String!
   collector: String!
+  documentRef: String
 }
 
 "SLSAPredicateInputSpec allows ingesting SLSAPredicateSpec."

@@ -40,13 +40,22 @@ reference to the contact details.
 """
 type PointOfContact {
   id: ID!
+  "The package, source or artifact that is attested"
   subject: PackageSourceOrArtifact!
+  "Email for the POC"
   email: String!
+  "Generic info for the POC"
   info: String!
+  "Timestamp when the certification for POC was created (in RFC 3339 format)"
   since: Time!
+  "The justification for the POC attestation"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String
 }
 
 """
@@ -71,6 +80,7 @@ input PointOfContactSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -83,6 +93,7 @@ input PointOfContactInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String
 }
 
 extend type Query {

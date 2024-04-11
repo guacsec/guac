@@ -29,12 +29,14 @@ type HasSBOM {
   digest: String!
   "Location from which the SBOM can be downloaded"
   downloadLocation: String!
+  "Timestamp for SBOM creation"
+  knownSince: Time!
   "Document from which this attestation is generated from"
   origin: String!
   "GUAC collector for the document"
   collector: String!
-  "Timestamp for SBOM creation"
-  knownSince: Time!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String
   "Included packages and artifacts"
   includedSoftware: [PackageOrArtifact!]!
   "Included dependencies"
@@ -58,9 +60,10 @@ input HasSBOMSpec {
   algorithm: String
   digest: String
   downloadLocation: String
+  knownSince: Time
   origin: String
   collector: String
-  knownSince: Time
+  documentRef: String
   includedSoftware: [PackageOrArtifactSpec!]
   includedDependencies: [IsDependencySpec!]
   includedOccurrences: [IsOccurrenceSpec!]
@@ -79,9 +82,10 @@ input HasSBOMInputSpec {
   algorithm: String!
   digest: String!
   downloadLocation: String!
+  knownSince: Time!
   origin: String!
   collector: String!
-  knownSince: Time!
+  documentRef: String
 }
 
 extend type Query {

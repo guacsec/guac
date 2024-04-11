@@ -32,6 +32,8 @@ type HasSourceAt {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String
 }
 
 "HasSourceAtSpec allows filtering the list of HasSourceAt to return."
@@ -43,6 +45,7 @@ input HasSourceAtSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "HasSourceAtInputSpec is the same as HasSourceAt but for mutation input."
@@ -51,6 +54,7 @@ input HasSourceAtInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String
 }
 
 extend type Query {

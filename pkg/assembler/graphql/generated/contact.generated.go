@@ -357,6 +357,44 @@ func (ec *executionContext) fieldContext_PointOfContact_collector(ctx context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _PointOfContact_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.PointOfContact) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PointOfContact_documentRef(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DocumentRef, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PointOfContact_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PointOfContact",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -368,7 +406,7 @@ func (ec *executionContext) unmarshalInputPointOfContactInputSpec(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email", "info", "since", "justification", "origin", "collector"}
+	fieldsInOrder := [...]string{"email", "info", "since", "justification", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -417,6 +455,13 @@ func (ec *executionContext) unmarshalInputPointOfContactInputSpec(ctx context.Co
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -430,7 +475,7 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "subject", "email", "info", "since", "justification", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "subject", "email", "info", "since", "justification", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -493,6 +538,13 @@ func (ec *executionContext) unmarshalInputPointOfContactSpec(ctx context.Context
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -558,6 +610,8 @@ func (ec *executionContext) _PointOfContact(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "documentRef":
+			out.Values[i] = ec._PointOfContact_documentRef(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

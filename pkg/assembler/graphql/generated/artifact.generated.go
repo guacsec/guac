@@ -4641,12 +4641,14 @@ func (ec *executionContext) fieldContext_Query_CertifyBad(ctx context.Context, f
 				return ec.fieldContext_CertifyBad_subject(ctx, field)
 			case "justification":
 				return ec.fieldContext_CertifyBad_justification(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_CertifyBad_knownSince(ctx, field)
 			case "origin":
 				return ec.fieldContext_CertifyBad_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyBad_collector(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_CertifyBad_knownSince(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyBad_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyBad", field.Name)
 		},
@@ -4707,12 +4709,14 @@ func (ec *executionContext) fieldContext_Query_CertifyGood(ctx context.Context, 
 				return ec.fieldContext_CertifyGood_subject(ctx, field)
 			case "justification":
 				return ec.fieldContext_CertifyGood_justification(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_CertifyGood_knownSince(ctx, field)
 			case "origin":
 				return ec.fieldContext_CertifyGood_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyGood_collector(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_CertifyGood_knownSince(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyGood_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyGood", field.Name)
 		},
@@ -4789,6 +4793,8 @@ func (ec *executionContext) fieldContext_Query_CertifyLegal(ctx context.Context,
 				return ec.fieldContext_CertifyLegal_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyLegal_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyLegal_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
 		},
@@ -4923,6 +4929,8 @@ func (ec *executionContext) fieldContext_Query_CertifyVEXStatement(ctx context.C
 				return ec.fieldContext_CertifyVEXStatement_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyVEXStatement_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyVEXStatement_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyVEXStatement", field.Name)
 		},
@@ -5055,6 +5063,8 @@ func (ec *executionContext) fieldContext_Query_PointOfContact(ctx context.Contex
 				return ec.fieldContext_PointOfContact_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_PointOfContact_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_PointOfContact_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PointOfContact", field.Name)
 		},
@@ -5121,12 +5131,14 @@ func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, fiel
 				return ec.fieldContext_HasSBOM_digest(ctx, field)
 			case "downloadLocation":
 				return ec.fieldContext_HasSBOM_downloadLocation(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_HasSBOM_knownSince(ctx, field)
 			case "origin":
 				return ec.fieldContext_HasSBOM_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_HasSBOM_collector(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_HasSBOM_knownSince(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_HasSBOM_documentRef(ctx, field)
 			case "includedSoftware":
 				return ec.fieldContext_HasSBOM_includedSoftware(ctx, field)
 			case "includedDependencies":
@@ -5261,6 +5273,8 @@ func (ec *executionContext) fieldContext_Query_HasSourceAt(ctx context.Context, 
 				return ec.fieldContext_HasSourceAt_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_HasSourceAt_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_HasSourceAt_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HasSourceAt", field.Name)
 		},
@@ -5325,6 +5339,8 @@ func (ec *executionContext) fieldContext_Query_HashEqual(ctx context.Context, fi
 				return ec.fieldContext_HashEqual_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_HashEqual_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_HashEqual_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HashEqual", field.Name)
 		},
@@ -5395,6 +5411,8 @@ func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context,
 				return ec.fieldContext_IsDependency_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_IsDependency_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_IsDependency_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
 		},
@@ -5461,6 +5479,8 @@ func (ec *executionContext) fieldContext_Query_IsOccurrence(ctx context.Context,
 				return ec.fieldContext_IsOccurrence_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_IsOccurrence_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_IsOccurrence_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type IsOccurrence", field.Name)
 		},
@@ -5593,6 +5613,8 @@ func (ec *executionContext) fieldContext_Query_HasMetadata(ctx context.Context, 
 				return ec.fieldContext_HasMetadata_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_HasMetadata_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_HasMetadata_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HasMetadata", field.Name)
 		},
@@ -5925,6 +5947,8 @@ func (ec *executionContext) fieldContext_Query_PkgEqual(ctx context.Context, fie
 				return ec.fieldContext_PkgEqual_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_PkgEqual_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_PkgEqual_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PkgEqual", field.Name)
 		},
@@ -6101,6 +6125,8 @@ func (ec *executionContext) fieldContext_Query_vulnEqual(ctx context.Context, fi
 				return ec.fieldContext_VulnEqual_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_VulnEqual_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_VulnEqual_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VulnEqual", field.Name)
 		},
@@ -6169,6 +6195,8 @@ func (ec *executionContext) fieldContext_Query_vulnerabilityMetadata(ctx context
 				return ec.fieldContext_VulnerabilityMetadata_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_VulnerabilityMetadata_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_VulnerabilityMetadata_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetadata", field.Name)
 		},

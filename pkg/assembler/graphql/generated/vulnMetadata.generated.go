@@ -325,6 +325,44 @@ func (ec *executionContext) fieldContext_VulnerabilityMetadata_collector(ctx con
 	return fc, nil
 }
 
+func (ec *executionContext) _VulnerabilityMetadata_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.VulnerabilityMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VulnerabilityMetadata_documentRef(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DocumentRef, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VulnerabilityMetadata_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VulnerabilityMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -336,7 +374,7 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx con
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"scoreType", "scoreValue", "timestamp", "origin", "collector"}
+	fieldsInOrder := [...]string{"scoreType", "scoreValue", "timestamp", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -378,6 +416,13 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataInputSpec(ctx con
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -391,7 +436,7 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "vulnerability", "scoreType", "scoreValue", "comparator", "timestamp", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "vulnerability", "scoreType", "scoreValue", "comparator", "timestamp", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -454,6 +499,13 @@ func (ec *executionContext) unmarshalInputVulnerabilityMetadataSpec(ctx context.
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -514,6 +566,8 @@ func (ec *executionContext) _VulnerabilityMetadata(ctx context.Context, sel ast.
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "documentRef":
+			out.Values[i] = ec._VulnerabilityMetadata_documentRef(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

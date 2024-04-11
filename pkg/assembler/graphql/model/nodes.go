@@ -102,12 +102,19 @@ type BuilderSpec struct {
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type CertifyBad struct {
-	ID            string                  `json:"id"`
-	Subject       PackageSourceOrArtifact `json:"subject"`
-	Justification string                  `json:"justification"`
-	Origin        string                  `json:"origin"`
-	Collector     string                  `json:"collector"`
-	KnownSince    time.Time               `json:"knownSince"`
+	ID string `json:"id"`
+	// The package, source or artifact that is attested
+	Subject PackageSourceOrArtifact `json:"subject"`
+	// The justification for the subject being certified bad
+	Justification string `json:"justification"`
+	// Timestamp when the certification was created (in RFC 3339 format)
+	KnownSince time.Time `json:"knownSince"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (CertifyBad) IsNode() {}
@@ -116,9 +123,10 @@ func (CertifyBad) IsNode() {}
 // evidence.
 type CertifyBadInputSpec struct {
 	Justification string    `json:"justification"`
+	KnownSince    time.Time `json:"knownSince"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
-	KnownSince    time.Time `json:"knownSince"`
+	DocumentRef   *string   `json:"documentRef,omitempty"`
 }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
@@ -137,9 +145,10 @@ type CertifyBadSpec struct {
 	ID            *string                      `json:"id,omitempty"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
 	Justification *string                      `json:"justification,omitempty"`
+	KnownSince    *time.Time                   `json:"knownSince,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
-	KnownSince    *time.Time                   `json:"knownSince,omitempty"`
+	DocumentRef   *string                      `json:"documentRef,omitempty"`
 }
 
 // CertifyGood is an attestation that a package, source, or artifact is considered
@@ -154,12 +163,19 @@ type CertifyBadSpec struct {
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type CertifyGood struct {
-	ID            string                  `json:"id"`
-	Subject       PackageSourceOrArtifact `json:"subject"`
-	Justification string                  `json:"justification"`
-	Origin        string                  `json:"origin"`
-	Collector     string                  `json:"collector"`
-	KnownSince    time.Time               `json:"knownSince"`
+	ID string `json:"id"`
+	// The package, source or artifact that is attested
+	Subject PackageSourceOrArtifact `json:"subject"`
+	// The justification for the subject being certified good
+	Justification string `json:"justification"`
+	// Timestamp when the certification was created (in RFC 3339 format)
+	KnownSince time.Time `json:"knownSince"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (CertifyGood) IsNode() {}
@@ -167,9 +183,10 @@ func (CertifyGood) IsNode() {}
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
 	Justification string    `json:"justification"`
+	KnownSince    time.Time `json:"knownSince"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
-	KnownSince    time.Time `json:"knownSince"`
+	DocumentRef   *string   `json:"documentRef,omitempty"`
 }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
@@ -188,9 +205,10 @@ type CertifyGoodSpec struct {
 	ID            *string                      `json:"id,omitempty"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject,omitempty"`
 	Justification *string                      `json:"justification,omitempty"`
+	KnownSince    *time.Time                   `json:"knownSince,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
-	KnownSince    *time.Time                   `json:"knownSince,omitempty"`
+	DocumentRef   *string                      `json:"documentRef,omitempty"`
 }
 
 // CertifyLegal is an attestation to attach legal information to a package or source.
@@ -229,6 +247,8 @@ type CertifyLegal struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (CertifyLegal) IsNode() {}
@@ -243,6 +263,7 @@ type CertifyLegalInputSpec struct {
 	TimeScanned       time.Time `json:"timeScanned"`
 	Origin            string    `json:"origin"`
 	Collector         string    `json:"collector"`
+	DocumentRef       *string   `json:"documentRef,omitempty"`
 }
 
 // CertifyLegalSpec allows filtering the list of legal certifications to
@@ -262,6 +283,7 @@ type CertifyLegalSpec struct {
 	TimeScanned        *time.Time           `json:"timeScanned,omitempty"`
 	Origin             *string              `json:"origin,omitempty"`
 	Collector          *string              `json:"collector,omitempty"`
+	DocumentRef        *string              `json:"documentRef,omitempty"`
 }
 
 // CertifyScorecard is an attestation to attach a Scorecard analysis to a
@@ -287,6 +309,7 @@ type CertifyScorecardSpec struct {
 	ScorecardCommit  *string               `json:"scorecardCommit,omitempty"`
 	Origin           *string               `json:"origin,omitempty"`
 	Collector        *string               `json:"collector,omitempty"`
+	DocumentRef      *string               `json:"documentRef,omitempty"`
 }
 
 // CertifyVEXStatement is an attestation to attach VEX statements to a package or
@@ -311,6 +334,8 @@ type CertifyVEXStatement struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (CertifyVEXStatement) IsNode() {}
@@ -332,6 +357,7 @@ type CertifyVEXStatementSpec struct {
 	KnownSince       *time.Time             `json:"knownSince,omitempty"`
 	Origin           *string                `json:"origin,omitempty"`
 	Collector        *string                `json:"collector,omitempty"`
+	DocumentRef      *string                `json:"documentRef,omitempty"`
 }
 
 // CertifyVuln is an attestation to attach vulnerability information to a package.
@@ -370,6 +396,7 @@ type CertifyVulnSpec struct {
 	ScannerVersion *string            `json:"scannerVersion,omitempty"`
 	Origin         *string            `json:"origin,omitempty"`
 	Collector      *string            `json:"collector,omitempty"`
+	DocumentRef    *string            `json:"documentRef,omitempty"`
 }
 
 // HasMetadata is an attestation that a package, source, or artifact has a certain
@@ -387,14 +414,23 @@ type CertifyVulnSpec struct {
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type HasMetadata struct {
-	ID            string                  `json:"id"`
-	Subject       PackageSourceOrArtifact `json:"subject"`
-	Key           string                  `json:"key"`
-	Value         string                  `json:"value"`
-	Timestamp     time.Time               `json:"timestamp"`
-	Justification string                  `json:"justification"`
-	Origin        string                  `json:"origin"`
-	Collector     string                  `json:"collector"`
+	ID string `json:"id"`
+	// The package, source or artifact that is attested
+	Subject PackageSourceOrArtifact `json:"subject"`
+	// Key in the key value pair
+	Key string `json:"key"`
+	// Value in the key value pair
+	Value string `json:"value"`
+	// Timestamp when the certification was created (in RFC 3339 format)
+	Timestamp time.Time `json:"timestamp"`
+	// The justification for the metadata
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (HasMetadata) IsNode() {}
@@ -407,6 +443,7 @@ type HasMetadataInputSpec struct {
 	Justification string    `json:"justification"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
+	DocumentRef   *string   `json:"documentRef,omitempty"`
 }
 
 // HasMetadataSpec allows filtering the list of HasMetadata evidence to return in a
@@ -429,6 +466,7 @@ type HasMetadataSpec struct {
 	Justification *string                      `json:"justification,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
+	DocumentRef   *string                      `json:"documentRef,omitempty"`
 }
 
 type HasSbom struct {
@@ -443,12 +481,14 @@ type HasSbom struct {
 	Digest string `json:"digest"`
 	// Location from which the SBOM can be downloaded
 	DownloadLocation string `json:"downloadLocation"`
+	// Timestamp for SBOM creation
+	KnownSince time.Time `json:"knownSince"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
-	// Timestamp for SBOM creation
-	KnownSince time.Time `json:"knownSince"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 	// Included packages and artifacts
 	IncludedSoftware []PackageOrArtifact `json:"includedSoftware"`
 	// Included dependencies
@@ -472,9 +512,10 @@ type HasSBOMInputSpec struct {
 	Algorithm        string    `json:"algorithm"`
 	Digest           string    `json:"digest"`
 	DownloadLocation string    `json:"downloadLocation"`
+	KnownSince       time.Time `json:"knownSince"`
 	Origin           string    `json:"origin"`
 	Collector        string    `json:"collector"`
-	KnownSince       time.Time `json:"knownSince"`
+	DocumentRef      *string   `json:"documentRef,omitempty"`
 }
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
@@ -490,9 +531,10 @@ type HasSBOMSpec struct {
 	Algorithm            *string                  `json:"algorithm,omitempty"`
 	Digest               *string                  `json:"digest,omitempty"`
 	DownloadLocation     *string                  `json:"downloadLocation,omitempty"`
+	KnownSince           *time.Time               `json:"knownSince,omitempty"`
 	Origin               *string                  `json:"origin,omitempty"`
 	Collector            *string                  `json:"collector,omitempty"`
-	KnownSince           *time.Time               `json:"knownSince,omitempty"`
+	DocumentRef          *string                  `json:"documentRef,omitempty"`
 	IncludedSoftware     []*PackageOrArtifactSpec `json:"includedSoftware,omitempty"`
 	IncludedDependencies []*IsDependencySpec      `json:"includedDependencies,omitempty"`
 	IncludedOccurrences  []*IsOccurrenceSpec      `json:"includedOccurrences,omitempty"`
@@ -522,6 +564,7 @@ type HasSLSASpec struct {
 	FinishedOn  *time.Time           `json:"finishedOn,omitempty"`
 	Origin      *string              `json:"origin,omitempty"`
 	Collector   *string              `json:"collector,omitempty"`
+	DocumentRef *string              `json:"documentRef,omitempty"`
 }
 
 // HasSourceAt records that a package's repository is a given source.
@@ -539,6 +582,8 @@ type HasSourceAt struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (HasSourceAt) IsNode() {}
@@ -549,6 +594,7 @@ type HasSourceAtInputSpec struct {
 	Justification string    `json:"justification"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
+	DocumentRef   *string   `json:"documentRef,omitempty"`
 }
 
 // HasSourceAtSpec allows filtering the list of HasSourceAt to return.
@@ -560,6 +606,7 @@ type HasSourceAtSpec struct {
 	Justification *string     `json:"justification,omitempty"`
 	Origin        *string     `json:"origin,omitempty"`
 	Collector     *string     `json:"collector,omitempty"`
+	DocumentRef   *string     `json:"documentRef,omitempty"`
 }
 
 // HashEqual is an attestation that a set of artifacts are identical.
@@ -573,15 +620,18 @@ type HashEqual struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (HashEqual) IsNode() {}
 
 // HashEqualInputSpec represents the input to certify that packages are similar.
 type HashEqualInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string  `json:"justification"`
+	Origin        string  `json:"origin"`
+	Collector     string  `json:"collector"`
+	DocumentRef   *string `json:"documentRef,omitempty"`
 }
 
 // HashEqualSpec allows filtering the list of artifact equality statements to
@@ -595,6 +645,7 @@ type HashEqualSpec struct {
 	Justification *string         `json:"justification,omitempty"`
 	Origin        *string         `json:"origin,omitempty"`
 	Collector     *string         `json:"collector,omitempty"`
+	DocumentRef   *string         `json:"documentRef,omitempty"`
 }
 
 // IDorArtifactInput allows for specifying either the artifact ID or the ArtifactInputSpec.
@@ -680,6 +731,8 @@ type IsDependency struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (IsDependency) IsNode() {}
@@ -692,6 +745,7 @@ type IsDependencyInputSpec struct {
 	Justification  string         `json:"justification"`
 	Origin         string         `json:"origin"`
 	Collector      string         `json:"collector"`
+	DocumentRef    *string        `json:"documentRef,omitempty"`
 }
 
 // IsDependencySpec allows filtering the list of dependencies to return.
@@ -709,6 +763,7 @@ type IsDependencySpec struct {
 	Justification     *string         `json:"justification,omitempty"`
 	Origin            *string         `json:"origin,omitempty"`
 	Collector         *string         `json:"collector,omitempty"`
+	DocumentRef       *string         `json:"documentRef,omitempty"`
 }
 
 // IsOccurrence is an attestation to link an artifact to a package or source.
@@ -726,15 +781,18 @@ type IsOccurrence struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (IsOccurrence) IsNode() {}
 
 // IsOccurrenceInputSpec represents the input to record an artifact's origin.
 type IsOccurrenceInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string  `json:"justification"`
+	Origin        string  `json:"origin"`
+	Collector     string  `json:"collector"`
+	DocumentRef   *string `json:"documentRef,omitempty"`
 }
 
 // IsOccurrenceSpec allows filtering the list of artifact occurences to return in
@@ -746,6 +804,7 @@ type IsOccurrenceSpec struct {
 	Justification *string              `json:"justification,omitempty"`
 	Origin        *string              `json:"origin,omitempty"`
 	Collector     *string              `json:"collector,omitempty"`
+	DocumentRef   *string              `json:"documentRef,omitempty"`
 }
 
 // License represents a particular license. If the license is found on the SPDX
@@ -1018,15 +1077,18 @@ type PkgEqual struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (PkgEqual) IsNode() {}
 
 // PkgEqualInputSpec represents the input to certify that packages are similar.
 type PkgEqualInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string  `json:"justification"`
+	Origin        string  `json:"origin"`
+	Collector     string  `json:"collector"`
+	DocumentRef   *string `json:"documentRef,omitempty"`
 }
 
 // PkgEqualSpec allows filtering the list of package equality statements to return
@@ -1040,6 +1102,7 @@ type PkgEqualSpec struct {
 	Justification *string    `json:"justification,omitempty"`
 	Origin        *string    `json:"origin,omitempty"`
 	Collector     *string    `json:"collector,omitempty"`
+	DocumentRef   *string    `json:"documentRef,omitempty"`
 }
 
 // PkgInputSpec specifies a package for mutations.
@@ -1103,14 +1166,23 @@ type PkgSpec struct {
 // hierarchy. However, until the use case arises, PointOfContact will be a flat
 // reference to the contact details.
 type PointOfContact struct {
-	ID            string                  `json:"id"`
-	Subject       PackageSourceOrArtifact `json:"subject"`
-	Email         string                  `json:"email"`
-	Info          string                  `json:"info"`
-	Since         time.Time               `json:"since"`
-	Justification string                  `json:"justification"`
-	Origin        string                  `json:"origin"`
-	Collector     string                  `json:"collector"`
+	ID string `json:"id"`
+	// The package, source or artifact that is attested
+	Subject PackageSourceOrArtifact `json:"subject"`
+	// Email for the POC
+	Email string `json:"email"`
+	// Generic info for the POC
+	Info string `json:"info"`
+	// Timestamp when the certification for POC was created (in RFC 3339 format)
+	Since time.Time `json:"since"`
+	// The justification for the POC attestation
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (PointOfContact) IsNode() {}
@@ -1123,6 +1195,7 @@ type PointOfContactInputSpec struct {
 	Justification string    `json:"justification"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
+	DocumentRef   *string   `json:"documentRef,omitempty"`
 }
 
 // PointOfContactSpec allows filtering the list of PointOfContact evidence to return in a
@@ -1145,6 +1218,7 @@ type PointOfContactSpec struct {
 	Justification *string                      `json:"justification,omitempty"`
 	Origin        *string                      `json:"origin,omitempty"`
 	Collector     *string                      `json:"collector,omitempty"`
+	DocumentRef   *string                      `json:"documentRef,omitempty"`
 }
 
 type Query struct {
@@ -1177,6 +1251,8 @@ type Slsa struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 // SLSAInputSpec is the same as SLSA but for mutation input.
@@ -1188,6 +1264,7 @@ type SLSAInputSpec struct {
 	FinishedOn    *time.Time                `json:"finishedOn,omitempty"`
 	Origin        string                    `json:"origin"`
 	Collector     string                    `json:"collector"`
+	DocumentRef   *string                   `json:"documentRef,omitempty"`
 }
 
 // SLSAPredicate are the values from the SLSA predicate in key-value pair form.
@@ -1252,6 +1329,8 @@ type ScanMetadata struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 // ScanMetadataInput represents the input for certifying vulnerability
@@ -1264,6 +1343,7 @@ type ScanMetadataInput struct {
 	ScannerVersion string    `json:"scannerVersion"`
 	Origin         string    `json:"origin"`
 	Collector      string    `json:"collector"`
+	DocumentRef    *string   `json:"documentRef,omitempty"`
 }
 
 // Scorecard contains all of the fields present in a Scorecard attestation.
@@ -1286,6 +1366,8 @@ type Scorecard struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 // ScorecardCheck are the individual checks from scorecard and their values as a
@@ -1330,6 +1412,7 @@ type ScorecardInputSpec struct {
 	ScorecardCommit  string                     `json:"scorecardCommit"`
 	Origin           string                     `json:"origin"`
 	Collector        string                     `json:"collector"`
+	DocumentRef      *string                    `json:"documentRef,omitempty"`
 }
 
 // Source represents the root of the source trie/tree.
@@ -1428,6 +1511,7 @@ type VexStatementInputSpec struct {
 	KnownSince       time.Time        `json:"knownSince"`
 	Origin           string           `json:"origin"`
 	Collector        string           `json:"collector"`
+	DocumentRef      *string          `json:"documentRef,omitempty"`
 }
 
 // VulnEqual is an attestation to link two vulnerabilities together as being equal"
@@ -1443,15 +1527,18 @@ type VulnEqual struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (VulnEqual) IsNode() {}
 
 // VulnEqualInputSpec represents the input to link vulnerabilities to each other.
 type VulnEqualInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string  `json:"justification"`
+	Origin        string  `json:"origin"`
+	Collector     string  `json:"collector"`
+	DocumentRef   *string `json:"documentRef,omitempty"`
 }
 
 // VulnEqualSpec allows filtering the list of vulnerability links to return
@@ -1462,6 +1549,7 @@ type VulnEqualSpec struct {
 	Justification   *string              `json:"justification,omitempty"`
 	Origin          *string              `json:"origin,omitempty"`
 	Collector       *string              `json:"collector,omitempty"`
+	DocumentRef     *string              `json:"documentRef,omitempty"`
 }
 
 // Vulnerability represents the root of the vulnerability trie/tree.
@@ -1544,24 +1632,33 @@ type VulnerabilityInputSpec struct {
 //
 // The timestamp is used to determine when the score was evaluated for the specific vulnerability.
 type VulnerabilityMetadata struct {
-	ID            string                 `json:"id"`
-	Vulnerability *Vulnerability         `json:"vulnerability"`
-	ScoreType     VulnerabilityScoreType `json:"scoreType"`
-	ScoreValue    float64                `json:"scoreValue"`
-	Timestamp     time.Time              `json:"timestamp"`
-	Origin        string                 `json:"origin"`
-	Collector     string                 `json:"collector"`
+	ID string `json:"id"`
+	// The subject vulnerability that the metadata applies to
+	Vulnerability *Vulnerability `json:"vulnerability"`
+	// The specific score type for the score value
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+	// The score value based on the score type
+	ScoreValue float64 `json:"scoreValue"`
+	// Timestamp when the certification was created (in RFC 3339 format)
+	Timestamp time.Time `json:"timestamp"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef *string `json:"documentRef,omitempty"`
 }
 
 func (VulnerabilityMetadata) IsNode() {}
 
 // VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
 type VulnerabilityMetadataInputSpec struct {
-	ScoreType  VulnerabilityScoreType `json:"scoreType"`
-	ScoreValue float64                `json:"scoreValue"`
-	Timestamp  time.Time              `json:"timestamp"`
-	Origin     string                 `json:"origin"`
-	Collector  string                 `json:"collector"`
+	ScoreType   VulnerabilityScoreType `json:"scoreType"`
+	ScoreValue  float64                `json:"scoreValue"`
+	Timestamp   time.Time              `json:"timestamp"`
+	Origin      string                 `json:"origin"`
+	Collector   string                 `json:"collector"`
+	DocumentRef *string                `json:"documentRef,omitempty"`
 }
 
 // VulnerabilityMetadataSpec allows filtering the list of VulnerabilityMetadata evidence
@@ -1580,6 +1677,7 @@ type VulnerabilityMetadataSpec struct {
 	Timestamp     *time.Time              `json:"timestamp,omitempty"`
 	Origin        *string                 `json:"origin,omitempty"`
 	Collector     *string                 `json:"collector,omitempty"`
+	DocumentRef   *string                 `json:"documentRef,omitempty"`
 }
 
 // VulnerabilitySpec allows filtering the list of vulnerabilities to return in a query.
