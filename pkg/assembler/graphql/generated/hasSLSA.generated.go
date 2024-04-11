@@ -174,6 +174,8 @@ func (ec *executionContext) fieldContext_HasSLSA_slsa(ctx context.Context, field
 				return ec.fieldContext_SLSA_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_SLSA_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_SLSA_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SLSA", field.Name)
 		},
@@ -564,6 +566,47 @@ func (ec *executionContext) fieldContext_SLSA_collector(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _SLSA_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.Slsa) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SLSA_documentRef(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DocumentRef, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SLSA_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SLSA",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SLSAPredicate_key(ctx context.Context, field graphql.CollectedField, obj *model.SLSAPredicate) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SLSAPredicate_key(ctx, field)
 	if err != nil {
@@ -661,7 +704,7 @@ func (ec *executionContext) unmarshalInputHasSLSASpec(ctx context.Context, obj i
 		asMap["predicate"] = []interface{}{}
 	}
 
-	fieldsInOrder := [...]string{"id", "subject", "builtFrom", "builtBy", "buildType", "predicate", "slsaVersion", "startedOn", "finishedOn", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "subject", "builtFrom", "builtBy", "buildType", "predicate", "slsaVersion", "startedOn", "finishedOn", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -745,6 +788,13 @@ func (ec *executionContext) unmarshalInputHasSLSASpec(ctx context.Context, obj i
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -758,7 +808,7 @@ func (ec *executionContext) unmarshalInputSLSAInputSpec(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"buildType", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin", "collector"}
+	fieldsInOrder := [...]string{"buildType", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -814,6 +864,13 @@ func (ec *executionContext) unmarshalInputSLSAInputSpec(ctx context.Context, obj
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -992,6 +1049,11 @@ func (ec *executionContext) _SLSA(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "collector":
 			out.Values[i] = ec._SLSA_collector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "documentRef":
+			out.Values[i] = ec._SLSA_documentRef(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

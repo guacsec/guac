@@ -219,6 +219,8 @@ func (ec *executionContext) fieldContext_CertifyVuln_metadata(ctx context.Contex
 				return ec.fieldContext_ScanMetadata_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_ScanMetadata_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_ScanMetadata_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ScanMetadata", field.Name)
 		},
@@ -513,6 +515,47 @@ func (ec *executionContext) fieldContext_ScanMetadata_collector(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _ScanMetadata_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.ScanMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScanMetadata_documentRef(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DocumentRef, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScanMetadata_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScanMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -524,7 +567,7 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "package", "vulnerability", "timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "package", "vulnerability", "timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -601,6 +644,13 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -614,7 +664,7 @@ func (ec *executionContext) unmarshalInputScanMetadataInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
+	fieldsInOrder := [...]string{"timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -670,6 +720,13 @@ func (ec *executionContext) unmarshalInputScanMetadataInput(ctx context.Context,
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -781,6 +838,11 @@ func (ec *executionContext) _ScanMetadata(ctx context.Context, sel ast.Selection
 			}
 		case "collector":
 			out.Values[i] = ec._ScanMetadata_collector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "documentRef":
+			out.Values[i] = ec._ScanMetadata_documentRef(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

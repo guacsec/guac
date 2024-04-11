@@ -71,11 +71,18 @@ SourceName.
 """
 type CertifyBad {
   id: ID!
+  "The package, source or artifact that is attested"
   subject: PackageSourceOrArtifact!
+  "The justification for the subject being certified bad"
   justification: String!
-  origin: String!
-  collector: String!
+  "Timestamp when the certification was created (in RFC 3339 format)"
   knownSince: Time!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -96,9 +103,10 @@ input CertifyBadSpec {
   id: ID
   subject: PackageSourceOrArtifactSpec
   justification: String
+  knownSince: Time
   origin: String
   collector: String
-  knownSince: Time
+  documentRef: String
 }
 
 """
@@ -107,9 +115,10 @@ evidence.
 """
 input CertifyBadInputSpec {
   justification: String!
+  knownSince: Time!
   origin: String!
   collector: String!
-  knownSince: Time!
+  documentRef: String!
 }
 
 """

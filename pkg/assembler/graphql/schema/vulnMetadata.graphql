@@ -63,12 +63,20 @@ The timestamp is used to determine when the score was evaluated for the specific
 """
 type VulnerabilityMetadata {
   id: ID!
+  "The subject vulnerability that the metadata applies to"
   vulnerability: Vulnerability!
+  "The specific score type for the score value"
   scoreType: VulnerabilityScoreType!
+  "The score value based on the score type"
   scoreValue: Float!
+  "Timestamp when the certification was created (in RFC 3339 format)"
   timestamp: Time!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -89,6 +97,7 @@ input VulnerabilityMetadataSpec {
   timestamp: Time
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -100,6 +109,7 @@ input VulnerabilityMetadataInputSpec {
   timestamp: Time!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {

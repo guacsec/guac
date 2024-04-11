@@ -153,6 +153,47 @@ func (ec *executionContext) fieldContext_CertifyBad_justification(ctx context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _CertifyBad_knownSince(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyBad_knownSince(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.KnownSince, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyBad_knownSince(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyBad",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _CertifyBad_origin(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_CertifyBad_origin(ctx, field)
 	if err != nil {
@@ -235,8 +276,8 @@ func (ec *executionContext) fieldContext_CertifyBad_collector(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _CertifyBad_knownSince(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_CertifyBad_knownSince(ctx, field)
+func (ec *executionContext) _CertifyBad_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.CertifyBad) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyBad_documentRef(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -249,7 +290,7 @@ func (ec *executionContext) _CertifyBad_knownSince(ctx context.Context, field gr
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.KnownSince, nil
+		return obj.DocumentRef, nil
 	})
 
 	if resTmp == nil {
@@ -258,19 +299,19 @@ func (ec *executionContext) _CertifyBad_knownSince(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(time.Time)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_CertifyBad_knownSince(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CertifyBad_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "CertifyBad",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -287,7 +328,7 @@ func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"justification", "origin", "collector", "knownSince"}
+	fieldsInOrder := [...]string{"justification", "knownSince", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -301,6 +342,13 @@ func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Contex
 				return it, err
 			}
 			it.Justification = data
+		case "knownSince":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
+			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.KnownSince = data
 		case "origin":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -315,13 +363,13 @@ func (ec *executionContext) unmarshalInputCertifyBadInputSpec(ctx context.Contex
 				return it, err
 			}
 			it.Collector = data
-		case "knownSince":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
-			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.KnownSince = data
+			it.DocumentRef = data
 		}
 	}
 
@@ -335,7 +383,7 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "subject", "justification", "origin", "collector", "knownSince"}
+	fieldsInOrder := [...]string{"id", "subject", "justification", "knownSince", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -363,6 +411,13 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 				return it, err
 			}
 			it.Justification = data
+		case "knownSince":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.KnownSince = data
 		case "origin":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("origin"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
@@ -377,13 +432,13 @@ func (ec *executionContext) unmarshalInputCertifyBadSpec(ctx context.Context, ob
 				return it, err
 			}
 			it.Collector = data
-		case "knownSince":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("knownSince"))
-			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.KnownSince = data
+			it.DocumentRef = data
 		}
 	}
 
@@ -604,6 +659,11 @@ func (ec *executionContext) _CertifyBad(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "knownSince":
+			out.Values[i] = ec._CertifyBad_knownSince(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "origin":
 			out.Values[i] = ec._CertifyBad_origin(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -614,8 +674,8 @@ func (ec *executionContext) _CertifyBad(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "knownSince":
-			out.Values[i] = ec._CertifyBad_knownSince(ctx, field, obj)
+		case "documentRef":
+			out.Values[i] = ec._CertifyBad_documentRef(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

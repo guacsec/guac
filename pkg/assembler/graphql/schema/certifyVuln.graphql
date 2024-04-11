@@ -54,6 +54,8 @@ type ScanMetadata {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -77,6 +79,7 @@ input CertifyVulnSpec {
   scannerVersion: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -91,6 +94,7 @@ input ScanMetadataInput {
   scannerVersion: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {

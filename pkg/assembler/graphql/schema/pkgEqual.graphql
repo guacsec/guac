@@ -28,6 +28,8 @@ type PkgEqual {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -43,6 +45,7 @@ input PkgEqualSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "PkgEqualInputSpec represents the input to certify that packages are similar."
@@ -50,6 +53,7 @@ input PkgEqualInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {

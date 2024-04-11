@@ -56,6 +56,7 @@ type ComplexityRoot struct {
 
 	CertifyBad struct {
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		KnownSince    func(childComplexity int) int
@@ -65,6 +66,7 @@ type ComplexityRoot struct {
 
 	CertifyGood struct {
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		KnownSince    func(childComplexity int) int
@@ -79,6 +81,7 @@ type ComplexityRoot struct {
 		DeclaredLicenses   func(childComplexity int) int
 		DiscoveredLicense  func(childComplexity int) int
 		DiscoveredLicenses func(childComplexity int) int
+		DocumentRef        func(childComplexity int) int
 		ID                 func(childComplexity int) int
 		Justification      func(childComplexity int) int
 		Origin             func(childComplexity int) int
@@ -94,6 +97,7 @@ type ComplexityRoot struct {
 
 	CertifyVEXStatement struct {
 		Collector        func(childComplexity int) int
+		DocumentRef      func(childComplexity int) int
 		ID               func(childComplexity int) int
 		KnownSince       func(childComplexity int) int
 		Origin           func(childComplexity int) int
@@ -114,6 +118,7 @@ type ComplexityRoot struct {
 
 	HasMetadata struct {
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		Key           func(childComplexity int) int
@@ -127,6 +132,7 @@ type ComplexityRoot struct {
 		Algorithm            func(childComplexity int) int
 		Collector            func(childComplexity int) int
 		Digest               func(childComplexity int) int
+		DocumentRef          func(childComplexity int) int
 		DownloadLocation     func(childComplexity int) int
 		ID                   func(childComplexity int) int
 		IncludedDependencies func(childComplexity int) int
@@ -146,6 +152,7 @@ type ComplexityRoot struct {
 
 	HasSourceAt struct {
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		KnownSince    func(childComplexity int) int
@@ -157,6 +164,7 @@ type ComplexityRoot struct {
 	HashEqual struct {
 		Artifacts     func(childComplexity int) int
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		Origin        func(childComplexity int) int
@@ -166,6 +174,7 @@ type ComplexityRoot struct {
 		Collector         func(childComplexity int) int
 		DependencyPackage func(childComplexity int) int
 		DependencyType    func(childComplexity int) int
+		DocumentRef       func(childComplexity int) int
 		ID                func(childComplexity int) int
 		Justification     func(childComplexity int) int
 		Origin            func(childComplexity int) int
@@ -176,6 +185,7 @@ type ComplexityRoot struct {
 	IsOccurrence struct {
 		Artifact      func(childComplexity int) int
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		Origin        func(childComplexity int) int
@@ -278,6 +288,7 @@ type ComplexityRoot struct {
 
 	PkgEqual struct {
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
 		Origin        func(childComplexity int) int
@@ -286,6 +297,7 @@ type ComplexityRoot struct {
 
 	PointOfContact struct {
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		Email         func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Info          func(childComplexity int) int
@@ -331,6 +343,7 @@ type ComplexityRoot struct {
 		BuiltBy       func(childComplexity int) int
 		BuiltFrom     func(childComplexity int) int
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		FinishedOn    func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		SlsaPredicate func(childComplexity int) int
@@ -347,6 +360,7 @@ type ComplexityRoot struct {
 		Collector      func(childComplexity int) int
 		DbURI          func(childComplexity int) int
 		DbVersion      func(childComplexity int) int
+		DocumentRef    func(childComplexity int) int
 		Origin         func(childComplexity int) int
 		ScannerURI     func(childComplexity int) int
 		ScannerVersion func(childComplexity int) int
@@ -357,6 +371,7 @@ type ComplexityRoot struct {
 		AggregateScore   func(childComplexity int) int
 		Checks           func(childComplexity int) int
 		Collector        func(childComplexity int) int
+		DocumentRef      func(childComplexity int) int
 		Origin           func(childComplexity int) int
 		ScorecardCommit  func(childComplexity int) int
 		ScorecardVersion func(childComplexity int) int
@@ -395,6 +410,7 @@ type ComplexityRoot struct {
 
 	VulnEqual struct {
 		Collector       func(childComplexity int) int
+		DocumentRef     func(childComplexity int) int
 		ID              func(childComplexity int) int
 		Justification   func(childComplexity int) int
 		Origin          func(childComplexity int) int
@@ -419,6 +435,7 @@ type ComplexityRoot struct {
 
 	VulnerabilityMetadata struct {
 		Collector     func(childComplexity int) int
+		DocumentRef   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		ScoreType     func(childComplexity int) int
@@ -489,6 +506,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyBad.Collector(childComplexity), true
 
+	case "CertifyBad.documentRef":
+		if e.complexity.CertifyBad.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.CertifyBad.DocumentRef(childComplexity), true
+
 	case "CertifyBad.id":
 		if e.complexity.CertifyBad.ID == nil {
 			break
@@ -530,6 +554,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyGood.Collector(childComplexity), true
+
+	case "CertifyGood.documentRef":
+		if e.complexity.CertifyGood.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.CertifyGood.DocumentRef(childComplexity), true
 
 	case "CertifyGood.id":
 		if e.complexity.CertifyGood.ID == nil {
@@ -608,6 +639,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyLegal.DiscoveredLicenses(childComplexity), true
 
+	case "CertifyLegal.documentRef":
+		if e.complexity.CertifyLegal.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegal.DocumentRef(childComplexity), true
+
 	case "CertifyLegal.id":
 		if e.complexity.CertifyLegal.ID == nil {
 			break
@@ -670,6 +708,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyVEXStatement.Collector(childComplexity), true
+
+	case "CertifyVEXStatement.documentRef":
+		if e.complexity.CertifyVEXStatement.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.CertifyVEXStatement.DocumentRef(childComplexity), true
 
 	case "CertifyVEXStatement.id":
 		if e.complexity.CertifyVEXStatement.ID == nil {
@@ -769,6 +814,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HasMetadata.Collector(childComplexity), true
 
+	case "HasMetadata.documentRef":
+		if e.complexity.HasMetadata.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.HasMetadata.DocumentRef(childComplexity), true
+
 	case "HasMetadata.id":
 		if e.complexity.HasMetadata.ID == nil {
 			break
@@ -838,6 +890,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSBOM.Digest(childComplexity), true
+
+	case "HasSBOM.documentRef":
+		if e.complexity.HasSBOM.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.DocumentRef(childComplexity), true
 
 	case "HasSBOM.downloadLocation":
 		if e.complexity.HasSBOM.DownloadLocation == nil {
@@ -930,6 +989,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HasSourceAt.Collector(childComplexity), true
 
+	case "HasSourceAt.documentRef":
+		if e.complexity.HasSourceAt.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAt.DocumentRef(childComplexity), true
+
 	case "HasSourceAt.id":
 		if e.complexity.HasSourceAt.ID == nil {
 			break
@@ -986,6 +1052,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HashEqual.Collector(childComplexity), true
 
+	case "HashEqual.documentRef":
+		if e.complexity.HashEqual.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.HashEqual.DocumentRef(childComplexity), true
+
 	case "HashEqual.id":
 		if e.complexity.HashEqual.ID == nil {
 			break
@@ -1027,6 +1100,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IsDependency.DependencyType(childComplexity), true
+
+	case "IsDependency.documentRef":
+		if e.complexity.IsDependency.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.IsDependency.DocumentRef(childComplexity), true
 
 	case "IsDependency.id":
 		if e.complexity.IsDependency.ID == nil {
@@ -1076,6 +1156,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IsOccurrence.Collector(childComplexity), true
+
+	case "IsOccurrence.documentRef":
+		if e.complexity.IsOccurrence.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrence.DocumentRef(childComplexity), true
 
 	case "IsOccurrence.id":
 		if e.complexity.IsOccurrence.ID == nil {
@@ -1832,6 +1919,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PkgEqual.Collector(childComplexity), true
 
+	case "PkgEqual.documentRef":
+		if e.complexity.PkgEqual.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.PkgEqual.DocumentRef(childComplexity), true
+
 	case "PkgEqual.id":
 		if e.complexity.PkgEqual.ID == nil {
 			break
@@ -1866,6 +1960,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PointOfContact.Collector(childComplexity), true
+
+	case "PointOfContact.documentRef":
+		if e.complexity.PointOfContact.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.PointOfContact.DocumentRef(childComplexity), true
 
 	case "PointOfContact.email":
 		if e.complexity.PointOfContact.Email == nil {
@@ -2280,6 +2381,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SLSA.Collector(childComplexity), true
 
+	case "SLSA.documentRef":
+		if e.complexity.SLSA.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.SLSA.DocumentRef(childComplexity), true
+
 	case "SLSA.finishedOn":
 		if e.complexity.SLSA.FinishedOn == nil {
 			break
@@ -2350,6 +2458,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ScanMetadata.DbVersion(childComplexity), true
 
+	case "ScanMetadata.documentRef":
+		if e.complexity.ScanMetadata.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.ScanMetadata.DocumentRef(childComplexity), true
+
 	case "ScanMetadata.origin":
 		if e.complexity.ScanMetadata.Origin == nil {
 			break
@@ -2398,6 +2513,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Scorecard.Collector(childComplexity), true
+
+	case "Scorecard.documentRef":
+		if e.complexity.Scorecard.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.Scorecard.DocumentRef(childComplexity), true
 
 	case "Scorecard.origin":
 		if e.complexity.Scorecard.Origin == nil {
@@ -2539,6 +2661,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.VulnEqual.Collector(childComplexity), true
 
+	case "VulnEqual.documentRef":
+		if e.complexity.VulnEqual.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.VulnEqual.DocumentRef(childComplexity), true
+
 	case "VulnEqual.id":
 		if e.complexity.VulnEqual.ID == nil {
 			break
@@ -2622,6 +2751,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.VulnerabilityMetadata.Collector(childComplexity), true
+
+	case "VulnerabilityMetadata.documentRef":
+		if e.complexity.VulnerabilityMetadata.DocumentRef == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetadata.DocumentRef(childComplexity), true
 
 	case "VulnerabilityMetadata.id":
 		if e.complexity.VulnerabilityMetadata.ID == nil {
@@ -3055,11 +3191,18 @@ SourceName.
 """
 type CertifyBad {
   id: ID!
+  "The package, source or artifact that is attested"
   subject: PackageSourceOrArtifact!
+  "The justification for the subject being certified bad"
   justification: String!
-  origin: String!
-  collector: String!
+  "Timestamp when the certification was created (in RFC 3339 format)"
   knownSince: Time!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -3080,9 +3223,10 @@ input CertifyBadSpec {
   id: ID
   subject: PackageSourceOrArtifactSpec
   justification: String
+  knownSince: Time
   origin: String
   collector: String
-  knownSince: Time
+  documentRef: String
 }
 
 """
@@ -3091,9 +3235,10 @@ evidence.
 """
 input CertifyBadInputSpec {
   justification: String!
+  knownSince: Time!
   origin: String!
   collector: String!
-  knownSince: Time!
+  documentRef: String!
 }
 
 """
@@ -3164,11 +3309,18 @@ SourceName.
 """
 type CertifyGood {
   id: ID!
+  "The package, source or artifact that is attested"
   subject: PackageSourceOrArtifact!
+  "The justification for the subject being certified good"
   justification: String!
-  origin: String!
-  collector: String!
+  "Timestamp when the certification was created (in RFC 3339 format)"
   knownSince: Time!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -3189,9 +3341,10 @@ input CertifyGoodSpec {
   id: ID
   subject: PackageSourceOrArtifactSpec
   justification: String
+  knownSince: Time
   origin: String
   collector: String
-  knownSince: Time
+  documentRef: String
 }
 
 """
@@ -3199,9 +3352,10 @@ CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evide
 """
 input CertifyGoodInputSpec {
   justification: String!
+  knownSince: Time!
   origin: String!
   collector: String!
-  knownSince: Time!
+  documentRef: String!
 }
 
 extend type Query {
@@ -3281,6 +3435,8 @@ type CertifyLegal {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -3302,6 +3458,7 @@ input CertifyLegalSpec {
   timeScanned: Time
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -3316,6 +3473,7 @@ input CertifyLegalInputSpec {
   timeScanned: Time!
   origin: String!
   collector: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -3392,6 +3550,8 @@ type Scorecard {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -3426,6 +3586,7 @@ input CertifyScorecardSpec {
   scorecardCommit: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "ScorecardCheckSpec is the same as ScorecardCheck, but usable as query input."
@@ -3443,6 +3604,7 @@ input ScorecardInputSpec {
   scorecardCommit: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 "ScorecardCheckInputSpec represents the mutation input for a Scorecard check."
@@ -3561,6 +3723,8 @@ type CertifyVEXStatement {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -3582,6 +3746,7 @@ input CertifyVEXStatementSpec {
   knownSince: Time
   origin: String
   collector: String
+  documentRef: String
 }
 
 "VexStatementInputSpec represents the input to ingest VEX statements."
@@ -3593,6 +3758,7 @@ input VexStatementInputSpec {
   knownSince: Time!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -3673,6 +3839,8 @@ type ScanMetadata {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -3696,6 +3864,7 @@ input CertifyVulnSpec {
   scannerVersion: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -3710,6 +3879,7 @@ input ScanMetadataInput {
   scannerVersion: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -3774,13 +3944,22 @@ reference to the contact details.
 """
 type PointOfContact {
   id: ID!
+  "The package, source or artifact that is attested"
   subject: PackageSourceOrArtifact!
+  "Email for the POC"
   email: String!
+  "Generic info for the POC"
   info: String!
+  "Timestamp when the certification for POC was created (in RFC 3339 format)"
   since: Time!
+  "The justification for the POC attestation"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -3805,6 +3984,7 @@ input PointOfContactSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -3817,6 +3997,7 @@ input PointOfContactInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -3875,12 +4056,14 @@ type HasSBOM {
   digest: String!
   "Location from which the SBOM can be downloaded"
   downloadLocation: String!
+  "Timestamp for SBOM creation"
+  knownSince: Time!
   "Document from which this attestation is generated from"
   origin: String!
   "GUAC collector for the document"
   collector: String!
-  "Timestamp for SBOM creation"
-  knownSince: Time!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
   "Included packages and artifacts"
   includedSoftware: [PackageOrArtifact!]!
   "Included dependencies"
@@ -3904,9 +4087,10 @@ input HasSBOMSpec {
   algorithm: String
   digest: String
   downloadLocation: String
+  knownSince: Time
   origin: String
   collector: String
-  knownSince: Time
+  documentRef: String
   includedSoftware: [PackageOrArtifactSpec!]
   includedDependencies: [IsDependencySpec!]
   includedOccurrences: [IsOccurrenceSpec!]
@@ -3925,9 +4109,10 @@ input HasSBOMInputSpec {
   algorithm: String!
   digest: String!
   downloadLocation: String!
+  knownSince: Time!
   origin: String!
   collector: String!
-  knownSince: Time!
+  documentRef: String!
 }
 
 extend type Query {
@@ -4007,6 +4192,8 @@ type SLSA {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -4054,6 +4241,7 @@ input HasSLSASpec {
   finishedOn: Time
   origin: String
   collector: String
+  documentRef: String
 }
 
 "SLSAPredicateSpec is the same as SLSAPredicate, but usable as query input."
@@ -4071,6 +4259,7 @@ input SLSAInputSpec {
   finishedOn: Time
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 "SLSAPredicateInputSpec allows ingesting SLSAPredicateSpec."
@@ -4135,6 +4324,8 @@ type HasSourceAt {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 "HasSourceAtSpec allows filtering the list of HasSourceAt to return."
@@ -4146,6 +4337,7 @@ input HasSourceAtSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "HasSourceAtInputSpec is the same as HasSourceAt but for mutation input."
@@ -4154,6 +4346,7 @@ input HasSourceAtInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -4208,6 +4401,8 @@ type HashEqual {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -4223,6 +4418,7 @@ input HashEqualSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "HashEqualInputSpec represents the input to certify that packages are similar."
@@ -4230,6 +4426,7 @@ input HashEqualInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -4298,6 +4495,8 @@ type IsDependency {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -4317,6 +4516,7 @@ input IsDependencySpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "IsDependencyInputSpec is the input to record a new dependency."
@@ -4327,6 +4527,7 @@ input IsDependencyInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -4419,6 +4620,8 @@ type IsOccurrence {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -4432,6 +4635,7 @@ input IsOccurrenceSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "IsOccurrenceInputSpec represents the input to record an artifact's origin."
@@ -4439,6 +4643,7 @@ input IsOccurrenceInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -4595,13 +4800,22 @@ SourceName.
 """
 type HasMetadata {
   id: ID!
+  "The package, source or artifact that is attested"
   subject: PackageSourceOrArtifact!
+  "Key in the key value pair"
   key: String!
+  "Value in the key value pair"
   value: String!
+  "Timestamp when the certification was created (in RFC 3339 format)"
   timestamp: Time!
+  "The justification for the metadata"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -4626,6 +4840,7 @@ input HasMetadataSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -4638,6 +4853,7 @@ input HasMetadataInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -5104,6 +5320,8 @@ type PkgEqual {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -5119,6 +5337,7 @@ input PkgEqualSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "PkgEqualInputSpec represents the input to certify that packages are similar."
@@ -5126,6 +5345,7 @@ input PkgEqualInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -5358,6 +5578,8 @@ type VulnEqual {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -5370,6 +5592,7 @@ input VulnEqualSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "VulnEqualInputSpec represents the input to link vulnerabilities to each other."
@@ -5377,6 +5600,7 @@ input VulnEqualInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
@@ -5464,12 +5688,20 @@ The timestamp is used to determine when the score was evaluated for the specific
 """
 type VulnerabilityMetadata {
   id: ID!
+  "The subject vulnerability that the metadata applies to"
   vulnerability: Vulnerability!
+  "The specific score type for the score value"
   scoreType: VulnerabilityScoreType!
+  "The score value based on the score type"
   scoreValue: Float!
+  "Timestamp when the certification was created (in RFC 3339 format)"
   timestamp: Time!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -5490,6 +5722,7 @@ input VulnerabilityMetadataSpec {
   timestamp: Time
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -5501,6 +5734,7 @@ input VulnerabilityMetadataInputSpec {
   timestamp: Time!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {

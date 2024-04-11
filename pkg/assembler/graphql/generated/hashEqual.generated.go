@@ -242,6 +242,47 @@ func (ec *executionContext) fieldContext_HashEqual_collector(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _HashEqual_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.HashEqual) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HashEqual_documentRef(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DocumentRef, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_HashEqual_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "HashEqual",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -253,7 +294,7 @@ func (ec *executionContext) unmarshalInputHashEqualInputSpec(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"justification", "origin", "collector"}
+	fieldsInOrder := [...]string{"justification", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -281,6 +322,13 @@ func (ec *executionContext) unmarshalInputHashEqualInputSpec(ctx context.Context
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -294,7 +342,7 @@ func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "artifacts", "justification", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "artifacts", "justification", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -336,6 +384,13 @@ func (ec *executionContext) unmarshalInputHashEqualSpec(ctx context.Context, obj
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -383,6 +438,11 @@ func (ec *executionContext) _HashEqual(ctx context.Context, sel ast.SelectionSet
 			}
 		case "collector":
 			out.Values[i] = ec._HashEqual_collector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "documentRef":
+			out.Values[i] = ec._HashEqual_documentRef(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

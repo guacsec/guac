@@ -66,6 +66,8 @@ type IsOccurrence {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -79,6 +81,7 @@ input IsOccurrenceSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "IsOccurrenceInputSpec represents the input to record an artifact's origin."
@@ -86,6 +89,7 @@ input IsOccurrenceInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 extend type Query {
