@@ -208,7 +208,7 @@ func printHighlightedAnalysis(dot bool, diffList analyzer.HighlightedDiff, all b
 		var appendList []string
 
 		if i < len(diffList.MissingAddedRemovedNodes) {
-			value, err := analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedNodes[i], "Namespace[0]")
+			value, err := analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedNodes[i], "Namespace")
 			if err != nil {
 				fmt.Println("Error getting node namespace attribute: ", err)
 				os.Exit(1)
@@ -225,13 +225,13 @@ func printHighlightedAnalysis(dot bool, diffList analyzer.HighlightedDiff, all b
 		}
 
 		if i < len(diffList.MissingAddedRemovedLinks) {
-			value, err := analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedLinks[i][0], "Namespace[0]")
+			value, err := analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedLinks[i][0], "Namespace")
 			if err != nil {
 				return fmt.Errorf("error getting node namespace attribute: %w", err)
 			}
 			namespaceOne, okOne := value.(string)
 
-			value, err = analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedLinks[i][1], "Namespace[0]")
+			value, err = analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedLinks[i][1], "Namespace")
 			if err != nil {
 				return fmt.Errorf("error getting node namespace attribute: %w", err)
 			}

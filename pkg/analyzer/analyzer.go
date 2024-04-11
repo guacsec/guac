@@ -59,7 +59,7 @@ func GetNodeAttribute(g graph.Graph[string, *Node], ID, key string) (interface{}
 	val, ok := node.Attributes[key]
 
 	if !ok {
-		return ID, fmt.Errorf("node %s does not have attribute %s", ID, key)
+		return ID, nil
 	}
 	return val, nil
 }
@@ -171,7 +171,8 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 				nodeSmall, _ := small.Vertex(bigNodeId)
 				//TODO: if nodes are not equal we need to highlight which attribute is different
 				for key := range nodeBig.Attributes {
-					if key != "InclSoft" {
+
+					if key != "InclSoft" && nodeBig.ID == "HasSBOM" {
 						overlay, ok1 := nodeBig.Attributes[key].(string)
 						g, ok2 := nodeSmall.Attributes[key].(string)
 						if ok1 && ok2 && g != overlay {
@@ -208,9 +209,10 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 		}
 
 		for _, edge := range edges {
-			_, err := small.Edge(edge.Source, edge.Target)
-			if err != nil { //missing edge, add with red color
-				AddGraphEdge(small, edge.Source, edge.Target, "red") //hmm how to add color?
+			_, errOne := small.Edge(edge.Source, edge.Target)
+			_, errTwo := small.Edge(edge.Target, edge.Source)
+			if errOne != nil && errTwo != nil { //missing edge, add with red color
+				AddGraphEdge(small, edge.Source, edge.Target, "red") // how to add color?
 				diffList.MissingAddedRemovedLinks = append(diffList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
 			}
 		}
@@ -261,6 +263,9 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 
 		//check if nodes are present in small but not in big
 		for smallNodeId := range smallNodes {
+			if smallNodeId == "HasSBOM" {
+				continue
+			}
 			if _, err = big.Vertex(smallNodeId); err != nil {
 				AddGraphNode(big, smallNodeId, "red") //change color to red
 				analysisList.MissingAddedRemovedNodes = append(analysisList.MissingAddedRemovedNodes, smallNodeId)
@@ -274,6 +279,9 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 		}
 
 		for _, edge := range edges {
+			if edge.Source == "HasSBOM" || edge.Target == "HasSBOM" {
+				continue
+			}
 			_, err := big.Edge(edge.Source, edge.Target)
 			if err != nil { //missing edge, add with red color
 				AddGraphEdge(big, edge.Source, edge.Target, "red") //hmm how to add color?
@@ -304,7 +312,6 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 			SetNodeAttribute(g, "HasSBOM", "Origin", hasSBOM.Origin) &&
 			SetNodeAttribute(g, "HasSBOM", "Subject", *hasSBOM.Subject.GetTypename())) {
 			return g, fmt.Errorf("error setting metadata attribute")
-
 		}
 	}
 
@@ -342,10 +349,12 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 			AddGraphEdge(g, "HasSBOM", packageId, "black")
 			includedDepsId := dependency.Id
 			AddGraphEdge(g, packageId, includedDepsId, "black")
+
 			SetNodeAttribute(g, packageId, "Type", dependency.Package.Type)
+
 			if namespaces || compareAll {
 				//add namespaces
-				if !SetNodeAttribute(g, packageId, "Namespace[0]", dependency.Package.Namespaces[0].Names[0].Name) {
+				if !SetNodeAttribute(g, packageId, "Namespace", dependency.Package.Namespaces[0].Names[0].Name) {
 					return g, fmt.Errorf("error setting namespace attribute")
 				}
 			}
@@ -365,10 +374,9 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
 				if namespaces || compareAll {
 					//add namespaces
-					SetNodeAttribute(g, dependPkgId, "Namespace[0]", dependency.DependencyPackage.Namespaces[0].Names[0].Name)
+					SetNodeAttribute(g, dependPkgId, "Namespace", dependency.DependencyPackage.Namespaces[0].Names[0].Name)
 				}
 			}
-
 		}
 	}
 	return g, nil
