@@ -67,6 +67,21 @@ func TestArtifacts(t *testing.T) {
 		}},
 		wantErr: false,
 	}, {
+		name: "sha-1",
+		artifactInput: &model.ArtifactInputSpec{
+			Algorithm: "SHA-1",
+			Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+		},
+		artifactSpec: &model.ArtifactSpec{
+			Algorithm: ptrfrom.String("SHA-1"),
+			Digest:    ptrfrom.String("7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
+		},
+		want: []*model.Artifact{{
+			Algorithm: "sha-1",
+			Digest:    "7a8f47318e4676dacb0142afa0b83029cd7befd9",
+		}},
+		wantErr: false,
+	}, {
 		name: "sha512",
 		artifactInput: &model.ArtifactInputSpec{
 			Algorithm: "sha512",

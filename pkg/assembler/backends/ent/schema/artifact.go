@@ -72,7 +72,6 @@ func (Artifact) Edges() []ent.Edge {
 // to query all artifacts using a specific algorithm.
 func (Artifact) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("algorithm"),
-		index.Fields("digest").Unique(),
+		index.Fields("algorithm", "digest").Unique(),
 	}
 }
