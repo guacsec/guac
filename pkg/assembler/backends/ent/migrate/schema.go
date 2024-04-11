@@ -22,14 +22,9 @@ var (
 		PrimaryKey: []*schema.Column{ArtifactsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "artifact_algorithm",
-				Unique:  false,
-				Columns: []*schema.Column{ArtifactsColumns[1]},
-			},
-			{
-				Name:    "artifact_digest",
+				Name:    "artifact_algorithm_digest",
 				Unique:  true,
-				Columns: []*schema.Column{ArtifactsColumns[2]},
+				Columns: []*schema.Column{ArtifactsColumns[1], ArtifactsColumns[2]},
 			},
 		},
 	}
