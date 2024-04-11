@@ -3202,7 +3202,7 @@ type CertifyBad {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -3238,7 +3238,7 @@ input CertifyBadInputSpec {
   knownSince: Time!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -3320,7 +3320,7 @@ type CertifyGood {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -3355,7 +3355,7 @@ input CertifyGoodInputSpec {
   knownSince: Time!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -3436,7 +3436,7 @@ type CertifyLegal {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -3551,7 +3551,7 @@ type Scorecard {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -3604,7 +3604,7 @@ input ScorecardInputSpec {
   scorecardCommit: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 "ScorecardCheckInputSpec represents the mutation input for a Scorecard check."
@@ -3724,7 +3724,7 @@ type CertifyVEXStatement {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -3758,7 +3758,7 @@ input VexStatementInputSpec {
   knownSince: Time!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -3840,7 +3840,7 @@ type ScanMetadata {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -3879,7 +3879,7 @@ input ScanMetadataInput {
   scannerVersion: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -3959,7 +3959,7 @@ type PointOfContact {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -3997,7 +3997,7 @@ input PointOfContactInputSpec {
   justification: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -4063,7 +4063,7 @@ type HasSBOM {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
   "Included packages and artifacts"
   includedSoftware: [PackageOrArtifact!]!
   "Included dependencies"
@@ -4112,7 +4112,7 @@ input HasSBOMInputSpec {
   knownSince: Time!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -4193,7 +4193,7 @@ type SLSA {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -4259,7 +4259,7 @@ input SLSAInputSpec {
   finishedOn: Time
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 "SLSAPredicateInputSpec allows ingesting SLSAPredicateSpec."
@@ -4325,7 +4325,7 @@ type HasSourceAt {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 "HasSourceAtSpec allows filtering the list of HasSourceAt to return."
@@ -4346,7 +4346,7 @@ input HasSourceAtInputSpec {
   justification: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -4402,7 +4402,7 @@ type HashEqual {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -4426,7 +4426,7 @@ input HashEqualInputSpec {
   justification: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -4496,7 +4496,7 @@ type IsDependency {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -4527,7 +4527,7 @@ input IsDependencyInputSpec {
   justification: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -4621,7 +4621,7 @@ type IsOccurrence {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -4643,7 +4643,7 @@ input IsOccurrenceInputSpec {
   justification: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -4815,7 +4815,7 @@ type HasMetadata {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -4853,7 +4853,7 @@ input HasMetadataInputSpec {
   justification: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -5321,7 +5321,7 @@ type PkgEqual {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -5345,7 +5345,7 @@ input PkgEqualInputSpec {
   justification: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -5579,7 +5579,7 @@ type VulnEqual {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -5600,7 +5600,7 @@ input VulnEqualInputSpec {
   justification: String!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {
@@ -5701,7 +5701,7 @@ type VulnerabilityMetadata {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String!
+  documentRef: String
 }
 
 """
@@ -5734,7 +5734,7 @@ input VulnerabilityMetadataInputSpec {
   timestamp: Time!
   origin: String!
   collector: String!
-  documentRef: String!
+  documentRef: String
 }
 
 extend type Query {

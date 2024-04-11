@@ -6632,7 +6632,7 @@ type CertifyBadInputSpec struct {
 	KnownSince    time.Time `json:"knownSince"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
-	DocumentRef   string    `json:"documentRef"`
+	DocumentRef   *string   `json:"documentRef"`
 }
 
 // GetJustification returns CertifyBadInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -6648,7 +6648,7 @@ func (v *CertifyBadInputSpec) GetOrigin() string { return v.Origin }
 func (v *CertifyBadInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns CertifyBadInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *CertifyBadInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *CertifyBadInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
 // query.
@@ -6816,7 +6816,7 @@ type CertifyGoodInputSpec struct {
 	KnownSince    time.Time `json:"knownSince"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
-	DocumentRef   string    `json:"documentRef"`
+	DocumentRef   *string   `json:"documentRef"`
 }
 
 // GetJustification returns CertifyGoodInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -6832,7 +6832,7 @@ func (v *CertifyGoodInputSpec) GetOrigin() string { return v.Origin }
 func (v *CertifyGoodInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns CertifyGoodInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *CertifyGoodInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *CertifyGoodInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // CertifyLegalInputSpec represents the input for certifying legal information in
 // mutations.
@@ -7830,7 +7830,7 @@ type HasMetadataInputSpec struct {
 	Justification string    `json:"justification"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
-	DocumentRef   string    `json:"documentRef"`
+	DocumentRef   *string   `json:"documentRef"`
 }
 
 // GetKey returns HasMetadataInputSpec.Key, and is useful for accessing the field via an interface.
@@ -7852,7 +7852,7 @@ func (v *HasMetadataInputSpec) GetOrigin() string { return v.Origin }
 func (v *HasMetadataInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns HasMetadataInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *HasMetadataInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *HasMetadataInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 type HasSBOMIncludesInputSpec struct {
 	Packages     []string `json:"packages"`
@@ -7882,7 +7882,7 @@ type HasSBOMInputSpec struct {
 	KnownSince       time.Time `json:"knownSince"`
 	Origin           string    `json:"origin"`
 	Collector        string    `json:"collector"`
-	DocumentRef      string    `json:"documentRef"`
+	DocumentRef      *string   `json:"documentRef"`
 }
 
 // GetUri returns HasSBOMInputSpec.Uri, and is useful for accessing the field via an interface.
@@ -7907,7 +7907,7 @@ func (v *HasSBOMInputSpec) GetOrigin() string { return v.Origin }
 func (v *HasSBOMInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns HasSBOMInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *HasSBOMInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *HasSBOMInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
 //
@@ -8139,7 +8139,7 @@ type HasSourceAtInputSpec struct {
 	Justification string    `json:"justification"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
-	DocumentRef   string    `json:"documentRef"`
+	DocumentRef   *string   `json:"documentRef"`
 }
 
 // GetKnownSince returns HasSourceAtInputSpec.KnownSince, and is useful for accessing the field via an interface.
@@ -8155,14 +8155,14 @@ func (v *HasSourceAtInputSpec) GetOrigin() string { return v.Origin }
 func (v *HasSourceAtInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns HasSourceAtInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *HasSourceAtInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *HasSourceAtInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // HashEqualInputSpec represents the input to certify that packages are similar.
 type HashEqualInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
-	DocumentRef   string `json:"documentRef"`
+	Justification string  `json:"justification"`
+	Origin        string  `json:"origin"`
+	Collector     string  `json:"collector"`
+	DocumentRef   *string `json:"documentRef"`
 }
 
 // GetJustification returns HashEqualInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -8175,7 +8175,7 @@ func (v *HashEqualInputSpec) GetOrigin() string { return v.Origin }
 func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns HashEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *HashEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *HashEqualInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // IDorArtifactInput allows for specifying either the artifact ID or the ArtifactInputSpec.
 //
@@ -9117,7 +9117,7 @@ type IsDependencyInputSpec struct {
 	Justification  string         `json:"justification"`
 	Origin         string         `json:"origin"`
 	Collector      string         `json:"collector"`
-	DocumentRef    string         `json:"documentRef"`
+	DocumentRef    *string        `json:"documentRef"`
 }
 
 // GetVersionRange returns IsDependencyInputSpec.VersionRange, and is useful for accessing the field via an interface.
@@ -9136,7 +9136,7 @@ func (v *IsDependencyInputSpec) GetOrigin() string { return v.Origin }
 func (v *IsDependencyInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns IsDependencyInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *IsDependencyInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *IsDependencyInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // IsDependencySpec allows filtering the list of dependencies to return.
 //
@@ -9185,10 +9185,10 @@ func (v *IsDependencySpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // IsOccurrenceInputSpec represents the input to record an artifact's origin.
 type IsOccurrenceInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
-	DocumentRef   string `json:"documentRef"`
+	Justification string  `json:"justification"`
+	Origin        string  `json:"origin"`
+	Collector     string  `json:"collector"`
+	DocumentRef   *string `json:"documentRef"`
 }
 
 // GetJustification returns IsOccurrenceInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -9201,7 +9201,7 @@ func (v *IsOccurrenceInputSpec) GetOrigin() string { return v.Origin }
 func (v *IsOccurrenceInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns IsOccurrenceInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *IsOccurrenceInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *IsOccurrenceInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // IsOccurrenceSpec allows filtering the list of artifact occurences to return in
 // a query.
@@ -21851,10 +21851,10 @@ func (v *PathResponse) __premarshalJSON() (*__premarshalPathResponse, error) {
 
 // PkgEqualInputSpec represents the input to certify that packages are similar.
 type PkgEqualInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
-	DocumentRef   string `json:"documentRef"`
+	Justification string  `json:"justification"`
+	Origin        string  `json:"origin"`
+	Collector     string  `json:"collector"`
+	DocumentRef   *string `json:"documentRef"`
 }
 
 // GetJustification returns PkgEqualInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -21867,7 +21867,7 @@ func (v *PkgEqualInputSpec) GetOrigin() string { return v.Origin }
 func (v *PkgEqualInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns PkgEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *PkgEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *PkgEqualInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // PkgInputSpec specifies a package for mutations.
 //
@@ -21967,7 +21967,7 @@ type PointOfContactInputSpec struct {
 	Justification string    `json:"justification"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
-	DocumentRef   string    `json:"documentRef"`
+	DocumentRef   *string   `json:"documentRef"`
 }
 
 // GetEmail returns PointOfContactInputSpec.Email, and is useful for accessing the field via an interface.
@@ -21989,7 +21989,7 @@ func (v *PointOfContactInputSpec) GetOrigin() string { return v.Origin }
 func (v *PointOfContactInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns PointOfContactInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *PointOfContactInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *PointOfContactInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // SLSAInputSpec is the same as SLSA but for mutation input.
 type SLSAInputSpec struct {
@@ -22000,7 +22000,7 @@ type SLSAInputSpec struct {
 	FinishedOn    *time.Time               `json:"finishedOn"`
 	Origin        string                   `json:"origin"`
 	Collector     string                   `json:"collector"`
-	DocumentRef   string                   `json:"documentRef"`
+	DocumentRef   *string                  `json:"documentRef"`
 }
 
 // GetBuildType returns SLSAInputSpec.BuildType, and is useful for accessing the field via an interface.
@@ -22025,7 +22025,7 @@ func (v *SLSAInputSpec) GetOrigin() string { return v.Origin }
 func (v *SLSAInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns SLSAInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *SLSAInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *SLSAInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // SLSAPredicateInputSpec allows ingesting SLSAPredicateSpec.
 type SLSAPredicateInputSpec struct {
@@ -22049,7 +22049,7 @@ type ScanMetadataInput struct {
 	ScannerVersion string    `json:"scannerVersion"`
 	Origin         string    `json:"origin"`
 	Collector      string    `json:"collector"`
-	DocumentRef    string    `json:"documentRef"`
+	DocumentRef    *string   `json:"documentRef"`
 }
 
 // GetTimeScanned returns ScanMetadataInput.TimeScanned, and is useful for accessing the field via an interface.
@@ -22074,7 +22074,7 @@ func (v *ScanMetadataInput) GetOrigin() string { return v.Origin }
 func (v *ScanMetadataInput) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns ScanMetadataInput.DocumentRef, and is useful for accessing the field via an interface.
-func (v *ScanMetadataInput) GetDocumentRef() string { return v.DocumentRef }
+func (v *ScanMetadataInput) GetDocumentRef() *string { return v.DocumentRef }
 
 // ScorecardCheckInputSpec represents the mutation input for a Scorecard check.
 type ScorecardCheckInputSpec struct {
@@ -22109,7 +22109,7 @@ type ScorecardInputSpec struct {
 	ScorecardCommit  string                    `json:"scorecardCommit"`
 	Origin           string                    `json:"origin"`
 	Collector        string                    `json:"collector"`
-	DocumentRef      string                    `json:"documentRef"`
+	DocumentRef      *string                   `json:"documentRef"`
 }
 
 // GetChecks returns ScorecardInputSpec.Checks, and is useful for accessing the field via an interface.
@@ -22134,7 +22134,7 @@ func (v *ScorecardInputSpec) GetOrigin() string { return v.Origin }
 func (v *ScorecardInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns ScorecardInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *ScorecardInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *ScorecardInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // ScorecardsResponse is returned by Scorecards on success.
 type ScorecardsResponse struct {
@@ -22394,7 +22394,7 @@ type VexStatementInputSpec struct {
 	KnownSince       time.Time        `json:"knownSince"`
 	Origin           string           `json:"origin"`
 	Collector        string           `json:"collector"`
-	DocumentRef      string           `json:"documentRef"`
+	DocumentRef      *string          `json:"documentRef"`
 }
 
 // GetStatus returns VexStatementInputSpec.Status, and is useful for accessing the field via an interface.
@@ -22419,7 +22419,7 @@ func (v *VexStatementInputSpec) GetOrigin() string { return v.Origin }
 func (v *VexStatementInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns VexStatementInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *VexStatementInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *VexStatementInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // Records the status of a VEX statement subject.
 type VexStatus string
@@ -22433,10 +22433,10 @@ const (
 
 // VulnEqualInputSpec represents the input to link vulnerabilities to each other.
 type VulnEqualInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
-	DocumentRef   string `json:"documentRef"`
+	Justification string  `json:"justification"`
+	Origin        string  `json:"origin"`
+	Collector     string  `json:"collector"`
+	DocumentRef   *string `json:"documentRef"`
 }
 
 // GetJustification returns VulnEqualInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -22449,7 +22449,7 @@ func (v *VulnEqualInputSpec) GetOrigin() string { return v.Origin }
 func (v *VulnEqualInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns VulnEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *VulnEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *VulnEqualInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // VulnerabilitiesResponse is returned by Vulnerabilities on success.
 type VulnerabilitiesResponse struct {
@@ -22581,7 +22581,7 @@ type VulnerabilityMetadataInputSpec struct {
 	Timestamp   time.Time              `json:"timestamp"`
 	Origin      string                 `json:"origin"`
 	Collector   string                 `json:"collector"`
-	DocumentRef string                 `json:"documentRef"`
+	DocumentRef *string                `json:"documentRef"`
 }
 
 // GetScoreType returns VulnerabilityMetadataInputSpec.ScoreType, and is useful for accessing the field via an interface.
@@ -22600,7 +22600,7 @@ func (v *VulnerabilityMetadataInputSpec) GetOrigin() string { return v.Origin }
 func (v *VulnerabilityMetadataInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns VulnerabilityMetadataInputSpec.DocumentRef, and is useful for accessing the field via an interface.
-func (v *VulnerabilityMetadataInputSpec) GetDocumentRef() string { return v.DocumentRef }
+func (v *VulnerabilityMetadataInputSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // Records the type of the score being captured by the score node
 type VulnerabilityScoreType string
