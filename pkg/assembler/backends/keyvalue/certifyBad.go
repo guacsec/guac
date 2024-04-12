@@ -38,6 +38,7 @@ type badLink struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 	KnownSince    time.Time
 }
 
@@ -114,6 +115,7 @@ func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.Package
 		Justification: certifyBad.Justification,
 		Origin:        certifyBad.Origin,
 		Collector:     certifyBad.Collector,
+		DocumentRef:   certifyBad.DocumentRef,
 		KnownSince:    certifyBad.KnownSince.UTC(),
 	}
 

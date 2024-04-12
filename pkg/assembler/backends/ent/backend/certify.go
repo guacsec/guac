@@ -256,16 +256,16 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 		certifyCreate.
 			SetType(certification.TypeBAD).
 			SetJustification(cb.Justification).
+			SetKnownSince(cb.KnownSince.UTC()).
 			SetOrigin(cb.Origin).
-			SetCollector(cb.Collector).
-			SetKnownSince(cb.KnownSince.UTC())
+			SetCollector(cb.Collector)
 	} else if cg != nil {
 		certifyCreate.
 			SetType(certification.TypeGOOD).
 			SetJustification(cg.Justification).
+			SetKnownSince(cg.KnownSince.UTC()).
 			SetOrigin(cg.Origin).
-			SetCollector(cg.Collector).
-			SetKnownSince(cg.KnownSince.UTC())
+			SetCollector(cg.Collector)
 	} else {
 		return nil, fmt.Errorf("must specify either certifyGood or certifyBad")
 	}

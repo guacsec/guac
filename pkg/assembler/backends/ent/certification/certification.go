@@ -29,12 +29,14 @@ const (
 	FieldType = "type"
 	// FieldJustification holds the string denoting the justification field in the database.
 	FieldJustification = "justification"
+	// FieldKnownSince holds the string denoting the known_since field in the database.
+	FieldKnownSince = "known_since"
 	// FieldOrigin holds the string denoting the origin field in the database.
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
-	// FieldKnownSince holds the string denoting the known_since field in the database.
-	FieldKnownSince = "known_since"
+	// FieldDocumentRef holds the string denoting the document_ref field in the database.
+	FieldDocumentRef = "document_ref"
 	// EdgeSource holds the string denoting the source edge name in mutations.
 	EdgeSource = "source"
 	// EdgePackageVersion holds the string denoting the package_version edge name in mutations.
@@ -84,9 +86,10 @@ var Columns = []string{
 	FieldArtifactID,
 	FieldType,
 	FieldJustification,
+	FieldKnownSince,
 	FieldOrigin,
 	FieldCollector,
-	FieldKnownSince,
+	FieldDocumentRef,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -168,6 +171,11 @@ func ByJustification(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldJustification, opts...).ToFunc()
 }
 
+// ByKnownSince orders the results by the known_since field.
+func ByKnownSince(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldKnownSince, opts...).ToFunc()
+}
+
 // ByOrigin orders the results by the origin field.
 func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOrigin, opts...).ToFunc()
@@ -178,9 +186,9 @@ func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
 }
 
-// ByKnownSince orders the results by the known_since field.
-func ByKnownSince(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldKnownSince, opts...).ToFunc()
+// ByDocumentRef orders the results by the document_ref field.
+func ByDocumentRef(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentRef, opts...).ToFunc()
 }
 
 // BySourceField orders the results by source field.

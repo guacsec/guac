@@ -81,6 +81,11 @@ func Justification(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldJustification, v))
 }
 
+// KnownSince applies equality check predicate on the "known_since" field. It's identical to KnownSinceEQ.
+func KnownSince(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldKnownSince, v))
+}
+
 // Origin applies equality check predicate on the "origin" field. It's identical to OriginEQ.
 func Origin(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldOrigin, v))
@@ -91,9 +96,9 @@ func Collector(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldCollector, v))
 }
 
-// KnownSince applies equality check predicate on the "known_since" field. It's identical to KnownSinceEQ.
-func KnownSince(v time.Time) predicate.Certification {
-	return predicate.Certification(sql.FieldEQ(FieldKnownSince, v))
+// DocumentRef applies equality check predicate on the "document_ref" field. It's identical to DocumentRefEQ.
+func DocumentRef(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldDocumentRef, v))
 }
 
 // SourceIDEQ applies the EQ predicate on the "source_id" field.
@@ -301,6 +306,46 @@ func JustificationContainsFold(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldContainsFold(FieldJustification, v))
 }
 
+// KnownSinceEQ applies the EQ predicate on the "known_since" field.
+func KnownSinceEQ(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldKnownSince, v))
+}
+
+// KnownSinceNEQ applies the NEQ predicate on the "known_since" field.
+func KnownSinceNEQ(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldNEQ(FieldKnownSince, v))
+}
+
+// KnownSinceIn applies the In predicate on the "known_since" field.
+func KnownSinceIn(vs ...time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldIn(FieldKnownSince, vs...))
+}
+
+// KnownSinceNotIn applies the NotIn predicate on the "known_since" field.
+func KnownSinceNotIn(vs ...time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldNotIn(FieldKnownSince, vs...))
+}
+
+// KnownSinceGT applies the GT predicate on the "known_since" field.
+func KnownSinceGT(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldGT(FieldKnownSince, v))
+}
+
+// KnownSinceGTE applies the GTE predicate on the "known_since" field.
+func KnownSinceGTE(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldGTE(FieldKnownSince, v))
+}
+
+// KnownSinceLT applies the LT predicate on the "known_since" field.
+func KnownSinceLT(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldLT(FieldKnownSince, v))
+}
+
+// KnownSinceLTE applies the LTE predicate on the "known_since" field.
+func KnownSinceLTE(v time.Time) predicate.Certification {
+	return predicate.Certification(sql.FieldLTE(FieldKnownSince, v))
+}
+
 // OriginEQ applies the EQ predicate on the "origin" field.
 func OriginEQ(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldOrigin, v))
@@ -431,44 +476,69 @@ func CollectorContainsFold(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldContainsFold(FieldCollector, v))
 }
 
-// KnownSinceEQ applies the EQ predicate on the "known_since" field.
-func KnownSinceEQ(v time.Time) predicate.Certification {
-	return predicate.Certification(sql.FieldEQ(FieldKnownSince, v))
+// DocumentRefEQ applies the EQ predicate on the "document_ref" field.
+func DocumentRefEQ(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldDocumentRef, v))
 }
 
-// KnownSinceNEQ applies the NEQ predicate on the "known_since" field.
-func KnownSinceNEQ(v time.Time) predicate.Certification {
-	return predicate.Certification(sql.FieldNEQ(FieldKnownSince, v))
+// DocumentRefNEQ applies the NEQ predicate on the "document_ref" field.
+func DocumentRefNEQ(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldNEQ(FieldDocumentRef, v))
 }
 
-// KnownSinceIn applies the In predicate on the "known_since" field.
-func KnownSinceIn(vs ...time.Time) predicate.Certification {
-	return predicate.Certification(sql.FieldIn(FieldKnownSince, vs...))
+// DocumentRefIn applies the In predicate on the "document_ref" field.
+func DocumentRefIn(vs ...string) predicate.Certification {
+	return predicate.Certification(sql.FieldIn(FieldDocumentRef, vs...))
 }
 
-// KnownSinceNotIn applies the NotIn predicate on the "known_since" field.
-func KnownSinceNotIn(vs ...time.Time) predicate.Certification {
-	return predicate.Certification(sql.FieldNotIn(FieldKnownSince, vs...))
+// DocumentRefNotIn applies the NotIn predicate on the "document_ref" field.
+func DocumentRefNotIn(vs ...string) predicate.Certification {
+	return predicate.Certification(sql.FieldNotIn(FieldDocumentRef, vs...))
 }
 
-// KnownSinceGT applies the GT predicate on the "known_since" field.
-func KnownSinceGT(v time.Time) predicate.Certification {
-	return predicate.Certification(sql.FieldGT(FieldKnownSince, v))
+// DocumentRefGT applies the GT predicate on the "document_ref" field.
+func DocumentRefGT(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldGT(FieldDocumentRef, v))
 }
 
-// KnownSinceGTE applies the GTE predicate on the "known_since" field.
-func KnownSinceGTE(v time.Time) predicate.Certification {
-	return predicate.Certification(sql.FieldGTE(FieldKnownSince, v))
+// DocumentRefGTE applies the GTE predicate on the "document_ref" field.
+func DocumentRefGTE(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldGTE(FieldDocumentRef, v))
 }
 
-// KnownSinceLT applies the LT predicate on the "known_since" field.
-func KnownSinceLT(v time.Time) predicate.Certification {
-	return predicate.Certification(sql.FieldLT(FieldKnownSince, v))
+// DocumentRefLT applies the LT predicate on the "document_ref" field.
+func DocumentRefLT(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldLT(FieldDocumentRef, v))
 }
 
-// KnownSinceLTE applies the LTE predicate on the "known_since" field.
-func KnownSinceLTE(v time.Time) predicate.Certification {
-	return predicate.Certification(sql.FieldLTE(FieldKnownSince, v))
+// DocumentRefLTE applies the LTE predicate on the "document_ref" field.
+func DocumentRefLTE(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldLTE(FieldDocumentRef, v))
+}
+
+// DocumentRefContains applies the Contains predicate on the "document_ref" field.
+func DocumentRefContains(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldContains(FieldDocumentRef, v))
+}
+
+// DocumentRefHasPrefix applies the HasPrefix predicate on the "document_ref" field.
+func DocumentRefHasPrefix(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldHasPrefix(FieldDocumentRef, v))
+}
+
+// DocumentRefHasSuffix applies the HasSuffix predicate on the "document_ref" field.
+func DocumentRefHasSuffix(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldHasSuffix(FieldDocumentRef, v))
+}
+
+// DocumentRefEqualFold applies the EqualFold predicate on the "document_ref" field.
+func DocumentRefEqualFold(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldEqualFold(FieldDocumentRef, v))
+}
+
+// DocumentRefContainsFold applies the ContainsFold predicate on the "document_ref" field.
+func DocumentRefContainsFold(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldContainsFold(FieldDocumentRef, v))
 }
 
 // HasSource applies the HasEdge predicate on the "source" edge.

@@ -141,6 +141,20 @@ func (cu *CertificationUpdate) SetNillableJustification(s *string) *Certificatio
 	return cu
 }
 
+// SetKnownSince sets the "known_since" field.
+func (cu *CertificationUpdate) SetKnownSince(t time.Time) *CertificationUpdate {
+	cu.mutation.SetKnownSince(t)
+	return cu
+}
+
+// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
+func (cu *CertificationUpdate) SetNillableKnownSince(t *time.Time) *CertificationUpdate {
+	if t != nil {
+		cu.SetKnownSince(*t)
+	}
+	return cu
+}
+
 // SetOrigin sets the "origin" field.
 func (cu *CertificationUpdate) SetOrigin(s string) *CertificationUpdate {
 	cu.mutation.SetOrigin(s)
@@ -169,16 +183,16 @@ func (cu *CertificationUpdate) SetNillableCollector(s *string) *CertificationUpd
 	return cu
 }
 
-// SetKnownSince sets the "known_since" field.
-func (cu *CertificationUpdate) SetKnownSince(t time.Time) *CertificationUpdate {
-	cu.mutation.SetKnownSince(t)
+// SetDocumentRef sets the "document_ref" field.
+func (cu *CertificationUpdate) SetDocumentRef(s string) *CertificationUpdate {
+	cu.mutation.SetDocumentRef(s)
 	return cu
 }
 
-// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableKnownSince(t *time.Time) *CertificationUpdate {
-	if t != nil {
-		cu.SetKnownSince(*t)
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (cu *CertificationUpdate) SetNillableDocumentRef(s *string) *CertificationUpdate {
+	if s != nil {
+		cu.SetDocumentRef(*s)
 	}
 	return cu
 }
@@ -301,14 +315,17 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.Justification(); ok {
 		_spec.SetField(certification.FieldJustification, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.KnownSince(); ok {
+		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
+	}
 	if value, ok := cu.mutation.Origin(); ok {
 		_spec.SetField(certification.FieldOrigin, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.Collector(); ok {
 		_spec.SetField(certification.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := cu.mutation.KnownSince(); ok {
-		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
+	if value, ok := cu.mutation.DocumentRef(); ok {
+		_spec.SetField(certification.FieldDocumentRef, field.TypeString, value)
 	}
 	if cu.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -554,6 +571,20 @@ func (cuo *CertificationUpdateOne) SetNillableJustification(s *string) *Certific
 	return cuo
 }
 
+// SetKnownSince sets the "known_since" field.
+func (cuo *CertificationUpdateOne) SetKnownSince(t time.Time) *CertificationUpdateOne {
+	cuo.mutation.SetKnownSince(t)
+	return cuo
+}
+
+// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
+func (cuo *CertificationUpdateOne) SetNillableKnownSince(t *time.Time) *CertificationUpdateOne {
+	if t != nil {
+		cuo.SetKnownSince(*t)
+	}
+	return cuo
+}
+
 // SetOrigin sets the "origin" field.
 func (cuo *CertificationUpdateOne) SetOrigin(s string) *CertificationUpdateOne {
 	cuo.mutation.SetOrigin(s)
@@ -582,16 +613,16 @@ func (cuo *CertificationUpdateOne) SetNillableCollector(s *string) *Certificatio
 	return cuo
 }
 
-// SetKnownSince sets the "known_since" field.
-func (cuo *CertificationUpdateOne) SetKnownSince(t time.Time) *CertificationUpdateOne {
-	cuo.mutation.SetKnownSince(t)
+// SetDocumentRef sets the "document_ref" field.
+func (cuo *CertificationUpdateOne) SetDocumentRef(s string) *CertificationUpdateOne {
+	cuo.mutation.SetDocumentRef(s)
 	return cuo
 }
 
-// SetNillableKnownSince sets the "known_since" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableKnownSince(t *time.Time) *CertificationUpdateOne {
-	if t != nil {
-		cuo.SetKnownSince(*t)
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (cuo *CertificationUpdateOne) SetNillableDocumentRef(s *string) *CertificationUpdateOne {
+	if s != nil {
+		cuo.SetDocumentRef(*s)
 	}
 	return cuo
 }
@@ -744,14 +775,17 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 	if value, ok := cuo.mutation.Justification(); ok {
 		_spec.SetField(certification.FieldJustification, field.TypeString, value)
 	}
+	if value, ok := cuo.mutation.KnownSince(); ok {
+		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
+	}
 	if value, ok := cuo.mutation.Origin(); ok {
 		_spec.SetField(certification.FieldOrigin, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.Collector(); ok {
 		_spec.SetField(certification.FieldCollector, field.TypeString, value)
 	}
-	if value, ok := cuo.mutation.KnownSince(); ok {
-		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
+	if value, ok := cuo.mutation.DocumentRef(); ok {
+		_spec.SetField(certification.FieldDocumentRef, field.TypeString, value)
 	}
 	if cuo.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{

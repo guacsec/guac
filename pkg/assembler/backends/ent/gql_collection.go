@@ -616,6 +616,11 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certification.FieldJustification)
 				fieldSeen[certification.FieldJustification] = struct{}{}
 			}
+		case "knownSince":
+			if _, ok := fieldSeen[certification.FieldKnownSince]; !ok {
+				selectedFields = append(selectedFields, certification.FieldKnownSince)
+				fieldSeen[certification.FieldKnownSince] = struct{}{}
+			}
 		case "origin":
 			if _, ok := fieldSeen[certification.FieldOrigin]; !ok {
 				selectedFields = append(selectedFields, certification.FieldOrigin)
@@ -626,10 +631,10 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certification.FieldCollector)
 				fieldSeen[certification.FieldCollector] = struct{}{}
 			}
-		case "knownSince":
-			if _, ok := fieldSeen[certification.FieldKnownSince]; !ok {
-				selectedFields = append(selectedFields, certification.FieldKnownSince)
-				fieldSeen[certification.FieldKnownSince] = struct{}{}
+		case "documentRef":
+			if _, ok := fieldSeen[certification.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certification.FieldDocumentRef)
+				fieldSeen[certification.FieldDocumentRef] = struct{}{}
 			}
 		case "id":
 		case "__typename":

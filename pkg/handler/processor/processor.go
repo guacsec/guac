@@ -98,4 +98,6 @@ type SourceInformation struct {
 	Collector string
 	// Source describes the source which the collector got this information
 	Source string
+	// DocumentRef describes the location of the document in the blob store
+	DocumentRef string
 }

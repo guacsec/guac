@@ -43,7 +43,7 @@ type CertifyGood {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String
+  documentRef: String!
 }
 
 """
@@ -78,7 +78,7 @@ input CertifyGoodInputSpec {
   knownSince: Time!
   origin: String!
   collector: String!
-  documentRef: String
+  documentRef: String!
 }
 
 extend type Query {
