@@ -31,17 +31,18 @@ import (
 
 type (
 	hasSLSAStruct struct {
-		ThisID     string
-		Subject    string
-		BuiltFrom  []string
-		BuiltBy    string
-		BuildType  string
-		Predicates []*model.SLSAPredicate
-		Version    string
-		Start      *time.Time
-		Finish     *time.Time
-		Origin     string
-		Collector  string
+		ThisID      string
+		Subject     string
+		BuiltFrom   []string
+		BuiltBy     string
+		BuildType   string
+		Predicates  []*model.SLSAPredicate
+		Version     string
+		Start       *time.Time
+		Finish      *time.Time
+		Origin      string
+		Collector   string
+		DocumentRef string
 	}
 )
 
@@ -66,6 +67,7 @@ func (n *hasSLSAStruct) Key() string {
 		fn,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -215,11 +217,12 @@ func (c *demoClient) ingestSLSA(ctx context.Context,
 ) {
 	preds := convSLSAP(slsa.SlsaPredicate)
 	in := &hasSLSAStruct{
-		BuildType:  slsa.BuildType,
-		Predicates: preds,
-		Version:    slsa.SlsaVersion,
-		Origin:     slsa.Origin,
-		Collector:  slsa.Collector,
+		BuildType:   slsa.BuildType,
+		Predicates:  preds,
+		Version:     slsa.SlsaVersion,
+		Origin:      slsa.Origin,
+		Collector:   slsa.Collector,
+		DocumentRef: slsa.DocumentRef,
 	}
 	if slsa.StartedOn != nil {
 		t := slsa.StartedOn.UTC()
@@ -339,6 +342,7 @@ func (c *demoClient) convSLSA(ctx context.Context, in *hasSLSAStruct) (*model.Ha
 			FinishedOn:    in.Finish,
 			Origin:        in.Origin,
 			Collector:     in.Collector,
+			DocumentRef:   in.DocumentRef,
 		},
 	}, nil
 }
@@ -355,6 +359,7 @@ func (c *demoClient) addSLSAIfMatch(ctx context.Context, out []*model.HasSlsa,
 		noMatch(filter.SlsaVersion, link.Version) ||
 		noMatch(filter.Origin, link.Origin) ||
 		noMatch(filter.Collector, link.Collector) ||
+		noMatch(filter.DocumentRef, link.DocumentRef) ||
 		(filter.StartedOn != nil && (link.Start == nil || !filter.StartedOn.Equal(*link.Start))) ||
 		(filter.FinishedOn != nil && (link.Finish == nil || !filter.FinishedOn.Equal(*link.Finish))) ||
 		(filter.BuiltBy != nil && filter.BuiltBy.ID != nil && *filter.BuiltBy.ID != bb.ThisID) ||

@@ -41,6 +41,7 @@ type certifyVulnerabilityLink struct {
 	ScannerVersion  string
 	Origin          string
 	Collector       string
+	DocumentRef     string
 }
 
 func (n *certifyVulnerabilityLink) ID() string { return n.ThisID }
@@ -55,6 +56,7 @@ func (n *certifyVulnerabilityLink) Key() string {
 		n.ScannerVersion,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -101,6 +103,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.I
 		ScannerVersion: certifyVuln.ScannerVersion,
 		Origin:         certifyVuln.Origin,
 		Collector:      certifyVuln.Collector,
+		DocumentRef:    certifyVuln.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -276,6 +279,9 @@ func (c *demoClient) addCVIfMatch(ctx context.Context, out []*model.CertifyVuln,
 	if filter != nil && noMatch(filter.Origin, link.Origin) {
 		return out, nil
 	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
+		return out, nil
+	}
 
 	foundCertifyVuln, err := c.buildCertifyVulnerability(ctx, link, filter, false)
 	if err != nil {
@@ -353,6 +359,7 @@ func (c *demoClient) buildCertifyVulnerability(ctx context.Context, link *certif
 			ScannerVersion: link.ScannerVersion,
 			Origin:         link.Origin,
 			Collector:      link.Collector,
+			DocumentRef:    link.DocumentRef,
 		},
 	}, nil
 }

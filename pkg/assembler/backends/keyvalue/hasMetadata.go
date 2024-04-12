@@ -38,6 +38,7 @@ type hasMetadataLink struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 }
 
 func (n *hasMetadataLink) ID() string { return n.ThisID }
@@ -52,6 +53,7 @@ func (n *hasMetadataLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -119,6 +121,7 @@ func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.Packag
 		Justification: hasMetadata.Justification,
 		Origin:        hasMetadata.Origin,
 		Collector:     hasMetadata.Collector,
+		DocumentRef:   hasMetadata.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -294,6 +297,9 @@ func (c *demoClient) addHMIfMatch(ctx context.Context, out []*model.HasMetadata,
 	if filter != nil && noMatch(filter.Value, link.Value) {
 		return out, nil
 	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
+		return out, nil
+	}
 	// no match if filter time since is after the timestamp
 	if filter != nil && filter.Since != nil && filter.Since.After(link.Timestamp) {
 		return out, nil
@@ -389,6 +395,7 @@ func (c *demoClient) buildHasMetadata(ctx context.Context, link *hasMetadataLink
 		Justification: link.Justification,
 		Origin:        link.Origin,
 		Collector:     link.Collector,
+		DocumentRef:   link.DocumentRef,
 	}
 	return &hasMetadata, nil
 }

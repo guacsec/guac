@@ -34,6 +34,7 @@ type vulnerabilityEqualLink struct {
 	Justification   string
 	Origin          string
 	Collector       string
+	DocumentRef     string
 }
 
 func (n *vulnerabilityEqualLink) ID() string { return n.ThisID }
@@ -43,6 +44,7 @@ func (n *vulnerabilityEqualLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -82,6 +84,7 @@ func (c *demoClient) ingestVulnEqual(ctx context.Context, vulnerability model.ID
 		Justification: vulnEqual.Justification,
 		Origin:        vulnEqual.Origin,
 		Collector:     vulnEqual.Collector,
+		DocumentRef:   vulnEqual.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -137,6 +140,7 @@ func (c *demoClient) convVulnEqual(ctx context.Context, in *vulnerabilityEqualLi
 		Justification: in.Justification,
 		Origin:        in.Origin,
 		Collector:     in.Collector,
+		DocumentRef:   in.DocumentRef,
 	}
 	for _, id := range in.Vulnerabilities {
 		v, err := c.buildVulnResponse(ctx, id, nil)
@@ -226,7 +230,8 @@ func (c *demoClient) addVulnIfMatch(ctx context.Context, out []*model.VulnEqual,
 ) {
 	if noMatch(filter.Justification, link.Justification) ||
 		noMatch(filter.Origin, link.Origin) ||
-		noMatch(filter.Collector, link.Collector) {
+		noMatch(filter.Collector, link.Collector) ||
+		noMatch(filter.DocumentRef, link.DocumentRef) {
 		return out, nil
 	}
 	for _, vs := range filter.Vulnerabilities {

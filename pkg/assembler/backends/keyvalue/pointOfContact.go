@@ -39,6 +39,7 @@ type pointOfContactLink struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 }
 
 func (n *pointOfContactLink) ID() string { return n.ThisID }
@@ -53,6 +54,7 @@ func (n *pointOfContactLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -120,6 +122,7 @@ func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.Pac
 		Justification: pointOfContact.Justification,
 		Origin:        pointOfContact.Origin,
 		Collector:     pointOfContact.Collector,
+		DocumentRef:   pointOfContact.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -292,6 +295,9 @@ func (c *demoClient) addPOCIfMatch(ctx context.Context, out []*model.PointOfCont
 	if filter != nil && noMatch(filter.Info, link.Info) {
 		return out, nil
 	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
+		return out, nil
+	}
 	// no match if filter time since is after the timestamp
 	if filter != nil && filter.Since != nil && filter.Since.After(link.Since) {
 		return out, nil
@@ -387,6 +393,7 @@ func (c *demoClient) buildPointOfContact(ctx context.Context, link *pointOfConta
 		Justification: link.Justification,
 		Origin:        link.Origin,
 		Collector:     link.Collector,
+		DocumentRef:   link.DocumentRef,
 	}
 	return &pointOfContact, nil
 }

@@ -36,6 +36,7 @@ type srcMapLink struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 }
 
 func (n *srcMapLink) ID() string { return n.ThisID }
@@ -47,6 +48,7 @@ func (n *srcMapLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -92,6 +94,7 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.IDo
 		Justification: hasSourceAt.Justification,
 		Origin:        hasSourceAt.Origin,
 		Collector:     hasSourceAt.Collector,
+		DocumentRef:   hasSourceAt.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -259,6 +262,7 @@ func (c *demoClient) buildHasSourceAt(ctx context.Context, link *srcMapLink, fil
 		Justification: link.Justification,
 		Origin:        link.Origin,
 		Collector:     link.Collector,
+		DocumentRef:   link.DocumentRef,
 	}
 	return &newHSA, nil
 }
@@ -273,6 +277,9 @@ func (c *demoClient) addSrcIfMatch(ctx context.Context, out []*model.HasSourceAt
 		return out, nil
 	}
 	if filter != nil && noMatch(filter.Collector, link.Collector) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
 		return out, nil
 	}
 	if filter != nil && filter.KnownSince != nil && !filter.KnownSince.Equal(link.KnownSince) {
