@@ -45,6 +45,7 @@ func (PkgEqual) Fields() []ent.Field {
 		field.UUID("equal_pkg_id", getUUIDv7()),
 		field.String("origin"),
 		field.String("collector"),
+		field.String("document_ref"),
 		field.String("justification"),
 		field.String("packages_hash").Comment("An opaque hash of the package IDs that are equal"),
 	}
@@ -61,6 +62,6 @@ func (PkgEqual) Edges() []ent.Edge {
 // Indexes of the PkgEqual.
 func (PkgEqual) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("pkg_id", "equal_pkg_id", "packages_hash", "origin", "justification", "collector").Unique(),
+		index.Fields("pkg_id", "equal_pkg_id", "packages_hash", "origin", "justification", "collector", "document_ref").Unique(),
 	}
 }

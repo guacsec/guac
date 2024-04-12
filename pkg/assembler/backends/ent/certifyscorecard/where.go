@@ -91,6 +91,11 @@ func Collector(v string) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldCollector, v))
 }
 
+// DocumentRef applies equality check predicate on the "document_ref" field. It's identical to DocumentRefEQ.
+func DocumentRef(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldDocumentRef, v))
+}
+
 // ChecksHash applies equality check predicate on the "checks_hash" field. It's identical to ChecksHashEQ.
 func ChecksHash(v string) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldEQ(FieldChecksHash, v))
@@ -454,6 +459,71 @@ func CollectorEqualFold(v string) predicate.CertifyScorecard {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.CertifyScorecard {
 	return predicate.CertifyScorecard(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// DocumentRefEQ applies the EQ predicate on the "document_ref" field.
+func DocumentRefEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefNEQ applies the NEQ predicate on the "document_ref" field.
+func DocumentRefNEQ(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefIn applies the In predicate on the "document_ref" field.
+func DocumentRefIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefNotIn applies the NotIn predicate on the "document_ref" field.
+func DocumentRefNotIn(vs ...string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldNotIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefGT applies the GT predicate on the "document_ref" field.
+func DocumentRefGT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGT(FieldDocumentRef, v))
+}
+
+// DocumentRefGTE applies the GTE predicate on the "document_ref" field.
+func DocumentRefGTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldGTE(FieldDocumentRef, v))
+}
+
+// DocumentRefLT applies the LT predicate on the "document_ref" field.
+func DocumentRefLT(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLT(FieldDocumentRef, v))
+}
+
+// DocumentRefLTE applies the LTE predicate on the "document_ref" field.
+func DocumentRefLTE(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldLTE(FieldDocumentRef, v))
+}
+
+// DocumentRefContains applies the Contains predicate on the "document_ref" field.
+func DocumentRefContains(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContains(FieldDocumentRef, v))
+}
+
+// DocumentRefHasPrefix applies the HasPrefix predicate on the "document_ref" field.
+func DocumentRefHasPrefix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasPrefix(FieldDocumentRef, v))
+}
+
+// DocumentRefHasSuffix applies the HasSuffix predicate on the "document_ref" field.
+func DocumentRefHasSuffix(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldHasSuffix(FieldDocumentRef, v))
+}
+
+// DocumentRefEqualFold applies the EqualFold predicate on the "document_ref" field.
+func DocumentRefEqualFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldEqualFold(FieldDocumentRef, v))
+}
+
+// DocumentRefContainsFold applies the ContainsFold predicate on the "document_ref" field.
+func DocumentRefContainsFold(v string) predicate.CertifyScorecard {
+	return predicate.CertifyScorecard(sql.FieldContainsFold(FieldDocumentRef, v))
 }
 
 // ChecksHashEQ applies the EQ predicate on the "checks_hash" field.

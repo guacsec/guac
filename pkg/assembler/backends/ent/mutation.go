@@ -1394,6 +1394,7 @@ type BillOfMaterialsMutation struct {
 	download_location                  *string
 	origin                             *string
 	collector                          *string
+	document_ref                       *string
 	known_since                        *time.Time
 	included_packages_hash             *string
 	included_artifacts_hash            *string
@@ -1837,6 +1838,42 @@ func (m *BillOfMaterialsMutation) OldCollector(ctx context.Context) (v string, e
 // ResetCollector resets all changes to the "collector" field.
 func (m *BillOfMaterialsMutation) ResetCollector() {
 	m.collector = nil
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (m *BillOfMaterialsMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *BillOfMaterialsMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the BillOfMaterials entity.
+// If the BillOfMaterials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillOfMaterialsMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *BillOfMaterialsMutation) ResetDocumentRef() {
+	m.document_ref = nil
 }
 
 // SetKnownSince sets the "known_since" field.
@@ -2323,7 +2360,7 @@ func (m *BillOfMaterialsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BillOfMaterialsMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m._package != nil {
 		fields = append(fields, billofmaterials.FieldPackageID)
 	}
@@ -2347,6 +2384,9 @@ func (m *BillOfMaterialsMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, billofmaterials.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, billofmaterials.FieldDocumentRef)
 	}
 	if m.known_since != nil {
 		fields = append(fields, billofmaterials.FieldKnownSince)
@@ -2387,6 +2427,8 @@ func (m *BillOfMaterialsMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case billofmaterials.FieldCollector:
 		return m.Collector()
+	case billofmaterials.FieldDocumentRef:
+		return m.DocumentRef()
 	case billofmaterials.FieldKnownSince:
 		return m.KnownSince()
 	case billofmaterials.FieldIncludedPackagesHash:
@@ -2422,6 +2464,8 @@ func (m *BillOfMaterialsMutation) OldField(ctx context.Context, name string) (en
 		return m.OldOrigin(ctx)
 	case billofmaterials.FieldCollector:
 		return m.OldCollector(ctx)
+	case billofmaterials.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	case billofmaterials.FieldKnownSince:
 		return m.OldKnownSince(ctx)
 	case billofmaterials.FieldIncludedPackagesHash:
@@ -2496,6 +2540,13 @@ func (m *BillOfMaterialsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case billofmaterials.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	case billofmaterials.FieldKnownSince:
 		v, ok := value.(time.Time)
@@ -2619,6 +2670,9 @@ func (m *BillOfMaterialsMutation) ResetField(name string) error {
 		return nil
 	case billofmaterials.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case billofmaterials.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	case billofmaterials.FieldKnownSince:
 		m.ResetKnownSince()
@@ -4377,6 +4431,7 @@ type CertifyLegalMutation struct {
 	time_scanned               *time.Time
 	origin                     *string
 	collector                  *string
+	document_ref               *string
 	declared_licenses_hash     *string
 	discovered_licenses_hash   *string
 	clearedFields              map[string]struct{}
@@ -4849,6 +4904,42 @@ func (m *CertifyLegalMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *CertifyLegalMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *CertifyLegalMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the CertifyLegal entity.
+// If the CertifyLegal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyLegalMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *CertifyLegalMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
 func (m *CertifyLegalMutation) SetDeclaredLicensesHash(s string) {
 	m.declared_licenses_hash = &s
@@ -5117,7 +5208,7 @@ func (m *CertifyLegalMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertifyLegalMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m._package != nil {
 		fields = append(fields, certifylegal.FieldPackageID)
 	}
@@ -5144,6 +5235,9 @@ func (m *CertifyLegalMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, certifylegal.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, certifylegal.FieldDocumentRef)
 	}
 	if m.declared_licenses_hash != nil {
 		fields = append(fields, certifylegal.FieldDeclaredLicensesHash)
@@ -5177,6 +5271,8 @@ func (m *CertifyLegalMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case certifylegal.FieldCollector:
 		return m.Collector()
+	case certifylegal.FieldDocumentRef:
+		return m.DocumentRef()
 	case certifylegal.FieldDeclaredLicensesHash:
 		return m.DeclaredLicensesHash()
 	case certifylegal.FieldDiscoveredLicensesHash:
@@ -5208,6 +5304,8 @@ func (m *CertifyLegalMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldOrigin(ctx)
 	case certifylegal.FieldCollector:
 		return m.OldCollector(ctx)
+	case certifylegal.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	case certifylegal.FieldDeclaredLicensesHash:
 		return m.OldDeclaredLicensesHash(ctx)
 	case certifylegal.FieldDiscoveredLicensesHash:
@@ -5283,6 +5381,13 @@ func (m *CertifyLegalMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case certifylegal.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	case certifylegal.FieldDeclaredLicensesHash:
 		v, ok := value.(string)
@@ -5388,6 +5493,9 @@ func (m *CertifyLegalMutation) ResetField(name string) error {
 		return nil
 	case certifylegal.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case certifylegal.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	case certifylegal.FieldDeclaredLicensesHash:
 		m.ResetDeclaredLicensesHash()
@@ -5560,6 +5668,7 @@ type CertifyScorecardMutation struct {
 	scorecard_commit   *string
 	origin             *string
 	collector          *string
+	document_ref       *string
 	checks_hash        *string
 	clearedFields      map[string]struct{}
 	source             *uuid.UUID
@@ -5996,6 +6105,42 @@ func (m *CertifyScorecardMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *CertifyScorecardMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *CertifyScorecardMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the CertifyScorecard entity.
+// If the CertifyScorecard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyScorecardMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *CertifyScorecardMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // SetChecksHash sets the "checks_hash" field.
 func (m *CertifyScorecardMutation) SetChecksHash(s string) {
 	m.checks_hash = &s
@@ -6093,7 +6238,7 @@ func (m *CertifyScorecardMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertifyScorecardMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.source != nil {
 		fields = append(fields, certifyscorecard.FieldSourceID)
 	}
@@ -6117,6 +6262,9 @@ func (m *CertifyScorecardMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, certifyscorecard.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, certifyscorecard.FieldDocumentRef)
 	}
 	if m.checks_hash != nil {
 		fields = append(fields, certifyscorecard.FieldChecksHash)
@@ -6145,6 +6293,8 @@ func (m *CertifyScorecardMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case certifyscorecard.FieldCollector:
 		return m.Collector()
+	case certifyscorecard.FieldDocumentRef:
+		return m.DocumentRef()
 	case certifyscorecard.FieldChecksHash:
 		return m.ChecksHash()
 	}
@@ -6172,6 +6322,8 @@ func (m *CertifyScorecardMutation) OldField(ctx context.Context, name string) (e
 		return m.OldOrigin(ctx)
 	case certifyscorecard.FieldCollector:
 		return m.OldCollector(ctx)
+	case certifyscorecard.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	case certifyscorecard.FieldChecksHash:
 		return m.OldChecksHash(ctx)
 	}
@@ -6238,6 +6390,13 @@ func (m *CertifyScorecardMutation) SetField(name string, value ent.Value) error 
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case certifyscorecard.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	case certifyscorecard.FieldChecksHash:
 		v, ok := value.(string)
@@ -6334,6 +6493,9 @@ func (m *CertifyScorecardMutation) ResetField(name string) error {
 	case certifyscorecard.FieldCollector:
 		m.ResetCollector()
 		return nil
+	case certifyscorecard.FieldDocumentRef:
+		m.ResetDocumentRef()
+		return nil
 	case certifyscorecard.FieldChecksHash:
 		m.ResetChecksHash()
 		return nil
@@ -6428,6 +6590,7 @@ type CertifyVexMutation struct {
 	justification        *string
 	origin               *string
 	collector            *string
+	document_ref         *string
 	clearedFields        map[string]struct{}
 	_package             *uuid.UUID
 	cleared_package      bool
@@ -6930,6 +7093,42 @@ func (m *CertifyVexMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *CertifyVexMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *CertifyVexMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the CertifyVex entity.
+// If the CertifyVex object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyVexMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *CertifyVexMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // ClearPackage clears the "package" edge to the PackageVersion entity.
 func (m *CertifyVexMutation) ClearPackage() {
 	m.cleared_package = true
@@ -7045,7 +7244,7 @@ func (m *CertifyVexMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertifyVexMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m._package != nil {
 		fields = append(fields, certifyvex.FieldPackageID)
 	}
@@ -7076,6 +7275,9 @@ func (m *CertifyVexMutation) Fields() []string {
 	if m.collector != nil {
 		fields = append(fields, certifyvex.FieldCollector)
 	}
+	if m.document_ref != nil {
+		fields = append(fields, certifyvex.FieldDocumentRef)
+	}
 	return fields
 }
 
@@ -7104,6 +7306,8 @@ func (m *CertifyVexMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case certifyvex.FieldCollector:
 		return m.Collector()
+	case certifyvex.FieldDocumentRef:
+		return m.DocumentRef()
 	}
 	return nil, false
 }
@@ -7133,6 +7337,8 @@ func (m *CertifyVexMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldOrigin(ctx)
 	case certifyvex.FieldCollector:
 		return m.OldCollector(ctx)
+	case certifyvex.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	}
 	return nil, fmt.Errorf("unknown CertifyVex field %s", name)
 }
@@ -7211,6 +7417,13 @@ func (m *CertifyVexMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case certifyvex.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CertifyVex field %s", name)
@@ -7305,6 +7518,9 @@ func (m *CertifyVexMutation) ResetField(name string) error {
 		return nil
 	case certifyvex.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case certifyvex.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	}
 	return fmt.Errorf("unknown CertifyVex field %s", name)
@@ -7433,6 +7649,7 @@ type CertifyVulnMutation struct {
 	scanner_version      *string
 	origin               *string
 	collector            *string
+	document_ref         *string
 	clearedFields        map[string]struct{}
 	vulnerability        *uuid.UUID
 	clearedvulnerability bool
@@ -7871,6 +8088,42 @@ func (m *CertifyVulnMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *CertifyVulnMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *CertifyVulnMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the CertifyVuln entity.
+// If the CertifyVuln object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertifyVulnMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *CertifyVulnMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // ClearVulnerability clears the "vulnerability" edge to the VulnerabilityID entity.
 func (m *CertifyVulnMutation) ClearVulnerability() {
 	m.clearedvulnerability = true
@@ -7959,7 +8212,7 @@ func (m *CertifyVulnMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertifyVulnMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.vulnerability != nil {
 		fields = append(fields, certifyvuln.FieldVulnerabilityID)
 	}
@@ -7987,6 +8240,9 @@ func (m *CertifyVulnMutation) Fields() []string {
 	if m.collector != nil {
 		fields = append(fields, certifyvuln.FieldCollector)
 	}
+	if m.document_ref != nil {
+		fields = append(fields, certifyvuln.FieldDocumentRef)
+	}
 	return fields
 }
 
@@ -8013,6 +8269,8 @@ func (m *CertifyVulnMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case certifyvuln.FieldCollector:
 		return m.Collector()
+	case certifyvuln.FieldDocumentRef:
+		return m.DocumentRef()
 	}
 	return nil, false
 }
@@ -8040,6 +8298,8 @@ func (m *CertifyVulnMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldOrigin(ctx)
 	case certifyvuln.FieldCollector:
 		return m.OldCollector(ctx)
+	case certifyvuln.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	}
 	return nil, fmt.Errorf("unknown CertifyVuln field %s", name)
 }
@@ -8111,6 +8371,13 @@ func (m *CertifyVulnMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case certifyvuln.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CertifyVuln field %s", name)
@@ -8187,6 +8454,9 @@ func (m *CertifyVulnMutation) ResetField(name string) error {
 		return nil
 	case certifyvuln.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case certifyvuln.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	}
 	return fmt.Errorf("unknown CertifyVuln field %s", name)
@@ -8295,6 +8565,7 @@ type DependencyMutation struct {
 	justification                    *string
 	origin                           *string
 	collector                        *string
+	document_ref                     *string
 	clearedFields                    map[string]struct{}
 	_package                         *uuid.UUID
 	cleared_package                  bool
@@ -8728,6 +8999,42 @@ func (m *DependencyMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *DependencyMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *DependencyMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the Dependency entity.
+// If the Dependency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DependencyMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *DependencyMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // ClearPackage clears the "package" edge to the PackageVersion entity.
 func (m *DependencyMutation) ClearPackage() {
 	m.cleared_package = true
@@ -8897,7 +9204,7 @@ func (m *DependencyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DependencyMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m._package != nil {
 		fields = append(fields, dependency.FieldPackageID)
 	}
@@ -8921,6 +9228,9 @@ func (m *DependencyMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, dependency.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, dependency.FieldDocumentRef)
 	}
 	return fields
 }
@@ -8946,6 +9256,8 @@ func (m *DependencyMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case dependency.FieldCollector:
 		return m.Collector()
+	case dependency.FieldDocumentRef:
+		return m.DocumentRef()
 	}
 	return nil, false
 }
@@ -8971,6 +9283,8 @@ func (m *DependencyMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldOrigin(ctx)
 	case dependency.FieldCollector:
 		return m.OldCollector(ctx)
+	case dependency.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	}
 	return nil, fmt.Errorf("unknown Dependency field %s", name)
 }
@@ -9035,6 +9349,13 @@ func (m *DependencyMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case dependency.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency field %s", name)
@@ -9123,6 +9444,9 @@ func (m *DependencyMutation) ResetField(name string) error {
 		return nil
 	case dependency.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case dependency.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	}
 	return fmt.Errorf("unknown Dependency field %s", name)
@@ -9278,6 +9602,7 @@ type HasMetadataMutation struct {
 	justification          *string
 	origin                 *string
 	collector              *string
+	document_ref           *string
 	clearedFields          map[string]struct{}
 	source                 *uuid.UUID
 	clearedsource          bool
@@ -9808,6 +10133,42 @@ func (m *HasMetadataMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *HasMetadataMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *HasMetadataMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the HasMetadata entity.
+// If the HasMetadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HasMetadataMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *HasMetadataMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // ClearSource clears the "source" edge to the SourceName entity.
 func (m *HasMetadataMutation) ClearSource() {
 	m.clearedsource = true
@@ -9963,7 +10324,7 @@ func (m *HasMetadataMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *HasMetadataMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.source != nil {
 		fields = append(fields, hasmetadata.FieldSourceID)
 	}
@@ -9994,6 +10355,9 @@ func (m *HasMetadataMutation) Fields() []string {
 	if m.collector != nil {
 		fields = append(fields, hasmetadata.FieldCollector)
 	}
+	if m.document_ref != nil {
+		fields = append(fields, hasmetadata.FieldDocumentRef)
+	}
 	return fields
 }
 
@@ -10022,6 +10386,8 @@ func (m *HasMetadataMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case hasmetadata.FieldCollector:
 		return m.Collector()
+	case hasmetadata.FieldDocumentRef:
+		return m.DocumentRef()
 	}
 	return nil, false
 }
@@ -10051,6 +10417,8 @@ func (m *HasMetadataMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldOrigin(ctx)
 	case hasmetadata.FieldCollector:
 		return m.OldCollector(ctx)
+	case hasmetadata.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	}
 	return nil, fmt.Errorf("unknown HasMetadata field %s", name)
 }
@@ -10129,6 +10497,13 @@ func (m *HasMetadataMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case hasmetadata.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	}
 	return fmt.Errorf("unknown HasMetadata field %s", name)
@@ -10235,6 +10610,9 @@ func (m *HasMetadataMutation) ResetField(name string) error {
 		return nil
 	case hasmetadata.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case hasmetadata.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	}
 	return fmt.Errorf("unknown HasMetadata field %s", name)
@@ -10378,6 +10756,7 @@ type HasSourceAtMutation struct {
 	justification          *string
 	origin                 *string
 	collector              *string
+	document_ref           *string
 	clearedFields          map[string]struct{}
 	package_version        *uuid.UUID
 	clearedpackage_version bool
@@ -10772,6 +11151,42 @@ func (m *HasSourceAtMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *HasSourceAtMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *HasSourceAtMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the HasSourceAt entity.
+// If the HasSourceAt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HasSourceAtMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *HasSourceAtMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // ClearPackageVersion clears the "package_version" edge to the PackageVersion entity.
 func (m *HasSourceAtMutation) ClearPackageVersion() {
 	m.clearedpackage_version = true
@@ -10900,7 +11315,7 @@ func (m *HasSourceAtMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *HasSourceAtMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.package_version != nil {
 		fields = append(fields, hassourceat.FieldPackageVersionID)
 	}
@@ -10921,6 +11336,9 @@ func (m *HasSourceAtMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, hassourceat.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, hassourceat.FieldDocumentRef)
 	}
 	return fields
 }
@@ -10944,6 +11362,8 @@ func (m *HasSourceAtMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case hassourceat.FieldCollector:
 		return m.Collector()
+	case hassourceat.FieldDocumentRef:
+		return m.DocumentRef()
 	}
 	return nil, false
 }
@@ -10967,6 +11387,8 @@ func (m *HasSourceAtMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldOrigin(ctx)
 	case hassourceat.FieldCollector:
 		return m.OldCollector(ctx)
+	case hassourceat.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	}
 	return nil, fmt.Errorf("unknown HasSourceAt field %s", name)
 }
@@ -11024,6 +11446,13 @@ func (m *HasSourceAtMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case hassourceat.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	}
 	return fmt.Errorf("unknown HasSourceAt field %s", name)
@@ -11109,6 +11538,9 @@ func (m *HasSourceAtMutation) ResetField(name string) error {
 		return nil
 	case hassourceat.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case hassourceat.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	}
 	return fmt.Errorf("unknown HasSourceAt field %s", name)
@@ -11233,6 +11665,7 @@ type HashEqualMutation struct {
 	origin            *string
 	collector         *string
 	justification     *string
+	document_ref      *string
 	artifacts_hash    *string
 	clearedFields     map[string]struct{}
 	artifact_a        *uuid.UUID
@@ -11528,6 +11961,42 @@ func (m *HashEqualMutation) ResetJustification() {
 	m.justification = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *HashEqualMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *HashEqualMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the HashEqual entity.
+// If the HashEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HashEqualMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *HashEqualMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // SetArtifactsHash sets the "artifacts_hash" field.
 func (m *HashEqualMutation) SetArtifactsHash(s string) {
 	m.artifacts_hash = &s
@@ -11678,7 +12147,7 @@ func (m *HashEqualMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *HashEqualMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.artifact_a != nil {
 		fields = append(fields, hashequal.FieldArtID)
 	}
@@ -11693,6 +12162,9 @@ func (m *HashEqualMutation) Fields() []string {
 	}
 	if m.justification != nil {
 		fields = append(fields, hashequal.FieldJustification)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, hashequal.FieldDocumentRef)
 	}
 	if m.artifacts_hash != nil {
 		fields = append(fields, hashequal.FieldArtifactsHash)
@@ -11715,6 +12187,8 @@ func (m *HashEqualMutation) Field(name string) (ent.Value, bool) {
 		return m.Collector()
 	case hashequal.FieldJustification:
 		return m.Justification()
+	case hashequal.FieldDocumentRef:
+		return m.DocumentRef()
 	case hashequal.FieldArtifactsHash:
 		return m.ArtifactsHash()
 	}
@@ -11736,6 +12210,8 @@ func (m *HashEqualMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldCollector(ctx)
 	case hashequal.FieldJustification:
 		return m.OldJustification(ctx)
+	case hashequal.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	case hashequal.FieldArtifactsHash:
 		return m.OldArtifactsHash(ctx)
 	}
@@ -11781,6 +12257,13 @@ func (m *HashEqualMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetJustification(v)
+		return nil
+	case hashequal.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	case hashequal.FieldArtifactsHash:
 		v, ok := value.(string)
@@ -11852,6 +12335,9 @@ func (m *HashEqualMutation) ResetField(name string) error {
 		return nil
 	case hashequal.FieldJustification:
 		m.ResetJustification()
+		return nil
+	case hashequal.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	case hashequal.FieldArtifactsHash:
 		m.ResetArtifactsHash()
@@ -12618,6 +13104,7 @@ type OccurrenceMutation struct {
 	justification            *string
 	origin                   *string
 	collector                *string
+	document_ref             *string
 	clearedFields            map[string]struct{}
 	artifact                 *uuid.UUID
 	clearedartifact          bool
@@ -12879,6 +13366,42 @@ func (m *OccurrenceMutation) OldCollector(ctx context.Context) (v string, err er
 // ResetCollector resets all changes to the "collector" field.
 func (m *OccurrenceMutation) ResetCollector() {
 	m.collector = nil
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (m *OccurrenceMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *OccurrenceMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the Occurrence entity.
+// If the Occurrence object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OccurrenceMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *OccurrenceMutation) ResetDocumentRef() {
+	m.document_ref = nil
 }
 
 // SetSourceID sets the "source_id" field.
@@ -13148,7 +13671,7 @@ func (m *OccurrenceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OccurrenceMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.artifact != nil {
 		fields = append(fields, occurrence.FieldArtifactID)
 	}
@@ -13160,6 +13683,9 @@ func (m *OccurrenceMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, occurrence.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, occurrence.FieldDocumentRef)
 	}
 	if m.source != nil {
 		fields = append(fields, occurrence.FieldSourceID)
@@ -13183,6 +13709,8 @@ func (m *OccurrenceMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case occurrence.FieldCollector:
 		return m.Collector()
+	case occurrence.FieldDocumentRef:
+		return m.DocumentRef()
 	case occurrence.FieldSourceID:
 		return m.SourceID()
 	case occurrence.FieldPackageID:
@@ -13204,6 +13732,8 @@ func (m *OccurrenceMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldOrigin(ctx)
 	case occurrence.FieldCollector:
 		return m.OldCollector(ctx)
+	case occurrence.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	case occurrence.FieldSourceID:
 		return m.OldSourceID(ctx)
 	case occurrence.FieldPackageID:
@@ -13244,6 +13774,13 @@ func (m *OccurrenceMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case occurrence.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	case occurrence.FieldSourceID:
 		v, ok := value.(uuid.UUID)
@@ -13334,6 +13871,9 @@ func (m *OccurrenceMutation) ResetField(name string) error {
 		return nil
 	case occurrence.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case occurrence.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	case occurrence.FieldSourceID:
 		m.ResetSourceID()
@@ -16244,6 +16784,7 @@ type PkgEqualMutation struct {
 	id               *uuid.UUID
 	origin           *string
 	collector        *string
+	document_ref     *string
 	justification    *string
 	packages_hash    *string
 	clearedFields    map[string]struct{}
@@ -16504,6 +17045,42 @@ func (m *PkgEqualMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *PkgEqualMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *PkgEqualMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the PkgEqual entity.
+// If the PkgEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PkgEqualMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *PkgEqualMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // SetJustification sets the "justification" field.
 func (m *PkgEqualMutation) SetJustification(s string) {
 	m.justification = &s
@@ -16690,7 +17267,7 @@ func (m *PkgEqualMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PkgEqualMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.package_a != nil {
 		fields = append(fields, pkgequal.FieldPkgID)
 	}
@@ -16702,6 +17279,9 @@ func (m *PkgEqualMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, pkgequal.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, pkgequal.FieldDocumentRef)
 	}
 	if m.justification != nil {
 		fields = append(fields, pkgequal.FieldJustification)
@@ -16725,6 +17305,8 @@ func (m *PkgEqualMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case pkgequal.FieldCollector:
 		return m.Collector()
+	case pkgequal.FieldDocumentRef:
+		return m.DocumentRef()
 	case pkgequal.FieldJustification:
 		return m.Justification()
 	case pkgequal.FieldPackagesHash:
@@ -16746,6 +17328,8 @@ func (m *PkgEqualMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldOrigin(ctx)
 	case pkgequal.FieldCollector:
 		return m.OldCollector(ctx)
+	case pkgequal.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	case pkgequal.FieldJustification:
 		return m.OldJustification(ctx)
 	case pkgequal.FieldPackagesHash:
@@ -16786,6 +17370,13 @@ func (m *PkgEqualMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case pkgequal.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	case pkgequal.FieldJustification:
 		v, ok := value.(string)
@@ -16861,6 +17452,9 @@ func (m *PkgEqualMutation) ResetField(name string) error {
 		return nil
 	case pkgequal.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case pkgequal.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	case pkgequal.FieldJustification:
 		m.ResetJustification()
@@ -16976,6 +17570,7 @@ type PointOfContactMutation struct {
 	justification          *string
 	origin                 *string
 	collector              *string
+	document_ref           *string
 	clearedFields          map[string]struct{}
 	source                 *uuid.UUID
 	clearedsource          bool
@@ -17506,6 +18101,42 @@ func (m *PointOfContactMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *PointOfContactMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *PointOfContactMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the PointOfContact entity.
+// If the PointOfContact object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointOfContactMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *PointOfContactMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // ClearSource clears the "source" edge to the SourceName entity.
 func (m *PointOfContactMutation) ClearSource() {
 	m.clearedsource = true
@@ -17661,7 +18292,7 @@ func (m *PointOfContactMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PointOfContactMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.source != nil {
 		fields = append(fields, pointofcontact.FieldSourceID)
 	}
@@ -17692,6 +18323,9 @@ func (m *PointOfContactMutation) Fields() []string {
 	if m.collector != nil {
 		fields = append(fields, pointofcontact.FieldCollector)
 	}
+	if m.document_ref != nil {
+		fields = append(fields, pointofcontact.FieldDocumentRef)
+	}
 	return fields
 }
 
@@ -17720,6 +18354,8 @@ func (m *PointOfContactMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case pointofcontact.FieldCollector:
 		return m.Collector()
+	case pointofcontact.FieldDocumentRef:
+		return m.DocumentRef()
 	}
 	return nil, false
 }
@@ -17749,6 +18385,8 @@ func (m *PointOfContactMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldOrigin(ctx)
 	case pointofcontact.FieldCollector:
 		return m.OldCollector(ctx)
+	case pointofcontact.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	}
 	return nil, fmt.Errorf("unknown PointOfContact field %s", name)
 }
@@ -17827,6 +18465,13 @@ func (m *PointOfContactMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case pointofcontact.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PointOfContact field %s", name)
@@ -17933,6 +18578,9 @@ func (m *PointOfContactMutation) ResetField(name string) error {
 		return nil
 	case pointofcontact.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case pointofcontact.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	}
 	return fmt.Errorf("unknown PointOfContact field %s", name)
@@ -18080,6 +18728,7 @@ type SLSAAttestationMutation struct {
 	finished_on          *time.Time
 	origin               *string
 	collector            *string
+	document_ref         *string
 	built_from_hash      *string
 	clearedFields        map[string]struct{}
 	built_from           map[uuid.UUID]struct{}
@@ -18551,6 +19200,42 @@ func (m *SLSAAttestationMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *SLSAAttestationMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *SLSAAttestationMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the SLSAAttestation entity.
+// If the SLSAAttestation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SLSAAttestationMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *SLSAAttestationMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // SetBuiltFromHash sets the "built_from_hash" field.
 func (m *SLSAAttestationMutation) SetBuiltFromHash(s string) {
 	m.built_from_hash = &s
@@ -18729,7 +19414,7 @@ func (m *SLSAAttestationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SLSAAttestationMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.build_type != nil {
 		fields = append(fields, slsaattestation.FieldBuildType)
 	}
@@ -18756,6 +19441,9 @@ func (m *SLSAAttestationMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, slsaattestation.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, slsaattestation.FieldDocumentRef)
 	}
 	if m.built_from_hash != nil {
 		fields = append(fields, slsaattestation.FieldBuiltFromHash)
@@ -18786,6 +19474,8 @@ func (m *SLSAAttestationMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case slsaattestation.FieldCollector:
 		return m.Collector()
+	case slsaattestation.FieldDocumentRef:
+		return m.DocumentRef()
 	case slsaattestation.FieldBuiltFromHash:
 		return m.BuiltFromHash()
 	}
@@ -18815,6 +19505,8 @@ func (m *SLSAAttestationMutation) OldField(ctx context.Context, name string) (en
 		return m.OldOrigin(ctx)
 	case slsaattestation.FieldCollector:
 		return m.OldCollector(ctx)
+	case slsaattestation.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	case slsaattestation.FieldBuiltFromHash:
 		return m.OldBuiltFromHash(ctx)
 	}
@@ -18888,6 +19580,13 @@ func (m *SLSAAttestationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case slsaattestation.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	case slsaattestation.FieldBuiltFromHash:
 		v, ok := value.(string)
@@ -18980,6 +19679,9 @@ func (m *SLSAAttestationMutation) ResetField(name string) error {
 		return nil
 	case slsaattestation.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case slsaattestation.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	case slsaattestation.FieldBuiltFromHash:
 		m.ResetBuiltFromHash()
@@ -20297,6 +20999,7 @@ type VulnEqualMutation struct {
 	justification          *string
 	origin                 *string
 	collector              *string
+	document_ref           *string
 	vulnerabilities_hash   *string
 	clearedFields          map[string]struct{}
 	vulnerability_a        *uuid.UUID
@@ -20592,6 +21295,42 @@ func (m *VulnEqualMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *VulnEqualMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *VulnEqualMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the VulnEqual entity.
+// If the VulnEqual object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VulnEqualMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *VulnEqualMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
 func (m *VulnEqualMutation) SetVulnerabilitiesHash(s string) {
 	m.vulnerabilities_hash = &s
@@ -20742,7 +21481,7 @@ func (m *VulnEqualMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VulnEqualMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.vulnerability_a != nil {
 		fields = append(fields, vulnequal.FieldVulnID)
 	}
@@ -20757,6 +21496,9 @@ func (m *VulnEqualMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, vulnequal.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, vulnequal.FieldDocumentRef)
 	}
 	if m.vulnerabilities_hash != nil {
 		fields = append(fields, vulnequal.FieldVulnerabilitiesHash)
@@ -20779,6 +21521,8 @@ func (m *VulnEqualMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case vulnequal.FieldCollector:
 		return m.Collector()
+	case vulnequal.FieldDocumentRef:
+		return m.DocumentRef()
 	case vulnequal.FieldVulnerabilitiesHash:
 		return m.VulnerabilitiesHash()
 	}
@@ -20800,6 +21544,8 @@ func (m *VulnEqualMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldOrigin(ctx)
 	case vulnequal.FieldCollector:
 		return m.OldCollector(ctx)
+	case vulnequal.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	case vulnequal.FieldVulnerabilitiesHash:
 		return m.OldVulnerabilitiesHash(ctx)
 	}
@@ -20845,6 +21591,13 @@ func (m *VulnEqualMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case vulnequal.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	case vulnequal.FieldVulnerabilitiesHash:
 		v, ok := value.(string)
@@ -20916,6 +21669,9 @@ func (m *VulnEqualMutation) ResetField(name string) error {
 		return nil
 	case vulnequal.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case vulnequal.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	case vulnequal.FieldVulnerabilitiesHash:
 		m.ResetVulnerabilitiesHash()
@@ -21839,6 +22595,7 @@ type VulnerabilityMetadataMutation struct {
 	timestamp               *time.Time
 	origin                  *string
 	collector               *string
+	document_ref            *string
 	clearedFields           map[string]struct{}
 	vulnerability_id        *uuid.UUID
 	clearedvulnerability_id bool
@@ -22187,6 +22944,42 @@ func (m *VulnerabilityMetadataMutation) ResetCollector() {
 	m.collector = nil
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (m *VulnerabilityMetadataMutation) SetDocumentRef(s string) {
+	m.document_ref = &s
+}
+
+// DocumentRef returns the value of the "document_ref" field in the mutation.
+func (m *VulnerabilityMetadataMutation) DocumentRef() (r string, exists bool) {
+	v := m.document_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRef returns the old "document_ref" field's value of the VulnerabilityMetadata entity.
+// If the VulnerabilityMetadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VulnerabilityMetadataMutation) OldDocumentRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRef: %w", err)
+	}
+	return oldValue.DocumentRef, nil
+}
+
+// ResetDocumentRef resets all changes to the "document_ref" field.
+func (m *VulnerabilityMetadataMutation) ResetDocumentRef() {
+	m.document_ref = nil
+}
+
 // ClearVulnerabilityID clears the "vulnerability_id" edge to the VulnerabilityID entity.
 func (m *VulnerabilityMetadataMutation) ClearVulnerabilityID() {
 	m.clearedvulnerability_id = true
@@ -22248,7 +23041,7 @@ func (m *VulnerabilityMetadataMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VulnerabilityMetadataMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.vulnerability_id != nil {
 		fields = append(fields, vulnerabilitymetadata.FieldVulnerabilityIDID)
 	}
@@ -22266,6 +23059,9 @@ func (m *VulnerabilityMetadataMutation) Fields() []string {
 	}
 	if m.collector != nil {
 		fields = append(fields, vulnerabilitymetadata.FieldCollector)
+	}
+	if m.document_ref != nil {
+		fields = append(fields, vulnerabilitymetadata.FieldDocumentRef)
 	}
 	return fields
 }
@@ -22287,6 +23083,8 @@ func (m *VulnerabilityMetadataMutation) Field(name string) (ent.Value, bool) {
 		return m.Origin()
 	case vulnerabilitymetadata.FieldCollector:
 		return m.Collector()
+	case vulnerabilitymetadata.FieldDocumentRef:
+		return m.DocumentRef()
 	}
 	return nil, false
 }
@@ -22308,6 +23106,8 @@ func (m *VulnerabilityMetadataMutation) OldField(ctx context.Context, name strin
 		return m.OldOrigin(ctx)
 	case vulnerabilitymetadata.FieldCollector:
 		return m.OldCollector(ctx)
+	case vulnerabilitymetadata.FieldDocumentRef:
+		return m.OldDocumentRef(ctx)
 	}
 	return nil, fmt.Errorf("unknown VulnerabilityMetadata field %s", name)
 }
@@ -22358,6 +23158,13 @@ func (m *VulnerabilityMetadataMutation) SetField(name string, value ent.Value) e
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCollector(v)
+		return nil
+	case vulnerabilitymetadata.FieldDocumentRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRef(v)
 		return nil
 	}
 	return fmt.Errorf("unknown VulnerabilityMetadata field %s", name)
@@ -22440,6 +23247,9 @@ func (m *VulnerabilityMetadataMutation) ResetField(name string) error {
 		return nil
 	case vulnerabilitymetadata.FieldCollector:
 		m.ResetCollector()
+		return nil
+	case vulnerabilitymetadata.FieldDocumentRef:
+		m.ResetDocumentRef()
 		return nil
 	}
 	return fmt.Errorf("unknown VulnerabilityMetadata field %s", name)

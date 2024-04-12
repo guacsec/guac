@@ -85,6 +85,20 @@ func (peu *PkgEqualUpdate) SetNillableCollector(s *string) *PkgEqualUpdate {
 	return peu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (peu *PkgEqualUpdate) SetDocumentRef(s string) *PkgEqualUpdate {
+	peu.mutation.SetDocumentRef(s)
+	return peu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (peu *PkgEqualUpdate) SetNillableDocumentRef(s *string) *PkgEqualUpdate {
+	if s != nil {
+		peu.SetDocumentRef(*s)
+	}
+	return peu
+}
+
 // SetJustification sets the "justification" field.
 func (peu *PkgEqualUpdate) SetJustification(s string) *PkgEqualUpdate {
 	peu.mutation.SetJustification(s)
@@ -207,6 +221,9 @@ func (peu *PkgEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := peu.mutation.Collector(); ok {
 		_spec.SetField(pkgequal.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := peu.mutation.DocumentRef(); ok {
+		_spec.SetField(pkgequal.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := peu.mutation.Justification(); ok {
 		_spec.SetField(pkgequal.FieldJustification, field.TypeString, value)
@@ -344,6 +361,20 @@ func (peuo *PkgEqualUpdateOne) SetCollector(s string) *PkgEqualUpdateOne {
 func (peuo *PkgEqualUpdateOne) SetNillableCollector(s *string) *PkgEqualUpdateOne {
 	if s != nil {
 		peuo.SetCollector(*s)
+	}
+	return peuo
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (peuo *PkgEqualUpdateOne) SetDocumentRef(s string) *PkgEqualUpdateOne {
+	peuo.mutation.SetDocumentRef(s)
+	return peuo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (peuo *PkgEqualUpdateOne) SetNillableDocumentRef(s *string) *PkgEqualUpdateOne {
+	if s != nil {
+		peuo.SetDocumentRef(*s)
 	}
 	return peuo
 }
@@ -500,6 +531,9 @@ func (peuo *PkgEqualUpdateOne) sqlSave(ctx context.Context) (_node *PkgEqual, er
 	}
 	if value, ok := peuo.mutation.Collector(); ok {
 		_spec.SetField(pkgequal.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := peuo.mutation.DocumentRef(); ok {
+		_spec.SetField(pkgequal.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := peuo.mutation.Justification(); ok {
 		_spec.SetField(pkgequal.FieldJustification, field.TypeString, value)

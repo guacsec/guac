@@ -90,6 +90,12 @@ func (dc *DependencyCreate) SetCollector(s string) *DependencyCreate {
 	return dc
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (dc *DependencyCreate) SetDocumentRef(s string) *DependencyCreate {
+	dc.mutation.SetDocumentRef(s)
+	return dc
+}
+
 // SetID sets the "id" field.
 func (dc *DependencyCreate) SetID(u uuid.UUID) *DependencyCreate {
 	dc.mutation.SetID(u)
@@ -200,6 +206,9 @@ func (dc *DependencyCreate) check() error {
 	if _, ok := dc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "Dependency.collector"`)}
 	}
+	if _, ok := dc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "Dependency.document_ref"`)}
+	}
 	if _, ok := dc.mutation.PackageID(); !ok {
 		return &ValidationError{Name: "package", err: errors.New(`ent: missing required edge "Dependency.package"`)}
 	}
@@ -258,6 +267,10 @@ func (dc *DependencyCreate) createSpec() (*Dependency, *sqlgraph.CreateSpec) {
 	if value, ok := dc.mutation.Collector(); ok {
 		_spec.SetField(dependency.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := dc.mutation.DocumentRef(); ok {
+		_spec.SetField(dependency.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if nodes := dc.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -486,6 +499,18 @@ func (u *DependencyUpsert) UpdateCollector() *DependencyUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *DependencyUpsert) SetDocumentRef(v string) *DependencyUpsert {
+	u.Set(dependency.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *DependencyUpsert) UpdateDocumentRef() *DependencyUpsert {
+	u.SetExcluded(dependency.FieldDocumentRef)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -657,6 +682,20 @@ func (u *DependencyUpsertOne) SetCollector(v string) *DependencyUpsertOne {
 func (u *DependencyUpsertOne) UpdateCollector() *DependencyUpsertOne {
 	return u.Update(func(s *DependencyUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *DependencyUpsertOne) SetDocumentRef(v string) *DependencyUpsertOne {
+	return u.Update(func(s *DependencyUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *DependencyUpsertOne) UpdateDocumentRef() *DependencyUpsertOne {
+	return u.Update(func(s *DependencyUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -998,6 +1037,20 @@ func (u *DependencyUpsertBulk) SetCollector(v string) *DependencyUpsertBulk {
 func (u *DependencyUpsertBulk) UpdateCollector() *DependencyUpsertBulk {
 	return u.Update(func(s *DependencyUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *DependencyUpsertBulk) SetDocumentRef(v string) *DependencyUpsertBulk {
+	return u.Update(func(s *DependencyUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *DependencyUpsertBulk) UpdateDocumentRef() *DependencyUpsertBulk {
+	return u.Update(func(s *DependencyUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

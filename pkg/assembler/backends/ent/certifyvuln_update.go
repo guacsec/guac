@@ -157,6 +157,20 @@ func (cvu *CertifyVulnUpdate) SetNillableCollector(s *string) *CertifyVulnUpdate
 	return cvu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (cvu *CertifyVulnUpdate) SetDocumentRef(s string) *CertifyVulnUpdate {
+	cvu.mutation.SetDocumentRef(s)
+	return cvu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (cvu *CertifyVulnUpdate) SetNillableDocumentRef(s *string) *CertifyVulnUpdate {
+	if s != nil {
+		cvu.SetDocumentRef(*s)
+	}
+	return cvu
+}
+
 // SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
 func (cvu *CertifyVulnUpdate) SetVulnerability(v *VulnerabilityID) *CertifyVulnUpdate {
 	return cvu.SetVulnerabilityID(v.ID)
@@ -254,6 +268,9 @@ func (cvu *CertifyVulnUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cvu.mutation.Collector(); ok {
 		_spec.SetField(certifyvuln.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := cvu.mutation.DocumentRef(); ok {
+		_spec.SetField(certifyvuln.FieldDocumentRef, field.TypeString, value)
 	}
 	if cvu.mutation.VulnerabilityCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -459,6 +476,20 @@ func (cvuo *CertifyVulnUpdateOne) SetNillableCollector(s *string) *CertifyVulnUp
 	return cvuo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (cvuo *CertifyVulnUpdateOne) SetDocumentRef(s string) *CertifyVulnUpdateOne {
+	cvuo.mutation.SetDocumentRef(s)
+	return cvuo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (cvuo *CertifyVulnUpdateOne) SetNillableDocumentRef(s *string) *CertifyVulnUpdateOne {
+	if s != nil {
+		cvuo.SetDocumentRef(*s)
+	}
+	return cvuo
+}
+
 // SetVulnerability sets the "vulnerability" edge to the VulnerabilityID entity.
 func (cvuo *CertifyVulnUpdateOne) SetVulnerability(v *VulnerabilityID) *CertifyVulnUpdateOne {
 	return cvuo.SetVulnerabilityID(v.ID)
@@ -586,6 +617,9 @@ func (cvuo *CertifyVulnUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVu
 	}
 	if value, ok := cvuo.mutation.Collector(); ok {
 		_spec.SetField(certifyvuln.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := cvuo.mutation.DocumentRef(); ok {
+		_spec.SetField(certifyvuln.FieldDocumentRef, field.TypeString, value)
 	}
 	if cvuo.mutation.VulnerabilityCleared() {
 		edge := &sqlgraph.EdgeSpec{

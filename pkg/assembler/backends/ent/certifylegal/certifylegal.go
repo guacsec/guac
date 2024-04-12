@@ -31,6 +31,8 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldDocumentRef holds the string denoting the document_ref field in the database.
+	FieldDocumentRef = "document_ref"
 	// FieldDeclaredLicensesHash holds the string denoting the declared_licenses_hash field in the database.
 	FieldDeclaredLicensesHash = "declared_licenses_hash"
 	// FieldDiscoveredLicensesHash holds the string denoting the discovered_licenses_hash field in the database.
@@ -83,6 +85,7 @@ var Columns = []string{
 	FieldTimeScanned,
 	FieldOrigin,
 	FieldCollector,
+	FieldDocumentRef,
 	FieldDeclaredLicensesHash,
 	FieldDiscoveredLicensesHash,
 }
@@ -162,6 +165,11 @@ func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 // ByCollector orders the results by the collector field.
 func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
+}
+
+// ByDocumentRef orders the results by the document_ref field.
+func ByDocumentRef(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentRef, opts...).ToFunc()
 }
 
 // ByDeclaredLicensesHash orders the results by the declared_licenses_hash field.

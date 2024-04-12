@@ -120,6 +120,12 @@ func (pocc *PointOfContactCreate) SetCollector(s string) *PointOfContactCreate {
 	return pocc
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (pocc *PointOfContactCreate) SetDocumentRef(s string) *PointOfContactCreate {
+	pocc.mutation.SetDocumentRef(s)
+	return pocc
+}
+
 // SetID sets the "id" field.
 func (pocc *PointOfContactCreate) SetID(u uuid.UUID) *PointOfContactCreate {
 	pocc.mutation.SetID(u)
@@ -229,6 +235,9 @@ func (pocc *PointOfContactCreate) check() error {
 	if _, ok := pocc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "PointOfContact.collector"`)}
 	}
+	if _, ok := pocc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "PointOfContact.document_ref"`)}
+	}
 	return nil
 }
 
@@ -288,6 +297,10 @@ func (pocc *PointOfContactCreate) createSpec() (*PointOfContact, *sqlgraph.Creat
 	if value, ok := pocc.mutation.Collector(); ok {
 		_spec.SetField(pointofcontact.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := pocc.mutation.DocumentRef(); ok {
+		_spec.SetField(pointofcontact.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if nodes := pocc.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -553,6 +566,18 @@ func (u *PointOfContactUpsert) UpdateCollector() *PointOfContactUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *PointOfContactUpsert) SetDocumentRef(v string) *PointOfContactUpsert {
+	u.Set(pointofcontact.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *PointOfContactUpsert) UpdateDocumentRef() *PointOfContactUpsert {
+	u.SetExcluded(pointofcontact.FieldDocumentRef)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -766,6 +791,20 @@ func (u *PointOfContactUpsertOne) SetCollector(v string) *PointOfContactUpsertOn
 func (u *PointOfContactUpsertOne) UpdateCollector() *PointOfContactUpsertOne {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *PointOfContactUpsertOne) SetDocumentRef(v string) *PointOfContactUpsertOne {
+	return u.Update(func(s *PointOfContactUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *PointOfContactUpsertOne) UpdateDocumentRef() *PointOfContactUpsertOne {
+	return u.Update(func(s *PointOfContactUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -1149,6 +1188,20 @@ func (u *PointOfContactUpsertBulk) SetCollector(v string) *PointOfContactUpsertB
 func (u *PointOfContactUpsertBulk) UpdateCollector() *PointOfContactUpsertBulk {
 	return u.Update(func(s *PointOfContactUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *PointOfContactUpsertBulk) SetDocumentRef(v string) *PointOfContactUpsertBulk {
+	return u.Update(func(s *PointOfContactUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *PointOfContactUpsertBulk) UpdateDocumentRef() *PointOfContactUpsertBulk {
+	return u.Update(func(s *PointOfContactUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

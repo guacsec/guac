@@ -37,6 +37,8 @@ type CertifyScorecard struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// A SHA1 of the checks fields after sorting keys, used to ensure uniqueness of scorecard records.
 	ChecksHash string `json:"checks_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -78,7 +80,7 @@ func (*CertifyScorecard) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case certifyscorecard.FieldAggregateScore:
 			values[i] = new(sql.NullFloat64)
-		case certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldScorecardCommit, certifyscorecard.FieldOrigin, certifyscorecard.FieldCollector, certifyscorecard.FieldChecksHash:
+		case certifyscorecard.FieldScorecardVersion, certifyscorecard.FieldScorecardCommit, certifyscorecard.FieldOrigin, certifyscorecard.FieldCollector, certifyscorecard.FieldDocumentRef, certifyscorecard.FieldChecksHash:
 			values[i] = new(sql.NullString)
 		case certifyscorecard.FieldTimeScanned:
 			values[i] = new(sql.NullTime)
@@ -155,6 +157,12 @@ func (cs *CertifyScorecard) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				cs.Collector = value.String
 			}
+		case certifyscorecard.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				cs.DocumentRef = value.String
+			}
 		case certifyscorecard.FieldChecksHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field checks_hash", values[i])
@@ -225,6 +233,9 @@ func (cs *CertifyScorecard) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(cs.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(cs.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("checks_hash=")
 	builder.WriteString(cs.ChecksHash)

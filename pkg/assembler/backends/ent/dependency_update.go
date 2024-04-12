@@ -155,6 +155,20 @@ func (du *DependencyUpdate) SetNillableCollector(s *string) *DependencyUpdate {
 	return du
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (du *DependencyUpdate) SetDocumentRef(s string) *DependencyUpdate {
+	du.mutation.SetDocumentRef(s)
+	return du
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (du *DependencyUpdate) SetNillableDocumentRef(s *string) *DependencyUpdate {
+	if s != nil {
+		du.SetDocumentRef(*s)
+	}
+	return du
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (du *DependencyUpdate) SetPackage(p *PackageVersion) *DependencyUpdate {
 	return du.SetPackageID(p.ID)
@@ -295,6 +309,9 @@ func (du *DependencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := du.mutation.Collector(); ok {
 		_spec.SetField(dependency.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := du.mutation.DocumentRef(); ok {
+		_spec.SetField(dependency.FieldDocumentRef, field.TypeString, value)
 	}
 	if du.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -572,6 +589,20 @@ func (duo *DependencyUpdateOne) SetNillableCollector(s *string) *DependencyUpdat
 	return duo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (duo *DependencyUpdateOne) SetDocumentRef(s string) *DependencyUpdateOne {
+	duo.mutation.SetDocumentRef(s)
+	return duo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (duo *DependencyUpdateOne) SetNillableDocumentRef(s *string) *DependencyUpdateOne {
+	if s != nil {
+		duo.SetDocumentRef(*s)
+	}
+	return duo
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (duo *DependencyUpdateOne) SetPackage(p *PackageVersion) *DependencyUpdateOne {
 	return duo.SetPackageID(p.ID)
@@ -742,6 +773,9 @@ func (duo *DependencyUpdateOne) sqlSave(ctx context.Context) (_node *Dependency,
 	}
 	if value, ok := duo.mutation.Collector(); ok {
 		_spec.SetField(dependency.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := duo.mutation.DocumentRef(); ok {
+		_spec.SetField(dependency.FieldDocumentRef, field.TypeString, value)
 	}
 	if duo.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{

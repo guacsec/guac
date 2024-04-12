@@ -40,6 +40,8 @@ type SLSAAttestation struct {
 	Origin string `json:"origin,omitempty"`
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// Hash of the artifacts that was built
 	BuiltFromHash string `json:"built_from_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -107,7 +109,7 @@ func (*SLSAAttestation) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case slsaattestation.FieldSlsaPredicate:
 			values[i] = new([]byte)
-		case slsaattestation.FieldBuildType, slsaattestation.FieldSlsaVersion, slsaattestation.FieldOrigin, slsaattestation.FieldCollector, slsaattestation.FieldBuiltFromHash:
+		case slsaattestation.FieldBuildType, slsaattestation.FieldSlsaVersion, slsaattestation.FieldOrigin, slsaattestation.FieldCollector, slsaattestation.FieldDocumentRef, slsaattestation.FieldBuiltFromHash:
 			values[i] = new(sql.NullString)
 		case slsaattestation.FieldStartedOn, slsaattestation.FieldFinishedOn:
 			values[i] = new(sql.NullTime)
@@ -189,6 +191,12 @@ func (sa *SLSAAttestation) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				sa.Collector = value.String
+			}
+		case slsaattestation.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				sa.DocumentRef = value.String
 			}
 		case slsaattestation.FieldBuiltFromHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -273,6 +281,9 @@ func (sa *SLSAAttestation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(sa.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(sa.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("built_from_hash=")
 	builder.WriteString(sa.BuiltFromHash)

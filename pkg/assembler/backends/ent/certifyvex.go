@@ -41,6 +41,8 @@ type CertifyVex struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CertifyVexQuery when eager-loading is set.
 	Edges        CertifyVexEdges `json:"edges"`
@@ -108,7 +110,7 @@ func (*CertifyVex) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case certifyvex.FieldPackageID, certifyvex.FieldArtifactID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case certifyvex.FieldStatus, certifyvex.FieldStatement, certifyvex.FieldStatusNotes, certifyvex.FieldJustification, certifyvex.FieldOrigin, certifyvex.FieldCollector:
+		case certifyvex.FieldStatus, certifyvex.FieldStatement, certifyvex.FieldStatusNotes, certifyvex.FieldJustification, certifyvex.FieldOrigin, certifyvex.FieldCollector, certifyvex.FieldDocumentRef:
 			values[i] = new(sql.NullString)
 		case certifyvex.FieldKnownSince:
 			values[i] = new(sql.NullTime)
@@ -197,6 +199,12 @@ func (cv *CertifyVex) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				cv.Collector = value.String
 			}
+		case certifyvex.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				cv.DocumentRef = value.String
+			}
 		default:
 			cv.selectValues.Set(columns[i], values[i])
 		}
@@ -281,6 +289,9 @@ func (cv *CertifyVex) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(cv.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(cv.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

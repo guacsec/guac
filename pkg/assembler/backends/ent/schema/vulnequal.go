@@ -40,6 +40,7 @@ func (VulnEqual) Fields() []ent.Field {
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
+		field.String("document_ref"),
 		field.String("vulnerabilities_hash").Comment("An opaque hash of the vulnerability IDs that are equal"),
 	}
 }
@@ -55,6 +56,6 @@ func (VulnEqual) Edges() []ent.Edge {
 // Indexes of the VulnEqual.
 func (VulnEqual) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("vuln_id", "equal_vuln_id", "vulnerabilities_hash", "justification", "origin", "collector").Unique(),
+		index.Fields("vuln_id", "equal_vuln_id", "vulnerabilities_hash", "justification", "origin", "collector", "document_ref").Unique(),
 	}
 }

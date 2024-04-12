@@ -40,6 +40,7 @@ func (HashEqual) Fields() []ent.Field {
 		field.String("origin"),
 		field.String("collector"),
 		field.String("justification"),
+		field.String("document_ref"),
 		field.String("artifacts_hash").Comment("An opaque hash of the artifact IDs that are equal"),
 	}
 }
@@ -55,6 +56,6 @@ func (HashEqual) Edges() []ent.Edge {
 // Indexes of the HashEqual.
 func (HashEqual) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("art_id", "equal_art_id", "artifacts_hash", "origin", "justification", "collector").Unique(),
+		index.Fields("art_id", "equal_art_id", "artifacts_hash", "origin", "justification", "collector", "document_ref").Unique(),
 	}
 }

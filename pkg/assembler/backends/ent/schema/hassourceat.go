@@ -43,6 +43,7 @@ func (HasSourceAt) Fields() []ent.Field {
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
+		field.String("document_ref"),
 	}
 }
 
@@ -57,7 +58,7 @@ func (HasSourceAt) Edges() []ent.Edge {
 
 func (HasSourceAt) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("source_id", "package_version_id", "justification", "origin", "collector", "known_since").Unique().Annotations(entsql.IndexWhere("package_version_id IS NOT NULL AND package_name_id IS NULL")),
-		index.Fields("source_id", "package_name_id", "justification", "origin", "collector", "known_since").Unique().Annotations(entsql.IndexWhere("package_name_id IS NOT NULL AND package_version_id IS NULL")),
+		index.Fields("source_id", "package_version_id", "justification", "origin", "collector", "known_since", "document_ref").Unique().Annotations(entsql.IndexWhere("package_version_id IS NOT NULL AND package_name_id IS NULL")),
+		index.Fields("source_id", "package_name_id", "justification", "origin", "collector", "known_since", "document_ref").Unique().Annotations(entsql.IndexWhere("package_name_id IS NOT NULL AND package_version_id IS NULL")),
 	}
 }

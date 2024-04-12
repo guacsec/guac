@@ -97,6 +97,12 @@ func (clc *CertifyLegalCreate) SetCollector(s string) *CertifyLegalCreate {
 	return clc
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (clc *CertifyLegalCreate) SetDocumentRef(s string) *CertifyLegalCreate {
+	clc.mutation.SetDocumentRef(s)
+	return clc
+}
+
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
 func (clc *CertifyLegalCreate) SetDeclaredLicensesHash(s string) *CertifyLegalCreate {
 	clc.mutation.SetDeclaredLicensesHash(s)
@@ -227,6 +233,9 @@ func (clc *CertifyLegalCreate) check() error {
 	if _, ok := clc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyLegal.collector"`)}
 	}
+	if _, ok := clc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "CertifyLegal.document_ref"`)}
+	}
 	if _, ok := clc.mutation.DeclaredLicensesHash(); !ok {
 		return &ValidationError{Name: "declared_licenses_hash", err: errors.New(`ent: missing required field "CertifyLegal.declared_licenses_hash"`)}
 	}
@@ -296,6 +305,10 @@ func (clc *CertifyLegalCreate) createSpec() (*CertifyLegal, *sqlgraph.CreateSpec
 	if value, ok := clc.mutation.Collector(); ok {
 		_spec.SetField(certifylegal.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := clc.mutation.DocumentRef(); ok {
+		_spec.SetField(certifylegal.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if value, ok := clc.mutation.DeclaredLicensesHash(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicensesHash, field.TypeString, value)
@@ -543,6 +556,18 @@ func (u *CertifyLegalUpsert) UpdateCollector() *CertifyLegalUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyLegalUpsert) SetDocumentRef(v string) *CertifyLegalUpsert {
+	u.Set(certifylegal.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyLegalUpsert) UpdateDocumentRef() *CertifyLegalUpsert {
+	u.SetExcluded(certifylegal.FieldDocumentRef)
+	return u
+}
+
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
 func (u *CertifyLegalUpsert) SetDeclaredLicensesHash(v string) *CertifyLegalUpsert {
 	u.Set(certifylegal.FieldDeclaredLicensesHash, v)
@@ -752,6 +777,20 @@ func (u *CertifyLegalUpsertOne) SetCollector(v string) *CertifyLegalUpsertOne {
 func (u *CertifyLegalUpsertOne) UpdateCollector() *CertifyLegalUpsertOne {
 	return u.Update(func(s *CertifyLegalUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyLegalUpsertOne) SetDocumentRef(v string) *CertifyLegalUpsertOne {
+	return u.Update(func(s *CertifyLegalUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyLegalUpsertOne) UpdateDocumentRef() *CertifyLegalUpsertOne {
+	return u.Update(func(s *CertifyLegalUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -1135,6 +1174,20 @@ func (u *CertifyLegalUpsertBulk) SetCollector(v string) *CertifyLegalUpsertBulk 
 func (u *CertifyLegalUpsertBulk) UpdateCollector() *CertifyLegalUpsertBulk {
 	return u.Update(func(s *CertifyLegalUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyLegalUpsertBulk) SetDocumentRef(v string) *CertifyLegalUpsertBulk {
+	return u.Update(func(s *CertifyLegalUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyLegalUpsertBulk) UpdateDocumentRef() *CertifyLegalUpsertBulk {
+	return u.Update(func(s *CertifyLegalUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

@@ -35,6 +35,8 @@ type HasSourceAt struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the HasSourceAtQuery when eager-loading is set.
 	Edges        HasSourceAtEdges `json:"edges"`
@@ -102,7 +104,7 @@ func (*HasSourceAt) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case hassourceat.FieldPackageVersionID, hassourceat.FieldPackageNameID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case hassourceat.FieldJustification, hassourceat.FieldOrigin, hassourceat.FieldCollector:
+		case hassourceat.FieldJustification, hassourceat.FieldOrigin, hassourceat.FieldCollector, hassourceat.FieldDocumentRef:
 			values[i] = new(sql.NullString)
 		case hassourceat.FieldKnownSince:
 			values[i] = new(sql.NullTime)
@@ -172,6 +174,12 @@ func (hsa *HasSourceAt) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				hsa.Collector = value.String
+			}
+		case hassourceat.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				hsa.DocumentRef = value.String
 			}
 		default:
 			hsa.selectValues.Set(columns[i], values[i])
@@ -248,6 +256,9 @@ func (hsa *HasSourceAt) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(hsa.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(hsa.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

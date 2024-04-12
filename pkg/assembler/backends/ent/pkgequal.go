@@ -26,6 +26,8 @@ type PkgEqual struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
 	// An opaque hash of the package IDs that are equal
@@ -80,7 +82,7 @@ func (*PkgEqual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case pkgequal.FieldOrigin, pkgequal.FieldCollector, pkgequal.FieldJustification, pkgequal.FieldPackagesHash:
+		case pkgequal.FieldOrigin, pkgequal.FieldCollector, pkgequal.FieldDocumentRef, pkgequal.FieldJustification, pkgequal.FieldPackagesHash:
 			values[i] = new(sql.NullString)
 		case pkgequal.FieldID, pkgequal.FieldPkgID, pkgequal.FieldEqualPkgID:
 			values[i] = new(uuid.UUID)
@@ -128,6 +130,12 @@ func (pe *PkgEqual) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				pe.Collector = value.String
+			}
+		case pkgequal.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				pe.DocumentRef = value.String
 			}
 		case pkgequal.FieldJustification:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -198,6 +206,9 @@ func (pe *PkgEqual) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(pe.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(pe.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
 	builder.WriteString(pe.Justification)

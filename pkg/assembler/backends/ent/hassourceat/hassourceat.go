@@ -27,6 +27,8 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldDocumentRef holds the string denoting the document_ref field in the database.
+	FieldDocumentRef = "document_ref"
 	// EdgePackageVersion holds the string denoting the package_version edge name in mutations.
 	EdgePackageVersion = "package_version"
 	// EdgeAllVersions holds the string denoting the all_versions edge name in mutations.
@@ -68,6 +70,7 @@ var Columns = []string{
 	FieldJustification,
 	FieldOrigin,
 	FieldCollector,
+	FieldDocumentRef,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -126,6 +129,11 @@ func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 // ByCollector orders the results by the collector field.
 func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
+}
+
+// ByDocumentRef orders the results by the document_ref field.
+func ByDocumentRef(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentRef, opts...).ToFunc()
 }
 
 // ByPackageVersionField orders the results by package_version field.

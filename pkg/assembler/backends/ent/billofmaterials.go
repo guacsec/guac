@@ -36,6 +36,8 @@ type BillOfMaterials struct {
 	Origin string `json:"origin,omitempty"`
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// KnownSince holds the value of the "known_since" field.
 	KnownSince time.Time `json:"known_since,omitempty"`
 	// An opaque hash of the included packages
@@ -147,7 +149,7 @@ func (*BillOfMaterials) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case billofmaterials.FieldPackageID, billofmaterials.FieldArtifactID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case billofmaterials.FieldURI, billofmaterials.FieldAlgorithm, billofmaterials.FieldDigest, billofmaterials.FieldDownloadLocation, billofmaterials.FieldOrigin, billofmaterials.FieldCollector, billofmaterials.FieldIncludedPackagesHash, billofmaterials.FieldIncludedArtifactsHash, billofmaterials.FieldIncludedDependenciesHash, billofmaterials.FieldIncludedOccurrencesHash:
+		case billofmaterials.FieldURI, billofmaterials.FieldAlgorithm, billofmaterials.FieldDigest, billofmaterials.FieldDownloadLocation, billofmaterials.FieldOrigin, billofmaterials.FieldCollector, billofmaterials.FieldDocumentRef, billofmaterials.FieldIncludedPackagesHash, billofmaterials.FieldIncludedArtifactsHash, billofmaterials.FieldIncludedDependenciesHash, billofmaterials.FieldIncludedOccurrencesHash:
 			values[i] = new(sql.NullString)
 		case billofmaterials.FieldKnownSince:
 			values[i] = new(sql.NullTime)
@@ -223,6 +225,12 @@ func (bom *BillOfMaterials) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				bom.Collector = value.String
+			}
+		case billofmaterials.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				bom.DocumentRef = value.String
 			}
 		case billofmaterials.FieldKnownSince:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -347,6 +355,9 @@ func (bom *BillOfMaterials) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(bom.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(bom.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("known_since=")
 	builder.WriteString(bom.KnownSince.Format(time.ANSIC))

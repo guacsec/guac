@@ -44,6 +44,7 @@ func (BillOfMaterials) Fields() []ent.Field {
 		field.String("download_location"),
 		field.String("origin"),
 		field.String("collector").Comment("GUAC collector for the document"),
+		field.String("document_ref"),
 		field.Time("known_since"),
 		field.String("included_packages_hash").Comment("An opaque hash of the included packages"),
 		field.String("included_artifacts_hash").Comment("An opaque hash of the included artifacts"),
@@ -68,10 +69,10 @@ func (BillOfMaterials) Edges() []ent.Edge {
 func (BillOfMaterials) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("algorithm", "digest", "uri", "download_location", "known_since", "included_packages_hash",
-			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash", "origin", "collector").Edges("package").Unique().
+			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash", "origin", "collector", "document_ref").Edges("package").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND artifact_id IS NULL")).StorageKey("sbom_unique_package"),
 		index.Fields("algorithm", "digest", "uri", "download_location", "known_since", "included_packages_hash",
-			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash", "origin", "collector").Edges("artifact").Unique().
+			"included_artifacts_hash", "included_dependencies_hash", "included_occurrences_hash", "origin", "collector", "document_ref").Edges("artifact").Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND artifact_id IS NOT NULL")).StorageKey("sbom_unique_artifact"),
 	}
 }

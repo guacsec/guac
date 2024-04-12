@@ -85,6 +85,12 @@ func (hsac *HasSourceAtCreate) SetCollector(s string) *HasSourceAtCreate {
 	return hsac
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (hsac *HasSourceAtCreate) SetDocumentRef(s string) *HasSourceAtCreate {
+	hsac.mutation.SetDocumentRef(s)
+	return hsac
+}
+
 // SetID sets the "id" field.
 func (hsac *HasSourceAtCreate) SetID(u uuid.UUID) *HasSourceAtCreate {
 	hsac.mutation.SetID(u)
@@ -186,6 +192,9 @@ func (hsac *HasSourceAtCreate) check() error {
 	if _, ok := hsac.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "HasSourceAt.collector"`)}
 	}
+	if _, ok := hsac.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "HasSourceAt.document_ref"`)}
+	}
 	if _, ok := hsac.mutation.SourceID(); !ok {
 		return &ValidationError{Name: "source", err: errors.New(`ent: missing required edge "HasSourceAt.source"`)}
 	}
@@ -240,6 +249,10 @@ func (hsac *HasSourceAtCreate) createSpec() (*HasSourceAt, *sqlgraph.CreateSpec)
 	if value, ok := hsac.mutation.Collector(); ok {
 		_spec.SetField(hassourceat.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := hsac.mutation.DocumentRef(); ok {
+		_spec.SetField(hassourceat.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if nodes := hsac.mutation.PackageVersionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -440,6 +453,18 @@ func (u *HasSourceAtUpsert) UpdateCollector() *HasSourceAtUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *HasSourceAtUpsert) SetDocumentRef(v string) *HasSourceAtUpsert {
+	u.Set(hassourceat.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *HasSourceAtUpsert) UpdateDocumentRef() *HasSourceAtUpsert {
+	u.SetExcluded(hassourceat.FieldDocumentRef)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -597,6 +622,20 @@ func (u *HasSourceAtUpsertOne) SetCollector(v string) *HasSourceAtUpsertOne {
 func (u *HasSourceAtUpsertOne) UpdateCollector() *HasSourceAtUpsertOne {
 	return u.Update(func(s *HasSourceAtUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *HasSourceAtUpsertOne) SetDocumentRef(v string) *HasSourceAtUpsertOne {
+	return u.Update(func(s *HasSourceAtUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *HasSourceAtUpsertOne) UpdateDocumentRef() *HasSourceAtUpsertOne {
+	return u.Update(func(s *HasSourceAtUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -924,6 +963,20 @@ func (u *HasSourceAtUpsertBulk) SetCollector(v string) *HasSourceAtUpsertBulk {
 func (u *HasSourceAtUpsertBulk) UpdateCollector() *HasSourceAtUpsertBulk {
 	return u.Update(func(s *HasSourceAtUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *HasSourceAtUpsertBulk) SetDocumentRef(v string) *HasSourceAtUpsertBulk {
+	return u.Update(func(s *HasSourceAtUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *HasSourceAtUpsertBulk) UpdateDocumentRef() *HasSourceAtUpsertBulk {
+	return u.Update(func(s *HasSourceAtUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

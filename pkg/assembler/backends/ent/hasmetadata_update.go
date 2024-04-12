@@ -197,6 +197,20 @@ func (hmu *HasMetadataUpdate) SetNillableCollector(s *string) *HasMetadataUpdate
 	return hmu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (hmu *HasMetadataUpdate) SetDocumentRef(s string) *HasMetadataUpdate {
+	hmu.mutation.SetDocumentRef(s)
+	return hmu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (hmu *HasMetadataUpdate) SetNillableDocumentRef(s *string) *HasMetadataUpdate {
+	if s != nil {
+		hmu.SetDocumentRef(*s)
+	}
+	return hmu
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (hmu *HasMetadataUpdate) SetSource(s *SourceName) *HasMetadataUpdate {
 	return hmu.SetSourceID(s.ID)
@@ -313,6 +327,9 @@ func (hmu *HasMetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := hmu.mutation.Collector(); ok {
 		_spec.SetField(hasmetadata.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := hmu.mutation.DocumentRef(); ok {
+		_spec.SetField(hasmetadata.FieldDocumentRef, field.TypeString, value)
 	}
 	if hmu.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -614,6 +631,20 @@ func (hmuo *HasMetadataUpdateOne) SetNillableCollector(s *string) *HasMetadataUp
 	return hmuo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (hmuo *HasMetadataUpdateOne) SetDocumentRef(s string) *HasMetadataUpdateOne {
+	hmuo.mutation.SetDocumentRef(s)
+	return hmuo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (hmuo *HasMetadataUpdateOne) SetNillableDocumentRef(s *string) *HasMetadataUpdateOne {
+	if s != nil {
+		hmuo.SetDocumentRef(*s)
+	}
+	return hmuo
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (hmuo *HasMetadataUpdateOne) SetSource(s *SourceName) *HasMetadataUpdateOne {
 	return hmuo.SetSourceID(s.ID)
@@ -760,6 +791,9 @@ func (hmuo *HasMetadataUpdateOne) sqlSave(ctx context.Context) (_node *HasMetada
 	}
 	if value, ok := hmuo.mutation.Collector(); ok {
 		_spec.SetField(hasmetadata.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := hmuo.mutation.DocumentRef(); ok {
+		_spec.SetField(hasmetadata.FieldDocumentRef, field.TypeString, value)
 	}
 	if hmuo.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
