@@ -21,10 +21,11 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"go.uber.org/zap"
 	"io"
 	"path/filepath"
 	"strings"
+
+	"go.uber.org/zap"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/blob"
@@ -85,7 +86,7 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 	}
 	uuidString := uuid.String()
 
-	sub, err := emPubSub.Subscribe(ctx, uuidString)
+	sub, err := emPubSub.Subscribe(ctx)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}
@@ -129,7 +130,7 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 		return nil
 	}
 
-	err = sub.GetDataFromSubscriber(ctx, processFunc)
+	err = sub.GetDataFromSubscriber(ctx, processFunc, uuidString)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to get data from %s: %w", uuidString, emPubSub.ServiceURL, err)
 	}

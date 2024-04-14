@@ -75,7 +75,7 @@ func TestEmitter_PublishOnEmit(t *testing.T) {
 
 	err = testSubscribe(ctx, transportFunc, pubsub)
 	if err != nil {
-		if err != nil && !errors.Is(err, context.DeadlineExceeded) {
+		if !errors.Is(err, context.DeadlineExceeded) {
 			t.Errorf("nats emitter Subscribe test errored = %v", err)
 		}
 	}
