@@ -26,7 +26,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -323,12 +322,7 @@ func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
 		} else if filter.Subject.Source != nil {
 			predicates = append(predicates,
 				occurrence.HasSourceWith(
-					optionalPredicate(filter.Subject.Source.ID, IDEQ),
-					optionalPredicate(filter.Subject.Source.Namespace, sourcename.NamespaceEQ),
-					optionalPredicate(filter.Subject.Source.Type, sourcename.TypeEQ),
-					optionalPredicate(filter.Subject.Source.Name, sourcename.NameEQ),
-					optionalPredicate(filter.Subject.Source.Commit, sourcename.CommitEQ),
-					optionalPredicate(filter.Subject.Source.Tag, sourcename.TagEQ),
+					sourceQuery(filter.Subject.Source),
 				),
 			)
 		}

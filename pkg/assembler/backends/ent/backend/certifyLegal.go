@@ -24,11 +24,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
@@ -93,6 +89,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 			certifylegal.FieldTimeScanned,
 			certifylegal.FieldOrigin,
 			certifylegal.FieldCollector,
+			certifylegal.FieldDocumentRef,
 			certifylegal.FieldDeclaredLicensesHash,
 			certifylegal.FieldDiscoveredLicensesHash,
 		}
@@ -147,7 +144,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		SetJustification(cl.Justification).
 		SetTimeScanned(cl.TimeScanned.UTC()).
 		SetOrigin(cl.Origin).
-		SetCollector(cl.Collector)
+		SetCollector(cl.Collector).
+		SetDocumentRef(cl.DocumentRef)
 
 	var sortedDeclaredLicenseHash string
 	var sortedDiscoveredLicenseHash string
@@ -272,6 +270,7 @@ func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.Pack
 		certifylegal.FieldTimeScanned,
 		certifylegal.FieldOrigin,
 		certifylegal.FieldCollector,
+		certifylegal.FieldDocumentRef,
 		certifylegal.FieldDeclaredLicensesHash,
 		certifylegal.FieldDiscoveredLicensesHash,
 	}
@@ -344,33 +343,16 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 		optionalPredicate(filter.TimeScanned, certifylegal.TimeScannedEQ),
 		optionalPredicate(filter.Origin, certifylegal.OriginEqualFold),
 		optionalPredicate(filter.Collector, certifylegal.CollectorEqualFold),
+		optionalPredicate(filter.DocumentRef, certifylegal.DocumentRefEQ),
 	}
 
 	if filter.Subject != nil {
 		if filter.Subject.Package != nil {
 			predicates = append(predicates,
-				certifylegal.HasPackageWith(
-					optionalPredicate(filter.Subject.Package.ID, IDEQ),
-					optionalPredicate(filter.Subject.Package.Version, packageversion.VersionEqualFold),
-					packageversion.QualifiersMatch(filter.Subject.Package.Qualifiers, ptrWithDefault(filter.Subject.Package.MatchOnlyEmptyQualifiers, false)),
-					optionalPredicate(filter.Subject.Package.Subpath, packageversion.SubpathEqualFold),
-					packageversion.HasNameWith(
-						optionalPredicate(filter.Subject.Package.Name, packagename.NameEqualFold),
-						optionalPredicate(filter.Subject.Package.Namespace, packagename.NamespaceEqualFold),
-						optionalPredicate(filter.Subject.Package.Type, packagename.TypeEqualFold),
-					),
-				),
-			)
+				certifylegal.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
 		} else if filter.Subject.Source != nil {
 			predicates = append(predicates,
-				certifylegal.HasSourceWith(
-					optionalPredicate(filter.Subject.Source.ID, IDEQ),
-					optionalPredicate(filter.Subject.Source.Type, sourcename.TypeEqualFold),
-					optionalPredicate(filter.Subject.Source.Namespace, sourcename.NamespaceEqualFold),
-					optionalPredicate(filter.Subject.Source.Name, sourcename.NameEqualFold),
-					optionalPredicate(filter.Subject.Source.Tag, sourcename.TagEqualFold),
-					optionalPredicate(filter.Subject.Source.Commit, sourcename.CommitEqualFold),
-				),
+				certifylegal.HasSourceWith(sourceQuery(filter.Subject.Source)),
 			)
 		}
 	}
@@ -378,10 +360,7 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 	declaredLicensePredicate := make([]predicate.License, 0)
 	for _, dl := range filter.DeclaredLicenses {
 		declaredLicensePredicate = append(declaredLicensePredicate,
-			optionalPredicate(dl.ID, IDEQ),
-			optionalPredicate(dl.Name, license.NameEqualFold),
-			optionalPredicate(dl.Inline, license.InlineEqualFold),
-			optionalPredicate(dl.ListVersion, license.ListVersion),
+			licenseQuery(*dl),
 		)
 	}
 	if len(declaredLicensePredicate) > 0 {
@@ -391,10 +370,7 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 	discoveredLicensePredicate := make([]predicate.License, 0)
 	for _, dl := range filter.DiscoveredLicenses {
 		discoveredLicensePredicate = append(discoveredLicensePredicate,
-			optionalPredicate(dl.ID, IDEQ),
-			optionalPredicate(dl.Name, license.NameEqualFold),
-			optionalPredicate(dl.Inline, license.InlineEqualFold),
-			optionalPredicate(dl.ListVersion, license.ListVersion),
+			licenseQuery(*dl),
 		)
 	}
 	if len(discoveredLicensePredicate) > 0 {

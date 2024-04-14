@@ -92,6 +92,7 @@ func queryCertifications(typ certification.Type, filter *model.CertifyBadSpec) p
 		optionalPredicate(filter.Origin, certification.OriginEQ),
 		optionalPredicate(filter.Justification, certification.JustificationEQ),
 		optionalPredicate(filter.KnownSince, certification.KnownSinceEQ),
+		optionalPredicate(filter.DocumentRef, certification.DocumentRef),
 	}
 
 	if filter.Subject != nil {
@@ -175,6 +176,7 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.
 		certification.FieldCollector,
 		certification.FieldOrigin,
 		certification.FieldJustification,
+		certification.FieldDocumentRef,
 		certification.FieldKnownSince,
 	}
 
@@ -258,14 +260,16 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 			SetJustification(cb.Justification).
 			SetKnownSince(cb.KnownSince.UTC()).
 			SetOrigin(cb.Origin).
-			SetCollector(cb.Collector)
+			SetCollector(cb.Collector).
+			SetDocumentRef(cb.DocumentRef)
 	} else if cg != nil {
 		certifyCreate.
 			SetType(certification.TypeGOOD).
 			SetJustification(cg.Justification).
 			SetKnownSince(cg.KnownSince.UTC()).
 			SetOrigin(cg.Origin).
-			SetCollector(cg.Collector)
+			SetCollector(cg.Collector).
+			SetDocumentRef(cg.DocumentRef)
 	} else {
 		return nil, fmt.Errorf("must specify either certifyGood or certifyBad")
 	}
@@ -356,6 +360,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 		certification.FieldOrigin,
 		certification.FieldJustification,
 		certification.FieldKnownSince,
+		certification.FieldDocumentRef,
 	}
 
 	switch {
@@ -506,6 +511,7 @@ func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 		Subject:       sub,
 		KnownSince:    v.KnownSince,
 	}
@@ -533,6 +539,7 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 		Subject:       sub,
 		KnownSince:    v.KnownSince,
 	}

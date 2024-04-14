@@ -126,18 +126,16 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) (pr
 	if filter.Vulnerability != nil {
 		predicates = append(predicates,
 			vulnerabilitymetadata.HasVulnerabilityIDWith(
-				optionalPredicate(filter.Vulnerability.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold),
-				optionalPredicate(filter.Vulnerability.ID, IDEQ),
-				optionalPredicate(filter.Vulnerability.Type, vulnerabilityid.TypeEqualFold),
+				vulnerabilityQueryPredicates(*filter.Vulnerability)...,
 			),
 		)
-		if filter.Vulnerability.NoVuln != nil && *filter.Vulnerability.NoVuln {
-			predicates = append(predicates,
-				vulnerabilitymetadata.HasVulnerabilityIDWith(
-					vulnerabilityid.TypeEqualFold(NoVuln),
-				),
-			)
-		}
+		// if filter.Vulnerability.NoVuln != nil && *filter.Vulnerability.NoVuln {
+		// 	predicates = append(predicates,
+		// 		vulnerabilitymetadata.HasVulnerabilityIDWith(
+		// 			vulnerabilityid.TypeEqualFold(NoVuln),
+		// 		),
+		// 	)
+		// }
 	}
 	return vulnerabilitymetadata.And(predicates...), nil
 }

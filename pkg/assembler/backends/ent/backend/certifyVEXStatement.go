@@ -337,9 +337,7 @@ func certifyVexPredicate(filter model.CertifyVEXStatementSpec) predicate.Certify
 		} else {
 			predicates = append(predicates,
 				certifyvex.HasVulnerabilityWith(
-					optionalPredicate(filter.Vulnerability.ID, IDEQ),
-					optionalPredicate(filter.Vulnerability.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold),
-					optionalPredicate(filter.Vulnerability.Type, vulnerabilityid.TypeEqualFold),
+					vulnerabilityQueryPredicates(*filter.Vulnerability)...,
 				),
 			)
 		}

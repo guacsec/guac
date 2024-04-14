@@ -24,8 +24,6 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -226,42 +224,32 @@ func certifyVulnPredicate(spec model.CertifyVulnSpec) predicate.CertifyVuln {
 		optionalPredicate(spec.TimeScanned, certifyvuln.TimeScannedEQ),
 		optionalPredicate(spec.Package, func(pkg model.PkgSpec) predicate.CertifyVuln {
 			return certifyvuln.HasPackageWith(
-				optionalPredicate(pkg.ID, IDEQ),
-				optionalPredicate(pkg.Version, packageversion.VersionEQ),
-				optionalPredicate(pkg.Subpath, packageversion.SubpathEQ),
-				packageversion.QualifiersMatch(pkg.Qualifiers, ptrWithDefault(pkg.MatchOnlyEmptyQualifiers, false)),
-				packageversion.HasNameWith(
-					optionalPredicate(pkg.Name, packagename.NameEQ),
-					optionalPredicate(pkg.Namespace, packagename.NamespaceEQ),
-					optionalPredicate(pkg.Type, packagename.TypeEQ),
-				),
+				packageVersionQuery(spec.Package),
 			)
 		}),
 		optionalPredicate(spec.Vulnerability, func(vuln model.VulnerabilitySpec) predicate.CertifyVuln {
 			return certifyvuln.HasVulnerabilityWith(
-				optionalPredicate(vuln.ID, IDEQ),
-				optionalPredicate(vuln.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold),
-				optionalPredicate(vuln.Type, vulnerabilityid.TypeEqualFold),
+				vulnerabilityQueryPredicates(*spec.Vulnerability)...,
 			)
 		}),
 	}
 
-	if spec.Vulnerability != nil &&
-		spec.Vulnerability.NoVuln != nil {
-		if *spec.Vulnerability.NoVuln {
-			predicates = append(predicates,
-				certifyvuln.HasVulnerabilityWith(
-					vulnerabilityid.TypeEqualFold(NoVuln),
-				),
-			)
-		} else {
-			predicates = append(predicates,
-				certifyvuln.HasVulnerabilityWith(
-					vulnerabilityid.TypeNEQ(NoVuln),
-				),
-			)
-		}
-	}
+	// if spec.Vulnerability != nil &&
+	// 	spec.Vulnerability.NoVuln != nil {
+	// 	if *spec.Vulnerability.NoVuln {
+	// 		predicates = append(predicates,
+	// 			certifyvuln.HasVulnerabilityWith(
+	// 				vulnerabilityid.TypeEqualFold(NoVuln),
+	// 			),
+	// 		)
+	// 	} else {
+	// 		predicates = append(predicates,
+	// 			certifyvuln.HasVulnerabilityWith(
+	// 				vulnerabilityid.TypeNEQ(NoVuln),
+	// 			),
+	// 		)
+	// 	}
+	// }
 	return certifyvuln.And(predicates...)
 }
 
