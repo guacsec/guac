@@ -16,6 +16,7 @@ const (
 	vulnerabilityID string        = "vulnerabilityIDs"
 	origin          string        = "origin"
 	collector       string        = "collector"
+	docRef          string        = "documentRef"
 	justification   string        = "justification"
 	knownSince      string        = "knownSince"
 	maxRetires      int           = 100

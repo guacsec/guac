@@ -136,7 +136,8 @@ func getPkgVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilder 
 		'statusNotes': certifyVex.statusNotes,
 		'knownSince': certifyVex.knownSince,
 		'collector': certifyVex.collector,
-		'origin': certifyVex.origin  
+		'origin': certifyVex.origin,
+		'documentRef': certifyVex.documentRef  
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVEXStatement")
@@ -169,7 +170,8 @@ func getArtifactVexForQuery(ctx context.Context, c *arangoClient, arangoQueryBui
 		'statusNotes': certifyVex.statusNotes,
 		'knownSince': certifyVex.knownSince,
 		'collector': certifyVex.collector,
-		'origin': certifyVex.origin  
+		'origin': certifyVex.origin,
+		'documentRef': certifyVex.documentRef  
 	}`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVEXStatement")
@@ -214,6 +216,10 @@ func setVexMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVexSpec *m
 		arangoQueryBuilder.filter("certifyVex", collector, "==", "@"+collector)
 		queryValues[collector] = *certifyVexSpec.Collector
 	}
+	if certifyVexSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("certifyVex", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *certifyVexSpec.DocumentRef
+	}
 	if certifyVexSpec.Vulnerability != nil {
 		arangoQueryBuilder.forOutBound(certifyVexVulnEdgesStr, "vVulnID", "certifyVex")
 		if certifyVexSpec.Vulnerability.ID != nil {
@@ -256,6 +262,7 @@ func getVEXStatementQueryValues(pkg *model.PkgInputSpec, artifact *model.Artifac
 	values[knownSinceStr] = vexStatement.KnownSince.UTC()
 	values[origin] = vexStatement.Origin
 	values[collector] = vexStatement.Collector
+	values[docRef] = vexStatement.DocumentRef
 
 	return values
 }
@@ -302,8 +309,8 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 		)
 		  
 		LET certifyVex = FIRST(
-			UPSERT { artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
-				INSERT {artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
+			UPSERT { artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				INSERT {artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				UPDATE {} IN certifyVEXs
 				RETURN {
 					'_id': NEW._id,
@@ -385,8 +392,8 @@ func (c *arangoClient) IngestVEXStatements(ctx context.Context, subjects model.P
 		)
 		  
 		LET certifyVex = FIRST(
-			UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
-				INSERT {packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin } 
+			UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				INSERT {packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:doc.status, vexJustification:doc.vexJustification, statement:doc.statement, statusNotes:doc.statusNotes, knownSince:doc.knownSince, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				UPDATE {} IN certifyVEXs
 				RETURN {
 					'_id': NEW._id,
@@ -440,8 +447,8 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 		  )
 		  
 		  LET certifyVex = FIRST(
-			  UPSERT { artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
-				  INSERT {artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
+			  UPSERT { artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				  INSERT {artifactID:artifact._id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				  UPDATE {} IN certifyVEXs
 				  RETURN {
 					'_id': NEW._id,
@@ -490,8 +497,8 @@ func (c *arangoClient) IngestVEXStatement(ctx context.Context, subject model.Pac
 		)
 		  
 		LET certifyVex = FIRST(
-			UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
-				INSERT {packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin } 
+			UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				INSERT {packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, status:@status, vexJustification:@vexJustification, statement:@statement, statusNotes:@statusNotes, knownSince:@knownSince, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				UPDATE {} IN certifyVEXs
 				RETURN {
 					'_id': NEW._id,
@@ -537,6 +544,7 @@ func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor, ingestio
 		KnownSince       time.Time       `json:"knownSince"`
 		Collector        string          `json:"collector"`
 		Origin           string          `json:"origin"`
+		DocumentRef      string          `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -571,6 +579,7 @@ func getCertifyVexFromCursor(ctx context.Context, cursor driver.Cursor, ingestio
 			KnownSince:       createdValue.KnownSince,
 			Origin:           createdValue.Origin,
 			Collector:        createdValue.Collector,
+			DocumentRef:      createdValue.DocumentRef,
 		}
 		if pkg != nil {
 			certifyVex.Subject = pkg
@@ -656,6 +665,7 @@ func (c *arangoClient) queryCertifyVexNodeByID(ctx context.Context, filter *mode
 		KnownSince       time.Time `json:"knownSince"`
 		Collector        string    `json:"collector"`
 		Origin           string    `json:"origin"`
+		DocumentRef      string    `json:"documentRef"`
 	}
 
 	var collectedValues []dbVex
@@ -685,6 +695,7 @@ func (c *arangoClient) queryCertifyVexNodeByID(ctx context.Context, filter *mode
 		KnownSince:       collectedValues[0].KnownSince,
 		Origin:           collectedValues[0].Origin,
 		Collector:        collectedValues[0].Collector,
+		DocumentRef:      collectedValues[0].DocumentRef,
 	}
 
 	builtVuln, err := c.buildVulnResponseByID(ctx, collectedValues[0].VulnerabilityID, filter.Vulnerability)

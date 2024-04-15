@@ -82,7 +82,8 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 		'startedOn': hasSLSA.startedOn,
 		'finishedOn': hasSLSA.finishedOn,
 		'collector': hasSLSA.collector,
-		'origin': hasSLSA.origin
+		'origin': hasSLSA.origin,
+		'documentRef': hashEqual.documentRef
 	}`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSlsa")
@@ -127,6 +128,10 @@ func setHasSLSAMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSLSASpec *
 	if hasSLSASpec.Collector != nil {
 		arangoQueryBuilder.filter("hasSLSA", collector, "==", "@"+collector)
 		queryValues[collector] = *hasSLSASpec.Collector
+	}
+	if hasSLSASpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("hasSLSA", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *hasSLSASpec.DocumentRef
 	}
 }
 
@@ -192,6 +197,7 @@ func getSLSAValues(subject model.ArtifactInputSpec, builtFrom []*model.Artifact,
 	}
 	values[origin] = slsa.Origin
 	values[collector] = slsa.Collector
+	values[docRef] = slsa.DocumentRef
 
 	return values
 }
@@ -236,8 +242,8 @@ func (c *arangoClient) IngestSLSAs(ctx context.Context, subjects []*model.IDorAr
 	LET subject = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.algorithm FILTER art.digest == doc.digest RETURN art)
 	LET builtBy = FIRST(FOR builder IN builders FILTER builder.uri == doc.uri RETURN builder)
 	LET hasSLSA = FIRST(
-		UPSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:doc.builtFrom, buildType:doc.buildType, slsaPredicate:doc.slsaPredicate, slsaVersion:doc.slsaVersion, startedOn:doc.startedOn, finishedOn:doc.finishedOn, collector:doc.collector, origin:doc.origin } 
-		INSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:doc.builtFrom, buildType:doc.buildType, slsaPredicate:doc.slsaPredicate, slsaVersion:doc.slsaVersion, startedOn:doc.startedOn, finishedOn:doc.finishedOn, collector:doc.collector, origin:doc.origin } 
+		UPSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:doc.builtFrom, buildType:doc.buildType, slsaPredicate:doc.slsaPredicate, slsaVersion:doc.slsaVersion, startedOn:doc.startedOn, finishedOn:doc.finishedOn, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+		INSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:doc.builtFrom, buildType:doc.buildType, slsaPredicate:doc.slsaPredicate, slsaVersion:doc.slsaVersion, startedOn:doc.startedOn, finishedOn:doc.finishedOn, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 		UPDATE {} IN hasSLSAs
 		RETURN {
 			'_id': NEW._id,
@@ -285,8 +291,8 @@ func (c *arangoClient) IngestSLSA(ctx context.Context, subject model.IDorArtifac
 	LET subject = FIRST(FOR art IN artifacts FILTER art.algorithm == @algorithm FILTER art.digest == @digest RETURN art)
 	LET builtBy = FIRST(FOR builder IN builders FILTER builder.uri == @uri RETURN builder)
 	LET hasSLSA = FIRST(
-		UPSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:@builtFrom, buildType:@buildType, slsaPredicate:@slsaPredicate, slsaVersion:@slsaVersion, startedOn:@startedOn, finishedOn:@finishedOn, collector:@collector, origin:@origin } 
-		INSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:@builtFrom, buildType:@buildType, slsaPredicate:@slsaPredicate, slsaVersion:@slsaVersion, startedOn:@startedOn, finishedOn:@finishedOn, collector:@collector, origin:@origin } 
+		UPSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:@builtFrom, buildType:@buildType, slsaPredicate:@slsaPredicate, slsaVersion:@slsaVersion, startedOn:@startedOn, finishedOn:@finishedOn, collector:@collector, origin:@origin, documentRef:@documentRef } 
+		INSERT { subjectID:subject._id, builtByID:builtBy._id, builtFrom:@builtFrom, buildType:@buildType, slsaPredicate:@slsaPredicate, slsaVersion:@slsaVersion, startedOn:@startedOn, finishedOn:@finishedOn, collector:@collector, origin:@origin, documentRef:@documentRef } 
 		UPDATE {} IN hasSLSAs
 		RETURN {
 			'_id': NEW._id,
@@ -340,6 +346,7 @@ func getHasSLSAFromCursor(c *arangoClient, ctx context.Context, cursor driver.Cu
 		FinishedOn    *time.Time      `json:"finishedOn"`
 		Collector     string          `json:"collector"`
 		Origin        string          `json:"origin"`
+		DocumentRef   string          `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -395,6 +402,7 @@ func getHasSLSAFromCursor(c *arangoClient, ctx context.Context, cursor driver.Cu
 					SlsaVersion:   createdValue.SlsaVersion,
 					Origin:        createdValue.Origin,
 					Collector:     createdValue.Collector,
+					DocumentRef:   createdValue.DocumentRef,
 				}
 
 				if !createdValue.StartedOn.Equal(time.Unix(0, 0).UTC()) {
@@ -526,6 +534,7 @@ func (c *arangoClient) queryHasSlsaNodeByID(ctx context.Context, filter *model.H
 		FinishedOn    *time.Time `json:"finishedOn"`
 		Collector     string     `json:"collector"`
 		Origin        string     `json:"origin"`
+		DocumentRef   string     `json:"documentRef"`
 	}
 
 	var collectedValues []dbHasSLSA
@@ -553,6 +562,7 @@ func (c *arangoClient) queryHasSlsaNodeByID(ctx context.Context, filter *model.H
 		SlsaVersion:   collectedValues[0].SlsaVersion,
 		Origin:        collectedValues[0].Origin,
 		Collector:     collectedValues[0].Collector,
+		DocumentRef:   collectedValues[0].DocumentRef,
 	}
 
 	if !collectedValues[0].StartedOn.Equal(time.Unix(0, 0).UTC()) {

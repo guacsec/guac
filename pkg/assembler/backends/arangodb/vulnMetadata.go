@@ -82,7 +82,8 @@ func getVulnMetadataForQuery(ctx context.Context, c *arangoClient, arangoQueryBu
 		'scoreValue': vulnMetadata.scoreValue,
 		'timestamp': vulnMetadata.timestamp,
 		'collector': vulnMetadata.collector,
-		'origin': vulnMetadata.origin
+		'origin': vulnMetadata.origin,
+		'documentRef': vulnMetadata.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "VulnerabilityMetadata")
@@ -143,6 +144,10 @@ func setVulnMetadataMatchValues(arangoQueryBuilder *arangoQueryBuilder, vulnMeta
 		arangoQueryBuilder.filter("vulnMetadata", collector, "==", "@"+collector)
 		queryValues[collector] = *vulnMetadata.Collector
 	}
+	if vulnMetadata.DocumentRef != nil {
+		arangoQueryBuilder.filter("vulnMetadata", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *vulnMetadata.DocumentRef
+	}
 	return nil
 }
 
@@ -159,6 +164,7 @@ func getVulnMetadataQueryValues(vulnerability *model.VulnerabilityInputSpec, vul
 	values[timeStampStr] = vulnerabilityMetadata.Timestamp.UTC()
 	values[origin] = vulnerabilityMetadata.Origin
 	values[collector] = vulnerabilityMetadata.Collector
+	values[docRef] = vulnerabilityMetadata.DocumentRef
 
 	return values
 }
@@ -175,8 +181,8 @@ func (c *arangoClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerab
 	)
 	  
 	  LET vulnMetadata = FIRST(
-		  UPSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin } 
-			  INSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin } 
+		  UPSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin, documentRef:@documentRef } 
+			  INSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:@scoreType, scoreValue:@scoreValue, timestamp:@timestamp, collector:@collector, origin:@origin, documentRef:@documentRef } 
 			  UPDATE {} IN vulnMetadataCollection
 			  RETURN {
 				'_id': NEW._id,
@@ -246,8 +252,8 @@ func (c *arangoClient) IngestBulkVulnerabilityMetadata(ctx context.Context, vuln
 	  )
 	  
 	  LET vulnMetadata = FIRST(
-		  UPSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin } 
-			  INSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin } 
+		  UPSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+			  INSERT { vulnerabilityID:firstVuln.vuln_id, scoreType:doc.scoreType, scoreValue:doc.scoreValue, timestamp:doc.timestamp, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 			  UPDATE {} IN vulnMetadataCollection
 			  RETURN {
 				'_id': NEW._id,
@@ -288,6 +294,7 @@ func geVulnMetadataFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 		Timestamp      time.Time                    `json:"timestamp"`
 		Collector      string                       `json:"collector"`
 		Origin         string                       `json:"origin"`
+		DocumentRef    string                       `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -328,6 +335,7 @@ func geVulnMetadataFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 				Timestamp:     createdValue.Timestamp,
 				Origin:        createdValue.Origin,
 				Collector:     createdValue.Collector,
+				DocumentRef:   createdValue.DocumentRef,
 			}
 		} else {
 			vulnMetadata = &model.VulnerabilityMetadata{ID: createdValue.VulnMetadataID}
@@ -387,6 +395,7 @@ func (c *arangoClient) queryVulnerabilityMetadataNodeByID(ctx context.Context, f
 		Timestamp       time.Time                    `json:"timestamp"`
 		Collector       string                       `json:"collector"`
 		Origin          string                       `json:"origin"`
+		DocumentRef     string                       `json:"documentRef"`
 	}
 
 	var collectedValues []dbVulnMetadata
@@ -421,6 +430,7 @@ func (c *arangoClient) queryVulnerabilityMetadataNodeByID(ctx context.Context, f
 		Timestamp:     collectedValues[0].Timestamp,
 		Origin:        collectedValues[0].Origin,
 		Collector:     collectedValues[0].Collector,
+		DocumentRef:   collectedValues[0].DocumentRef,
 	}, nil
 }
 

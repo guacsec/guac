@@ -136,7 +136,8 @@ func getPkgHasSourceAtForQuery(ctx context.Context, c *arangoClient, arangoQuery
 			'knownSince': hasSourceAt.knownSince,
 			'justification': hasSourceAt.justification,
 			'collector': hasSourceAt.collector,
-			'origin': hasSourceAt.origin
+			'origin': hasSourceAt.origin,
+			'documentRef': hasSourceAt.documentRef
 		  }`)
 	} else {
 		arangoQueryBuilder.query.WriteString("\n")
@@ -163,7 +164,8 @@ func getPkgHasSourceAtForQuery(ctx context.Context, c *arangoClient, arangoQuery
 			'knownSince': hasSourceAt.knownSince,
 			'justification': hasSourceAt.justification,
 			'collector': hasSourceAt.collector,
-			'origin': hasSourceAt.origin
+			'origin': hasSourceAt.origin,
+			'documentRef': hasSourceAt.documentRef
 		  }`)
 	}
 
@@ -196,6 +198,10 @@ func queryHasSourceAtBasedOnFilter(arangoQueryBuilder *arangoQueryBuilder, hasSo
 	if hasSourceAtSpec.Collector != nil {
 		arangoQueryBuilder.filter("hasSourceAt", collector, "==", "@"+collector)
 		queryValues[collector] = *hasSourceAtSpec.Collector
+	}
+	if hasSourceAtSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("hasSourceAt", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *hasSourceAtSpec.DocumentRef
 	}
 }
 
@@ -253,6 +259,7 @@ func getHasSourceAtQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 	values[justification] = hasSourceAt.Justification
 	values[origin] = hasSourceAt.Origin
 	values[collector] = hasSourceAt.Collector
+	values[docRef] = hasSourceAt.DocumentRef
 
 	return values
 }
@@ -281,8 +288,8 @@ func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgI
 		)
 		  
 		  LET hasSourceAt = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
-				  INSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
+			  UPSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				  INSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				  UPDATE {} IN hasSourceAts
 				  RETURN {
 					'_id': NEW._id,
@@ -321,8 +328,8 @@ func (c *arangoClient) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgI
 			)
 			  
 			  LET hasSourceAt = FIRST(
-				  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
-					  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin } 
+				  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+					  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:@knownSince, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 					  UPDATE {} IN hasSourceAts
 					  RETURN {
 						'_id': NEW._id,
@@ -405,8 +412,8 @@ func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDo
 		)
 		  
 		  LET hasSourceAt = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				  INSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			  UPSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				  INSERT {  packageID:firstPkg.version_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				  UPDATE {} IN hasSourceAts
 				  RETURN {
 					'_id': NEW._id,
@@ -448,8 +455,8 @@ func (c *arangoClient) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDo
 		)
 		  
 		  LET hasSourceAt = FIRST(
-			  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			  UPSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				  INSERT {  packageID:firstPkg.name_id, sourceID:firstSrc.name_id, knownSince:doc.knownSince, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				  UPDATE {} IN hasSourceAts
 				  RETURN {
 					'_id': NEW._id,
@@ -492,6 +499,7 @@ func getHasSourceAtFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 		Justification string        `json:"justification"`
 		Collector     string        `json:"collector"`
 		Origin        string        `json:"origin"`
+		DocumentRef   string        `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -526,6 +534,7 @@ func getHasSourceAtFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 				Justification: createdValue.Justification,
 				Origin:        createdValue.Origin,
 				Collector:     createdValue.Collector,
+				DocumentRef:   createdValue.DocumentRef,
 			}
 		} else {
 			hasSourceAt = &model.HasSourceAt{ID: createdValue.HasSourceAtID}
@@ -582,6 +591,7 @@ func (c *arangoClient) queryHasSourceAtNodeByID(ctx context.Context, filter *mod
 		Justification string    `json:"justification"`
 		Collector     string    `json:"collector"`
 		Origin        string    `json:"origin"`
+		DocumentRef   string    `json:"documentRef"`
 	}
 
 	var collectedValues []dbHasSourceAt
@@ -620,6 +630,7 @@ func (c *arangoClient) queryHasSourceAtNodeByID(ctx context.Context, filter *mod
 		KnownSince:    collectedValues[0].KnownSince,
 		Justification: collectedValues[0].Justification,
 		Origin:        collectedValues[0].Origin,
+		DocumentRef:   collectedValues[0].DocumentRef,
 	}, nil
 }
 
