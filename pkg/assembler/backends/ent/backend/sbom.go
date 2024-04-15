@@ -62,7 +62,7 @@ func hasSBOMQuery(spec model.HasSBOMSpec) predicate.BillOfMaterials {
 		optionalPredicate(spec.DownloadLocation, billofmaterials.DownloadLocationEQ),
 		optionalPredicate(spec.Origin, billofmaterials.OriginEQ),
 		optionalPredicate(spec.KnownSince, billofmaterials.KnownSinceEQ),
-		// billofmaterials.AnnotationsMatchSpec(spec.Annotations),
+		optionalPredicate(spec.DocumentRef, billofmaterials.DocumentRefEQ),
 	}
 
 	if spec.Subject != nil {
@@ -147,10 +147,8 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 	return toGlobalIDs(billofmaterials.Table, sbomIDs), nil
 }
 
-func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includes *model.HasSBOMIncludesInputSpec, hasSBOM *model.HasSBOMInputSpec) (*string, error) {
-
-	// If a new column is included in the conflict columns, it must be added to the Indexes() function in the schema
-	conflictColumns := []string{
+func sbomConflictColumns() []string {
+	return []string{
 		billofmaterials.FieldURI,
 		billofmaterials.FieldAlgorithm,
 		billofmaterials.FieldDigest,
@@ -162,7 +160,14 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		billofmaterials.FieldIncludedOccurrencesHash,
 		billofmaterials.FieldCollector,
 		billofmaterials.FieldOrigin,
+		billofmaterials.FieldDocumentRef,
 	}
+}
+
+func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includes *model.HasSBOMIncludesInputSpec, hasSBOM *model.HasSBOMInputSpec) (*string, error) {
+
+	// If a new column is included in the conflict columns, it must be added to the Indexes() function in the schema
+	conflictColumns := sbomConflictColumns()
 
 	var conflictWhere *sql.Predicate
 
@@ -189,6 +194,7 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		SetDownloadLocation(hasSBOM.DownloadLocation).
 		SetOrigin(hasSBOM.Origin).
 		SetCollector(hasSBOM.Collector).
+		SetDocumentRef(hasSBOM.DocumentRef).
 		SetKnownSince(hasSBOM.KnownSince.UTC())
 
 	sortedPkgIDs := helper.SortAndRemoveDups(includes.Packages)
@@ -418,7 +424,7 @@ func updateHasSBOMWithIncludeOccurrences(ctx context.Context, client *ent.Client
 }
 
 func canonicalHasSBOMString(hasSBOM *model.HasSBOMInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", hasSBOM.URI, hasSBOM.Algorithm, hasSBOM.Digest, hasSBOM.DownloadLocation, hasSBOM.Origin, hasSBOM.Collector, hasSBOM.KnownSince.UTC())
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s:%s", hasSBOM.URI, hasSBOM.Algorithm, hasSBOM.Digest, hasSBOM.DownloadLocation, hasSBOM.Origin, hasSBOM.Collector, hasSBOM.KnownSince.UTC(), hasSBOM.DocumentRef)
 }
 
 // guacHasSBOMKey generates an uuid based on the hash of the inputspec and inputs. hasSBOM ID has to be set for bulk ingestion

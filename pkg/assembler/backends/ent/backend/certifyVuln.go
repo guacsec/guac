@@ -31,22 +31,27 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func certifyVulnConflictColumns() []string {
+	return []string{
+		certifyvuln.FieldPackageID,
+		certifyvuln.FieldVulnerabilityID,
+		certifyvuln.FieldCollector,
+		certifyvuln.FieldScannerURI,
+		certifyvuln.FieldScannerVersion,
+		certifyvuln.FieldOrigin,
+		certifyvuln.FieldDbURI,
+		certifyvuln.FieldDbVersion,
+		certifyvuln.FieldTimeScanned,
+		certifyvuln.FieldDocumentRef,
+	}
+}
+
 func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
 
 	record, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
-		conflictColumns := []string{
-			certifyvuln.FieldPackageID,
-			certifyvuln.FieldVulnerabilityID,
-			certifyvuln.FieldCollector,
-			certifyvuln.FieldScannerURI,
-			certifyvuln.FieldScannerVersion,
-			certifyvuln.FieldOrigin,
-			certifyvuln.FieldDbURI,
-			certifyvuln.FieldDbVersion,
-			certifyvuln.FieldTimeScanned,
-		}
+		conflictColumns := certifyVulnConflictColumns()
 
 		insert, err := generateCertifyVulnCreate(ctx, tx, &pkg, &vulnerability, &certifyVuln)
 		if err != nil {
@@ -146,7 +151,8 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		SetOrigin(certifyVuln.Origin).
 		SetScannerURI(certifyVuln.ScannerURI).
 		SetScannerVersion(certifyVuln.ScannerVersion).
-		SetTimeScanned(certifyVuln.TimeScanned)
+		SetTimeScanned(certifyVuln.TimeScanned).
+		SetDocumentRef(certifyVuln.DocumentRef)
 
 	return certifyVulnCreate, nil
 }
@@ -154,17 +160,7 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) (*[]string, error) {
 	ids := make([]string, 0)
 
-	conflictColumns := []string{
-		certifyvuln.FieldPackageID,
-		certifyvuln.FieldVulnerabilityID,
-		certifyvuln.FieldCollector,
-		certifyvuln.FieldScannerURI,
-		certifyvuln.FieldScannerVersion,
-		certifyvuln.FieldOrigin,
-		certifyvuln.FieldDbURI,
-		certifyvuln.FieldDbVersion,
-		certifyvuln.FieldTimeScanned,
-	}
+	conflictColumns := certifyVulnConflictColumns()
 
 	batches := chunk(certifyVulns, MaxBatchSize)
 
@@ -222,6 +218,7 @@ func certifyVulnPredicate(spec model.CertifyVulnSpec) predicate.CertifyVuln {
 		optionalPredicate(spec.ScannerURI, certifyvuln.ScannerURIEQ),
 		optionalPredicate(spec.ScannerVersion, certifyvuln.ScannerVersionEQ),
 		optionalPredicate(spec.TimeScanned, certifyvuln.TimeScannedEQ),
+		optionalPredicate(spec.DocumentRef, certifyvuln.DocumentRefEQ),
 		optionalPredicate(spec.Package, func(pkg model.PkgSpec) predicate.CertifyVuln {
 			return certifyvuln.HasPackageWith(
 				packageVersionQuery(spec.Package),
@@ -275,6 +272,7 @@ func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 			ScannerVersion: record.ScannerVersion,
 			Origin:         record.Origin,
 			Collector:      record.Collector,
+			DocumentRef:    record.DocumentRef,
 		},
 	}
 

@@ -76,23 +76,27 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 	return toGlobalIDs(certifylegal.Table, *ids), nil
 }
 
+func certifyLegalConflictColumns() []string {
+	return []string{
+		certifylegal.FieldDeclaredLicense,
+		certifylegal.FieldDiscoveredLicense,
+		certifylegal.FieldAttribution,
+		certifylegal.FieldJustification,
+		certifylegal.FieldTimeScanned,
+		certifylegal.FieldOrigin,
+		certifylegal.FieldCollector,
+		certifylegal.FieldDocumentRef,
+		certifylegal.FieldDeclaredLicensesHash,
+		certifylegal.FieldDiscoveredLicensesHash,
+	}
+}
+
 func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, spec *model.CertifyLegalInputSpec) (string, error) {
 
 	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
-		certifyLegalConflictColumns := []string{
-			certifylegal.FieldDeclaredLicense,
-			certifylegal.FieldDiscoveredLicense,
-			certifylegal.FieldAttribution,
-			certifylegal.FieldJustification,
-			certifylegal.FieldTimeScanned,
-			certifylegal.FieldOrigin,
-			certifylegal.FieldCollector,
-			certifylegal.FieldDocumentRef,
-			certifylegal.FieldDeclaredLicensesHash,
-			certifylegal.FieldDiscoveredLicensesHash,
-		}
+		certifyLegalConflictColumns := certifyLegalConflictColumns()
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
@@ -262,18 +266,7 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
-	certifyLegalConflictColumns := []string{
-		certifylegal.FieldDeclaredLicense,
-		certifylegal.FieldDiscoveredLicense,
-		certifylegal.FieldAttribution,
-		certifylegal.FieldJustification,
-		certifylegal.FieldTimeScanned,
-		certifylegal.FieldOrigin,
-		certifylegal.FieldCollector,
-		certifylegal.FieldDocumentRef,
-		certifylegal.FieldDeclaredLicensesHash,
-		certifylegal.FieldDiscoveredLicensesHash,
-	}
+	certifyLegalConflictColumns := certifyLegalConflictColumns()
 
 	var conflictWhere *sql.Predicate
 
@@ -381,7 +374,7 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 }
 
 func canonicalCertifyLegalString(cl *model.CertifyLegalInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", cl.DeclaredLicense, cl.DiscoveredLicense, cl.Attribution, cl.Justification, cl.TimeScanned.UTC(), cl.Origin, cl.Collector)
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s:%s", cl.DeclaredLicense, cl.DiscoveredLicense, cl.Attribution, cl.Justification, cl.TimeScanned.UTC(), cl.Origin, cl.Collector, cl.DocumentRef)
 }
 
 // guacCertifyLegalKey generates an uuid based on the hash of the inputspec and inputs. certifyLegal ID has to be set for bulk ingestion

@@ -71,6 +71,7 @@ func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
 		optionalPredicate(filter.Justification, vulnequal.JustificationEQ),
 		optionalPredicate(filter.Origin, vulnequal.OriginEQ),
 		optionalPredicate(filter.Collector, vulnequal.CollectorEQ),
+		optionalPredicate(filter.DocumentRef, vulnequal.DocumentRefEQ),
 	}
 
 	if len(filter.Vulnerabilities) == 1 {
@@ -142,17 +143,20 @@ func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.ID
 	return toGlobalID(vulnequal.Table, *id), nil
 }
 
-func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func vulnEqualConflictColumns() []string {
+	return []string{
 		vulnequal.FieldVulnerabilitiesHash,
 		vulnequal.FieldVulnID,
 		vulnequal.FieldEqualVulnID,
 		vulnequal.FieldOrigin,
 		vulnequal.FieldCollector,
 		vulnequal.FieldJustification,
+		vulnequal.FieldDocumentRef,
 	}
+}
+
+func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	batches := chunk(vulnEquals, MaxBatchSize)
 
@@ -172,7 +176,7 @@ func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*mo
 
 		err := tx.VulnEqual.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(vulnEqualConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -195,7 +199,8 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 	vulnEqualCreate := tx.VulnEqual.Create().
 		SetCollector(ve.Collector).
 		SetJustification(ve.Justification).
-		SetOrigin(ve.Origin)
+		SetOrigin(ve.Origin).
+		SetDocumentRef(ve.DocumentRef)
 
 	if vulnerability.VulnerabilityNodeID == nil {
 		foundVulnID, err := tx.VulnerabilityID.Query().
@@ -265,14 +270,7 @@ func upsertVulnEquals(ctx context.Context, tx *ent.Tx, vulnerability model.IDorV
 
 	if id, err := vulnEqualCreate.
 		OnConflict(
-			sql.ConflictColumns(
-				vulnequal.FieldVulnerabilitiesHash,
-				vulnequal.FieldVulnID,
-				vulnequal.FieldEqualVulnID,
-				vulnequal.FieldOrigin,
-				vulnequal.FieldCollector,
-				vulnequal.FieldJustification,
-			),
+			sql.ConflictColumns(vulnEqualConflictColumns()...),
 		).
 		Ignore().
 		ID(ctx); err != nil {
@@ -307,6 +305,7 @@ func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
 		Justification:   record.Justification,
 		Origin:          record.Origin,
 		Collector:       record.Collector,
+		DocumentRef:     record.DocumentRef,
 	}
 }
 
@@ -319,7 +318,7 @@ func toModelVulnerabilityFromVulnerabilityID(vulnID *ent.VulnerabilityID) *model
 }
 
 func canonicalVulnEqualString(ve *model.VulnEqualInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s", ve.Justification, ve.Origin, ve.Collector)
+	return fmt.Sprintf("%s::%s::%s:%s", ve.Justification, ve.Origin, ve.Collector, ve.DocumentRef)
 }
 
 // guacVulnEqualKey generates an uuid based on the hash of the inputspec and inputs. vulnEqual ID has to be set for bulk ingestion

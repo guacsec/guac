@@ -71,6 +71,7 @@ func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.Certify
 		optionalPredicate(filter.ScorecardCommit, certifyscorecard.ScorecardCommitEqualFold),
 		optionalPredicate(filter.Origin, certifyscorecard.OriginEQ),
 		optionalPredicate(filter.Collector, certifyscorecard.CollectorEQ),
+		optionalPredicate(filter.DocumentRef, certifyscorecard.DocumentRef),
 	}
 
 	if len(filter.Checks) > 0 {
@@ -164,15 +165,14 @@ func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSou
 		SetScorecardVersion(scorecard.ScorecardVersion).
 		SetScorecardCommit(scorecard.ScorecardCommit).
 		SetOrigin(scorecard.Origin).
-		SetCollector(scorecard.Collector)
+		SetCollector(scorecard.Collector).
+		SetDocumentRef(scorecard.DocumentRef)
 
 	return scorecardCreate, nil
 }
 
-func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func scorecardConflictColumns() []string {
+	return []string{
 		certifyscorecard.FieldSourceID,
 		certifyscorecard.FieldOrigin,
 		certifyscorecard.FieldCollector,
@@ -180,7 +180,13 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 		certifyscorecard.FieldScorecardVersion,
 		certifyscorecard.FieldTimeScanned,
 		certifyscorecard.FieldAggregateScore,
-		certifyscorecard.FieldChecksHash}
+		certifyscorecard.FieldChecksHash,
+		certifyscorecard.FieldDocumentRef,
+	}
+}
+
+func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	batches := chunk(scorecards, MaxBatchSize)
 
@@ -199,7 +205,7 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 
 		err := tx.CertifyScorecard.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(scorecardConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -219,15 +225,7 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.IDorSourceInp
 	}
 	if id, err := scorecardCreate.
 		OnConflict(
-			sql.ConflictColumns(
-				certifyscorecard.FieldSourceID,
-				certifyscorecard.FieldOrigin,
-				certifyscorecard.FieldCollector,
-				certifyscorecard.FieldScorecardCommit,
-				certifyscorecard.FieldScorecardVersion,
-				certifyscorecard.FieldTimeScanned,
-				certifyscorecard.FieldAggregateScore,
-				certifyscorecard.FieldChecksHash),
+			sql.ConflictColumns(scorecardConflictColumns()...),
 		).
 		Ignore().
 		ID(ctx); err != nil {
@@ -269,6 +267,7 @@ func toModelScorecard(record *ent.CertifyScorecard) *model.Scorecard {
 		ScorecardCommit:  record.ScorecardCommit,
 		Origin:           record.Origin,
 		Collector:        record.Collector,
+		DocumentRef:      record.DocumentRef,
 	}
 }
 

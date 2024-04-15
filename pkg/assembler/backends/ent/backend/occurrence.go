@@ -23,7 +23,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -74,15 +73,20 @@ func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.Packa
 	return toGlobalIDs(occurrence.Table, *ids), nil
 }
 
-func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	occurrenceConflictColumns := []string{
+func occurrenceConflictColumns() []string {
+	return []string{
 		occurrence.FieldArtifactID,
 		occurrence.FieldJustification,
 		occurrence.FieldOrigin,
 		occurrence.FieldCollector,
+		occurrence.FieldDocumentRef,
 	}
+}
+
+func upsertBulkOccurrences(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, artifacts []*model.IDorArtifactInput, occurrences []*model.IsOccurrenceInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	occurrenceConflictColumns := occurrenceConflictColumns()
 
 	var conflictWhere *sql.Predicate
 
@@ -176,7 +180,8 @@ func generateOccurrenceCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 		SetArtifactID(artID).
 		SetJustification(occur.Justification).
 		SetOrigin(occur.Origin).
-		SetCollector(occur.Collector)
+		SetCollector(occur.Collector).
+		SetDocumentRef(occur.DocumentRef)
 
 	var isOccurrenceID *uuid.UUID
 	if pkg != nil {
@@ -244,12 +249,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
-		occurrenceConflictColumns := []string{
-			occurrence.FieldArtifactID,
-			occurrence.FieldJustification,
-			occurrence.FieldOrigin,
-			occurrence.FieldCollector,
-		}
+		occurrenceConflictColumns := occurrenceConflictColumns()
 
 		var conflictWhere *sql.Predicate
 
@@ -302,17 +302,12 @@ func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
 		optionalPredicate(filter.Justification, occurrence.JustificationEQ),
 		optionalPredicate(filter.Origin, occurrence.OriginEQ),
 		optionalPredicate(filter.Collector, occurrence.CollectorEQ),
+		optionalPredicate(filter.DocumentRef, occurrence.DocumentRef),
 	}
 
 	if filter.Artifact != nil {
 		predicates = append(predicates,
-			occurrence.HasArtifactWith(func(s *sql.Selector) {
-				if filter.Artifact != nil {
-					optionalPredicate(filter.Artifact.Digest, artifact.DigestEQ)(s)
-					optionalPredicate(filter.Artifact.Algorithm, artifact.AlgorithmEQ)(s)
-					optionalPredicate(filter.Artifact.ID, IDEQ)(s)
-				}
-			}),
+			occurrence.HasArtifactWith(artifactQueryPredicates(filter.Artifact)),
 		)
 	}
 
@@ -331,7 +326,7 @@ func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
 }
 
 func canonicalOccurrenceString(occur model.IsOccurrenceInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s", occur.Justification, occur.Origin, occur.Collector)
+	return fmt.Sprintf("%s::%s::%s:%s", occur.Justification, occur.Origin, occur.Collector, occur.DocumentRef)
 }
 
 func guacOccurrenceKey(pkgVersionID *string, srcNameID *string, artID *string, occur model.IsOccurrenceInputSpec) (*uuid.UUID, error) {

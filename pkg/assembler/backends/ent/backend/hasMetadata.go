@@ -92,6 +92,7 @@ func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {
 		optionalPredicate(filter.Justification, hasmetadata.JustificationEQ),
 		optionalPredicate(filter.Origin, hasmetadata.OriginEQ),
 		optionalPredicate(filter.Collector, hasmetadata.CollectorEQ),
+		optionalPredicate(filter.DocumentRef, hasmetadata.DocumentRefEQ),
 	}
 	if filter.Since != nil {
 		timeSince := *filter.Since
@@ -114,16 +115,21 @@ func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {
 	return hasmetadata.And(predicates...)
 }
 
-func upsertHasMetadata(ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.HasMetadataInputSpec) (*string, error) {
-
-	conflictColumns := []string{
+func hasMetadataConflictColumns() []string {
+	return []string{
 		hasmetadata.FieldKey,
 		hasmetadata.FieldValue,
 		hasmetadata.FieldJustification,
 		hasmetadata.FieldTimestamp,
 		hasmetadata.FieldOrigin,
 		hasmetadata.FieldCollector,
+		hasmetadata.FieldDocumentRef,
 	}
+}
+
+func upsertHasMetadata(ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.HasMetadataInputSpec) (*string, error) {
+
+	conflictColumns := hasMetadataConflictColumns()
 	var conflictWhere *sql.Predicate
 
 	switch {
@@ -194,7 +200,8 @@ func generateHasMetadataCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		SetTimestamp(hm.Timestamp.UTC()).
 		SetJustification(hm.Justification).
 		SetOrigin(hm.Origin).
-		SetCollector(hm.Collector)
+		SetCollector(hm.Collector).
+		SetDocumentRef(hm.DocumentRef)
 
 	switch {
 	case art != nil:
@@ -274,14 +281,8 @@ func generateHasMetadataCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 func upsertBulkHasMetadata(ctx context.Context, tx *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
-	conflictColumns := []string{
-		hasmetadata.FieldKey,
-		hasmetadata.FieldValue,
-		hasmetadata.FieldJustification,
-		hasmetadata.FieldTimestamp,
-		hasmetadata.FieldOrigin,
-		hasmetadata.FieldCollector,
-	}
+	conflictColumns := hasMetadataConflictColumns()
+
 	var conflictWhere *sql.Predicate
 
 	switch {
@@ -392,6 +393,7 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 	}
 }
 

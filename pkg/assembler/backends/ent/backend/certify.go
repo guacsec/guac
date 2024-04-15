@@ -168,10 +168,8 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 	return toGlobalIDs(certifyGoodString, *ids), nil
 }
 
-func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*string, error) {
-	var conflictWhere *sql.Predicate
-
-	conflictColumns := []string{
+func certifyConflictColumns() []string {
+	return []string{
 		certification.FieldType,
 		certification.FieldCollector,
 		certification.FieldOrigin,
@@ -179,6 +177,12 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.
 		certification.FieldDocumentRef,
 		certification.FieldKnownSince,
 	}
+}
+
+func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*string, error) {
+	var conflictWhere *sql.Predicate
+
+	conflictColumns := certifyConflictColumns()
 
 	switch {
 	case subject.Artifact != nil:
@@ -354,14 +358,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 
 	var conflictWhere *sql.Predicate
 
-	conflictColumns := []string{
-		certification.FieldType,
-		certification.FieldCollector,
-		certification.FieldOrigin,
-		certification.FieldJustification,
-		certification.FieldKnownSince,
-		certification.FieldDocumentRef,
-	}
+	conflictColumns := certifyConflictColumns()
 
 	switch {
 	case len(subjects.Artifacts) > 0:

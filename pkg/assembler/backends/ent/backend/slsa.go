@@ -60,6 +60,7 @@ func hasSLSAQuery(spec model.HasSLSASpec) predicate.SLSAAttestation {
 		optionalPredicate(spec.SlsaVersion, slsaattestation.SlsaVersionEQ),
 		optionalPredicate(spec.Collector, slsaattestation.CollectorEQ),
 		optionalPredicate(spec.Origin, slsaattestation.OriginEQ),
+		optionalPredicate(spec.DocumentRef, slsaattestation.DocumentRefEQ),
 		optionalPredicate(spec.FinishedOn, slsaattestation.FinishedOnEQ),
 		optionalPredicate(spec.StartedOn, slsaattestation.StartedOnEQ),
 	}
@@ -114,10 +115,8 @@ func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArti
 	return toGlobalIDs(slsaattestation.Table, *ids), nil
 }
 
-func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func slsaConflictColumns() []string {
+	return []string{
 		slsaattestation.FieldSubjectID,
 		slsaattestation.FieldOrigin,
 		slsaattestation.FieldCollector,
@@ -126,7 +125,13 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 		slsaattestation.FieldBuiltByID,
 		slsaattestation.FieldStartedOn,
 		slsaattestation.FieldFinishedOn,
-		slsaattestation.FieldBuiltFromHash}
+		slsaattestation.FieldBuiltFromHash,
+		slsaattestation.FieldDocumentRef,
+	}
+}
+
+func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	batches := chunk(slsaList, MaxBatchSize)
 
@@ -145,7 +150,7 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 
 		err := tx.SLSAAttestation.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(slsaConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -172,6 +177,7 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		SetBuildType(slsa.BuildType).
 		SetCollector(slsa.Collector).
 		SetOrigin(slsa.Origin).
+		SetDocumentRef(slsa.Origin).
 		SetSlsaVersion(slsa.SlsaVersion).
 		SetSlsaPredicate(toSLSAInputPredicate(slsa.SlsaPredicate)).
 		SetStartedOn(setDefaultTime(slsa.StartedOn)).
@@ -267,17 +273,7 @@ func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput
 
 	if id, err := slsaCreate.
 		OnConflict(
-			sql.ConflictColumns(
-				slsaattestation.FieldSubjectID,
-				slsaattestation.FieldOrigin,
-				slsaattestation.FieldCollector,
-				slsaattestation.FieldBuildType,
-				slsaattestation.FieldSlsaVersion,
-				slsaattestation.FieldBuiltByID,
-				slsaattestation.FieldStartedOn,
-				slsaattestation.FieldFinishedOn,
-				slsaattestation.FieldBuiltFromHash,
-			),
+			sql.ConflictColumns(slsaConflictColumns()...),
 		).
 		Ignore().
 		ID(ctx); err != nil {
@@ -314,6 +310,7 @@ func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 		SlsaVersion:   att.SlsaVersion,
 		Origin:        att.Origin,
 		Collector:     att.Collector,
+		DocumentRef:   att.DocumentRef,
 	}
 
 	if !att.StartedOn.Equal(time.Unix(0, 0).UTC()) {
@@ -383,7 +380,7 @@ func canonicalSLSAString(slsa model.SLSAInputSpec) string {
 		finishedOn = time.Unix(0, 0).UTC()
 	}
 
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", slsa.BuildType, fmt.Sprintf("%x", hash.Sum(nil)), slsa.SlsaVersion, startedOn, finishedOn, slsa.Origin, slsa.Collector)
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s:%s", slsa.BuildType, fmt.Sprintf("%x", hash.Sum(nil)), slsa.SlsaVersion, startedOn, finishedOn, slsa.Origin, slsa.Collector, slsa.DocumentRef)
 }
 
 // guacSLSAKey generates an uuid based on the hash of the inputspec and inputs. slsa ID has to be set for bulk ingestion

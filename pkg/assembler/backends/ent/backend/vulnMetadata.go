@@ -93,6 +93,7 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) (pr
 		optionalPredicate(filter.Timestamp, vulnerabilitymetadata.TimestampGTE),
 		optionalPredicate(filter.Origin, vulnerabilitymetadata.OriginEQ),
 		optionalPredicate(filter.Collector, vulnerabilitymetadata.CollectorEQ),
+		optionalPredicate(filter.DocumentRef, vulnerabilitymetadata.DocumentRefEQ),
 	}
 
 	if filter.ScoreType != nil {
@@ -140,17 +141,20 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) (pr
 	return vulnerabilitymetadata.And(predicates...), nil
 }
 
-func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func vulnMetaConflictColumns() []string {
+	return []string{
 		vulnerabilitymetadata.FieldVulnerabilityIDID,
 		vulnerabilitymetadata.FieldScoreType,
 		vulnerabilitymetadata.FieldScoreValue,
 		vulnerabilitymetadata.FieldTimestamp,
 		vulnerabilitymetadata.FieldOrigin,
 		vulnerabilitymetadata.FieldCollector,
+		vulnerabilitymetadata.FieldDocumentRef,
 	}
+}
+
+func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, vulnerabilityMetadataList []*model.VulnerabilityMetadataInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	batches := chunk(vulnerabilityMetadataList, MaxBatchSize)
 
@@ -170,7 +174,7 @@ func upsertBulkVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerabil
 
 		err := tx.VulnerabilityMetadata.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(vulnMetaConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -216,20 +220,13 @@ func generateVulnMetadataCreate(ctx context.Context, tx *ent.Tx, vuln *model.IDo
 		SetScoreValue(metadata.ScoreValue).
 		SetTimestamp(metadata.Timestamp.UTC()).
 		SetOrigin(metadata.Origin).
-		SetCollector(metadata.Collector)
+		SetCollector(metadata.Collector).
+		SetDocumentRef(metadata.DocumentRef)
 
 	return vulnMetadataCreate, nil
 }
 
 func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability model.IDorVulnerabilityInput, spec model.VulnerabilityMetadataInputSpec) (*string, error) {
-	conflictColumns := []string{
-		vulnerabilitymetadata.FieldVulnerabilityIDID,
-		vulnerabilitymetadata.FieldScoreType,
-		vulnerabilitymetadata.FieldScoreValue,
-		vulnerabilitymetadata.FieldTimestamp,
-		vulnerabilitymetadata.FieldOrigin,
-		vulnerabilitymetadata.FieldCollector,
-	}
 
 	insert, err := generateVulnMetadataCreate(ctx, tx, &vulnerability, &spec)
 	if err != nil {
@@ -237,7 +234,7 @@ func upsertVulnerabilityMetadata(ctx context.Context, tx *ent.Tx, vulnerability 
 
 	}
 	if id, err := insert.OnConflict(
-		sql.ConflictColumns(conflictColumns...),
+		sql.ConflictColumns(vulnMetaConflictColumns()...),
 	).
 		Ignore().
 		ID(ctx); err != nil {
@@ -256,6 +253,7 @@ func toModelVulnerabilityMetadata(v *ent.VulnerabilityMetadata) *model.Vulnerabi
 		Timestamp:     v.Timestamp,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 	}
 }
 

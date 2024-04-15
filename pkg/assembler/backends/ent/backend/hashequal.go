@@ -71,6 +71,7 @@ func hashEqualQueryPredicates(spec *model.HashEqualSpec) predicate.HashEqual {
 		optionalPredicate(spec.Origin, hashequal.OriginEQ),
 		optionalPredicate(spec.Collector, hashequal.CollectorEQ),
 		optionalPredicate(spec.Justification, hashequal.JustificationEQ),
+		optionalPredicate(spec.DocumentRef, hashequal.DocumentRefEQ),
 	}
 
 	if len(spec.Artifacts) == 1 {
@@ -112,17 +113,20 @@ func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.ID
 	return toGlobalIDs(hashequal.Table, *ids), nil
 }
 
-func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func hasEqualConflictColumns() []string {
+	return []string{
 		hashequal.FieldArtID,
 		hashequal.FieldEqualArtID,
 		hashequal.FieldArtifactsHash,
 		hashequal.FieldOrigin,
 		hashequal.FieldCollector,
 		hashequal.FieldJustification,
+		hashequal.FieldDocumentRef,
 	}
+}
+
+func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	batches := chunk(hashEquals, MaxBatchSize)
 
@@ -141,7 +145,7 @@ func upsertBulkHashEqual(ctx context.Context, tx *ent.Tx, artifacts []*model.IDo
 
 		err := tx.HashEqual.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(hasEqualConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -164,7 +168,8 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 	hashEqualCreate := tx.HashEqual.Create().
 		SetJustification(he.Justification).
 		SetOrigin(he.Origin).
-		SetCollector(he.Collector)
+		SetCollector(he.Collector).
+		SetDocumentRef(he.DocumentRef)
 
 	if artifactA.ArtifactID == nil {
 		foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*artifactA.ArtifactInput)).Only(ctx)
@@ -224,12 +229,7 @@ func upsertHashEqual(ctx context.Context, tx *ent.Tx, artifactA model.IDorArtifa
 	if id, err := hashEqualCreate.
 		OnConflict(
 			sql.ConflictColumns(
-				hashequal.FieldArtID,
-				hashequal.FieldEqualArtID,
-				hashequal.FieldArtifactsHash,
-				hashequal.FieldOrigin,
-				hashequal.FieldCollector,
-				hashequal.FieldJustification,
+				hasEqualConflictColumns()...,
 			),
 		).
 		Ignore().
@@ -265,11 +265,12 @@ func toModelHashEqual(record *ent.HashEqual) *model.HashEqual {
 		Justification: record.Justification,
 		Collector:     record.Collector,
 		Origin:        record.Origin,
+		DocumentRef:   record.DocumentRef,
 	}
 }
 
 func canonicalHashEqualString(he *model.HashEqualInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s", he.Justification, he.Origin, he.Collector)
+	return fmt.Sprintf("%s::%s::%s:%s", he.Justification, he.Origin, he.Collector, he.DocumentRef)
 }
 
 // guacHashEqualKey generates an uuid based on the hash of the inputspec and inputs. hashEqual ID has to be set for bulk ingestion

@@ -92,11 +92,13 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifact
 	return toGlobalID(artifact.Table, *id), nil
 }
 
+func artConflictColumns() []string {
+	return []string{artifact.FieldAlgorithm, artifact.FieldDigest}
+}
+
 func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDorArtifactInput) (*[]string, error) {
 	batches := chunk(artInputs, MaxBatchSize)
 	ids := make([]string, 0)
-
-	conflictColumns := []string{artifact.FieldAlgorithm, artifact.FieldDigest}
 
 	for _, artifacts := range batches {
 		creates := make([]*ent.ArtifactCreate, len(artifacts))
@@ -110,7 +112,7 @@ func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDor
 
 		err := tx.Artifact.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(artConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -131,13 +133,11 @@ func generateArtifactCreate(tx *ent.Tx, artifactID *uuid.UUID, art *model.IDorAr
 
 func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInput) (*string, error) {
 
-	conflictColumns := []string{artifact.FieldAlgorithm, artifact.FieldDigest}
-
 	artifactID := generateUUIDKey([]byte(helpers.GetKey[*model.ArtifactInputSpec, string](art.ArtifactInput, helpers.ArtifactServerKey)))
 	insert := generateArtifactCreate(tx, &artifactID, art)
 	err := insert.
 		OnConflict(
-			sql.ConflictColumns(conflictColumns...),
+			sql.ConflictColumns(artConflictColumns()...),
 		).
 		DoNothing().
 		Exec(ctx)
