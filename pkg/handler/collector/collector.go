@@ -132,33 +132,33 @@ func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobSto
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
-	logger.Debugf("Successfully marshaled document.")
+	logger.Infof("Successfully marshaled document.")
 
 	key := events.GetKey(d.Blob)
 
 	if err = blobStore.Write(ctx, key, docByte); err != nil {
 		return fmt.Errorf("failed write document to blob store: %w", err)
 	}
-	logger.Debugf("Successfully wrote document to blob store.")
+	logger.Infof("Successfully wrote document to blob store.")
 
 	cdEvent, err := events.CreateArtifactPubEvent(ctx, key)
 	if err != nil {
 		return fmt.Errorf("failed create an event: %w", err)
 	}
-	logger.Debugf("Successfully created an event.")
+	logger.Infof("Successfully created an event.")
 
 	keyByte, err := json.Marshal(cdEvent)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document key: %w", err)
 	}
-	logger.Debugf("Successfully marshaled document key.")
+	logger.Infof("Successfully marshaled document key.")
 
 	if err := pubsub.Publish(ctx, keyByte); err != nil {
 		return fmt.Errorf("failed to publish event with error: %w", err)
 	}
-	logger.Debugf("Successfully published event.")
+	logger.Infof("Successfully published event.")
 
-	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
+	logger.Infof("doc published: %+v", d.SourceInformation.Source)
 
 	return nil
 }
