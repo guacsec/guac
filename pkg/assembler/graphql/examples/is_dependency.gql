@@ -47,6 +47,7 @@ fragment allIsDependencyTree on IsDependency {
   versionRange
   origin
   collector
+  documentRef
 }
 
 query IsDependencyQ1 {

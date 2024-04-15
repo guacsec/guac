@@ -13,6 +13,7 @@ fragment allVulnMetadataTree on VulnerabilityMetadata {
   timestamp
   origin
   collector
+  documentRef
 }
 
 query VulnMetadataQ1 {

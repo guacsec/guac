@@ -11,6 +11,7 @@ fragment allVulnEqualTree on VulnEqual {
   justification
   origin
   collector
+  documentRef
 }
 
 query IsVulnerabilityQ1 {

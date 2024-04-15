@@ -46,6 +46,7 @@ fragment allIsOccurrencesTree on IsOccurrence {
   justification
   origin
   collector
+  documentRef
 }
 
 query IsOccurrenceQ1 {

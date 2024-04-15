@@ -47,6 +47,7 @@ fragment allCertifyGoodTree on CertifyGood {
   }
   origin
   collector
+  documentRef
 }
 
 query CertifactGoodQ1 {

@@ -81,8 +81,9 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollector),
-				Source:    "sha256:5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+				Collector:   string(FileCollector),
+				Source:      "file:///testdata/hello",
+				DocumentRef: "sha256:5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
 			}},
 		},
 		wantErr: false,

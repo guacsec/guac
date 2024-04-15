@@ -230,23 +230,6 @@ func certifyVulnPredicate(spec model.CertifyVulnSpec) predicate.CertifyVuln {
 			)
 		}),
 	}
-
-	// if spec.Vulnerability != nil &&
-	// 	spec.Vulnerability.NoVuln != nil {
-	// 	if *spec.Vulnerability.NoVuln {
-	// 		predicates = append(predicates,
-	// 			certifyvuln.HasVulnerabilityWith(
-	// 				vulnerabilityid.TypeEqualFold(NoVuln),
-	// 			),
-	// 		)
-	// 	} else {
-	// 		predicates = append(predicates,
-	// 			certifyvuln.HasVulnerabilityWith(
-	// 				vulnerabilityid.TypeNEQ(NoVuln),
-	// 			),
-	// 		)
-	// 	}
-	// }
 	return certifyvuln.And(predicates...)
 }
 

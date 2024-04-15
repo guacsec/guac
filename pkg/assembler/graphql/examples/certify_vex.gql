@@ -44,6 +44,7 @@ fragment allCertifyVEXStatementTree on CertifyVEXStatement {
   knownSince
   origin
   collector
+  documentRef
 }
 
 query CertifyVEXStatementQ1 {

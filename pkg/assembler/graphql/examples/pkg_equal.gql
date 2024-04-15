@@ -24,6 +24,7 @@ fragment allPkgEqualTree on PkgEqual {
   }
   origin
   collector
+  documentRef
 }
 
 query PkgEqualQ1 {

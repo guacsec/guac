@@ -130,13 +130,6 @@ func vulnerabilityMetadataPredicate(filter *model.VulnerabilityMetadataSpec) (pr
 				vulnerabilityQueryPredicates(*filter.Vulnerability)...,
 			),
 		)
-		// if filter.Vulnerability.NoVuln != nil && *filter.Vulnerability.NoVuln {
-		// 	predicates = append(predicates,
-		// 		vulnerabilitymetadata.HasVulnerabilityIDWith(
-		// 			vulnerabilityid.TypeEqualFold(NoVuln),
-		// 		),
-		// 	)
-		// }
 	}
 	return vulnerabilitymetadata.And(predicates...), nil
 }
