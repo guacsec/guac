@@ -493,6 +493,7 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 		Justification: record.Justification,
 		Origin:        record.Origin,
 		Collector:     record.Collector,
+		DocumentRef:   record.DocumentRef,
 	}
 }
 

@@ -177,7 +177,7 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		SetBuildType(slsa.BuildType).
 		SetCollector(slsa.Collector).
 		SetOrigin(slsa.Origin).
-		SetDocumentRef(slsa.Origin).
+		SetDocumentRef(slsa.DocumentRef).
 		SetSlsaVersion(slsa.SlsaVersion).
 		SetSlsaPredicate(toSLSAInputPredicate(slsa.SlsaPredicate)).
 		SetStartedOn(setDefaultTime(slsa.StartedOn)).

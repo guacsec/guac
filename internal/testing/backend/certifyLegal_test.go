@@ -486,6 +486,31 @@ func TestLegal(t *testing.T) {
 					Justification:    "test justification special",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Dec: []*model.IDorLicenseInput{{LicenseInput: testdata.L1}},
+					Legal: &model.CertifyLegalInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.CertifyLegalSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpLegal: []*model.CertifyLegal{
+				{
+					Subject:          testdata.P1out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
+					DocumentRef:      "test",
+				},
+			},
 		},
 		// {
 		// 	Name: "Ingest without Package",
@@ -619,6 +644,34 @@ func TestLegals(t *testing.T) {
 					Subject:          testdata.P2out,
 					DeclaredLicenses: []*model.License{testdata.L1out},
 					Justification:    "test justification",
+				},
+			},
+		},
+		{
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInputs{
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+					},
+					Dec: [][]*model.IDorLicenseInput{{{LicenseInput: testdata.L1}}, {{LicenseInput: testdata.L1}}},
+					Dis: [][]*model.IDorLicenseInput{{}, {}},
+					Legal: []*model.CertifyLegalInputSpec{
+						{Justification: "test justification"},
+						{DocumentRef: "test"},
+					},
+				},
+			},
+			Query: &model.CertifyLegalSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpLegal: []*model.CertifyLegal{
+				{
+					Subject:          testdata.P2out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
+					DocumentRef:      "test",
 				},
 			},
 		},

@@ -449,6 +449,31 @@ func TestOccurrence(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.IsOccurrenceSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpOcc: []*model.IsOccurrence{
+				{
+					Subject:     testdata.P1out,
+					Artifact:    testdata.A1out,
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -586,6 +611,30 @@ func TestIngestOccurrences(t *testing.T) {
 				Subject:       testdata.S1out,
 				Artifact:      testdata.A1out,
 				Justification: "test justification",
+			},
+		},
+	}, {
+		Name:  "docref",
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+		Calls: []call{
+			{
+				PkgSrcs: model.PackageOrSourceInputs{
+					Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+				},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
+				Occurrences: []*model.IsOccurrenceInputSpec{{
+					DocumentRef: "test",
+				}, {
+					Justification: "test justification",
+				}},
+			},
+		},
+		ExpOcc: []*model.IsOccurrence{
+			{
+				Subject:     testdata.P1out,
+				Artifact:    testdata.A1out,
+				DocumentRef: "test",
 			},
 		},
 	}}

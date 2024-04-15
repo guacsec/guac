@@ -542,6 +542,32 @@ func TestHasSourceAt(t *testing.T) {
 					Source:  testdata.S4out,
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Pkg: testdata.P1,
+					Src: testdata.S1,
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSA: &model.HasSourceAtInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.HasSourceAtSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHSA: []*model.HasSourceAt{
+				{
+					Package:     testdata.P1out,
+					Source:      testdata.S1out,
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -824,6 +850,34 @@ func TestIngestHasSourceAts(t *testing.T) {
 					Package:    testdata.P1out,
 					Source:     testdata.S1out,
 					KnownSince: testTime,
+				},
+			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Pkgs: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					Srcs: []*model.IDorSourceInput{&model.IDorSourceInput{SourceInput: testdata.S1}},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HSAs: []*model.HasSourceAtInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.HasSourceAtSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHSA: []*model.HasSourceAt{
+				{
+					Package:     testdata.P1out,
+					Source:      testdata.S1out,
+					DocumentRef: "test",
 				},
 			},
 		},

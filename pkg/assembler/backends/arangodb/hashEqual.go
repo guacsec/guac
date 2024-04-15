@@ -216,7 +216,7 @@ func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.
 	LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 	LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.equal_algorithm FILTER art.digest == doc.equal_digest RETURN art)
 	LET hashEqual = FIRST(
-		UPSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+		UPSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:do.origin, documentRef:doc.documentRef } 
 			INSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 			UPDATE {} IN hashEquals
 			RETURN {

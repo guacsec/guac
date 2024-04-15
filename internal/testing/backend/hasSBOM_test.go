@@ -2654,6 +2654,32 @@ func TestHasSBOM(t *testing.T) {
 			}},
 			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Collector: ptrfrom.String("invalid_collector")}}},
 			ExpHS: nil,
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					HS: &model.HasSBOMInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:          testdata.P1out,
+					DocumentRef:      "test",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -3028,6 +3054,34 @@ func TestIngestHasSBOMs(t *testing.T) {
 						Artifact:      testdata.A2out,
 						Justification: "test justification",
 					}},
+				},
+			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:          testdata.P1out,
+					DocumentRef:      "test",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
 				},
 			},
 		},

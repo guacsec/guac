@@ -813,6 +813,29 @@ func TestIsDependency(t *testing.T) {
 					DependencyPackage: testdata.P4out,
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+					DocumentRef:       "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -927,6 +950,29 @@ func TestIsDependencies(t *testing.T) {
 					Package:           testdata.P1out,
 					DependencyPackage: testdata.P2out,
 					Justification:     "test justification",
+				},
+			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3, testdata.P4},
+			Calls: []call{{
+				P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+				P2s: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P4}},
+				MF:  mAll,
+				IDs: []*model.IsDependencyInputSpec{
+					{
+						DocumentRef: "test",
+					},
+					{
+						Justification: "test justification",
+					},
+				},
+			}},
+			ExpID: []*model.IsDependency{
+				{
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+					DocumentRef:       "test",
 				},
 			},
 		},

@@ -524,6 +524,27 @@ func TestPkgEqual(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:    []*model.Package{testdata.P1out, testdata.P2out},
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -750,6 +771,32 @@ func TestIngestPkgEquals(t *testing.T) {
 				{
 					Packages:      []*model.Package{testdata.P1out, testdata.P3out},
 					Justification: "test justification",
+				},
+			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P2}},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:    []*model.Package{testdata.P1out, testdata.P2out},
+					DocumentRef: "test",
 				},
 			},
 		},
