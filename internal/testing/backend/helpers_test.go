@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
+
 package backend_test
 
 import (
@@ -84,6 +86,10 @@ func certifyVexLess(e1, e2 *model.CertifyVEXStatement) bool {
 
 	if e1.VexJustification != e2.VexJustification {
 		return e1.VexJustification < e2.VexJustification
+	}
+
+	if e1.Vulnerability.Type != e2.Vulnerability.Type {
+		return e1.Vulnerability.Type < e2.Vulnerability.Type
 	}
 
 	ap, oka := e1.Subject.(*model.Package)

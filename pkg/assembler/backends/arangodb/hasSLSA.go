@@ -83,7 +83,7 @@ func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASp
 		'finishedOn': hasSLSA.finishedOn,
 		'collector': hasSLSA.collector,
 		'origin': hasSLSA.origin,
-		'documentRef': hashEqual.documentRef
+		'documentRef': hasSLSA.documentRef
 	}`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasSlsa")

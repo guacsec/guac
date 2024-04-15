@@ -83,6 +83,7 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.IDorArt
 		Justification: hashEqual.Justification,
 		Origin:        hashEqual.Origin,
 		Collector:     hashEqual.Collector,
+		DocumentRef:   hashEqual.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
