@@ -64,7 +64,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		reader       gcsReader
 		lastDownload time.Time
 		poll         bool
-		storeBlobURL bool
+		storeBlobKey bool
 	}
 	tests := []struct {
 		name     string
@@ -86,11 +86,11 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		wantErr:  false,
 		wantDone: true,
 	}, {
-		name: "get object and storeBlobURL",
+		name: "get object and storeBlobKey",
 		fields: fields{
 			bucket:       bucketName,
 			reader:       &reader{client: client, bucket: bucketName},
-			storeBlobURL: true,
+			storeBlobKey: true,
 		},
 		want:     []*processor.Document{docWithRef},
 		wantErr:  false,
@@ -124,7 +124,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 				reader:       tt.fields.reader,
 				lastDownload: tt.fields.lastDownload,
 				poll:         tt.fields.poll,
-				storeBlobURL: tt.fields.storeBlobURL,
+				storeBlobKey: tt.fields.storeBlobKey,
 			}
 			if err := collector.RegisterDocumentCollector(g, CollectorGCS); err != nil &&
 				!errors.Is(err, collector.ErrCollectorOverwrite) {

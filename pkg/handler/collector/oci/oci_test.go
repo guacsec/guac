@@ -35,7 +35,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	ctx := context.Background()
 	type fields struct {
 		ociValues    []string
-		storeBlobURL bool
+		storeBlobKey bool
 		poll         bool
 		interval     time.Duration
 	}
@@ -353,12 +353,12 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 		},
 		wantErr: false,
 	}, {
-		name: "reference by tag AND digest, with storeBlobURL set",
+		name: "reference by tag AND digest, with storeBlobKey set",
 		fields: fields{
 			ociValues: []string{
 				"ghcr.io/guacsec/guac-test-image:carrot@sha256:9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09",
 			},
-			storeBlobURL: true,
+			storeBlobKey: true,
 			poll:         false,
 			interval:     0,
 		},
@@ -388,7 +388,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, tt.fields.storeBlobURL, tt.fields.interval)
+			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, tt.fields.storeBlobKey, tt.fields.interval)
 
 			var cancel context.CancelFunc
 			if tt.fields.poll {
@@ -427,13 +427,13 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 					t.Errorf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
 				}
 
-				if tt.fields.storeBlobURL {
+				if tt.fields.storeBlobKey {
 					// Why do we do this here instead of in the test case definition?
 					//
 					// Because the blob that we input into the test is not the final blob
-					// that gets hashed to come up with the blob URL; the blob that gets
-					// hashed is different. So we run the hashing function on the final
-					// blob and then add it to our original want doc.
+					// that gets hashed to come up with the blob key; the final blob is
+					// different. So we run the hashing function on the final blob and
+					// then set it on our original want doc.
 
 					tt.want[i].SourceInformation.DocumentRef = events.GetKey(collectedDoc.Blob)
 				}

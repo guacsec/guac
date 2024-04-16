@@ -36,15 +36,15 @@ type fileCollector struct {
 	lastChecked  time.Time
 	poll         bool
 	interval     time.Duration
-	storeBlobURL bool
+	storeBlobKey bool
 }
 
-func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration, storeBlobURL bool) *fileCollector {
+func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration, storeBlobKey bool) *fileCollector {
 	return &fileCollector{
 		path:         path,
 		poll:         poll,
 		interval:     interval,
-		storeBlobURL: storeBlobURL,
+		storeBlobKey: storeBlobKey,
 	}
 }
 
@@ -91,7 +91,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 		}
 
 		docRef := ""
-		if f.storeBlobURL {
+		if f.storeBlobKey {
 			docRef = events.GetKey(blob) // this is the blob store path
 		}
 

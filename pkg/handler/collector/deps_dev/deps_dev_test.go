@@ -64,7 +64,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		want               []*processor.Document
 		poll               bool
 		disableGettingDeps bool
-		storeBlobURL       bool
+		storeBlobKey       bool
 		interval           time.Duration
 		wantErr            bool
 		errMessage         error
@@ -94,7 +94,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:     "org.webjars.npm:a maven package, with storeBlobURL set",
+			name:     "org.webjars.npm:a maven package, with storeBlobKey set",
 			packages: []string{"pkg:maven/org.webjars.npm/a@2.1.2"},
 			want: []*processor.Document{
 				{
@@ -108,7 +108,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 					},
 				},
 			},
-			storeBlobURL: true,
+			storeBlobKey: true,
 			poll:         false,
 			wantErr:      false,
 		},
@@ -236,7 +236,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 			wantErr:            false,
 		},
 		{
-			name:     "disable getting deps -- only metadata is retrieved, with storeBlobURL set",
+			name:     "disable getting deps -- only metadata is retrieved, with storeBlobKey set",
 			packages: []string{"pkg:cargo/foreign-types@0.3.2"},
 			want: []*processor.Document{
 				{
@@ -250,7 +250,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 					},
 				},
 			},
-			storeBlobURL:       true,
+			storeBlobKey:       true,
 			poll:               false,
 			disableGettingDeps: true,
 			interval:           time.Minute,
@@ -268,7 +268,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.storeBlobURL, tt.interval)
+			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.storeBlobKey, tt.interval)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -304,13 +304,13 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				t.Errorf("Wanted %v elements, but got %v", len(tt.want), len(collectedDocs))
 			}
 			for i := range collectedDocs {
-				if tt.storeBlobURL {
+				if tt.storeBlobKey {
 					// Why do we do this here instead of in the test case definition?
 					//
 					// Because the blob that we input into the test is not the final blob
-					// that gets hashed to come up with the blob URL; the blob that gets
-					// hashed is different. So we run the hashing function on the final
-					// blob and then add it to our original want doc.
+					// that gets hashed to come up with the blob key; the final blob is
+					// different. So we run the hashing function on the final blob and
+					// then set it on our original want doc.
 
 					tt.want[i].SourceInformation.DocumentRef = events.GetKey(collectedDocs[i].Blob)
 				}

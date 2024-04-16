@@ -286,7 +286,7 @@ func Test_githubCollector_RetrieveArtifacts(t *testing.T) {
 	mockData := mockDataSource()
 
 	// TODO: Currently, len(collectedDocs) == 0. Fix this, and implement a
-	// more robust doc comparison. Then, add a new bool field storeBlobURL
+	// more robust doc comparison. Then, add a new bool field storeBlobKey
 	// and make use of it in some testcases.
 
 	type fields struct {

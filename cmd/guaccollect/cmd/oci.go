@@ -42,8 +42,8 @@ type ociOptions struct {
 	blobAddr string
 	// run as poll collector
 	poll bool
-	// store blob URL in origin (useful if the blob store is persistent)
-	storeBlobURL bool
+	// store blob key in origin (useful if the blob store is persistent)
+	storeBlobKey bool
 }
 
 var ociCmd = &cobra.Command{
@@ -76,7 +76,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
-			viper.GetBool("store-blob-url"),
+			viper.GetBool("set-blob-key"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -88,7 +88,7 @@ you have access to read and write to the respective blob store.`,
 		// TODO(lumjjb): Return this to a longer duration (~10 minutes) so as to not keep hitting
 		// the OCI server. This will require adding triggers to get new repos as they come up from
 		// the CollectSources so that there isn't a long delay from adding new data sources.
-		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, opts.storeBlobURL, 30*time.Second)
+		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, opts.poll, opts.storeBlobKey, 30*time.Second)
 		err = collector.RegisterDocumentCollector(ociCollector, oci.OCICollector)
 		if err != nil {
 			logger.Fatalf("unable to register oci collector: %v", err)
@@ -106,14 +106,14 @@ func validateOCIFlags(
 	csubTlsSkipVerify,
 	useCsub,
 	poll,
-	storeBlobURL bool,
+	storeBlobKey bool,
 	args []string,
 ) (ociOptions, error) {
 	var opts ociOptions
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
-	opts.storeBlobURL = storeBlobURL
+	opts.storeBlobKey = storeBlobKey
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

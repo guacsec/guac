@@ -108,19 +108,19 @@ func (td *TestBucketBuilder) GetDownloader(url string, region string) bucket.Buc
 func TestS3Collector(t *testing.T) {
 	ctx := context.Background()
 
-	for _, storeBlobURL := range []bool{true, false} {
-		t.Run(fmt.Sprintf("no polling with storeBlobURL=%v", storeBlobURL), func(t *testing.T) { testNoPolling(t, ctx, storeBlobURL) })
-		t.Run(fmt.Sprintf("queues split polling with storeBlobURL=%v", storeBlobURL), func(t *testing.T) { testQueuesSplitPolling(t, ctx, storeBlobURL) })
+	for _, storeBlobKey := range []bool{true, false} {
+		t.Run(fmt.Sprintf("no polling with storeBlobKey=%v", storeBlobKey), func(t *testing.T) { testNoPolling(t, ctx, storeBlobKey) })
+		t.Run(fmt.Sprintf("queues split polling with storeBlobKey=%v", storeBlobKey), func(t *testing.T) { testQueuesSplitPolling(t, ctx, storeBlobKey) })
 	}
 }
 
-func testQueuesSplitPolling(t *testing.T, ctx context.Context, storeBlobURL bool) {
+func testQueuesSplitPolling(t *testing.T, ctx context.Context, storeBlobKey bool) {
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		Queues:        "q1,q2",
 		MpBuilder:     &TestMpBuilder{},
 		BucketBuilder: &TestBucketBuilder{},
 		Poll:          true,
-		StoreBlobURL:  storeBlobURL,
+		StoreBlobKey:  storeBlobKey,
 	})
 
 	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
@@ -172,17 +172,17 @@ func testQueuesSplitPolling(t *testing.T, ctx context.Context, storeBlobURL bool
 			t.Errorf("wrong encoding returned: %s", doc.Encoding)
 		}
 
-		assertDocRef(t, doc, storeBlobURL)
+		assertDocRef(t, doc, storeBlobKey)
 	}
 }
 
-func testNoPolling(t *testing.T, ctx context.Context, storeBlobURL bool) {
+func testNoPolling(t *testing.T, ctx context.Context, storeBlobKey bool) {
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		BucketBuilder: &TestBucketBuilder{},
 		S3Bucket:      "no-poll-bucket",
 		S3Item:        "no-poll-item",
 		Poll:          false,
-		StoreBlobURL:  storeBlobURL,
+		StoreBlobKey:  storeBlobKey,
 	})
 
 	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
@@ -213,12 +213,12 @@ func testNoPolling(t *testing.T, ctx context.Context, storeBlobURL bool) {
 		t.Errorf("wrong item returned")
 	}
 
-	assertDocRef(t, s[0], storeBlobURL)
+	assertDocRef(t, s[0], storeBlobKey)
 }
 
-func assertDocRef(t *testing.T, doc *processor.Document, storeBlobURL bool) {
+func assertDocRef(t *testing.T, doc *processor.Document, storeBlobKey bool) {
 	docRef := ""
-	if storeBlobURL {
+	if storeBlobKey {
 		docRef = events.GetKey(doc.Blob)
 	}
 

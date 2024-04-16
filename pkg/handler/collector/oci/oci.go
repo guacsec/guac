@@ -70,7 +70,7 @@ type ociCollector struct {
 	checkedDigest     sync.Map
 	poll              bool
 	interval          time.Duration
-	storeBlobURL      bool
+	storeBlobKey      bool
 }
 
 // NewOCICollector initializes the oci collector by passing in the repo and tag being collected.
@@ -78,13 +78,13 @@ type ociCollector struct {
 // repos in a given registry. For further details see issue #298
 //
 // Interval should be set to about 5 mins or more for production so that it doesn't clobber registries.
-func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, storeBlobURL bool, interval time.Duration) *ociCollector {
+func NewOCICollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, storeBlobKey bool, interval time.Duration) *ociCollector {
 	return &ociCollector{
 		collectDataSource: collectDataSource,
 		checkedDigest:     sync.Map{},
 		poll:              poll,
 		interval:          interval,
-		storeBlobURL:      storeBlobURL,
+		storeBlobKey:      storeBlobKey,
 	}
 }
 
@@ -323,7 +323,7 @@ func (o *ociCollector) fetchFallbackArtifacts(ctx context.Context, repo string, 
 		// check to see if the digest + suffix has already been collected
 		if !o.isDigestCollected(repo, digestTag) {
 			imageTag := fmt.Sprintf("%v:%v", repo, digestTag)
-			err := fetchOCIArtifactBlobs(ctx, rc, imageTag, "unknown", docChannel, o.storeBlobURL)
+			err := fetchOCIArtifactBlobs(ctx, rc, imageTag, "unknown", docChannel, o.storeBlobKey)
 			if err != nil {
 				return fmt.Errorf("failed retrieving artifact blobs from registry fallback artifacts: %w", err)
 			}
@@ -366,7 +366,7 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 				if !o.isDigestCollected(repo, referrerDescDigest) {
 					logger.Infof("Fetching referrer %s with artifact type %s", referrerDescDigest, referrerDesc.ArtifactType)
 					referrerDigest := fmt.Sprintf("%v@%v", repo, referrerDescDigest)
-					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel, o.storeBlobURL)
+					e := fetchOCIArtifactBlobs(ctx, rc, referrerDigest, referrerDesc.ArtifactType, docChannel, o.storeBlobKey)
 					if e != nil {
 						errorChan <- fmt.Errorf("failed retrieving artifact blobs from registry: %w", err)
 						cancel()
@@ -407,7 +407,7 @@ func fetchOCIArtifactBlobs(
 	artifact,
 	artifactType string,
 	docChannel chan<- *processor.Document,
-	storeBlobURL bool,
+	storeBlobKey bool,
 ) error {
 	logger := logging.FromContext(ctx)
 	r, err := ref.New(artifact)
@@ -461,8 +461,8 @@ func fetchOCIArtifactBlobs(
 		}
 
 		docRef := ""
-		if storeBlobURL {
-			docRef = events.GetKey(btr1) // this is the blob store URL
+		if storeBlobKey {
+			docRef = events.GetKey(btr1) // this is the blob store key
 		}
 
 		doc := &processor.Document{

@@ -56,7 +56,7 @@ type githubCollector struct {
 	owner             string
 	repo              string
 	lastIngestedRun   int64
-	storeBlobURL      bool
+	storeBlobKey      bool
 }
 
 type Config struct {
@@ -164,9 +164,9 @@ func WithCollectDataSource(collectDataSource datasource.CollectSource) Opt {
 	}
 }
 
-func WithStoreBlobURL(storeBlobURL bool) Opt {
+func WithStoreBlobKey(storeBlobKey bool) Opt {
 	return func(g *githubCollector) {
-		g.storeBlobURL = storeBlobURL
+		g.storeBlobKey = storeBlobKey
 	}
 }
 
@@ -359,8 +359,8 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 }
 
 func (g *githubCollector) getDocRef(blob []byte) string {
-	if g.storeBlobURL {
-		return events.GetKey(blob) // this is the blob store URL
+	if g.storeBlobKey {
+		return events.GetKey(blob) // this is the blob store key
 	}
 
 	return ""

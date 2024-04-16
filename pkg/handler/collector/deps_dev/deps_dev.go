@@ -78,12 +78,12 @@ type depsCollector struct {
 	projectInfoMap       map[string]*pb.Project
 	versions             map[string]*pb.Version
 	dependencies         map[string]*pb.Dependencies
-	storeBlobURL         bool
+	storeBlobKey         bool
 }
 
 var registerOnce sync.Once
 
-func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies, storeBlobURL bool, interval time.Duration) (*depsCollector, error) {
+func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectSource, poll, retrieveDependencies, storeBlobKey bool, interval time.Duration) (*depsCollector, error) {
 	ctx = metrics.WithMetrics(ctx, prometheusPrefix)
 	// Get the system certificates.
 	sysPool, err := x509.SystemCertPool()
@@ -120,7 +120,7 @@ func NewDepsCollector(ctx context.Context, collectDataSource datasource.CollectS
 		versions:             map[string]*pb.Version{},
 		dependencies:         map[string]*pb.Dependencies{},
 		Metrics:              metricsCollector,
-		storeBlobURL:         storeBlobURL,
+		storeBlobKey:         storeBlobKey,
 	}, nil
 }
 
@@ -532,8 +532,8 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 }
 
 func (d *depsCollector) getDocRef(blob []byte) string {
-	if d.storeBlobURL {
-		return events.GetKey(blob) // this is the blob store URL
+	if d.storeBlobKey {
+		return events.GetKey(blob) // this is the blob store key
 	}
 
 	return ""

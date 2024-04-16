@@ -32,7 +32,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 		lastChecked  time.Time
 		poll         bool
 		interval     time.Duration
-		storeBlobURL bool
+		storeBlobKey bool
 	}
 	tests := []struct {
 		name    string
@@ -68,13 +68,13 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 		},
 		wantErr: false,
 	}, {
-		name: "found file with storeBlobURL",
+		name: "found file with storeBlobKey",
 		fields: fields{
 			path:         "./testdata",
 			lastChecked:  time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 			poll:         false,
 			interval:     0,
-			storeBlobURL: true,
+			storeBlobKey: true,
 		},
 		want: []*processor.Document{{
 			Blob:   []byte("hello\n"),
@@ -113,7 +113,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 				lastChecked:  tt.fields.lastChecked,
 				poll:         tt.fields.poll,
 				interval:     tt.fields.interval,
-				storeBlobURL: tt.fields.storeBlobURL,
+				storeBlobKey: tt.fields.storeBlobKey,
 			}
 			// NOTE: Below is one of the simplest ways to validate the context getting canceled()
 			// This is still brittle if a test for some reason takes longer than a second.

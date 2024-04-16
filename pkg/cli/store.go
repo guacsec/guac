@@ -130,7 +130,7 @@ func init() {
 	set.String("github-workflow-file", "", "name of workflow file to look for in github workflow. \nThis will be the name of the actual file, not the workflow name (i.e. ci.yaml).")
 
 	// Collector options
-	set.Bool("store-blob-url", false, "store blob URL in origin (useful if the blob store is persistent)")
+	set.Bool("set-blob-key", false, "store blob key in origin (useful if the blob store is persistent)")
 
 	set.String("header-file", "", "a text file containing HTTP headers to send to the GQL server, in RFC 822 format")
 

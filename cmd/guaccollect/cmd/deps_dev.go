@@ -49,8 +49,8 @@ type depsDevOptions struct {
 	enablePrometheus bool
 	// prometheus address
 	prometheusPort int
-	// store blob URL in origin (useful if the blob store is persistent)
-	storeBlobURL bool
+	// store blob key in origin (useful if the blob store is persistent)
+	storeBlobKey bool
 }
 
 var depsDevCmd = &cobra.Command{
@@ -85,7 +85,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("service-poll"),
 			viper.GetBool("retrieve-dependencies"),
 			viper.GetBool("enable-prometheus"),
-			viper.GetBool("store-blob-url"),
+			viper.GetBool("set-blob-key"),
 			viper.GetInt("prometheus-port"),
 			args,
 		)
@@ -95,7 +95,7 @@ you have access to read and write to the respective blob store.`,
 			os.Exit(1)
 		}
 		// Register collector
-		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, opts.storeBlobURL, 30*time.Second)
+		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, opts.storeBlobKey, 30*time.Second)
 		if err != nil {
 			logger.Fatalf("unable to register oci collector: %v", err)
 		}
@@ -127,7 +127,7 @@ func validateDepsDevFlags(
 	poll,
 	retrieveDependencies,
 	enablePrometheus,
-	storeBlobURL bool,
+	storeBlobKey bool,
 	prometheusPort int,
 	args []string,
 ) (depsDevOptions, error) {
@@ -137,7 +137,7 @@ func validateDepsDevFlags(
 	opts.poll = poll
 	opts.retrieveDependencies = retrieveDependencies
 	opts.enablePrometheus = enablePrometheus
-	opts.storeBlobURL = storeBlobURL
+	opts.storeBlobKey = storeBlobKey
 	opts.prometheusPort = prometheusPort
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
