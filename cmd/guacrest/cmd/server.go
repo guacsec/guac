@@ -27,6 +27,7 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/go-chi/chi"
+	"github.com/guacsec/guac/pkg/cli"
 	gen "github.com/guacsec/guac/pkg/guacrest/generated"
 	"github.com/guacsec/guac/pkg/guacrest/server"
 	"github.com/guacsec/guac/pkg/logging"
@@ -39,7 +40,12 @@ func startServer() {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
 
-	httpClient := &http.Client{}
+	transport, err := cli.NewHTTPHeaderTransport(flags.headerFile, http.DefaultTransport)
+	if err != nil {
+		logger.Fatalf("unable to create HTTP transport: %+v", err)
+	}
+
+	httpClient := &http.Client{Transport: transport}
 	gqlClient := getGraphqlServerClientOrExit(ctx, httpClient)
 	handler := server.NewDefaultServer(gqlClient)
 	handlerWrapper := gen.NewStrictHandler(handler, nil)

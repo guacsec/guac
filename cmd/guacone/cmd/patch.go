@@ -34,6 +34,7 @@ import (
 
 type queryPatchOptions struct {
 	graphqlEndpoint       string
+	headerFile            string
 	startPurl             string
 	stopPurl              string
 	depth                 int
@@ -50,19 +51,23 @@ var queryPatchCmd = &cobra.Command{
 
 		opts, err := validateQueryPatchFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetString("start-purl"),
 			viper.GetString("stop-purl"),
 			viper.GetInt("search-depth"),
 			viper.GetBool("is-pkg-version-start"),
 			viper.GetBool("is-pkg-version-stop"),
-			args,
 		)
-
 		if err != nil {
 			logger.Fatalf("unable to validate flags: %s\n", err)
 		}
 
-		httpClient := http.Client{}
+		transport, err := cli.NewHTTPHeaderTransport(opts.headerFile, http.DefaultTransport)
+		if err != nil {
+			logger.Fatalf("unable to create HTTP transport: %v", err)
+		}
+
+		httpClient := http.Client{Transport: transport}
 		gqlClient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		var startID string
@@ -263,7 +268,15 @@ func getPkgID(ctx context.Context, gqlClient graphql.Client, purl string, isPack
 	return pkgResponse.Packages[0].Namespaces[0].Names[0].Id, nil
 }
 
-func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string, depth int, isPackageVersionStart bool, isPackageVersionStop bool, args []string) (queryPatchOptions, error) {
+func validateQueryPatchFlags(
+	graphqlEndpoint,
+	headerFile,
+	startPurl,
+	stopPurl string,
+	depth int,
+	isPackageVersionStart,
+	isPackageVersionStop bool,
+) (queryPatchOptions, error) {
 	var opts queryPatchOptions
 	opts.startPurl = startPurl
 
@@ -281,6 +294,7 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 	}
 
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 	opts.depth = depth
 	opts.isPackageVersionStart = isPackageVersionStart
 	opts.isPackageVersionStop = isPackageVersionStop
@@ -289,7 +303,14 @@ func validateQueryPatchFlags(graphqlEndpoint, startPurl string, stopPurl string,
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"start-purl", "stop-purl", "search-depth", "is-pkg-version-start", "is-pkg-version-stop"})
+	set, err := cli.BuildFlags([]string{
+		"header-file",
+		"start-purl",
+		"stop-purl",
+		"search-depth",
+		"is-pkg-version-start",
+		"is-pkg-version-stop",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
 		os.Exit(1)
