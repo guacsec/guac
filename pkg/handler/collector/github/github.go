@@ -289,7 +289,7 @@ func (g *githubCollector) collectAssetsForRelease(ctx context.Context, release c
 				SourceInformation: processor.SourceInformation{
 					Collector:   GithubCollector,
 					Source:      asset.URL,
-					DocumentRef: g.getDocRef(content.Bytes),
+					DocumentRef: getDocRef(content.Bytes),
 				},
 			}
 			docChannel <- doc
@@ -340,7 +340,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 				SourceInformation: processor.SourceInformation{
 					Collector:   GithubCollector,
 					Source:      artifact.Name,
-					DocumentRef: g.getDocRef(artifact.Bytes),
+					DocumentRef: getDocRef(artifact.Bytes),
 				},
 			}
 
@@ -351,7 +351,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 	}
 }
 
-func (g *githubCollector) getDocRef(blob []byte) string {
+func getDocRef(blob []byte) string {
 	return events.GetKey(blob) // this is the blob store key
 }
 

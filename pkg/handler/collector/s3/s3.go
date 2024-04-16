@@ -58,15 +58,15 @@ func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
 
 func (s *S3Collector) RetrieveArtifacts(ctx context.Context, docChannel chan<- *processor.Document) error {
 	if s.config.Poll {
-		s.retrieveWithPoll(ctx, docChannel)
+		retrieveWithPoll(*s, ctx, docChannel)
 	} else {
-		return s.retrieve(ctx, docChannel)
+		return retrieve(*s, ctx, docChannel)
 	}
 
 	return nil
 }
 
-func (s S3Collector) retrieve(ctx context.Context, docChannel chan<- *processor.Document) error {
+func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.Document) error {
 	logger := logging.FromContext(ctx)
 	downloader := getDownloader(s)
 
@@ -92,7 +92,7 @@ func (s S3Collector) retrieve(ctx context.Context, docChannel chan<- *processor.
 			SourceInformation: processor.SourceInformation{
 				Collector:   S3CollectorType,
 				Source:      "S3",
-				DocumentRef: s.getDocRef(blob),
+				DocumentRef: getDocRef(blob),
 			},
 		}
 		docChannel <- doc
@@ -128,7 +128,7 @@ func (s S3Collector) retrieve(ctx context.Context, docChannel chan<- *processor.
 					SourceInformation: processor.SourceInformation{
 						Collector:   S3CollectorType,
 						Source:      "S3",
-						DocumentRef: s.getDocRef(blob),
+						DocumentRef: getDocRef(blob),
 					},
 				}
 				docChannel <- doc
@@ -145,7 +145,7 @@ func (s S3Collector) retrieve(ctx context.Context, docChannel chan<- *processor.
 	return nil
 }
 
-func (s S3Collector) retrieveWithPoll(ctx context.Context, docChannel chan<- *processor.Document) {
+func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *processor.Document) {
 	logger := logging.FromContext(ctx)
 	downloader := getDownloader(s)
 	queues := strings.Split(s.config.Queues, ",")
@@ -219,7 +219,7 @@ func (s S3Collector) retrieveWithPoll(ctx context.Context, docChannel chan<- *pr
 						SourceInformation: processor.SourceInformation{
 							Collector:   S3CollectorType,
 							Source:      "S3",
-							DocumentRef: s.getDocRef(blob),
+							DocumentRef: getDocRef(blob),
 						},
 					}
 					select {
@@ -237,7 +237,7 @@ func (s S3Collector) retrieveWithPoll(ctx context.Context, docChannel chan<- *pr
 	wg.Wait()
 }
 
-func (s S3Collector) getDocRef(blob []byte) string {
+func getDocRef(blob []byte) string {
 	return events.GetKey(blob) // this is the blob store key
 }
 

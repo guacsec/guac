@@ -285,7 +285,7 @@ func (d *depsCollector) collectMetadata(ctx context.Context, docChannel chan<- *
 			SourceInformation: processor.SourceInformation{
 				Collector:   DepsCollector,
 				Source:      DepsCollector,
-				DocumentRef: d.getDocRef(blob),
+				DocumentRef: getDocRef(blob),
 			},
 		}
 		docChannel <- doc
@@ -521,7 +521,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 		SourceInformation: processor.SourceInformation{
 			Collector:   DepsCollector,
 			Source:      DepsCollector,
-			DocumentRef: d.getDocRef(blob),
+			DocumentRef: getDocRef(blob),
 		},
 	}
 	docChannel <- doc
@@ -529,7 +529,7 @@ func (d *depsCollector) fetchDependencies(ctx context.Context, purl string, docC
 	return nil
 }
 
-func (d *depsCollector) getDocRef(blob []byte) string {
+func getDocRef(blob []byte) string {
 	return events.GetKey(blob) // this is the blob store key
 }
 
