@@ -60,8 +60,9 @@ func TestCollect(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(file.FileCollector),
-				Source:    "file:///testdata/hello",
+				Collector:   string(file.FileCollector),
+				Source:      "file:///testdata/hello",
+				DocumentRef: events.GetKey([]byte("hello\n")),
 			}},
 		},
 		wantErr: false,

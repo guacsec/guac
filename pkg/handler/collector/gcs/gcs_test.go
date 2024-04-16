@@ -24,6 +24,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/fsouza/fake-gcs-server/fakestorage"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -50,8 +51,9 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		Type:   processor.DocumentUnknown,
 		Format: processor.FormatUnknown,
 		SourceInformation: processor.SourceInformation{
-			Collector: string(CollectorGCS),
-			Source:    bucketName + "/some/object/file.txt",
+			Collector:   string(CollectorGCS),
+			Source:      bucketName + "/some/object/file.txt",
+			DocumentRef: events.GetKey(blob),
 		},
 	}
 

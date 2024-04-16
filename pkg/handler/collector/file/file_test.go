@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -61,8 +62,9 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollector),
-				Source:    "file:///testdata/hello",
+				Collector:   string(FileCollector),
+				Source:      "file:///testdata/hello",
+				DocumentRef: events.GetKey([]byte("hello\n")),
 			}},
 		},
 		wantErr: false,
@@ -79,8 +81,9 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollector),
-				Source:    "file:///testdata/hello",
+				Collector:   string(FileCollector),
+				Source:      "file:///testdata/hello",
+				DocumentRef: events.GetKey([]byte("hello\n")),
 			}},
 		},
 		wantErr: true,
