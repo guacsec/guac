@@ -149,33 +149,33 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certification_type_justification_origin_collector_document_ref_source_id_known_since_document_ref",
+				Name:    "certification_type_justification_origin_collector_source_id_known_since_document_ref",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[4], CertificationsColumns[5], CertificationsColumns[6], CertificationsColumns[7], CertificationsColumns[3], CertificationsColumns[6]},
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[4], CertificationsColumns[5], CertificationsColumns[7], CertificationsColumns[3], CertificationsColumns[6]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "certification_type_justification_origin_collector_document_ref_package_version_id_known_since_document_ref",
+				Name:    "certification_type_justification_origin_collector_package_version_id_known_since_document_ref",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[4], CertificationsColumns[5], CertificationsColumns[6], CertificationsColumns[8], CertificationsColumns[3], CertificationsColumns[6]},
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[4], CertificationsColumns[5], CertificationsColumns[8], CertificationsColumns[3], CertificationsColumns[6]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "certification_type_justification_origin_collector_document_ref_package_name_id_known_since_document_ref",
+				Name:    "certification_type_justification_origin_collector_package_name_id_known_since_document_ref",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[4], CertificationsColumns[5], CertificationsColumns[6], CertificationsColumns[9], CertificationsColumns[3], CertificationsColumns[6]},
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[4], CertificationsColumns[5], CertificationsColumns[9], CertificationsColumns[3], CertificationsColumns[6]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL",
 				},
 			},
 			{
-				Name:    "certification_type_justification_origin_collector_document_ref_artifact_id_known_since_document_ref",
+				Name:    "certification_type_justification_origin_collector_artifact_id_known_since_document_ref",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[4], CertificationsColumns[5], CertificationsColumns[6], CertificationsColumns[10], CertificationsColumns[3], CertificationsColumns[6]},
+				Columns: []*schema.Column{CertificationsColumns[1], CertificationsColumns[2], CertificationsColumns[4], CertificationsColumns[5], CertificationsColumns[10], CertificationsColumns[3], CertificationsColumns[6]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL",
 				},
