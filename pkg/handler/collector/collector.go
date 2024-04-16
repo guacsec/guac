@@ -73,7 +73,7 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 	return nil
 }
 
-func addChildLogger(logger *zap.SugaredLogger, d *processor.Document) {
+func AddChildLogger(logger *zap.SugaredLogger, d *processor.Document) {
 	key := events.GetKey(d.Blob)
 	childLogger := logger.With(zap.String(logging.DocumentHash, key))
 	d.ChildLogger = childLogger
@@ -101,7 +101,7 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	for collectorsDone < numCollectors {
 		select {
 		case d := <-docChan:
-			addChildLogger(logger, d)
+			AddChildLogger(logger, d)
 			logger.Debugf("starting up the child logger: %+v", d.SourceInformation.Source)
 
 			if err := emitter(d); err != nil {
@@ -118,7 +118,7 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	}
 	for len(docChan) > 0 {
 		d := <-docChan
-		addChildLogger(logger, d)
+		AddChildLogger(logger, d)
 		logger.Debugf("starting up the child logger: %+v", d.SourceInformation.Source)
 		if err := emitter(d); err != nil {
 			d.ChildLogger.Errorf("emit error: %v", err)
