@@ -24,11 +24,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 	"github.com/guacsec/guac/pkg/assembler/backends/helper"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/pkg/errors"
@@ -80,22 +76,27 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 	return toGlobalIDs(certifylegal.Table, *ids), nil
 }
 
+func certifyLegalConflictColumns() []string {
+	return []string{
+		certifylegal.FieldDeclaredLicense,
+		certifylegal.FieldDiscoveredLicense,
+		certifylegal.FieldAttribution,
+		certifylegal.FieldJustification,
+		certifylegal.FieldTimeScanned,
+		certifylegal.FieldOrigin,
+		certifylegal.FieldCollector,
+		certifylegal.FieldDocumentRef,
+		certifylegal.FieldDeclaredLicensesHash,
+		certifylegal.FieldDiscoveredLicensesHash,
+	}
+}
+
 func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.PackageOrSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput, spec *model.CertifyLegalInputSpec) (string, error) {
 
 	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
-		certifyLegalConflictColumns := []string{
-			certifylegal.FieldDeclaredLicense,
-			certifylegal.FieldDiscoveredLicense,
-			certifylegal.FieldAttribution,
-			certifylegal.FieldJustification,
-			certifylegal.FieldTimeScanned,
-			certifylegal.FieldOrigin,
-			certifylegal.FieldCollector,
-			certifylegal.FieldDeclaredLicensesHash,
-			certifylegal.FieldDiscoveredLicensesHash,
-		}
+		certifyLegalConflictColumns := certifyLegalConflictColumns()
 		var conflictWhere *sql.Predicate
 
 		if subject.Package != nil {
@@ -147,7 +148,8 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 		SetJustification(cl.Justification).
 		SetTimeScanned(cl.TimeScanned.UTC()).
 		SetOrigin(cl.Origin).
-		SetCollector(cl.Collector)
+		SetCollector(cl.Collector).
+		SetDocumentRef(cl.DocumentRef)
 
 	var sortedDeclaredLicenseHash string
 	var sortedDiscoveredLicenseHash string
@@ -264,17 +266,7 @@ func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.Certi
 func upsertBulkCertifyLegal(ctx context.Context, tx *ent.Tx, subjects model.PackageOrSourceInputs, declaredLicensesList [][]*model.IDorLicenseInput, discoveredLicensesList [][]*model.IDorLicenseInput, certifyLegals []*model.CertifyLegalInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
-	certifyLegalConflictColumns := []string{
-		certifylegal.FieldDeclaredLicense,
-		certifylegal.FieldDiscoveredLicense,
-		certifylegal.FieldAttribution,
-		certifylegal.FieldJustification,
-		certifylegal.FieldTimeScanned,
-		certifylegal.FieldOrigin,
-		certifylegal.FieldCollector,
-		certifylegal.FieldDeclaredLicensesHash,
-		certifylegal.FieldDiscoveredLicensesHash,
-	}
+	certifyLegalConflictColumns := certifyLegalConflictColumns()
 
 	var conflictWhere *sql.Predicate
 
@@ -344,33 +336,16 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 		optionalPredicate(filter.TimeScanned, certifylegal.TimeScannedEQ),
 		optionalPredicate(filter.Origin, certifylegal.OriginEqualFold),
 		optionalPredicate(filter.Collector, certifylegal.CollectorEqualFold),
+		optionalPredicate(filter.DocumentRef, certifylegal.DocumentRefEQ),
 	}
 
 	if filter.Subject != nil {
 		if filter.Subject.Package != nil {
 			predicates = append(predicates,
-				certifylegal.HasPackageWith(
-					optionalPredicate(filter.Subject.Package.ID, IDEQ),
-					optionalPredicate(filter.Subject.Package.Version, packageversion.VersionEqualFold),
-					packageversion.QualifiersMatch(filter.Subject.Package.Qualifiers, ptrWithDefault(filter.Subject.Package.MatchOnlyEmptyQualifiers, false)),
-					optionalPredicate(filter.Subject.Package.Subpath, packageversion.SubpathEqualFold),
-					packageversion.HasNameWith(
-						optionalPredicate(filter.Subject.Package.Name, packagename.NameEqualFold),
-						optionalPredicate(filter.Subject.Package.Namespace, packagename.NamespaceEqualFold),
-						optionalPredicate(filter.Subject.Package.Type, packagename.TypeEqualFold),
-					),
-				),
-			)
+				certifylegal.HasPackageWith(packageVersionQuery(filter.Subject.Package)))
 		} else if filter.Subject.Source != nil {
 			predicates = append(predicates,
-				certifylegal.HasSourceWith(
-					optionalPredicate(filter.Subject.Source.ID, IDEQ),
-					optionalPredicate(filter.Subject.Source.Type, sourcename.TypeEqualFold),
-					optionalPredicate(filter.Subject.Source.Namespace, sourcename.NamespaceEqualFold),
-					optionalPredicate(filter.Subject.Source.Name, sourcename.NameEqualFold),
-					optionalPredicate(filter.Subject.Source.Tag, sourcename.TagEqualFold),
-					optionalPredicate(filter.Subject.Source.Commit, sourcename.CommitEqualFold),
-				),
+				certifylegal.HasSourceWith(sourceQuery(filter.Subject.Source)),
 			)
 		}
 	}
@@ -378,10 +353,7 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 	declaredLicensePredicate := make([]predicate.License, 0)
 	for _, dl := range filter.DeclaredLicenses {
 		declaredLicensePredicate = append(declaredLicensePredicate,
-			optionalPredicate(dl.ID, IDEQ),
-			optionalPredicate(dl.Name, license.NameEqualFold),
-			optionalPredicate(dl.Inline, license.InlineEqualFold),
-			optionalPredicate(dl.ListVersion, license.ListVersion),
+			licenseQuery(*dl),
 		)
 	}
 	if len(declaredLicensePredicate) > 0 {
@@ -391,10 +363,7 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 	discoveredLicensePredicate := make([]predicate.License, 0)
 	for _, dl := range filter.DiscoveredLicenses {
 		discoveredLicensePredicate = append(discoveredLicensePredicate,
-			optionalPredicate(dl.ID, IDEQ),
-			optionalPredicate(dl.Name, license.NameEqualFold),
-			optionalPredicate(dl.Inline, license.InlineEqualFold),
-			optionalPredicate(dl.ListVersion, license.ListVersion),
+			licenseQuery(*dl),
 		)
 	}
 	if len(discoveredLicensePredicate) > 0 {
@@ -405,7 +374,7 @@ func certifyLegalQuery(filter model.CertifyLegalSpec) predicate.CertifyLegal {
 }
 
 func canonicalCertifyLegalString(cl *model.CertifyLegalInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", cl.DeclaredLicense, cl.DiscoveredLicense, cl.Attribution, cl.Justification, cl.TimeScanned.UTC(), cl.Origin, cl.Collector)
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s:%s", cl.DeclaredLicense, cl.DiscoveredLicense, cl.Attribution, cl.Justification, cl.TimeScanned.UTC(), cl.Origin, cl.Collector, cl.DocumentRef)
 }
 
 // guacCertifyLegalKey generates an uuid based on the hash of the inputspec and inputs. certifyLegal ID has to be set for bulk ingestion

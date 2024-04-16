@@ -28,6 +28,8 @@ type HashEqual struct {
 	Collector string `json:"collector,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// An opaque hash of the artifact IDs that are equal
 	ArtifactsHash string `json:"artifacts_hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -80,7 +82,7 @@ func (*HashEqual) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case hashequal.FieldOrigin, hashequal.FieldCollector, hashequal.FieldJustification, hashequal.FieldArtifactsHash:
+		case hashequal.FieldOrigin, hashequal.FieldCollector, hashequal.FieldJustification, hashequal.FieldDocumentRef, hashequal.FieldArtifactsHash:
 			values[i] = new(sql.NullString)
 		case hashequal.FieldID, hashequal.FieldArtID, hashequal.FieldEqualArtID:
 			values[i] = new(uuid.UUID)
@@ -134,6 +136,12 @@ func (he *HashEqual) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field justification", values[i])
 			} else if value.Valid {
 				he.Justification = value.String
+			}
+		case hashequal.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				he.DocumentRef = value.String
 			}
 		case hashequal.FieldArtifactsHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -201,6 +209,9 @@ func (he *HashEqual) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("justification=")
 	builder.WriteString(he.Justification)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(he.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("artifacts_hash=")
 	builder.WriteString(he.ArtifactsHash)

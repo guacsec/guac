@@ -46,6 +46,7 @@ func (CertifyScorecard) Fields() []ent.Field {
 		field.String("scorecard_commit"),
 		field.String("origin"),
 		field.String("collector"),
+		field.String("document_ref"),
 		field.String("checks_hash").Comment("A SHA1 of the checks fields after sorting keys, used to ensure uniqueness of scorecard records."),
 	}
 }
@@ -58,6 +59,6 @@ func (CertifyScorecard) Edges() []ent.Edge {
 }
 func (CertifyScorecard) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("source_id", "origin", "collector", "scorecard_version", "scorecard_commit", "aggregate_score", "time_scanned", "checks_hash").Unique(),
+		index.Fields("source_id", "origin", "collector", "scorecard_version", "scorecard_commit", "aggregate_score", "time_scanned", "checks_hash", "document_ref").Unique(),
 	}
 }

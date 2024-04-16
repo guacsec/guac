@@ -90,17 +90,20 @@ func (b *EntBackend) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPkgI
 	return toGlobalIDs(pkgequal.Table, *ids), nil
 }
 
-func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func pkgEqualConflictColumns() []string {
+	return []string{
 		pkgequal.FieldPkgID,
 		pkgequal.FieldEqualPkgID,
 		pkgequal.FieldPackagesHash,
 		pkgequal.FieldOrigin,
 		pkgequal.FieldCollector,
 		pkgequal.FieldJustification,
+		pkgequal.FieldDocumentRef,
 	}
+}
+
+func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, otherPackages []*model.IDorPkgInput, pkgEquals []*model.PkgEqualInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	batches := chunk(pkgEquals, MaxBatchSize)
 
@@ -120,7 +123,7 @@ func upsertBulkPkgEquals(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgI
 
 		err := tx.PkgEqual.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(pkgEqualConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -143,7 +146,8 @@ func generatePkgEqualCreate(ctx context.Context, tx *ent.Tx, pkgA *model.IDorPkg
 	pkgEqalCreate := tx.PkgEqual.Create().
 		SetCollector(pkgEqualInput.Collector).
 		SetJustification(pkgEqualInput.Justification).
-		SetOrigin(pkgEqualInput.Origin)
+		SetOrigin(pkgEqualInput.Origin).
+		SetDocumentRef(pkgEqualInput.DocumentRef)
 
 	if pkgA.PackageVersionID == nil {
 		pv, err := getPkgVersion(ctx, tx.Client(), *pkgA.PackageInput)
@@ -202,14 +206,7 @@ func upsertPackageEqual(ctx context.Context, tx *ent.Tx, pkgA model.IDorPkgInput
 	}
 	if id, err := pkgEqualCreate.
 		OnConflict(
-			sql.ConflictColumns(
-				pkgequal.FieldPkgID,
-				pkgequal.FieldEqualPkgID,
-				pkgequal.FieldPackagesHash,
-				pkgequal.FieldOrigin,
-				pkgequal.FieldCollector,
-				pkgequal.FieldJustification,
-			),
+			sql.ConflictColumns(pkgEqualConflictColumns()...),
 		).
 		Ignore().
 		ID(ctx); err != nil {
@@ -228,6 +225,7 @@ func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {
 		optionalPredicate(spec.Origin, pkgequal.OriginEQ),
 		optionalPredicate(spec.Collector, pkgequal.CollectorEQ),
 		optionalPredicate(spec.Justification, pkgequal.JustificationEQ),
+		optionalPredicate(spec.DocumentRef, pkgequal.DocumentRefEQ),
 	}
 
 	if len(spec.Packages) == 1 {
@@ -240,14 +238,6 @@ func pkgEqualQueryPredicates(spec *model.PkgEqualSpec) predicate.PkgEqual {
 	return pkgequal.And(predicates...)
 }
 
-//func pkgEqualInputQueryPredicates(spec model.PkgEqualInputSpec) predicate.PkgEqual {
-//	return pkgequal.And(
-//		pkgequal.OriginEQ(spec.Origin),
-//		pkgequal.CollectorEQ(spec.Collector),
-//		pkgequal.JustificationEQ(spec.Justification),
-//	)
-//}
-
 func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 	equalPkgs := []*ent.PackageVersion{record.Edges.PackageA, record.Edges.PackageB}
 	packages := collect(equalPkgs, backReferencePackageVersion)
@@ -257,6 +247,7 @@ func toModelPkgEqual(record *ent.PkgEqual) *model.PkgEqual {
 		Origin:        record.Origin,
 		Collector:     record.Collector,
 		Justification: record.Justification,
+		DocumentRef:   record.DocumentRef,
 		Packages:      collect(packages, toModelPackage),
 	}
 }
@@ -276,7 +267,7 @@ func hashPackages(slc []model.IDorPkgInput) string {
 }
 
 func canonicalPkgEqualString(pe *model.PkgEqualInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s", pe.Justification, pe.Origin, pe.Collector)
+	return fmt.Sprintf("%s::%s::%s:%s", pe.Justification, pe.Origin, pe.Collector, pe.DocumentRef)
 }
 
 // guacPkgEqualKey generates an uuid based on the hash of the inputspec and inputs. pkgEqual ID has to be set for bulk ingestion

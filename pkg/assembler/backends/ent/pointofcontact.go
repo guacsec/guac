@@ -42,6 +42,8 @@ type PointOfContact struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PointOfContactQuery when eager-loading is set.
 	Edges        PointOfContactEdges `json:"edges"`
@@ -124,7 +126,7 @@ func (*PointOfContact) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case pointofcontact.FieldSourceID, pointofcontact.FieldPackageVersionID, pointofcontact.FieldPackageNameID, pointofcontact.FieldArtifactID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case pointofcontact.FieldEmail, pointofcontact.FieldInfo, pointofcontact.FieldJustification, pointofcontact.FieldOrigin, pointofcontact.FieldCollector:
+		case pointofcontact.FieldEmail, pointofcontact.FieldInfo, pointofcontact.FieldJustification, pointofcontact.FieldOrigin, pointofcontact.FieldCollector, pointofcontact.FieldDocumentRef:
 			values[i] = new(sql.NullString)
 		case pointofcontact.FieldSince:
 			values[i] = new(sql.NullTime)
@@ -214,6 +216,12 @@ func (poc *PointOfContact) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				poc.Collector = value.String
+			}
+		case pointofcontact.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				poc.DocumentRef = value.String
 			}
 		default:
 			poc.selectValues.Set(columns[i], values[i])
@@ -308,6 +316,9 @@ func (poc *PointOfContact) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(poc.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(poc.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

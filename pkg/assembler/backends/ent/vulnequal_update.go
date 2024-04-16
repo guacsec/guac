@@ -99,6 +99,20 @@ func (veu *VulnEqualUpdate) SetNillableCollector(s *string) *VulnEqualUpdate {
 	return veu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (veu *VulnEqualUpdate) SetDocumentRef(s string) *VulnEqualUpdate {
+	veu.mutation.SetDocumentRef(s)
+	return veu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (veu *VulnEqualUpdate) SetNillableDocumentRef(s *string) *VulnEqualUpdate {
+	if s != nil {
+		veu.SetDocumentRef(*s)
+	}
+	return veu
+}
+
 // SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
 func (veu *VulnEqualUpdate) SetVulnerabilitiesHash(s string) *VulnEqualUpdate {
 	veu.mutation.SetVulnerabilitiesHash(s)
@@ -210,6 +224,9 @@ func (veu *VulnEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := veu.mutation.Collector(); ok {
 		_spec.SetField(vulnequal.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := veu.mutation.DocumentRef(); ok {
+		_spec.SetField(vulnequal.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := veu.mutation.VulnerabilitiesHash(); ok {
 		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)
@@ -362,6 +379,20 @@ func (veuo *VulnEqualUpdateOne) SetNillableCollector(s *string) *VulnEqualUpdate
 	return veuo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (veuo *VulnEqualUpdateOne) SetDocumentRef(s string) *VulnEqualUpdateOne {
+	veuo.mutation.SetDocumentRef(s)
+	return veuo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (veuo *VulnEqualUpdateOne) SetNillableDocumentRef(s *string) *VulnEqualUpdateOne {
+	if s != nil {
+		veuo.SetDocumentRef(*s)
+	}
+	return veuo
+}
+
 // SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
 func (veuo *VulnEqualUpdateOne) SetVulnerabilitiesHash(s string) *VulnEqualUpdateOne {
 	veuo.mutation.SetVulnerabilitiesHash(s)
@@ -503,6 +534,9 @@ func (veuo *VulnEqualUpdateOne) sqlSave(ctx context.Context) (_node *VulnEqual, 
 	}
 	if value, ok := veuo.mutation.Collector(); ok {
 		_spec.SetField(vulnequal.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := veuo.mutation.DocumentRef(); ok {
+		_spec.SetField(vulnequal.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := veuo.mutation.VulnerabilitiesHash(); ok {
 		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)

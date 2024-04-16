@@ -92,6 +92,12 @@ func (bomc *BillOfMaterialsCreate) SetCollector(s string) *BillOfMaterialsCreate
 	return bomc
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (bomc *BillOfMaterialsCreate) SetDocumentRef(s string) *BillOfMaterialsCreate {
+	bomc.mutation.SetDocumentRef(s)
+	return bomc
+}
+
 // SetKnownSince sets the "known_since" field.
 func (bomc *BillOfMaterialsCreate) SetKnownSince(t time.Time) *BillOfMaterialsCreate {
 	bomc.mutation.SetKnownSince(t)
@@ -267,6 +273,9 @@ func (bomc *BillOfMaterialsCreate) check() error {
 	if _, ok := bomc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "BillOfMaterials.collector"`)}
 	}
+	if _, ok := bomc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "BillOfMaterials.document_ref"`)}
+	}
 	if _, ok := bomc.mutation.KnownSince(); !ok {
 		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "BillOfMaterials.known_since"`)}
 	}
@@ -341,6 +350,10 @@ func (bomc *BillOfMaterialsCreate) createSpec() (*BillOfMaterials, *sqlgraph.Cre
 	if value, ok := bomc.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := bomc.mutation.DocumentRef(); ok {
+		_spec.SetField(billofmaterials.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if value, ok := bomc.mutation.KnownSince(); ok {
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
@@ -620,6 +633,18 @@ func (u *BillOfMaterialsUpsert) UpdateCollector() *BillOfMaterialsUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *BillOfMaterialsUpsert) SetDocumentRef(v string) *BillOfMaterialsUpsert {
+	u.Set(billofmaterials.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsert) UpdateDocumentRef() *BillOfMaterialsUpsert {
+	u.SetExcluded(billofmaterials.FieldDocumentRef)
+	return u
+}
+
 // SetKnownSince sets the "known_since" field.
 func (u *BillOfMaterialsUpsert) SetKnownSince(v time.Time) *BillOfMaterialsUpsert {
 	u.Set(billofmaterials.FieldKnownSince, v)
@@ -851,6 +876,20 @@ func (u *BillOfMaterialsUpsertOne) SetCollector(v string) *BillOfMaterialsUpsert
 func (u *BillOfMaterialsUpsertOne) UpdateCollector() *BillOfMaterialsUpsertOne {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *BillOfMaterialsUpsertOne) SetDocumentRef(v string) *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertOne) UpdateDocumentRef() *BillOfMaterialsUpsertOne {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -1262,6 +1301,20 @@ func (u *BillOfMaterialsUpsertBulk) SetCollector(v string) *BillOfMaterialsUpser
 func (u *BillOfMaterialsUpsertBulk) UpdateCollector() *BillOfMaterialsUpsertBulk {
 	return u.Update(func(s *BillOfMaterialsUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *BillOfMaterialsUpsertBulk) SetDocumentRef(v string) *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *BillOfMaterialsUpsertBulk) UpdateDocumentRef() *BillOfMaterialsUpsertBulk {
+	return u.Update(func(s *BillOfMaterialsUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

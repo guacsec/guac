@@ -21,6 +21,8 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldDocumentRef holds the string denoting the document_ref field in the database.
+	FieldDocumentRef = "document_ref"
 	// FieldJustification holds the string denoting the justification field in the database.
 	FieldJustification = "justification"
 	// FieldPackagesHash holds the string denoting the packages_hash field in the database.
@@ -54,6 +56,7 @@ var Columns = []string{
 	FieldEqualPkgID,
 	FieldOrigin,
 	FieldCollector,
+	FieldDocumentRef,
 	FieldJustification,
 	FieldPackagesHash,
 }
@@ -99,6 +102,11 @@ func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 // ByCollector orders the results by the collector field.
 func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
+}
+
+// ByDocumentRef orders the results by the document_ref field.
+func ByDocumentRef(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentRef, opts...).ToFunc()
 }
 
 // ByJustification orders the results by the justification field.

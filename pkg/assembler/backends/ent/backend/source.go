@@ -62,6 +62,7 @@ func hasSourceAtQuery(filter model.HasSourceAtSpec) predicate.HasSourceAt {
 		optionalPredicate(filter.ID, IDEQ),
 		optionalPredicate(filter.Collector, hassourceat.CollectorEQ),
 		optionalPredicate(filter.Origin, hassourceat.OriginEQ),
+		optionalPredicate(filter.DocumentRef, hassourceat.DocumentRefEQ),
 		optionalPredicate(filter.Justification, hassourceat.JustificationEQ),
 		optionalPredicate(filter.KnownSince, hassourceat.KnownSinceEQ),
 	}
@@ -117,16 +118,21 @@ func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorP
 	return toGlobalIDs(hassourceat.Table, *ids), nil
 }
 
-func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func hasSourceAtConflictColumns() []string {
+	return []string{
 		hassourceat.FieldSourceID,
 		hassourceat.FieldJustification,
 		hassourceat.FieldKnownSince,
 		hassourceat.FieldCollector,
 		hassourceat.FieldOrigin,
+		hassourceat.FieldDocumentRef,
 	}
+}
+
+func upsertBulkHasSourceAts(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := hasSourceAtConflictColumns()
 	var conflictWhere *sql.Predicate
 
 	if pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
@@ -194,6 +200,7 @@ func generateHasSourceAtCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 	hasSourceAtCreate.
 		SetCollector(hs.Collector).
 		SetOrigin(hs.Origin).
+		SetDocumentRef(hs.DocumentRef).
 		SetJustification(hs.Justification).
 		SetKnownSince(hs.KnownSince.UTC()).
 		SetSourceID(sourceID)
@@ -241,13 +248,8 @@ func generateHasSourceAtCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 }
 
 func upsertHasSourceAt(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput, pkgMatchType model.MatchFlags, source model.IDorSourceInput, spec model.HasSourceAtInputSpec) (*string, error) {
-	conflictColumns := []string{
-		hassourceat.FieldSourceID,
-		hassourceat.FieldJustification,
-		hassourceat.FieldKnownSince,
-		hassourceat.FieldCollector,
-		hassourceat.FieldOrigin,
-	}
+	conflictColumns := hasSourceAtConflictColumns()
+
 	// conflictWhere MUST match the IndexWhere() defined on the index we plan to use for this query
 	var conflictWhere *sql.Predicate
 
@@ -491,6 +493,7 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 		Justification: record.Justification,
 		Origin:        record.Origin,
 		Collector:     record.Collector,
+		DocumentRef:   record.DocumentRef,
 	}
 }
 

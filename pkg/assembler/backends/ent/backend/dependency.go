@@ -75,17 +75,22 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorP
 	return toGlobalIDs(dependency.Table, *ids), nil
 }
 
-func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func dependencyConflictColumns() []string {
+	return []string{
 		dependency.FieldPackageID,
 		dependency.FieldVersionRange,
 		dependency.FieldDependencyType,
 		dependency.FieldJustification,
 		dependency.FieldOrigin,
 		dependency.FieldCollector,
+		dependency.FieldDocumentRef,
 	}
+}
+
+func upsertBulkDependencies(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, depPkgs []*model.IDorPkgInput, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := dependencyConflictColumns()
 
 	var conflictWhere *sql.Predicate
 
@@ -169,7 +174,8 @@ func generateDependencyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPk
 		SetDependencyType(dependencyTypeToEnum(dep.DependencyType)).
 		SetJustification(dep.Justification).
 		SetOrigin(dep.Origin).
-		SetCollector(dep.Collector)
+		SetCollector(dep.Collector).
+		SetDocumentRef(dep.DocumentRef)
 
 	var isDependencyID *uuid.UUID
 	if depPkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
@@ -231,14 +237,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
-		conflictColumns := []string{
-			dependency.FieldPackageID,
-			dependency.FieldVersionRange,
-			dependency.FieldDependencyType,
-			dependency.FieldJustification,
-			dependency.FieldOrigin,
-			dependency.FieldCollector,
-		}
+		conflictColumns := dependencyConflictColumns()
 
 		var conflictWhere *sql.Predicate
 
@@ -302,6 +301,7 @@ func isDependencyQuery(filter *model.IsDependencySpec) predicate.Dependency {
 		optionalPredicate(filter.Justification, dependency.Justification),
 		optionalPredicate(filter.Origin, dependency.Origin),
 		optionalPredicate(filter.Collector, dependency.Collector),
+		optionalPredicate(filter.DocumentRef, dependency.DocumentRef),
 	}
 	if filter.DependencyPackage != nil {
 		if filter.DependencyPackage.Version == nil && filter.DependencyPackage.Subpath == nil &&
@@ -328,7 +328,7 @@ func isDependencyQuery(filter *model.IsDependencySpec) predicate.Dependency {
 }
 
 func canonicalDependencyString(dep model.IsDependencyInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s::%s::%s", dep.VersionRange, dep.DependencyType.String(), dep.Justification, dep.Origin, dep.Collector)
+	return fmt.Sprintf("%s::%s::%s::%s::%s:%s", dep.VersionRange, dep.DependencyType.String(), dep.Justification, dep.Origin, dep.Collector, dep.DocumentRef)
 }
 
 func guacDependencyKey(pkgVersionID *string, depPkgNameID *string, depPkgVersionID *string, depPkgMatchType model.MatchFlags, dep model.IsDependencyInputSpec) (*uuid.UUID, error) {

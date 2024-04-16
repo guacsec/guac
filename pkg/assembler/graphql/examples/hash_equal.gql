@@ -8,6 +8,7 @@ fragment allHashEqualTree on HashEqual {
   }
   origin
   collector
+  documentRef
 }
 
 query HashEqualQ1 {

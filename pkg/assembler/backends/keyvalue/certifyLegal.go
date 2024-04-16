@@ -43,6 +43,7 @@ type certifyLegalStruct struct {
 	TimeScanned        time.Time
 	Origin             string
 	Collector          string
+	DocumentRef        string
 }
 
 func (n *certifyLegalStruct) ID() string { return n.ThisID }
@@ -59,6 +60,7 @@ func (n *certifyLegalStruct) Key() string {
 		timeKey(n.TimeScanned),
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -120,6 +122,7 @@ func (c *demoClient) ingestCertifyLegal(ctx context.Context, subject model.Packa
 		Justification:     certifyLegal.Justification,
 		Origin:            certifyLegal.Origin,
 		Collector:         certifyLegal.Collector,
+		DocumentRef:       certifyLegal.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -230,6 +233,7 @@ func (c *demoClient) convLegal(ctx context.Context, in *certifyLegalStruct) (*mo
 		TimeScanned:       in.TimeScanned,
 		Origin:            in.Origin,
 		Collector:         in.Collector,
+		DocumentRef:       in.DocumentRef,
 	}
 	for _, lid := range in.DeclaredLicenses {
 		l, err := byIDkv[*licStruct](ctx, lid, c)
@@ -377,6 +381,7 @@ func (c *demoClient) addLegalIfMatch(ctx context.Context, out []*model.CertifyLe
 		noMatch(filter.Justification, link.Justification) ||
 		noMatch(filter.Origin, link.Origin) ||
 		noMatch(filter.Collector, link.Collector) ||
+		noMatch(filter.DocumentRef, link.DocumentRef) ||
 		(filter.TimeScanned != nil && !link.TimeScanned.Equal(*filter.TimeScanned)) ||
 		!c.matchLicenses(ctx, filter.DeclaredLicenses, link.DeclaredLicenses) ||
 		!c.matchLicenses(ctx, filter.DiscoveredLicenses, link.DiscoveredLicenses) {

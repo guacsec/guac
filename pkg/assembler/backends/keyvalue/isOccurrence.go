@@ -37,6 +37,7 @@ type isOccurrenceStruct struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 }
 
 func (n *isOccurrenceStruct) ID() string { return n.ThisID }
@@ -67,6 +68,7 @@ func (n *isOccurrenceStruct) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -109,6 +111,7 @@ func (c *demoClient) ingestOccurrence(ctx context.Context, subject model.Package
 		Justification: occurrence.Justification,
 		Origin:        occurrence.Origin,
 		Collector:     occurrence.Collector,
+		DocumentRef:   occurrence.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -188,6 +191,7 @@ func (c *demoClient) convOccurrence(ctx context.Context, in *isOccurrenceStruct)
 		Justification: in.Justification,
 		Origin:        in.Origin,
 		Collector:     in.Collector,
+		DocumentRef:   in.DocumentRef,
 	}
 	if in.Pkg != "" {
 		p, err := c.buildPackageResponse(ctx, in.Pkg, nil)
@@ -327,7 +331,8 @@ func (c *demoClient) addOccIfMatch(ctx context.Context, out []*model.IsOccurrenc
 
 	if noMatch(filter.Justification, link.Justification) ||
 		noMatch(filter.Origin, link.Origin) ||
-		noMatch(filter.Collector, link.Collector) {
+		noMatch(filter.Collector, link.Collector) ||
+		noMatch(filter.DocumentRef, link.DocumentRef) {
 		return out, nil
 	}
 	if filter.Artifact != nil && !c.artifactMatch(ctx, link.Artifact, filter.Artifact) {
@@ -394,7 +399,8 @@ func (c *demoClient) matchOccurrences(ctx context.Context, filters []*model.IsOc
 		for _, link := range occLinks {
 			if noMatch(filter.Justification, link.Justification) ||
 				noMatch(filter.Origin, link.Origin) ||
-				noMatch(filter.Collector, link.Collector) {
+				noMatch(filter.Collector, link.Collector) ||
+				noMatch(filter.DocumentRef, link.DocumentRef) {
 				continue
 			}
 			if filter.Artifact != nil && !c.artifactMatch(ctx, link.Artifact, filter.Artifact) {

@@ -29,6 +29,7 @@ fragment allCertifyScorecardTree on CertifyScorecard {
     scorecardCommit
     origin
     collector
+    documentRef
   }
 }
 

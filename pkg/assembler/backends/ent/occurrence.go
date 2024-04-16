@@ -28,6 +28,8 @@ type Occurrence struct {
 	Origin string `json:"origin,omitempty"`
 	// GUAC collector for the document
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// SourceID holds the value of the "source_id" field.
 	SourceID *uuid.UUID `json:"source_id,omitempty"`
 	// PackageID holds the value of the "package_id" field.
@@ -112,7 +114,7 @@ func (*Occurrence) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case occurrence.FieldSourceID, occurrence.FieldPackageID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case occurrence.FieldJustification, occurrence.FieldOrigin, occurrence.FieldCollector:
+		case occurrence.FieldJustification, occurrence.FieldOrigin, occurrence.FieldCollector, occurrence.FieldDocumentRef:
 			values[i] = new(sql.NullString)
 		case occurrence.FieldID, occurrence.FieldArtifactID:
 			values[i] = new(uuid.UUID)
@@ -160,6 +162,12 @@ func (o *Occurrence) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				o.Collector = value.String
+			}
+		case occurrence.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				o.DocumentRef = value.String
 			}
 		case occurrence.FieldSourceID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -242,6 +250,9 @@ func (o *Occurrence) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(o.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(o.DocumentRef)
 	builder.WriteString(", ")
 	if v := o.SourceID; v != nil {
 		builder.WriteString("source_id=")

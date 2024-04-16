@@ -25,6 +25,7 @@ fragment allHasSLSATree on HasSLSA {
     finishedOn
     origin
     collector
+    documentRef
   }
 }
 

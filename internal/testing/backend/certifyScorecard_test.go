@@ -478,6 +478,29 @@ func TestCertifyScorecard(t *testing.T) {
 					},
 				},
 			},
+		}, {
+			Name:  "docref",
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Src: testdata.S1,
+					SC: &model.ScorecardInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.CertifyScorecardSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpSC: []*model.CertifyScorecard{
+				{
+					Source: testdata.S1out,
+					Scorecard: &model.Scorecard{
+						Checks:      []*model.ScorecardCheck{},
+						DocumentRef: "test",
+					},
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -688,6 +711,31 @@ func TestIngestScorecards(t *testing.T) {
 					Scorecard: &model.Scorecard{
 						Checks: []*model.ScorecardCheck{},
 						Origin: "test origin",
+					},
+				},
+			},
+		}, {
+			Name:  "docref",
+			InSrc: []*model.SourceInputSpec{testdata.S1},
+			Calls: []call{
+				{
+					Src: []*model.IDorSourceInput{{SourceInput: testdata.S1}},
+					SC: []*model.ScorecardInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyScorecardSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpSC: []*model.CertifyScorecard{
+				{
+					Source: testdata.S1out,
+					Scorecard: &model.Scorecard{
+						Checks:      []*model.ScorecardCheck{},
+						DocumentRef: "test",
 					},
 				},
 			},

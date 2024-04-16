@@ -48,6 +48,12 @@ func (pec *PkgEqualCreate) SetCollector(s string) *PkgEqualCreate {
 	return pec
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (pec *PkgEqualCreate) SetDocumentRef(s string) *PkgEqualCreate {
+	pec.mutation.SetDocumentRef(s)
+	return pec
+}
+
 // SetJustification sets the "justification" field.
 func (pec *PkgEqualCreate) SetJustification(s string) *PkgEqualCreate {
 	pec.mutation.SetJustification(s)
@@ -151,6 +157,9 @@ func (pec *PkgEqualCreate) check() error {
 	if _, ok := pec.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "PkgEqual.collector"`)}
 	}
+	if _, ok := pec.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "PkgEqual.document_ref"`)}
+	}
 	if _, ok := pec.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "PkgEqual.justification"`)}
 	}
@@ -206,6 +215,10 @@ func (pec *PkgEqualCreate) createSpec() (*PkgEqual, *sqlgraph.CreateSpec) {
 	if value, ok := pec.mutation.Collector(); ok {
 		_spec.SetField(pkgequal.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := pec.mutation.DocumentRef(); ok {
+		_spec.SetField(pkgequal.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if value, ok := pec.mutation.Justification(); ok {
 		_spec.SetField(pkgequal.FieldJustification, field.TypeString, value)
@@ -349,6 +362,18 @@ func (u *PkgEqualUpsert) UpdateCollector() *PkgEqualUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *PkgEqualUpsert) SetDocumentRef(v string) *PkgEqualUpsert {
+	u.Set(pkgequal.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *PkgEqualUpsert) UpdateDocumentRef() *PkgEqualUpsert {
+	u.SetExcluded(pkgequal.FieldDocumentRef)
+	return u
+}
+
 // SetJustification sets the "justification" field.
 func (u *PkgEqualUpsert) SetJustification(v string) *PkgEqualUpsert {
 	u.Set(pkgequal.FieldJustification, v)
@@ -474,6 +499,20 @@ func (u *PkgEqualUpsertOne) SetCollector(v string) *PkgEqualUpsertOne {
 func (u *PkgEqualUpsertOne) UpdateCollector() *PkgEqualUpsertOne {
 	return u.Update(func(s *PkgEqualUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *PkgEqualUpsertOne) SetDocumentRef(v string) *PkgEqualUpsertOne {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *PkgEqualUpsertOne) UpdateDocumentRef() *PkgEqualUpsertOne {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -773,6 +812,20 @@ func (u *PkgEqualUpsertBulk) SetCollector(v string) *PkgEqualUpsertBulk {
 func (u *PkgEqualUpsertBulk) UpdateCollector() *PkgEqualUpsertBulk {
 	return u.Update(func(s *PkgEqualUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *PkgEqualUpsertBulk) SetDocumentRef(v string) *PkgEqualUpsertBulk {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *PkgEqualUpsertBulk) UpdateDocumentRef() *PkgEqualUpsertBulk {
+	return u.Update(func(s *PkgEqualUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

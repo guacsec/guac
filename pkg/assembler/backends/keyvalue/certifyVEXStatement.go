@@ -41,6 +41,7 @@ type vexLink struct {
 	Justification   model.VexJustification
 	Origin          string
 	Collector       string
+	DocumentRef     string
 }
 
 func (n *vexLink) ID() string { return n.ThisID }
@@ -57,6 +58,7 @@ func (n *vexLink) Key() string {
 		string(n.Justification),
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -119,6 +121,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		Justification: vexStatement.VexJustification,
 		Origin:        vexStatement.Origin,
 		Collector:     vexStatement.Collector,
+		DocumentRef:   vexStatement.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -303,6 +306,9 @@ func (c *demoClient) addVexIfMatch(ctx context.Context, out []*model.CertifyVEXS
 	if filter != nil && noMatch(filter.Origin, link.Origin) {
 		return out, nil
 	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
+		return out, nil
+	}
 
 	foundCertifyVex, err := c.buildCertifyVEXStatement(ctx, link, filter, false)
 	if err != nil {
@@ -401,5 +407,6 @@ func (c *demoClient) buildCertifyVEXStatement(ctx context.Context, link *vexLink
 		KnownSince:       link.KnownSince,
 		Origin:           link.Origin,
 		Collector:        link.Collector,
+		DocumentRef:      link.DocumentRef,
 	}, nil
 }

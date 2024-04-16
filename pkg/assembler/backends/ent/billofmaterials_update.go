@@ -157,6 +157,20 @@ func (bomu *BillOfMaterialsUpdate) SetNillableCollector(s *string) *BillOfMateri
 	return bomu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (bomu *BillOfMaterialsUpdate) SetDocumentRef(s string) *BillOfMaterialsUpdate {
+	bomu.mutation.SetDocumentRef(s)
+	return bomu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (bomu *BillOfMaterialsUpdate) SetNillableDocumentRef(s *string) *BillOfMaterialsUpdate {
+	if s != nil {
+		bomu.SetDocumentRef(*s)
+	}
+	return bomu
+}
+
 // SetKnownSince sets the "known_since" field.
 func (bomu *BillOfMaterialsUpdate) SetKnownSince(t time.Time) *BillOfMaterialsUpdate {
 	bomu.mutation.SetKnownSince(t)
@@ -451,6 +465,9 @@ func (bomu *BillOfMaterialsUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if value, ok := bomu.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := bomu.mutation.DocumentRef(); ok {
+		_spec.SetField(billofmaterials.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := bomu.mutation.KnownSince(); ok {
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)
@@ -849,6 +866,20 @@ func (bomuo *BillOfMaterialsUpdateOne) SetNillableCollector(s *string) *BillOfMa
 	return bomuo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (bomuo *BillOfMaterialsUpdateOne) SetDocumentRef(s string) *BillOfMaterialsUpdateOne {
+	bomuo.mutation.SetDocumentRef(s)
+	return bomuo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (bomuo *BillOfMaterialsUpdateOne) SetNillableDocumentRef(s *string) *BillOfMaterialsUpdateOne {
+	if s != nil {
+		bomuo.SetDocumentRef(*s)
+	}
+	return bomuo
+}
+
 // SetKnownSince sets the "known_since" field.
 func (bomuo *BillOfMaterialsUpdateOne) SetKnownSince(t time.Time) *BillOfMaterialsUpdateOne {
 	bomuo.mutation.SetKnownSince(t)
@@ -1173,6 +1204,9 @@ func (bomuo *BillOfMaterialsUpdateOne) sqlSave(ctx context.Context) (_node *Bill
 	}
 	if value, ok := bomuo.mutation.Collector(); ok {
 		_spec.SetField(billofmaterials.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := bomuo.mutation.DocumentRef(); ok {
+		_spec.SetField(billofmaterials.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := bomuo.mutation.KnownSince(); ok {
 		_spec.SetField(billofmaterials.FieldKnownSince, field.TypeTime, value)

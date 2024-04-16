@@ -37,6 +37,7 @@ fragment allCertifyVulnTree on CertifyVuln {
     timeScanned
     origin
     collector
+    documentRef
   }
 }
 

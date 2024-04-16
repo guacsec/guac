@@ -581,6 +581,35 @@ func TestHasSLSA(t *testing.T) {
 				},
 			},
 			ExpHS: nil,
+		}, {
+			Name:  "docref",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: testdata.A1,
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  testdata.B1,
+					SLSA: &model.SLSAInputSpec{
+						BuildType:   "test type",
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:     testdata.B1out,
+						BuiltFrom:   []*model.Artifact{testdata.A2out},
+						BuildType:   "test type",
+						DocumentRef: "test",
+					},
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -814,6 +843,37 @@ func TestIngestHasSLSAs(t *testing.T) {
 					Slsa: &model.Slsa{
 						BuiltBy:   testdata.B1out,
 						BuiltFrom: []*model.Artifact{testdata.A4out},
+					},
+				},
+			},
+		}, {
+			Name:  "docref",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}},
+					SLSA: []*model.SLSAInputSpec{
+						{
+							BuildType:   "test type",
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:     testdata.B1out,
+						BuiltFrom:   []*model.Artifact{testdata.A2out},
+						BuildType:   "test type",
+						DocumentRef: "test",
 					},
 				},
 			},

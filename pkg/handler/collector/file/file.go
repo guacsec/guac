@@ -90,9 +90,11 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			return fmt.Errorf("error reading file: %s, err: %w", path, err)
 		}
 
-		source := fmt.Sprintf("file:///%s", path)
+		var docRef string
 		if f.useBlobURL {
-			source = events.GetKey(blob) // this is the blob store path
+			docRef = events.GetKey(blob) // this is the blob store path
+		} else {
+			docRef = ""
 		}
 
 		doc := &processor.Document{
@@ -100,8 +102,9 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollector),
-				Source:    source,
+				Collector:   string(FileCollector),
+				Source:      fmt.Sprintf("file:///%s", path),
+				DocumentRef: docRef,
 			},
 		}
 

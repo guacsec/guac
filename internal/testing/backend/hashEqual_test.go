@@ -432,6 +432,27 @@ func TestHashEqual(t *testing.T) {
 					Artifacts: []*model.Artifact{testdata.A1out, testdata.A3out},
 				},
 			},
+		}, {
+			Name:  "docref",
+			InArt: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
+			Calls: []call{
+				{
+					A1: testdata.A1,
+					A2: testdata.A2,
+					HE: &model.HashEqualInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts:   []*model.Artifact{testdata.A1out, testdata.A2out},
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -745,6 +766,29 @@ func TestIngestHashEquals(t *testing.T) {
 			ExpHE: []*model.HashEqual{
 				{
 					Artifacts: []*model.Artifact{testdata.A2out, testdata.A3out},
+				},
+			},
+		}, {
+			Name:  "docref",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			Calls: []call{
+				{
+					A1: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					A2: []*model.IDorArtifactInput{{ArtifactInput: testdata.A2}},
+					HE: []*model.HashEqualInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.HashEqualSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHE: []*model.HashEqual{
+				{
+					Artifacts:   []*model.Artifact{testdata.A1out, testdata.A2out},
+					DocumentRef: "test",
 				},
 			},
 		},

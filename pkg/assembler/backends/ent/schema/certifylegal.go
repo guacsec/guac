@@ -45,6 +45,7 @@ func (CertifyLegal) Fields() []ent.Field {
 		field.Time("time_scanned"),
 		field.String("origin"),
 		field.String("collector"),
+		field.String("document_ref"),
 		field.String("declared_licenses_hash").Comment("An opaque hash of the declared license IDs to ensure uniqueness"),
 		field.String("discovered_licenses_hash").Comment("An opaque hash of the discovered license IDs to ensure uniqueness"),
 	}
@@ -63,11 +64,11 @@ func (CertifyLegal) Edges() []ent.Edge {
 func (CertifyLegal) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("source_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned",
-			"origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
+			"origin", "collector", "document_ref", "declared_licenses_hash", "discovered_licenses_hash").
 			Unique().
 			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")),
 		index.Fields("package_id", "declared_license", "discovered_license", "attribution", "justification", "time_scanned",
-			"origin", "collector", "declared_licenses_hash", "discovered_licenses_hash").
+			"origin", "collector", "document_ref", "declared_licenses_hash", "discovered_licenses_hash").
 			Unique().
 			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")),
 	}

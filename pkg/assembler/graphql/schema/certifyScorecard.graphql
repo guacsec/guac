@@ -61,7 +61,7 @@ type Scorecard {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String
+  documentRef: String!
 }
 
 """
@@ -114,7 +114,7 @@ input ScorecardInputSpec {
   scorecardCommit: String!
   origin: String!
   collector: String!
-  documentRef: String
+  documentRef: String!
 }
 
 "ScorecardCheckInputSpec represents the mutation input for a Scorecard check."

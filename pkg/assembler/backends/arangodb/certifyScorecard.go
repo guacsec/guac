@@ -80,7 +80,8 @@ func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *mod
 		'scorecardVersion': scorecard.scorecardVersion,
 		'scorecardCommit': scorecard.scorecardCommit,
 		'collector': scorecard.collector,
-		'origin': scorecard.origin
+		'origin': scorecard.origin,
+		'documentRef': scorecard.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "Scorecards")
@@ -125,6 +126,10 @@ func setCertifyScorecardMatchValues(arangoQueryBuilder *arangoQueryBuilder, cert
 	if certifyScorecardSpec.Collector != nil {
 		arangoQueryBuilder.filter("scorecard", collector, "==", "@"+collector)
 		queryValues["collector"] = *certifyScorecardSpec.Collector
+	}
+	if certifyScorecardSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("scorecard", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *certifyScorecardSpec.DocumentRef
 	}
 	if certifyScorecardSpec.Source == nil {
 		// get sources
@@ -174,6 +179,7 @@ func getScorecardValues(src *model.SourceInputSpec, scorecard *model.ScorecardIn
 	values[scorecardCommitStr] = scorecard.ScorecardCommit
 	values[origin] = scorecard.Origin
 	values[collector] = scorecard.Collector
+	values[docRef] = scorecard.DocumentRef
 
 	return values
 }
@@ -220,8 +226,8 @@ func (c *arangoClient) IngestScorecards(ctx context.Context, sources []*model.ID
 	)
 	  	  
 	LET scorecard = FIRST(
-		UPSERT { sourceID:firstSrc.name_id, checks:doc.checks, aggregateScore:doc.aggregateScore, timeScanned:doc.timeScanned, scorecardVersion:doc.scorecardVersion, scorecardCommit:doc.scorecardCommit, collector:doc.collector, origin:doc.origin } 
-			INSERT { sourceID:firstSrc.name_id, checks:doc.checks, aggregateScore:doc.aggregateScore, timeScanned:doc.timeScanned, scorecardVersion:doc.scorecardVersion, scorecardCommit:doc.scorecardCommit, collector:doc.collector, origin:doc.origin } 
+		UPSERT { sourceID:firstSrc.name_id, checks:doc.checks, aggregateScore:doc.aggregateScore, timeScanned:doc.timeScanned, scorecardVersion:doc.scorecardVersion, scorecardCommit:doc.scorecardCommit, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+			INSERT { sourceID:firstSrc.name_id, checks:doc.checks, aggregateScore:doc.aggregateScore, timeScanned:doc.timeScanned, scorecardVersion:doc.scorecardVersion, scorecardCommit:doc.scorecardCommit, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 			UPDATE {} IN scorecards
 			RETURN {
 				'_id': NEW._id,
@@ -268,8 +274,8 @@ func (c *arangoClient) IngestScorecard(ctx context.Context, source model.IDorSou
 	)
 	  	  
 	LET scorecard = FIRST(
-		UPSERT { sourceID:firstSrc.name_id, checks:@checks, aggregateScore:@aggregateScore, timeScanned:@timeScanned, scorecardVersion:@scorecardVersion, scorecardCommit:@scorecardCommit, collector:@collector, origin:@origin } 
-			INSERT { sourceID:firstSrc.name_id, checks:@checks, aggregateScore:@aggregateScore, timeScanned:@timeScanned, scorecardVersion:@scorecardVersion, scorecardCommit:@scorecardCommit, collector:@collector, origin:@origin } 
+		UPSERT { sourceID:firstSrc.name_id, checks:@checks, aggregateScore:@aggregateScore, timeScanned:@timeScanned, scorecardVersion:@scorecardVersion, scorecardCommit:@scorecardCommit, collector:@collector, origin:@origin, documentRef:@documentRef } 
+			INSERT { sourceID:firstSrc.name_id, checks:@checks, aggregateScore:@aggregateScore, timeScanned:@timeScanned, scorecardVersion:@scorecardVersion, scorecardCommit:@scorecardCommit, collector:@collector, origin:@origin, documentRef:@documentRef } 
 			UPDATE {} IN scorecards
 			RETURN {
 				'_id': NEW._id,
@@ -331,6 +337,7 @@ func getCertifyScorecardFromCursor(ctx context.Context, cursor driver.Cursor, in
 		ScorecardCommit  string     `json:"scorecardCommit"`
 		Collector        string     `json:"collector"`
 		Origin           string     `json:"origin"`
+		DocumentRef      string     `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -362,6 +369,7 @@ func getCertifyScorecardFromCursor(ctx context.Context, cursor driver.Cursor, in
 			ScorecardCommit:  createdValue.ScorecardCommit,
 			Origin:           createdValue.Origin,
 			Collector:        createdValue.Collector,
+			DocumentRef:      createdValue.DocumentRef,
 		}
 
 		certifyScorecard := &model.CertifyScorecard{
@@ -431,6 +439,7 @@ func (c *arangoClient) queryCertifyScorecardNodeByID(ctx context.Context, filter
 		ScorecardCommit  string    `json:"scorecardCommit"`
 		Collector        string    `json:"collector"`
 		Origin           string    `json:"origin"`
+		DocumentRef      string    `json:"documentRef"`
 	}
 
 	var collectedValues []dbScorecard
@@ -464,6 +473,7 @@ func (c *arangoClient) queryCertifyScorecardNodeByID(ctx context.Context, filter
 		ScorecardCommit:  collectedValues[0].ScorecardCommit,
 		Origin:           collectedValues[0].Origin,
 		Collector:        collectedValues[0].Collector,
+		DocumentRef:      collectedValues[0].DocumentRef,
 	}
 
 	builtSource, err := c.buildSourceResponseFromID(ctx, collectedValues[0].SourceID, filter.Source)

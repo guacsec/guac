@@ -99,6 +99,20 @@ func (heu *HashEqualUpdate) SetNillableJustification(s *string) *HashEqualUpdate
 	return heu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (heu *HashEqualUpdate) SetDocumentRef(s string) *HashEqualUpdate {
+	heu.mutation.SetDocumentRef(s)
+	return heu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (heu *HashEqualUpdate) SetNillableDocumentRef(s *string) *HashEqualUpdate {
+	if s != nil {
+		heu.SetDocumentRef(*s)
+	}
+	return heu
+}
+
 // SetArtifactsHash sets the "artifacts_hash" field.
 func (heu *HashEqualUpdate) SetArtifactsHash(s string) *HashEqualUpdate {
 	heu.mutation.SetArtifactsHash(s)
@@ -210,6 +224,9 @@ func (heu *HashEqualUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := heu.mutation.Justification(); ok {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
+	}
+	if value, ok := heu.mutation.DocumentRef(); ok {
+		_spec.SetField(hashequal.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := heu.mutation.ArtifactsHash(); ok {
 		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
@@ -362,6 +379,20 @@ func (heuo *HashEqualUpdateOne) SetNillableJustification(s *string) *HashEqualUp
 	return heuo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (heuo *HashEqualUpdateOne) SetDocumentRef(s string) *HashEqualUpdateOne {
+	heuo.mutation.SetDocumentRef(s)
+	return heuo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (heuo *HashEqualUpdateOne) SetNillableDocumentRef(s *string) *HashEqualUpdateOne {
+	if s != nil {
+		heuo.SetDocumentRef(*s)
+	}
+	return heuo
+}
+
 // SetArtifactsHash sets the "artifacts_hash" field.
 func (heuo *HashEqualUpdateOne) SetArtifactsHash(s string) *HashEqualUpdateOne {
 	heuo.mutation.SetArtifactsHash(s)
@@ -503,6 +534,9 @@ func (heuo *HashEqualUpdateOne) sqlSave(ctx context.Context) (_node *HashEqual, 
 	}
 	if value, ok := heuo.mutation.Justification(); ok {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
+	}
+	if value, ok := heuo.mutation.DocumentRef(); ok {
+		_spec.SetField(hashequal.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := heuo.mutation.ArtifactsHash(); ok {
 		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)

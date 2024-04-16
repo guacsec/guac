@@ -749,6 +749,32 @@ func TestCertifyBad(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:     testdata.P1out,
+					DocumentRef: "test",
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
@@ -990,8 +1016,7 @@ func TestIngestCertifyBads(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
-		},
-		{
+		}, {
 			Name:  "Query on Source",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
@@ -1077,6 +1102,33 @@ func TestIngestCertifyBads(t *testing.T) {
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
+				},
+			},
+		}, {
+			Name:  "docRef",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:     testdata.P1out,
+					DocumentRef: "test",
 				},
 			},
 		},

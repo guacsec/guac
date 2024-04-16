@@ -970,6 +970,40 @@ func TestIngestVulnMetadata(t *testing.T) {
 					Origin:     "test origin",
 				},
 			},
+		}, {
+			Name:   "docref",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.C1},
+			Calls: []call{
+				{
+					Vuln: testdata.C1,
+					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+						ScoreType:   model.VulnerabilityScoreTypeCVSSv2,
+						ScoreValue:  8.9,
+						Timestamp:   testdata.T1,
+						Collector:   "test collector",
+						Origin:      "test origin",
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.VulnerabilityMetadataSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVuln: []*model.VulnerabilityMetadata{
+				{
+					ID: "1",
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+					},
+					ScoreType:   model.VulnerabilityScoreTypeCVSSv2,
+					ScoreValue:  8.9,
+					Timestamp:   testdata.T1,
+					Collector:   "test collector",
+					Origin:      "test origin",
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -1280,6 +1314,47 @@ func TestIngestVulnMetadatas(t *testing.T) {
 				},
 			},
 			ExpVuln: nil,
+		}, {
+			Name:   "docref",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
+			Calls: []call{
+				{
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
+					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
+						{
+							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+							ScoreValue: 7.9,
+							Timestamp:  testdata.T1,
+							Collector:  "test collector",
+							Origin:     "test origin",
+						},
+						{
+							ScoreType:   model.VulnerabilityScoreTypeCVSSv2,
+							ScoreValue:  8.9,
+							Timestamp:   testdata.T1,
+							DocumentRef: "test",
+							Origin:      "test origin",
+						},
+					},
+				},
+			},
+			Query: &model.VulnerabilityMetadataSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVuln: []*model.VulnerabilityMetadata{
+				{
+					ID: "10",
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
+					},
+					ScoreType:   model.VulnerabilityScoreTypeCVSSv2,
+					ScoreValue:  8.9,
+					Timestamp:   testdata.T1,
+					DocumentRef: "test",
+					Origin:      "test origin",
+				},
+			},
 		},
 	}
 	for _, test := range tests {

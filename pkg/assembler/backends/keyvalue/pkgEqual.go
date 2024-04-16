@@ -33,6 +33,7 @@ type pkgEqualStruct struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 }
 
 func (n *pkgEqualStruct) ID() string { return n.ThisID }
@@ -42,6 +43,7 @@ func (n *pkgEqualStruct) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -76,6 +78,7 @@ func (c *demoClient) convPkgEqual(ctx context.Context, in *pkgEqualStruct) (*mod
 		Justification: in.Justification,
 		Origin:        in.Origin,
 		Collector:     in.Collector,
+		DocumentRef:   in.DocumentRef,
 	}
 	for _, id := range in.Pkgs {
 		p, err := c.buildPackageResponse(ctx, id, nil)
@@ -98,6 +101,7 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.IDorPkgInput,
 		Justification: pkgEqual.Justification,
 		Origin:        pkgEqual.Origin,
 		Collector:     pkgEqual.Collector,
+		DocumentRef:   pkgEqual.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -221,7 +225,8 @@ func (c *demoClient) addCPIfMatch(ctx context.Context, out []*model.PkgEqual,
 ) {
 	if noMatch(filter.Justification, link.Justification) ||
 		noMatch(filter.Origin, link.Origin) ||
-		noMatch(filter.Collector, link.Collector) {
+		noMatch(filter.Collector, link.Collector) ||
+		noMatch(filter.DocumentRef, link.DocumentRef) {
 		return out, nil
 	}
 	for _, ps := range filter.Packages {

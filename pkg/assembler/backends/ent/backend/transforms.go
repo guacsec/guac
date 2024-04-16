@@ -127,6 +127,7 @@ func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
 		Justification: o.Justification,
 		Origin:        o.Origin,
 		Collector:     o.Collector,
+		DocumentRef:   o.DocumentRef,
 	}
 }
 
@@ -195,6 +196,7 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 		Justification:     id.Justification,
 		Origin:            id.Origin,
 		Collector:         id.Collector,
+		DocumentRef:       id.DocumentRef,
 	}
 }
 
@@ -219,6 +221,7 @@ func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 		DownloadLocation:     sbom.DownloadLocation,
 		Origin:               sbom.Origin,
 		Collector:            sbom.Collector,
+		DocumentRef:          sbom.DocumentRef,
 		KnownSince:           sbom.KnownSince,
 		IncludedSoftware:     toIncludedSoftware(sbom.Edges.IncludedSoftwarePackages, sbom.Edges.IncludedSoftwareArtifacts),
 		IncludedDependencies: collect(sbom.Edges.IncludedDependencies, toModelIsDependencyWithBackrefs),
@@ -278,6 +281,7 @@ func toModelCertifyLegal(cl *ent.CertifyLegal) *model.CertifyLegal {
 		TimeScanned:        cl.TimeScanned,
 		Origin:             cl.Origin,
 		Collector:          cl.Collector,
+		DocumentRef:        cl.DocumentRef,
 	}
 }
 

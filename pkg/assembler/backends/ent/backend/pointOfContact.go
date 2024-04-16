@@ -93,6 +93,7 @@ func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOf
 		optionalPredicate(filter.Justification, pointofcontact.JustificationEQ),
 		optionalPredicate(filter.Origin, pointofcontact.OriginEQ),
 		optionalPredicate(filter.Collector, pointofcontact.CollectorEQ),
+		optionalPredicate(filter.DocumentRef, pointofcontact.DocumentRefEQ),
 	}
 
 	if filter.Subject != nil {
@@ -111,17 +112,22 @@ func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOf
 	return pointofcontact.And(predicates...)
 }
 
-func upsertBulkPointOfContact(ctx context.Context, tx *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func pocConflictColumns() []string {
+	return []string{
 		pointofcontact.FieldEmail,
 		pointofcontact.FieldInfo,
 		pointofcontact.FieldSince,
 		pointofcontact.FieldJustification,
 		pointofcontact.FieldOrigin,
 		pointofcontact.FieldCollector,
+		pointofcontact.FieldDocumentRef,
 	}
+}
+
+func upsertBulkPointOfContact(ctx context.Context, tx *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := pocConflictColumns()
 	var conflictWhere *sql.Predicate
 
 	switch {
@@ -216,7 +222,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 		SetSince(poc.Since.UTC()).
 		SetJustification(poc.Justification).
 		SetOrigin(poc.Origin).
-		SetCollector(poc.Collector)
+		SetCollector(poc.Collector).
+		SetDocumentRef(poc.DocumentRef)
 
 	switch {
 	case art != nil:
@@ -295,14 +302,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 
 func upsertPointOfContact(ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.PointOfContactInputSpec) (*string, error) {
 
-	conflictColumns := []string{
-		pointofcontact.FieldEmail,
-		pointofcontact.FieldInfo,
-		pointofcontact.FieldSince,
-		pointofcontact.FieldJustification,
-		pointofcontact.FieldOrigin,
-		pointofcontact.FieldCollector,
-	}
+	conflictColumns := pocConflictColumns()
+
 	var conflictWhere *sql.Predicate
 
 	switch {
@@ -387,6 +388,7 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 	}
 }
 

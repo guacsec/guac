@@ -36,6 +36,7 @@ type goodLink struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 	KnownSince    time.Time
 }
 
@@ -49,6 +50,7 @@ func (n *goodLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 		timeKey(n.KnownSince),
 	}, ":"))
 }
@@ -113,6 +115,7 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 		Justification: certifyGood.Justification,
 		Origin:        certifyGood.Origin,
 		Collector:     certifyGood.Collector,
+		DocumentRef:   certifyGood.DocumentRef,
 		KnownSince:    certifyGood.KnownSince.UTC(),
 	}
 
@@ -274,6 +277,7 @@ func (c *demoClient) addCGIfMatch(ctx context.Context, out []*model.CertifyGood,
 		if noMatch(filter.Justification, link.Justification) ||
 			noMatch(filter.Collector, link.Collector) ||
 			noMatch(filter.Origin, link.Origin) ||
+			noMatch(filter.DocumentRef, link.DocumentRef) ||
 			filter.KnownSince != nil && filter.KnownSince.After(link.KnownSince) {
 			return out, nil
 		}
@@ -366,6 +370,7 @@ func (c *demoClient) buildCertifyGood(ctx context.Context, link *goodLink, filte
 		Justification: link.Justification,
 		Origin:        link.Origin,
 		Collector:     link.Collector,
+		DocumentRef:   link.DocumentRef,
 		KnownSince:    link.KnownSince.UTC(),
 	}
 	return &certifyGood, nil

@@ -31,21 +31,26 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func certifyVexConflictColumns() []string {
+	return []string{
+		certifyvex.FieldKnownSince,
+		certifyvex.FieldStatus,
+		certifyvex.FieldStatement,
+		certifyvex.FieldStatusNotes,
+		certifyvex.FieldJustification,
+		certifyvex.FieldOrigin,
+		certifyvex.FieldCollector,
+		certifyvex.FieldDocumentRef,
+		certifyvex.FieldVulnerabilityID,
+	}
+}
+
 func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.PackageOrArtifactInput, vulnerability model.IDorVulnerabilityInput, vexStatement model.VexStatementInputSpec) (string, error) {
 	funcName := "IngestVEXStatement"
 
 	recordID, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
-		conflictColumns := []string{
-			certifyvex.FieldKnownSince,
-			certifyvex.FieldStatus,
-			certifyvex.FieldStatement,
-			certifyvex.FieldStatusNotes,
-			certifyvex.FieldJustification,
-			certifyvex.FieldOrigin,
-			certifyvex.FieldCollector,
-			certifyvex.FieldVulnerabilityID,
-		}
+		conflictColumns := certifyVexConflictColumns()
 
 		var conflictWhere *sql.Predicate
 
@@ -187,7 +192,8 @@ func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput,
 		SetStatusNotes(vexStatement.StatusNotes).
 		SetJustification(vexStatement.VexJustification.String()).
 		SetOrigin(vexStatement.Origin).
-		SetCollector(vexStatement.Collector)
+		SetCollector(vexStatement.Collector).
+		SetDocumentRef(vexStatement.DocumentRef)
 
 	return certifyVexCreate, nil
 }
@@ -195,16 +201,7 @@ func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput,
 func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) (*[]string, error) {
 	ids := make([]string, 0)
 
-	conflictColumns := []string{
-		certifyvex.FieldKnownSince,
-		certifyvex.FieldStatus,
-		certifyvex.FieldStatement,
-		certifyvex.FieldStatusNotes,
-		certifyvex.FieldJustification,
-		certifyvex.FieldOrigin,
-		certifyvex.FieldCollector,
-		certifyvex.FieldVulnerabilityID,
-	}
+	conflictColumns := certifyVexConflictColumns()
 
 	var conflictWhere *sql.Predicate
 
@@ -301,6 +298,7 @@ func toModelCertifyVEXStatement(record *ent.CertifyVex) *model.CertifyVEXStateme
 		VexJustification: model.VexJustification(record.Justification),
 		Origin:           record.Origin,
 		Collector:        record.Collector,
+		DocumentRef:      record.DocumentRef,
 	}
 
 }
@@ -313,6 +311,7 @@ func certifyVexPredicate(filter model.CertifyVEXStatementSpec) predicate.Certify
 		optionalPredicate(filter.StatusNotes, certifyvex.StatusNotesEQ),
 		optionalPredicate(filter.Collector, certifyvex.CollectorEQ),
 		optionalPredicate(filter.Origin, certifyvex.OriginEQ),
+		optionalPredicate(filter.DocumentRef, certifyvex.DocumentRefEQ),
 	}
 	if filter.Status != nil {
 		status := filter.Status.String()
@@ -337,9 +336,7 @@ func certifyVexPredicate(filter model.CertifyVEXStatementSpec) predicate.Certify
 		} else {
 			predicates = append(predicates,
 				certifyvex.HasVulnerabilityWith(
-					optionalPredicate(filter.Vulnerability.ID, IDEQ),
-					optionalPredicate(filter.Vulnerability.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold),
-					optionalPredicate(filter.Vulnerability.Type, vulnerabilityid.TypeEqualFold),
+					vulnerabilityQueryPredicates(*filter.Vulnerability)...,
 				),
 			)
 		}

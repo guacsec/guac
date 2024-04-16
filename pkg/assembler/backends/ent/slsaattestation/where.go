@@ -96,6 +96,11 @@ func Collector(v string) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldCollector, v))
 }
 
+// DocumentRef applies equality check predicate on the "document_ref" field. It's identical to DocumentRefEQ.
+func DocumentRef(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEQ(FieldDocumentRef, v))
+}
+
 // BuiltFromHash applies equality check predicate on the "built_from_hash" field. It's identical to BuiltFromHashEQ.
 func BuiltFromHash(v string) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldEQ(FieldBuiltFromHash, v))
@@ -489,6 +494,71 @@ func CollectorEqualFold(v string) predicate.SLSAAttestation {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.SLSAAttestation {
 	return predicate.SLSAAttestation(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// DocumentRefEQ applies the EQ predicate on the "document_ref" field.
+func DocumentRefEQ(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefNEQ applies the NEQ predicate on the "document_ref" field.
+func DocumentRefNEQ(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldNEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefIn applies the In predicate on the "document_ref" field.
+func DocumentRefIn(vs ...string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefNotIn applies the NotIn predicate on the "document_ref" field.
+func DocumentRefNotIn(vs ...string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldNotIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefGT applies the GT predicate on the "document_ref" field.
+func DocumentRefGT(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldGT(FieldDocumentRef, v))
+}
+
+// DocumentRefGTE applies the GTE predicate on the "document_ref" field.
+func DocumentRefGTE(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldGTE(FieldDocumentRef, v))
+}
+
+// DocumentRefLT applies the LT predicate on the "document_ref" field.
+func DocumentRefLT(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldLT(FieldDocumentRef, v))
+}
+
+// DocumentRefLTE applies the LTE predicate on the "document_ref" field.
+func DocumentRefLTE(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldLTE(FieldDocumentRef, v))
+}
+
+// DocumentRefContains applies the Contains predicate on the "document_ref" field.
+func DocumentRefContains(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldContains(FieldDocumentRef, v))
+}
+
+// DocumentRefHasPrefix applies the HasPrefix predicate on the "document_ref" field.
+func DocumentRefHasPrefix(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldHasPrefix(FieldDocumentRef, v))
+}
+
+// DocumentRefHasSuffix applies the HasSuffix predicate on the "document_ref" field.
+func DocumentRefHasSuffix(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldHasSuffix(FieldDocumentRef, v))
+}
+
+// DocumentRefEqualFold applies the EqualFold predicate on the "document_ref" field.
+func DocumentRefEqualFold(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldEqualFold(FieldDocumentRef, v))
+}
+
+// DocumentRefContainsFold applies the ContainsFold predicate on the "document_ref" field.
+func DocumentRefContainsFold(v string) predicate.SLSAAttestation {
+	return predicate.SLSAAttestation(sql.FieldContainsFold(FieldDocumentRef, v))
 }
 
 // BuiltFromHashEQ applies the EQ predicate on the "built_from_hash" field.

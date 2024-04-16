@@ -741,6 +741,37 @@ func TestPointOfContact(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Email:       "a@b.com",
+						Info:        "info1",
+						Since:       time.Unix(1e9, 0),
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpPoc: []*model.PointOfContact{
+				{
+					Subject:     testdata.P1out,
+					Email:       "a@b.com",
+					Info:        "info1",
+					Since:       time.Unix(1e9, 0),
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -1071,6 +1102,33 @@ func TestIngestPointOfContacts(t *testing.T) {
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
+				},
+			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpPC: []*model.PointOfContact{
+				{
+					Subject:     testdata.P1out,
+					DocumentRef: "test",
 				},
 			},
 		},

@@ -47,6 +47,7 @@ fragment allCertifyBadTree on CertifyBad {
   }
   origin
   collector
+  documentRef
 }
 
 query CertifactBadQ1 {

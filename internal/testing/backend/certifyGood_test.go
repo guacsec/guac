@@ -601,6 +601,31 @@ func TestCertifyGood(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: &model.CertifyGoodInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:     testdata.P1out,
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -756,8 +781,7 @@ func TestIngestCertifyGoods(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
-		},
-		{
+		}, {
 			Name:  "Ingest same twice",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			Calls: []call{
@@ -791,8 +815,7 @@ func TestIngestCertifyGoods(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
-		},
-		{
+		}, {
 			Name:  "Query on Package",
 			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
 			InSrc: []*model.SourceInputSpec{testdata.S1},
@@ -841,8 +864,7 @@ func TestIngestCertifyGoods(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
-		},
-		{
+		}, {
 			Name:  "Query on Source",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
@@ -887,8 +909,7 @@ func TestIngestCertifyGoods(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
-		},
-		{
+		}, {
 			Name:  "Query on Artifact",
 			InSrc: []*model.SourceInputSpec{testdata.S1},
 			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
@@ -928,6 +949,33 @@ func TestIngestCertifyGoods(t *testing.T) {
 				{
 					Subject:       testdata.A2out,
 					Justification: "test justification",
+				},
+			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CG: []*model.CertifyGoodInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyGoodSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpCG: []*model.CertifyGood{
+				{
+					Subject:     testdata.P1out,
+					DocumentRef: "test",
 				},
 			},
 		},

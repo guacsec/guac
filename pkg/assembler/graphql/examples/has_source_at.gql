@@ -39,6 +39,7 @@ fragment allHasSourceAtTree on HasSourceAt {
   }
   origin
   collector
+  documentRef
 }
 
 query HasSourceAtQ1 {

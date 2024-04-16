@@ -106,6 +106,11 @@ func Collector(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldCollector, v))
 }
 
+// DocumentRef applies equality check predicate on the "document_ref" field. It's identical to DocumentRefEQ.
+func DocumentRef(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldEQ(FieldDocumentRef, v))
+}
+
 // PackageIDEQ applies the EQ predicate on the "package_id" field.
 func PackageIDEQ(v uuid.UUID) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldEQ(FieldPackageID, v))
@@ -614,6 +619,71 @@ func CollectorEqualFold(v string) predicate.CertifyVex {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.CertifyVex {
 	return predicate.CertifyVex(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// DocumentRefEQ applies the EQ predicate on the "document_ref" field.
+func DocumentRefEQ(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefNEQ applies the NEQ predicate on the "document_ref" field.
+func DocumentRefNEQ(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldNEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefIn applies the In predicate on the "document_ref" field.
+func DocumentRefIn(vs ...string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefNotIn applies the NotIn predicate on the "document_ref" field.
+func DocumentRefNotIn(vs ...string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldNotIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefGT applies the GT predicate on the "document_ref" field.
+func DocumentRefGT(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldGT(FieldDocumentRef, v))
+}
+
+// DocumentRefGTE applies the GTE predicate on the "document_ref" field.
+func DocumentRefGTE(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldGTE(FieldDocumentRef, v))
+}
+
+// DocumentRefLT applies the LT predicate on the "document_ref" field.
+func DocumentRefLT(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldLT(FieldDocumentRef, v))
+}
+
+// DocumentRefLTE applies the LTE predicate on the "document_ref" field.
+func DocumentRefLTE(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldLTE(FieldDocumentRef, v))
+}
+
+// DocumentRefContains applies the Contains predicate on the "document_ref" field.
+func DocumentRefContains(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldContains(FieldDocumentRef, v))
+}
+
+// DocumentRefHasPrefix applies the HasPrefix predicate on the "document_ref" field.
+func DocumentRefHasPrefix(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldHasPrefix(FieldDocumentRef, v))
+}
+
+// DocumentRefHasSuffix applies the HasSuffix predicate on the "document_ref" field.
+func DocumentRefHasSuffix(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldHasSuffix(FieldDocumentRef, v))
+}
+
+// DocumentRefEqualFold applies the EqualFold predicate on the "document_ref" field.
+func DocumentRefEqualFold(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldEqualFold(FieldDocumentRef, v))
+}
+
+// DocumentRefContainsFold applies the ContainsFold predicate on the "document_ref" field.
+func DocumentRefContainsFold(v string) predicate.CertifyVex {
+	return predicate.CertifyVex(sql.FieldContainsFold(FieldDocumentRef, v))
 }
 
 // HasPackage applies the HasEdge predicate on the "package" edge.

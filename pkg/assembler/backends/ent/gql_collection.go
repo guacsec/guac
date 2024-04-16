@@ -370,6 +370,11 @@ func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphq
 				selectedFields = append(selectedFields, billofmaterials.FieldCollector)
 				fieldSeen[billofmaterials.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[billofmaterials.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, billofmaterials.FieldDocumentRef)
+				fieldSeen[billofmaterials.FieldDocumentRef] = struct{}{}
+			}
 		case "knownSince":
 			if _, ok := fieldSeen[billofmaterials.FieldKnownSince]; !ok {
 				selectedFields = append(selectedFields, billofmaterials.FieldKnownSince)
@@ -616,6 +621,11 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certification.FieldJustification)
 				fieldSeen[certification.FieldJustification] = struct{}{}
 			}
+		case "knownSince":
+			if _, ok := fieldSeen[certification.FieldKnownSince]; !ok {
+				selectedFields = append(selectedFields, certification.FieldKnownSince)
+				fieldSeen[certification.FieldKnownSince] = struct{}{}
+			}
 		case "origin":
 			if _, ok := fieldSeen[certification.FieldOrigin]; !ok {
 				selectedFields = append(selectedFields, certification.FieldOrigin)
@@ -626,10 +636,10 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certification.FieldCollector)
 				fieldSeen[certification.FieldCollector] = struct{}{}
 			}
-		case "knownSince":
-			if _, ok := fieldSeen[certification.FieldKnownSince]; !ok {
-				selectedFields = append(selectedFields, certification.FieldKnownSince)
-				fieldSeen[certification.FieldKnownSince] = struct{}{}
+		case "documentRef":
+			if _, ok := fieldSeen[certification.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certification.FieldDocumentRef)
+				fieldSeen[certification.FieldDocumentRef] = struct{}{}
 			}
 		case "id":
 		case "__typename":
@@ -787,6 +797,11 @@ func (cl *CertifyLegalQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certifylegal.FieldCollector)
 				fieldSeen[certifylegal.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[certifylegal.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldDocumentRef)
+				fieldSeen[certifylegal.FieldDocumentRef] = struct{}{}
+			}
 		case "declaredLicensesHash":
 			if _, ok := fieldSeen[certifylegal.FieldDeclaredLicensesHash]; !ok {
 				selectedFields = append(selectedFields, certifylegal.FieldDeclaredLicensesHash)
@@ -909,6 +924,11 @@ func (cs *CertifyScorecardQuery) collectField(ctx context.Context, opCtx *graphq
 			if _, ok := fieldSeen[certifyscorecard.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, certifyscorecard.FieldCollector)
 				fieldSeen[certifyscorecard.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[certifyscorecard.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certifyscorecard.FieldDocumentRef)
+				fieldSeen[certifyscorecard.FieldDocumentRef] = struct{}{}
 			}
 		case "checksHash":
 			if _, ok := fieldSeen[certifyscorecard.FieldChecksHash]; !ok {
@@ -1066,6 +1086,11 @@ func (cv *CertifyVexQuery) collectField(ctx context.Context, opCtx *graphql.Oper
 				selectedFields = append(selectedFields, certifyvex.FieldCollector)
 				fieldSeen[certifyvex.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[certifyvex.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldDocumentRef)
+				fieldSeen[certifyvex.FieldDocumentRef] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -1197,6 +1222,11 @@ func (cv *CertifyVulnQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 			if _, ok := fieldSeen[certifyvuln.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, certifyvuln.FieldCollector)
 				fieldSeen[certifyvuln.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[certifyvuln.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certifyvuln.FieldDocumentRef)
+				fieldSeen[certifyvuln.FieldDocumentRef] = struct{}{}
 			}
 		case "id":
 		case "__typename":
@@ -1350,6 +1380,11 @@ func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if _, ok := fieldSeen[dependency.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, dependency.FieldCollector)
 				fieldSeen[dependency.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[dependency.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, dependency.FieldDocumentRef)
+				fieldSeen[dependency.FieldDocumentRef] = struct{}{}
 			}
 		case "id":
 		case "__typename":
@@ -1516,6 +1551,11 @@ func (hm *HasMetadataQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 				selectedFields = append(selectedFields, hasmetadata.FieldCollector)
 				fieldSeen[hasmetadata.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[hasmetadata.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, hasmetadata.FieldDocumentRef)
+				fieldSeen[hasmetadata.FieldDocumentRef] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -1652,6 +1692,11 @@ func (hsa *HasSourceAtQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, hassourceat.FieldCollector)
 				fieldSeen[hassourceat.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[hassourceat.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, hassourceat.FieldDocumentRef)
+				fieldSeen[hassourceat.FieldDocumentRef] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -1763,6 +1808,11 @@ func (he *HashEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if _, ok := fieldSeen[hashequal.FieldJustification]; !ok {
 				selectedFields = append(selectedFields, hashequal.FieldJustification)
 				fieldSeen[hashequal.FieldJustification] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[hashequal.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, hashequal.FieldDocumentRef)
+				fieldSeen[hashequal.FieldDocumentRef] = struct{}{}
 			}
 		case "artifactsHash":
 			if _, ok := fieldSeen[hashequal.FieldArtifactsHash]; !ok {
@@ -1999,6 +2049,11 @@ func (o *OccurrenceQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if _, ok := fieldSeen[occurrence.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, occurrence.FieldCollector)
 				fieldSeen[occurrence.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[occurrence.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, occurrence.FieldDocumentRef)
+				fieldSeen[occurrence.FieldDocumentRef] = struct{}{}
 			}
 		case "sourceID":
 			if _, ok := fieldSeen[occurrence.FieldSourceID]; !ok {
@@ -2529,6 +2584,11 @@ func (pe *PkgEqualQuery) collectField(ctx context.Context, opCtx *graphql.Operat
 				selectedFields = append(selectedFields, pkgequal.FieldCollector)
 				fieldSeen[pkgequal.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[pkgequal.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldDocumentRef)
+				fieldSeen[pkgequal.FieldDocumentRef] = struct{}{}
+			}
 		case "justification":
 			if _, ok := fieldSeen[pkgequal.FieldJustification]; !ok {
 				selectedFields = append(selectedFields, pkgequal.FieldJustification)
@@ -2704,6 +2764,11 @@ func (poc *PointOfContactQuery) collectField(ctx context.Context, opCtx *graphql
 				selectedFields = append(selectedFields, pointofcontact.FieldCollector)
 				fieldSeen[pointofcontact.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[pointofcontact.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, pointofcontact.FieldDocumentRef)
+				fieldSeen[pointofcontact.FieldDocumentRef] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -2847,6 +2912,11 @@ func (sa *SLSAAttestationQuery) collectField(ctx context.Context, opCtx *graphql
 			if _, ok := fieldSeen[slsaattestation.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, slsaattestation.FieldCollector)
 				fieldSeen[slsaattestation.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[slsaattestation.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, slsaattestation.FieldDocumentRef)
+				fieldSeen[slsaattestation.FieldDocumentRef] = struct{}{}
 			}
 		case "builtFromHash":
 			if _, ok := fieldSeen[slsaattestation.FieldBuiltFromHash]; !ok {
@@ -3133,6 +3203,11 @@ func (ve *VulnEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, vulnequal.FieldCollector)
 				fieldSeen[vulnequal.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[vulnequal.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldDocumentRef)
+				fieldSeen[vulnequal.FieldDocumentRef] = struct{}{}
+			}
 		case "vulnerabilitiesHash":
 			if _, ok := fieldSeen[vulnequal.FieldVulnerabilitiesHash]; !ok {
 				selectedFields = append(selectedFields, vulnequal.FieldVulnerabilitiesHash)
@@ -3369,6 +3444,11 @@ func (vm *VulnerabilityMetadataQuery) collectField(ctx context.Context, opCtx *g
 			if _, ok := fieldSeen[vulnerabilitymetadata.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldCollector)
 				fieldSeen[vulnerabilitymetadata.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[vulnerabilitymetadata.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldDocumentRef)
+				fieldSeen[vulnerabilitymetadata.FieldDocumentRef] = struct{}{}
 			}
 		case "id":
 		case "__typename":

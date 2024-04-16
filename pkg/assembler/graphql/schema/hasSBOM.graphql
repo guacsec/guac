@@ -36,7 +36,7 @@ type HasSBOM {
   "GUAC collector for the document"
   collector: String!
   "Reference location of the document in the persistent blob store (if that is configured)"
-  documentRef: String
+  documentRef: String!
   "Included packages and artifacts"
   includedSoftware: [PackageOrArtifact!]!
   "Included dependencies"
@@ -85,7 +85,7 @@ input HasSBOMInputSpec {
   knownSince: Time!
   origin: String!
   collector: String!
-  documentRef: String
+  documentRef: String!
 }
 
 extend type Query {

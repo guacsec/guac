@@ -54,6 +54,12 @@ func (vec *VulnEqualCreate) SetCollector(s string) *VulnEqualCreate {
 	return vec
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (vec *VulnEqualCreate) SetDocumentRef(s string) *VulnEqualCreate {
+	vec.mutation.SetDocumentRef(s)
+	return vec
+}
+
 // SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
 func (vec *VulnEqualCreate) SetVulnerabilitiesHash(s string) *VulnEqualCreate {
 	vec.mutation.SetVulnerabilitiesHash(s)
@@ -154,6 +160,9 @@ func (vec *VulnEqualCreate) check() error {
 	if _, ok := vec.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "VulnEqual.collector"`)}
 	}
+	if _, ok := vec.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "VulnEqual.document_ref"`)}
+	}
 	if _, ok := vec.mutation.VulnerabilitiesHash(); !ok {
 		return &ValidationError{Name: "vulnerabilities_hash", err: errors.New(`ent: missing required field "VulnEqual.vulnerabilities_hash"`)}
 	}
@@ -210,6 +219,10 @@ func (vec *VulnEqualCreate) createSpec() (*VulnEqual, *sqlgraph.CreateSpec) {
 	if value, ok := vec.mutation.Collector(); ok {
 		_spec.SetField(vulnequal.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := vec.mutation.DocumentRef(); ok {
+		_spec.SetField(vulnequal.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if value, ok := vec.mutation.VulnerabilitiesHash(); ok {
 		_spec.SetField(vulnequal.FieldVulnerabilitiesHash, field.TypeString, value)
@@ -361,6 +374,18 @@ func (u *VulnEqualUpsert) UpdateCollector() *VulnEqualUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *VulnEqualUpsert) SetDocumentRef(v string) *VulnEqualUpsert {
+	u.Set(vulnequal.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *VulnEqualUpsert) UpdateDocumentRef() *VulnEqualUpsert {
+	u.SetExcluded(vulnequal.FieldDocumentRef)
+	return u
+}
+
 // SetVulnerabilitiesHash sets the "vulnerabilities_hash" field.
 func (u *VulnEqualUpsert) SetVulnerabilitiesHash(v string) *VulnEqualUpsert {
 	u.Set(vulnequal.FieldVulnerabilitiesHash, v)
@@ -488,6 +513,20 @@ func (u *VulnEqualUpsertOne) SetCollector(v string) *VulnEqualUpsertOne {
 func (u *VulnEqualUpsertOne) UpdateCollector() *VulnEqualUpsertOne {
 	return u.Update(func(s *VulnEqualUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *VulnEqualUpsertOne) SetDocumentRef(v string) *VulnEqualUpsertOne {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *VulnEqualUpsertOne) UpdateDocumentRef() *VulnEqualUpsertOne {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -787,6 +826,20 @@ func (u *VulnEqualUpsertBulk) SetCollector(v string) *VulnEqualUpsertBulk {
 func (u *VulnEqualUpsertBulk) UpdateCollector() *VulnEqualUpsertBulk {
 	return u.Update(func(s *VulnEqualUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *VulnEqualUpsertBulk) SetDocumentRef(v string) *VulnEqualUpsertBulk {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *VulnEqualUpsertBulk) UpdateDocumentRef() *VulnEqualUpsertBulk {
+	return u.Update(func(s *VulnEqualUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

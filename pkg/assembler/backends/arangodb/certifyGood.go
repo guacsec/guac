@@ -175,7 +175,8 @@ func getSrcCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'justification': certifyGood.justification,
 		'collector': certifyGood.collector,
 		'knownSince': certifyGood.knownSince,
-		'origin': certifyGood.origin
+		'origin': certifyGood.origin,
+		'documentRef': certifyGood.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "certifyGood")
@@ -199,7 +200,8 @@ func getArtCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'justification': certifyGood.justification,
 		'collector': certifyGood.collector,
 		'knownSince': certifyGood.knownSince,
-		'origin': certifyGood.origin
+		'origin': certifyGood.origin,
+		'documentRef': certifyGood.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "certifyGood")
@@ -231,7 +233,8 @@ func getPkgCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 			'justification': certifyGood.justification,
 			'collector': certifyGood.collector,
 			'knownSince': certifyGood.knownSince,
-			'origin': certifyGood.origin
+			'origin': certifyGood.origin,
+			'documentRef': certifyGood.documentRef
 		  }`)
 
 	} else {
@@ -249,7 +252,8 @@ func getPkgCertifyGoodForQuery(ctx context.Context, c *arangoClient, arangoQuery
 			'justification': certifyGood.justification,
 			'collector': certifyGood.collector,
 			'knownSince': certifyGood.knownSince,
-			'origin': certifyGood.origin
+			'origin': certifyGood.origin,
+			'documentRef': certifyGood.documentRef
 		  }`)
 	}
 
@@ -278,6 +282,10 @@ func setCertifyGoodMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyGo
 	if certifyGoodSpec.Collector != nil {
 		arangoQueryBuilder.filter("certifyGood", collector, "==", "@"+collector)
 		queryValues[collector] = *certifyGoodSpec.Collector
+	}
+	if certifyGoodSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("certifyGood", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *certifyGoodSpec.DocumentRef
 	}
 	if certifyGoodSpec.KnownSince != nil {
 		certifyGoodKnownSince := *certifyGoodSpec.KnownSince
@@ -308,6 +316,7 @@ func getCertifyGoodQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 	values["origin"] = certifyGood.Origin
 	values["collector"] = certifyGood.Collector
 	values["knownSince"] = certifyGood.KnownSince.UTC()
+	values[docRef] = certifyGood.DocumentRef
 
 	return values
 }
@@ -328,8 +337,8 @@ func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.Pack
 		)
 
 		  LET certifyGood = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, justification:@justification, collector:@collector, origin:@origin, knownSince:@knownSince }
-				  INSERT {  packageID:firstPkg.version_id, justification:@justification, collector:@collector, origin:@origin, knownSince:@knownSince }
+			  UPSERT {  packageID:firstPkg.version_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef, knownSince:@knownSince }
+				  INSERT {  packageID:firstPkg.version_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef, knownSince:@knownSince }
 				  UPDATE {} IN certifyGoods
 				  RETURN {
 					'_id': NEW._id,
@@ -360,8 +369,8 @@ func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.Pack
 			)
 
 			  LET certifyGood = FIRST(
-				  UPSERT {  packageID:firstPkg.name_id, justification:@justification, collector:@collector, origin:@origin, knownSince:@knownSince }
-					  INSERT {  packageID:firstPkg.name_id, justification:@justification, collector:@collector, origin:@origin, knownSince:@knownSince }
+				  UPSERT {  packageID:firstPkg.name_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef, knownSince:@knownSince }
+					  INSERT {  packageID:firstPkg.name_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef, knownSince:@knownSince }
 					  UPDATE {} IN certifyGoods
 					  RETURN {
 						'_id': NEW._id,
@@ -386,8 +395,8 @@ func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.Pack
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 
 		LET certifyGood = FIRST(
-			UPSERT { artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin, knownSince:@knownSince }
-				INSERT { artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin, knownSince:@knownSince }
+			UPSERT { artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef, knownSince:@knownSince }
+				INSERT { artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef, knownSince:@knownSince }
 				UPDATE {} IN certifyGoods
 				RETURN {
 					'_id': NEW._id,
@@ -418,8 +427,8 @@ func (c *arangoClient) IngestCertifyGood(ctx context.Context, subject model.Pack
 		)
 
 		LET certifyGood = FIRST(
-			UPSERT { sourceID:firstSrc.name_id, justification:@justification, collector:@collector, origin:@origin, knownSince:@knownSince }
-				INSERT { sourceID:firstSrc.name_id, justification:@justification, collector:@collector, origin:@origin, knownSince:@knownSince }
+			UPSERT { sourceID:firstSrc.name_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef, knownSince:@knownSince }
+				INSERT { sourceID:firstSrc.name_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef, knownSince:@knownSince }
 				UPDATE {} IN certifyGoods
 				RETURN {
 					'_id': NEW._id,
@@ -502,8 +511,8 @@ func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.Pa
 		)
 		  
 		  LET certifyGood = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
-				  INSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+			  UPSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef, knownSince:doc.knownSince } 
+				  INSERT {  packageID:firstPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef, knownSince:doc.knownSince } 
 				  UPDATE {} IN certifyGoods
 				  RETURN {
 					'_id': NEW._id,
@@ -536,8 +545,8 @@ func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.Pa
 			)
 			  
 			  LET certifyGood = FIRST(
-				  UPSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
-					  INSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+				  UPSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef, knownSince:doc.knownSince } 
+					  INSERT {  packageID:firstPkg.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef, knownSince:doc.knownSince } 
 					  UPDATE {} IN certifyGoods
 					  RETURN {
 						'_id': NEW._id,
@@ -596,8 +605,8 @@ func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.Pa
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		LET certifyGood = FIRST(
-			UPSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
-				INSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+			UPSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef, knownSince:doc.knownSince } 
+				INSERT { artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef, knownSince:doc.knownSince } 
 				UPDATE {} IN certifyGoods
 				RETURN {
 					'_id': NEW._id,
@@ -663,8 +672,8 @@ func (c *arangoClient) IngestCertifyGoods(ctx context.Context, subjects model.Pa
 		)
 		  
 		LET certifyGood = FIRST(
-			UPSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
-				INSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+			UPSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef, knownSince:doc.knownSince } 
+				INSERT { sourceID:firstSrc.name_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef, knownSince:doc.knownSince } 
 				UPDATE {} IN certifyGoods
 				RETURN {
 					'_id': NEW._id,
@@ -711,6 +720,7 @@ func getCertifyGoodFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 		Collector     string          `json:"collector"`
 		KnownSince    time.Time       `json:"knownSince"`
 		Origin        string          `json:"origin"`
+		DocumentRef   string          `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -745,6 +755,7 @@ func getCertifyGoodFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 			Origin:        createdValue.Collector,
 			Collector:     createdValue.Origin,
 			KnownSince:    createdValue.KnownSince,
+			DocumentRef:   createdValue.DocumentRef,
 		}
 		if pkg != nil {
 			certifyGood.Subject = pkg
@@ -809,6 +820,7 @@ func (c *arangoClient) queryCertifyGoodNodeByID(ctx context.Context, filter *mod
 		Justification string  `json:"justification"`
 		Collector     string  `json:"collector"`
 		Origin        string  `json:"origin"`
+		DocumentRef   string  `json:"documentRef"`
 	}
 
 	var collectedValues []dbCertifyGood
@@ -835,6 +847,7 @@ func (c *arangoClient) queryCertifyGoodNodeByID(ctx context.Context, filter *mod
 		Justification: collectedValues[0].Justification,
 		Origin:        collectedValues[0].Origin,
 		Collector:     collectedValues[0].Collector,
+		DocumentRef:   collectedValues[0].DocumentRef,
 	}
 
 	if collectedValues[0].PackageID != nil {

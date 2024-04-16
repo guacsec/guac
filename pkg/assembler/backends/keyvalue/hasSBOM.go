@@ -39,6 +39,7 @@ type hasSBOMStruct struct {
 	DownloadLocation     string
 	Origin               string
 	Collector            string
+	DocumentRef          string
 	KnownSince           time.Time
 	IncludedSoftware     []string
 	IncludedDependencies []string
@@ -56,6 +57,7 @@ func (n *hasSBOMStruct) Key() string {
 		n.DownloadLocation,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 		timeKey(n.KnownSince),
 		fmt.Sprint(n.IncludedSoftware),
 		fmt.Sprint(n.IncludedDependencies),
@@ -179,6 +181,7 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 		DownloadLocation:     input.DownloadLocation,
 		Origin:               input.Origin,
 		Collector:            input.Collector,
+		DocumentRef:          input.DocumentRef,
 		KnownSince:           input.KnownSince.UTC(),
 		IncludedSoftware:     includedSoftware,
 		IncludedDependencies: includedDependencies,
@@ -254,6 +257,7 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 		DownloadLocation: in.DownloadLocation,
 		Origin:           in.Origin,
 		Collector:        in.Collector,
+		DocumentRef:      in.DocumentRef,
 		KnownSince:       in.KnownSince.UTC(),
 	}
 	if in.Pkg != "" {
@@ -408,6 +412,7 @@ func (c *demoClient) addHasSBOMIfMatch(ctx context.Context, out []*model.HasSbom
 			noMatch(filter.DownloadLocation, link.DownloadLocation) ||
 			noMatch(filter.Origin, link.Origin) ||
 			noMatch(filter.Collector, link.Collector) ||
+			noMatch(filter.DocumentRef, link.DocumentRef) ||
 			(filter.KnownSince != nil && filter.KnownSince.After(link.KnownSince)) {
 			return out, nil
 		}

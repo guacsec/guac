@@ -23,6 +23,8 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldDocumentRef holds the string denoting the document_ref field in the database.
+	FieldDocumentRef = "document_ref"
 	// FieldVulnerabilitiesHash holds the string denoting the vulnerabilities_hash field in the database.
 	FieldVulnerabilitiesHash = "vulnerabilities_hash"
 	// EdgeVulnerabilityA holds the string denoting the vulnerability_a edge name in mutations.
@@ -55,6 +57,7 @@ var Columns = []string{
 	FieldJustification,
 	FieldOrigin,
 	FieldCollector,
+	FieldDocumentRef,
 	FieldVulnerabilitiesHash,
 }
 
@@ -104,6 +107,11 @@ func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 // ByCollector orders the results by the collector field.
 func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
+}
+
+// ByDocumentRef orders the results by the document_ref field.
+func ByDocumentRef(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentRef, opts...).ToFunc()
 }
 
 // ByVulnerabilitiesHash orders the results by the vulnerabilities_hash field.

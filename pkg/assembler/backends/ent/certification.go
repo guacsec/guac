@@ -34,12 +34,14 @@ type Certification struct {
 	Type certification.Type `json:"type,omitempty"`
 	// Justification holds the value of the "justification" field.
 	Justification string `json:"justification,omitempty"`
+	// KnownSince holds the value of the "known_since" field.
+	KnownSince time.Time `json:"known_since,omitempty"`
 	// Origin holds the value of the "origin" field.
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
-	// KnownSince holds the value of the "known_since" field.
-	KnownSince time.Time `json:"known_since,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CertificationQuery when eager-loading is set.
 	Edges        CertificationEdges `json:"edges"`
@@ -122,7 +124,7 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case certification.FieldSourceID, certification.FieldPackageVersionID, certification.FieldPackageNameID, certification.FieldArtifactID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case certification.FieldType, certification.FieldJustification, certification.FieldOrigin, certification.FieldCollector:
+		case certification.FieldType, certification.FieldJustification, certification.FieldOrigin, certification.FieldCollector, certification.FieldDocumentRef:
 			values[i] = new(sql.NullString)
 		case certification.FieldKnownSince:
 			values[i] = new(sql.NullTime)
@@ -189,6 +191,12 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.Justification = value.String
 			}
+		case certification.FieldKnownSince:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field known_since", values[i])
+			} else if value.Valid {
+				c.KnownSince = value.Time
+			}
 		case certification.FieldOrigin:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field origin", values[i])
@@ -201,11 +209,11 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.Collector = value.String
 			}
-		case certification.FieldKnownSince:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field known_since", values[i])
+		case certification.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
 			} else if value.Valid {
-				c.KnownSince = value.Time
+				c.DocumentRef = value.String
 			}
 		default:
 			c.selectValues.Set(columns[i], values[i])
@@ -289,14 +297,17 @@ func (c *Certification) String() string {
 	builder.WriteString("justification=")
 	builder.WriteString(c.Justification)
 	builder.WriteString(", ")
+	builder.WriteString("known_since=")
+	builder.WriteString(c.KnownSince.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("origin=")
 	builder.WriteString(c.Origin)
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(c.Collector)
 	builder.WriteString(", ")
-	builder.WriteString("known_since=")
-	builder.WriteString(c.KnownSince.Format(time.ANSIC))
+	builder.WriteString("document_ref=")
+	builder.WriteString(c.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

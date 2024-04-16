@@ -38,6 +38,7 @@ type badLink struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 	KnownSince    time.Time
 }
 
@@ -51,6 +52,7 @@ func (n *badLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 		timeKey(n.KnownSince),
 	}, ":"))
 }
@@ -114,6 +116,7 @@ func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.Package
 		Justification: certifyBad.Justification,
 		Origin:        certifyBad.Origin,
 		Collector:     certifyBad.Collector,
+		DocumentRef:   certifyBad.DocumentRef,
 		KnownSince:    certifyBad.KnownSince.UTC(),
 	}
 
@@ -275,6 +278,7 @@ func (c *demoClient) addCBIfMatch(ctx context.Context, out []*model.CertifyBad,
 		if noMatch(filter.Justification, link.Justification) ||
 			noMatch(filter.Collector, link.Collector) ||
 			noMatch(filter.Origin, link.Origin) ||
+			noMatch(filter.DocumentRef, link.DocumentRef) ||
 			filter.KnownSince != nil && filter.KnownSince.After(link.KnownSince) {
 			return out, nil
 		}
@@ -367,6 +371,7 @@ func (c *demoClient) buildCertifyBad(ctx context.Context, link *badLink, filter 
 		Justification: link.Justification,
 		Origin:        link.Origin,
 		Collector:     link.Collector,
+		DocumentRef:   link.DocumentRef,
 		KnownSince:    link.KnownSince.UTC(),
 	}
 	return &certifyBad, nil

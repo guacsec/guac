@@ -92,6 +92,7 @@ func queryCertifications(typ certification.Type, filter *model.CertifyBadSpec) p
 		optionalPredicate(filter.Origin, certification.OriginEQ),
 		optionalPredicate(filter.Justification, certification.JustificationEQ),
 		optionalPredicate(filter.KnownSince, certification.KnownSinceEQ),
+		optionalPredicate(filter.DocumentRef, certification.DocumentRef),
 	}
 
 	if filter.Subject != nil {
@@ -167,16 +168,21 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 	return toGlobalIDs(certifyGoodString, *ids), nil
 }
 
-func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*string, error) {
-	var conflictWhere *sql.Predicate
-
-	conflictColumns := []string{
+func certifyConflictColumns() []string {
+	return []string{
 		certification.FieldType,
 		certification.FieldCollector,
 		certification.FieldOrigin,
 		certification.FieldJustification,
+		certification.FieldDocumentRef,
 		certification.FieldKnownSince,
 	}
+}
+
+func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*string, error) {
+	var conflictWhere *sql.Predicate
+
+	conflictColumns := certifyConflictColumns()
 
 	switch {
 	case subject.Artifact != nil:
@@ -256,16 +262,18 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 		certifyCreate.
 			SetType(certification.TypeBAD).
 			SetJustification(cb.Justification).
+			SetKnownSince(cb.KnownSince.UTC()).
 			SetOrigin(cb.Origin).
 			SetCollector(cb.Collector).
-			SetKnownSince(cb.KnownSince.UTC())
+			SetDocumentRef(cb.DocumentRef)
 	} else if cg != nil {
 		certifyCreate.
 			SetType(certification.TypeGOOD).
 			SetJustification(cg.Justification).
+			SetKnownSince(cg.KnownSince.UTC()).
 			SetOrigin(cg.Origin).
 			SetCollector(cg.Collector).
-			SetKnownSince(cg.KnownSince.UTC())
+			SetDocumentRef(cg.DocumentRef)
 	} else {
 		return nil, fmt.Errorf("must specify either certifyGood or certifyBad")
 	}
@@ -350,13 +358,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 
 	var conflictWhere *sql.Predicate
 
-	conflictColumns := []string{
-		certification.FieldType,
-		certification.FieldCollector,
-		certification.FieldOrigin,
-		certification.FieldJustification,
-		certification.FieldKnownSince,
-	}
+	conflictColumns := certifyConflictColumns()
 
 	switch {
 	case len(subjects.Artifacts) > 0:
@@ -506,6 +508,7 @@ func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 		Subject:       sub,
 		KnownSince:    v.KnownSince,
 	}
@@ -533,6 +536,7 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 		Subject:       sub,
 		KnownSince:    v.KnownSince,
 	}

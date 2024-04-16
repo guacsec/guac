@@ -36,6 +36,7 @@ type vulnerabilityMetadataLink struct {
 	Timestamp       time.Time
 	Origin          string
 	Collector       string
+	DocumentRef     string
 }
 
 func (n *vulnerabilityMetadataLink) ID() string { return n.ThisID }
@@ -47,6 +48,7 @@ func (n *vulnerabilityMetadataLink) Key() string {
 		timeKey(n.Timestamp),
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -82,11 +84,12 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 	funcName := "IngestVulnerabilityMetadata"
 
 	in := &vulnerabilityMetadataLink{
-		Timestamp:  vulnerabilityMetadata.Timestamp,
-		ScoreType:  vulnerabilityMetadata.ScoreType,
-		ScoreValue: (vulnerabilityMetadata.ScoreValue),
-		Origin:     vulnerabilityMetadata.Origin,
-		Collector:  vulnerabilityMetadata.Collector,
+		Timestamp:   vulnerabilityMetadata.Timestamp,
+		ScoreType:   vulnerabilityMetadata.ScoreType,
+		ScoreValue:  (vulnerabilityMetadata.ScoreValue),
+		Origin:      vulnerabilityMetadata.Origin,
+		Collector:   vulnerabilityMetadata.Collector,
+		DocumentRef: vulnerabilityMetadata.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -203,9 +206,6 @@ func (c *demoClient) addVulnMetadataMatch(ctx context.Context, out []*model.Vuln
 	filter *model.VulnerabilityMetadataSpec,
 	link *vulnerabilityMetadataLink) ([]*model.VulnerabilityMetadata, error) {
 
-	if filter != nil && filter.Timestamp != nil && !filter.Timestamp.Equal(link.Timestamp) {
-		return out, nil
-	}
 	if filter != nil && filter.Comparator != nil {
 		if filter.ScoreValue == nil {
 			return out, gqlerror.Errorf("comparator set without a vulnerability score being specified")
@@ -236,6 +236,9 @@ func (c *demoClient) addVulnMetadataMatch(ctx context.Context, out []*model.Vuln
 		return out, nil
 	}
 	if filter != nil && noMatch(filter.Origin, link.Origin) {
+		return out, nil
+	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
 		return out, nil
 	}
 
@@ -292,6 +295,7 @@ func (c *demoClient) buildVulnerabilityMetadata(ctx context.Context, link *vulne
 		ScoreValue:    link.ScoreValue,
 		Origin:        link.Origin,
 		Collector:     link.Collector,
+		DocumentRef:   link.DocumentRef,
 	}
 
 	return vulnMetadata, nil

@@ -35,6 +35,7 @@ type hashEqualStruct struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 }
 
 func (n *hashEqualStruct) ID() string { return n.ThisID }
@@ -44,6 +45,7 @@ func (n *hashEqualStruct) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -81,6 +83,7 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.IDorArt
 		Justification: hashEqual.Justification,
 		Origin:        hashEqual.Origin,
 		Collector:     hashEqual.Collector,
+		DocumentRef:   hashEqual.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -266,6 +269,7 @@ func (c *demoClient) convHashEqual(ctx context.Context, h *hashEqualStruct) (*mo
 		Artifacts:     artifacts,
 		Origin:        h.Origin,
 		Collector:     h.Collector,
+		DocumentRef:   h.DocumentRef,
 	}, nil
 }
 
@@ -276,6 +280,7 @@ func (c *demoClient) addHEIfMatch(ctx context.Context, out []*model.HashEqual,
 	if noMatch(filter.Justification, link.Justification) ||
 		noMatch(filter.Origin, link.Origin) ||
 		noMatch(filter.Collector, link.Collector) ||
+		noMatch(filter.DocumentRef, link.DocumentRef) ||
 		!c.matchArtifacts(ctx, filter.Artifacts, link.Artifacts) {
 		return out, nil
 	}

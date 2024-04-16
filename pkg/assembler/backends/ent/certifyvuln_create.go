@@ -80,6 +80,12 @@ func (cvc *CertifyVulnCreate) SetCollector(s string) *CertifyVulnCreate {
 	return cvc
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (cvc *CertifyVulnCreate) SetDocumentRef(s string) *CertifyVulnCreate {
+	cvc.mutation.SetDocumentRef(s)
+	return cvc
+}
+
 // SetID sets the "id" field.
 func (cvc *CertifyVulnCreate) SetID(u uuid.UUID) *CertifyVulnCreate {
 	cvc.mutation.SetID(u)
@@ -174,6 +180,9 @@ func (cvc *CertifyVulnCreate) check() error {
 	if _, ok := cvc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyVuln.collector"`)}
 	}
+	if _, ok := cvc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "CertifyVuln.document_ref"`)}
+	}
 	if _, ok := cvc.mutation.VulnerabilityID(); !ok {
 		return &ValidationError{Name: "vulnerability", err: errors.New(`ent: missing required edge "CertifyVuln.vulnerability"`)}
 	}
@@ -243,6 +252,10 @@ func (cvc *CertifyVulnCreate) createSpec() (*CertifyVuln, *sqlgraph.CreateSpec) 
 	if value, ok := cvc.mutation.Collector(); ok {
 		_spec.SetField(certifyvuln.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := cvc.mutation.DocumentRef(); ok {
+		_spec.SetField(certifyvuln.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if nodes := cvc.mutation.VulnerabilityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -438,6 +451,18 @@ func (u *CertifyVulnUpsert) UpdateCollector() *CertifyVulnUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyVulnUpsert) SetDocumentRef(v string) *CertifyVulnUpsert {
+	u.Set(certifyvuln.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyVulnUpsert) UpdateDocumentRef() *CertifyVulnUpsert {
+	u.SetExcluded(certifyvuln.FieldDocumentRef)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -609,6 +634,20 @@ func (u *CertifyVulnUpsertOne) SetCollector(v string) *CertifyVulnUpsertOne {
 func (u *CertifyVulnUpsertOne) UpdateCollector() *CertifyVulnUpsertOne {
 	return u.Update(func(s *CertifyVulnUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyVulnUpsertOne) SetDocumentRef(v string) *CertifyVulnUpsertOne {
+	return u.Update(func(s *CertifyVulnUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyVulnUpsertOne) UpdateDocumentRef() *CertifyVulnUpsertOne {
+	return u.Update(func(s *CertifyVulnUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -950,6 +989,20 @@ func (u *CertifyVulnUpsertBulk) SetCollector(v string) *CertifyVulnUpsertBulk {
 func (u *CertifyVulnUpsertBulk) UpdateCollector() *CertifyVulnUpsertBulk {
 	return u.Update(func(s *CertifyVulnUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyVulnUpsertBulk) SetDocumentRef(v string) *CertifyVulnUpsertBulk {
+	return u.Update(func(s *CertifyVulnUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyVulnUpsertBulk) UpdateDocumentRef() *CertifyVulnUpsertBulk {
+	return u.Update(func(s *CertifyVulnUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

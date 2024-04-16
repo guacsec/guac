@@ -37,6 +37,7 @@ type isDependencyLink struct {
 	Justification  string
 	Origin         string
 	Collector      string
+	DocumentRef    string
 }
 
 func (n *isDependencyLink) ID() string { return n.ThisID }
@@ -49,6 +50,7 @@ func (n *isDependencyLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -93,6 +95,7 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDor
 		Justification:  dependency.Justification,
 		Origin:         dependency.Origin,
 		Collector:      dependency.Collector,
+		DocumentRef:    dependency.DocumentRef,
 	}
 	helper.FixDependencyType(&inLink.DependencyType)
 
@@ -259,6 +262,7 @@ func (c *demoClient) buildIsDependency(ctx context.Context, link *isDependencyLi
 		Justification:     link.Justification,
 		Origin:            link.Origin,
 		Collector:         link.Collector,
+		DocumentRef:       link.DocumentRef,
 	}
 	return &foundIsDependency, nil
 }
@@ -285,6 +289,7 @@ func noMatchIsDep(filter *model.IsDependencySpec, link *isDependencyLink) bool {
 		return noMatch(filter.Justification, link.Justification) ||
 			noMatch(filter.Origin, link.Origin) ||
 			noMatch(filter.Collector, link.Collector) ||
+			noMatch(filter.DocumentRef, link.DocumentRef) ||
 			noMatch(filter.VersionRange, link.VersionRange) ||
 			(filter.DependencyType != nil && *filter.DependencyType != link.DependencyType)
 	} else {

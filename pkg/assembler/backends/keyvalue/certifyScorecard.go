@@ -40,6 +40,7 @@ type scorecardLink struct {
 	ScorecardCommit  string
 	Origin           string
 	Collector        string
+	DocumentRef      string
 }
 
 func (n *scorecardLink) ID() string { return n.ThisID }
@@ -53,6 +54,7 @@ func (n *scorecardLink) Key() string {
 		n.ScorecardCommit,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -98,6 +100,7 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.IDorSour
 		ScorecardCommit:  scorecard.ScorecardCommit,
 		Origin:           scorecard.Origin,
 		Collector:        scorecard.Collector,
+		DocumentRef:      scorecard.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -232,6 +235,9 @@ func (c *demoClient) addSCIfMatch(ctx context.Context, out []*model.CertifyScore
 	if filter != nil && noMatch(filter.Collector, link.Collector) {
 		return out, nil
 	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
+		return out, nil
+	}
 
 	foundCertifyScorecard, err := c.buildScorecard(ctx, link, filter, false)
 	if err != nil {
@@ -276,6 +282,7 @@ func (c *demoClient) buildScorecard(ctx context.Context, link *scorecardLink, fi
 			ScorecardCommit:  link.ScorecardCommit,
 			Origin:           link.Origin,
 			Collector:        link.Collector,
+			DocumentRef:      link.DocumentRef,
 		},
 	}
 	return &newScorecard, nil
