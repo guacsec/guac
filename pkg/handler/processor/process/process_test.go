@@ -16,8 +16,11 @@
 package process
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"strings"
 	"testing"
 	"time"
@@ -625,6 +628,16 @@ func Test_validateFormat(t *testing.T) {
 }
 
 func Test_ProcessSubscribe(t *testing.T) {
+	// Create a buffer to capture logs
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
 	natsTest := nats_test.NewNatsTestServer()
 	url, err := natsTest.EnableJetStreamForTest()
 	if err != nil {
@@ -744,6 +757,8 @@ func Test_ProcessSubscribe(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
+			ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
 			jetStream := emitter.NewJetStream(url, "", "")
 			if err := jetStream.JetStreamInit(ctx); err != nil {
 				t.Fatalf("unexpected error initializing jetstream: %v", err)
@@ -786,7 +801,17 @@ func Test_ProcessSubscribe(t *testing.T) {
 				return nil
 			}
 
+			logBuffer.Reset()
+
 			err = Subscribe(ctx, emit, blobStore, pubsub)
+
+			logOutput := logBuffer.String()
+
+			// Check the logs to make sure that the logger is outputting with the child logger
+			if !strings.Contains(logOutput, logging.DocumentHash) {
+				t.Errorf("Log output for %s does not contain the %s key in the child logger", tt.name, logging.DocumentHash)
+			}
+
 			if err != nil {
 				if !strings.Contains(err.Error(), "context deadline exceeded") {
 					t.Errorf("nats emitter Subscribe test errored = %v, want %v", err, tt.errMessage)

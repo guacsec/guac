@@ -16,9 +16,12 @@
 package collector
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"reflect"
 	"testing"
 	"time"
@@ -83,7 +86,7 @@ func TestCollect(t *testing.T) {
 				t.Errorf("Collect() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if err == nil {
-				if !reflect.DeepEqual(collectedDoc, tt.want) {
+				if !checkWhileIgnoringLogger(collectedDoc, tt.want) {
 					t.Errorf("Collect() = %v, want %v", collectedDoc, tt.want)
 				}
 			}
@@ -91,7 +94,47 @@ func TestCollect(t *testing.T) {
 	}
 }
 
+// checkWhileIgnoringLogger works like a regular reflect.DeepEqual(), but ignores the loggers.
+func checkWhileIgnoringLogger(collectedDoc, want []*processor.Document) bool {
+	if len(collectedDoc) != len(want) {
+		return false
+	}
+
+	for i := 0; i < len(collectedDoc); i++ {
+		// Store the loggers, and then set the loggers to nil so that can ignore them.
+		a, b := collectedDoc[i].ChildLogger, want[i].ChildLogger
+		collectedDoc[i].ChildLogger, want[i].ChildLogger = nil, nil
+
+		if !reflect.DeepEqual(collectedDoc[i], want[i]) {
+			return false
+		}
+
+		// Re-assign the loggers so that they remain the same
+		collectedDoc[i].ChildLogger, want[i].ChildLogger = a, b
+	}
+
+	return true
+}
+
 func Test_Publish(t *testing.T) {
+	// Create a buffer to capture logs
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
+	Ite6SLSADocWithLogger := processor.Document{
+		Blob:              testdata.Ite6SLSADoc.Blob,
+		Type:              testdata.Ite6SLSADoc.Type,
+		Format:            testdata.Ite6SLSADoc.Format,
+		SourceInformation: testdata.Ite6SLSADoc.SourceInformation,
+		ChildLogger:       logger,
+	}
+
 	expectedDocTree := dochelper.DocNode(&testdata.Ite6SLSADoc)
 
 	natsTest := nats_test.NewNatsTestServer()
@@ -102,6 +145,8 @@ func Test_Publish(t *testing.T) {
 	defer natsTest.Shutdown()
 
 	ctx := context.Background()
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
 	jetStream := emitter.NewJetStream(url, "", "")
 	if err := jetStream.JetStreamInit(ctx); err != nil {
 		t.Fatalf("unexpected error initializing jetstream: %v", err)
@@ -119,7 +164,9 @@ func Test_Publish(t *testing.T) {
 
 	pubsub := emitter.NewEmitterPubSub(ctx, url)
 
-	err = Publish(ctx, &testdata.Ite6SLSADoc, blobStore, pubsub)
+	logBuffer.Reset()
+
+	err = Publish(ctx, &Ite6SLSADocWithLogger, blobStore, pubsub)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}

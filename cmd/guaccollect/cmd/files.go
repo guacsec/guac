@@ -150,6 +150,8 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 	// Set emit function to go through the entire pipeline
 	emit := func(d *processor.Document) error {
 		err = collectorPubFunc(d)
+		// updating the logger to the child logger so that if there is an error we which document has it
+		logger = d.ChildLogger
 		if err != nil {
 			logger.Fatalf("error publishing document from collector: %v", err)
 		}

@@ -33,6 +33,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
 	"github.com/guacsec/guac/pkg/emitter"
+	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
@@ -85,7 +86,7 @@ func validateOsvFlags(user string, pass string, dbAddr string, realm string, pub
 
 func getCertifierPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return certify.Publish(ctx, d, blobStore, pubsub)
+		return collector.Publish(ctx, d, blobStore, pubsub)
 	}, nil
 }
 

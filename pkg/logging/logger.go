@@ -26,16 +26,21 @@ import (
 
 var logger *zap.SugaredLogger
 
-type LogLevel string
+type (
+	LogLevel   string
+	contextKey string
+)
 
 const (
-	Debug  LogLevel = "debug"
-	Info   LogLevel = "info"
-	Warn   LogLevel = "warn"
-	Error  LogLevel = "error"
-	DPanic LogLevel = "dpanic"
-	Panic  LogLevel = "panic"
-	Fatal  LogLevel = "fatal"
+	Debug          LogLevel   = "debug"
+	Info           LogLevel   = "info"
+	Warn           LogLevel   = "warn"
+	Error          LogLevel   = "error"
+	DPanic         LogLevel   = "dpanic"
+	Panic          LogLevel   = "panic"
+	Fatal          LogLevel   = "fatal"
+	ChildLoggerKey contextKey = "childLogger"
+	DocumentHash              = "documentHash"
 )
 
 type loggerKey struct{}
@@ -103,6 +108,11 @@ func WithLogger(ctx context.Context) context.Context {
 }
 
 func FromContext(ctx context.Context) *zap.SugaredLogger {
+	// First, try to retrieve the childLogger from the context as to avoid breaking the default logger
+	if childLogger, ok := ctx.Value(ChildLoggerKey).(*zap.SugaredLogger); ok {
+		return childLogger
+	}
+	// Fallback to the existing behavior if the childLogger is not found
 	if logger, ok := ctx.Value(loggerKey{}).(*zap.SugaredLogger); ok {
 		return logger
 	}

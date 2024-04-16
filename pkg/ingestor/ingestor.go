@@ -18,6 +18,7 @@ package ingestor
 import (
 	"context"
 	"fmt"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 
@@ -35,12 +36,12 @@ import (
 
 // Synchronously ingest document using GraphQL endpoint
 func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
-	logger := logging.FromContext(ctx)
+	logger := d.ChildLogger
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
 	ingestorFunc := GetIngestor(ctx)
 	collectSubEmitFunc := GetCollectSubEmit(ctx, csubClient)
-	assemblerFunc := GetAssembler(ctx, graphqlEndpoint)
+	assemblerFunc := GetAssembler(ctx, d.ChildLogger, graphqlEndpoint)
 
 	start := time.Now()
 
@@ -74,7 +75,7 @@ func MergedIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoi
 	processorFunc := GetProcessor(ctx)
 	ingestorFunc := GetIngestor(ctx)
 	collectSubEmitFunc := GetCollectSubEmit(ctx, csubClient)
-	assemblerFunc := GetAssembler(ctx, graphqlEndpoint)
+	assemblerFunc := GetAssembler(ctx, logger, graphqlEndpoint)
 
 	start := time.Now()
 
@@ -151,10 +152,10 @@ func GetIngestor(ctx context.Context) func(processor.DocumentTree) ([]assembler.
 	}
 }
 
-func GetAssembler(ctx context.Context, graphqlEndpoint string) func([]assembler.IngestPredicates) error {
+func GetAssembler(ctx context.Context, childLogger *zap.SugaredLogger, graphqlEndpoint string) func([]assembler.IngestPredicates) error {
 	httpClient := http.Client{}
 	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
-	f := helpers.GetBulkAssembler(ctx, gqlclient)
+	f := helpers.GetBulkAssembler(ctx, childLogger, gqlclient)
 	return f
 }
 

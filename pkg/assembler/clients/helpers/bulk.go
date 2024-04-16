@@ -18,17 +18,16 @@ package helpers
 import (
 	"context"
 	"fmt"
+	"go.uber.org/zap"
 
 	"github.com/Khan/genqlient/graphql"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
-	"github.com/guacsec/guac/pkg/logging"
 )
 
-func GetBulkAssembler(ctx context.Context, gqlclient graphql.Client) func([]assembler.AssemblerInput) error {
-	logger := logging.FromContext(ctx)
+func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient graphql.Client) func([]assembler.AssemblerInput) error {
 	return func(preds []assembler.IngestPredicates) error {
 		var rvErr error
 		for _, p := range preds {

@@ -69,7 +69,7 @@ var certifyCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		assemblerFunc := ingestor.GetAssembler(ctx, opts.graphqlEndpoint)
+		assemblerFunc := ingestor.GetAssembler(ctx, logger, opts.graphqlEndpoint)
 
 		preds := &assembler.IngestPredicates{}
 		var pkgInput *model.PkgInputSpec
