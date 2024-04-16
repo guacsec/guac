@@ -56,7 +56,6 @@ type githubCollector struct {
 	owner             string
 	repo              string
 	lastIngestedRun   int64
-	storeBlobKey      bool
 }
 
 type Config struct {
@@ -161,12 +160,6 @@ func WithAssetSuffixes(assetSuffixes []string) Opt {
 func WithCollectDataSource(collectDataSource datasource.CollectSource) Opt {
 	return func(g *githubCollector) {
 		g.collectDataSource = collectDataSource
-	}
-}
-
-func WithStoreBlobKey(storeBlobKey bool) Opt {
-	return func(g *githubCollector) {
-		g.storeBlobKey = storeBlobKey
 	}
 }
 
@@ -359,11 +352,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 }
 
 func (g *githubCollector) getDocRef(blob []byte) string {
-	if g.storeBlobKey {
-		return events.GetKey(blob) // this is the blob store key
-	}
-
-	return ""
+	return events.GetKey(blob) // this is the blob store key
 }
 
 func checkSuffixes(name string, suffixes []string) bool {

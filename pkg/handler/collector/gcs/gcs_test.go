@@ -24,7 +24,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/fsouza/fake-gcs-server/fakestorage"
-	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -32,6 +31,7 @@ import (
 func TestGCS_RetrieveArtifacts(t *testing.T) {
 	const bucketName = "some-bucket"
 	ctx := context.Background()
+	blob := []byte("inside the file")
 	server := fakestorage.NewServer([]fakestorage.Object{
 		{
 			ObjectAttrs: fakestorage.ObjectAttrs{
@@ -39,14 +39,14 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 				Name:       "some/object/file.txt",
 				Updated:    time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 			},
-			Content: []byte("inside the file"),
+			Content: blob,
 		},
 	})
 	defer server.Stop()
 	client := server.Client()
 
 	var doc *processor.Document = &processor.Document{
-		Blob:   []byte("inside the file"),
+		Blob:   blob,
 		Type:   processor.DocumentUnknown,
 		Format: processor.FormatUnknown,
 		SourceInformation: processor.SourceInformation{
@@ -55,16 +55,11 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		},
 	}
 
-	docWithRef := new(processor.Document)
-	*docWithRef = *doc
-	docWithRef.SourceInformation.DocumentRef = events.GetKey(docWithRef.Blob)
-
 	type fields struct {
 		bucket       string
 		reader       gcsReader
 		lastDownload time.Time
 		poll         bool
-		storeBlobKey bool
 	}
 	tests := []struct {
 		name     string
@@ -83,16 +78,6 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			reader: &reader{client: client, bucket: bucketName},
 		},
 		want:     []*processor.Document{doc},
-		wantErr:  false,
-		wantDone: true,
-	}, {
-		name: "get object and storeBlobKey",
-		fields: fields{
-			bucket:       bucketName,
-			reader:       &reader{client: client, bucket: bucketName},
-			storeBlobKey: true,
-		},
-		want:     []*processor.Document{docWithRef},
 		wantErr:  false,
 		wantDone: true,
 	}, {
@@ -124,7 +109,6 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 				reader:       tt.fields.reader,
 				lastDownload: tt.fields.lastDownload,
 				poll:         tt.fields.poll,
-				storeBlobKey: tt.fields.storeBlobKey,
 			}
 			if err := collector.RegisterDocumentCollector(g, CollectorGCS); err != nil &&
 				!errors.Is(err, collector.ErrCollectorOverwrite) {

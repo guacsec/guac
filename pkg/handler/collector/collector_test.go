@@ -54,7 +54,7 @@ func TestCollect(t *testing.T) {
 		want          []*processor.Document
 	}{{
 		name:      "file collector file",
-		collector: file.NewFileCollector(ctx, "./testdata", false, time.Second, false),
+		collector: file.NewFileCollector(ctx, "./testdata", false, time.Second),
 		want: []*processor.Document{{
 			Blob:   []byte("hello\n"),
 			Type:   processor.DocumentUnknown,

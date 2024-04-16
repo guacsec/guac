@@ -37,7 +37,6 @@ type gcs struct {
 	lastDownload time.Time
 	poll         bool
 	interval     time.Duration
-	storeBlobKey bool
 }
 
 const CollectorGCS = "GCS"
@@ -82,12 +81,6 @@ func WithClient(client *storage.Client) Opt {
 func WithBucket(bucket string) Opt {
 	return func(g *gcs) {
 		g.bucket = bucket
-	}
-}
-
-func WithStoreBlobKey(storeBlobKey bool) Opt {
-	return func(g *gcs) {
-		g.storeBlobKey = storeBlobKey
 	}
 }
 
@@ -185,11 +178,6 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 				continue
 			}
 
-			docRef := ""
-			if g.storeBlobKey {
-				docRef = events.GetKey(payload) // this is the blob store key
-			}
-
 			doc := &processor.Document{
 				Blob:   payload,
 				Type:   processor.DocumentUnknown,
@@ -197,7 +185,7 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 				SourceInformation: processor.SourceInformation{
 					Collector:   string(CollectorGCS),
 					Source:      g.bucket + "/" + attrs.Name,
-					DocumentRef: docRef,
+					DocumentRef: events.GetKey(payload), // this is the blob store key
 				},
 			}
 			docChannel <- doc

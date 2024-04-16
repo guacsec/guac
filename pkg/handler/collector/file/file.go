@@ -32,19 +32,17 @@ const (
 )
 
 type fileCollector struct {
-	path         string
-	lastChecked  time.Time
-	poll         bool
-	interval     time.Duration
-	storeBlobKey bool
+	path        string
+	lastChecked time.Time
+	poll        bool
+	interval    time.Duration
 }
 
-func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration, storeBlobKey bool) *fileCollector {
+func NewFileCollector(ctx context.Context, path string, poll bool, interval time.Duration) *fileCollector {
 	return &fileCollector{
-		path:         path,
-		poll:         poll,
-		interval:     interval,
-		storeBlobKey: storeBlobKey,
+		path:     path,
+		poll:     poll,
+		interval: interval,
 	}
 }
 
@@ -90,11 +88,6 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			return fmt.Errorf("error reading file: %s, err: %w", path, err)
 		}
 
-		docRef := ""
-		if f.storeBlobKey {
-			docRef = events.GetKey(blob) // this is the blob store path
-		}
-
 		doc := &processor.Document{
 			Blob:   blob,
 			Type:   processor.DocumentUnknown,
@@ -102,7 +95,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			SourceInformation: processor.SourceInformation{
 				Collector:   string(FileCollector),
 				Source:      fmt.Sprintf("file:///%s", path),
-				DocumentRef: docRef,
+				DocumentRef: events.GetKey(blob), // this is the blob store key
 			},
 		}
 

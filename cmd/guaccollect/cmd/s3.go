@@ -30,7 +30,6 @@ type s3Options struct {
 	poll              bool                          // polling or non-polling behaviour? (defaults to non-polling)
 	graphqlEndpoint   string                        // endpoint for the graphql server
 	csubClientOptions csub_client.CsubClientOptions // options for the collectsub client
-	storeBlobKey      bool                          // store blob key in origin (useful if the blob store is persistent)
 }
 
 var s3Cmd = &cobra.Command{
@@ -77,7 +76,6 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
-			viper.GetBool("set-blob-key"),
 		)
 		if err != nil {
 			fmt.Printf("failed to validate flags: %v\n", err)
@@ -97,7 +95,6 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			MessageProviderEndpoint: s3Opts.mpEndpoint,
 			Queues:                  s3Opts.queues,
 			Poll:                    s3Opts.poll,
-			StoreBlobKey:            s3Opts.storeBlobKey,
 		})
 
 		if err := collector.RegisterDocumentCollector(s3Collector, s3.S3CollectorType); err != nil {
@@ -130,8 +127,7 @@ func validateS3Opts(
 	queues string,
 	csubTls,
 	csubTlsSkipVerify,
-	poll,
-	storeBlobKey bool,
+	poll bool,
 ) (s3Options, error) {
 	var opts s3Options
 
@@ -168,7 +164,6 @@ func validateS3Opts(
 		poll:              poll,
 		graphqlEndpoint:   graphqlEndpoint,
 		csubClientOptions: csubClientOptions,
-		storeBlobKey:      storeBlobKey,
 	}
 
 	return opts, nil

@@ -44,8 +44,6 @@ type filesOptions struct {
 	blobAddr string
 	// poll location
 	poll bool
-	// store blob key in origin (useful if the blob store is persistent)
-	storeBlobKey bool
 }
 
 var filesCmd = &cobra.Command{
@@ -72,7 +70,6 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
 			viper.GetBool("service-poll"),
-			viper.GetBool("set-blob-key"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -84,7 +81,7 @@ you have access to read and write to the respective blob store.`,
 		logger := logging.FromContext(ctx)
 
 		// Register collector
-		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, 30*time.Second, opts.storeBlobKey)
+		fileCollector := file.NewFileCollector(ctx, opts.path, opts.poll, 30*time.Second)
 		err = collector.RegisterDocumentCollector(fileCollector, file.FileCollector)
 		if err != nil {
 			logger.Fatalf("unable to register file collector: %v", err)
@@ -94,13 +91,12 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateFilesFlags(pubsubAddr, blobAddr string, poll, storeBlobKey bool, args []string) (filesOptions, error) {
+func validateFilesFlags(pubsubAddr, blobAddr string, poll bool, args []string) (filesOptions, error) {
 	var opts filesOptions
 
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
-	opts.storeBlobKey = storeBlobKey
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")

@@ -23,8 +23,6 @@ type gcsOptions struct {
 	graphqlEndpoint   string
 	csubClientOptions csub_client.CsubClientOptions
 	bucket            string
-	// store blob key in origin (useful if the blob store is persistent)
-	storeBlobKey bool
 }
 
 const gcsCredentialsPathFlag = "gcp-credentials-path"
@@ -46,7 +44,6 @@ var gcsCmd = &cobra.Command{
 			viper.GetString(gcsCredentialsPathFlag),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
-			viper.GetBool("set-blob-key"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -70,7 +67,7 @@ var gcsCmd = &cobra.Command{
 		}
 
 		// Register collector
-		gcsCollector, err := gcs.NewGCSCollector(gcs.WithBucket(opts.bucket), gcs.WithClient(client), gcs.WithStoreBlobKey(opts.storeBlobKey))
+		gcsCollector, err := gcs.NewGCSCollector(gcs.WithBucket(opts.bucket), gcs.WithClient(client))
 		if err != nil {
 			logger.Fatalf("unable to create gcs client: %v", err)
 		}
@@ -100,15 +97,13 @@ func validateGCSFlags(
 	csubAddr,
 	credentialsPath string,
 	csubTls,
-	csubTlsSkipVerify,
-	storeBlobKey bool,
+	csubTlsSkipVerify bool,
 	args []string,
 ) (gcsOptions, error) {
 	opts := gcsOptions{
 		pubSubAddr:      pubSubAddr,
 		blobAddr:        blobAddr,
 		graphqlEndpoint: gqlEndpoint,
-		storeBlobKey:    storeBlobKey,
 	}
 
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

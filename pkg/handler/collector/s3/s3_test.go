@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -108,19 +107,16 @@ func (td *TestBucketBuilder) GetDownloader(url string, region string) bucket.Buc
 func TestS3Collector(t *testing.T) {
 	ctx := context.Background()
 
-	for _, storeBlobKey := range []bool{true, false} {
-		t.Run(fmt.Sprintf("no polling with storeBlobKey=%v", storeBlobKey), func(t *testing.T) { testNoPolling(t, ctx, storeBlobKey) })
-		t.Run(fmt.Sprintf("queues split polling with storeBlobKey=%v", storeBlobKey), func(t *testing.T) { testQueuesSplitPolling(t, ctx, storeBlobKey) })
-	}
+	t.Run("no polling", func(t *testing.T) { testNoPolling(t, ctx) })
+	t.Run("queues split polling", func(t *testing.T) { testQueuesSplitPolling(t, ctx) })
 }
 
-func testQueuesSplitPolling(t *testing.T, ctx context.Context, storeBlobKey bool) {
+func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		Queues:        "q1,q2",
 		MpBuilder:     &TestMpBuilder{},
 		BucketBuilder: &TestBucketBuilder{},
 		Poll:          true,
-		StoreBlobKey:  storeBlobKey,
 	})
 
 	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
@@ -172,17 +168,16 @@ func testQueuesSplitPolling(t *testing.T, ctx context.Context, storeBlobKey bool
 			t.Errorf("wrong encoding returned: %s", doc.Encoding)
 		}
 
-		assertDocRef(t, doc, storeBlobKey)
+		assertDocRef(t, doc)
 	}
 }
 
-func testNoPolling(t *testing.T, ctx context.Context, storeBlobKey bool) {
+func testNoPolling(t *testing.T, ctx context.Context) {
 	s3Collector := NewS3Collector(S3CollectorConfig{
 		BucketBuilder: &TestBucketBuilder{},
 		S3Bucket:      "no-poll-bucket",
 		S3Item:        "no-poll-item",
 		Poll:          false,
-		StoreBlobKey:  storeBlobKey,
 	})
 
 	if err := collector.RegisterDocumentCollector(s3Collector, S3CollectorType); err != nil &&
@@ -213,16 +208,13 @@ func testNoPolling(t *testing.T, ctx context.Context, storeBlobKey bool) {
 		t.Errorf("wrong item returned")
 	}
 
-	assertDocRef(t, s[0], storeBlobKey)
+	assertDocRef(t, s[0])
 }
 
-func assertDocRef(t *testing.T, doc *processor.Document, storeBlobKey bool) {
-	docRef := ""
-	if storeBlobKey {
-		docRef = events.GetKey(doc.Blob)
-	}
+func assertDocRef(t *testing.T, doc *processor.Document) {
+	want := events.GetKey(doc.Blob)
 
-	if doc.SourceInformation.DocumentRef != docRef {
-		t.Errorf("want DocumentRef = %s, got = %s", docRef, doc.SourceInformation.DocumentRef)
+	if doc.SourceInformation.DocumentRef != want {
+		t.Errorf("want DocumentRef = %s, got = %s", want, doc.SourceInformation.DocumentRef)
 	}
 }

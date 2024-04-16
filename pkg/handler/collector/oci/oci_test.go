@@ -34,10 +34,9 @@ import (
 func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 	ctx := context.Background()
 	type fields struct {
-		ociValues    []string
-		storeBlobKey bool
-		poll         bool
-		interval     time.Duration
+		ociValues []string
+		poll      bool
+		interval  time.Duration
 	}
 
 	tests := []struct {
@@ -352,43 +351,10 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			},
 		},
 		wantErr: false,
-	}, {
-		name: "reference by tag AND digest, with storeBlobKey set",
-		fields: fields{
-			ociValues: []string{
-				"ghcr.io/guacsec/guac-test-image:carrot@sha256:9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09",
-			},
-			storeBlobKey: true,
-			poll:         false,
-			interval:     0,
-		},
-		want: []*processor.Document{
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCIDsseAttExample),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
-				SourceInformation: processor.SourceInformation{
-					Collector:   string(OCICollector),
-					Source:      "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.att",
-					DocumentRef: "placeholder - see below", // this gets overwritten in the test body,
-				},
-			},
-			{
-				Blob:   dochelper.ConsistentJsonBytes(testdata.OCISPDXExample),
-				Type:   processor.DocumentUnknown,
-				Format: processor.FormatUnknown,
-				SourceInformation: processor.SourceInformation{
-					Collector:   string(OCICollector),
-					Source:      "ghcr.io/guacsec/guac-test-image:sha256-9e183c89765d92a440f44ac7059385c778cbadad0ee8fe3208360efb07c0ba09.sbom",
-					DocumentRef: "placeholder - see below", // this gets overwritten in the test body,
-				},
-			},
-		},
-		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, tt.fields.storeBlobKey, tt.fields.interval)
+			g := NewOCICollector(ctx, toDataSource(tt.fields.ociValues), tt.fields.poll, tt.fields.interval)
 
 			var cancel context.CancelFunc
 			if tt.fields.poll {
@@ -424,19 +390,17 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			for i := range tt.want {
 				collectedDoc := findDocumentBySource(collectedDocs, tt.want[i].SourceInformation.Source)
 				if collectedDoc == nil {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
+					t.Fatalf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
 				}
 
-				if tt.fields.storeBlobKey {
-					// Why do we do this here instead of in the test case definition?
-					//
-					// Because the blob that we input into the test is not the final blob
-					// that gets hashed to come up with the blob key; the final blob is
-					// different. So we run the hashing function on the final blob and
-					// then set it on our original want doc.
+				// Why do we do this here instead of in the test case definition?
+				//
+				// Because the blob that we input into the test is not the final blob
+				// that gets hashed to come up with the blob key; the final blob is
+				// different. So we run the hashing function on the final blob and
+				// then set it on our original want doc.
 
-					tt.want[i].SourceInformation.DocumentRef = events.GetKey(collectedDoc.Blob)
-				}
+				tt.want[i].SourceInformation.DocumentRef = events.GetKey(collectedDoc.Blob)
 
 				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDoc), dochelper.DocNode(tt.want[i]))
 				if !result {

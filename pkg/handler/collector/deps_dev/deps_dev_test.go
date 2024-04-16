@@ -48,7 +48,7 @@ func TestNewDepsCollector(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, false, 5*time.Second)
+			_, err := NewDepsCollector(ctx, toPurlSource(tt.packages), false, true, 5*time.Second)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewDepsCollector() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -64,7 +64,6 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 		want               []*processor.Document
 		poll               bool
 		disableGettingDeps bool
-		storeBlobKey       bool
 		interval           time.Duration
 		wantErr            bool
 		errMessage         error
@@ -92,25 +91,6 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 			},
 			poll:    false,
 			wantErr: false,
-		},
-		{
-			name:     "org.webjars.npm:a maven package, with storeBlobKey set",
-			packages: []string{"pkg:maven/org.webjars.npm/a@2.1.2"},
-			want: []*processor.Document{
-				{
-					Blob:   []byte(testdata.CollectedMavenWebJars),
-					Type:   processor.DocumentDepsDev,
-					Format: processor.FormatJSON,
-					SourceInformation: processor.SourceInformation{
-						Collector:   DepsCollector,
-						Source:      DepsCollector,
-						DocumentRef: "placeholder - see below", // this gets overwritten in the test body
-					},
-				},
-			},
-			storeBlobKey: true,
-			poll:         false,
-			wantErr:      false,
 		},
 		{
 			name:     "wheel-axle-runtime pypi package",
@@ -235,27 +215,6 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 			interval:           time.Minute,
 			wantErr:            false,
 		},
-		{
-			name:     "disable getting deps -- only metadata is retrieved, with storeBlobKey set",
-			packages: []string{"pkg:cargo/foreign-types@0.3.2"},
-			want: []*processor.Document{
-				{
-					Blob:   []byte(testdata.CollectedForeignTypesNoDeps),
-					Type:   processor.DocumentDepsDev,
-					Format: processor.FormatJSON,
-					SourceInformation: processor.SourceInformation{
-						Collector:   DepsCollector,
-						Source:      DepsCollector,
-						DocumentRef: "placeholder - see below", // this gets overwritten in the test body,
-					},
-				},
-			},
-			storeBlobKey:       true,
-			poll:               false,
-			disableGettingDeps: true,
-			interval:           time.Minute,
-			wantErr:            false,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -268,7 +227,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.storeBlobKey, tt.interval)
+			c, err := NewDepsCollector(ctx, toPurlSource(tt.packages), tt.poll, !tt.disableGettingDeps, tt.interval)
 			if err != nil {
 				t.Errorf("NewDepsCollector() error = %v", err)
 				return
@@ -304,16 +263,14 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				t.Errorf("Wanted %v elements, but got %v", len(tt.want), len(collectedDocs))
 			}
 			for i := range collectedDocs {
-				if tt.storeBlobKey {
-					// Why do we do this here instead of in the test case definition?
-					//
-					// Because the blob that we input into the test is not the final blob
-					// that gets hashed to come up with the blob key; the final blob is
-					// different. So we run the hashing function on the final blob and
-					// then set it on our original want doc.
+				// Why do we do this here instead of in the test case definition?
+				//
+				// Because the blob that we input into the test is not the final blob
+				// that gets hashed to come up with the blob key; the final blob is
+				// different. So we run the hashing function on the final blob and
+				// then set it on our original want doc.
 
-					tt.want[i].SourceInformation.DocumentRef = events.GetKey(collectedDocs[i].Blob)
-				}
+				tt.want[i].SourceInformation.DocumentRef = events.GetKey(collectedDocs[i].Blob)
 
 				collectedDocs[i].Blob, err = normalizeTimeStampAndScorecard(collectedDocs[i].Blob)
 				if err != nil {
@@ -396,7 +353,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 		ctx = context.Background()
 	}
 
-	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, false, tests.interval)
+	c, err := NewDepsCollector(ctx, toPurlSource(tests.packages), tests.poll, true, tests.interval)
 	if err != nil {
 		t.Errorf("NewDepsCollector() error = %v", err)
 		return

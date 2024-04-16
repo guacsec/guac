@@ -47,7 +47,6 @@ type S3CollectorConfig struct {
 	MpBuilder               messaging.MessageProviderBuilder // optional
 	BucketBuilder           bucket.BuildBucket               // optional
 	Poll                    bool
-	StoreBlobKey            bool
 }
 
 func NewS3Collector(cfg S3CollectorConfig) *S3Collector {
@@ -239,11 +238,7 @@ func (s S3Collector) retrieveWithPoll(ctx context.Context, docChannel chan<- *pr
 }
 
 func (s S3Collector) getDocRef(blob []byte) string {
-	if s.config.StoreBlobKey {
-		return events.GetKey(blob) // this is the blob store key
-	}
-
-	return ""
+	return events.GetKey(blob) // this is the blob store key
 }
 
 func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider, error) {

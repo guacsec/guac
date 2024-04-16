@@ -60,8 +60,6 @@ type githubOptions struct {
 	workflowFileName string
 	// the owner/repo name to use for the collector
 	ownerRepoName string
-	// store blob key in origin (useful if the blob store is persistent)
-	storeBlobKey bool
 }
 
 var githubCmd = &cobra.Command{
@@ -101,7 +99,6 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
-			viper.GetBool("set-blob-key"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -126,7 +123,6 @@ you have access to read and write to the respective blob store.`,
 			github.WithMode(opts.githubMode),
 			github.WithSbomName(opts.sbomName),
 			github.WithWorkflowName(opts.workflowFileName),
-			github.WithStoreBlobKey(opts.storeBlobKey),
 		}
 		if opts.poll {
 			collectorOpts = append(collectorOpts, github.WithPolling(30*time.Second))
@@ -168,8 +164,7 @@ func validateGithubFlags(
 	csubTls,
 	csubTlsSkipVerify,
 	useCsub,
-	poll,
-	storeBlobKey bool,
+	poll bool,
 	args []string,
 ) (githubOptions, error) {
 	var opts githubOptions
@@ -179,7 +174,6 @@ func validateGithubFlags(
 	opts.githubMode = githubMode
 	opts.sbomName = sbomName
 	opts.workflowFileName = workflowFileName
-	opts.storeBlobKey = storeBlobKey
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
