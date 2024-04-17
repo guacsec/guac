@@ -168,7 +168,7 @@ func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
 			t.Errorf("wrong encoding returned: %s", doc.Encoding)
 		}
 
-		assertDocRef(t, doc)
+		assertSource(t, "test-message", doc)
 	}
 }
 
@@ -208,13 +208,21 @@ func testNoPolling(t *testing.T, ctx context.Context) {
 		t.Errorf("wrong item returned")
 	}
 
-	assertDocRef(t, s[0])
+	assertSource(t, "no-poll-item", s[0])
 }
 
-func assertDocRef(t *testing.T, doc *processor.Document) {
-	want := events.GetKey(doc.Blob)
+func assertSource(t *testing.T, wantSource string, doc *processor.Document) {
+	wantDocRef := events.GetKey(doc.Blob)
+	if doc.SourceInformation.DocumentRef != wantDocRef {
+		t.Errorf("want DocumentRef = %s, got = %s", wantDocRef, doc.SourceInformation.DocumentRef)
+	}
 
-	if doc.SourceInformation.DocumentRef != want {
-		t.Errorf("want DocumentRef = %s, got = %s", want, doc.SourceInformation.DocumentRef)
+	if doc.SourceInformation.Source != wantSource {
+		t.Errorf("want Source = %s, got = %s", wantSource, doc.SourceInformation.Source)
+	}
+
+	const wantCollector string = "S3CollectorType"
+	if doc.SourceInformation.Collector != wantCollector {
+		t.Errorf("want Collector = %s, got = %s", wantCollector, doc.SourceInformation.Collector)
 	}
 }

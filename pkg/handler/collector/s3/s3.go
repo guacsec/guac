@@ -91,7 +91,7 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 			Encoding: bucket.ExtractEncoding(enc, item),
 			SourceInformation: processor.SourceInformation{
 				Collector:   S3CollectorType,
-				Source:      "S3",
+				Source:      item,
 				DocumentRef: getDocRef(blob),
 			},
 		}
@@ -127,7 +127,7 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 					Encoding: bucket.ExtractEncoding(enc, item),
 					SourceInformation: processor.SourceInformation{
 						Collector:   S3CollectorType,
-						Source:      "S3",
+						Source:      item,
 						DocumentRef: getDocRef(blob),
 					},
 				}
@@ -218,7 +218,7 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 						Encoding: bucket.ExtractEncoding(enc, item),
 						SourceInformation: processor.SourceInformation{
 							Collector:   S3CollectorType,
-							Source:      "S3",
+							Source:      item,
 							DocumentRef: getDocRef(blob),
 						},
 					}
