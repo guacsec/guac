@@ -263,14 +263,7 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				t.Errorf("Wanted %v elements, but got %v", len(tt.want), len(collectedDocs))
 			}
 			for i := range collectedDocs {
-				// Why do we do this here instead of in the test case definition?
-				//
-				// Because the blob that we input into the test is not the final blob
-				// that gets hashed to come up with the blob key; the final blob is
-				// different. So we run the hashing function on the final blob and
-				// then set it on our original want doc.
-
-				tt.want[i].SourceInformation.DocumentRef = events.GetKey(collectedDocs[i].Blob)
+				tt.want[i].SourceInformation.DocumentRef = actualDocRef(collectedDocs[i].Blob)
 
 				collectedDocs[i].Blob, err = normalizeTimeStampAndScorecard(collectedDocs[i].Blob)
 				if err != nil {
@@ -389,6 +382,14 @@ func TestPerformanceDepsCollector(t *testing.T) {
 	if len(collectedDocs) == 0 {
 		t.Errorf("g.RetrieveArtifacts() = %v", len(collectedDocs))
 	}
+}
+
+// The blob that we input into the test is not the final blob that
+// gets hashed to come up with the blob key; the final blob is
+// different. So we run the hashing function on the final blob and
+// then set it on our original want doc.
+func actualDocRef(blob []byte) string {
+	return events.GetKey(blob)
 }
 
 // Scorecard and timestamp data constantly changes, causing CI to keep erroring every few days.

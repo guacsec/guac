@@ -393,14 +393,7 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 					t.Fatalf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
 				}
 
-				// Why do we do this here instead of in the test case definition?
-				//
-				// Because the blob that we input into the test is not the final blob
-				// that gets hashed to come up with the blob key; the final blob is
-				// different. So we run the hashing function on the final blob and
-				// then set it on our original want doc.
-
-				tt.want[i].SourceInformation.DocumentRef = events.GetKey(collectedDoc.Blob)
+				tt.want[i].SourceInformation.DocumentRef = actualDocRef(collectedDoc.Blob)
 
 				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDoc), dochelper.DocNode(tt.want[i]))
 				if !result {
@@ -428,6 +421,14 @@ func findDocumentBySource(docs []*processor.Document, source string) *processor.
 		}
 	}
 	return nil
+}
+
+// The blob that we input into the test is not the final blob that
+// gets hashed to come up with the blob key; the final blob is
+// different. So we run the hashing function on the final blob and
+// then set it on our original want doc.
+func actualDocRef(blob []byte) string {
+	return events.GetKey(blob)
 }
 
 func toDataSource(ociValues []string) datasource.CollectSource {

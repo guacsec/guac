@@ -80,7 +80,7 @@ func DocTreeEqual(a, b processor.DocumentTree) bool {
 		}
 	}
 
-	return true
+	return reflect.DeepEqual(a.Document.SourceInformation, b.Document.SourceInformation)
 }
 
 // ConsistentJsonBytes makes sure that the blob byte comparison
