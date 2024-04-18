@@ -20,15 +20,11 @@ import (
 	"fmt"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	BufferChannelSize int = 1000
