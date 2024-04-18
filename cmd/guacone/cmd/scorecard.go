@@ -27,6 +27,7 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/ingestor"
@@ -43,6 +44,7 @@ import (
 
 type scorecardOptions struct {
 	graphqlEndpoint   string
+	headerFile        string
 	poll              bool
 	interval          time.Duration
 	csubClientOptions client.CsubClientOptions
@@ -57,21 +59,21 @@ var scorecardCmd = &cobra.Command{
 
 		opts, err := validateScorecardFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetString("csub-addr"),
+			viper.GetString("interval"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
-			viper.GetString("interval"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
 		// scorecard runner is the scorecard library that runs the scorecard checks
 		scorecardRunner, err := scorecard.NewScorecardRunner(ctx)
-
 		if err != nil {
 			fmt.Printf("unable to create scorecard runner: %v\n", err)
 			_ = cmd.Help()
@@ -87,7 +89,12 @@ var scorecardCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		httpClient := http.Client{}
+		transport, err := cli.NewHTTPHeaderTransport(opts.headerFile, http.DefaultTransport)
+		if err != nil {
+			logger.Fatalf("unable to create HTTP transport: %v", err)
+		}
+
+		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		// running and getting the scorecard checks
@@ -170,9 +177,18 @@ var scorecardCmd = &cobra.Command{
 	},
 }
 
-func validateScorecardFlags(graphqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, poll bool, interval string) (scorecardOptions, error) {
+func validateScorecardFlags(
+	graphqlEndpoint,
+	headerFile,
+	csubAddr,
+	interval string,
+	csubTls,
+	csubTlsSkipVerify,
+	poll bool,
+) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 
 	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
@@ -191,5 +207,16 @@ func validateScorecardFlags(graphqlEndpoint string, csubAddr string, csubTls boo
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"header-file"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	scorecardCmd.Flags().AddFlagSet(set)
+	if err := viper.BindPFlags(scorecardCmd.Flags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
+
 	certifierCmd.AddCommand(scorecardCmd)
 }

@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -37,9 +38,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 	"github.com/guacsec/guac/pkg/assembler/kv/redis"
-	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"golang.org/x/exp/maps"
 )
 
@@ -81,9 +83,8 @@ func startServer(cmd *cobra.Command) {
 		logger.Errorf("unable to initialize graphql server: %v", err)
 		os.Exit(1)
 	}
-	// Setup Prometheus metrics handler
-	metric, err := cli.SetupPrometheus(ctx, logger, "guacgql")
 
+	metric, err := setupPrometheus(ctx, "guacgql")
 	if err != nil {
 		logger.Fatalf("Error setting up Prometheus: %v", err)
 	}
@@ -138,6 +139,22 @@ func startServer(cmd *cobra.Command) {
 		server.Close()
 	}
 	cf()
+}
+
+// setupPrometheus sets up the Prometheus server, registering its handler on http.DefaultServeMux
+func setupPrometheus(ctx context.Context, name string) (metrics.MetricCollector, error) {
+	enablePrometheus := viper.GetBool("enable-prometheus")
+	if !enablePrometheus {
+		return nil, nil
+	}
+
+	if name == "" {
+		return nil, errors.New("name cannot be empty")
+	}
+
+	m := metrics.FromContext(ctx, name)
+	http.Handle("/metrics", m.MetricsHandler())
+	return m, nil
 }
 
 func validateFlags() error {

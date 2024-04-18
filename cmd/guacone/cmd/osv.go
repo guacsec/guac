@@ -31,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -42,6 +43,7 @@ import (
 
 type osvOptions struct {
 	graphqlEndpoint   string
+	headerFile        string
 	poll              bool
 	csubClientOptions client.CsubClientOptions
 	interval          time.Duration
@@ -56,13 +58,13 @@ var osvCmd = &cobra.Command{
 
 		opts, err := validateOSVFlags(
 			viper.GetString("gql-addr"),
-			viper.GetBool("poll"),
+			viper.GetString("header-file"),
 			viper.GetString("interval"),
 			viper.GetString("csub-addr"),
+			viper.GetBool("poll"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
@@ -82,7 +84,12 @@ var osvCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		httpClient := http.Client{}
+		transport, err := cli.NewHTTPHeaderTransport(opts.headerFile, http.DefaultTransport)
+		if err != nil {
+			logger.Fatalf("unable to create HTTP transport: %v", err)
+		}
+
+		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 		packageQuery := root_package.NewPackageQuery(gqlclient, 0)
 
@@ -203,9 +210,18 @@ var osvCmd = &cobra.Command{
 	},
 }
 
-func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAddr string, csubTls bool, csubTlsSkipVerify bool) (osvOptions, error) {
+func validateOSVFlags(
+	graphqlEndpoint,
+	headerFile,
+	interval,
+	csubAddr string,
+	poll,
+	csubTls,
+	csubTlsSkipVerify bool,
+) (osvOptions, error) {
 	var opts osvOptions
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 	opts.poll = poll
 	i, err := time.ParseDuration(interval)
 	if err != nil {
@@ -223,5 +239,16 @@ func validateOSVFlags(graphqlEndpoint string, poll bool, interval string, csubAd
 }
 
 func init() {
+	set, err := cli.BuildFlags([]string{"header-file"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
+		os.Exit(1)
+	}
+	osvCmd.Flags().AddFlagSet(set)
+	if err := viper.BindPFlags(osvCmd.Flags()); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
+		os.Exit(1)
+	}
+
 	certifierCmd.AddCommand(osvCmd)
 }

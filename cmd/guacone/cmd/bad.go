@@ -35,6 +35,7 @@ import (
 type queryBadOptions struct {
 	// gql endpoint
 	graphqlEndpoint string
+	headerFile      string
 	depth           int
 }
 
@@ -47,16 +48,21 @@ var queryBadCmd = &cobra.Command{
 
 		opts, err := validateQueryBadFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetInt("search-depth"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
 
-		httpClient := http.Client{}
+		transport, err := cli.NewHTTPHeaderTransport(opts.headerFile, http.DefaultTransport)
+		if err != nil {
+			logger.Fatalf("unable to create HTTP transport: %v", err)
+		}
+
+		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		certifyBadResponse, err := model.CertifyBads(ctx, gqlclient, model.CertifyBadSpec{})
@@ -242,15 +248,17 @@ var queryBadCmd = &cobra.Command{
 	},
 }
 
-func validateQueryBadFlags(graphqlEndpoint string, depth int) (queryBadOptions, error) {
+func validateQueryBadFlags(graphqlEndpoint, headerFile string, depth int) (queryBadOptions, error) {
 	var opts queryBadOptions
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 	opts.depth = depth
+
 	return opts, nil
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"search-depth"})
+	set, err := cli.BuildFlags([]string{"header-file", "search-depth"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

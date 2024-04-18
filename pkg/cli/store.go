@@ -132,6 +132,8 @@ func init() {
 	// Files collector options
 	set.Bool("use-blob-url", false, "use blob URL for origin instead of source URL (useful if the blob store is persistent and we want to store the blob source location)")
 
+	set.String("header-file", "", "a text file containing HTTP headers to send to the GQL server, in RFC 822 format")
+
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f
 	})

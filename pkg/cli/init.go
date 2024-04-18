@@ -17,17 +17,13 @@ package cli
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/logging"
-	"github.com/guacsec/guac/pkg/metrics"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 func InitConfig() {
@@ -68,20 +64,4 @@ func InitConfig() {
 	if err == nil {
 		logger.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
-}
-
-// SetupPrometheus sets up the Prometheus server, registering its handler on http.DefaultServeMux
-func SetupPrometheus(ctx context.Context, logger *zap.SugaredLogger, name string) (metrics.MetricCollector, error) {
-	enablePrometheus := viper.GetBool("enable-prometheus")
-	if !enablePrometheus {
-		return nil, nil
-	}
-
-	if name == "" {
-		return nil, errors.New("name cannot be empty")
-	}
-
-	m := metrics.FromContext(ctx, name)
-	http.Handle("/metrics", m.MetricsHandler())
-	return m, nil
 }
