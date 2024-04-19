@@ -40,12 +40,7 @@ func startServer() {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
 
-	transport, err := cli.NewHTTPHeaderTransport(flags.headerFile, http.DefaultTransport)
-	if err != nil {
-		logger.Fatalf("unable to create HTTP transport: %+v", err)
-	}
-
-	httpClient := &http.Client{Transport: transport}
+	httpClient := &http.Client{Transport: cli.HTTPHeaderTransport(ctx, flags.headerFile, http.DefaultTransport)}
 	gqlClient := getGraphqlServerClientOrExit(ctx, httpClient)
 	handler := server.NewDefaultServer(gqlClient)
 	handlerWrapper := gen.NewStrictHandler(handler, nil)

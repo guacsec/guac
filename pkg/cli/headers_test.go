@@ -15,18 +15,23 @@
 package cli
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/guacsec/guac/pkg/logging"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-func TestNewHTTPHeaderTransport(t *testing.T) {
+func TestHTTPHeaderTransport(t *testing.T) {
 	type test struct {
 		name        string
 		headerFile  string
-		wantErr     string
+		wantErr     any
 		wantHeaders map[string][]string
 	}
 
@@ -34,7 +39,7 @@ func TestNewHTTPHeaderTransport(t *testing.T) {
 		{
 			name:       "creating a header transport with a non-existent file results in an error",
 			headerFile: "does-not-exist.txt",
-			wantErr:    "open does-not-exist.txt: no such file or directory",
+			wantErr:    "error reading header file: open does-not-exist.txt: no such file or directory",
 		},
 		{
 			name:       "creating a header transport with a valid RFC 822 header file works",
@@ -54,20 +59,34 @@ func TestNewHTTPHeaderTransport(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			transport, err := NewHTTPHeaderTransport(test.headerFile, http.DefaultTransport)
-			if err != nil {
-				if err.Error() == test.wantErr {
-					return
-				} else if test.wantErr == "" {
-					t.Fatalf("did not want an error, but got %v", err)
-				}
+			// The zap.WithFatalHook value WriteThenPanic makes it so that instead of
+			// exiting on .Fatal() calls, the logger panics. You can recover from these
+			// panics in a goroutine, and this makes it possible to test such cases.
+			logging.InitLogger(logging.Debug, zap.WithFatalHook(zapcore.WriteThenPanic))
+			ctx := logging.WithLogger(context.Background())
 
-				t.Fatalf("want error %s, but got %v", test.wantErr, err)
+			var transport http.RoundTripper
+			recovered := make(chan any)
+			finished := false
+
+			go func() {
+				defer func() {
+					recovered <- recover()
+				}()
+
+				transport = HTTPHeaderTransport(ctx, test.headerFile, http.DefaultTransport)
+
+				finished = true
+			}()
+
+			require.Equal(t, test.wantErr, <-recovered, "fatal error message")
+
+			if test.wantErr != nil {
+				assert.False(t, finished, "call did not finish")
+				return
 			}
 
-			if test.wantErr != "" {
-				t.Fatalf("want error %s, but got %v", test.wantErr, err)
-			}
+			assert.True(t, finished, "call finished")
 
 			var gotHeaders map[string][]string
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -77,12 +96,12 @@ func TestNewHTTPHeaderTransport(t *testing.T) {
 
 			client := http.Client{Transport: transport}
 
-			_, err = client.Get(srv.URL)
+			_, err := client.Get(srv.URL)
 			if err != nil {
 				t.Fatalf("error making test server request: %+v", err)
 			}
 
-			assert.Equalf(t, test.wantHeaders, gotHeaders, "headers as expected")
+			assert.Equalf(t, test.wantHeaders, gotHeaders, "headers")
 		})
 	}
 }

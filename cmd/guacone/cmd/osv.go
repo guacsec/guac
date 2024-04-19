@@ -84,12 +84,7 @@ var osvCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		transport, err := cli.NewHTTPHeaderTransport(opts.headerFile, http.DefaultTransport)
-		if err != nil {
-			logger.Fatalf("unable to create HTTP transport: %v", err)
-		}
-
-		httpClient := http.Client{Transport: transport}
+		httpClient := http.Client{Transport: cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 		packageQuery := root_package.NewPackageQuery(gqlclient, 0)
 

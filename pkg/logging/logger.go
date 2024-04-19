@@ -18,8 +18,9 @@ package logging
 import (
 	"context"
 	"fmt"
-	"github.com/guacsec/guac/pkg/version"
 	"strings"
+
+	"github.com/guacsec/guac/pkg/version"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -48,7 +49,7 @@ const (
 type loggerKey struct{}
 
 // Initializes the logger with the input level, defaulting to Info if the input is invalid
-func InitLogger(level LogLevel) {
+func InitLogger(level LogLevel, opts ...zap.Option) {
 	zapLevel, levelErr := zapcore.ParseLevel(string(level))
 	if levelErr != nil {
 		zapLevel = zapcore.InfoLevel
@@ -69,7 +70,7 @@ func InitLogger(level LogLevel) {
 		_ = zapLogger.Sync()
 	}()
 
-	logger = zapLogger.Sugar().With(guacVersion, version.Version)
+	logger = zapLogger.Sugar().With(guacVersion, version.Version).WithOptions(opts...)
 
 	if levelErr != nil {
 		logger.Infof("Invalid log level %s: ", level, levelErr)
