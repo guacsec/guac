@@ -520,14 +520,13 @@ func (c *cyclonedxParser) findCDXPkgVersionIDs(ctx context.Context, pkgIdentifie
 		Name:      &pkgIdentifier,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error querying for packages1: %w", err)
+		return nil, fmt.Errorf("error querying for packages: %w", err)
 	}
 
 	pkgVersionsMap := map[string]string{}
 	var pkgVersions []string
 	for _, depPkgVersion := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
 		pkgVersions = append(pkgVersions, depPkgVersion.Version)
-		pkgVersionsMap[depPkgVersion.Version] = depPkgVersion.Id
 		pkgVersionsMap[depPkgVersion.Version] = guacCDXPkgPurl(typeGUAC, depPkgVersion.Version, "", false)
 	}
 
