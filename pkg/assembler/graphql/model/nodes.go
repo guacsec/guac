@@ -52,6 +52,22 @@ func (Artifact) IsPackageOrArtifact() {}
 
 func (Artifact) IsNode() {}
 
+// ArtifactConnection returns the paginated results for artifact.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next or previous page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the ArtifactsEdge which contains the current cursor
+// and the artifact node itself
+type ArtifactConnection struct {
+	TotalCount int              `json:"totalCount"`
+	PageInfo   *PageInfo        `json:"pageInfo"`
+	Edges      []*ArtifactsEdge `json:"edges"`
+}
+
 // ArtifactInputSpec specifies an artifact for mutations.
 //
 // The checksum fields are canonicalized to be lowercase.
@@ -67,6 +83,13 @@ type ArtifactSpec struct {
 	ID        *string `json:"id,omitempty"`
 	Algorithm *string `json:"algorithm,omitempty"`
 	Digest    *string `json:"digest,omitempty"`
+}
+
+// ArtifactsEdge contains the cursor for the resulting node and
+// the artifact node itself.
+type ArtifactsEdge struct {
+	Cursor string    `json:"cursor"`
+	Node   *Artifact `json:"node,omitempty"`
 }
 
 // Builder represents the builder (e.g., FRSCA or GitHub Actions).
@@ -1064,6 +1087,22 @@ type PackageVersion struct {
 	Version    string              `json:"version"`
 	Qualifiers []*PackageQualifier `json:"qualifiers"`
 	Subpath    string              `json:"subpath"`
+}
+
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type PageInfo struct {
+	HasNextPage     bool    `json:"hasNextPage"`
+	HasPreviousPage bool    `json:"hasPreviousPage"`
+	StartCursor     *string `json:"startCursor,omitempty"`
+	EndCursor       *string `json:"endCursor,omitempty"`
 }
 
 // PkgEqual is an attestation that a set of packages are similar.

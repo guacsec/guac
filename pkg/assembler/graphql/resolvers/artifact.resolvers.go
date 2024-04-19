@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -24,6 +25,11 @@ func (r *mutationResolver) IngestArtifacts(ctx context.Context, artifacts []*mod
 // Artifacts is the resolver for the artifacts field.
 func (r *queryResolver) Artifacts(ctx context.Context, artifactSpec model.ArtifactSpec) ([]*model.Artifact, error) {
 	return r.Backend.Artifacts(ctx, &artifactSpec)
+}
+
+// ArtifactsList is the resolver for the artifactsList field.
+func (r *queryResolver) ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int, before *string, last *int) (*model.ArtifactConnection, error) {
+	panic(fmt.Errorf("not implemented: ArtifactsList - artifactsList"))
 }
 
 // Mutation returns generated.MutationResolver implementation.
