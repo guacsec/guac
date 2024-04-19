@@ -22,8 +22,8 @@ type Error struct {
 
 // PackageName defines model for PackageName.
 type PackageName struct {
-	DependentCount int    `json:"DependentCount"`
-	Name           string `json:"Name"`
+	DependentCount int  `json:"DependentCount"`
+	Name           Purl `json:"Name"`
 }
 
 // PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.

@@ -145,7 +145,7 @@ components:
         - DependentCount
       properties:
         Name:
-          type: string
+          $ref: "#/components/schemas/Purl"
         DependentCount:
           type: integer
   responses:

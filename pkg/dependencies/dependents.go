@@ -18,6 +18,7 @@ package dependencies
 import (
 	"context"
 	"fmt"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"sort"
 
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -101,9 +102,8 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 		// Iterate through the included dependencies of each SBOM.
 		for _, dependency := range resp.IncludedDependencies {
 			// Construct unique names for the dependency package and the package itself.
-			// TODO: Make the names actually unique, not just add "_".
-			depPkgName := dependency.DependencyPackage.Type + "_" + dependency.DependencyPackage.Namespaces[0].Namespace + "_" + dependency.DependencyPackage.Namespaces[0].Names[0].Name
-			pkgName := dependency.Package.Type + "_" + dependency.Package.Namespaces[0].Namespace + "_" + dependency.Package.Namespaces[0].Names[0].Name
+			depPkgName := helpers.AllPkgTreeToPurl(&dependency.DependencyPackage.AllPkgTree)
+			pkgName := helpers.AllPkgTreeToPurl(&dependency.Package.AllPkgTree)
 
 			var depPkgIds []string
 			pkgId := dependency.Package.Namespaces[0].Names[0].Versions[0].Id
@@ -121,38 +121,8 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 			}
 
 			for _, depPkgId := range depPkgIds {
-				// Map the IDs to their names.
-				idToName[depPkgId] = depPkgName
-				idToName[pkgId] = pkgName
-
-				// Skip "guac" files.
-				if dependency.DependencyPackage.Type == "guac" && dependency.DependencyPackage.Namespaces[0].Namespace == "files" {
-					continue
-				}
-
-				// First, we need to find all the packages that have pkgName as a dependency.
-				// Note that we are only searching of packages with pkgName as a dependency from the packages that have scanned so far.
-
-				// This dependencyPackages map finds all packages that have pkgName as a dependent out of our pre-scanned packages.
-				dependencyPackages := reachableNodesOf(depPkgId, dependencyEdges)
-
-				// Next we want to find all the packages that are dependencies of pkgName.
-				// We need to add them all to the dependencies of all nodes that have pkgName as a dependent.
-				// Note that we are only searching for dependencies of pkgName from the packages that have scanned so far
-
-				dependentPackages := reachableNodesOf(pkgId, dependentEdges)
-
-				for depPkgNodeId := range dependencyPackages {
-					depPkgNode := idToName[depPkgNodeId]
-					if _, ok := packages[depPkgNode]; !ok {
-						packages[depPkgNode] = dependencyNode{dependents: make(map[string]bool)}
-					}
-
-					for node := range dependentPackages {
-						// Mark the node as a dependent.
-						packages[depPkgNode].dependents[node] = true
-					}
-				}
+				// Inside the loop where you iterate through dependencies
+				updatePackagesAndNames(idToName, packages, depPkgId, pkgId, depPkgName, pkgName, dependency.DependencyPackage.Type, dependency.DependencyPackage.Namespaces[0].Namespace, dependencyEdges, dependentEdges)
 
 				// Update the edges with pkgId and depPkgId.
 				dependentEdges[depPkgId] = append(dependentEdges[depPkgId], pkgId) // pkgId is dependent on depPkgId
@@ -164,24 +134,68 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 	return packages, nil
 }
 
-func reachableNodesOf(startNode string, edges map[string][]string) map[string]bool {
+// updatePackagesAndNames updates the mapping of package IDs to their names, and constructs the dependency graph.
+// It takes a set of parameters including maps for ID to name conversion, packages, dependency and dependent edges,
+// and information about the package and its dependency such as their IDs, names, types, and namespaces.
+// This function skips processing for "guac" files in the "files" namespace and updates the provided maps with
+// the relationships between packages and their dependencies. It leverages traverseGraph to find all packages
+// that are either dependencies of or dependents on the given package, and updates the packages map accordingly.
+func updatePackagesAndNames(idToName map[string]string, packages map[string]dependencyNode, depPkgId, pkgId, depPkgName, pkgName, depPkgType, depPkgNamespace string, dependencyEdges, dependentEdges map[string][]string) {
+	// Skip "guac" files.
+	if depPkgType == "guac" && depPkgNamespace == "files" {
+		return
+	}
+
+	// Map the IDs to their names.
+	idToName[depPkgId] = depPkgName
+	idToName[pkgId] = pkgName
+
+	// First, we need to find all the packages that have pkgName as a dependency.
+	// Note that we are only searching of packages with pkgName as a dependency from the packages that have scanned so far.
+
+	// This dependencyPackages map finds all packages that have pkgName as a dependent out of our pre-scanned packages.
+	dependencyPackages := traverseGraph(depPkgId, dependencyEdges)
+
+	// Next we want to find all the packages that are dependencies of pkgName.
+	// We need to add them all to the dependencies of all nodes that have pkgName as a dependent.
+	// Note that we are only searching for dependencies of pkgName from the packages that have scanned so far
+	dependentPackages := traverseGraph(pkgId, dependentEdges)
+
+	for depPkgNodeId := range dependencyPackages {
+		depPkgNode := idToName[depPkgNodeId]
+		if _, ok := packages[depPkgNode]; !ok {
+			packages[depPkgNode] = dependencyNode{dependents: make(map[string]bool)}
+		}
+
+		for node := range dependentPackages {
+			packages[depPkgNode].dependents[node] = true
+		}
+	}
+}
+
+// traverseGraph performs a breadth-first search (BFS) on the dependency graph starting from a given node.
+// It takes a startNode ID and a map of edges (either dependencyEdges or dependentEdges) and returns a map
+// of visited nodes. This function is used to find all packages that are either dependencies of or dependents
+// on a given package by traversing the graph and marking nodes as visited.
+func traverseGraph(startNode string, edges map[string][]string) map[string]bool {
 	visited := make(map[string]bool)
 	queue := []string{startNode}
 
 	// Perform BFS to mark visited nodes.
 	for len(queue) > 0 {
-		n := len(queue)
+		currentNode := queue[0]
+		queue = queue[1:]
 
-		for i := 0; i < n; i++ {
-			node := queue[0]
-			queue = queue[1:]
+		if visited[currentNode] {
+			continue // Skip already visited nodes
+		}
+		visited[currentNode] = true // Mark current node as visited
 
-			if _, ok := visited[node]; ok {
-				continue
+		// Enqueue all adjacent nodes that haven't been visited yet
+		for _, adjacentNode := range edges[currentNode] {
+			if !visited[adjacentNode] {
+				queue = append(queue, adjacentNode)
 			}
-			visited[node] = true
-
-			queue = append(queue, edges[node]...)
 		}
 	}
 
