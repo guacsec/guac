@@ -17,8 +17,6 @@
 
 # Defines a GraphQL schema for the pagination
 
-scalar Cursor
-
 """
 PageInfo serves the client information about the paginated query results.
 
@@ -32,7 +30,6 @@ endCursor is where the query ended.
 """
 type PageInfo {
     hasNextPage: Boolean!
-    hasPreviousPage: Boolean!
-    startCursor: Cursor
-    endCursor: Cursor
+    startCursor: ID
+    endCursor: ID
 }

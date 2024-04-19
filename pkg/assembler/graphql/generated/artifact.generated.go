@@ -68,8 +68,9 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Artifacts(ctx context.Context, artifactSpec model.ArtifactSpec) ([]*model.Artifact, error)
-	ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int, before *string, last *int) (*model.ArtifactConnection, error)
+	ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error)
 	Builders(ctx context.Context, builderSpec model.BuilderSpec) ([]*model.Builder, error)
+	BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error)
 	CertifyBad(ctx context.Context, certifyBadSpec model.CertifyBadSpec) ([]*model.CertifyBad, error)
 	CertifyGood(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec) ([]*model.CertifyGood, error)
 	CertifyLegal(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec) ([]*model.CertifyLegal, error)
@@ -1680,7 +1681,7 @@ func (ec *executionContext) field_Query_artifactsList_args(ctx context.Context, 
 	var arg1 *string
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOCursor2ᚖstring(ctx, tmp)
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1695,24 +1696,6 @@ func (ec *executionContext) field_Query_artifactsList_args(ctx context.Context, 
 		}
 	}
 	args["first"] = arg2
-	var arg3 *string
-	if tmp, ok := rawArgs["before"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg3, err = ec.unmarshalOCursor2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["before"] = arg3
-	var arg4 *int
-	if tmp, ok := rawArgs["last"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
-		arg4, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["last"] = arg4
 	return args, nil
 }
 
@@ -1728,6 +1711,39 @@ func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawA
 		}
 	}
 	args["artifactSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_buildersList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.BuilderSpec
+	if tmp, ok := rawArgs["builderSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builderSpec"))
+		arg0, err = ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["builderSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -2172,8 +2188,6 @@ func (ec *executionContext) fieldContext_ArtifactConnection_pageInfo(ctx context
 			switch field.Name {
 			case "hasNextPage":
 				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
 			case "startCursor":
 				return ec.fieldContext_PageInfo_startCursor(ctx, field)
 			case "endCursor":
@@ -2208,9 +2222,9 @@ func (ec *executionContext) _ArtifactConnection_edges(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.ArtifactsEdge)
+	res := resTmp.([]*model.ArtifactEdge)
 	fc.Result = res
-	return ec.marshalNArtifactsEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactsEdgeᚄ(ctx, field.Selections, res)
+	return ec.marshalNArtifactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ArtifactConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2222,18 +2236,18 @@ func (ec *executionContext) fieldContext_ArtifactConnection_edges(ctx context.Co
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "cursor":
-				return ec.fieldContext_ArtifactsEdge_cursor(ctx, field)
+				return ec.fieldContext_ArtifactEdge_cursor(ctx, field)
 			case "node":
-				return ec.fieldContext_ArtifactsEdge_node(ctx, field)
+				return ec.fieldContext_ArtifactEdge_node(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ArtifactsEdge", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type ArtifactEdge", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _ArtifactsEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactsEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ArtifactsEdge_cursor(ctx, field)
+func (ec *executionContext) _ArtifactEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ArtifactEdge_cursor(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2257,24 +2271,24 @@ func (ec *executionContext) _ArtifactsEdge_cursor(ctx context.Context, field gra
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNCursor2string(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ArtifactsEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ArtifactEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ArtifactsEdge",
+		Object:     "ArtifactEdge",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Cursor does not have child fields")
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _ArtifactsEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactsEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ArtifactsEdge_node(ctx, field)
+func (ec *executionContext) _ArtifactEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ArtifactEdge_node(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2298,9 +2312,9 @@ func (ec *executionContext) _ArtifactsEdge_node(ctx context.Context, field graph
 	return ec.marshalOArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ArtifactsEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ArtifactEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ArtifactsEdge",
+		Object:     "ArtifactEdge",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -4833,18 +4847,15 @@ func (ec *executionContext) _Query_artifactsList(ctx context.Context, field grap
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ArtifactsList(rctx, fc.Args["artifactSpec"].(model.ArtifactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int), fc.Args["before"].(*string), fc.Args["last"].(*int))
+		return ec.resolvers.Query().ArtifactsList(rctx, fc.Args["artifactSpec"].(model.ArtifactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
 
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.ArtifactConnection)
 	fc.Result = res
-	return ec.marshalNArtifactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactConnection(ctx, field.Selections, res)
+	return ec.marshalOArtifactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_artifactsList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4931,6 +4942,63 @@ func (ec *executionContext) fieldContext_Query_builders(ctx context.Context, fie
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_builders_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_buildersList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_buildersList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BuildersList(rctx, fc.Args["builderSpec"].(model.BuilderSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.BuilderConnection)
+	fc.Result = res
+	return ec.marshalOBuilderConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_buildersList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_BuilderConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_BuilderConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_BuilderConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BuilderConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_buildersList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6955,24 +7023,24 @@ func (ec *executionContext) _ArtifactConnection(ctx context.Context, sel ast.Sel
 	return out
 }
 
-var artifactsEdgeImplementors = []string{"ArtifactsEdge"}
+var artifactEdgeImplementors = []string{"ArtifactEdge"}
 
-func (ec *executionContext) _ArtifactsEdge(ctx context.Context, sel ast.SelectionSet, obj *model.ArtifactsEdge) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, artifactsEdgeImplementors)
+func (ec *executionContext) _ArtifactEdge(ctx context.Context, sel ast.SelectionSet, obj *model.ArtifactEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, artifactEdgeImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("ArtifactsEdge")
+			out.Values[i] = graphql.MarshalString("ArtifactEdge")
 		case "cursor":
-			out.Values[i] = ec._ArtifactsEdge_cursor(ctx, field, obj)
+			out.Values[i] = ec._ArtifactEdge_cursor(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "node":
-			out.Values[i] = ec._ArtifactsEdge_node(ctx, field, obj)
+			out.Values[i] = ec._ArtifactEdge_node(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7411,9 +7479,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_artifactsList(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
 				return res
 			}
 
@@ -7436,6 +7501,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "buildersList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_buildersList(ctx, field)
 				return res
 			}
 
@@ -8106,31 +8190,7 @@ func (ec *executionContext) marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋ
 	return ec._Artifact(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNArtifactConnection2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactConnection(ctx context.Context, sel ast.SelectionSet, v model.ArtifactConnection) graphql.Marshaler {
-	return ec._ArtifactConnection(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNArtifactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactConnection(ctx context.Context, sel ast.SelectionSet, v *model.ArtifactConnection) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ArtifactConnection(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (model.ArtifactSpec, error) {
-	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (*model.ArtifactSpec, error) {
-	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNArtifactsEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ArtifactsEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNArtifactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ArtifactEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -8154,7 +8214,7 @@ func (ec *executionContext) marshalNArtifactsEdge2ᚕᚖgithubᚗcomᚋguacsec�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNArtifactsEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactsEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNArtifactEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -8174,14 +8234,24 @@ func (ec *executionContext) marshalNArtifactsEdge2ᚕᚖgithubᚗcomᚋguacsec�
 	return ret
 }
 
-func (ec *executionContext) marshalNArtifactsEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactsEdge(ctx context.Context, sel ast.SelectionSet, v *model.ArtifactsEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNArtifactEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdge(ctx context.Context, sel ast.SelectionSet, v *model.ArtifactEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._ArtifactsEdge(ctx, sel, v)
+	return ec._ArtifactEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (model.ArtifactSpec, error) {
+	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNArtifactSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (*model.ArtifactSpec, error) {
+	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNIDorArtifactInput2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v interface{}) (model.IDorArtifactInput, error) {
@@ -8233,6 +8303,13 @@ func (ec *executionContext) marshalOArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋ
 		return graphql.Null
 	}
 	return ec._Artifact(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOArtifactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactConnection(ctx context.Context, sel ast.SelectionSet, v *model.ArtifactConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ArtifactConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v interface{}) (*model.ArtifactInputSpec, error) {

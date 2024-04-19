@@ -71,24 +71,24 @@ ArtifactConnection returns the paginated results for artifact.
 totalCount is the total number of results returned.
 
 pageInfo provides information to the client if there is
-a next or previous page of results and the starting and
+a next page of results and the starting and
 ending cursor for the current set.
 
-edges contains the ArtifactsEdge which contains the current cursor
+edges contains the ArtifactEdge which contains the current cursor
 and the artifact node itself
 """
 type ArtifactConnection {
     totalCount: Int!
     pageInfo: PageInfo!
-    edges: [ArtifactsEdge!]!
+    edges: [ArtifactEdge!]!
 }
 
 """
-ArtifactsEdge contains the cursor for the resulting node and
+ArtifactEdge contains the cursor for the resulting node and
 the artifact node itself.
 """
-type ArtifactsEdge {
-  cursor: Cursor!
+type ArtifactEdge {
+  cursor: ID!
   node: Artifact
 }
 
@@ -96,7 +96,7 @@ extend type Query {
   "Returns all artifacts matching a filter."
   artifacts(artifactSpec: ArtifactSpec!): [Artifact!]!
   "Returns a paginated results via ArtifactConnection"
-  artifactsList(artifactSpec: ArtifactSpec!, after: Cursor, first: Int, before: Cursor, last: Int): ArtifactConnection!
+  artifactsList(artifactSpec: ArtifactSpec!, after: ID, first: Int): ArtifactConnection
 }
 
 extend type Mutation {

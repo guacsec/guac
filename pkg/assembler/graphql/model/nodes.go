@@ -57,15 +57,22 @@ func (Artifact) IsNode() {}
 // totalCount is the total number of results returned.
 //
 // pageInfo provides information to the client if there is
-// a next or previous page of results and the starting and
+// a next page of results and the starting and
 // ending cursor for the current set.
 //
-// edges contains the ArtifactsEdge which contains the current cursor
+// edges contains the ArtifactEdge which contains the current cursor
 // and the artifact node itself
 type ArtifactConnection struct {
-	TotalCount int              `json:"totalCount"`
-	PageInfo   *PageInfo        `json:"pageInfo"`
-	Edges      []*ArtifactsEdge `json:"edges"`
+	TotalCount int             `json:"totalCount"`
+	PageInfo   *PageInfo       `json:"pageInfo"`
+	Edges      []*ArtifactEdge `json:"edges"`
+}
+
+// ArtifactEdge contains the cursor for the resulting node and
+// the artifact node itself.
+type ArtifactEdge struct {
+	Cursor string    `json:"cursor"`
+	Node   *Artifact `json:"node,omitempty"`
 }
 
 // ArtifactInputSpec specifies an artifact for mutations.
@@ -85,13 +92,6 @@ type ArtifactSpec struct {
 	Digest    *string `json:"digest,omitempty"`
 }
 
-// ArtifactsEdge contains the cursor for the resulting node and
-// the artifact node itself.
-type ArtifactsEdge struct {
-	Cursor string    `json:"cursor"`
-	Node   *Artifact `json:"node,omitempty"`
-}
-
 // Builder represents the builder (e.g., FRSCA or GitHub Actions).
 //
 // Currently builders are identified by the uri field.
@@ -101,6 +101,29 @@ type Builder struct {
 }
 
 func (Builder) IsNode() {}
+
+// BuilderConnection returns the paginated results for artifact.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the BuilderEdge which contains the current cursor
+// and the Builder node itself
+type BuilderConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*BuilderEdge `json:"edges"`
+}
+
+// BuilderEdge contains the cursor for the resulting node and
+// the Builder node itself.
+type BuilderEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *Builder `json:"node,omitempty"`
+}
 
 // BuilderInputSpec specifies a builder for mutations.
 type BuilderInputSpec struct {
@@ -1099,10 +1122,9 @@ type PackageVersion struct {
 //
 // endCursor is where the query ended.
 type PageInfo struct {
-	HasNextPage     bool    `json:"hasNextPage"`
-	HasPreviousPage bool    `json:"hasPreviousPage"`
-	StartCursor     *string `json:"startCursor,omitempty"`
-	EndCursor       *string `json:"endCursor,omitempty"`
+	HasNextPage bool    `json:"hasNextPage"`
+	StartCursor *string `json:"startCursor,omitempty"`
+	EndCursor   *string `json:"endCursor,omitempty"`
 }
 
 // PkgEqual is an attestation that a set of packages are similar.

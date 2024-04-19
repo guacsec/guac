@@ -50,9 +50,40 @@ input IDorBuilderInput {
   builderInput: BuilderInputSpec
 }
 
+
+"""
+BuilderConnection returns the paginated results for artifact.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the BuilderEdge which contains the current cursor
+and the Builder node itself
+"""
+type BuilderConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [BuilderEdge!]!
+}
+
+"""
+BuilderEdge contains the cursor for the resulting node and
+the Builder node itself.
+"""
+type BuilderEdge {
+  cursor: ID!
+  node: Builder
+}
+
+
 extend type Query {
   "Returns all builders matching a filter."
   builders(builderSpec: BuilderSpec!): [Builder!]!
+  "Returns a paginated results via BuilderConnection"
+  buildersList(builderSpec: BuilderSpec!, after: ID, first: Int): BuilderConnection
 }
 
 extend type Mutation {

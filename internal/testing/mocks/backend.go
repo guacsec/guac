@@ -50,6 +50,21 @@ func (mr *MockBackendMockRecorder) Artifacts(ctx, artifactSpec interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Artifacts", reflect.TypeOf((*MockBackend)(nil).Artifacts), ctx, artifactSpec)
 }
 
+// ArtifactsList mocks base method.
+func (m *MockBackend) ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ArtifactsList", ctx, artifactSpec, after, first)
+	ret0, _ := ret[0].(*model.ArtifactConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ArtifactsList indicates an expected call of ArtifactsList.
+func (mr *MockBackendMockRecorder) ArtifactsList(ctx, artifactSpec, after, first interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArtifactsList", reflect.TypeOf((*MockBackend)(nil).ArtifactsList), ctx, artifactSpec, after, first)
+}
+
 // Builders mocks base method.
 func (m *MockBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	m.ctrl.T.Helper()
@@ -63,6 +78,21 @@ func (m *MockBackend) Builders(ctx context.Context, builderSpec *model.BuilderSp
 func (mr *MockBackendMockRecorder) Builders(ctx, builderSpec interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Builders", reflect.TypeOf((*MockBackend)(nil).Builders), ctx, builderSpec)
+}
+
+// BuildersList mocks base method.
+func (m *MockBackend) BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BuildersList", ctx, builderSpec, after, first)
+	ret0, _ := ret[0].(*model.BuilderConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BuildersList indicates an expected call of BuildersList.
+func (mr *MockBackendMockRecorder) BuildersList(ctx, builderSpec, after, first interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildersList", reflect.TypeOf((*MockBackend)(nil).BuildersList), ctx, builderSpec, after, first)
 }
 
 // CertifyBad mocks base method.

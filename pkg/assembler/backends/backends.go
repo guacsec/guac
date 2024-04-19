@@ -33,6 +33,10 @@ type Backend interface {
 	Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
 	Vulnerabilities(ctx context.Context, vulnSpec *model.VulnerabilitySpec) ([]*model.Vulnerability, error)
 
+	// Paginated Retrieval read-only queries for software trees
+	ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error)
+	BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error)
+
 	// Retrieval read-only queries for evidence trees
 	CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error)
 	CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error)

@@ -31,6 +31,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error) {
+	return &model.BuilderConnection{}, fmt.Errorf("not implemented: BuildersList")
+}
+
 func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	if builderSpec == nil {
 		builderSpec = &model.BuilderSpec{}

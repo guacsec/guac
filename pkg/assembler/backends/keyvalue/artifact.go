@@ -19,10 +19,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 )
@@ -224,6 +226,117 @@ func (c *demoClient) artifactExact(ctx context.Context, artifactSpec *model.Arti
 }
 
 // Query Artifacts
+
+func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+	aExact, err := c.artifactExact(ctx, &artifactSpec)
+	if err != nil {
+		return nil, gqlerror.Errorf("Artifacts :: invalid spec %s", err)
+	}
+	if aExact != nil {
+		return &model.ArtifactConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(aExact.ID()),
+				EndCursor:   ptrfrom.String(aExact.ID()),
+			},
+			Edges: []*model.ArtifactEdge{{
+				Cursor: aExact.ID(),
+				Node:   c.convArtifact(aExact),
+			}}}, nil
+	}
+
+	edges := make([]*model.ArtifactEdge, 0)
+	count := 0
+	currentPage := false
+
+	// If no cursor present start from the top
+	if after == nil {
+		currentPage = true
+	}
+	hasNextPage := false
+
+	algorithm := strings.ToLower(nilToEmpty(artifactSpec.Algorithm))
+	digest := strings.ToLower(nilToEmpty(artifactSpec.Digest))
+	var done bool
+	scn := c.kv.Keys(artCol)
+	var artKeys []string
+	for !done {
+		artKeys, done, err = scn.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+		sort.Strings(artKeys)
+		for i, ak := range artKeys {
+			a, err := byKeykv[*artStruct](ctx, artCol, ak, c)
+			if err != nil {
+				return nil, err
+			}
+			convArt := c.convArtifact(a)
+			if after != nil && !currentPage {
+				if convArt.ID == *after {
+					currentPage = true
+					continue
+				} else {
+					continue
+				}
+			}
+			if first != nil {
+				if currentPage && count < *first {
+					artEdge := createArtifactEdges(algorithm, a, digest, convArt)
+					if artEdge != nil {
+						edges = append(edges, artEdge)
+						count++
+					}
+				}
+				// If there are any elements left after the current page we indicate that in the response
+				if count == *first && i < len(artKeys) {
+					hasNextPage = true
+				}
+			} else {
+				artEdge := createArtifactEdges(algorithm, a, digest, convArt)
+				if artEdge != nil {
+					edges = append(edges, artEdge)
+					count++
+				}
+			}
+		}
+	}
+	if len(edges) > 0 {
+		return &model.ArtifactConnection{
+			TotalCount: len(artKeys),
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[count-1].Node.ID),
+			},
+			Edges: edges}, nil
+	} else {
+		return nil, nil
+	}
+}
+
+func createArtifactEdges(algorithm string, a *artStruct, digest string, convArt *model.Artifact) *model.ArtifactEdge {
+	matchAlgorithm := false
+	if algorithm == "" || algorithm == a.Algorithm {
+		matchAlgorithm = true
+	}
+
+	matchDigest := false
+	if digest == "" || digest == a.Digest {
+		matchDigest = true
+	}
+
+	if matchDigest && matchAlgorithm {
+		return &model.ArtifactEdge{
+			Cursor: convArt.ID,
+			Node:   convArt,
+		}
+	}
+	return nil
+}
 
 func (c *demoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
 	c.m.RLock()

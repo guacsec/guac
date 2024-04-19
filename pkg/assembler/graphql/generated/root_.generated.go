@@ -55,7 +55,7 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
-	ArtifactsEdge struct {
+	ArtifactEdge struct {
 		Cursor func(childComplexity int) int
 		Node   func(childComplexity int) int
 	}
@@ -63,6 +63,17 @@ type ComplexityRoot struct {
 	Builder struct {
 		ID  func(childComplexity int) int
 		URI func(childComplexity int) int
+	}
+
+	BuilderConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	BuilderEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	CertifyBad struct {
@@ -298,10 +309,9 @@ type ComplexityRoot struct {
 	}
 
 	PageInfo struct {
-		EndCursor       func(childComplexity int) int
-		HasNextPage     func(childComplexity int) int
-		HasPreviousPage func(childComplexity int) int
-		StartCursor     func(childComplexity int) int
+		EndCursor   func(childComplexity int) int
+		HasNextPage func(childComplexity int) int
+		StartCursor func(childComplexity int) int
 	}
 
 	PkgEqual struct {
@@ -327,8 +337,9 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Artifacts             func(childComplexity int, artifactSpec model.ArtifactSpec) int
-		ArtifactsList         func(childComplexity int, artifactSpec model.ArtifactSpec, after *string, first *int, before *string, last *int) int
+		ArtifactsList         func(childComplexity int, artifactSpec model.ArtifactSpec, after *string, first *int) int
 		Builders              func(childComplexity int, builderSpec model.BuilderSpec) int
+		BuildersList          func(childComplexity int, builderSpec model.BuilderSpec, after *string, first *int) int
 		CertifyBad            func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
 		CertifyGood           func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
 		CertifyLegal          func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec) int
@@ -525,19 +536,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ArtifactConnection.TotalCount(childComplexity), true
 
-	case "ArtifactsEdge.cursor":
-		if e.complexity.ArtifactsEdge.Cursor == nil {
+	case "ArtifactEdge.cursor":
+		if e.complexity.ArtifactEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.ArtifactsEdge.Cursor(childComplexity), true
+		return e.complexity.ArtifactEdge.Cursor(childComplexity), true
 
-	case "ArtifactsEdge.node":
-		if e.complexity.ArtifactsEdge.Node == nil {
+	case "ArtifactEdge.node":
+		if e.complexity.ArtifactEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.ArtifactsEdge.Node(childComplexity), true
+		return e.complexity.ArtifactEdge.Node(childComplexity), true
 
 	case "Builder.id":
 		if e.complexity.Builder.ID == nil {
@@ -552,6 +563,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Builder.URI(childComplexity), true
+
+	case "BuilderConnection.edges":
+		if e.complexity.BuilderConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.BuilderConnection.Edges(childComplexity), true
+
+	case "BuilderConnection.pageInfo":
+		if e.complexity.BuilderConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.BuilderConnection.PageInfo(childComplexity), true
+
+	case "BuilderConnection.totalCount":
+		if e.complexity.BuilderConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.BuilderConnection.TotalCount(childComplexity), true
+
+	case "BuilderEdge.cursor":
+		if e.complexity.BuilderEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.BuilderEdge.Cursor(childComplexity), true
+
+	case "BuilderEdge.node":
+		if e.complexity.BuilderEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.BuilderEdge.Node(childComplexity), true
 
 	case "CertifyBad.collector":
 		if e.complexity.CertifyBad.Collector == nil {
@@ -1980,13 +2026,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PageInfo.HasNextPage(childComplexity), true
 
-	case "PageInfo.hasPreviousPage":
-		if e.complexity.PageInfo.HasPreviousPage == nil {
-			break
-		}
-
-		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
-
 	case "PageInfo.startCursor":
 		if e.complexity.PageInfo.StartCursor == nil {
 			break
@@ -2121,7 +2160,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ArtifactsList(childComplexity, args["artifactSpec"].(model.ArtifactSpec), args["after"].(*string), args["first"].(*int), args["before"].(*string), args["last"].(*int)), true
+		return e.complexity.Query.ArtifactsList(childComplexity, args["artifactSpec"].(model.ArtifactSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.builders":
 		if e.complexity.Query.Builders == nil {
@@ -2134,6 +2173,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Builders(childComplexity, args["builderSpec"].(model.BuilderSpec)), true
+
+	case "Query.buildersList":
+		if e.complexity.Query.BuildersList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_buildersList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BuildersList(childComplexity, args["builderSpec"].(model.BuilderSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.CertifyBad":
 		if e.complexity.Query.CertifyBad == nil {
@@ -3142,24 +3193,24 @@ ArtifactConnection returns the paginated results for artifact.
 totalCount is the total number of results returned.
 
 pageInfo provides information to the client if there is
-a next or previous page of results and the starting and
+a next page of results and the starting and
 ending cursor for the current set.
 
-edges contains the ArtifactsEdge which contains the current cursor
+edges contains the ArtifactEdge which contains the current cursor
 and the artifact node itself
 """
 type ArtifactConnection {
     totalCount: Int!
     pageInfo: PageInfo!
-    edges: [ArtifactsEdge!]!
+    edges: [ArtifactEdge!]!
 }
 
 """
-ArtifactsEdge contains the cursor for the resulting node and
+ArtifactEdge contains the cursor for the resulting node and
 the artifact node itself.
 """
-type ArtifactsEdge {
-  cursor: Cursor!
+type ArtifactEdge {
+  cursor: ID!
   node: Artifact
 }
 
@@ -3167,7 +3218,7 @@ extend type Query {
   "Returns all artifacts matching a filter."
   artifacts(artifactSpec: ArtifactSpec!): [Artifact!]!
   "Returns a paginated results via ArtifactConnection"
-  artifactsList(artifactSpec: ArtifactSpec!, after: Cursor, first: Int, before: Cursor, last: Int): ArtifactConnection!
+  artifactsList(artifactSpec: ArtifactSpec!, after: ID, first: Int): ArtifactConnection
 }
 
 extend type Mutation {
@@ -3229,9 +3280,40 @@ input IDorBuilderInput {
   builderInput: BuilderInputSpec
 }
 
+
+"""
+BuilderConnection returns the paginated results for artifact.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the BuilderEdge which contains the current cursor
+and the Builder node itself
+"""
+type BuilderConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [BuilderEdge!]!
+}
+
+"""
+BuilderEdge contains the cursor for the resulting node and
+the Builder node itself.
+"""
+type BuilderEdge {
+  cursor: ID!
+  node: Builder
+}
+
+
 extend type Query {
   "Returns all builders matching a filter."
   builders(builderSpec: BuilderSpec!): [Builder!]!
+  "Returns a paginated results via BuilderConnection"
+  buildersList(builderSpec: BuilderSpec!, after: ID, first: Int): BuilderConnection
 }
 
 extend type Mutation {
@@ -5236,8 +5318,6 @@ extend type Mutation {
 
 # Defines a GraphQL schema for the pagination
 
-scalar Cursor
-
 """
 PageInfo serves the client information about the paginated query results.
 
@@ -5251,9 +5331,8 @@ endCursor is where the query ended.
 """
 type PageInfo {
     hasNextPage: Boolean!
-    hasPreviousPage: Boolean!
-    startCursor: Cursor
-    endCursor: Cursor
+    startCursor: ID
+    endCursor: ID
 }
 `, BuiltIn: false},
 	{Name: "../schema/path.graphql", Input: `#
