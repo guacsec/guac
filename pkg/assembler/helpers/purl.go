@@ -137,7 +137,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 		purl.TypeDebian, purl.TypeGem, purl.TypeGithub,
 		purl.TypeGolang, purl.TypeHackage, purl.TypeHex, purl.TypeMaven,
 		purl.TypeNPM, purl.TypeNuget, purl.TypePyPi, purl.TypeRPM, purl.TypeSwift,
-		purl.TypeGeneric:
+		purl.TypeGeneric, purl.TypeYocto, purl.TypeCpan:
 		// some code
 		r := pkg(p.Type, p.Namespace, p.Name, p.Version, p.Subpath, p.Qualifiers.Map())
 		return r, nil
