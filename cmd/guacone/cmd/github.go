@@ -18,15 +18,19 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
-	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/guacsec/guac/pkg/ingestor"
+	"net/http"
 	"os"
 	"strings"
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/guacsec/guac/pkg/cli"
+	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
+	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor"
+
+	"os/signal"
 
 	"github.com/guacsec/guac/internal/client/githubclient"
 	"github.com/guacsec/guac/pkg/collectsub/client"
@@ -38,7 +42,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os/signal"
 )
 
 const (
@@ -64,6 +67,7 @@ type githubOptions struct {
 	csubClientOptions client.CsubClientOptions
 	// graphql endpoint
 	graphqlEndpoint string
+	headerFile      string
 }
 
 var githubCmd = &cobra.Command{
@@ -73,10 +77,9 @@ var githubCmd = &cobra.Command{
   if <github-mode> is "release" then [flags] release_url1 release_url2..., otherwise if <github-mode> is "workflow" then [flags] <owner>/<repo>.`,
 	Args: cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateGithubFlags(
+			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetString(githubMode),
 			viper.GetString(githubSbom),
 			viper.GetString(githubWorkflowFile),
@@ -91,6 +94,10 @@ var githubCmd = &cobra.Command{
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// GITHUB_TOKEN is the default token name
 		ghc, err := githubclient.NewGithubClient(ctx, os.Getenv("GITHUB_TOKEN"))
@@ -145,7 +152,7 @@ var githubCmd = &cobra.Command{
 		var errFound bool
 
 		emit := func(d *processor.Document) error {
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient)
 
 			if err != nil {
 				errFound = true
@@ -198,8 +205,10 @@ var githubCmd = &cobra.Command{
 	},
 }
 
-func validateGithubFlags(githubMode, sbomName, workflowFileName, csubAddr string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(graphqlEndpoint, headerFile, githubMode, sbomName, workflowFileName, csubAddr string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
 	var opts githubOptions
+	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 	opts.poll = poll
 	opts.githubMode = githubMode
 	opts.sbomName = sbomName

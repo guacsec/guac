@@ -54,9 +54,6 @@ var scorecardCmd = &cobra.Command{
 	Use:   "scorecard [flags]",
 	Short: "runs the scorecard certifier",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateScorecardFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("header-file"),
@@ -71,6 +68,10 @@ var scorecardCmd = &cobra.Command{
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// scorecard runner is the scorecard library that runs the scorecard checks
 		scorecardRunner, err := scorecard.NewScorecardRunner(ctx)
@@ -89,7 +90,7 @@ var scorecardCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		httpClient := http.Client{Transport: cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)}
+		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		// running and getting the scorecard checks
@@ -123,7 +124,7 @@ var scorecardCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient)
 
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)

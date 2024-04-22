@@ -53,9 +53,6 @@ var osvCmd = &cobra.Command{
 	Use:   "osv [flags]",
 	Short: "runs the osv certifier",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateOSVFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("header-file"),
@@ -71,6 +68,10 @@ var osvCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
 		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
@@ -84,7 +85,7 @@ var osvCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		httpClient := http.Client{Transport: cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)}
+		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 		packageQuery := root_package.NewPackageQuery(gqlclient, 0)
 
@@ -105,7 +106,7 @@ var osvCmd = &cobra.Command{
 				select {
 				case <-ticker.C:
 					if len(totalDocs) > 0 {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -118,7 +119,7 @@ var osvCmd = &cobra.Command{
 					totalNum += 1
 					totalDocs = append(totalDocs, d)
 					if len(totalDocs) >= threshold {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -137,7 +138,7 @@ var osvCmd = &cobra.Command{
 				totalNum += 1
 				totalDocs = append(totalDocs, <-docChan)
 				if len(totalDocs) >= threshold {
-					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
 					if err != nil {
 						atomic.StoreInt32(&gotErr, 1)
 						logger.Errorf("unable to ingest documents: %v", err)
@@ -146,7 +147,7 @@ var osvCmd = &cobra.Command{
 				}
 			}
 			if len(totalDocs) > 0 {
-				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
 				if err != nil {
 					atomic.StoreInt32(&gotErr, 1)
 					logger.Errorf("unable to ingest documents: %v", err)

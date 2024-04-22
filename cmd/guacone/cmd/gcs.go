@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	"cloud.google.com/go/storage"
@@ -37,6 +38,7 @@ import (
 
 type gcsOptions struct {
 	graphqlEndpoint   string
+	headerFile        string
 	csubClientOptions client.CsubClientOptions
 	bucket            string
 }
@@ -49,21 +51,23 @@ var gcsCmd = &cobra.Command{
 	Example: "guacone collect gcs my-bucket --gcs-credentials-path /secret/sa.json",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateGCSFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetString("csub-addr"),
+			viper.GetString(gcsCredentialsPathFlag),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
-			viper.GetString(gcsCredentialsPathFlag),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		gcsOpts := []option.ClientOption{
 			option.WithUserAgent(version.UserAgent),
@@ -105,7 +109,7 @@ var gcsCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient)
 
 			if err != nil {
 				gotErr = true
@@ -135,9 +139,10 @@ var gcsCmd = &cobra.Command{
 	},
 }
 
-func validateGCSFlags(gqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, credentialsPath string, args []string) (gcsOptions, error) {
+func validateGCSFlags(gqlEndpoint, headerFile, csubAddr, credentialsPath string, csubTls, csubTlsSkipVerify bool, args []string) (gcsOptions, error) {
 	var opts gcsOptions
 	opts.graphqlEndpoint = gqlEndpoint
+	opts.headerFile = headerFile
 
 	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {

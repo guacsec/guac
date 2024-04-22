@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -48,6 +49,7 @@ type fileOptions struct {
 	path string
 	// gql endpoint
 	graphqlEndpoint string
+	headerFile      string
 	// csub client options for identifier strings
 	csubClientOptions client.CsubClientOptions
 }
@@ -56,13 +58,11 @@ var filesCmd = &cobra.Command{
 	Use:   "files [flags] file_path",
 	Short: "take a folder of files and create a GUAC graph, this command talks directly to the graphQL endpoint",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateFilesFlags(
 			viper.GetString("verifier-key-path"),
 			viper.GetString("verifier-key-id"),
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
@@ -72,6 +72,10 @@ var filesCmd = &cobra.Command{
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// Register Keystore
 		inmemory := inmemory.NewInmemoryProvider()
@@ -122,7 +126,7 @@ var filesCmd = &cobra.Command{
 
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient); err != nil {
+			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient); err != nil {
 				gotErr = true
 				filesWithErrors = append(filesWithErrors, d.SourceInformation.Source)
 				return fmt.Errorf("unable to ingest document: %w", err)
@@ -154,9 +158,10 @@ var filesCmd = &cobra.Command{
 	},
 }
 
-func validateFilesFlags(keyPath string, keyID string, graphqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, args []string) (fileOptions, error) {
+func validateFilesFlags(keyPath, keyID, graphqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool, args []string) (fileOptions, error) {
 	var opts fileOptions
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 
 	if keyPath != "" {
 		if strings.HasSuffix(keyPath, "pem") {
