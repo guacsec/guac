@@ -317,61 +317,54 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 		logger.Debugf("no vulnerabilities found in CycloneDX BOM")
 		return nil
 	}
-
-	var status model.VexStatus
-	var justification model.VexJustification
-	var publishedTime time.Time
 	for _, vulnerability := range *c.cdxBom.Vulnerabilities {
 		vuln, err := asmhelpers.CreateVulnInput(vulnerability.ID)
 		if err != nil {
 			return fmt.Errorf("failed to create vuln input spec %v", err)
 		}
 		var vd model.VexStatementInputSpec
+		publishedTime := time.Unix(0, 0)
 		if vulnerability.Analysis != nil {
 			if vexStatus, ok := vexStatusMap[vulnerability.Analysis.State]; ok {
-				status = vexStatus
+				vd.Status = vexStatus
 			} else {
 				return fmt.Errorf("unknown vulnerability status %s", vulnerability.Analysis.State)
 			}
 
 			if vexJustification, ok := justificationsMap[vulnerability.Analysis.Justification]; ok {
-				justification = vexJustification
+				vd.VexJustification = vexJustification
 			} else {
-				justification = model.VexJustificationNotProvided
+				vd.VexJustification = model.VexJustificationNotProvided
 			}
 
 			if vulnerability.Published != "" {
-				publishedTime, _ = time.Parse(time.RFC3339, vulnerability.Published)
-			} else {
-				publishedTime = time.Unix(0, 0)
+				publishedTime, err = time.Parse(time.RFC3339, vulnerability.Published)
+				if err != nil {
+					return fmt.Errorf("failed to pase time: %s, with error: %w", vulnerability.Published, err)
+				}
 			}
-
-			vd = model.VexStatementInputSpec{
-				Status:           status,
-				VexJustification: justification,
-				KnownSince:       publishedTime,
-				StatusNotes:      vulnerability.Description,
-			}
+			vd.KnownSince = publishedTime
+			vd.Statement = vulnerability.Description
 
 			if vulnerability.Analysis.Detail != "" {
-				vd.Statement = vulnerability.Analysis.Detail
+				vd.StatusNotes = vulnerability.Analysis.Detail
 			} else if vulnerability.Analysis.Response != nil {
 				var response []string
 				for _, res := range *vulnerability.Analysis.Response {
 					response = append(response, string(res))
 				}
-				vd.Statement = strings.Join(response, ",")
+				vd.StatusNotes = strings.Join(response, ",")
 			} else {
-				vd.Statement = vulnerability.Detail
+				vd.StatusNotes = vulnerability.Detail
 			}
 		} else {
 			vd = model.VexStatementInputSpec{
 				// if status not specified, assume affected
 				Status:           model.VexStatusAffected,
 				VexJustification: model.VexJustificationNotProvided,
-				KnownSince:       time.Unix(0, 0),
-				StatusNotes:      vulnerability.Description,
-				Statement:        vulnerability.Detail,
+				KnownSince:       publishedTime,
+				StatusNotes:      vulnerability.Detail,
+				Statement:        vulnerability.Description,
 			}
 		}
 
@@ -383,11 +376,11 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 			c.vulnData.vex = append(c.vulnData.vex, *vi...)
 
 			for _, v := range *vi {
-				if status == model.VexStatusAffected || status == model.VexStatusUnderInvestigation {
+				if v.VexData.Status == model.VexStatusAffected || v.VexData.Status == model.VexStatusUnderInvestigation {
 					cv := assembler.CertifyVulnIngest{
 						Vulnerability: vuln,
 						VulnData: &model.ScanMetadataInput{
-							TimeScanned: publishedTime,
+							TimeScanned: v.VexData.KnownSince,
 						},
 						Pkg: v.Pkg,
 					}

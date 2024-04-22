@@ -208,6 +208,14 @@ func TestPurlConvert(t *testing.T) {
 			expected: pkg("oci", "registry.redhat.io/ubi9", "ubi9-container", "sha256:8614ce95268b970880a1eca97dddfce5154fab35418d839c5f75012cccaca0d9", "", map[string]string{
 				"tag": "9.2-489",
 			}),
+		}, {
+			purlUri: "pkg:yocto/dmidecode@2.12-r0?arch=core2-32",
+			expected: pkg("yocto", "", "dmidecode", "2.12-r0", "", map[string]string{
+				"arch": "core2-32",
+			}),
+		}, {
+			purlUri:  "pkg:cpan/Pod-Perldoc@3.20",
+			expected: pkg("cpan", "", "Pod-Perldoc", "3.20", "", map[string]string{}),
 		},
 	}
 
