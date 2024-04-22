@@ -221,10 +221,32 @@ type ComplexityRoot struct {
 		URI                  func(childComplexity int) int
 	}
 
+	HasSBOMConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	HasSBOMEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	HasSLSA struct {
 		ID      func(childComplexity int) int
 		Slsa    func(childComplexity int) int
 		Subject func(childComplexity int) int
+	}
+
+	HasSLSAConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	HasSLSAEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	HasSourceAt struct {
@@ -429,6 +451,8 @@ type ComplexityRoot struct {
 		CertifyVulnList         func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) int
 		FindSoftware            func(childComplexity int, searchText string) int
 		HasMetadata             func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
+		HasSBOMList             func(childComplexity int, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) int
+		HasSLSAList             func(childComplexity int, hasSLSASpec model.HasSLSASpec, after *string, first *int) int
 		HasSbom                 func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
 		HasSlsa                 func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
 		HasSourceAt             func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec) int
@@ -1332,6 +1356,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HasSBOM.URI(childComplexity), true
 
+	case "HasSBOMConnection.edges":
+		if e.complexity.HasSBOMConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.HasSBOMConnection.Edges(childComplexity), true
+
+	case "HasSBOMConnection.pageInfo":
+		if e.complexity.HasSBOMConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.HasSBOMConnection.PageInfo(childComplexity), true
+
+	case "HasSBOMConnection.totalCount":
+		if e.complexity.HasSBOMConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.HasSBOMConnection.TotalCount(childComplexity), true
+
+	case "HasSBOMEdge.cursor":
+		if e.complexity.HasSBOMEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.HasSBOMEdge.Cursor(childComplexity), true
+
+	case "HasSBOMEdge.node":
+		if e.complexity.HasSBOMEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.HasSBOMEdge.Node(childComplexity), true
+
 	case "HasSLSA.id":
 		if e.complexity.HasSLSA.ID == nil {
 			break
@@ -1352,6 +1411,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSLSA.Subject(childComplexity), true
+
+	case "HasSLSAConnection.edges":
+		if e.complexity.HasSLSAConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.HasSLSAConnection.Edges(childComplexity), true
+
+	case "HasSLSAConnection.pageInfo":
+		if e.complexity.HasSLSAConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.HasSLSAConnection.PageInfo(childComplexity), true
+
+	case "HasSLSAConnection.totalCount":
+		if e.complexity.HasSLSAConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.HasSLSAConnection.TotalCount(childComplexity), true
+
+	case "HasSLSAEdge.cursor":
+		if e.complexity.HasSLSAEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.HasSLSAEdge.Cursor(childComplexity), true
+
+	case "HasSLSAEdge.node":
+		if e.complexity.HasSLSAEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.HasSLSAEdge.Node(childComplexity), true
 
 	case "HasSourceAt.collector":
 		if e.complexity.HasSourceAt.Collector == nil {
@@ -2670,6 +2764,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.HasMetadata(childComplexity, args["hasMetadataSpec"].(model.HasMetadataSpec)), true
+
+	case "Query.HasSBOMList":
+		if e.complexity.Query.HasSBOMList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HasSBOMList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HasSBOMList(childComplexity, args["hasSBOMSpec"].(model.HasSBOMSpec), args["after"].(*string), args["first"].(*int)), true
+
+	case "Query.HasSLSAList":
+		if e.complexity.Query.HasSLSAList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HasSLSAList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HasSLSAList(childComplexity, args["hasSLSASpec"].(model.HasSLSASpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.HasSBOM":
 		if e.complexity.Query.HasSbom == nil {
@@ -4993,9 +5111,38 @@ input HasSBOMInputSpec {
   documentRef: String!
 }
 
+"""
+HasSBOMConnection returns the paginated results for HasSBOM.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasSBOMEdge which contains the current cursor
+and the HasSBOM node itself
+"""
+type HasSBOMConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasSBOMEdge!]!
+}
+
+"""
+HasSBOMEdge contains the cursor for the resulting node and
+the HasSBOMEdge node itself.
+"""
+type HasSBOMEdge {
+  cursor: ID!
+  node: HasSBOM!
+}
+
 extend type Query {
   "Returns all SBOM certifications."
   HasSBOM(hasSBOMSpec: HasSBOMSpec!): [HasSBOM!]!
+  "Returns a paginated results via HasSBOMConnection"
+  HasSBOMList(hasSBOMSpec: HasSBOMSpec!, after: ID, first: Int): HasSBOMConnection
 }
 
 extend type Mutation {
@@ -5146,9 +5293,38 @@ input SLSAPredicateInputSpec {
   value: String!
 }
 
+"""
+HasSLSAConnection returns the paginated results for HasSLSA.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasSLSAEdge which contains the current cursor
+and the HasSLSA node itself
+"""
+type HasSLSAConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasSLSAEdge!]!
+}
+
+"""
+HasSLSAEdge contains the cursor for the resulting node and
+the HasSLSA node itself.
+"""
+type HasSLSAEdge {
+  cursor: ID!
+  node: HasSLSA!
+}
+
 extend type Query {
   "Returns all SLSA attestations matching the filter."
   HasSLSA(hasSLSASpec: HasSLSASpec!): [HasSLSA!]!
+  "Returns a paginated results via HasSLSAConnection"
+  HasSLSAList(hasSLSASpec: HasSLSASpec!, after: ID, first: Int): HasSLSAConnection
 }
 
 extend type Mutation {

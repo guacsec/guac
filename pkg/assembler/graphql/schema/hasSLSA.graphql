@@ -131,9 +131,38 @@ input SLSAPredicateInputSpec {
   value: String!
 }
 
+"""
+HasSLSAConnection returns the paginated results for HasSLSA.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasSLSAEdge which contains the current cursor
+and the HasSLSA node itself
+"""
+type HasSLSAConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasSLSAEdge!]!
+}
+
+"""
+HasSLSAEdge contains the cursor for the resulting node and
+the HasSLSA node itself.
+"""
+type HasSLSAEdge {
+  cursor: ID!
+  node: HasSLSA!
+}
+
 extend type Query {
   "Returns all SLSA attestations matching the filter."
   HasSLSA(hasSLSASpec: HasSLSASpec!): [HasSLSA!]!
+  "Returns a paginated results via HasSLSAConnection"
+  HasSLSAList(hasSLSASpec: HasSLSASpec!, after: ID, first: Int): HasSLSAConnection
 }
 
 extend type Mutation {

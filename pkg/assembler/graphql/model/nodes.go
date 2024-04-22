@@ -660,6 +660,29 @@ type HasSbom struct {
 
 func (HasSbom) IsNode() {}
 
+// HasSBOMConnection returns the paginated results for HasSBOM.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSBOMEdge which contains the current cursor
+// and the HasSBOM node itself
+type HasSBOMConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*HasSBOMEdge `json:"edges"`
+}
+
+// HasSBOMEdge contains the cursor for the resulting node and
+// the HasSBOMEdge node itself.
+type HasSBOMEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *HasSbom `json:"node"`
+}
+
 type HasSBOMIncludesInputSpec struct {
 	Packages     []string `json:"packages"`
 	Artifacts    []string `json:"artifacts"`
@@ -711,6 +734,29 @@ type HasSlsa struct {
 }
 
 func (HasSlsa) IsNode() {}
+
+// HasSLSAConnection returns the paginated results for HasSLSA.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSLSAEdge which contains the current cursor
+// and the HasSLSA node itself
+type HasSLSAConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*HasSLSAEdge `json:"edges"`
+}
+
+// HasSLSAEdge contains the cursor for the resulting node and
+// the HasSLSA node itself.
+type HasSLSAEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *HasSlsa `json:"node"`
+}
 
 // HasSLSASpec allows filtering the list of HasSLSA to return.
 type HasSLSASpec struct {
