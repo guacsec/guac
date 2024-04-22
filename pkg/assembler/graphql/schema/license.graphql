@@ -83,9 +83,38 @@ input IDorLicenseInput {
   licenseInput: LicenseInputSpec
 }
 
+"""
+LicenseConnection returns the paginated results for License.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the LicenseEdge which contains the current cursor
+and the License node itself
+"""
+type LicenseConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [LicenseEdge!]!
+}
+
+"""
+LicenseEdge contains the cursor for the resulting node and
+the License node itself.
+"""
+type LicenseEdge {
+  cursor: ID!
+  node: License!
+}
+
 extend type Query {
   "Returns all licenses matching a filter."
   licenses(licenseSpec: LicenseSpec!): [License!]!
+  "Returns a paginated results via LicenseConnection"
+  licenseList(licenseSpec: LicenseSpec!, after: ID, first: Int): LicenseConnection
 }
 
 extend type Mutation {

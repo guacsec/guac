@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
@@ -35,4 +36,9 @@ func (r *mutationResolver) IngestLicenses(ctx context.Context, licenses []*model
 // Licenses is the resolver for the licenses field.
 func (r *queryResolver) Licenses(ctx context.Context, licenseSpec model.LicenseSpec) ([]*model.License, error) {
 	return r.Backend.Licenses(ctx, &licenseSpec)
+}
+
+// LicenseList is the resolver for the licenseList field.
+func (r *queryResolver) LicenseList(ctx context.Context, licenseSpec model.LicenseSpec, after *string, first *int) (*model.LicenseConnection, error) {
+	panic(fmt.Errorf("not implemented: LicenseList - licenseList"))
 }

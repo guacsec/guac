@@ -260,6 +260,17 @@ type ComplexityRoot struct {
 		Source        func(childComplexity int) int
 	}
 
+	HasSourceAtConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	HasSourceAtEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	HashEqual struct {
 		Artifacts     func(childComplexity int) int
 		Collector     func(childComplexity int) int
@@ -292,6 +303,17 @@ type ComplexityRoot struct {
 		VersionRange      func(childComplexity int) int
 	}
 
+	IsDependencyConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	IsDependencyEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	IsOccurrence struct {
 		Artifact      func(childComplexity int) int
 		Collector     func(childComplexity int) int
@@ -302,11 +324,33 @@ type ComplexityRoot struct {
 		Subject       func(childComplexity int) int
 	}
 
+	IsOccurrenceConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	IsOccurrenceEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	License struct {
 		ID          func(childComplexity int) int
 		Inline      func(childComplexity int) int
 		ListVersion func(childComplexity int) int
 		Name        func(childComplexity int) int
+	}
+
+	LicenseConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	LicenseEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -456,10 +500,14 @@ type ComplexityRoot struct {
 		HasSbom                 func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
 		HasSlsa                 func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
 		HasSourceAt             func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec) int
+		HasSourceAtList         func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) int
 		HashEqual               func(childComplexity int, hashEqualSpec model.HashEqualSpec) int
 		HashEqualList           func(childComplexity int, hashEqualSpec model.HashEqualSpec, after *string, first *int) int
 		IsDependency            func(childComplexity int, isDependencySpec model.IsDependencySpec) int
+		IsDependencyList        func(childComplexity int, isDependencySpec model.IsDependencySpec, after *string, first *int) int
 		IsOccurrence            func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
+		IsOccurrenceList        func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) int
+		LicenseList             func(childComplexity int, licenseSpec model.LicenseSpec, after *string, first *int) int
 		Licenses                func(childComplexity int, licenseSpec model.LicenseSpec) int
 		Neighbors               func(childComplexity int, node string, usingOnly []model.Edge) int
 		Node                    func(childComplexity int, node string) int
@@ -1503,6 +1551,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HasSourceAt.Source(childComplexity), true
 
+	case "HasSourceAtConnection.edges":
+		if e.complexity.HasSourceAtConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAtConnection.Edges(childComplexity), true
+
+	case "HasSourceAtConnection.pageInfo":
+		if e.complexity.HasSourceAtConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAtConnection.PageInfo(childComplexity), true
+
+	case "HasSourceAtConnection.totalCount":
+		if e.complexity.HasSourceAtConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAtConnection.TotalCount(childComplexity), true
+
+	case "HasSourceAtEdge.cursor":
+		if e.complexity.HasSourceAtEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAtEdge.Cursor(childComplexity), true
+
+	case "HasSourceAtEdge.node":
+		if e.complexity.HasSourceAtEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.HasSourceAtEdge.Node(childComplexity), true
+
 	case "HashEqual.artifacts":
 		if e.complexity.HashEqual.Artifacts == nil {
 			break
@@ -1643,6 +1726,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsDependency.VersionRange(childComplexity), true
 
+	case "IsDependencyConnection.edges":
+		if e.complexity.IsDependencyConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.IsDependencyConnection.Edges(childComplexity), true
+
+	case "IsDependencyConnection.pageInfo":
+		if e.complexity.IsDependencyConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.IsDependencyConnection.PageInfo(childComplexity), true
+
+	case "IsDependencyConnection.totalCount":
+		if e.complexity.IsDependencyConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.IsDependencyConnection.TotalCount(childComplexity), true
+
+	case "IsDependencyEdge.cursor":
+		if e.complexity.IsDependencyEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.IsDependencyEdge.Cursor(childComplexity), true
+
+	case "IsDependencyEdge.node":
+		if e.complexity.IsDependencyEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.IsDependencyEdge.Node(childComplexity), true
+
 	case "IsOccurrence.artifact":
 		if e.complexity.IsOccurrence.Artifact == nil {
 			break
@@ -1692,6 +1810,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IsOccurrence.Subject(childComplexity), true
 
+	case "IsOccurrenceConnection.edges":
+		if e.complexity.IsOccurrenceConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrenceConnection.Edges(childComplexity), true
+
+	case "IsOccurrenceConnection.pageInfo":
+		if e.complexity.IsOccurrenceConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrenceConnection.PageInfo(childComplexity), true
+
+	case "IsOccurrenceConnection.totalCount":
+		if e.complexity.IsOccurrenceConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrenceConnection.TotalCount(childComplexity), true
+
+	case "IsOccurrenceEdge.cursor":
+		if e.complexity.IsOccurrenceEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrenceEdge.Cursor(childComplexity), true
+
+	case "IsOccurrenceEdge.node":
+		if e.complexity.IsOccurrenceEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.IsOccurrenceEdge.Node(childComplexity), true
+
 	case "License.id":
 		if e.complexity.License.ID == nil {
 			break
@@ -1719,6 +1872,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.License.Name(childComplexity), true
+
+	case "LicenseConnection.edges":
+		if e.complexity.LicenseConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.LicenseConnection.Edges(childComplexity), true
+
+	case "LicenseConnection.pageInfo":
+		if e.complexity.LicenseConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.LicenseConnection.PageInfo(childComplexity), true
+
+	case "LicenseConnection.totalCount":
+		if e.complexity.LicenseConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.LicenseConnection.TotalCount(childComplexity), true
+
+	case "LicenseEdge.cursor":
+		if e.complexity.LicenseEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.LicenseEdge.Cursor(childComplexity), true
+
+	case "LicenseEdge.node":
+		if e.complexity.LicenseEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.LicenseEdge.Node(childComplexity), true
 
 	case "Mutation.ingestArtifact":
 		if e.complexity.Mutation.IngestArtifact == nil {
@@ -2825,6 +3013,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.HasSourceAt(childComplexity, args["hasSourceAtSpec"].(model.HasSourceAtSpec)), true
 
+	case "Query.HasSourceAtList":
+		if e.complexity.Query.HasSourceAtList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HasSourceAtList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HasSourceAtList(childComplexity, args["hasSourceAtSpec"].(model.HasSourceAtSpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.HashEqual":
 		if e.complexity.Query.HashEqual == nil {
 			break
@@ -2861,6 +3061,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.IsDependency(childComplexity, args["isDependencySpec"].(model.IsDependencySpec)), true
 
+	case "Query.IsDependencyList":
+		if e.complexity.Query.IsDependencyList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_IsDependencyList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IsDependencyList(childComplexity, args["isDependencySpec"].(model.IsDependencySpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.IsOccurrence":
 		if e.complexity.Query.IsOccurrence == nil {
 			break
@@ -2872,6 +3084,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.IsOccurrence(childComplexity, args["isOccurrenceSpec"].(model.IsOccurrenceSpec)), true
+
+	case "Query.IsOccurrenceList":
+		if e.complexity.Query.IsOccurrenceList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_IsOccurrenceList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IsOccurrenceList(childComplexity, args["isOccurrenceSpec"].(model.IsOccurrenceSpec), args["after"].(*string), args["first"].(*int)), true
+
+	case "Query.licenseList":
+		if e.complexity.Query.LicenseList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_licenseList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.LicenseList(childComplexity, args["licenseSpec"].(model.LicenseSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.licenses":
 		if e.complexity.Query.Licenses == nil {
@@ -5403,9 +5639,38 @@ input HasSourceAtInputSpec {
   documentRef: String!
 }
 
+"""
+HasSourceAtConnection returns the paginated results for HasSourceAt.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasSourceAtEdge which contains the current cursor
+and the HasSourceAt node itself
+"""
+type HasSourceAtConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasSourceAtEdge!]!
+}
+
+"""
+HasSourceAtEdge contains the cursor for the resulting node and
+the HasSourceAt node itself.
+"""
+type HasSourceAtEdge {
+  cursor: ID!
+  node: HasSourceAt!
+}
+
 extend type Query {
   "Returns all source mappings that match the filter."
   HasSourceAt(hasSourceAtSpec: HasSourceAtSpec!): [HasSourceAt!]!
+  "Returns a paginated results via HasSourceAtConnection"
+  HasSourceAtList(hasSourceAtSpec: HasSourceAtSpec!, after: ID, first: Int): HasSourceAtConnection
 }
 
 extend type Mutation {
@@ -5613,9 +5878,38 @@ input IsDependencyInputSpec {
   documentRef: String!
 }
 
+"""
+IsDependencyConnection returns the paginated results for IsDependency.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the IsDependencyEdge which contains the current cursor
+and the IsDependency node itself
+"""
+type IsDependencyConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [IsDependencyEdge!]!
+}
+
+"""
+IsDependencyEdge contains the cursor for the resulting node and
+the IsDependency node itself.
+"""
+type IsDependencyEdge {
+  cursor: ID!
+  node: IsDependency!
+}
+
 extend type Query {
   "Returns all package dependencies that match the filter."
   IsDependency(isDependencySpec: IsDependencySpec!): [IsDependency!]!
+  "Returns a paginated results via IsDependencyConnection"
+  IsDependencyList(isDependencySpec: IsDependencySpec!, after: ID, first: Int): IsDependencyConnection
 }
 
 extend type Mutation {
@@ -5729,9 +6023,38 @@ input IsOccurrenceInputSpec {
   documentRef: String!
 }
 
+"""
+IsOccurrenceConnection returns the paginated results for IsOccurrence.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the IsOccurrenceEdge which contains the current cursor
+and the IsOccurrence node itself
+"""
+type IsOccurrenceConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [IsOccurrenceEdge!]!
+}
+
+"""
+IsOccurrenceEdge contains the cursor for the resulting node and
+the IsOccurrence node itself.
+"""
+type IsOccurrenceEdge {
+  cursor: ID!
+  node: IsOccurrence!
+}
+
 extend type Query {
   "Returns all artifacts-source/package mappings that match a filter."
   IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec!): [IsOccurrence!]!
+  "Returns a paginated results via IsOccurrenceConnection"
+  IsOccurrenceList(isOccurrenceSpec: IsOccurrenceSpec!, after: ID, first: Int): IsOccurrenceConnection
 }
 
 extend type Mutation {
@@ -5834,9 +6157,38 @@ input IDorLicenseInput {
   licenseInput: LicenseInputSpec
 }
 
+"""
+LicenseConnection returns the paginated results for License.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the LicenseEdge which contains the current cursor
+and the License node itself
+"""
+type LicenseConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [LicenseEdge!]!
+}
+
+"""
+LicenseEdge contains the cursor for the resulting node and
+the License node itself.
+"""
+type LicenseEdge {
+  cursor: ID!
+  node: License!
+}
+
 extend type Query {
   "Returns all licenses matching a filter."
   licenses(licenseSpec: LicenseSpec!): [License!]!
+  "Returns a paginated results via LicenseConnection"
+  licenseList(licenseSpec: LicenseSpec!, after: ID, first: Int): LicenseConnection
 }
 
 extend type Mutation {

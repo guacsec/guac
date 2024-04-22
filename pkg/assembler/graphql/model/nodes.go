@@ -795,6 +795,29 @@ type HasSourceAt struct {
 
 func (HasSourceAt) IsNode() {}
 
+// HasSourceAtConnection returns the paginated results for HasSourceAt.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSourceAtEdge which contains the current cursor
+// and the HasSourceAt node itself
+type HasSourceAtConnection struct {
+	TotalCount int                `json:"totalCount"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	Edges      []*HasSourceAtEdge `json:"edges"`
+}
+
+// HasSourceAtEdge contains the cursor for the resulting node and
+// the HasSourceAt node itself.
+type HasSourceAtEdge struct {
+	Cursor string       `json:"cursor"`
+	Node   *HasSourceAt `json:"node"`
+}
+
 // HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
 type HasSourceAtInputSpec struct {
 	KnownSince    time.Time `json:"knownSince"`
@@ -967,6 +990,29 @@ type IsDependency struct {
 
 func (IsDependency) IsNode() {}
 
+// IsDependencyConnection returns the paginated results for IsDependency.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the IsDependencyEdge which contains the current cursor
+// and the IsDependency node itself
+type IsDependencyConnection struct {
+	TotalCount int                 `json:"totalCount"`
+	PageInfo   *PageInfo           `json:"pageInfo"`
+	Edges      []*IsDependencyEdge `json:"edges"`
+}
+
+// IsDependencyEdge contains the cursor for the resulting node and
+// the IsDependency node itself.
+type IsDependencyEdge struct {
+	Cursor string        `json:"cursor"`
+	Node   *IsDependency `json:"node"`
+}
+
 // IsDependencyInputSpec is the input to record a new dependency.
 type IsDependencyInputSpec struct {
 	// versionRange should be specified for depedentPackages that point to PackageName
@@ -1016,6 +1062,29 @@ type IsOccurrence struct {
 }
 
 func (IsOccurrence) IsNode() {}
+
+// IsOccurrenceConnection returns the paginated results for IsOccurrence.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the IsOccurrenceEdge which contains the current cursor
+// and the IsOccurrence node itself
+type IsOccurrenceConnection struct {
+	TotalCount int                 `json:"totalCount"`
+	PageInfo   *PageInfo           `json:"pageInfo"`
+	Edges      []*IsOccurrenceEdge `json:"edges"`
+}
+
+// IsOccurrenceEdge contains the cursor for the resulting node and
+// the IsOccurrence node itself.
+type IsOccurrenceEdge struct {
+	Cursor string        `json:"cursor"`
+	Node   *IsOccurrence `json:"node"`
+}
 
 // IsOccurrenceInputSpec represents the input to record an artifact's origin.
 type IsOccurrenceInputSpec struct {
@@ -1070,6 +1139,29 @@ type License struct {
 }
 
 func (License) IsNode() {}
+
+// LicenseConnection returns the paginated results for License.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the LicenseEdge which contains the current cursor
+// and the License node itself
+type LicenseConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*LicenseEdge `json:"edges"`
+}
+
+// LicenseEdge contains the cursor for the resulting node and
+// the License node itself.
+type LicenseEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *License `json:"node"`
+}
 
 // LicenseInputSpec specifies an license for mutations. One of inline or
 // listVersion should be empty or missing.

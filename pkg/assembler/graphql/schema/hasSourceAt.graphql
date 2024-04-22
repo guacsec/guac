@@ -57,9 +57,38 @@ input HasSourceAtInputSpec {
   documentRef: String!
 }
 
+"""
+HasSourceAtConnection returns the paginated results for HasSourceAt.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasSourceAtEdge which contains the current cursor
+and the HasSourceAt node itself
+"""
+type HasSourceAtConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasSourceAtEdge!]!
+}
+
+"""
+HasSourceAtEdge contains the cursor for the resulting node and
+the HasSourceAt node itself.
+"""
+type HasSourceAtEdge {
+  cursor: ID!
+  node: HasSourceAt!
+}
+
 extend type Query {
   "Returns all source mappings that match the filter."
   HasSourceAt(hasSourceAtSpec: HasSourceAtSpec!): [HasSourceAt!]!
+  "Returns a paginated results via HasSourceAtConnection"
+  HasSourceAtList(hasSourceAtSpec: HasSourceAtSpec!, after: ID, first: Int): HasSourceAtConnection
 }
 
 extend type Mutation {

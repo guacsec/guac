@@ -92,9 +92,38 @@ input IsOccurrenceInputSpec {
   documentRef: String!
 }
 
+"""
+IsOccurrenceConnection returns the paginated results for IsOccurrence.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the IsOccurrenceEdge which contains the current cursor
+and the IsOccurrence node itself
+"""
+type IsOccurrenceConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [IsOccurrenceEdge!]!
+}
+
+"""
+IsOccurrenceEdge contains the cursor for the resulting node and
+the IsOccurrence node itself.
+"""
+type IsOccurrenceEdge {
+  cursor: ID!
+  node: IsOccurrence!
+}
+
 extend type Query {
   "Returns all artifacts-source/package mappings that match a filter."
   IsOccurrence(isOccurrenceSpec: IsOccurrenceSpec!): [IsOccurrence!]!
+  "Returns a paginated results via IsOccurrenceConnection"
+  IsOccurrenceList(isOccurrenceSpec: IsOccurrenceSpec!, after: ID, first: Int): IsOccurrenceConnection
 }
 
 extend type Mutation {

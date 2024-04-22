@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -48,4 +49,9 @@ func (r *queryResolver) IsDependency(ctx context.Context, isDependencySpec model
 	}
 
 	return r.Backend.IsDependency(ctx, &isDependencySpec)
+}
+
+// IsDependencyList is the resolver for the IsDependencyList field.
+func (r *queryResolver) IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error) {
+	panic(fmt.Errorf("not implemented: IsDependencyList - IsDependencyList"))
 }
