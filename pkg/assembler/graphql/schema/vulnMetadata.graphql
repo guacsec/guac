@@ -112,9 +112,38 @@ input VulnerabilityMetadataInputSpec {
   documentRef: String!
 }
 
+"""
+VulnerabilityMetadataConnection returns the paginated results for VulnerabilityMetadata.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the VulnerabilityMetadataEdge which contains the current cursor
+and the VulnerabilityMetadata node itself
+"""
+type VulnerabilityMetadataConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [VulnerabilityMetadataEdge!]!
+}
+
+"""
+VulnerabilityMetadataEdge contains the cursor for the resulting node and
+the VulnerabilityMetadata node itself.
+"""
+type VulnerabilityMetadataEdge {
+  cursor: ID!
+  node: VulnerabilityMetadata!
+}
+
 extend type Query {
   "Returns all vulnerabilityMetadata attestations matching a filter."
   vulnerabilityMetadata(vulnerabilityMetadataSpec: VulnerabilityMetadataSpec!): [VulnerabilityMetadata!]!
+  "Returns a paginated results via VulnerabilityMetadataConnection"
+  vulnerabilityMetadataList(vulnerabilityMetadataSpec: VulnerabilityMetadataSpec!, after: ID, first: Int): VulnerabilityMetadataConnection
 }
 
 extend type Mutation {

@@ -56,9 +56,38 @@ input PkgEqualInputSpec {
   documentRef: String!
 }
 
+"""
+PkgEqualConnection returns the paginated results for PkgEqual.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the PkgEqualEdge which contains the current cursor
+and the PkgEqual node itself
+"""
+type PkgEqualConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [PkgEqualEdge!]!
+}
+
+"""
+PkgEqualEdge contains the cursor for the resulting node and
+the PkgEqual node itself.
+"""
+type PkgEqualEdge {
+  cursor: ID!
+  node: PkgEqual!
+}
+
 extend type Query {
   "Returns all package equality statements matching a filter."
   PkgEqual(pkgEqualSpec: PkgEqualSpec!): [PkgEqual!]!
+  "Returns a paginated results via PkgEqualConnection"
+  PkgEqualList(pkgEqualSpec: PkgEqualSpec!, after: ID, first: Int): PkgEqualConnection
 }
 
 extend type Mutation {

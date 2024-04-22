@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -164,4 +165,9 @@ func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnE
 	} else {
 		return r.Backend.VulnEqual(ctx, &vulnEqualSpec)
 	}
+}
+
+// VulnEqualList is the resolver for the vulnEqualList field.
+func (r *queryResolver) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
+	panic(fmt.Errorf("not implemented: VulnEqualList - vulnEqualList"))
 }

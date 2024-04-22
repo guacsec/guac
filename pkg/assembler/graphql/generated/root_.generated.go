@@ -205,6 +205,17 @@ type ComplexityRoot struct {
 		Value         func(childComplexity int) int
 	}
 
+	HasMetadataConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	HasMetadataEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	HasSBOM struct {
 		Algorithm            func(childComplexity int) int
 		Collector            func(childComplexity int) int
@@ -408,6 +419,17 @@ type ComplexityRoot struct {
 		Type       func(childComplexity int) int
 	}
 
+	PackageConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	PackageEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	PackageIDs struct {
 		PackageNameID      func(childComplexity int) int
 		PackageNamespaceID func(childComplexity int) int
@@ -455,6 +477,17 @@ type ComplexityRoot struct {
 		Packages      func(childComplexity int) int
 	}
 
+	PkgEqualConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	PkgEqualEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	PointOfContact struct {
 		Collector     func(childComplexity int) int
 		DocumentRef   func(childComplexity int) int
@@ -479,50 +512,57 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Artifacts               func(childComplexity int, artifactSpec model.ArtifactSpec) int
-		ArtifactsList           func(childComplexity int, artifactSpec model.ArtifactSpec, after *string, first *int) int
-		Builders                func(childComplexity int, builderSpec model.BuilderSpec) int
-		BuildersList            func(childComplexity int, builderSpec model.BuilderSpec, after *string, first *int) int
-		CertifyBad              func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
-		CertifyBadList          func(childComplexity int, certifyBadSpec model.CertifyBadSpec, after *string, first *int) int
-		CertifyGood             func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
-		CertifyGoodList         func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) int
-		CertifyLegal            func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec) int
-		CertifyLegalList        func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) int
-		CertifyVEXStatement     func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec) int
-		CertifyVEXStatementList func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) int
-		CertifyVuln             func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
-		CertifyVulnList         func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) int
-		FindSoftware            func(childComplexity int, searchText string) int
-		HasMetadata             func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
-		HasSBOMList             func(childComplexity int, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) int
-		HasSLSAList             func(childComplexity int, hasSLSASpec model.HasSLSASpec, after *string, first *int) int
-		HasSbom                 func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
-		HasSlsa                 func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
-		HasSourceAt             func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec) int
-		HasSourceAtList         func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) int
-		HashEqual               func(childComplexity int, hashEqualSpec model.HashEqualSpec) int
-		HashEqualList           func(childComplexity int, hashEqualSpec model.HashEqualSpec, after *string, first *int) int
-		IsDependency            func(childComplexity int, isDependencySpec model.IsDependencySpec) int
-		IsDependencyList        func(childComplexity int, isDependencySpec model.IsDependencySpec, after *string, first *int) int
-		IsOccurrence            func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
-		IsOccurrenceList        func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) int
-		LicenseList             func(childComplexity int, licenseSpec model.LicenseSpec, after *string, first *int) int
-		Licenses                func(childComplexity int, licenseSpec model.LicenseSpec) int
-		Neighbors               func(childComplexity int, node string, usingOnly []model.Edge) int
-		Node                    func(childComplexity int, node string) int
-		Nodes                   func(childComplexity int, nodes []string) int
-		Packages                func(childComplexity int, pkgSpec model.PkgSpec) int
-		Path                    func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
-		PkgEqual                func(childComplexity int, pkgEqualSpec model.PkgEqualSpec) int
-		PointOfContact          func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
-		PointOfContactList      func(childComplexity int, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) int
-		Scorecards              func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
-		ScorecardsList          func(childComplexity int, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) int
-		Sources                 func(childComplexity int, sourceSpec model.SourceSpec) int
-		VulnEqual               func(childComplexity int, vulnEqualSpec model.VulnEqualSpec) int
-		Vulnerabilities         func(childComplexity int, vulnSpec model.VulnerabilitySpec) int
-		VulnerabilityMetadata   func(childComplexity int, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec) int
+		Artifacts                 func(childComplexity int, artifactSpec model.ArtifactSpec) int
+		ArtifactsList             func(childComplexity int, artifactSpec model.ArtifactSpec, after *string, first *int) int
+		Builders                  func(childComplexity int, builderSpec model.BuilderSpec) int
+		BuildersList              func(childComplexity int, builderSpec model.BuilderSpec, after *string, first *int) int
+		CertifyBad                func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
+		CertifyBadList            func(childComplexity int, certifyBadSpec model.CertifyBadSpec, after *string, first *int) int
+		CertifyGood               func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
+		CertifyGoodList           func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) int
+		CertifyLegal              func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec) int
+		CertifyLegalList          func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) int
+		CertifyVEXStatement       func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec) int
+		CertifyVEXStatementList   func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) int
+		CertifyVuln               func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
+		CertifyVulnList           func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) int
+		FindSoftware              func(childComplexity int, searchText string) int
+		HasMetadata               func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
+		HasMetadataList           func(childComplexity int, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) int
+		HasSBOMList               func(childComplexity int, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) int
+		HasSLSAList               func(childComplexity int, hasSLSASpec model.HasSLSASpec, after *string, first *int) int
+		HasSbom                   func(childComplexity int, hasSBOMSpec model.HasSBOMSpec) int
+		HasSlsa                   func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
+		HasSourceAt               func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec) int
+		HasSourceAtList           func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) int
+		HashEqual                 func(childComplexity int, hashEqualSpec model.HashEqualSpec) int
+		HashEqualList             func(childComplexity int, hashEqualSpec model.HashEqualSpec, after *string, first *int) int
+		IsDependency              func(childComplexity int, isDependencySpec model.IsDependencySpec) int
+		IsDependencyList          func(childComplexity int, isDependencySpec model.IsDependencySpec, after *string, first *int) int
+		IsOccurrence              func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
+		IsOccurrenceList          func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) int
+		LicenseList               func(childComplexity int, licenseSpec model.LicenseSpec, after *string, first *int) int
+		Licenses                  func(childComplexity int, licenseSpec model.LicenseSpec) int
+		Neighbors                 func(childComplexity int, node string, usingOnly []model.Edge) int
+		Node                      func(childComplexity int, node string) int
+		Nodes                     func(childComplexity int, nodes []string) int
+		Packages                  func(childComplexity int, pkgSpec model.PkgSpec) int
+		PackagesList              func(childComplexity int, pkgSpec model.PkgSpec, after *string, first *int) int
+		Path                      func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
+		PkgEqual                  func(childComplexity int, pkgEqualSpec model.PkgEqualSpec) int
+		PkgEqualList              func(childComplexity int, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) int
+		PointOfContact            func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
+		PointOfContactList        func(childComplexity int, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) int
+		Scorecards                func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
+		ScorecardsList            func(childComplexity int, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) int
+		Sources                   func(childComplexity int, sourceSpec model.SourceSpec) int
+		SourcesList               func(childComplexity int, sourceSpec model.SourceSpec, after *string, first *int) int
+		VulnEqual                 func(childComplexity int, vulnEqualSpec model.VulnEqualSpec) int
+		VulnEqualList             func(childComplexity int, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) int
+		Vulnerabilities           func(childComplexity int, vulnSpec model.VulnerabilitySpec) int
+		VulnerabilityList         func(childComplexity int, vulnSpec model.VulnerabilitySpec, after *string, first *int) int
+		VulnerabilityMetadata     func(childComplexity int, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec) int
+		VulnerabilityMetadataList func(childComplexity int, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) int
 	}
 
 	SLSA struct {
@@ -576,6 +616,17 @@ type ComplexityRoot struct {
 		Type       func(childComplexity int) int
 	}
 
+	SourceConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	SourceEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	SourceIDs struct {
 		SourceNameID      func(childComplexity int) int
 		SourceNamespaceID func(childComplexity int) int
@@ -615,10 +666,32 @@ type ComplexityRoot struct {
 		Vulnerabilities func(childComplexity int) int
 	}
 
+	VulnEqualConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	VulnEqualEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	Vulnerability struct {
 		ID               func(childComplexity int) int
 		Type             func(childComplexity int) int
 		VulnerabilityIDs func(childComplexity int) int
+	}
+
+	VulnerabilityConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	VulnerabilityEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	VulnerabilityID struct {
@@ -640,6 +713,17 @@ type ComplexityRoot struct {
 		ScoreValue    func(childComplexity int) int
 		Timestamp     func(childComplexity int) int
 		Vulnerability func(childComplexity int) int
+	}
+
+	VulnerabilityMetadataConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	VulnerabilityMetadataEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 }
 
@@ -1312,6 +1396,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasMetadata.Value(childComplexity), true
+
+	case "HasMetadataConnection.edges":
+		if e.complexity.HasMetadataConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.HasMetadataConnection.Edges(childComplexity), true
+
+	case "HasMetadataConnection.pageInfo":
+		if e.complexity.HasMetadataConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.HasMetadataConnection.PageInfo(childComplexity), true
+
+	case "HasMetadataConnection.totalCount":
+		if e.complexity.HasMetadataConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.HasMetadataConnection.TotalCount(childComplexity), true
+
+	case "HasMetadataEdge.cursor":
+		if e.complexity.HasMetadataEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.HasMetadataEdge.Cursor(childComplexity), true
+
+	case "HasMetadataEdge.node":
+		if e.complexity.HasMetadataEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.HasMetadataEdge.Node(childComplexity), true
 
 	case "HasSBOM.algorithm":
 		if e.complexity.HasSBOM.Algorithm == nil {
@@ -2481,6 +2600,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Package.Type(childComplexity), true
 
+	case "PackageConnection.edges":
+		if e.complexity.PackageConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.PackageConnection.Edges(childComplexity), true
+
+	case "PackageConnection.pageInfo":
+		if e.complexity.PackageConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.PackageConnection.PageInfo(childComplexity), true
+
+	case "PackageConnection.totalCount":
+		if e.complexity.PackageConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.PackageConnection.TotalCount(childComplexity), true
+
+	case "PackageEdge.cursor":
+		if e.complexity.PackageEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.PackageEdge.Cursor(childComplexity), true
+
+	case "PackageEdge.node":
+		if e.complexity.PackageEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.PackageEdge.Node(childComplexity), true
+
 	case "PackageIDs.packageNameID":
 		if e.complexity.PackageIDs.PackageNameID == nil {
 			break
@@ -2662,6 +2816,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PkgEqual.Packages(childComplexity), true
+
+	case "PkgEqualConnection.edges":
+		if e.complexity.PkgEqualConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.PkgEqualConnection.Edges(childComplexity), true
+
+	case "PkgEqualConnection.pageInfo":
+		if e.complexity.PkgEqualConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.PkgEqualConnection.PageInfo(childComplexity), true
+
+	case "PkgEqualConnection.totalCount":
+		if e.complexity.PkgEqualConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.PkgEqualConnection.TotalCount(childComplexity), true
+
+	case "PkgEqualEdge.cursor":
+		if e.complexity.PkgEqualEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.PkgEqualEdge.Cursor(childComplexity), true
+
+	case "PkgEqualEdge.node":
+		if e.complexity.PkgEqualEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.PkgEqualEdge.Node(childComplexity), true
 
 	case "PointOfContact.collector":
 		if e.complexity.PointOfContact.Collector == nil {
@@ -2953,6 +3142,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.HasMetadata(childComplexity, args["hasMetadataSpec"].(model.HasMetadataSpec)), true
 
+	case "Query.HasMetadataList":
+		if e.complexity.Query.HasMetadataList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HasMetadataList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HasMetadataList(childComplexity, args["hasMetadataSpec"].(model.HasMetadataSpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.HasSBOMList":
 		if e.complexity.Query.HasSBOMList == nil {
 			break
@@ -3169,6 +3370,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Packages(childComplexity, args["pkgSpec"].(model.PkgSpec)), true
 
+	case "Query.packagesList":
+		if e.complexity.Query.PackagesList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_packagesList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PackagesList(childComplexity, args["pkgSpec"].(model.PkgSpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.path":
 		if e.complexity.Query.Path == nil {
 			break
@@ -3192,6 +3405,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.PkgEqual(childComplexity, args["pkgEqualSpec"].(model.PkgEqualSpec)), true
+
+	case "Query.PkgEqualList":
+		if e.complexity.Query.PkgEqualList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_PkgEqualList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PkgEqualList(childComplexity, args["pkgEqualSpec"].(model.PkgEqualSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.PointOfContact":
 		if e.complexity.Query.PointOfContact == nil {
@@ -3253,6 +3478,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Sources(childComplexity, args["sourceSpec"].(model.SourceSpec)), true
 
+	case "Query.sourcesList":
+		if e.complexity.Query.SourcesList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_sourcesList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SourcesList(childComplexity, args["sourceSpec"].(model.SourceSpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.vulnEqual":
 		if e.complexity.Query.VulnEqual == nil {
 			break
@@ -3264,6 +3501,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.VulnEqual(childComplexity, args["vulnEqualSpec"].(model.VulnEqualSpec)), true
+
+	case "Query.vulnEqualList":
+		if e.complexity.Query.VulnEqualList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_vulnEqualList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.VulnEqualList(childComplexity, args["vulnEqualSpec"].(model.VulnEqualSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.vulnerabilities":
 		if e.complexity.Query.Vulnerabilities == nil {
@@ -3277,6 +3526,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Vulnerabilities(childComplexity, args["vulnSpec"].(model.VulnerabilitySpec)), true
 
+	case "Query.vulnerabilityList":
+		if e.complexity.Query.VulnerabilityList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_vulnerabilityList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.VulnerabilityList(childComplexity, args["vulnSpec"].(model.VulnerabilitySpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.vulnerabilityMetadata":
 		if e.complexity.Query.VulnerabilityMetadata == nil {
 			break
@@ -3288,6 +3549,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.VulnerabilityMetadata(childComplexity, args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec)), true
+
+	case "Query.vulnerabilityMetadataList":
+		if e.complexity.Query.VulnerabilityMetadataList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_vulnerabilityMetadataList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.VulnerabilityMetadataList(childComplexity, args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "SLSA.buildType":
 		if e.complexity.SLSA.BuildType == nil {
@@ -3520,6 +3793,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Source.Type(childComplexity), true
 
+	case "SourceConnection.edges":
+		if e.complexity.SourceConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.SourceConnection.Edges(childComplexity), true
+
+	case "SourceConnection.pageInfo":
+		if e.complexity.SourceConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.SourceConnection.PageInfo(childComplexity), true
+
+	case "SourceConnection.totalCount":
+		if e.complexity.SourceConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.SourceConnection.TotalCount(childComplexity), true
+
+	case "SourceEdge.cursor":
+		if e.complexity.SourceEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.SourceEdge.Cursor(childComplexity), true
+
+	case "SourceEdge.node":
+		if e.complexity.SourceEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.SourceEdge.Node(childComplexity), true
+
 	case "SourceIDs.sourceNameID":
 		if e.complexity.SourceIDs.SourceNameID == nil {
 			break
@@ -3667,6 +3975,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.VulnEqual.Vulnerabilities(childComplexity), true
 
+	case "VulnEqualConnection.edges":
+		if e.complexity.VulnEqualConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.VulnEqualConnection.Edges(childComplexity), true
+
+	case "VulnEqualConnection.pageInfo":
+		if e.complexity.VulnEqualConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.VulnEqualConnection.PageInfo(childComplexity), true
+
+	case "VulnEqualConnection.totalCount":
+		if e.complexity.VulnEqualConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.VulnEqualConnection.TotalCount(childComplexity), true
+
+	case "VulnEqualEdge.cursor":
+		if e.complexity.VulnEqualEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.VulnEqualEdge.Cursor(childComplexity), true
+
+	case "VulnEqualEdge.node":
+		if e.complexity.VulnEqualEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.VulnEqualEdge.Node(childComplexity), true
+
 	case "Vulnerability.id":
 		if e.complexity.Vulnerability.ID == nil {
 			break
@@ -3687,6 +4030,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Vulnerability.VulnerabilityIDs(childComplexity), true
+
+	case "VulnerabilityConnection.edges":
+		if e.complexity.VulnerabilityConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityConnection.Edges(childComplexity), true
+
+	case "VulnerabilityConnection.pageInfo":
+		if e.complexity.VulnerabilityConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityConnection.PageInfo(childComplexity), true
+
+	case "VulnerabilityConnection.totalCount":
+		if e.complexity.VulnerabilityConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityConnection.TotalCount(childComplexity), true
+
+	case "VulnerabilityEdge.cursor":
+		if e.complexity.VulnerabilityEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityEdge.Cursor(childComplexity), true
+
+	case "VulnerabilityEdge.node":
+		if e.complexity.VulnerabilityEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityEdge.Node(childComplexity), true
 
 	case "VulnerabilityID.id":
 		if e.complexity.VulnerabilityID.ID == nil {
@@ -3771,6 +4149,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.VulnerabilityMetadata.Vulnerability(childComplexity), true
+
+	case "VulnerabilityMetadataConnection.edges":
+		if e.complexity.VulnerabilityMetadataConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetadataConnection.Edges(childComplexity), true
+
+	case "VulnerabilityMetadataConnection.pageInfo":
+		if e.complexity.VulnerabilityMetadataConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetadataConnection.PageInfo(childComplexity), true
+
+	case "VulnerabilityMetadataConnection.totalCount":
+		if e.complexity.VulnerabilityMetadataConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetadataConnection.TotalCount(childComplexity), true
+
+	case "VulnerabilityMetadataEdge.cursor":
+		if e.complexity.VulnerabilityMetadataEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetadataEdge.Cursor(childComplexity), true
+
+	case "VulnerabilityMetadataEdge.node":
+		if e.complexity.VulnerabilityMetadataEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.VulnerabilityMetadataEdge.Node(childComplexity), true
 
 	}
 	return 0, false
@@ -6291,9 +6704,38 @@ input HasMetadataInputSpec {
   documentRef: String!
 }
 
+"""
+HasMetadataConnection returns the paginated results for HasMetadata.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasMetadataEdge which contains the current cursor
+and the HasMetadata node itself
+"""
+type HasMetadataConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasMetadataEdge!]!
+}
+
+"""
+HasMetadataEdge contains the cursor for the resulting node and
+the HasMetadata node itself.
+"""
+type HasMetadataEdge {
+  cursor: ID!
+  node: HasMetadata!
+}
+
 extend type Query {
   "Returns all HasMetdata attestations matching a filter."
   HasMetadata(hasMetadataSpec: HasMetadataSpec!): [HasMetadata!]!
+  "Returns a paginated results via HasMetadataConnection"
+  HasMetadataList(hasMetadataSpec: HasMetadataSpec!, after: ID, first: Int): HasMetadataConnection
 }
 
 extend type Mutation {
@@ -6517,9 +6959,38 @@ input IDorPkgInput {
   packageInput: PkgInputSpec
 }
 
+"""
+PackageConnection returns the paginated results for Package.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the PackageEdge which contains the current cursor
+and the Package node itself
+"""
+type PackageConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [PackageEdge!]!
+}
+
+"""
+PackageEdge contains the cursor for the resulting node and
+the Package node itself.
+"""
+type PackageEdge {
+  cursor: ID!
+  node: Package!
+}
+
 extend type Query {
   "Returns all packages matching a filter."
   packages(pkgSpec: PkgSpec!): [Package!]!
+  "Returns a paginated results via PackageConnection"
+  packagesList(pkgSpec: PkgSpec!, after: ID, first: Int): PackageConnection
 }
 
 extend type Mutation {
@@ -6819,9 +7290,38 @@ input PkgEqualInputSpec {
   documentRef: String!
 }
 
+"""
+PkgEqualConnection returns the paginated results for PkgEqual.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the PkgEqualEdge which contains the current cursor
+and the PkgEqual node itself
+"""
+type PkgEqualConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [PkgEqualEdge!]!
+}
+
+"""
+PkgEqualEdge contains the cursor for the resulting node and
+the PkgEqual node itself.
+"""
+type PkgEqualEdge {
+  cursor: ID!
+  node: PkgEqual!
+}
+
 extend type Query {
   "Returns all package equality statements matching a filter."
   PkgEqual(pkgEqualSpec: PkgEqualSpec!): [PkgEqual!]!
+  "Returns a paginated results via PkgEqualConnection"
+  PkgEqualList(pkgEqualSpec: PkgEqualSpec!, after: ID, first: Int): PkgEqualConnection
 }
 
 extend type Mutation {
@@ -7003,9 +7503,38 @@ input IDorSourceInput {
   sourceInput: SourceInputSpec
 }
 
+"""
+SourceConnection returns the paginated results for Source.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the SourceEdge which contains the current cursor
+and the Source node itself
+"""
+type SourceConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [SourceEdge!]!
+}
+
+"""
+SourceEdge contains the cursor for the resulting node and
+the Source node itself.
+"""
+type SourceEdge {
+  cursor: ID!
+  node: Source!
+}
+
 extend type Query {
   "Returns all sources matching a filter."
   sources(sourceSpec: SourceSpec!): [Source!]!
+  "Returns a paginated results via SourceConnection"
+  sourcesList(sourceSpec: SourceSpec!, after: ID, first: Int): SourceConnection
 }
 
 extend type Mutation {
@@ -7074,9 +7603,38 @@ input VulnEqualInputSpec {
   documentRef: String!
 }
 
+"""
+VulnEqualConnection returns the paginated results for VulnEqual.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the VulnEqualEdge which contains the current cursor
+and the VulnEqual node itself
+"""
+type VulnEqualConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [VulnEqualEdge!]!
+}
+
+"""
+VulnEqualEdge contains the cursor for the resulting node and
+the VulnEqual node itself.
+"""
+type VulnEqualEdge {
+  cursor: ID!
+  node: VulnEqual!
+}
+
 extend type Query {
   "Returns all equal vulnerability mappings that match a filter."
   vulnEqual(vulnEqualSpec: VulnEqualSpec!): [VulnEqual!]!
+  "Returns a paginated results via VulnEqualConnection"
+  vulnEqualList(vulnEqualSpec: VulnEqualSpec!, after: ID, first: Int): VulnEqualConnection
 }
 
 extend type Mutation {
@@ -7208,9 +7766,38 @@ input VulnerabilityMetadataInputSpec {
   documentRef: String!
 }
 
+"""
+VulnerabilityMetadataConnection returns the paginated results for VulnerabilityMetadata.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the VulnerabilityMetadataEdge which contains the current cursor
+and the VulnerabilityMetadata node itself
+"""
+type VulnerabilityMetadataConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [VulnerabilityMetadataEdge!]!
+}
+
+"""
+VulnerabilityMetadataEdge contains the cursor for the resulting node and
+the VulnerabilityMetadata node itself.
+"""
+type VulnerabilityMetadataEdge {
+  cursor: ID!
+  node: VulnerabilityMetadata!
+}
+
 extend type Query {
   "Returns all vulnerabilityMetadata attestations matching a filter."
   vulnerabilityMetadata(vulnerabilityMetadataSpec: VulnerabilityMetadataSpec!): [VulnerabilityMetadata!]!
+  "Returns a paginated results via VulnerabilityMetadataConnection"
+  vulnerabilityMetadataList(vulnerabilityMetadataSpec: VulnerabilityMetadataSpec!, after: ID, first: Int): VulnerabilityMetadataConnection
 }
 
 extend type Mutation {
@@ -7337,9 +7924,38 @@ input IDorVulnerabilityInput {
   vulnerabilityInput: VulnerabilityInputSpec
 }
 
+"""
+VulnerabilityConnection returns the paginated results for Vulnerability.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the VulnerabilityEdge which contains the current cursor
+and the Vulnerability node itself
+"""
+type VulnerabilityConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [VulnerabilityEdge!]!
+}
+
+"""
+VulnerabilityEdge contains the cursor for the resulting node and
+the Vulnerability node itself.
+"""
+type VulnerabilityEdge {
+  cursor: ID!
+  node: Vulnerability!
+}
+
 extend type Query {
   "Returns all vulnerabilities matching a filter."
   vulnerabilities(vulnSpec: VulnerabilitySpec!): [Vulnerability!]!
+  "Returns a paginated results via VulnerabilityConnection"
+  vulnerabilityList(vulnSpec: VulnerabilitySpec!, after: ID, first: Int): VulnerabilityConnection
 }
 
 extend type Mutation {

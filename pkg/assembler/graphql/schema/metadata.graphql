@@ -91,9 +91,38 @@ input HasMetadataInputSpec {
   documentRef: String!
 }
 
+"""
+HasMetadataConnection returns the paginated results for HasMetadata.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasMetadataEdge which contains the current cursor
+and the HasMetadata node itself
+"""
+type HasMetadataConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasMetadataEdge!]!
+}
+
+"""
+HasMetadataEdge contains the cursor for the resulting node and
+the HasMetadata node itself.
+"""
+type HasMetadataEdge {
+  cursor: ID!
+  node: HasMetadata!
+}
+
 extend type Query {
   "Returns all HasMetdata attestations matching a filter."
   HasMetadata(hasMetadataSpec: HasMetadataSpec!): [HasMetadata!]!
+  "Returns a paginated results via HasMetadataConnection"
+  HasMetadataList(hasMetadataSpec: HasMetadataSpec!, after: ID, first: Int): HasMetadataConnection
 }
 
 extend type Mutation {

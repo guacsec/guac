@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -30,4 +31,9 @@ func (r *queryResolver) Sources(ctx context.Context, sourceSpec model.SourceSpec
 	}
 
 	return r.Backend.Sources(ctx, &sourceSpec)
+}
+
+// SourcesList is the resolver for the sourcesList field.
+func (r *queryResolver) SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
+	panic(fmt.Errorf("not implemented: SourcesList - sourcesList"))
 }

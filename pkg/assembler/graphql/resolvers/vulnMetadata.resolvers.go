@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -121,4 +122,9 @@ func (r *queryResolver) VulnerabilityMetadata(ctx context.Context, vulnerability
 	} else {
 		return r.Backend.VulnerabilityMetadata(ctx, &vulnerabilityMetadataSpec)
 	}
+}
+
+// VulnerabilityMetadataList is the resolver for the vulnerabilityMetadataList field.
+func (r *queryResolver) VulnerabilityMetadataList(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) (*model.VulnerabilityMetadataConnection, error) {
+	panic(fmt.Errorf("not implemented: VulnerabilityMetadataList - vulnerabilityMetadataList"))
 }

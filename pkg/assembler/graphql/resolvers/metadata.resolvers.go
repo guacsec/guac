@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -55,4 +56,9 @@ func (r *queryResolver) HasMetadata(ctx context.Context, hasMetadataSpec model.H
 		return nil, gqlerror.Errorf("HasMetadata ::  %s", err)
 	}
 	return r.Backend.HasMetadata(ctx, &hasMetadataSpec)
+}
+
+// HasMetadataList is the resolver for the HasMetadataList field.
+func (r *queryResolver) HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
+	panic(fmt.Errorf("not implemented: HasMetadataList - HasMetadataList"))
 }
