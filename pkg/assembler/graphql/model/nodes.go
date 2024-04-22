@@ -515,6 +515,29 @@ type CertifyVuln struct {
 
 func (CertifyVuln) IsNode() {}
 
+// CertifyVulnConnection returns the paginated results for CertifyVuln.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyVulnEdge which contains the current cursor
+// and the CertifyVuln node itself
+type CertifyVulnConnection struct {
+	TotalCount int                `json:"totalCount"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	Edges      []*CertifyVulnEdge `json:"edges"`
+}
+
+// CertifyVulnEdge contains the cursor for the resulting node and
+// the CertifyVuln node itself.
+type CertifyVulnEdge struct {
+	Cursor string       `json:"cursor"`
+	Node   *CertifyVuln `json:"node,omitempty"`
+}
+
 // CertifyVulnSpec allows filtering the list of vulnerability certifications to
 // return in a query.
 //
@@ -1653,6 +1676,29 @@ type SourceSpec struct {
 	Name      *string `json:"name,omitempty"`
 	Tag       *string `json:"tag,omitempty"`
 	Commit    *string `json:"commit,omitempty"`
+}
+
+// VEXConnection returns the paginated results for CertifyVEXStatement.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VEXEdge which contains the current cursor
+// and the CertifyVEXStatement node itself
+type VEXConnection struct {
+	TotalCount int        `json:"totalCount"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	Edges      []*VEXEdge `json:"edges"`
+}
+
+// VEXEdge contains the cursor for the resulting node and
+// the CertifyVEXStatement node itself.
+type VEXEdge struct {
+	Cursor string               `json:"cursor"`
+	Node   *CertifyVEXStatement `json:"node,omitempty"`
 }
 
 // VexStatementInputSpec represents the input to ingest VEX statements.

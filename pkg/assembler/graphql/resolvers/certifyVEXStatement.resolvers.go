@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -138,4 +139,9 @@ func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXState
 	} else {
 		return r.Backend.CertifyVEXStatement(ctx, &certifyVEXStatementSpec)
 	}
+}
+
+// CertifyVEXStatementList is the resolver for the CertifyVEXStatementList field.
+func (r *queryResolver) CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error) {
+	panic(fmt.Errorf("not implemented: CertifyVEXStatementList - CertifyVEXStatementList"))
 }

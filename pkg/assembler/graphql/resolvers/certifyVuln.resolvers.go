@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -114,4 +115,9 @@ func (r *queryResolver) CertifyVuln(ctx context.Context, certifyVulnSpec model.C
 	} else {
 		return r.Backend.CertifyVuln(ctx, &certifyVulnSpec)
 	}
+}
+
+// CertifyVulnList is the resolver for the CertifyVulnList field.
+func (r *queryResolver) CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	panic(fmt.Errorf("not implemented: CertifyVulnList - CertifyVulnList"))
 }
