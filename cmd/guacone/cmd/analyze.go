@@ -26,6 +26,7 @@ import (
 	"github.com/dominikbraun/graph/draw"
 	analyzer "github.com/guacsec/guac/pkg/analyzer"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
+	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -117,7 +118,8 @@ var analyzeCmd = &cobra.Command{
 			if err != nil {
 				logger.Fatalf("Unable to generate diff analysis: %v", err)
 			}
-			if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 0) != nil {
+
+			if generateAnalysisOutput(ctx, gqlclient, analysisGraph, analysisList, all, dot, maxprint, 0) != nil {
 				logger.Fatalf("Unable to generate diff analysis output: %v", err)
 			}
 		} else if args[0] == "intersect" {
@@ -125,7 +127,7 @@ var analyzeCmd = &cobra.Command{
 			if err != nil {
 				logger.Fatalf("Unable to generate intersect analysis: %v", err)
 			}
-			if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 1) != nil {
+			if generateAnalysisOutput(ctx, gqlclient, analysisGraph, analysisList, all, dot, maxprint, 1) != nil {
 				logger.Fatalf("Unable to generate diff analysis output: %v", err)
 			}
 		} else if args[0] == "union" {
@@ -133,14 +135,34 @@ var analyzeCmd = &cobra.Command{
 			if err != nil {
 				logger.Fatalf("Unable to generate union analysis: %v", err)
 			}
-			if generateAnalysisOutput(analysisGraph, analysisList, all, dot, maxprint, 2) != nil {
+			if generateAnalysisOutput(ctx, gqlclient, analysisGraph, analysisList, all, dot, maxprint, 2) != nil {
 				logger.Fatalf("Unable to generate diff analysis output: %v", err)
 			}
 		}
 	},
 }
 
-func createGraphDotFile(dot bool, g graph.Graph[string, *analyzer.Node]) error {
+func addNewline(s string) string {
+	if len(s) <= 100 {
+		return s
+	}
+
+	var result string
+	for i := 0; i < len(s); i += 100 {
+		end := i + 100
+		if end > len(s) {
+			end = len(s)
+		}
+		result += s[i:end]
+		if end != len(s) {
+			result += "\n"
+		}
+	}
+
+	return result
+}
+
+func createGraphDotFile( dot bool, g graph.Graph[string, *analyzer.Node]) error {
 	if !dot {
 		return nil
 	}
@@ -167,11 +189,91 @@ func max(nums []int) int {
 	return max
 }
 
-func printHighlightedAnalysis(dot bool, diffList analyzer.HighlightedDiff, all bool, maxprint, action int, analysisGraph graph.Graph[string, *analyzer.Node]) error {
+func prettifyNode(ctx context.Context, gqlclient graphql.Client, id string) (string, error) {
+	node, err := model.Node(ctx, gqlclient, id)
+	if err != nil {
+		return "", err
+	}
 
+	switch node := node.Node.(type) {
+	case *model.NodeNodeArtifact:
+		return prettifyNodeNodeArtifact(*node), nil
+	case *model.NodeNodeBuilder:
+
+		return prettifyNodeNodeBuilder(*node), nil
+	case *model.NodeNodeCertifyBad:
+
+		return prettifyNodeNodeCertifyBad(*node), nil
+	case *model.NodeNodeCertifyGood:
+
+		return prettifyNodeNodeCertifyGood(*node), nil
+	case *model.NodeNodeCertifyLegal:
+
+		return prettifyNodeNodeCertifyLegal(*node), nil
+	case *model.NodeNodeCertifyScorecard:
+
+		return prettifyNodeNodeCertifyScorecard(*node), nil
+	case *model.NodeNodeCertifyVEXStatement:
+
+		return prettifyNodeNodeCertifyVEXStatement(*node), nil
+	case *model.NodeNodeCertifyVuln:
+
+		return prettifyNodeNodeCertifyVuln(*node), nil
+	case *model.NodeNodeHasMetadata:
+
+		return prettifyNodeNodeHasMetadata(*node), nil
+	case *model.NodeNodeHasSBOM:
+
+		return prettifyNodeNodeHasSBOM(*node), nil
+	case *model.NodeNodeHasSLSA:
+
+		return prettifyNodeNodeHasSLSA(*node), nil
+	case *model.NodeNodeHasSourceAt:
+
+		return prettifyNodeNodeHasSourceAt(*node), nil
+	case *model.NodeNodeHashEqual:
+
+		return prettifyNodeNodeHashEqual(*node), nil
+	case *model.NodeNodeIsDependency:
+
+		return prettifyNodeNodeIsDependency(*node), nil
+	case *model.NodeNodeIsOccurrence:
+
+		return prettifyNodeNodeIsOccurrence(*node), nil
+	case *model.NodeNodeLicense:
+
+		return prettifyNodeNodeLicense(*node), nil
+	case *model.NodeNodePackage:
+
+		return prettifyNodeNodePackage(*node), nil
+	case *model.NodeNodePkgEqual:
+
+		return prettifyNodeNodePkgEqual(*node), nil
+	case *model.NodeNodePointOfContact:
+
+		return prettifyNodeNodePointOfContact(*node), nil
+	case *model.NodeNodeSource:
+
+		return prettifyNodeNodeSource(*node), nil
+	case *model.NodeNodeVulnEqual:
+
+		return prettifyNodeNodeVulnEqual(*node), nil
+	case *model.NodeNodeVulnerability:
+
+		return prettifyNodeNodeVulnerability(*node), nil
+	case *model.NodeNodeVulnerabilityMetadata:
+
+		return prettifyNodeNodeVulnerabilityMetadata(*node), nil
+	default:
+		return "", fmt.Errorf("unkown node type")
+	}
+}
+
+func printHighlightedAnalysis(ctx context.Context, gqlclient graphql.Client, dot bool, diffList analyzer.HighlightedDiff, all bool, maxprint, action int) error {
 	if dot {
 		return nil
 	}
+
 	//use action here to do different things
 	if action == 0 {
 		metadataTable := tablewriter.NewWriter(os.Stdout)
@@ -180,7 +282,8 @@ func printHighlightedAnalysis(dot bool, diffList analyzer.HighlightedDiff, all b
 			if !all && len(diffList.MetadataMismatch) == maxprint {
 				break
 			}
-			metadataTable.Append([]string{metadata})
+			metadataTable.Append([]string{ addNewline(metadata)})
+			metadataTable.Append([]string{ ""})
 		}
 		metadataTable.SetAlignment(tablewriter.ALIGN_LEFT)
 		metadataTable.Render()
@@ -208,41 +311,25 @@ func printHighlightedAnalysis(dot bool, diffList analyzer.HighlightedDiff, all b
 		var appendList []string
 
 		if i < len(diffList.MissingAddedRemovedNodes) {
-			value, err := analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedNodes[i], "Namespace")
+			pretty, err := prettifyNode(ctx, gqlclient, diffList.MissingAddedRemovedNodes[i])
 			if err != nil {
-				fmt.Println("Error getting node namespace attribute: ", err)
-				os.Exit(1)
+				return fmt.Errorf("could not prettify node")
 			}
-			namespace, ok := value.(string)
-
-			if !ok {
-				fmt.Println("Error getting node namespace attribute")
-				os.Exit(1)
-			}
-			appendList = append(appendList, namespace)
+			appendList = append(appendList, pretty)
 		} else {
 			appendList = append(appendList, "")
 		}
 
 		if i < len(diffList.MissingAddedRemovedLinks) {
-			value, err := analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedLinks[i][0], "Namespace")
-			if err != nil {
-				return fmt.Errorf("error getting node namespace attribute: %w", err)
-			}
-			namespaceOne, okOne := value.(string)
+			prettyOne, errOne := prettifyNode(ctx, gqlclient, diffList.MissingAddedRemovedLinks[i][0])
 
-			value, err = analyzer.GetNodeAttribute(analysisGraph, diffList.MissingAddedRemovedLinks[i][1], "Namespace")
-			if err != nil {
-				return fmt.Errorf("error getting node namespace attribute: %w", err)
-			}
-			namespaceTwo, okTwo := value.(string)
+			prettyTwo, errTwo := prettifyNode(ctx, gqlclient, diffList.MissingAddedRemovedLinks[i][1])
 
-			if !okOne || !okTwo {
-				fmt.Println("Error getting node namespace attribute")
-				os.Exit(1)
+			if errOne != nil || errTwo != nil {
+				return fmt.Errorf("could not prettify node")
 			}
 
-			appendList = append(appendList, namespaceOne+"--->"+namespaceTwo)
+			appendList = append(appendList, prettyOne+"--->"+prettyTwo)
 		} else {
 			appendList = append(appendList, "")
 		}
@@ -257,13 +344,13 @@ func printHighlightedAnalysis(dot bool, diffList analyzer.HighlightedDiff, all b
 	return nil
 }
 
-func generateAnalysisOutput(analysisGraph graph.Graph[string, *analyzer.Node], diffList analyzer.HighlightedDiff, all, dot bool, maxprint, action int) error {
+func generateAnalysisOutput(ctx context.Context, gqlclient graphql.Client, analysisGraph graph.Graph[string, *analyzer.Node], diffList analyzer.HighlightedDiff, all, dot bool, maxprint, action int) error {
 	//Create dot file
-	if createGraphDotFile(dot, analysisGraph) != nil {
+	if createGraphDotFile( dot, analysisGraph) != nil {
 		return fmt.Errorf("error creating dot file")
 	}
 	//print to stdout
-	if printHighlightedAnalysis(dot, diffList, all, maxprint, action, analysisGraph) != nil {
+	if printHighlightedAnalysis(ctx, gqlclient, dot, diffList, all, maxprint, action) != nil {
 		return fmt.Errorf("error printing analysis")
 	}
 	return nil
@@ -332,7 +419,6 @@ func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 		gOne,
 		gTwo,
 	}, nil
-
 }
 
 func verifyAnalyzeFlags(slsas, sboms []string, errSlsa, errSbom error, uri, purl, id bool) error {
@@ -386,4 +472,127 @@ func init() {
 
 	rootCmd.AddCommand(analyzeCmd)
 
+}
+
+// Function to prettify NodeNodeArtifact
+func prettifyNodeNodeArtifact(node model.NodeNodeArtifact) string {
+	return fmt.Sprintf("Id-%s, Algorithm-%s, Digest-%s", node.Id, node.Algorithm, node.Digest)
+}
+
+// Function to prettify NodeNodeBuilder
+func prettifyNodeNodeBuilder(node model.NodeNodeBuilder) string {
+	return fmt.Sprintf("Id-%s, Uri-%s", node.Id, node.Uri)
+}
+
+// Function to prettify NodeNodeCertifyBad
+func prettifyNodeNodeCertifyBad(node model.NodeNodeCertifyBad) string {
+	return fmt.Sprintf("CBadId-%s, Description-%s", node.Id, node.Justification)
+}
+
+// Function to prettify NodeNodeCertifyGood
+func prettifyNodeNodeCertifyGood(node model.NodeNodeCertifyGood) string {
+	return fmt.Sprintf("CGood Id-%s, Description-%s", node.Id, node.Justification)
+}
+
+// Function to prettify NodeNodeCertifyLegal
+func prettifyNodeNodeCertifyLegal(node model.NodeNodeCertifyLegal) string {
+	return fmt.Sprintf("CLegal Id-%s, Description-%s", node.Id, node.Justification)
+}
+
+// Function to prettify NodeNodeCertifyScorecard
+func prettifyNodeNodeCertifyScorecard(node model.NodeNodeCertifyScorecard) string {
+	return fmt.Sprintf("Id-%s, Scorecard Commit-%s", node.Id, node.Scorecard.ScorecardCommit)
+}
+
+// Function to prettify NodeNodeCertifyVEXStatement
+func prettifyNodeNodeCertifyVEXStatement(node model.NodeNodeCertifyVEXStatement) string {
+	return fmt.Sprintf("Id-%s, Statement-%s", node.Id, node.Statement)
+}
+
+// Function to prettify NodeNodeCertifyVuln
+func prettifyNodeNodeCertifyVuln(node model.NodeNodeCertifyVuln) string {
+	return fmt.Sprintf("CVuln Id-%s, DbUri-%s", node.Id, node.GetMetadata().DbUri)
+}
+
+// Function to prettify NodeNodeHasMetadata
+func prettifyNodeNodeHasMetadata(node model.NodeNodeHasMetadata) string {
+	return fmt.Sprintf("Id-%s, Description-%s", node.Id, node.Justification)
+}
+
+// Function to prettify NodeNodeHasSBOM
+func prettifyNodeNodeHasSBOM(node model.NodeNodeHasSBOM) string {
+	return fmt.Sprintf("Id-%s, Algorithm-%s, Digest-%s", node.Id, node.Algorithm, node.Digest)
+}
+
+// Function to prettify NodeNodeHasSLSA
+func prettifyNodeNodeHasSLSA(node model.NodeNodeHasSLSA) string {
+	return fmt.Sprintf("HasSLSA Id-%s BuildType-%s BuiltBy-%s BuiltFrom-%s Origin-%s", node.Id, node.Slsa.BuildType, node.Slsa.BuiltBy.Uri, node.Slsa.BuiltFrom, node.Slsa.Origin)
+}
+
+// Function to prettify NodeNodeHasSourceAt
+func prettifyNodeNodeHasSourceAt(node model.NodeNodeHasSourceAt) string {
+	return fmt.Sprintf("Id-%s, Description-%s", node.Id, node.Justification)
+}
+
+// Function to prettify NodeNodeHashEqual
+func prettifyNodeNodeHashEqual(node model.NodeNodeHashEqual) string {
+	return fmt.Sprintf("Id-%s, Description-%s", node.Id, node.Justification)
+}
+
+// Function to prettify NodeNodeIsDependency TODO: improve this
+func prettifyNodeNodeIsDependency(node model.NodeNodeIsDependency) string {
+	return node.DependencyPackage.Namespaces[0].Names[0].Name
+
+}
+
+// Function to prettify NodeNodeIsOccurrence
+func prettifyNodeNodeIsOccurrence(node model.NodeNodeIsOccurrence) string {
+	return fmt.Sprintf("Id-%s, Description-%s", node.Id, node.Justification)
+}
+
+// Function to prettify NodeNodeLicense
+func prettifyNodeNodeLicense(node model.NodeNodeLicense) string {
+	return fmt.Sprintf("Id-%s, Name-%s", node.Id, node.Name)
+}
+
+// Function to prettify NodeNodePackage
+func prettifyNodeNodePackage(node model.NodeNodePackage) string {
+	if len(node.Namespaces) == 0 {
+		if len(node.AllPkgTree.Namespaces) == 0{
+			return node.Id
+		}
+		return "zerohero" 
+	}
+	pkgString := helpers.PkgToPurl(node.Type, node.Namespaces[0].Namespace, node.Namespaces[0].Names[0].Name, "", "", []string{})
+	return pkgString
+}
+
+// Function to prettify NodeNodePkgEqual
+func prettifyNodeNodePkgEqual(node model.NodeNodePkgEqual) string {
+	return fmt.Sprintf("Id-%s, Description-%s", node.Id, node.Justification)
+}
+
+// Function to prettify NodeNodePointOfContact
+func prettifyNodeNodePointOfContact(node model.NodeNodePointOfContact) string {
+	return fmt.Sprintf("id- %s | email- %s | info- %s | collector- %s | justification- %s | origin- %s | since- %s", node.Id, node.Email, node.Info, node.Collector, node.Justification, node.Origin, node.Since)
+}
+
+// Function to prettify NodeNodeSource
+func prettifyNodeNodeSource(node model.NodeNodeSource) string {
+	return fmt.Sprintf("src:%s/%s/%s", node.Type, node.Namespaces[0].Namespace, node.Namespaces[0].Names[0].Name)
+}
+
+// Function to prettify NodeNodeVulnEqual
+func prettifyNodeNodeVulnEqual(node model.NodeNodeVulnEqual) string {
+	return fmt.Sprintf("Id-%s, Description-%s", node.Id, node.Justification)
+}
+
+// Function to prettify NodeNodeVulnerability
+func prettifyNodeNodeVulnerability(node model.NodeNodeVulnerability) string {
+	return fmt.Sprintf("Vuln Node Id-%s, Vuln Id-%s", node.GetId(), node.VulnerabilityIDs[0].Id)
+}
+
+// Function to prettify NodeNodeVulnerabilityMetadata
+func prettifyNodeNodeVulnerabilityMetadata(node model.NodeNodeVulnerabilityMetadata) string {
+	return fmt.Sprintf("VulnMet Id-%s", node.GetVulnerability().Id)
 }

@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+
 	"github.com/Khan/genqlient/graphql"
 	"github.com/dominikbraun/graph"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
@@ -63,6 +64,7 @@ func GetNodeAttribute(g graph.Graph[string, *Node], ID, key string) (interface{}
 	}
 	return val, nil
 }
+
 
 func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl string) (*model.PackagesResponse, error) {
 	pkgInput, err := helpers.PurlToPkg(purl)
@@ -160,12 +162,30 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 		smallNodes = gOneNodes
 	}
 
+  // var smallkeys, bigkeys []string
+  // for key := range smallNodes {
+	// 	smallkeys = append(smallkeys, key)
+	// }
+  // for key := range bigNodes {
+	// 	bigkeys = append(bigkeys, key)
+	// }
+
+  // sort.Strings(smallkeys)
+  // sort.Strings(bigkeys)
+
+  // for i := range smallkeys {
+  //   fmt.Println(smallkeys[i], bigkeys[i])
+  // }
+  // os.Exit(1)
+
+
 	switch action {
 	//0 is diff
 	case 0:
 		var diffList HighlightedDiff
 		//check nodes and their data
 		for bigNodeId := range bigNodes {
+
 			if _, err = small.Vertex(bigNodeId); err == nil {
 				nodeBig, _ := big.Vertex(bigNodeId)
 				nodeSmall, _ := small.Vertex(bigNodeId)
@@ -176,7 +196,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 						overlay, ok1 := nodeBig.Attributes[key].(string)
 						g, ok2 := nodeSmall.Attributes[key].(string)
 						if ok1 && ok2 && g != overlay {
-							//TODO: change color of node here
+							//TODO: change color of node here,
 
 							diffList.MetadataMismatch = append(diffList.MetadataMismatch, key+"->"+g+"<->"+overlay)
 						}
@@ -216,10 +236,9 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 				diffList.MissingAddedRemovedLinks = append(diffList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
 			}
 		}
-
 		return small, diffList, nil
 	case 1:
-		//intersect
+		// 1 is intersect
 
 		//remove edges present in small but not in big
 		edges, err := small.Edges()
@@ -258,9 +277,10 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 				analysisList.MissingAddedRemovedNodes = append(analysisList.MissingAddedRemovedNodes, smallNodeId)
 			}
 		}
+
 		return small, analysisList, nil
 	case 2:
-		//union
+		//2 is union
 
 		//check if nodes are present in small but not in big
 		for smallNodeId := range smallNodes {
@@ -286,7 +306,7 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph
 			_, errOne := big.Edge(edge.Source, edge.Target)
 			_, errTwo := big.Edge(edge.Target, edge.Source)
 			if errOne != nil && errTwo != nil { //missing edge, add with red color
-				AddGraphEdge(big, edge.Source, edge.Target, "red") //hmm how to add color?
+				AddGraphEdge(big, edge.Source, edge.Target, "red") 
 				analysisList.MissingAddedRemovedLinks = append(analysisList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
 			}
 		}
@@ -347,6 +367,10 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 	if inclDeps || compareAll {
 		//add included dependencies
 		for _, dependency := range hasSBOM.IncludedDependencies {
+      //TODO instead of comparing package and dependencypackage, compare isdep change this code
+
+
+       
 			packageId := dependency.Package.Id
 			AddGraphEdge(g, "HasSBOM", packageId, "black")
 			includedDepsId := dependency.Id
