@@ -20,6 +20,7 @@ import (
 	stdsql "database/sql"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -32,7 +33,47 @@ import (
 )
 
 func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error) {
-	return &model.BuilderConnection{}, fmt.Errorf("not implemented: BuildersList")
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		afterUUID, err := uuid.Parse(*after)
+		if err != nil {
+			return nil, err
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	query, err := b.client.Builder.Query().
+		Where(builderQueryPredicate(&builderSpec)).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var edges []*model.BuilderEdge
+	for _, edge := range query.Edges {
+		edges = append(edges, &model.BuilderEdge{
+			Cursor: edge.Cursor.ID.String(),
+			Node:   toModelBuilder(edge.Node),
+		})
+	}
+
+	if query.PageInfo.StartCursor != nil {
+		return &model.BuilderConnection{
+			TotalCount: query.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: query.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(query.PageInfo.StartCursor.ID.String()),
+				EndCursor:   ptrfrom.String(query.PageInfo.EndCursor.ID.String()),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {

@@ -18,9 +18,11 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"sort"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/kv"
 )
@@ -115,92 +117,92 @@ func (c *demoClient) ingestBuilder(ctx context.Context, builder *model.IDorBuild
 // Query Builder
 
 func (c *demoClient) BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error) {
-	// c.m.RLock()
-	// defer c.m.RUnlock()
-	// b, err := c.exactBuilder(ctx, &builderSpec)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if b != nil {
-	// 	exactBuilder := c.convBuilder(b)
-	// 	return &model.BuilderConnection{
-	// 		TotalCount: 1,
-	// 		PageInfo: &model.PageInfo{
-	// 			HasNextPage: false,
-	// 			StartCursor: ptrfrom.String(exactBuilder.ID),
-	// 			EndCursor:   ptrfrom.String(exactBuilder.ID),
-	// 		},
-	// 		Edges: []*model.BuilderEdge{{
-	// 			Cursor: exactBuilder.ID,
-	// 			Node:   exactBuilder,
-	// 		}}}, nil
-	// }
-	// edges := make([]*model.ArtifactEdge, 0)
-	// count := 0
-	// currentPage := false
+	c.m.RLock()
+	defer c.m.RUnlock()
+	b, err := c.exactBuilder(ctx, &builderSpec)
+	if err != nil {
+		return nil, err
+	}
+	if b != nil {
+		exactBuilder := c.convBuilder(b)
+		return &model.BuilderConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(exactBuilder.ID),
+				EndCursor:   ptrfrom.String(exactBuilder.ID),
+			},
+			Edges: []*model.BuilderEdge{{
+				Cursor: exactBuilder.ID,
+				Node:   exactBuilder,
+			}}}, nil
+	}
+	edges := make([]*model.BuilderEdge, 0)
+	count := 0
+	currentPage := false
 
-	// // If no cursor present start from the top
-	// if after == nil {
-	// 	currentPage = true
-	// }
-	// hasNextPage := false
-	// var done bool
+	// If no cursor present start from the top
+	if after == nil {
+		currentPage = true
+	}
+	hasNextPage := false
+	var done bool
 
-	// scn := c.kv.Keys(builderCol)
-	// for !done {
-	// 	var bKeys []string
-	// 	bKeys, done, err = scn.Scan(ctx)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	sort.Strings(bKeys)
-	// 	for i, bk := range bKeys {
-	// 		b, err := byKeykv[*builderStruct](ctx, builderCol, bk, c)
-	// 		if err != nil {
-	// 			return nil, err
-	// 		}
-	// 		convBuild := c.convBuilder(b)
-	// 		if after != nil && !currentPage {
-	// 			if convBuild.ID == *after {
-	// 				currentPage = true
-	// 			} else {
-	// 				continue
-	// 			}
-	// 		}
-	// 		if first != nil {
-	// 			if currentPage && count < *first {
-	// 				artEdge := createArtifactEdges(algorithm, a, digest, convArt)
-	// 				if artEdge != nil {
-	// 					edges = append(edges, artEdge)
-	// 					count++
-	// 				}
-	// 			}
-	// 			// If there are any elements left after the current page we indicate that in the response
-	// 			if count == *first && i < len(artKeys) {
-	// 				hasNextPage = true
-	// 			}
-	// 		} else {
-	// 			artEdge := createArtifactEdges(algorithm, a, digest, convArt)
-	// 			if artEdge != nil {
-	// 				edges = append(edges, artEdge)
-	// 				count++
-	// 			}
-	// 		}
-	// 	}
-	// }
-	// if len(edges) > 0 {
-	// 	return &model.ArtifactConnection{
-	// 		TotalCount: len(artKeys),
-	// 		PageInfo: &model.PageInfo{
-	// 			HasNextPage: hasNextPage,
-	// 			StartCursor: ptrfrom.String(edges[0].Node.ID),
-	// 			EndCursor:   ptrfrom.String(edges[count-1].Node.ID),
-	// 		},
-	// 		Edges: edges}, nil
-	// } else {
-	// 	return nil, nil
-	// }
-	return nil, nil
+	scn := c.kv.Keys(builderCol)
+	var bKeys []string
+	for !done {
+		bKeys, done, err = scn.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+		sort.Strings(bKeys)
+		for i, bk := range bKeys {
+			b, err := byKeykv[*builderStruct](ctx, builderCol, bk, c)
+			if err != nil {
+				return nil, err
+			}
+			convBuild := c.convBuilder(b)
+			if after != nil && !currentPage {
+				if convBuild.ID == *after {
+					currentPage = true
+					continue
+				} else {
+					continue
+				}
+			}
+			if first != nil {
+				if currentPage && count < *first {
+					edges = append(edges, &model.BuilderEdge{
+						Cursor: convBuild.ID,
+						Node:   convBuild,
+					})
+					count++
+				}
+				// If there are any elements left after the current page we indicate that in the response
+				if count == *first && i < len(bKeys) {
+					hasNextPage = true
+				}
+			} else {
+				edges = append(edges, &model.BuilderEdge{
+					Cursor: convBuild.ID,
+					Node:   convBuild,
+				})
+				count++
+			}
+		}
+	}
+	if len(edges) > 0 {
+		return &model.BuilderConnection{
+			TotalCount: len(bKeys),
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[count-1].Node.ID),
+			},
+			Edges: edges}, nil
+	} else {
+		return nil, nil
+	}
 }
 
 func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
