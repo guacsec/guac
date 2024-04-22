@@ -270,7 +270,7 @@ require (
 	deps.dev/api/v3alpha v0.0.0-20240312000934-38ffc8dd1d92
 	entgo.io/contrib v0.4.5
 	entgo.io/ent v0.13.0
-	github.com/99designs/gqlgen v0.17.44
+	github.com/99designs/gqlgen v0.17.45
 	github.com/CycloneDX/cyclonedx-go v0.8.0
 	github.com/Khan/genqlient v0.7.0
 	github.com/Masterminds/semver v1.5.0
