@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -35,4 +36,9 @@ func (r *queryResolver) HashEqual(ctx context.Context, hashEqualSpec model.HashE
 		return nil, gqlerror.Errorf("HashEqual :: Provided spec has too many Artifacts")
 	}
 	return r.Backend.HashEqual(ctx, &hashEqualSpec)
+}
+
+// HashEqualList is the resolver for the HashEqualList field.
+func (r *queryResolver) HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error) {
+	panic(fmt.Errorf("not implemented: HashEqualList - HashEqualList"))
 }

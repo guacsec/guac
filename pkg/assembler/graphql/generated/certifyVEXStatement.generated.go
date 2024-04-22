@@ -685,11 +685,14 @@ func (ec *executionContext) _VEXEdge_node(ctx context.Context, field graphql.Col
 	})
 
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.CertifyVEXStatement)
 	fc.Result = res
-	return ec.marshalOCertifyVEXStatement2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatement(ctx, field.Selections, res)
+	return ec.marshalNCertifyVEXStatement2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatement(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_VEXEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1195,6 +1198,9 @@ func (ec *executionContext) _VEXEdge(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "node":
 			out.Values[i] = ec._VEXEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1449,13 +1455,6 @@ func (ec *executionContext) unmarshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋ
 
 func (ec *executionContext) marshalNVexStatus2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVexStatus(ctx context.Context, sel ast.SelectionSet, v model.VexStatus) graphql.Marshaler {
 	return v
-}
-
-func (ec *executionContext) marshalOCertifyVEXStatement2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatement(ctx context.Context, sel ast.SelectionSet, v *model.CertifyVEXStatement) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._CertifyVEXStatement(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOPackageOrArtifactSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageOrArtifactSpecᚄ(ctx context.Context, v interface{}) ([]*model.PackageOrArtifactSpec, error) {

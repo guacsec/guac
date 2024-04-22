@@ -72,7 +72,7 @@ type ArtifactConnection struct {
 // the artifact node itself.
 type ArtifactEdge struct {
 	Cursor string    `json:"cursor"`
-	Node   *Artifact `json:"node,omitempty"`
+	Node   *Artifact `json:"node"`
 }
 
 // ArtifactInputSpec specifies an artifact for mutations.
@@ -122,7 +122,7 @@ type BuilderConnection struct {
 // the Builder node itself.
 type BuilderEdge struct {
 	Cursor string   `json:"cursor"`
-	Node   *Builder `json:"node,omitempty"`
+	Node   *Builder `json:"node"`
 }
 
 // BuilderInputSpec specifies a builder for mutations.
@@ -185,7 +185,7 @@ type CertifyBadConnection struct {
 // the CertifyBad node itself.
 type CertifyBadEdge struct {
 	Cursor string      `json:"cursor"`
-	Node   *CertifyBad `json:"node,omitempty"`
+	Node   *CertifyBad `json:"node"`
 }
 
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
@@ -269,7 +269,7 @@ type CertifyGoodConnection struct {
 // the CertifyGood node itself.
 type CertifyGoodEdge struct {
 	Cursor string       `json:"cursor"`
-	Node   *CertifyGood `json:"node,omitempty"`
+	Node   *CertifyGood `json:"node"`
 }
 
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
@@ -365,7 +365,7 @@ type CertifyLegalConnection struct {
 // the CertifyLegal node itself.
 type CertifyLegalEdge struct {
 	Cursor string        `json:"cursor"`
-	Node   *CertifyLegal `json:"node,omitempty"`
+	Node   *CertifyLegal `json:"node"`
 }
 
 // CertifyLegalInputSpec represents the input for certifying legal information in
@@ -433,7 +433,7 @@ type CertifyScorecardConnection struct {
 // the CertifyScorecard node itself.
 type CertifyScorecardEdge struct {
 	Cursor string            `json:"cursor"`
-	Node   *CertifyScorecard `json:"node,omitempty"`
+	Node   *CertifyScorecard `json:"node"`
 }
 
 // CertifyScorecardSpec allows filtering the list of Scorecards to return.
@@ -535,7 +535,7 @@ type CertifyVulnConnection struct {
 // the CertifyVuln node itself.
 type CertifyVulnEdge struct {
 	Cursor string       `json:"cursor"`
-	Node   *CertifyVuln `json:"node,omitempty"`
+	Node   *CertifyVuln `json:"node"`
 }
 
 // CertifyVulnSpec allows filtering the list of vulnerability certifications to
@@ -786,6 +786,29 @@ type HashEqual struct {
 }
 
 func (HashEqual) IsNode() {}
+
+// HashEqualConnection returns the paginated results for HashEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HashEqualEdge which contains the current cursor
+// and the HashEqual node itself
+type HashEqualConnection struct {
+	TotalCount int              `json:"totalCount"`
+	PageInfo   *PageInfo        `json:"pageInfo"`
+	Edges      []*HashEqualEdge `json:"edges"`
+}
+
+// HashEqualEdge contains the cursor for the resulting node and
+// the HashEqual node itself.
+type HashEqualEdge struct {
+	Cursor string     `json:"cursor"`
+	Node   *HashEqual `json:"node"`
+}
 
 // HashEqualInputSpec represents the input to certify that packages are similar.
 type HashEqualInputSpec struct {
@@ -1363,6 +1386,29 @@ type PointOfContact struct {
 
 func (PointOfContact) IsNode() {}
 
+// PointOfContactConnection returns the paginated results for PointOfContact.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PointOfContactEdge which contains the current cursor
+// and the PointOfContact node itself
+type PointOfContactConnection struct {
+	TotalCount int                   `json:"totalCount"`
+	PageInfo   *PageInfo             `json:"pageInfo"`
+	Edges      []*PointOfContactEdge `json:"edges"`
+}
+
+// PointOfContactEdge contains the cursor for the resulting node and
+// the PointOfContact node itself.
+type PointOfContactEdge struct {
+	Cursor string          `json:"cursor"`
+	Node   *PointOfContact `json:"node"`
+}
+
 // PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
 type PointOfContactInputSpec struct {
 	Email         string    `json:"email"`
@@ -1698,7 +1744,7 @@ type VEXConnection struct {
 // the CertifyVEXStatement node itself.
 type VEXEdge struct {
 	Cursor string               `json:"cursor"`
-	Node   *CertifyVEXStatement `json:"node,omitempty"`
+	Node   *CertifyVEXStatement `json:"node"`
 }
 
 // VexStatementInputSpec represents the input to ingest VEX statements.

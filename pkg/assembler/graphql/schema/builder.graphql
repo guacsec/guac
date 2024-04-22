@@ -74,7 +74,7 @@ the Builder node itself.
 """
 type BuilderEdge {
   cursor: ID!
-  node: Builder
+  node: Builder!
 }
 
 extend type Query {

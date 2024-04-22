@@ -375,11 +375,14 @@ func (ec *executionContext) _CertifyScorecardEdge_node(ctx context.Context, fiel
 	})
 
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.CertifyScorecard)
 	fc.Result = res
-	return ec.marshalOCertifyScorecard2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecard(ctx, field.Selections, res)
+	return ec.marshalNCertifyScorecard2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecard(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyScorecardEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1185,6 +1188,9 @@ func (ec *executionContext) _CertifyScorecardEdge(ctx context.Context, sel ast.S
 			}
 		case "node":
 			out.Values[i] = ec._CertifyScorecardEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1574,13 +1580,6 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalOCertifyScorecard2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecard(ctx context.Context, sel ast.SelectionSet, v *model.CertifyScorecard) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._CertifyScorecard(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOCertifyScorecardConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardConnection(ctx context.Context, sel ast.SelectionSet, v *model.CertifyScorecardConnection) graphql.Marshaler {

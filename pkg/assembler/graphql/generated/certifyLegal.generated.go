@@ -738,11 +738,14 @@ func (ec *executionContext) _CertifyLegalEdge_node(ctx context.Context, field gr
 	})
 
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.CertifyLegal)
 	fc.Result = res
-	return ec.marshalOCertifyLegal2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegal(ctx, field.Selections, res)
+	return ec.marshalNCertifyLegal2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegal(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyLegalEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1137,6 +1140,9 @@ func (ec *executionContext) _CertifyLegalEdge(ctx context.Context, sel ast.Selec
 			}
 		case "node":
 			out.Values[i] = ec._CertifyLegalEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1302,13 +1308,6 @@ func (ec *executionContext) unmarshalNCertifyLegalInputSpec2ᚖgithubᚗcomᚋgu
 func (ec *executionContext) unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx context.Context, v interface{}) (model.CertifyLegalSpec, error) {
 	res, err := ec.unmarshalInputCertifyLegalSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOCertifyLegal2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegal(ctx context.Context, sel ast.SelectionSet, v *model.CertifyLegal) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._CertifyLegal(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOCertifyLegalConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalConnection(ctx context.Context, sel ast.SelectionSet, v *model.CertifyLegalConnection) graphql.Marshaler {

@@ -155,7 +155,7 @@ the CertifyVEXStatement node itself.
 """
 type VEXEdge {
   cursor: ID!
-  node: CertifyVEXStatement
+  node: CertifyVEXStatement!
 }
 
 extend type Query {

@@ -89,7 +89,7 @@ the artifact node itself.
 """
 type ArtifactEdge {
   cursor: ID!
-  node: Artifact
+  node: Artifact!
 }
 
 extend type Query {

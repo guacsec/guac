@@ -424,11 +424,14 @@ func (ec *executionContext) _CertifyVulnEdge_node(ctx context.Context, field gra
 	})
 
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.CertifyVuln)
 	fc.Result = res
-	return ec.marshalOCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVuln(ctx, field.Selections, res)
+	return ec.marshalNCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVuln(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyVulnEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1088,6 +1091,9 @@ func (ec *executionContext) _CertifyVulnEdge(ctx context.Context, sel ast.Select
 			}
 		case "node":
 			out.Values[i] = ec._CertifyVulnEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1337,13 +1343,6 @@ func (ec *executionContext) unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋgua
 func (ec *executionContext) unmarshalNScanMetadataInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx context.Context, v interface{}) (*model.ScanMetadataInput, error) {
 	res, err := ec.unmarshalInputScanMetadataInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVuln(ctx context.Context, sel ast.SelectionSet, v *model.CertifyVuln) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._CertifyVuln(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOCertifyVulnConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnConnection(ctx context.Context, sel ast.SelectionSet, v *model.CertifyVulnConnection) graphql.Marshaler {

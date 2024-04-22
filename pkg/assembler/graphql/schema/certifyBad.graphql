@@ -159,7 +159,7 @@ the CertifyBad node itself.
 """
 type CertifyBadEdge {
   cursor: ID!
-  node: CertifyBad
+  node: CertifyBad!
 }
 
 extend type Query {

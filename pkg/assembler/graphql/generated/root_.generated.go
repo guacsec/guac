@@ -247,6 +247,17 @@ type ComplexityRoot struct {
 		Origin        func(childComplexity int) int
 	}
 
+	HashEqualConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	HashEqualEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	IsDependency struct {
 		Collector         func(childComplexity int) int
 		DependencyPackage func(childComplexity int) int
@@ -390,6 +401,17 @@ type ComplexityRoot struct {
 		Subject       func(childComplexity int) int
 	}
 
+	PointOfContactConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	PointOfContactEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	Query struct {
 		Artifacts               func(childComplexity int, artifactSpec model.ArtifactSpec) int
 		ArtifactsList           func(childComplexity int, artifactSpec model.ArtifactSpec, after *string, first *int) int
@@ -411,6 +433,7 @@ type ComplexityRoot struct {
 		HasSlsa                 func(childComplexity int, hasSLSASpec model.HasSLSASpec) int
 		HasSourceAt             func(childComplexity int, hasSourceAtSpec model.HasSourceAtSpec) int
 		HashEqual               func(childComplexity int, hashEqualSpec model.HashEqualSpec) int
+		HashEqualList           func(childComplexity int, hashEqualSpec model.HashEqualSpec, after *string, first *int) int
 		IsDependency            func(childComplexity int, isDependencySpec model.IsDependencySpec) int
 		IsOccurrence            func(childComplexity int, isOccurrenceSpec model.IsOccurrenceSpec) int
 		Licenses                func(childComplexity int, licenseSpec model.LicenseSpec) int
@@ -421,6 +444,7 @@ type ComplexityRoot struct {
 		Path                    func(childComplexity int, subject string, target string, maxPathLength int, usingOnly []model.Edge) int
 		PkgEqual                func(childComplexity int, pkgEqualSpec model.PkgEqualSpec) int
 		PointOfContact          func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
+		PointOfContactList      func(childComplexity int, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) int
 		Scorecards              func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
 		ScorecardsList          func(childComplexity int, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) int
 		Sources                 func(childComplexity int, sourceSpec model.SourceSpec) int
@@ -1427,6 +1451,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HashEqual.Origin(childComplexity), true
 
+	case "HashEqualConnection.edges":
+		if e.complexity.HashEqualConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.HashEqualConnection.Edges(childComplexity), true
+
+	case "HashEqualConnection.pageInfo":
+		if e.complexity.HashEqualConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.HashEqualConnection.PageInfo(childComplexity), true
+
+	case "HashEqualConnection.totalCount":
+		if e.complexity.HashEqualConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.HashEqualConnection.TotalCount(childComplexity), true
+
+	case "HashEqualEdge.cursor":
+		if e.complexity.HashEqualEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.HashEqualEdge.Cursor(childComplexity), true
+
+	case "HashEqualEdge.node":
+		if e.complexity.HashEqualEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.HashEqualEdge.Node(childComplexity), true
+
 	case "IsDependency.collector":
 		if e.complexity.IsDependency.Collector == nil {
 			break
@@ -2385,6 +2444,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PointOfContact.Subject(childComplexity), true
 
+	case "PointOfContactConnection.edges":
+		if e.complexity.PointOfContactConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.PointOfContactConnection.Edges(childComplexity), true
+
+	case "PointOfContactConnection.pageInfo":
+		if e.complexity.PointOfContactConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.PointOfContactConnection.PageInfo(childComplexity), true
+
+	case "PointOfContactConnection.totalCount":
+		if e.complexity.PointOfContactConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.PointOfContactConnection.TotalCount(childComplexity), true
+
+	case "PointOfContactEdge.cursor":
+		if e.complexity.PointOfContactEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.PointOfContactEdge.Cursor(childComplexity), true
+
+	case "PointOfContactEdge.node":
+		if e.complexity.PointOfContactEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.PointOfContactEdge.Node(childComplexity), true
+
 	case "Query.artifacts":
 		if e.complexity.Query.Artifacts == nil {
 			break
@@ -2625,6 +2719,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.HashEqual(childComplexity, args["hashEqualSpec"].(model.HashEqualSpec)), true
 
+	case "Query.HashEqualList":
+		if e.complexity.Query.HashEqualList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_HashEqualList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.HashEqualList(childComplexity, args["hashEqualSpec"].(model.HashEqualSpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.IsDependency":
 		if e.complexity.Query.IsDependency == nil {
 			break
@@ -2744,6 +2850,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.PointOfContact(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec)), true
+
+	case "Query.PointOfContactList":
+		if e.complexity.Query.PointOfContactList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_PointOfContactList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.PointOfContactList(childComplexity, args["pointOfContactSpec"].(model.PointOfContactSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.scorecards":
 		if e.complexity.Query.Scorecards == nil {
@@ -3565,7 +3683,7 @@ the artifact node itself.
 """
 type ArtifactEdge {
   cursor: ID!
-  node: Artifact
+  node: Artifact!
 }
 
 extend type Query {
@@ -3658,7 +3776,7 @@ the Builder node itself.
 """
 type BuilderEdge {
   cursor: ID!
-  node: Builder
+  node: Builder!
 }
 
 extend type Query {
@@ -3836,7 +3954,7 @@ the CertifyBad node itself.
 """
 type CertifyBadEdge {
   cursor: ID!
-  node: CertifyBad
+  node: CertifyBad!
 }
 
 extend type Query {
@@ -3968,7 +4086,7 @@ the CertifyGood node itself.
 """
 type CertifyGoodEdge {
   cursor: ID!
-  node: CertifyGood
+  node: CertifyGood!
 }
 
 extend type Query {
@@ -4115,7 +4233,7 @@ the CertifyLegal node itself.
 """
 type CertifyLegalEdge {
   cursor: ID!
-  node: CertifyLegal
+  node: CertifyLegal!
 }
 
 extend type Query {
@@ -4281,7 +4399,7 @@ the CertifyScorecard node itself.
 """
 type CertifyScorecardEdge {
   cursor: ID!
-  node: CertifyScorecard
+  node: CertifyScorecard!
 }
 
 extend type Query {
@@ -4458,7 +4576,7 @@ the CertifyVEXStatement node itself.
 """
 type VEXEdge {
   cursor: ID!
-  node: CertifyVEXStatement
+  node: CertifyVEXStatement!
 }
 
 extend type Query {
@@ -4608,7 +4726,7 @@ the CertifyVuln node itself.
 """
 type CertifyVulnEdge {
   cursor: ID!
-  node: CertifyVuln
+  node: CertifyVuln!
 }
 
 extend type Query {
@@ -4731,9 +4849,38 @@ input PointOfContactInputSpec {
   documentRef: String!
 }
 
+"""
+PointOfContactConnection returns the paginated results for PointOfContact.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the PointOfContactEdge which contains the current cursor
+and the PointOfContact node itself
+"""
+type PointOfContactConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [PointOfContactEdge!]!
+}
+
+"""
+PointOfContactEdge contains the cursor for the resulting node and
+the PointOfContact node itself.
+"""
+type PointOfContactEdge {
+  cursor: ID!
+  node: PointOfContact!
+}
+
 extend type Query {
   "Returns all PointOfContact attestations matching a filter."
   PointOfContact(pointOfContactSpec: PointOfContactSpec!): [PointOfContact!]!
+  "Returns a paginated results via PointOfContactConnection"
+  PointOfContactList(pointOfContactSpec: PointOfContactSpec!, after: ID, first: Int): PointOfContactConnection
 }
 
 extend type Mutation {
@@ -5160,9 +5307,38 @@ input HashEqualInputSpec {
   documentRef: String!
 }
 
+"""
+HashEqualConnection returns the paginated results for HashEqual.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HashEqualEdge which contains the current cursor
+and the HashEqual node itself
+"""
+type HashEqualConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HashEqualEdge!]!
+}
+
+"""
+HashEqualEdge contains the cursor for the resulting node and
+the HashEqual node itself.
+"""
+type HashEqualEdge {
+  cursor: ID!
+  node: HashEqual!
+}
+
 extend type Query {
   "Returns all artifact equality statements matching a filter."
   HashEqual(hashEqualSpec: HashEqualSpec!): [HashEqual!]!
+  "Returns a paginated results via HashEqualConnection"
+  HashEqualList(hashEqualSpec: HashEqualSpec!, after: ID, first: Int): HashEqualConnection
 }
 
 extend type Mutation {

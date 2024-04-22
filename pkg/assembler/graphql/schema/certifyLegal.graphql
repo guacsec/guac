@@ -120,7 +120,7 @@ the CertifyLegal node itself.
 """
 type CertifyLegalEdge {
   cursor: ID!
-  node: CertifyLegal
+  node: CertifyLegal!
 }
 
 extend type Query {

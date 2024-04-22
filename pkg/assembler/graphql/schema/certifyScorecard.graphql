@@ -147,7 +147,7 @@ the CertifyScorecard node itself.
 """
 type CertifyScorecardEdge {
   cursor: ID!
-  node: CertifyScorecard
+  node: CertifyScorecard!
 }
 
 extend type Query {

@@ -121,7 +121,7 @@ the CertifyVuln node itself.
 """
 type CertifyVulnEdge {
   cursor: ID!
-  node: CertifyVuln
+  node: CertifyVuln!
 }
 
 extend type Query {

@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -54,4 +55,9 @@ func (r *queryResolver) PointOfContact(ctx context.Context, pointOfContactSpec m
 		return nil, gqlerror.Errorf("PointOfContact :: %s", err)
 	}
 	return r.Backend.PointOfContact(ctx, &pointOfContactSpec)
+}
+
+// PointOfContactList is the resolver for the PointOfContactList field.
+func (r *queryResolver) PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
+	panic(fmt.Errorf("not implemented: PointOfContactList - PointOfContactList"))
 }

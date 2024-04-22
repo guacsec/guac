@@ -513,11 +513,14 @@ func (ec *executionContext) _CertifyGoodEdge_node(ctx context.Context, field gra
 	})
 
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.CertifyGood)
 	fc.Result = res
-	return ec.marshalOCertifyGood2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGood(ctx, field.Selections, res)
+	return ec.marshalNCertifyGood2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGood(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_CertifyGoodEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -821,6 +824,9 @@ func (ec *executionContext) _CertifyGoodEdge(ctx context.Context, sel ast.Select
 			}
 		case "node":
 			out.Values[i] = ec._CertifyGoodEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -986,13 +992,6 @@ func (ec *executionContext) unmarshalNCertifyGoodInputSpec2ᚖgithubᚗcomᚋgua
 func (ec *executionContext) unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx context.Context, v interface{}) (model.CertifyGoodSpec, error) {
 	res, err := ec.unmarshalInputCertifyGoodSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOCertifyGood2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGood(ctx context.Context, sel ast.SelectionSet, v *model.CertifyGood) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._CertifyGood(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOCertifyGoodConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodConnection(ctx context.Context, sel ast.SelectionSet, v *model.CertifyGoodConnection) graphql.Marshaler {

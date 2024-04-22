@@ -105,7 +105,7 @@ the CertifyGood node itself.
 """
 type CertifyGoodEdge {
   cursor: ID!
-  node: CertifyGood
+  node: CertifyGood!
 }
 
 extend type Query {
