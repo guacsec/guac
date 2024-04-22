@@ -18,6 +18,7 @@ package logging
 import (
 	"context"
 	"fmt"
+	"github.com/guacsec/guac/pkg/version"
 	"strings"
 
 	"go.uber.org/zap"
@@ -41,6 +42,7 @@ const (
 	Fatal          LogLevel   = "fatal"
 	ChildLoggerKey contextKey = "childLogger"
 	DocumentHash              = "documentHash"
+	guacVersion               = "guac-version"
 )
 
 type loggerKey struct{}
@@ -67,7 +69,7 @@ func InitLogger(level LogLevel) {
 		_ = zapLogger.Sync()
 	}()
 
-	logger = zapLogger.Sugar()
+	logger = zapLogger.Sugar().With(guacVersion, version.Version)
 
 	if levelErr != nil {
 		logger.Infof("Invalid log level %s: ", level, levelErr)
