@@ -95,7 +95,7 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			SourceInformation: processor.SourceInformation{
 				Collector:   string(FileCollector),
 				Source:      fmt.Sprintf("file:///%s", path),
-				DocumentRef: events.GetKey(blob), // this is the blob store key
+				DocumentRef: events.GetDocRef(blob),
 			},
 		}
 

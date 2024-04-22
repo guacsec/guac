@@ -389,7 +389,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 // different. So we run the hashing function on the final blob and
 // then set it on our original want doc.
 func actualDocRef(blob []byte) string {
-	return events.GetKey(blob)
+	return events.GetDocRef(blob)
 }
 
 // Scorecard and timestamp data constantly changes, causing CI to keep erroring every few days.

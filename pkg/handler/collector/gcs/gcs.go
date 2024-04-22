@@ -185,7 +185,7 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 				SourceInformation: processor.SourceInformation{
 					Collector:   string(CollectorGCS),
 					Source:      g.bucket + "/" + attrs.Name,
-					DocumentRef: events.GetKey(payload), // this is the blob store key
+					DocumentRef: events.GetDocRef(payload),
 				},
 			}
 			docChannel <- doc

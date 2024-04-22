@@ -428,7 +428,7 @@ func findDocumentBySource(docs []*processor.Document, source string) *processor.
 // different. So we run the hashing function on the final blob and
 // then set it on our original want doc.
 func actualDocRef(blob []byte) string {
-	return events.GetKey(blob)
+	return events.GetDocRef(blob)
 }
 
 func toDataSource(ociValues []string) datasource.CollectSource {

@@ -212,7 +212,7 @@ func testNoPolling(t *testing.T, ctx context.Context) {
 }
 
 func assertSource(t *testing.T, wantSource string, doc *processor.Document) {
-	wantDocRef := events.GetKey(doc.Blob)
+	wantDocRef := events.GetDocRef(doc.Blob)
 	if doc.SourceInformation.DocumentRef != wantDocRef {
 		t.Errorf("want DocumentRef = %s, got = %s", wantDocRef, doc.SourceInformation.DocumentRef)
 	}

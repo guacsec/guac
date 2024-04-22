@@ -464,7 +464,7 @@ func fetchOCIArtifactBlobs(
 			SourceInformation: processor.SourceInformation{
 				Collector:   string(OCICollector),
 				Source:      artifact,
-				DocumentRef: events.GetKey(btr1), // this is the blob store key
+				DocumentRef: events.GetDocRef(btr1),
 			},
 		}
 		docChannel <- doc

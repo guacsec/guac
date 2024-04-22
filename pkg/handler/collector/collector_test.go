@@ -20,11 +20,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"reflect"
 	"testing"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/internal/testing/dochelper"
@@ -62,7 +63,7 @@ func TestCollect(t *testing.T) {
 			SourceInformation: processor.SourceInformation{
 				Collector:   string(file.FileCollector),
 				Source:      "file:///testdata/hello",
-				DocumentRef: events.GetKey([]byte("hello\n")),
+				DocumentRef: events.GetDocRef([]byte("hello\n")),
 			}},
 		},
 		wantErr: false,

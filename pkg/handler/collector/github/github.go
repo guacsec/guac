@@ -289,7 +289,7 @@ func (g *githubCollector) collectAssetsForRelease(ctx context.Context, release c
 				SourceInformation: processor.SourceInformation{
 					Collector:   GithubCollector,
 					Source:      asset.URL,
-					DocumentRef: getDocRef(content.Bytes),
+					DocumentRef: events.GetDocRef(content.Bytes),
 				},
 			}
 			docChannel <- doc
@@ -340,7 +340,7 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 				SourceInformation: processor.SourceInformation{
 					Collector:   GithubCollector,
 					Source:      artifact.Name,
-					DocumentRef: getDocRef(artifact.Bytes),
+					DocumentRef: events.GetDocRef(artifact.Bytes),
 				},
 			}
 
@@ -349,10 +349,6 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 
 		g.lastIngestedRun = run.RunId
 	}
-}
-
-func getDocRef(blob []byte) string {
-	return events.GetKey(blob) // this is the blob store key
 }
 
 func checkSuffixes(name string, suffixes []string) bool {

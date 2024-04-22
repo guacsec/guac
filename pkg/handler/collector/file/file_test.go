@@ -64,7 +64,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			SourceInformation: processor.SourceInformation{
 				Collector:   string(FileCollector),
 				Source:      "file:///testdata/hello",
-				DocumentRef: events.GetKey([]byte("hello\n")),
+				DocumentRef: events.GetDocRef([]byte("hello\n")),
 			}},
 		},
 		wantErr: false,
@@ -83,7 +83,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			SourceInformation: processor.SourceInformation{
 				Collector:   string(FileCollector),
 				Source:      "file:///testdata/hello",
-				DocumentRef: events.GetKey([]byte("hello\n")),
+				DocumentRef: events.GetDocRef([]byte("hello\n")),
 			}},
 		},
 		wantErr: true,

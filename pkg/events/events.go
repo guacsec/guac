@@ -64,6 +64,11 @@ func GetKey(blob []byte) string {
 	return fmt.Sprintf("sha256:%s", generatedHash)
 }
 
+// GetDocRef returns the Document Reference of a blob; i.e. the blob store key for this blob.
+func GetDocRef(blob []byte) string {
+	return GetKey(blob)
+}
+
 func getHash(data []byte) string {
 	sha256sum := sha256.Sum256(data)
 	return hex.EncodeToString(sha256sum[:])

@@ -92,7 +92,7 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 			SourceInformation: processor.SourceInformation{
 				Collector:   S3CollectorType,
 				Source:      item,
-				DocumentRef: getDocRef(blob),
+				DocumentRef: events.GetDocRef(blob),
 			},
 		}
 		docChannel <- doc
@@ -128,7 +128,7 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 					SourceInformation: processor.SourceInformation{
 						Collector:   S3CollectorType,
 						Source:      item,
-						DocumentRef: getDocRef(blob),
+						DocumentRef: events.GetDocRef(blob),
 					},
 				}
 				docChannel <- doc
@@ -219,7 +219,7 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 						SourceInformation: processor.SourceInformation{
 							Collector:   S3CollectorType,
 							Source:      item,
-							DocumentRef: getDocRef(blob),
+							DocumentRef: events.GetDocRef(blob),
 						},
 					}
 					select {
@@ -235,10 +235,6 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 	}
 
 	wg.Wait()
-}
-
-func getDocRef(blob []byte) string {
-	return events.GetKey(blob) // this is the blob store key
 }
 
 func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider, error) {

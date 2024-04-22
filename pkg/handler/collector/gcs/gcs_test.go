@@ -53,7 +53,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 		SourceInformation: processor.SourceInformation{
 			Collector:   string(CollectorGCS),
 			Source:      bucketName + "/some/object/file.txt",
-			DocumentRef: events.GetKey(blob),
+			DocumentRef: events.GetDocRef(blob),
 		},
 	}
 
