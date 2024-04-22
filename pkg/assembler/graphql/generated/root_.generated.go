@@ -86,6 +86,17 @@ type ComplexityRoot struct {
 		Subject       func(childComplexity int) int
 	}
 
+	CertifyBadConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	CertifyBadEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	CertifyGood struct {
 		Collector     func(childComplexity int) int
 		DocumentRef   func(childComplexity int) int
@@ -94,6 +105,17 @@ type ComplexityRoot struct {
 		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
+	}
+
+	CertifyGoodConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	CertifyGoodEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	CertifyLegal struct {
@@ -111,10 +133,32 @@ type ComplexityRoot struct {
 		TimeScanned        func(childComplexity int) int
 	}
 
+	CertifyLegalConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	CertifyLegalEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	CertifyScorecard struct {
 		ID        func(childComplexity int) int
 		Scorecard func(childComplexity int) int
 		Source    func(childComplexity int) int
+	}
+
+	CertifyScorecardConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	CertifyScorecardEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	CertifyVEXStatement struct {
@@ -341,8 +385,11 @@ type ComplexityRoot struct {
 		Builders              func(childComplexity int, builderSpec model.BuilderSpec) int
 		BuildersList          func(childComplexity int, builderSpec model.BuilderSpec, after *string, first *int) int
 		CertifyBad            func(childComplexity int, certifyBadSpec model.CertifyBadSpec) int
+		CertifyBadList        func(childComplexity int, certifyBadSpec model.CertifyBadSpec, after *string, first *int) int
 		CertifyGood           func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec) int
+		CertifyGoodList       func(childComplexity int, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) int
 		CertifyLegal          func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec) int
+		CertifyLegalList      func(childComplexity int, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) int
 		CertifyVEXStatement   func(childComplexity int, certifyVEXStatementSpec model.CertifyVEXStatementSpec) int
 		CertifyVuln           func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
 		FindSoftware          func(childComplexity int, searchText string) int
@@ -362,6 +409,7 @@ type ComplexityRoot struct {
 		PkgEqual              func(childComplexity int, pkgEqualSpec model.PkgEqualSpec) int
 		PointOfContact        func(childComplexity int, pointOfContactSpec model.PointOfContactSpec) int
 		Scorecards            func(childComplexity int, scorecardSpec model.CertifyScorecardSpec) int
+		ScorecardsList        func(childComplexity int, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) int
 		Sources               func(childComplexity int, sourceSpec model.SourceSpec) int
 		VulnEqual             func(childComplexity int, vulnEqualSpec model.VulnEqualSpec) int
 		Vulnerabilities       func(childComplexity int, vulnSpec model.VulnerabilitySpec) int
@@ -648,6 +696,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyBad.Subject(childComplexity), true
 
+	case "CertifyBadConnection.edges":
+		if e.complexity.CertifyBadConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.CertifyBadConnection.Edges(childComplexity), true
+
+	case "CertifyBadConnection.pageInfo":
+		if e.complexity.CertifyBadConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.CertifyBadConnection.PageInfo(childComplexity), true
+
+	case "CertifyBadConnection.totalCount":
+		if e.complexity.CertifyBadConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.CertifyBadConnection.TotalCount(childComplexity), true
+
+	case "CertifyBadEdge.cursor":
+		if e.complexity.CertifyBadEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.CertifyBadEdge.Cursor(childComplexity), true
+
+	case "CertifyBadEdge.node":
+		if e.complexity.CertifyBadEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.CertifyBadEdge.Node(childComplexity), true
+
 	case "CertifyGood.collector":
 		if e.complexity.CertifyGood.Collector == nil {
 			break
@@ -696,6 +779,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyGood.Subject(childComplexity), true
+
+	case "CertifyGoodConnection.edges":
+		if e.complexity.CertifyGoodConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.CertifyGoodConnection.Edges(childComplexity), true
+
+	case "CertifyGoodConnection.pageInfo":
+		if e.complexity.CertifyGoodConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.CertifyGoodConnection.PageInfo(childComplexity), true
+
+	case "CertifyGoodConnection.totalCount":
+		if e.complexity.CertifyGoodConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.CertifyGoodConnection.TotalCount(childComplexity), true
+
+	case "CertifyGoodEdge.cursor":
+		if e.complexity.CertifyGoodEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.CertifyGoodEdge.Cursor(childComplexity), true
+
+	case "CertifyGoodEdge.node":
+		if e.complexity.CertifyGoodEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.CertifyGoodEdge.Node(childComplexity), true
 
 	case "CertifyLegal.attribution":
 		if e.complexity.CertifyLegal.Attribution == nil {
@@ -781,6 +899,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyLegal.TimeScanned(childComplexity), true
 
+	case "CertifyLegalConnection.edges":
+		if e.complexity.CertifyLegalConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegalConnection.Edges(childComplexity), true
+
+	case "CertifyLegalConnection.pageInfo":
+		if e.complexity.CertifyLegalConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegalConnection.PageInfo(childComplexity), true
+
+	case "CertifyLegalConnection.totalCount":
+		if e.complexity.CertifyLegalConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegalConnection.TotalCount(childComplexity), true
+
+	case "CertifyLegalEdge.cursor":
+		if e.complexity.CertifyLegalEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegalEdge.Cursor(childComplexity), true
+
+	case "CertifyLegalEdge.node":
+		if e.complexity.CertifyLegalEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.CertifyLegalEdge.Node(childComplexity), true
+
 	case "CertifyScorecard.id":
 		if e.complexity.CertifyScorecard.ID == nil {
 			break
@@ -801,6 +954,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyScorecard.Source(childComplexity), true
+
+	case "CertifyScorecardConnection.edges":
+		if e.complexity.CertifyScorecardConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecardConnection.Edges(childComplexity), true
+
+	case "CertifyScorecardConnection.pageInfo":
+		if e.complexity.CertifyScorecardConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecardConnection.PageInfo(childComplexity), true
+
+	case "CertifyScorecardConnection.totalCount":
+		if e.complexity.CertifyScorecardConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecardConnection.TotalCount(childComplexity), true
+
+	case "CertifyScorecardEdge.cursor":
+		if e.complexity.CertifyScorecardEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecardEdge.Cursor(childComplexity), true
+
+	case "CertifyScorecardEdge.node":
+		if e.complexity.CertifyScorecardEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.CertifyScorecardEdge.Node(childComplexity), true
 
 	case "CertifyVEXStatement.collector":
 		if e.complexity.CertifyVEXStatement.Collector == nil {
@@ -2198,6 +2386,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyBad(childComplexity, args["certifyBadSpec"].(model.CertifyBadSpec)), true
 
+	case "Query.CertifyBadList":
+		if e.complexity.Query.CertifyBadList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyBadList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyBadList(childComplexity, args["certifyBadSpec"].(model.CertifyBadSpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.CertifyGood":
 		if e.complexity.Query.CertifyGood == nil {
 			break
@@ -2210,6 +2410,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CertifyGood(childComplexity, args["certifyGoodSpec"].(model.CertifyGoodSpec)), true
 
+	case "Query.CertifyGoodList":
+		if e.complexity.Query.CertifyGoodList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyGoodList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyGoodList(childComplexity, args["certifyGoodSpec"].(model.CertifyGoodSpec), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.CertifyLegal":
 		if e.complexity.Query.CertifyLegal == nil {
 			break
@@ -2221,6 +2433,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.CertifyLegal(childComplexity, args["certifyLegalSpec"].(model.CertifyLegalSpec)), true
+
+	case "Query.CertifyLegalList":
+		if e.complexity.Query.CertifyLegalList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CertifyLegalList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CertifyLegalList(childComplexity, args["certifyLegalSpec"].(model.CertifyLegalSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.CertifyVEXStatement":
 		if e.complexity.Query.CertifyVEXStatement == nil {
@@ -2449,6 +2673,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Scorecards(childComplexity, args["scorecardSpec"].(model.CertifyScorecardSpec)), true
+
+	case "Query.scorecardsList":
+		if e.complexity.Query.ScorecardsList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_scorecardsList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ScorecardsList(childComplexity, args["scorecardSpec"].(model.CertifyScorecardSpec), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.sources":
 		if e.complexity.Query.Sources == nil {
@@ -3280,9 +3516,8 @@ input IDorBuilderInput {
   builderInput: BuilderInputSpec
 }
 
-
 """
-BuilderConnection returns the paginated results for artifact.
+BuilderConnection returns the paginated results for builder.
 
 totalCount is the total number of results returned.
 
@@ -3307,7 +3542,6 @@ type BuilderEdge {
   cursor: ID!
   node: Builder
 }
-
 
 extend type Query {
   "Returns all builders matching a filter."
@@ -3460,9 +3694,38 @@ input MatchFlags {
   pkg: PkgMatchType!
 }
 
+"""
+CertifyBadConnection returns the paginated results for CertifyBad.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyBadEdge which contains the current cursor
+and the CertifyBad node itself
+"""
+type CertifyBadConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyBadEdge!]!
+}
+
+"""
+CertifyBadEdge contains the cursor for the resulting node and
+the CertifyBad node itself.
+"""
+type CertifyBadEdge {
+  cursor: ID!
+  node: CertifyBad
+}
+
 extend type Query {
   "Returns all CertifyBad attestations matching a filter."
   CertifyBad(certifyBadSpec: CertifyBadSpec!): [CertifyBad!]!
+  "Returns a paginated results via CertifyBadConnection"
+  CertifyBadList(certifyBadSpec: CertifyBadSpec!, after: ID, first: Int): CertifyBadConnection
 }
 
 extend type Mutation {
@@ -3563,9 +3826,38 @@ input CertifyGoodInputSpec {
   documentRef: String!
 }
 
+"""
+CertifyGoodConnection returns the paginated results for CertifyGood.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyGoodEdge which contains the current cursor
+and the CertifyGood node itself
+"""
+type CertifyGoodConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyGoodEdge!]!
+}
+
+"""
+CertifyGoodEdge contains the cursor for the resulting node and
+the CertifyGood node itself.
+"""
+type CertifyGoodEdge {
+  cursor: ID!
+  node: CertifyGood
+}
+
 extend type Query {
   "Returns all CertifyGood attestations matching a filter."
   CertifyGood(certifyGoodSpec: CertifyGoodSpec!): [CertifyGood!]!
+  "Returns a paginated results via CertifyGoodConnection"
+  CertifyGoodList(certifyGoodSpec: CertifyGoodSpec!, after: ID, first: Int): CertifyGoodConnection
 }
 
 extend type Mutation {
@@ -3681,9 +3973,38 @@ input CertifyLegalInputSpec {
   documentRef: String!
 }
 
+"""
+CertifyLegalConnection returns the paginated results for CertifyLegal.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyLegalEdge which contains the current cursor
+and the CertifyLegal node itself
+"""
+type CertifyLegalConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyLegalEdge!]!
+}
+
+"""
+CertifyLegalEdge contains the cursor for the resulting node and
+the CertifyLegal node itself.
+"""
+type CertifyLegalEdge {
+  cursor: ID!
+  node: CertifyLegal
+}
+
 extend type Query {
   "Returns all legal certifications matching the input filter."
   CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
+  "Returns a paginated results via CertifyLegalConnection"
+  CertifyLegalList(certifyLegalSpec: CertifyLegalSpec!, after: ID, first: Int): CertifyLegalConnection
 }
 
 extend type Mutation {
@@ -3818,9 +4139,38 @@ input ScorecardCheckInputSpec {
   score: Int!
 }
 
+"""
+CertifyScorecardConnection returns the paginated results for CertifyScorecard.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyScorecardEdge which contains the current cursor
+and the CertifyScorecard node itself
+"""
+type CertifyScorecardConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyScorecardEdge!]!
+}
+
+"""
+CertifyScorecardEdge contains the cursor for the resulting node and
+the CertifyScorecard node itself.
+"""
+type CertifyScorecardEdge {
+  cursor: ID!
+  node: CertifyScorecard
+}
+
 extend type Query {
   "Returns all Scorecard certifications matching the filter."
   scorecards(scorecardSpec: CertifyScorecardSpec!): [CertifyScorecard!]!
+  "Returns a paginated results via CertifyScorecardConnection"
+  scorecardsList(scorecardSpec: CertifyScorecardSpec!, after: ID, first: Int): CertifyScorecardConnection
 }
 
 extend type Mutation {

@@ -72,9 +72,13 @@ type QueryResolver interface {
 	Builders(ctx context.Context, builderSpec model.BuilderSpec) ([]*model.Builder, error)
 	BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error)
 	CertifyBad(ctx context.Context, certifyBadSpec model.CertifyBadSpec) ([]*model.CertifyBad, error)
+	CertifyBadList(ctx context.Context, certifyBadSpec model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error)
 	CertifyGood(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec) ([]*model.CertifyGood, error)
+	CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error)
 	CertifyLegal(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec) ([]*model.CertifyLegal, error)
+	CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error)
 	Scorecards(ctx context.Context, scorecardSpec model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error)
+	ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error)
 	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
 	CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
 	PointOfContact(ctx context.Context, pointOfContactSpec model.PointOfContactSpec) ([]*model.PointOfContact, error)
@@ -1441,6 +1445,39 @@ func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_CertifyBadList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyBadSpec
+	if tmp, ok := rawArgs["certifyBadSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBadSpec"))
+		arg0, err = ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyBadSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1456,6 +1493,39 @@ func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, raw
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_CertifyGoodList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyGoodSpec
+	if tmp, ok := rawArgs["certifyGoodSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoodSpec"))
+		arg0, err = ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyGoodSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1468,6 +1538,39 @@ func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, ra
 		}
 	}
 	args["certifyGoodSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_CertifyLegalList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyLegalSpec
+	if tmp, ok := rawArgs["certifyLegalSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegalSpec"))
+		arg0, err = ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyLegalSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1900,6 +2003,39 @@ func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["usingOnly"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_scorecardsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyScorecardSpec
+	if tmp, ok := rawArgs["scorecardSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardSpec"))
+		arg0, err = ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["scorecardSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -5073,6 +5209,63 @@ func (ec *executionContext) fieldContext_Query_CertifyBad(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_CertifyBadList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CertifyBadList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CertifyBadList(rctx, fc.Args["certifyBadSpec"].(model.CertifyBadSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyBadConnection)
+	fc.Result = res
+	return ec.marshalOCertifyBadConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CertifyBadList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_CertifyBadConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_CertifyBadConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CertifyBadConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyBadConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CertifyBadList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_CertifyGood(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_CertifyGood(ctx, field)
 	if err != nil {
@@ -5135,6 +5328,63 @@ func (ec *executionContext) fieldContext_Query_CertifyGood(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_CertifyGood_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_CertifyGoodList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CertifyGoodList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CertifyGoodList(rctx, fc.Args["certifyGoodSpec"].(model.CertifyGoodSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyGoodConnection)
+	fc.Result = res
+	return ec.marshalOCertifyGoodConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CertifyGoodList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_CertifyGoodConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_CertifyGoodConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CertifyGoodConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyGoodConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CertifyGoodList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5219,6 +5469,63 @@ func (ec *executionContext) fieldContext_Query_CertifyLegal(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_CertifyLegalList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CertifyLegalList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CertifyLegalList(rctx, fc.Args["certifyLegalSpec"].(model.CertifyLegalSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyLegalConnection)
+	fc.Result = res
+	return ec.marshalOCertifyLegalConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CertifyLegalList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_CertifyLegalConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_CertifyLegalConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CertifyLegalConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyLegalConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CertifyLegalList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_scorecards(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_scorecards(ctx, field)
 	if err != nil {
@@ -5273,6 +5580,63 @@ func (ec *executionContext) fieldContext_Query_scorecards(ctx context.Context, f
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_scorecards_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_scorecardsList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_scorecardsList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ScorecardsList(rctx, fc.Args["scorecardSpec"].(model.CertifyScorecardSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyScorecardConnection)
+	fc.Result = res
+	return ec.marshalOCertifyScorecardConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_scorecardsList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_CertifyScorecardConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_CertifyScorecardConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CertifyScorecardConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyScorecardConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_scorecardsList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -7551,6 +7915,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "CertifyBadList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CertifyBadList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "CertifyGood":
 			field := field
 
@@ -7564,6 +7947,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "CertifyGoodList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CertifyGoodList(ctx, field)
 				return res
 			}
 
@@ -7595,6 +7997,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "CertifyLegalList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CertifyLegalList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "scorecards":
 			field := field
 
@@ -7608,6 +8029,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "scorecardsList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_scorecardsList(ctx, field)
 				return res
 			}
 

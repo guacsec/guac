@@ -50,9 +50,8 @@ input IDorBuilderInput {
   builderInput: BuilderInputSpec
 }
 
-
 """
-BuilderConnection returns the paginated results for artifact.
+BuilderConnection returns the paginated results for builder.
 
 totalCount is the total number of results returned.
 
@@ -77,7 +76,6 @@ type BuilderEdge {
   cursor: ID!
   node: Builder
 }
-
 
 extend type Query {
   "Returns all builders matching a filter."

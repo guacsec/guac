@@ -123,9 +123,38 @@ input ScorecardCheckInputSpec {
   score: Int!
 }
 
+"""
+CertifyScorecardConnection returns the paginated results for CertifyScorecard.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyScorecardEdge which contains the current cursor
+and the CertifyScorecard node itself
+"""
+type CertifyScorecardConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyScorecardEdge!]!
+}
+
+"""
+CertifyScorecardEdge contains the cursor for the resulting node and
+the CertifyScorecard node itself.
+"""
+type CertifyScorecardEdge {
+  cursor: ID!
+  node: CertifyScorecard
+}
+
 extend type Query {
   "Returns all Scorecard certifications matching the filter."
   scorecards(scorecardSpec: CertifyScorecardSpec!): [CertifyScorecard!]!
+  "Returns a paginated results via CertifyScorecardConnection"
+  scorecardsList(scorecardSpec: CertifyScorecardSpec!, after: ID, first: Int): CertifyScorecardConnection
 }
 
 extend type Mutation {

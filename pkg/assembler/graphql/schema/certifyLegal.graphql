@@ -96,9 +96,38 @@ input CertifyLegalInputSpec {
   documentRef: String!
 }
 
+"""
+CertifyLegalConnection returns the paginated results for CertifyLegal.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyLegalEdge which contains the current cursor
+and the CertifyLegal node itself
+"""
+type CertifyLegalConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyLegalEdge!]!
+}
+
+"""
+CertifyLegalEdge contains the cursor for the resulting node and
+the CertifyLegal node itself.
+"""
+type CertifyLegalEdge {
+  cursor: ID!
+  node: CertifyLegal
+}
+
 extend type Query {
   "Returns all legal certifications matching the input filter."
   CertifyLegal(certifyLegalSpec: CertifyLegalSpec!): [CertifyLegal!]!
+  "Returns a paginated results via CertifyLegalConnection"
+  CertifyLegalList(certifyLegalSpec: CertifyLegalSpec!, after: ID, first: Int): CertifyLegalConnection
 }
 
 extend type Mutation {

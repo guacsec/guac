@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -54,4 +55,9 @@ func (r *queryResolver) CertifyLegal(ctx context.Context, certifyLegalSpec model
 	}
 
 	return r.Backend.CertifyLegal(ctx, &certifyLegalSpec)
+}
+
+// CertifyLegalList is the resolver for the CertifyLegalList field.
+func (r *queryResolver) CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
+	panic(fmt.Errorf("not implemented: CertifyLegalList - CertifyLegalList"))
 }

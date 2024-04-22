@@ -102,7 +102,7 @@ type Builder struct {
 
 func (Builder) IsNode() {}
 
-// BuilderConnection returns the paginated results for artifact.
+// BuilderConnection returns the paginated results for builder.
 //
 // totalCount is the total number of results returned.
 //
@@ -165,6 +165,29 @@ type CertifyBad struct {
 
 func (CertifyBad) IsNode() {}
 
+// CertifyBadConnection returns the paginated results for CertifyBad.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyBadEdge which contains the current cursor
+// and the CertifyBad node itself
+type CertifyBadConnection struct {
+	TotalCount int               `json:"totalCount"`
+	PageInfo   *PageInfo         `json:"pageInfo"`
+	Edges      []*CertifyBadEdge `json:"edges"`
+}
+
+// CertifyBadEdge contains the cursor for the resulting node and
+// the CertifyBad node itself.
+type CertifyBadEdge struct {
+	Cursor string      `json:"cursor"`
+	Node   *CertifyBad `json:"node,omitempty"`
+}
+
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
 type CertifyBadInputSpec struct {
@@ -225,6 +248,29 @@ type CertifyGood struct {
 }
 
 func (CertifyGood) IsNode() {}
+
+// CertifyGoodConnection returns the paginated results for CertifyGood.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyGoodEdge which contains the current cursor
+// and the CertifyGood node itself
+type CertifyGoodConnection struct {
+	TotalCount int                `json:"totalCount"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	Edges      []*CertifyGoodEdge `json:"edges"`
+}
+
+// CertifyGoodEdge contains the cursor for the resulting node and
+// the CertifyGood node itself.
+type CertifyGoodEdge struct {
+	Cursor string       `json:"cursor"`
+	Node   *CertifyGood `json:"node,omitempty"`
+}
 
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
@@ -299,6 +345,29 @@ type CertifyLegal struct {
 
 func (CertifyLegal) IsNode() {}
 
+// CertifyLegalConnection returns the paginated results for CertifyLegal.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyLegalEdge which contains the current cursor
+// and the CertifyLegal node itself
+type CertifyLegalConnection struct {
+	TotalCount int                 `json:"totalCount"`
+	PageInfo   *PageInfo           `json:"pageInfo"`
+	Edges      []*CertifyLegalEdge `json:"edges"`
+}
+
+// CertifyLegalEdge contains the cursor for the resulting node and
+// the CertifyLegal node itself.
+type CertifyLegalEdge struct {
+	Cursor string        `json:"cursor"`
+	Node   *CertifyLegal `json:"node,omitempty"`
+}
+
 // CertifyLegalInputSpec represents the input for certifying legal information in
 // mutations.
 type CertifyLegalInputSpec struct {
@@ -343,6 +412,29 @@ type CertifyScorecard struct {
 }
 
 func (CertifyScorecard) IsNode() {}
+
+// CertifyScorecardConnection returns the paginated results for CertifyScorecard.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyScorecardEdge which contains the current cursor
+// and the CertifyScorecard node itself
+type CertifyScorecardConnection struct {
+	TotalCount int                     `json:"totalCount"`
+	PageInfo   *PageInfo               `json:"pageInfo"`
+	Edges      []*CertifyScorecardEdge `json:"edges"`
+}
+
+// CertifyScorecardEdge contains the cursor for the resulting node and
+// the CertifyScorecard node itself.
+type CertifyScorecardEdge struct {
+	Cursor string            `json:"cursor"`
+	Node   *CertifyScorecard `json:"node,omitempty"`
+}
 
 // CertifyScorecardSpec allows filtering the list of Scorecards to return.
 type CertifyScorecardSpec struct {
