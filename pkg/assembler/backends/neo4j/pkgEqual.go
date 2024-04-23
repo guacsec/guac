@@ -29,6 +29,10 @@ import (
 
 // Query PkgEqual
 
+func (c *neo4jClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: PkgEqualList")
+}
+
 func (c *neo4jClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})

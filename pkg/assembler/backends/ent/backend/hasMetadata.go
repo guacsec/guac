@@ -30,6 +30,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (b *EntBackend) HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasMetadataList")
+}
+
 func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
 	if filter == nil {
 		filter = &model.HasMetadataSpec{}

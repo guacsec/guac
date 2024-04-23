@@ -22,6 +22,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *neo4jClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) (*model.VulnerabilityMetadataConnection, error) {
+	return nil, fmt.Errorf("not implemented: VulnerabilityMetadataList")
+}
+
 func (c *neo4jClient) IngestVulnerabilityMetadata(ctx context.Context, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) (string, error) {
 	return "", fmt.Errorf("not implemented - IngestVulnerabilityMetadata")
 }

@@ -28,6 +28,10 @@ import (
 	purl "github.com/package-url/packageurl-go"
 )
 
+func (c *arangoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: PkgEqualList")
+}
+
 func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 
 	if pkgEqualSpec != nil && pkgEqualSpec.ID != nil {

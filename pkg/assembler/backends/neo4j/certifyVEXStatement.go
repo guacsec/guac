@@ -22,6 +22,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *neo4jClient) CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error) {
+	return nil, fmt.Errorf("not implemented: BuildersList")
+}
+
 // TODO (pxp928): fix for new vulnerability
 func (c *neo4jClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 

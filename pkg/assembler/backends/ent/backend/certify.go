@@ -39,6 +39,10 @@ type certificationInputSpec interface {
 	model.CertifyGoodInputSpec | model.CertifyBadInputSpec
 }
 
+func (b *EntBackend) CertifyBadList(ctx context.Context, certifyBadSpec model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyBadList")
+}
+
 func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
 	if filter == nil {
 		filter = &model.CertifyBadSpec{}
@@ -55,6 +59,10 @@ func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 	}
 
 	return collect(records, toModelCertifyBad), nil
+}
+
+func (b *EntBackend) CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyGoodList")
 }
 
 func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {

@@ -24,7 +24,7 @@ import (
 )
 
 func (c *neo4jClient) BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error) {
-	return &model.BuilderConnection{}, fmt.Errorf("not implemented: BuildersList")
+	return nil, fmt.Errorf("not implemented: BuildersList")
 }
 
 func (c *neo4jClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {

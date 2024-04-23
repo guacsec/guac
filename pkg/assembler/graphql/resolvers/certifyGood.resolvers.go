@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -70,5 +69,8 @@ func (r *queryResolver) CertifyGood(ctx context.Context, certifyGoodSpec model.C
 
 // CertifyGoodList is the resolver for the CertifyGoodList field.
 func (r *queryResolver) CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
-	panic(fmt.Errorf("not implemented: CertifyGoodList - CertifyGoodList"))
+	if err := validatePackageSourceOrArtifactQueryFilter(certifyGoodSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("CertifyGood :: %s", err)
+	}
+	return r.Backend.CertifyGoodList(ctx, certifyGoodSpec, after, first)
 }

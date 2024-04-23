@@ -30,6 +30,10 @@ const (
 	finishedOn  string = "finishedOn"
 )
 
+func (c *neo4jClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSLSAList")
+}
+
 func (c *neo4jClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	// TODO update to not use PackageSourceOrArtifact
 	// session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})

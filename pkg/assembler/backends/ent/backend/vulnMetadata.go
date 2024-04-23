@@ -31,6 +31,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (b *EntBackend) VulnerabilityMetadataList(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) (*model.VulnerabilityMetadataConnection, error) {
+	return nil, fmt.Errorf("not implemented: VulnerabilityMetadataList")
+}
+
 func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
 	if filter == nil {
 		filter = &model.VulnerabilityMetadataSpec{}

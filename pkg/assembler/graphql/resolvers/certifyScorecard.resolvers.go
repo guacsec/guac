@@ -33,5 +33,5 @@ func (r *queryResolver) Scorecards(ctx context.Context, scorecardSpec model.Cert
 
 // ScorecardsList is the resolver for the scorecardsList field.
 func (r *queryResolver) ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
-	panic(fmt.Errorf("not implemented: ScorecardsList - scorecardsList"))
+	return r.Backend.ScorecardsList(ctx, scorecardSpec, after, first)
 }

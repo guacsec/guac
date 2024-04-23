@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -156,6 +157,10 @@ func (c *demoClient) licenseExact(ctx context.Context, licenseSpec *model.Licens
 }
 
 // Query Licenses
+
+func (c *demoClient) LicenseList(ctx context.Context, licenseSpec model.LicenseSpec, after *string, first *int) (*model.LicenseConnection, error) {
+	return nil, fmt.Errorf("not implemented: LicenseList")
+}
 
 func (c *demoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
 	c.m.RLock()

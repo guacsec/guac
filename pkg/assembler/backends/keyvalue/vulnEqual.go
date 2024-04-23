@@ -153,6 +153,11 @@ func (c *demoClient) convVulnEqual(ctx context.Context, in *vulnerabilityEqualLi
 }
 
 // Query VulnEqual
+
+func (c *demoClient) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: VulnEqualList")
+}
+
 func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 	funcName := "VulnEqual"
 	c.m.RLock()

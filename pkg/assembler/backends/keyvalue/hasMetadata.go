@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -198,6 +199,11 @@ func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.Packag
 }
 
 // Query HasMetadata
+
+func (c *demoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasMetadataList")
+}
+
 func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
 	funcName := "HasMetadata"
 

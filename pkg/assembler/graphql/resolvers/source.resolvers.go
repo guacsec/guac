@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -35,5 +34,11 @@ func (r *queryResolver) Sources(ctx context.Context, sourceSpec model.SourceSpec
 
 // SourcesList is the resolver for the sourcesList field.
 func (r *queryResolver) SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
-	panic(fmt.Errorf("not implemented: SourcesList - sourcesList"))
+	if sourceSpec.Commit != nil && sourceSpec.Tag != nil {
+		if *sourceSpec.Commit != "" && *sourceSpec.Tag != "" {
+			return nil, gqlerror.Errorf("Sources :: Passing both commit and tag selectors is an error")
+		}
+	}
+
+	return r.Backend.SourcesList(ctx, sourceSpec, after, first)
 }

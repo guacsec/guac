@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -169,5 +168,44 @@ func (r *queryResolver) VulnEqual(ctx context.Context, vulnEqualSpec model.VulnE
 
 // VulnEqualList is the resolver for the vulnEqualList field.
 func (r *queryResolver) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
-	panic(fmt.Errorf("not implemented: VulnEqualList - vulnEqualList"))
+	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+
+	if vulnEqualSpec.Vulnerabilities != nil && len(vulnEqualSpec.Vulnerabilities) > 2 {
+		return nil, gqlerror.Errorf("VulnEqual :: cannot specify more than 2 vulnerabilities in VulnEqual")
+	}
+
+	if len(vulnEqualSpec.Vulnerabilities) > 0 {
+		var lowercaseVulnFilterList []*model.VulnerabilitySpec
+		for _, v := range vulnEqualSpec.Vulnerabilities {
+			var typeLowerCase *string = nil
+			var vulnIDLowerCase *string = nil
+			if v.Type != nil {
+				lower := strings.ToLower(*v.Type)
+				typeLowerCase = &lower
+			}
+			if v.VulnerabilityID != nil {
+				lower := strings.ToLower(*v.VulnerabilityID)
+				vulnIDLowerCase = &lower
+			}
+
+			lowercaseVulnFilter := model.VulnerabilitySpec{
+				ID:              v.ID,
+				Type:            typeLowerCase,
+				VulnerabilityID: vulnIDLowerCase,
+				NoVuln:          v.NoVuln,
+			}
+			lowercaseVulnFilterList = append(lowercaseVulnFilterList, &lowercaseVulnFilter)
+		}
+
+		lowercaseVulnEqualFilter := model.VulnEqualSpec{
+			ID:              vulnEqualSpec.ID,
+			Vulnerabilities: lowercaseVulnFilterList,
+			Justification:   vulnEqualSpec.Justification,
+			Origin:          vulnEqualSpec.Origin,
+			Collector:       vulnEqualSpec.Collector,
+		}
+		return r.Backend.VulnEqualList(ctx, lowercaseVulnEqualFilter, after, first)
+	} else {
+		return r.Backend.VulnEqualList(ctx, vulnEqualSpec, after, first)
+	}
 }

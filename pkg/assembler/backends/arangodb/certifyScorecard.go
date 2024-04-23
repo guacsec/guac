@@ -39,6 +39,10 @@ const (
 
 // Query Scorecards
 
+func (c *arangoClient) ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
+	return nil, fmt.Errorf("not implemented: ScorecardsList")
+}
+
 func (c *arangoClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 
 	if certifyScorecardSpec != nil && certifyScorecardSpec.ID != nil {

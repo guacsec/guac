@@ -39,6 +39,10 @@ const (
 
 // Query Scorecards
 
+func (c *neo4jClient) ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
+	return nil, fmt.Errorf("not implemented: BuildersList")
+}
+
 func (c *neo4jClient) Scorecards(ctx context.Context, certifyScorecardSpec *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()

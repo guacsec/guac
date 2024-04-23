@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/generated"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -37,7 +36,7 @@ func (r *queryResolver) Packages(ctx context.Context, pkgSpec model.PkgSpec) ([]
 
 // PackagesList is the resolver for the packagesList field.
 func (r *queryResolver) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error) {
-	panic(fmt.Errorf("not implemented: PackagesList - packagesList"))
+	return r.Backend.PackagesList(ctx, pkgSpec, after, first)
 }
 
 // Package returns generated.PackageResolver implementation.

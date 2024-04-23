@@ -91,6 +91,10 @@ func (n *hasSLSAStruct) BuildModelNode(ctx context.Context, c *demoClient) (mode
 
 // Query HasSlsa
 
+func (c *demoClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSLSAList")
+}
+
 func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	funcName := "HasSlsa"
 	c.m.RLock()

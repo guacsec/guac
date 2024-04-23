@@ -27,6 +27,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
+func (c *arangoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSourceAtList")
+}
+
 func (c *arangoClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 
 	if hasSourceAtSpec != nil && hasSourceAtSpec.ID != nil {

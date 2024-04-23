@@ -28,6 +28,11 @@ import (
 )
 
 // Query VulnEqual
+
+func (c *arangoClient) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: VulnEqualList")
+}
+
 func (c *arangoClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 
 	if vulnEqualSpec != nil && vulnEqualSpec.ID != nil {

@@ -368,6 +368,10 @@ func setPkgVersionMatchValues(pkgSpec *model.PkgSpec, queryValues map[string]any
 	return arangoQueryBuilder
 }
 
+func (c *arangoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: PackagesList")
+}
+
 func (c *arangoClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	if pkgSpec != nil && pkgSpec.ID != nil {
 		p, err := c.buildPackageResponseFromID(ctx, *pkgSpec.ID, pkgSpec)

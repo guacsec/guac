@@ -191,6 +191,10 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 	return &ids, nil
 }
 
+func (b *EntBackend) CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyVulnList")
+}
+
 func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 	if spec == nil {
 		spec = &model.CertifyVulnSpec{}

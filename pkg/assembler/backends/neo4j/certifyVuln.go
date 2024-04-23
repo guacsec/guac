@@ -31,6 +31,10 @@ const (
 
 // Query CertifyVuln
 
+func (c *neo4jClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyVulnList")
+}
+
 // TODO (pxp928): fix for new vulnerability
 func (c *neo4jClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 

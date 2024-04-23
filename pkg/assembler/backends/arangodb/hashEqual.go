@@ -26,6 +26,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *arangoClient) HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: HashEqualList")
+}
+
 func (c *arangoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 
 	if hashEqualSpec != nil && hashEqualSpec.ID != nil {

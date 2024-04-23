@@ -29,6 +29,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
+func (c *arangoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSBOMList")
+}
+
 func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
 	if hasSBOMSpec != nil && hasSBOMSpec.ID != nil {

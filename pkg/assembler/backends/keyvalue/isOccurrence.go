@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -234,6 +235,10 @@ func (c *demoClient) artifactMatch(ctx context.Context, aID string, artifactSpec
 }
 
 // Query IsOccurrence
+
+func (c *demoClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error) {
+	return nil, fmt.Errorf("not implemented: IsOccurrenceList")
+}
 
 func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 	funcName := "IsOccurrence"

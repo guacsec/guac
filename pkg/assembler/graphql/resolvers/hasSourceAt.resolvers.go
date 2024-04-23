@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -36,5 +35,5 @@ func (r *queryResolver) HasSourceAt(ctx context.Context, hasSourceAtSpec model.H
 
 // HasSourceAtList is the resolver for the HasSourceAtList field.
 func (r *queryResolver) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error) {
-	panic(fmt.Errorf("not implemented: HasSourceAtList - HasSourceAtList"))
+	return r.Backend.HasSourceAtList(ctx, hasSourceAtSpec, after, first)
 }

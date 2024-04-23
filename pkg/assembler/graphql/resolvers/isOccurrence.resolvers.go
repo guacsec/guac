@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -61,5 +60,8 @@ func (r *queryResolver) IsOccurrence(ctx context.Context, isOccurrenceSpec model
 
 // IsOccurrenceList is the resolver for the IsOccurrenceList field.
 func (r *queryResolver) IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error) {
-	panic(fmt.Errorf("not implemented: IsOccurrenceList - IsOccurrenceList"))
+	if err := validatePackageOrSourceQueryFilter(isOccurrenceSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("IsOccurrence :: %s", err)
+	}
+	return r.Backend.IsOccurrenceList(ctx, isOccurrenceSpec, after, first)
 }

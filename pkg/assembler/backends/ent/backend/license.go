@@ -66,6 +66,10 @@ func (b *EntBackend) IngestLicense(ctx context.Context, licenseInput *model.IDor
 	return toGlobalID(license.Table, *record), nil
 }
 
+func (b *EntBackend) LicenseList(ctx context.Context, licenseSpec model.LicenseSpec, after *string, first *int) (*model.LicenseConnection, error) {
+	return nil, fmt.Errorf("not implemented: LicenseList")
+}
+
 func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([]*model.License, error) {
 	if filter == nil {
 		filter = &model.LicenseSpec{}

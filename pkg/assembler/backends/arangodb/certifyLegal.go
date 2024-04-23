@@ -27,6 +27,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
+func (c *arangoClient) CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyBadList")
+}
+
 func (c *arangoClient) CertifyLegal(ctx context.Context, certifyLegalSpec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
 
 	if certifyLegalSpec != nil && certifyLegalSpec.ID != nil {

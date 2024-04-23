@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -40,5 +39,8 @@ func (r *queryResolver) PkgEqual(ctx context.Context, pkgEqualSpec model.PkgEqua
 
 // PkgEqualList is the resolver for the PkgEqualList field.
 func (r *queryResolver) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error) {
-	panic(fmt.Errorf("not implemented: PkgEqualList - PkgEqualList"))
+	if len(pkgEqualSpec.Packages) > 2 {
+		return nil, gqlerror.Errorf("PkgEqual :: too many packages in query, max 2, got: %v", len(pkgEqualSpec.Packages))
+	}
+	return r.Backend.PkgEqualList(ctx, pkgEqualSpec, after, first)
 }

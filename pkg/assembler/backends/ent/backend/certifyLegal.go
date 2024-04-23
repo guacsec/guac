@@ -31,6 +31,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (b *EntBackend) CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyLegalList")
+}
+
 func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
 	if spec == nil {
 		spec = &model.CertifyLegalSpec{}

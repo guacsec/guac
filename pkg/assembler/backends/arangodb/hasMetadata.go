@@ -32,6 +32,10 @@ const (
 	valueStr string = "value"
 )
 
+func (c *arangoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasMetadataList")
+}
+
 func (c *arangoClient) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
 
 	if hasMetadataSpec != nil && hasMetadataSpec.ID != nil {

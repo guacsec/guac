@@ -270,6 +270,10 @@ func setSrcMatchValues(srcSpec *model.SourceSpec, queryValues map[string]any) *a
 	return arangoQueryBuilder
 }
 
+func (c *arangoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
+	return nil, fmt.Errorf("not implemented: SourcesList")
+}
+
 func (c *arangoClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 	if sourceSpec != nil && sourceSpec.ID != nil {
 		p, err := c.buildSourceResponseFromID(ctx, *sourceSpec.ID, sourceSpec)

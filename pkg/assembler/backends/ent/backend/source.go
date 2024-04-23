@@ -39,6 +39,10 @@ const (
 	srcNamespaceString = "srcNamespace"
 )
 
+func (b *EntBackend) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSourceAtList")
+}
+
 func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	if filter == nil {
 		filter = &model.HasSourceAtSpec{}
@@ -315,6 +319,10 @@ func (b *EntBackend) hasSourceAtNeighbors(ctx context.Context, nodeID string, al
 	}
 
 	return out, nil
+}
+
+func (b *EntBackend) SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
+	return nil, fmt.Errorf("not implemented: SourcesList")
 }
 
 func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {

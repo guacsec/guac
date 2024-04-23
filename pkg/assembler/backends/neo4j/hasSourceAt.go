@@ -31,6 +31,10 @@ const (
 	knownSince string = "knownSince"
 )
 
+func (c *neo4jClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSourceAtList")
+}
+
 func (c *neo4jClient) HasSourceAt(ctx context.Context, hasSourceAtSpec *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()

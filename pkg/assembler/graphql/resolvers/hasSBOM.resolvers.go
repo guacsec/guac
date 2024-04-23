@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -68,5 +67,8 @@ func (r *queryResolver) HasSbom(ctx context.Context, hasSBOMSpec model.HasSBOMSp
 
 // HasSBOMList is the resolver for the HasSBOMList field.
 func (r *queryResolver) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error) {
-	panic(fmt.Errorf("not implemented: HasSBOMList - HasSBOMList"))
+	if err := validatePackageOrArtifactQueryFilter(hasSBOMSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("%v :: %s", "HasSBOM", err)
+	}
+	return r.Backend.HasSBOMList(ctx, hasSBOMSpec, after, first)
 }

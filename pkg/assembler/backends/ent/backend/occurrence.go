@@ -30,6 +30,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (b *EntBackend) IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error) {
+	return nil, fmt.Errorf("not implemented: IsOccurrenceList")
+}
+
 func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 	if query == nil {
 		query = &model.IsOccurrenceSpec{}

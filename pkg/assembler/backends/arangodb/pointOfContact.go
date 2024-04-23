@@ -33,6 +33,10 @@ const (
 	sinceStr string = "since"
 )
 
+func (c *arangoClient) PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
+	return nil, fmt.Errorf("not implemented: PointOfContactList")
+}
+
 func (c *arangoClient) PointOfContact(ctx context.Context, pointOfContactSpec *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
 
 	if pointOfContactSpec != nil && pointOfContactSpec.ID != nil {

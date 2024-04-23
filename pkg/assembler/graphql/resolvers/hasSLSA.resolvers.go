@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -45,5 +44,5 @@ func (r *queryResolver) HasSlsa(ctx context.Context, hasSLSASpec model.HasSLSASp
 
 // HasSLSAList is the resolver for the HasSLSAList field.
 func (r *queryResolver) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error) {
-	panic(fmt.Errorf("not implemented: HasSLSAList - HasSLSAList"))
+	return r.Backend.HasSLSAList(ctx, hasSLSASpec, after, first)
 }

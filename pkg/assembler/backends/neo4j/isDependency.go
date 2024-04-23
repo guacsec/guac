@@ -34,6 +34,10 @@ const (
 
 // Query IsDependency
 
+func (c *neo4jClient) IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error) {
+	return nil, fmt.Errorf("not implemented: IsDependencyList")
+}
+
 func (c *neo4jClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()

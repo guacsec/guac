@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -76,7 +75,7 @@ func (r *mutationResolver) IngestBulkVulnerabilityMetadata(ctx context.Context, 
 
 // VulnerabilityMetadata is the resolver for the vulnerabilityMetadata field.
 func (r *queryResolver) VulnerabilityMetadata(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
-	funcName := "IngestVulnerabilityMetadata"
+	funcName := "VulnerabilityMetadata"
 	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
 
 	if vulnerabilityMetadataSpec.Comparator != nil && vulnerabilityMetadataSpec.ScoreValue == nil {
@@ -126,5 +125,50 @@ func (r *queryResolver) VulnerabilityMetadata(ctx context.Context, vulnerability
 
 // VulnerabilityMetadataList is the resolver for the vulnerabilityMetadataList field.
 func (r *queryResolver) VulnerabilityMetadataList(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) (*model.VulnerabilityMetadataConnection, error) {
-	panic(fmt.Errorf("not implemented: VulnerabilityMetadataList - vulnerabilityMetadataList"))
+	funcName := "VulnerabilityMetadataList"
+	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+
+	if vulnerabilityMetadataSpec.Comparator != nil && vulnerabilityMetadataSpec.ScoreValue == nil {
+		return nil, gqlerror.Errorf("%v :: comparator cannot be set without a score value specified", funcName)
+	}
+
+	if vulnerabilityMetadataSpec.Vulnerability != nil {
+
+		var typeLowerCase *string = nil
+		var vulnIDLowerCase *string = nil
+		if vulnerabilityMetadataSpec.Vulnerability.Type != nil {
+			lower := strings.ToLower(*vulnerabilityMetadataSpec.Vulnerability.Type)
+			typeLowerCase = &lower
+		}
+		if vulnerabilityMetadataSpec.Vulnerability.VulnerabilityID != nil {
+			lower := strings.ToLower(*vulnerabilityMetadataSpec.Vulnerability.VulnerabilityID)
+			vulnIDLowerCase = &lower
+		}
+
+		err := validateVulnerabilitySpec(*vulnerabilityMetadataSpec.Vulnerability)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v ::  %s", funcName, err)
+		}
+
+		lowercaseVulnFilter := model.VulnerabilitySpec{
+			ID:              vulnerabilityMetadataSpec.Vulnerability.ID,
+			Type:            typeLowerCase,
+			VulnerabilityID: vulnIDLowerCase,
+			NoVuln:          vulnerabilityMetadataSpec.Vulnerability.NoVuln,
+		}
+
+		lowercaseVulnerabilityMetadataSpec := model.VulnerabilityMetadataSpec{
+			ID:            vulnerabilityMetadataSpec.ID,
+			Vulnerability: &lowercaseVulnFilter,
+			ScoreType:     vulnerabilityMetadataSpec.ScoreType,
+			ScoreValue:    vulnerabilityMetadataSpec.ScoreValue,
+			Comparator:    vulnerabilityMetadataSpec.Comparator,
+			Timestamp:     vulnerabilityMetadataSpec.Timestamp,
+			Origin:        vulnerabilityMetadataSpec.Origin,
+			Collector:     vulnerabilityMetadataSpec.Collector,
+		}
+		return r.Backend.VulnerabilityMetadataList(ctx, lowercaseVulnerabilityMetadataSpec, after, first)
+	} else {
+		return r.Backend.VulnerabilityMetadataList(ctx, vulnerabilityMetadataSpec, after, first)
+	}
 }

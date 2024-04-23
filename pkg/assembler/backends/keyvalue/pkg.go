@@ -521,6 +521,11 @@ func hashVersionHelper(version string, subpath string, qualifiers map[string]str
 }
 
 // Query Package
+
+func (c *demoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: PackagesList")
+}
+
 func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*model.Package, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()

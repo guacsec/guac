@@ -37,6 +37,10 @@ const (
 	builtFromStr     string = "builtFrom"
 )
 
+func (c *arangoClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSLSAList")
+}
+
 func (c *arangoClient) HasSlsa(ctx context.Context, hasSLSASpec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 
 	if hasSLSASpec != nil && hasSLSASpec.ID != nil {

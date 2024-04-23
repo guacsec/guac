@@ -35,6 +35,10 @@ const (
 	knownSinceStr       string = "knownSince"
 )
 
+func (c *arangoClient) CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyVEXStatementList")
+}
+
 func (c *arangoClient) CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 
 	if certifyVEXStatementSpec != nil && certifyVEXStatementSpec.ID != nil {

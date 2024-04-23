@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -191,6 +192,11 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 }
 
 // Query CertifyVex
+
+func (c *demoClient) CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyVEXStatementList")
+}
+
 func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
