@@ -118,6 +118,15 @@ func Test_cyclonedxParser(t *testing.T) {
 		},
 		wantPredicates: affectedVexPredicates(),
 		wantErr:        false,
+	}, {
+		name: "valid CycloneDX VEX document with no analysis",
+		doc: &processor.Document{
+			Blob:   testdata.CycloneDXVEXWithoutAnalysis,
+			Format: processor.FormatJSON,
+			Type:   processor.DocumentCycloneDX,
+		},
+		wantPredicates: noAnalysisVexPredicates(),
+		wantErr:        false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -496,6 +505,41 @@ func affectedVexPredicates() *assembler.IngestPredicates {
 				Pkg:           guacPkgHelper("product-ABC", "2.6"),
 				Vulnerability: testdata.VulnSpecAffected,
 				VexData:       testdata.VexDataAffected,
+			},
+		},
+		CertifyVuln: []assembler.CertifyVulnIngest{
+			{
+				Pkg:           guacPkgHelper("product-ABC", "2.4"),
+				Vulnerability: testdata.VulnSpecAffected,
+				VulnData: &model.ScanMetadataInput{
+					TimeScanned: time.Unix(0, 0),
+				},
+			},
+			{
+				Pkg:           guacPkgHelper("product-ABC", "2.6"),
+				Vulnerability: testdata.VulnSpecAffected,
+				VulnData: &model.ScanMetadataInput{
+					TimeScanned: time.Unix(0, 0),
+				},
+			},
+		},
+	}
+}
+
+func noAnalysisVexPredicates() *assembler.IngestPredicates {
+	return &assembler.IngestPredicates{
+		HasSBOM:      testdata.HasSBOMVexNoAnalysis,
+		VulnMetadata: testdata.CycloneDXNoAnalysisVulnMetadata,
+		Vex: []assembler.VexIngest{
+			{
+				Pkg:           guacPkgHelper("product-ABC", "2.4"),
+				Vulnerability: testdata.VulnSpecAffected,
+				VexData:       testdata.VexDataNoAnalysis,
+			},
+			{
+				Pkg:           guacPkgHelper("product-ABC", "2.6"),
+				Vulnerability: testdata.VulnSpecAffected,
+				VexData:       testdata.VexDataNoAnalysis,
 			},
 		},
 		CertifyVuln: []assembler.CertifyVulnIngest{
