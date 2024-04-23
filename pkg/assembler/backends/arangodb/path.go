@@ -124,6 +124,10 @@ IN 1..@maxLength ANY K_PATHS
 	return foundNodes, nil
 }
 
+func (c *arangoClient) NeighborsList(ctx context.Context, node string, usingOnly []model.Edge, after *string, first *int) (*model.NeighborConnection, error) {
+	return nil, fmt.Errorf("not implemented: NeighborsList")
+}
+
 // TODO (pxp928): investigate if the individual neighbor queries (within nouns and verbs) can be done co-currently
 func (c *arangoClient) Neighbors(ctx context.Context, nodeID string, usingOnly []model.Edge) ([]model.Node, error) {
 	var neighborsID []string

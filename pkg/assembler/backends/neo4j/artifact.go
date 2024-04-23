@@ -141,5 +141,5 @@ func generateModelArtifact(algorithm, digest string) *model.Artifact {
 }
 
 func (c *neo4jClient) ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error) {
-	return &model.ArtifactConnection{}, fmt.Errorf("not implemented: ArtifactsList")
+	return nil, fmt.Errorf("not implemented: ArtifactsList")
 }

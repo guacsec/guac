@@ -26,7 +26,7 @@ import (
 )
 
 func (c *arangoClient) BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error) {
-	return &model.BuilderConnection{}, fmt.Errorf("not implemented: BuildersList")
+	return nil, fmt.Errorf("not implemented: BuildersList")
 }
 
 func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {

@@ -23,6 +23,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *arangoClient) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindSoftwareList")
+}
+
 // TODO(lumjjb): add source when it is implemented in arango backend
 func (c *arangoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 

@@ -560,6 +560,22 @@ type CertifyVulnSpec struct {
 	DocumentRef    *string            `json:"documentRef,omitempty"`
 }
 
+// FindSoftwareConnection returns the paginated results for FindSoftware.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the SoftwareEdge which contains the current cursor
+// and the PackageSourceOrArtifact node itself
+type FindSoftwareConnection struct {
+	TotalCount int             `json:"totalCount"`
+	PageInfo   *PageInfo       `json:"pageInfo"`
+	Edges      []*SoftwareEdge `json:"edges"`
+}
+
 // HasMetadata is an attestation that a package, source, or artifact has a certain
 // attested property (key) with value (value). For example, a source may have
 // metadata "SourceRepo2FAEnabled=true".
@@ -1210,6 +1226,29 @@ type MatchFlags struct {
 type Mutation struct {
 }
 
+// NeighborConnection returns the paginated results for Neighbor.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the NeighborEdge which contains the current cursor
+// and the node itself
+type NeighborConnection struct {
+	TotalCount int             `json:"totalCount"`
+	PageInfo   *PageInfo       `json:"pageInfo"`
+	Edges      []*NeighborEdge `json:"edges"`
+}
+
+// NeighborEdge contains the cursor for the resulting node and
+// the node itself.
+type NeighborEdge struct {
+	Cursor string `json:"cursor"`
+	Node   Node   `json:"node"`
+}
+
 // Package represents the root of the package trie/tree.
 //
 // We map package information to a trie, closely matching the pURL specification
@@ -1842,6 +1881,13 @@ type ScorecardInputSpec struct {
 	Origin           string                     `json:"origin"`
 	Collector        string                     `json:"collector"`
 	DocumentRef      string                     `json:"documentRef"`
+}
+
+// SoftwareEdge contains the cursor for the resulting node and
+// the PackageSourceOrArtifact node itself.
+type SoftwareEdge struct {
+	Cursor string                  `json:"cursor"`
+	Node   PackageSourceOrArtifact `json:"node"`
 }
 
 // Source represents the root of the source trie/tree.

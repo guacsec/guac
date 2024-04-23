@@ -260,6 +260,21 @@ func (mr *MockBackendMockRecorder) FindSoftware(ctx, searchText interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindSoftware", reflect.TypeOf((*MockBackend)(nil).FindSoftware), ctx, searchText)
 }
 
+// FindSoftwareList mocks base method.
+func (m *MockBackend) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindSoftwareList", ctx, searchText, after, first)
+	ret0, _ := ret[0].(*model.FindSoftwareConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindSoftwareList indicates an expected call of FindSoftwareList.
+func (mr *MockBackendMockRecorder) FindSoftwareList(ctx, searchText, after, first interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindSoftwareList", reflect.TypeOf((*MockBackend)(nil).FindSoftwareList), ctx, searchText, after, first)
+}
+
 // HasMetadata mocks base method.
 func (m *MockBackend) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
 	m.ctrl.T.Helper()
@@ -1203,6 +1218,21 @@ func (m *MockBackend) Neighbors(ctx context.Context, node string, usingOnly []mo
 func (mr *MockBackendMockRecorder) Neighbors(ctx, node, usingOnly interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Neighbors", reflect.TypeOf((*MockBackend)(nil).Neighbors), ctx, node, usingOnly)
+}
+
+// NeighborsList mocks base method.
+func (m *MockBackend) NeighborsList(ctx context.Context, node string, usingOnly []model.Edge, after *string, first *int) (*model.NeighborConnection, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NeighborsList", ctx, node, usingOnly, after, first)
+	ret0, _ := ret[0].(*model.NeighborConnection)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NeighborsList indicates an expected call of NeighborsList.
+func (mr *MockBackendMockRecorder) NeighborsList(ctx, node, usingOnly, after, first interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NeighborsList", reflect.TypeOf((*MockBackend)(nil).NeighborsList), ctx, node, usingOnly, after, first)
 }
 
 // Node mocks base method.

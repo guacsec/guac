@@ -26,7 +26,7 @@ import (
 )
 
 func (c *arangoClient) ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error) {
-	return &model.ArtifactConnection{}, fmt.Errorf("not implemented: ArtifactsList")
+	return nil, fmt.Errorf("not implemented: ArtifactsList")
 }
 
 func (c *arangoClient) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {

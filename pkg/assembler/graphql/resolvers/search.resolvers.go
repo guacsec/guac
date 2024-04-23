@@ -14,3 +14,8 @@ import (
 func (r *queryResolver) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 	return r.Backend.FindSoftware(ctx, searchText)
 }
+
+// FindSoftwareList is the resolver for the findSoftwareList field.
+func (r *queryResolver) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
+	return r.Backend.FindSoftwareList(ctx, searchText, after, first)
+}

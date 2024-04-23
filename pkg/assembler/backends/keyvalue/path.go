@@ -45,6 +45,10 @@ func (c *demoClient) Path(ctx context.Context, source string, target string, max
 	return c.bfs(ctx, source, target, maxPathLength, processUsingOnly(usingOnly))
 }
 
+func (c *demoClient) NeighborsList(ctx context.Context, node string, usingOnly []model.Edge, after *string, first *int) (*model.NeighborConnection, error) {
+	return nil, fmt.Errorf("not implemented: NeighborsList")
+}
+
 func (c *demoClient) Neighbors(ctx context.Context, source string, usingOnly []model.Edge) ([]model.Node, error) {
 	c.m.RLock()
 	neighbors, err := c.neighborsFromId(ctx, source, processUsingOnly(usingOnly))

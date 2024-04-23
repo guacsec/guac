@@ -193,6 +193,12 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
+	FindSoftwareConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
 	HasMetadata struct {
 		Collector     func(childComplexity int) int
 		DocumentRef   func(childComplexity int) int
@@ -413,6 +419,17 @@ type ComplexityRoot struct {
 		IngestVulnerabilityMetadata     func(childComplexity int, vulnerability model.IDorVulnerabilityInput, vulnerabilityMetadata model.VulnerabilityMetadataInputSpec) int
 	}
 
+	NeighborConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	NeighborEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	Package struct {
 		ID         func(childComplexity int) int
 		Namespaces func(childComplexity int) int
@@ -527,6 +544,7 @@ type ComplexityRoot struct {
 		CertifyVuln               func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec) int
 		CertifyVulnList           func(childComplexity int, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) int
 		FindSoftware              func(childComplexity int, searchText string) int
+		FindSoftwareList          func(childComplexity int, searchText string, after *string, first *int) int
 		HasMetadata               func(childComplexity int, hasMetadataSpec model.HasMetadataSpec) int
 		HasMetadataList           func(childComplexity int, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) int
 		HasSBOMList               func(childComplexity int, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) int
@@ -544,6 +562,7 @@ type ComplexityRoot struct {
 		LicenseList               func(childComplexity int, licenseSpec model.LicenseSpec, after *string, first *int) int
 		Licenses                  func(childComplexity int, licenseSpec model.LicenseSpec) int
 		Neighbors                 func(childComplexity int, node string, usingOnly []model.Edge) int
+		NeighborsList             func(childComplexity int, node string, usingOnly []model.Edge, after *string, first *int) int
 		Node                      func(childComplexity int, node string) int
 		Nodes                     func(childComplexity int, nodes []string) int
 		Packages                  func(childComplexity int, pkgSpec model.PkgSpec) int
@@ -608,6 +627,11 @@ type ComplexityRoot struct {
 	ScorecardCheck struct {
 		Check func(childComplexity int) int
 		Score func(childComplexity int) int
+	}
+
+	SoftwareEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	Source struct {
@@ -1333,6 +1357,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyVulnEdge.Node(childComplexity), true
+
+	case "FindSoftwareConnection.edges":
+		if e.complexity.FindSoftwareConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.FindSoftwareConnection.Edges(childComplexity), true
+
+	case "FindSoftwareConnection.pageInfo":
+		if e.complexity.FindSoftwareConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.FindSoftwareConnection.PageInfo(childComplexity), true
+
+	case "FindSoftwareConnection.totalCount":
+		if e.complexity.FindSoftwareConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.FindSoftwareConnection.TotalCount(childComplexity), true
 
 	case "HasMetadata.collector":
 		if e.complexity.HasMetadata.Collector == nil {
@@ -2579,6 +2624,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.IngestVulnerabilityMetadata(childComplexity, args["vulnerability"].(model.IDorVulnerabilityInput), args["vulnerabilityMetadata"].(model.VulnerabilityMetadataInputSpec)), true
 
+	case "NeighborConnection.edges":
+		if e.complexity.NeighborConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.NeighborConnection.Edges(childComplexity), true
+
+	case "NeighborConnection.pageInfo":
+		if e.complexity.NeighborConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.NeighborConnection.PageInfo(childComplexity), true
+
+	case "NeighborConnection.totalCount":
+		if e.complexity.NeighborConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.NeighborConnection.TotalCount(childComplexity), true
+
+	case "NeighborEdge.cursor":
+		if e.complexity.NeighborEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.NeighborEdge.Cursor(childComplexity), true
+
+	case "NeighborEdge.node":
+		if e.complexity.NeighborEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.NeighborEdge.Node(childComplexity), true
+
 	case "Package.id":
 		if e.complexity.Package.ID == nil {
 			break
@@ -3130,6 +3210,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.FindSoftware(childComplexity, args["searchText"].(string)), true
 
+	case "Query.findSoftwareList":
+		if e.complexity.Query.FindSoftwareList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_findSoftwareList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FindSoftwareList(childComplexity, args["searchText"].(string), args["after"].(*string), args["first"].(*int)), true
+
 	case "Query.HasMetadata":
 		if e.complexity.Query.HasMetadata == nil {
 			break
@@ -3333,6 +3425,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Neighbors(childComplexity, args["node"].(string), args["usingOnly"].([]model.Edge)), true
+
+	case "Query.neighborsList":
+		if e.complexity.Query.NeighborsList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_neighborsList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.NeighborsList(childComplexity, args["node"].(string), args["usingOnly"].([]model.Edge), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.node":
 		if e.complexity.Query.Node == nil {
@@ -3771,6 +3875,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ScorecardCheck.Score(childComplexity), true
+
+	case "SoftwareEdge.cursor":
+		if e.complexity.SoftwareEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.SoftwareEdge.Cursor(childComplexity), true
+
+	case "SoftwareEdge.node":
+		if e.complexity.SoftwareEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.SoftwareEdge.Node(childComplexity), true
 
 	case "Source.id":
 		if e.complexity.Source.ID == nil {
@@ -7190,6 +7308,35 @@ enum Edge {
   VULN_METADATA_VULNERABILITY
 }
 
+
+"""
+NeighborConnection returns the paginated results for Neighbor.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the NeighborEdge which contains the current cursor
+and the node itself
+"""
+type NeighborConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [NeighborEdge!]!
+}
+
+"""
+NeighborEdge contains the cursor for the resulting node and
+the node itself.
+"""
+type NeighborEdge {
+  cursor: ID!
+  node: Node!
+}
+
+
 extend type Query {
   """
   path query returns a path between subject and target, of a maximum length.
@@ -7216,6 +7363,8 @@ extend type Query {
   contain the corresponding GUAC evidence trees (GUAC verbs).
   """
   neighbors(node: ID!, usingOnly: [Edge!]!): [Node!]!
+  "Returns a paginated results via NeighborConnection"
+  neighborsList(node: ID!, usingOnly: [Edge!]!, after: ID, first: Int): NeighborConnection
 
   """
   node returns a single node, regardless of type.
@@ -7354,6 +7503,34 @@ extend type Mutation {
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+"""
+FindSoftwareConnection returns the paginated results for FindSoftware.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the SoftwareEdge which contains the current cursor
+and the PackageSourceOrArtifact node itself
+"""
+type FindSoftwareConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [SoftwareEdge!]!
+}
+
+"""
+SoftwareEdge contains the cursor for the resulting node and
+the PackageSourceOrArtifact node itself.
+"""
+type SoftwareEdge {
+  cursor: ID!
+  node: PackageSourceOrArtifact!
+}
+
 extend type Query {
   """
   findSoftware takes in a searchText string and looks for software
@@ -7375,6 +7552,8 @@ extend type Query {
   implement this API.
   """
   findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
+  "Returns a paginated results via CertifyBadConnection"
+  findSoftwareList(searchText: String!, after: ID, first: Int): FindSoftwareConnection
 }
 `, BuiltIn: false},
 	{Name: "../schema/source.graphql", Input: `#

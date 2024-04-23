@@ -128,6 +128,10 @@ func (b *EntBackend) bfs(ctx context.Context, from, to string, maxLength int, us
 	return b.Nodes(ctx, path)
 }
 
+func (b *EntBackend) NeighborsList(ctx context.Context, node string, usingOnly []model.Edge, after *string, first *int) (*model.NeighborConnection, error) {
+	return nil, fmt.Errorf("not implemented: NeighborsList")
+}
+
 func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []model.Edge) ([]model.Node, error) {
 	var neighbors []model.Node
 	var err error
