@@ -28,7 +28,6 @@ type s3Options struct {
 	mp                string                        // message provider name (sqs or kafka, will default to kafka)
 	mpEndpoint        string                        // endpoint for the message provider (only for polling behaviour)
 	poll              bool                          // polling or non-polling behaviour? (defaults to non-polling)
-	graphqlEndpoint   string                        // endpoint for the graphql server
 	csubClientOptions csub_client.CsubClientOptions // options for the collectsub client
 }
 
@@ -64,7 +63,6 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 		s3Opts, err := validateS3Opts(
 			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
-			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetString("s3-url"),
 			viper.GetString("s3-bucket"),
@@ -116,7 +114,6 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 func validateS3Opts(
 	pubSubAddr,
 	blobAddr,
-	graphqlEndpoint,
 	csubAddr,
 	s3url,
 	s3bucket,
@@ -162,7 +159,6 @@ func validateS3Opts(
 		mp:                mp,
 		mpEndpoint:        mpEndpoint,
 		poll:              poll,
-		graphqlEndpoint:   graphqlEndpoint,
 		csubClientOptions: csubClientOptions,
 	}
 
