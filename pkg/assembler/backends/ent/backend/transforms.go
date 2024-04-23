@@ -16,6 +16,8 @@
 package backend
 
 import (
+	"strings"
+
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
@@ -43,6 +45,66 @@ func toModelBuilder(b *ent.Builder) *model.Builder {
 		ID:  toGlobalID(builder.Table, b.ID.String()),
 		URI: b.URI,
 	}
+}
+
+func toModelPackageTrie(collectedPkgNames []*ent.PackageName) []*model.Package {
+	pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
+
+	for _, pkgName := range collectedPkgNames {
+		nameString := pkgName.Name + "," + toGlobalID(packagename.Table, pkgName.ID.String())
+
+		namespaceString := pkgName.Namespace + "," + toGlobalID(pkgNamespaceString, pkgName.Namespace)
+		typeString := pkgName.Type + "," + toGlobalID(pkgTypeString, pkgName.Type)
+
+		if pkgNamespaces, ok := pkgTypes[typeString]; ok {
+			if pkgNames, ok := pkgNamespaces[namespaceString]; ok {
+				pkgNames[nameString] = append(pkgNames[nameString], collect(pkgName.Edges.Versions, toModelPackageVersion)...)
+			} else {
+				pkgNames := map[string][]*model.PackageVersion{}
+				pkgNames[nameString] = append(pkgNames[nameString], collect(pkgName.Edges.Versions, toModelPackageVersion)...)
+				pkgNamespaces[namespaceString] = pkgNames
+				pkgTypes[typeString] = pkgNamespaces
+			}
+		} else {
+			pkgNames := map[string][]*model.PackageVersion{}
+			pkgNames[nameString] = append(pkgNames[nameString], collect(pkgName.Edges.Versions, toModelPackageVersion)...)
+			pkgNamespaces := map[string]map[string][]*model.PackageVersion{}
+			pkgNamespaces[namespaceString] = pkgNames
+			pkgTypes[typeString] = pkgNamespaces
+		}
+	}
+	var packages []*model.Package
+	for pkgType, pkgNamespaces := range pkgTypes {
+		collectedPkgNamespaces := []*model.PackageNamespace{}
+		for namespace, pkgNames := range pkgNamespaces {
+			var collectedPkgNames []*model.PackageName
+			for name, versions := range pkgNames {
+				nameValues := strings.Split(name, ",")
+				pkgName := &model.PackageName{
+					ID:       nameValues[1],
+					Name:     nameValues[0],
+					Versions: versions,
+				}
+				collectedPkgNames = append(collectedPkgNames, pkgName)
+			}
+			namespaceValues := strings.Split(namespace, ",")
+			pkgNamespace := &model.PackageNamespace{
+				ID:        namespaceValues[1],
+				Namespace: namespaceValues[0],
+				Names:     collectedPkgNames,
+			}
+			collectedPkgNamespaces = append(collectedPkgNamespaces, pkgNamespace)
+		}
+		typeValues := strings.Split(pkgType, ",")
+		collectedPackage := &model.Package{
+			ID:         typeValues[1],
+			Type:       typeValues[0],
+			Namespaces: collectedPkgNamespaces,
+		}
+		packages = append(packages, collectedPackage)
+	}
+
+	return packages
 }
 
 func toModelPackage(p *ent.PackageName) *model.Package {

@@ -19,6 +19,7 @@ import (
 	"context"
 	stdsql "database/sql"
 	"fmt"
+	"strings"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -35,8 +36,8 @@ import (
 )
 
 const (
-	srcTypeString      = "srcType"
-	srcNamespaceString = "srcNamespace"
+	srcTypeString      = "source_types"
+	srcNamespaceString = "source_namespaces"
 )
 
 func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
@@ -329,7 +330,7 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 		return nil, err
 	}
 
-	return collect(records, toModelSourceName), nil
+	return toModelSourceTrie(records), nil
 }
 
 func (b *EntBackend) IngestSources(ctx context.Context, sources []*model.IDorSourceInput) ([]*model.SourceIDs, error) {
@@ -486,7 +487,7 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 	}
 
 	return &model.HasSourceAt{
-		Source:        toModelSourceName(record.Edges.Source),
+		Source:        toModelSource(record.Edges.Source),
 		Package:       pkg,
 		ID:            toGlobalID(hassourceat.Table, record.ID.String()),
 		KnownSince:    record.KnownSince,
@@ -497,8 +498,54 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 	}
 }
 
-func toModelSourceName(s *ent.SourceName) *model.Source {
-	return toModelSource(s)
+func toModelSourceTrie(collectedSrcNames []*ent.SourceName) []*model.Source {
+	srcTypes := map[string]map[string][]*model.SourceName{}
+
+	for _, srcName := range collectedSrcNames {
+
+		namespaceString := srcName.Namespace + "," + toGlobalID(srcNamespaceString, srcName.Namespace)
+		typeString := srcName.Type + "," + toGlobalID(srcTypeString, srcName.Type)
+
+		sourceName := &model.SourceName{
+			ID:   toGlobalID(sourcename.Table, srcName.ID.String()),
+			Name: srcName.Name,
+		}
+		if srcName.Tag != "" {
+			sourceName.Tag = &srcName.Tag
+		}
+		if srcName.Commit != "" {
+			sourceName.Commit = &srcName.Commit
+		}
+		if srcNamespaces, ok := srcTypes[typeString]; ok {
+			srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], sourceName)
+		} else {
+			srcNamespaces := map[string][]*model.SourceName{}
+			srcNamespaces[namespaceString] = append(srcNamespaces[namespaceString], sourceName)
+			srcTypes[typeString] = srcNamespaces
+		}
+	}
+	var sources []*model.Source
+	for srcType, namespaces := range srcTypes {
+		var sourceNamespaces []*model.SourceNamespace
+		for namespace, sourceNames := range namespaces {
+			namespaceValues := strings.Split(namespace, ",")
+			srcNamespace := &model.SourceNamespace{
+				ID:        namespaceValues[1],
+				Namespace: namespaceValues[0],
+				Names:     sourceNames,
+			}
+			sourceNamespaces = append(sourceNamespaces, srcNamespace)
+		}
+		typeValues := strings.Split(srcType, ",")
+		source := &model.Source{
+			ID:         typeValues[1],
+			Type:       typeValues[0],
+			Namespaces: sourceNamespaces,
+		}
+		sources = append(sources, source)
+	}
+
+	return sources
 }
 
 func toModelSource(s *ent.SourceName) *model.Source {
@@ -537,7 +584,7 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 	var out []model.Node
 	if allowedEdges[model.EdgeSourceTypeSourceNamespace] {
 		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
+			Where(sourceQuery(&model.SourceSpec{Type: &nodeID})).
 			Limit(MaxPageSize)
 
 		srcNames, err := query.All(ctx)
@@ -566,7 +613,7 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 	var out []model.Node
 
 	query := b.client.SourceName.Query().
-		Where(sourceQuery(&model.SourceSpec{ID: &nodeID})).
+		Where(sourceQuery(&model.SourceSpec{Namespace: &nodeID})).
 		Limit(MaxPageSize)
 
 	srcNames, err := query.All(ctx)

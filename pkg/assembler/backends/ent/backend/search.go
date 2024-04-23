@@ -80,7 +80,7 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 		return nil, err
 	}
 	results = append(results, collect(sources, func(v *ent.SourceName) model.PackageSourceOrArtifact {
-		return toModelSourceName(v)
+		return toModelSource(v)
 	})...)
 
 	artifacts, err := b.client.Artifact.Query().Where(

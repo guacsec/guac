@@ -38,8 +38,8 @@ import (
 )
 
 const (
-	pkgTypeString      = "pkgType"
-	pkgNamespaceString = "pkgNamespace"
+	pkgTypeString      = "package_types"
+	pkgNamespaceString = "package_namespaces"
 )
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -61,7 +61,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgNames = append(pkgNames, backReferencePackageVersion(collectedPkgVersion))
 	}
 
-	return collect(pkgNames, toModelPackage), nil
+	return toModelPackageTrie(pkgNames), nil
 }
 
 func packageQueryPredicates(pkgSpec *model.PkgSpec) predicate.PackageVersion {
@@ -401,7 +401,7 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 	if allowedEdges[model.EdgePackageTypePackageNamespace] {
 		query := b.client.PackageName.Query().
 			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
+				optionalPredicate(&nodeID, packagename.TypeEQ),
 			}...).
 			Limit(MaxPageSize)
 
@@ -432,7 +432,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 
 	query := b.client.PackageName.Query().
 		Where([]predicate.PackageName{
-			optionalPredicate(&nodeID, IDEQ),
+			optionalPredicate(&nodeID, packagename.NamespaceEQ),
 		}...).
 		Limit(MaxPageSize)
 
