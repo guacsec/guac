@@ -25,6 +25,11 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+const (
+	// guacIDSplit is used as a separator to concatenate the type and namespace to create an ID
+	guacIDSplit = "guac-split-@@"
+)
+
 type globalID struct {
 	nodeType string
 	id       string

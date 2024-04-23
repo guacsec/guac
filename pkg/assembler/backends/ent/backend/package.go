@@ -157,7 +157,7 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 
 			pkgNameIDs = append(pkgNameIDs, pkgNameID.String())
 			pkgTypes[pkgNameID.String()] = pkgInput.PackageInput.Type
-			pkgNamespaces[pkgNameID.String()] = strings.Join([]string{pkgInput.PackageInput.Type, stringOrEmpty(pkgInput.PackageInput.Namespace)}, "@@")
+			pkgNamespaces[pkgNameID.String()] = strings.Join([]string{pkgInput.PackageInput.Type, stringOrEmpty(pkgInput.PackageInput.Namespace)}, guacIDSplit)
 			pkgVersionIDs = append(pkgVersionIDs, pkgVersionID.String())
 		}
 
@@ -233,7 +233,7 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 
 	return &model.PackageIDs{
 		PackageTypeID:      toGlobalID(pkgTypeString, pkg.PackageInput.Type),
-		PackageNamespaceID: toGlobalID(pkgNamespaceString, strings.Join([]string{pkg.PackageInput.Type, stringOrEmpty(pkg.PackageInput.Namespace)}, "@@")),
+		PackageNamespaceID: toGlobalID(pkgNamespaceString, strings.Join([]string{pkg.PackageInput.Type, stringOrEmpty(pkg.PackageInput.Namespace)}, guacIDSplit)),
 		PackageNameID:      toGlobalID(packagename.Table, pkgNameID.String()),
 		PackageVersionID:   toGlobalID(packageversion.Table, pkgVersionID.String())}, nil
 }
@@ -421,7 +421,7 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 				Type: foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{
 					{
-						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, "@@")),
+						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 						Namespace: foundPkgName.Namespace,
 						Names:     []*model.PackageName{},
 					},
@@ -436,7 +436,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 	var out []model.Node
 
 	// split to find the type and namespace value
-	splitQueryValue := strings.Split(nodeID, "@@")
+	splitQueryValue := strings.Split(nodeID, guacIDSplit)
 	if len(splitQueryValue) != 2 {
 		return out, fmt.Errorf("invalid query for packageNamespaceNeighbors with ID %s", nodeID)
 	}
@@ -567,7 +567,7 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 				Type: foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{
 					{
-						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, "@@")),
+						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 						Namespace: foundPkgName.Namespace,
 						Names:     []*model.PackageName{},
 					},
@@ -707,7 +707,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 					Type: foundPkgName.Type,
 					Namespaces: []*model.PackageNamespace{
 						{
-							ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, "@@")),
+							ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 							Namespace: foundPkgName.Namespace,
 							Names: []*model.PackageName{{
 								ID:       toGlobalID(packagename.Table, foundPkgName.ID.String()),

@@ -384,7 +384,7 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 			srcNameCreates[i] = generateSourceNameCreate(tx, &srcNameID, s)
 			srcNameIDs = append(srcNameIDs, srcNameID.String())
 			srcTypes[srcNameID.String()] = s.SourceInput.Type
-			srcNamespaces[srcNameID.String()] = strings.Join([]string{s.SourceInput.Type, s.SourceInput.Namespace}, "@@")
+			srcNamespaces[srcNameID.String()] = strings.Join([]string{s.SourceInput.Type, s.SourceInput.Namespace}, guacIDSplit)
 		}
 
 		if err := tx.SourceName.CreateBulk(srcNameCreates...).
@@ -449,7 +449,7 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 
 	return &model.SourceIDs{
 		SourceTypeID:      toGlobalID(srcTypeString, src.SourceInput.Type),
-		SourceNamespaceID: toGlobalID(srcNamespaceString, strings.Join([]string{src.SourceInput.Type, src.SourceInput.Namespace}, "@@")),
+		SourceNamespaceID: toGlobalID(srcNamespaceString, strings.Join([]string{src.SourceInput.Type, src.SourceInput.Namespace}, guacIDSplit)),
 		SourceNameID:      toGlobalID(sourcename.Table, srcNameID.String())}, nil
 }
 
@@ -507,7 +507,7 @@ func toModelSourceTrie(collectedSrcNames []*ent.SourceName) []*model.Source {
 
 	for _, srcName := range collectedSrcNames {
 
-		namespaceString := srcName.Namespace + "," + toGlobalID(srcNamespaceString, strings.Join([]string{srcName.Type, srcName.Namespace}, "@@"))
+		namespaceString := srcName.Namespace + "," + toGlobalID(srcNamespaceString, strings.Join([]string{srcName.Type, srcName.Namespace}, guacIDSplit))
 		typeString := srcName.Type + "," + toGlobalID(srcTypeString, srcName.Type)
 
 		sourceName := &model.SourceName{
@@ -573,7 +573,7 @@ func toModelSource(s *ent.SourceName) *model.Source {
 		ID:   toGlobalID(srcTypeString, s.Type),
 		Type: s.Type,
 		Namespaces: []*model.SourceNamespace{{
-			ID:        toGlobalID(srcNamespaceString, strings.Join([]string{s.Type, s.Namespace}, "@@")),
+			ID:        toGlobalID(srcNamespaceString, strings.Join([]string{s.Type, s.Namespace}, guacIDSplit)),
 			Namespace: s.Namespace,
 			Names:     []*model.SourceName{sourceName},
 		}},
@@ -602,7 +602,7 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 				Type: foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{
 					{
-						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, "@@")),
+						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, guacIDSplit)),
 						Namespace: foundSrcName.Namespace,
 						Names:     []*model.SourceName{},
 					},
@@ -617,7 +617,7 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 	var out []model.Node
 
 	// split to find the type and namespace value
-	splitQueryValue := strings.Split(nodeID, "@@")
+	splitQueryValue := strings.Split(nodeID, guacIDSplit)
 	if len(splitQueryValue) != 2 {
 		return out, fmt.Errorf("invalid query for srcNamespaceNeighbors with ID %s", nodeID)
 	}
@@ -638,7 +638,7 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 				Type: foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{
 					{
-						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, "@@")),
+						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, guacIDSplit)),
 						Namespace: foundSrcName.Namespace,
 						Names: []*model.SourceName{
 							{
@@ -735,7 +735,7 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 				Type: foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{
 					{
-						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, "@@")),
+						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, guacIDSplit)),
 						Namespace: foundSrcName.Namespace,
 						Names:     []*model.SourceName{},
 					},
