@@ -202,16 +202,5 @@ func validateScorecardFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"header-file"})
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
-		os.Exit(1)
-	}
-	scorecardCmd.Flags().AddFlagSet(set)
-	if err := viper.BindPFlags(scorecardCmd.Flags()); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
-		os.Exit(1)
-	}
-
 	certifierCmd.AddCommand(scorecardCmd)
 }

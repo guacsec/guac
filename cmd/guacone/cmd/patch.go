@@ -299,7 +299,6 @@ func validateQueryPatchFlags(
 
 func init() {
 	set, err := cli.BuildFlags([]string{
-		"header-file",
 		"start-purl",
 		"stop-purl",
 		"search-depth",

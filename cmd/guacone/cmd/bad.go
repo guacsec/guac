@@ -253,7 +253,7 @@ func validateQueryBadFlags(graphqlEndpoint, headerFile string, depth int) (query
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"header-file", "search-depth"})
+	set, err := cli.BuildFlags([]string{"search-depth"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
