@@ -68,7 +68,3 @@ func (s *DefaultServer) HealthCheck(ctx context.Context, request gen.HealthCheck
 func (s *DefaultServer) AnalyzeDependencies(ctx context.Context, request gen.AnalyzeDependenciesRequestObject) (gen.AnalyzeDependenciesResponseObject, error) {
 	return nil, fmt.Errorf("Unimplemented")
 }
-
-func (s *DefaultServer) RetrieveDependencies(ctx context.Context, request gen.RetrieveDependenciesRequestObject) (gen.RetrieveDependenciesResponseObject, error) {
-	return nil, fmt.Errorf("Unimplemented")
-}

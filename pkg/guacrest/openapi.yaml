@@ -30,14 +30,37 @@ paths:
                 type: string
   "/query/dependencies":
     get:
-      summary: Retrieve the dependencies of a package
+      summary: Retrieve transitive dependencies 
+      description: > 
+        Find the transitive dependencies of the input. The HasSBOM and HasSLSA
+        predicates are used as the dependency relationship and the IsOccurrence and 
+        PkgEqual predicates are used to find consider equivalent packages.
       operationId: retrieveDependencies
       parameters:
         - $ref: "#/components/parameters/PaginationSpec"
-        - name: purl
-          description: the purl of the dependent package
+        - name: linkCondition
+          description: > 
+            Whether links between nouns must be made by digest or if they 
+            can be made just by name (i.e. purl). Specify 'name' to allow using
+            SBOMs that don't provide the digest of the subject. The default is 
+            'digest'. To search by purl, 'name' must be specified.
           in: query
-          required: true
+          required: false
+          schema:
+            type: string 
+            enum: 
+              - digest
+              - name
+        - name: purl
+          description: The purl of the dependent package.
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: digest
+          description: The digest of the dependent package.
+          in: query
+          required: false
           schema:
             type: string
       responses:
@@ -81,7 +104,7 @@ paths:
 components:
   parameters:
     PaginationSpec:
-      name: PaginationSpec 
+      name: paginationSpec 
       in: query
       description: >
         The pagination configuration for the query.
