@@ -82,9 +82,9 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("retrieve-dependencies"),
-			args,
 			viper.GetBool("enable-prometheus"),
 			viper.GetInt("prometheus-port"),
+			args,
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -114,8 +114,18 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateDepsDevFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, retrieveDependencies bool, args []string,
-	enablePrometheus bool, prometheusPort int,
+func validateDepsDevFlags(
+	pubsubAddr,
+	blobAddr,
+	csubAddr string,
+	csubTls,
+	csubTlsSkipVerify,
+	useCsub,
+	poll,
+	retrieveDependencies,
+	enablePrometheus bool,
+	prometheusPort int,
+	args []string,
 ) (depsDevOptions, error) {
 	var opts depsDevOptions
 	opts.pubsubAddr = pubsubAddr

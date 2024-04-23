@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/bucket"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
@@ -105,8 +106,9 @@ func (td *TestBucketBuilder) GetDownloader(url string, region string) bucket.Buc
 
 func TestS3Collector(t *testing.T) {
 	ctx := context.Background()
-	testNoPolling(t, ctx)
-	testQueuesSplitPolling(t, ctx)
+
+	t.Run("no polling", func(t *testing.T) { testNoPolling(t, ctx) })
+	t.Run("queues split polling", func(t *testing.T) { testQueuesSplitPolling(t, ctx) })
 }
 
 func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
@@ -165,6 +167,8 @@ func testQueuesSplitPolling(t *testing.T, ctx context.Context) {
 		if doc.Encoding != "UNKNOWN" {
 			t.Errorf("wrong encoding returned: %s", doc.Encoding)
 		}
+
+		assertSource(t, "test-message", doc)
 	}
 }
 
@@ -202,5 +206,23 @@ func testNoPolling(t *testing.T, ctx context.Context) {
 
 	if s[0].Blob != nil && !bytes.Equal(s[0].Blob, []byte("{\"key\": \"value\"}")) {
 		t.Errorf("wrong item returned")
+	}
+
+	assertSource(t, "no-poll-item", s[0])
+}
+
+func assertSource(t *testing.T, wantSource string, doc *processor.Document) {
+	wantDocRef := events.GetDocRef(doc.Blob)
+	if doc.SourceInformation.DocumentRef != wantDocRef {
+		t.Errorf("want DocumentRef = %s, got = %s", wantDocRef, doc.SourceInformation.DocumentRef)
+	}
+
+	if doc.SourceInformation.Source != wantSource {
+		t.Errorf("want Source = %s, got = %s", wantSource, doc.SourceInformation.Source)
+	}
+
+	const wantCollector string = "S3CollectorType"
+	if doc.SourceInformation.Collector != wantCollector {
+		t.Errorf("want Collector = %s, got = %s", wantCollector, doc.SourceInformation.Collector)
 	}
 }

@@ -29,7 +29,14 @@ import (
 func init() {
 	cobra.OnInitialize(cli.InitConfig)
 
-	set, err := cli.BuildFlags([]string{"pubsub-addr", "blob-addr", "csub-addr", "use-csub", "service-poll", "enable-prometheus"})
+	set, err := cli.BuildFlags([]string{
+		"pubsub-addr",
+		"blob-addr",
+		"csub-addr",
+		"use-csub",
+		"service-poll",
+		"enable-prometheus",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

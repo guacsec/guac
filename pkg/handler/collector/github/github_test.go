@@ -145,14 +145,17 @@ func (m *MockGithubClient) GetReleaseAsset(asset client.ReleaseAsset) (*client.R
 	return &rac, nil
 }
 
+// TODO: implement this stub.
 func (m *MockGithubClient) GetWorkflow(ctx context.Context, owner string, repo string, githubWorkflowName string) ([]*client.Workflow, error) {
 	return nil, nil
 }
 
+// TODO: implement this stub.
 func (m *MockGithubClient) GetLatestWorkflowRun(ctx context.Context, owner, repo string, workflowId int64) (*client.WorkflowRun, error) {
 	return nil, nil
 }
 
+// TODO: implement this stub.
 func (m *MockGithubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName string, runID int64) ([]*client.WorkflowArtifactContent, error) {
 	return nil, nil
 }
@@ -281,6 +284,9 @@ func TestNewGithubCollector(t *testing.T) {
 func Test_githubCollector_RetrieveArtifacts(t *testing.T) {
 	mockClient := &MockGithubClient{}
 	mockData := mockDataSource()
+
+	// TODO: Currently, len(collectedDocs) == 0. Fix this, and implement a
+	// more robust doc comparison, like assert from github.com/stretchr/testify
 
 	type fields struct {
 		poll              bool

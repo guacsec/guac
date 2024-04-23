@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/pkg/errors"
@@ -389,8 +390,11 @@ func Test_ociCollector_RetrieveArtifacts(t *testing.T) {
 			for i := range tt.want {
 				collectedDoc := findDocumentBySource(collectedDocs, tt.want[i].SourceInformation.Source)
 				if collectedDoc == nil {
-					t.Errorf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
+					t.Fatalf("g.RetrieveArtifacts() = %v, want %v", nil, tt.want[i])
 				}
+
+				tt.want[i].SourceInformation.DocumentRef = actualDocRef(collectedDoc.Blob)
+
 				result := dochelper.DocTreeEqual(dochelper.DocNode(collectedDoc), dochelper.DocNode(tt.want[i]))
 				if !result {
 					t.Errorf("g.RetrieveArtifacts() = %v, want %v", string(collectedDocs[i].Blob), string(tt.want[i].Blob))
@@ -417,6 +421,14 @@ func findDocumentBySource(docs []*processor.Document, source string) *processor.
 		}
 	}
 	return nil
+}
+
+// The blob that we input into the test is not the final blob that
+// gets hashed to come up with the blob key; the final blob is
+// different. So we run the hashing function on the final blob and
+// then set it on our original want doc.
+func actualDocRef(blob []byte) string {
+	return events.GetDocRef(blob)
 }
 
 func toDataSource(ociValues []string) datasource.CollectSource {

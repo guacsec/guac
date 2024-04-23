@@ -25,6 +25,7 @@ import (
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -182,8 +183,9 @@ func (g *gcs) getArtifacts(ctx context.Context, docChannel chan<- *processor.Doc
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
-					Collector: string(CollectorGCS),
-					Source:    g.bucket + "/" + attrs.Name,
+					Collector:   string(CollectorGCS),
+					Source:      g.bucket + "/" + attrs.Name,
+					DocumentRef: events.GetDocRef(payload),
 				},
 			}
 			docChannel <- doc

@@ -95,7 +95,16 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateOCIFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (ociOptions, error) {
+func validateOCIFlags(
+	pubsubAddr,
+	blobAddr,
+	csubAddr string,
+	csubTls,
+	csubTlsSkipVerify,
+	useCsub,
+	poll bool,
+	args []string,
+) (ociOptions, error) {
 	var opts ociOptions
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr

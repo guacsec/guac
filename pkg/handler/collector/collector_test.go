@@ -20,11 +20,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"reflect"
 	"testing"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/internal/testing/dochelper"
@@ -54,14 +55,15 @@ func TestCollect(t *testing.T) {
 		want          []*processor.Document
 	}{{
 		name:      "file collector file",
-		collector: file.NewFileCollector(ctx, "./testdata", false, time.Second, false),
+		collector: file.NewFileCollector(ctx, "./testdata", false, time.Second),
 		want: []*processor.Document{{
 			Blob:   []byte("hello\n"),
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(file.FileCollector),
-				Source:    "file:///testdata/hello",
+				Collector:   string(file.FileCollector),
+				Source:      "file:///testdata/hello",
+				DocumentRef: events.GetDocRef([]byte("hello\n")),
 			}},
 		},
 		wantErr: false,

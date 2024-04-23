@@ -47,7 +47,7 @@ type gitDocumentCollector struct {
 }
 
 func NewGitDocumentCollector(ctx context.Context, url string, dir string, poll bool, interval time.Duration) *gitDocumentCollector {
-	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second, false)
+	fileCollector := file.NewFileCollector(ctx, dir, false, time.Second)
 
 	return &gitDocumentCollector{
 		url:           url,

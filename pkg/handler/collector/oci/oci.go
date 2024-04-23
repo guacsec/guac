@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/guacsec/guac/pkg/version"
@@ -398,7 +399,13 @@ func (o *ociCollector) fetchReferrerArtifacts(ctx context.Context, repo string, 
 // It takes a context.Context, a *regclient.RegClient, an artifact string, an artifactType string, and a docChannel chan<- *processor.Document as input.
 // Note that we are not concurrently fetching the layers since we will usually have 1 layer per artifact.
 // It returns an error if there was an issue fetching the artifact blobs.
-func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifact string, artifactType string, docChannel chan<- *processor.Document) error {
+func fetchOCIArtifactBlobs(
+	ctx context.Context,
+	rc *regclient.RegClient,
+	artifact,
+	artifactType string,
+	docChannel chan<- *processor.Document,
+) error {
 	logger := logging.FromContext(ctx)
 	r, err := ref.New(artifact)
 	if err != nil {
@@ -455,8 +462,9 @@ func fetchOCIArtifactBlobs(ctx context.Context, rc *regclient.RegClient, artifac
 			Type:   docType,
 			Format: docFormat,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(OCICollector),
-				Source:    artifact,
+				Collector:   string(OCICollector),
+				Source:      artifact,
+				DocumentRef: events.GetDocRef(btr1),
 			},
 		}
 		docChannel <- doc

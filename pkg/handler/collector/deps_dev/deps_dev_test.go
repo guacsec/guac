@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -262,6 +263,8 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				t.Errorf("Wanted %v elements, but got %v", len(tt.want), len(collectedDocs))
 			}
 			for i := range collectedDocs {
+				tt.want[i].SourceInformation.DocumentRef = actualDocRef(collectedDocs[i].Blob)
+
 				collectedDocs[i].Blob, err = normalizeTimeStampAndScorecard(collectedDocs[i].Blob)
 				if err != nil {
 					t.Fatalf("unexpected error while normalizing: %v", err)
@@ -379,6 +382,14 @@ func TestPerformanceDepsCollector(t *testing.T) {
 	if len(collectedDocs) == 0 {
 		t.Errorf("g.RetrieveArtifacts() = %v", len(collectedDocs))
 	}
+}
+
+// The blob that we input into the test is not the final blob that
+// gets hashed to come up with the blob key; the final blob is
+// different. So we run the hashing function on the final blob and
+// then set it on our original want doc.
+func actualDocRef(blob []byte) string {
+	return events.GetDocRef(blob)
 }
 
 // Scorecard and timestamp data constantly changes, causing CI to keep erroring every few days.

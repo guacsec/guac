@@ -18,12 +18,13 @@ package cmd
 import (
 	"context"
 	"fmt"
-	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
-	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
-	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 	"os"
 	"strings"
 	"time"
+
+	csubclient "github.com/guacsec/guac/pkg/collectsub/client"
+	"github.com/guacsec/guac/pkg/collectsub/datasource/csubsource"
+	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
 
 	"github.com/guacsec/guac/pkg/cli"
 
@@ -153,7 +154,19 @@ you have access to read and write to the respective blob store.`,
 	},
 }
 
-func validateGithubFlags(pubsubAddr, blobAddr, csubAddr, githubMode, sbomName, workflowFileName string, csubTls, csubTlsSkipVerify, useCsub, poll bool, args []string) (githubOptions, error) {
+func validateGithubFlags(
+	pubsubAddr,
+	blobAddr,
+	csubAddr,
+	githubMode,
+	sbomName,
+	workflowFileName string,
+	csubTls,
+	csubTlsSkipVerify,
+	useCsub,
+	poll bool,
+	args []string,
+) (githubOptions, error) {
 	var opts githubOptions
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr

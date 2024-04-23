@@ -21,6 +21,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/bucket"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -89,8 +90,9 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 			Format:   processor.FormatUnknown,
 			Encoding: bucket.ExtractEncoding(enc, item),
 			SourceInformation: processor.SourceInformation{
-				Collector: S3CollectorType,
-				Source:    "S3",
+				Collector:   S3CollectorType,
+				Source:      item,
+				DocumentRef: events.GetDocRef(blob),
 			},
 		}
 		docChannel <- doc
@@ -124,8 +126,9 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 					Format:   processor.FormatUnknown,
 					Encoding: bucket.ExtractEncoding(enc, item),
 					SourceInformation: processor.SourceInformation{
-						Collector: S3CollectorType,
-						Source:    "S3",
+						Collector:   S3CollectorType,
+						Source:      item,
+						DocumentRef: events.GetDocRef(blob),
 					},
 				}
 				docChannel <- doc
@@ -214,8 +217,9 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 						Format:   processor.FormatUnknown,
 						Encoding: bucket.ExtractEncoding(enc, item),
 						SourceInformation: processor.SourceInformation{
-							Collector: S3CollectorType,
-							Source:    "S3",
+							Collector:   S3CollectorType,
+							Source:      item,
+							DocumentRef: events.GetDocRef(blob),
 						},
 					}
 					select {
@@ -240,9 +244,6 @@ func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider,
 		mpBuilder = s.config.MpBuilder
 	} else {
 		mpBuilder = messaging.GetDefaultMessageProviderBuilder()
-		if err != nil {
-			return nil, fmt.Errorf("error getting message provider: %w", err)
-		}
 	}
 
 	mp, err := mpBuilder.GetMessageProvider(messaging.MessageProviderConfig{

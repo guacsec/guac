@@ -129,9 +129,6 @@ func init() {
 	set.String("github-sbom", "", "name of sbom file to look for in github release.")
 	set.String("github-workflow-file", "", "name of workflow file to look for in github workflow. \nThis will be the name of the actual file, not the workflow name (i.e. ci.yaml).")
 
-	// Files collector options
-	set.Bool("use-blob-url", false, "use blob URL for origin instead of source URL (useful if the blob store is persistent and we want to store the blob source location)")
-
 	set.String("header-file", "", "a text file containing HTTP headers to send to the GQL server, in RFC 822 format")
 
 	set.VisitAll(func(f *pflag.Flag) {
