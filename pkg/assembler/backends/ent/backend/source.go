@@ -370,6 +370,8 @@ func (b *EntBackend) IngestSource(ctx context.Context, source model.IDorSourceIn
 func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSourceInput) (*[]model.SourceIDs, error) {
 	batches := chunk(srcInputs, MaxBatchSize)
 	srcNameIDs := make([]string, 0)
+	srcTypes := map[string]string{}
+	srcNamespaces := map[string]string{}
 
 	for _, srcs := range batches {
 		srcNameCreates := make([]*ent.SourceNameCreate, len(srcs))
@@ -381,6 +383,8 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 
 			srcNameCreates[i] = generateSourceNameCreate(tx, &srcNameID, s)
 			srcNameIDs = append(srcNameIDs, srcNameID.String())
+			srcTypes[srcNameID.String()] = s.SourceInput.Type
+			srcNamespaces[srcNameID.String()] = strings.Join([]string{s.SourceInput.Type, s.SourceInput.Namespace}, "@@")
 		}
 
 		if err := tx.SourceName.CreateBulk(srcNameCreates...).
@@ -402,8 +406,8 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 	var collectedSrcIDs []model.SourceIDs
 	for i := range srcNameIDs {
 		collectedSrcIDs = append(collectedSrcIDs, model.SourceIDs{
-			SourceTypeID:      toGlobalID(srcTypeString, srcNameIDs[i]),
-			SourceNamespaceID: toGlobalID(srcNamespaceString, srcNameIDs[i]),
+			SourceTypeID:      toGlobalID(srcTypeString, srcTypes[srcNameIDs[i]]),
+			SourceNamespaceID: toGlobalID(srcNamespaceString, srcNamespaces[srcNameIDs[i]]),
 			SourceNameID:      toGlobalID(sourcename.Table, srcNameIDs[i])})
 	}
 
@@ -444,8 +448,8 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 	}
 
 	return &model.SourceIDs{
-		SourceTypeID:      toGlobalID(srcTypeString, srcNameID.String()),
-		SourceNamespaceID: toGlobalID(srcNamespaceString, srcNameID.String()),
+		SourceTypeID:      toGlobalID(srcTypeString, src.SourceInput.Type),
+		SourceNamespaceID: toGlobalID(srcNamespaceString, strings.Join([]string{src.SourceInput.Type, src.SourceInput.Namespace}, "@@")),
 		SourceNameID:      toGlobalID(sourcename.Table, srcNameID.String())}, nil
 }
 
@@ -503,7 +507,7 @@ func toModelSourceTrie(collectedSrcNames []*ent.SourceName) []*model.Source {
 
 	for _, srcName := range collectedSrcNames {
 
-		namespaceString := srcName.Namespace + "," + toGlobalID(srcNamespaceString, srcName.Namespace)
+		namespaceString := srcName.Namespace + "," + toGlobalID(srcNamespaceString, strings.Join([]string{srcName.Type, srcName.Namespace}, "@@"))
 		typeString := srcName.Type + "," + toGlobalID(srcTypeString, srcName.Type)
 
 		sourceName := &model.SourceName{
@@ -566,10 +570,10 @@ func toModelSource(s *ent.SourceName) *model.Source {
 	}
 
 	return &model.Source{
-		ID:   toGlobalID(srcTypeString, s.ID.String()),
+		ID:   toGlobalID(srcTypeString, s.Type),
 		Type: s.Type,
 		Namespaces: []*model.SourceNamespace{{
-			ID:        toGlobalID(srcNamespaceString, s.ID.String()),
+			ID:        toGlobalID(srcNamespaceString, strings.Join([]string{s.Type, s.Namespace}, "@@")),
 			Namespace: s.Namespace,
 			Names:     []*model.SourceName{sourceName},
 		}},
@@ -594,11 +598,11 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 
 		for _, foundSrcName := range srcNames {
 			out = append(out, &model.Source{
-				ID:   toGlobalID(srcTypeString, foundSrcName.ID.String()),
+				ID:   toGlobalID(srcTypeString, foundSrcName.Type),
 				Type: foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{
 					{
-						ID:        toGlobalID(srcNamespaceString, foundSrcName.ID.String()),
+						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, "@@")),
 						Namespace: foundSrcName.Namespace,
 						Names:     []*model.SourceName{},
 					},
@@ -612,8 +616,14 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
 
+	// split to find the type and namespace value
+	splitQueryValue := strings.Split(nodeID, "@@")
+	if len(splitQueryValue) != 2 {
+		return out, fmt.Errorf("invalid query for srcNamespaceNeighbors with ID %s", nodeID)
+	}
+
 	query := b.client.SourceName.Query().
-		Where(sourceQuery(&model.SourceSpec{Namespace: &nodeID})).
+		Where(sourceQuery(&model.SourceSpec{Type: &splitQueryValue[0], Namespace: &splitQueryValue[1]})).
 		Limit(MaxPageSize)
 
 	srcNames, err := query.All(ctx)
@@ -624,11 +634,11 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 	if allowedEdges[model.EdgeSourceNamespaceSourceName] {
 		for _, foundSrcName := range srcNames {
 			out = append(out, &model.Source{
-				ID:   toGlobalID(srcTypeString, foundSrcName.ID.String()),
+				ID:   toGlobalID(srcTypeString, foundSrcName.Type),
 				Type: foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{
 					{
-						ID:        toGlobalID(srcNamespaceString, foundSrcName.ID.String()),
+						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, "@@")),
 						Namespace: foundSrcName.Namespace,
 						Names: []*model.SourceName{
 							{
@@ -644,7 +654,7 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 	if allowedEdges[model.EdgeSourceNamespaceSourceType] {
 		for _, foundSrcName := range srcNames {
 			out = append(out, &model.Source{
-				ID:         toGlobalID(srcTypeString, foundSrcName.ID.String()),
+				ID:         toGlobalID(srcTypeString, foundSrcName.Type),
 				Type:       foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{},
 			})
@@ -721,11 +731,11 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 	for _, foundSrcName := range srcNames {
 		if allowedEdges[model.EdgeSourceNameSourceNamespace] {
 			out = append(out, &model.Source{
-				ID:   toGlobalID(srcTypeString, foundSrcName.ID.String()),
+				ID:   toGlobalID(srcTypeString, foundSrcName.Type),
 				Type: foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{
 					{
-						ID:        toGlobalID(srcNamespaceString, foundSrcName.ID.String()),
+						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, "@@")),
 						Namespace: foundSrcName.Namespace,
 						Names:     []*model.SourceName{},
 					},

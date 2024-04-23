@@ -148,12 +148,12 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 			return []model.Node{}, fmt.Errorf("failed to get pkgName neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case pkgNamespaceString:
-		neighbors, err = b.packageNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		neighbors, err = b.packageNamespaceNeighbors(ctx, foundGlobalID.id, processUsingOnly(usingOnly))
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get pkgNamespace neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case pkgTypeString:
-		neighbors, err = b.packageTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		neighbors, err = b.packageTypeNeighbors(ctx, foundGlobalID.id, processUsingOnly(usingOnly))
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get pkgType neighbors with id: %s with error: %w", nodeID, err)
 		}
@@ -163,12 +163,12 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 			return []model.Node{}, fmt.Errorf("failed to get source name neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case srcNamespaceString:
-		neighbors, err = b.srcNamespaceNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		neighbors, err = b.srcNamespaceNeighbors(ctx, foundGlobalID.id, processUsingOnly(usingOnly))
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get source namespace neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case srcTypeString:
-		neighbors, err = b.srcTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		neighbors, err = b.srcTypeNeighbors(ctx, foundGlobalID.id, processUsingOnly(usingOnly))
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get source type neighbors with id: %s with error: %w", nodeID, err)
 		}
@@ -178,7 +178,7 @@ func (b *EntBackend) Neighbors(ctx context.Context, nodeID string, usingOnly []m
 			return []model.Node{}, fmt.Errorf("failed to get vulnID neighbors with id: %s with error: %w", nodeID, err)
 		}
 	case vulnTypeString:
-		neighbors, err = b.vulnTypeNeighbors(ctx, nodeID, processUsingOnly(usingOnly))
+		neighbors, err = b.vulnTypeNeighbors(ctx, foundGlobalID.id, processUsingOnly(usingOnly))
 		if err != nil {
 			return []model.Node{}, fmt.Errorf("failed to get vuln type neighbors with id: %s with error: %w", nodeID, err)
 		}

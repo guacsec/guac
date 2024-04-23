@@ -53,7 +53,7 @@ func toModelPackageTrie(collectedPkgNames []*ent.PackageName) []*model.Package {
 	for _, pkgName := range collectedPkgNames {
 		nameString := pkgName.Name + "," + toGlobalID(packagename.Table, pkgName.ID.String())
 
-		namespaceString := pkgName.Namespace + "," + toGlobalID(pkgNamespaceString, pkgName.Namespace)
+		namespaceString := pkgName.Namespace + "," + toGlobalID(pkgNamespaceString, strings.Join([]string{pkgName.Type, pkgName.Namespace}, "@@"))
 		typeString := pkgName.Type + "," + toGlobalID(pkgTypeString, pkgName.Type)
 
 		if pkgNamespaces, ok := pkgTypes[typeString]; ok {
@@ -112,7 +112,7 @@ func toModelPackage(p *ent.PackageName) *model.Package {
 		return nil
 	}
 	return &model.Package{
-		ID:         toGlobalID(pkgTypeString, p.ID.String()),
+		ID:         toGlobalID(pkgTypeString, p.Type),
 		Type:       p.Type,
 		Namespaces: collect([]*ent.PackageName{p}, toModelNamespace),
 	}
@@ -123,7 +123,7 @@ func toModelNamespace(n *ent.PackageName) *model.PackageNamespace {
 		return nil
 	}
 	return &model.PackageNamespace{
-		ID:        toGlobalID(pkgNamespaceString, n.ID.String()),
+		ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{n.Type, n.Namespace}, "@@")),
 		Namespace: n.Namespace,
 		Names:     collect([]*ent.PackageName{n}, toModelPackageName),
 	}
