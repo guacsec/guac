@@ -22,6 +22,7 @@ import (
 	stdsql "database/sql"
 	"fmt"
 	"sort"
+	"strings"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -38,8 +39,8 @@ import (
 )
 
 const (
-	pkgTypeString      = "pkgType"
-	pkgNamespaceString = "pkgNamespace"
+	pkgTypeString      = "package_types"
+	pkgNamespaceString = "package_namespaces"
 )
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -61,7 +62,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		pkgNames = append(pkgNames, backReferencePackageVersion(collectedPkgVersion))
 	}
 
-	return collect(pkgNames, toModelPackage), nil
+	return toModelPackageTrie(pkgNames), nil
 }
 
 func packageQueryPredicates(pkgSpec *model.PkgSpec) predicate.PackageVersion {
@@ -138,6 +139,8 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 	batches := chunk(pkgInputs, MaxBatchSize)
 	pkgNameIDs := make([]string, 0)
 	pkgVersionIDs := make([]string, 0)
+	pkgTypes := map[string]string{}
+	pkgNamespaces := map[string]string{}
 
 	for _, pkgs := range batches {
 		pkgNameCreates := make([]*ent.PackageNameCreate, len(pkgs))
@@ -153,6 +156,8 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 			pkgVersionCreates[i] = generatePackageVersionCreate(tx, &pkgVersionID, &pkgNameID, pkgInput)
 
 			pkgNameIDs = append(pkgNameIDs, pkgNameID.String())
+			pkgTypes[pkgNameID.String()] = pkgInput.PackageInput.Type
+			pkgNamespaces[pkgNameID.String()] = strings.Join([]string{pkgInput.PackageInput.Type, stringOrEmpty(pkgInput.PackageInput.Namespace)}, guacIDSplit)
 			pkgVersionIDs = append(pkgVersionIDs, pkgVersionID.String())
 		}
 
@@ -182,8 +187,8 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 	var collectedPkgIDs []model.PackageIDs
 	for i := range pkgVersionIDs {
 		collectedPkgIDs = append(collectedPkgIDs, model.PackageIDs{
-			PackageTypeID:      toGlobalID(pkgTypeString, pkgNameIDs[i]),
-			PackageNamespaceID: toGlobalID(pkgNamespaceString, pkgNameIDs[i]),
+			PackageTypeID:      toGlobalID(pkgTypeString, pkgTypes[pkgNameIDs[i]]),
+			PackageNamespaceID: toGlobalID(pkgNamespaceString, pkgNamespaces[pkgNameIDs[i]]),
 			PackageNameID:      toGlobalID(ent.TypePackageName, pkgNameIDs[i]),
 			PackageVersionID:   toGlobalID(ent.TypePackageVersion, pkgVersionIDs[i])})
 	}
@@ -227,8 +232,8 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 	}
 
 	return &model.PackageIDs{
-		PackageTypeID:      toGlobalID(pkgTypeString, pkgNameID.String()),
-		PackageNamespaceID: toGlobalID(pkgNamespaceString, pkgNameID.String()),
+		PackageTypeID:      toGlobalID(pkgTypeString, pkg.PackageInput.Type),
+		PackageNamespaceID: toGlobalID(pkgNamespaceString, strings.Join([]string{pkg.PackageInput.Type, stringOrEmpty(pkg.PackageInput.Namespace)}, guacIDSplit)),
 		PackageNameID:      toGlobalID(packagename.Table, pkgNameID.String()),
 		PackageVersionID:   toGlobalID(packageversion.Table, pkgVersionID.String())}, nil
 }
@@ -401,7 +406,7 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 	if allowedEdges[model.EdgePackageTypePackageNamespace] {
 		query := b.client.PackageName.Query().
 			Where([]predicate.PackageName{
-				optionalPredicate(&nodeID, IDEQ),
+				optionalPredicate(&nodeID, packagename.TypeEQ),
 			}...).
 			Limit(MaxPageSize)
 
@@ -412,11 +417,11 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 
 		for _, foundPkgName := range pkgNames {
 			out = append(out, &model.Package{
-				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+				ID:   toGlobalID(pkgTypeString, foundPkgName.Type),
 				Type: foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{
 					{
-						ID:        toGlobalID(pkgNamespaceString, foundPkgName.ID.String()),
+						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 						Namespace: foundPkgName.Namespace,
 						Names:     []*model.PackageName{},
 					},
@@ -430,9 +435,15 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
 	var out []model.Node
 
+	// split to find the type and namespace value
+	splitQueryValue := strings.Split(nodeID, guacIDSplit)
+	if len(splitQueryValue) != 2 {
+		return out, fmt.Errorf("invalid query for packageNamespaceNeighbors with ID %s", nodeID)
+	}
 	query := b.client.PackageName.Query().
 		Where([]predicate.PackageName{
-			optionalPredicate(&nodeID, IDEQ),
+			optionalPredicate(&splitQueryValue[0], packagename.TypeEQ),
+			optionalPredicate(&splitQueryValue[1], packagename.NamespaceEQ),
 		}...).
 		Limit(MaxPageSize)
 
@@ -444,11 +455,11 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 	for _, foundPkgName := range pkgNames {
 		if allowedEdges[model.EdgePackageNamespacePackageName] {
 			out = append(out, &model.Package{
-				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+				ID:   toGlobalID(pkgTypeString, foundPkgName.Type),
 				Type: foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{
 					{
-						ID:        toGlobalID(pkgNamespaceString, foundPkgName.ID.String()),
+						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, ":")),
 						Namespace: foundPkgName.Namespace,
 						Names: []*model.PackageName{{
 							ID:       toGlobalID(packagename.Table, foundPkgName.ID.String()),
@@ -461,7 +472,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 		}
 		if allowedEdges[model.EdgePackageNamespacePackageType] {
 			out = append(out, &model.Package{
-				ID:         toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+				ID:         toGlobalID(pkgTypeString, foundPkgName.Type),
 				Type:       foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{},
 			})
@@ -552,11 +563,11 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 	for _, foundPkgName := range pkgNames {
 		if allowedEdges[model.EdgePackageNamePackageNamespace] {
 			out = append(out, &model.Package{
-				ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+				ID:   toGlobalID(pkgTypeString, foundPkgName.Type),
 				Type: foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{
 					{
-						ID:        toGlobalID(pkgNamespaceString, foundPkgName.ID.String()),
+						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 						Namespace: foundPkgName.Namespace,
 						Names:     []*model.PackageName{},
 					},
@@ -692,11 +703,11 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 			pkgNames = append(pkgNames, backReferencePackageVersion(foundPkgVersion))
 			for _, foundPkgName := range pkgNames {
 				out = append(out, &model.Package{
-					ID:   toGlobalID(pkgTypeString, foundPkgName.ID.String()),
+					ID:   toGlobalID(pkgTypeString, foundPkgName.Type),
 					Type: foundPkgName.Type,
 					Namespaces: []*model.PackageNamespace{
 						{
-							ID:        toGlobalID(pkgNamespaceString, foundPkgName.ID.String()),
+							ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 							Namespace: foundPkgName.Namespace,
 							Names: []*model.PackageName{{
 								ID:       toGlobalID(packagename.Table, foundPkgName.ID.String()),
