@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io"
 
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"google.golang.org/grpc"
@@ -34,7 +35,7 @@ type Client interface {
 }
 
 type client struct {
-	client pb.ColectSubscriberServiceClient
+	client pb.CollectSubscriberServiceClient
 	conn   *grpc.ClientConn
 }
 
@@ -72,7 +73,7 @@ func NewClient(opts CsubClientOptions) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := pb.NewColectSubscriberServiceClient(conn)
+	c := pb.NewCollectSubscriberServiceClient(conn)
 
 	return &client{
 		client: c,
@@ -92,7 +93,7 @@ func (c *client) AddCollectEntries(ctx context.Context, entries []*pb.CollectEnt
 		return err
 	}
 	if !res.Success {
-		return fmt.Errorf("add collect entry unsuccessful")
+		return fmt.Errorf("add collect entries unsuccessful")
 	}
 	return nil
 }
@@ -105,5 +106,15 @@ func (c *client) GetCollectEntries(ctx context.Context, filters []*pb.CollectEnt
 		return nil, err
 	}
 
-	return res.Entries, nil
+	var allEntries []*pb.CollectEntry
+	for {
+		entries, err := res.Recv()
+		if err == io.EOF {
+			return allEntries, nil
+		} else if err != nil {
+			return nil, err
+		}
+
+		allEntries = append(allEntries, entries.Entries...)
+	}
 }

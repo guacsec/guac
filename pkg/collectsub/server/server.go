@@ -25,10 +25,12 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
+	"github.com/guacsec/guac/pkg/collectsub/collectsub"
 	pb "github.com/guacsec/guac/pkg/collectsub/collectsub"
 	"github.com/guacsec/guac/pkg/collectsub/server/db/simpledb"
 	db "github.com/guacsec/guac/pkg/collectsub/server/db/types"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/misc/slice"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -36,7 +38,7 @@ import (
 )
 
 type server struct {
-	pb.UnimplementedColectSubscriberServiceServer
+	pb.UnimplementedCollectSubscriberServiceServer
 
 	// Db points to the backend DB, public for mocking testing purposes.
 	Db          db.CollectSubscriberDb
@@ -65,7 +67,7 @@ func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntries
 
 	err := s.Db.AddCollectEntries(ctx, in.Entries)
 	if err != nil {
-		return nil, fmt.Errorf("failed to add entry to db: %w", err)
+		return nil, fmt.Errorf("failed to add entries to db: %w", err)
 	}
 	logger.Infof("AddCollectEntries added %d entries", len(in.Entries))
 
@@ -74,19 +76,26 @@ func (s *server) AddCollectEntries(ctx context.Context, in *pb.AddCollectEntries
 	}, nil
 }
 
-func (s *server) GetCollectEntries(ctx context.Context, in *pb.GetCollectEntriesRequest) (*pb.GetCollectEntriesResponse, error) {
+func (s *server) GetCollectEntries(in *pb.GetCollectEntriesRequest, out collectsub.CollectSubscriberService_GetCollectEntriesServer) error {
+	ctx := out.Context()
+
 	logger := ctxzap.Extract(ctx).Sugar()
 	logger.Debugf("GetCollectEntries called with filters: %v", in.Filters)
 
-	ret, err := s.Db.GetCollectEntries(ctx, in.Filters, in.SinceTime)
+	entries, err := s.Db.GetCollectEntries(ctx, in.Filters, in.SinceTime)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get collect entries from db: %w", err)
+		return fmt.Errorf("failed to get collect entries from db: %w", err)
 	}
-	logger.Infof("GetCollectEntries returning %d entries", len(ret))
+	logger.Infof("GetCollectEntries returning %d entries", len(entries))
 
-	return &pb.GetCollectEntriesResponse{
-		Entries: ret,
-	}, nil
+	err = slice.Chunk(entries, 1000, func(subslice []*pb.CollectEntry) error {
+		return out.Send(&pb.GetCollectEntriesResponse{Entries: subslice})
+	})
+	if err != nil {
+		return fmt.Errorf("failed to write entries to client stream: %w", err)
+	}
+
+	return nil
 }
 
 func contextPropagationUnaryServerInterceptor() grpc.UnaryServerInterceptor {
@@ -146,7 +155,7 @@ func (s *server) Serve(ctx context.Context) error {
 
 	gs := grpc.NewServer(opts...)
 
-	pb.RegisterColectSubscriberServiceServer(gs, s)
+	pb.RegisterCollectSubscriberServiceServer(gs, s)
 
 	var wg sync.WaitGroup
 	var retErr error

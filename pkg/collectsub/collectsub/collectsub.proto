@@ -33,7 +33,7 @@ message CollectEntry {
     int64 since_time = 3;
 }
 
-// rpc AddCollectEntry
+// rpc AddCollectEntries
 message AddCollectEntriesRequest {
     repeated CollectEntry entries = 1;
 }
@@ -41,7 +41,6 @@ message AddCollectEntriesRequest {
 message AddCollectEntriesResponse {
     bool success = 1;
 }
-
 
 // rpc GetCollectEntries
 message CollectEntryFilter {
@@ -59,7 +58,7 @@ message GetCollectEntriesResponse {
     repeated CollectEntry entries = 1;
 }
 
-service ColectSubscriberService {
+service CollectSubscriberService {
   rpc AddCollectEntries(AddCollectEntriesRequest) returns (AddCollectEntriesResponse);
-  rpc GetCollectEntries (GetCollectEntriesRequest) returns (GetCollectEntriesResponse);
+  rpc GetCollectEntries (GetCollectEntriesRequest) returns (stream GetCollectEntriesResponse);
 }
