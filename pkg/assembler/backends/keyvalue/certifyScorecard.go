@@ -19,7 +19,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -144,7 +146,154 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.IDorSour
 // Query CertifyScorecard
 
 func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
-	return nil, fmt.Errorf("not implemented: ScorecardsList")
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	funcName := "Scorecards"
+
+	if &scorecardSpec != nil && scorecardSpec.ID != nil {
+		link, err := byIDkv[*scorecardLink](ctx, *scorecardSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+
+		exactCertifyScorecard, err := c.buildScorecard(ctx, link, &scorecardSpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+
+		return &model.CertifyScorecardConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(exactCertifyScorecard.ID),
+				EndCursor:   ptrfrom.String(exactCertifyScorecard.ID),
+			},
+			Edges: []*model.CertifyScorecardEdge{
+				{
+					Cursor: exactCertifyScorecard.ID,
+					Node:   exactCertifyScorecard,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.CertifyScorecardEdge, 0)
+	hasNextPage := false
+	var cscKeys []string
+	numNodes := 0
+	totalCount := 0
+
+	var search []string
+	foundOne := false
+	if &scorecardSpec != nil && &scorecardSpec.Source != nil {
+		exactSource, err := c.exactSource(ctx, scorecardSpec.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = exactSource.ScorecardLinks
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		var out []*model.CertifyScorecard
+		for _, id := range search {
+			link, err := byIDkv[*scorecardLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			out, err = c.addSCIfMatch(ctx, out, &scorecardSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+
+			for _, scorecardOut := range out {
+				edges = append(edges, &model.CertifyScorecardEdge{
+					Cursor: scorecardOut.ID,
+					Node:   scorecardOut,
+				})
+			}
+		}
+	} else {
+		scn := c.kv.Keys(cscCol)
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		for !done {
+			var err error
+			cscKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(cscKeys)
+
+			totalCount = len(cscKeys)
+
+			for i, cscKey := range cscKeys {
+				link, err := byKeykv[*scorecardLink](ctx, cscCol, cscKey, c)
+				if err != nil {
+					return nil, err
+				}
+
+				scorecardOut, err := c.SCIfMatch(ctx, &scorecardSpec, link)
+
+				if err != nil {
+					return nil, err
+				}
+
+				if scorecardOut == nil {
+					return nil, fmt.Errorf("the scorecard link doesn't match the specification")
+				}
+
+				if after != nil && !currentPage {
+					if scorecardOut.ID == *after {
+						totalCount = len(cscKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyScorecardEdge{
+							Cursor: scorecardOut.ID,
+							Node:   scorecardOut,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyScorecardEdge{
+						Cursor: scorecardOut.ID,
+						Node:   scorecardOut,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.CertifyScorecardConnection{
+			TotalCount: totalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
@@ -214,6 +363,41 @@ func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorec
 	}
 
 	return out, nil
+}
+
+func (c *demoClient) SCIfMatch(ctx context.Context, filter *model.CertifyScorecardSpec, link *scorecardLink) (
+	*model.CertifyScorecard, error) {
+	if filter != nil && filter.TimeScanned != nil && !filter.TimeScanned.Equal(link.TimeScanned) {
+		return nil, nil
+	}
+	if filter != nil && noMatchFloat(filter.AggregateScore, link.AggregateScore) {
+		return nil, nil
+	}
+	if filter != nil && noMatchChecks(filter.Checks, link.Checks) {
+		return nil, nil
+	}
+	if filter != nil && noMatch(filter.ScorecardVersion, link.ScorecardVersion) {
+		return nil, nil
+	}
+	if filter != nil && noMatch(filter.ScorecardCommit, link.ScorecardCommit) {
+		return nil, nil
+	}
+	if filter != nil && noMatch(filter.Origin, link.Origin) {
+		return nil, nil
+	}
+	if filter != nil && noMatch(filter.Collector, link.Collector) {
+		return nil, nil
+	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
+		return nil, nil
+	}
+
+	foundCertifyScorecard, err := c.buildScorecard(ctx, link, filter, false)
+	if err != nil {
+		return nil, err
+	}
+
+	return foundCertifyScorecard, nil
 }
 
 func (c *demoClient) addSCIfMatch(ctx context.Context, out []*model.CertifyScorecard,

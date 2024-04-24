@@ -260,20 +260,26 @@ func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 
 	algorithm := strings.ToLower(nilToEmpty(artifactSpec.Algorithm))
 	digest := strings.ToLower(nilToEmpty(artifactSpec.Digest))
+
 	var done bool
 	scn := c.kv.Keys(artCol)
+
 	var artKeys []string
+
 	for !done {
 		artKeys, done, err = scn.Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
+
 		sort.Strings(artKeys)
+
 		for i, ak := range artKeys {
 			a, err := byKeykv[*artStruct](ctx, artCol, ak, c)
 			if err != nil {
 				return nil, err
 			}
+
 			convArt := c.convArtifact(a)
 			if after != nil && !currentPage {
 				if convArt.ID == *after {
@@ -283,6 +289,7 @@ func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 					continue
 				}
 			}
+
 			if first != nil {
 				if currentPage && count < *first {
 					artEdge := createArtifactEdges(algorithm, a, digest, convArt)
