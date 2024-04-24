@@ -200,9 +200,8 @@ func (c *demoClient) BuildersList(ctx context.Context, builderSpec model.Builder
 				EndCursor:   ptrfrom.String(edges[count-1].Node.ID),
 			},
 			Edges: edges}, nil
-	} else {
-		return nil, nil
 	}
+	return nil, nil
 }
 
 func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
