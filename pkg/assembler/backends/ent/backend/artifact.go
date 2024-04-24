@@ -91,7 +91,7 @@ func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 
 	artifacts, err := query.All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed artifact query with error: %w", err)
 	}
 	return collect(artifacts, toModelArtifact), nil
 }
@@ -220,7 +220,7 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 	if allowedEdges[model.EdgeArtifactHasSbom] {
 		query.
 			WithSbom(func(q *ent.BillOfMaterialsQuery) {
-				getSBOMObject(q)
+				getSBOMObjectWithIncludes(q)
 			})
 	}
 	if allowedEdges[model.EdgeArtifactHasSlsa] {

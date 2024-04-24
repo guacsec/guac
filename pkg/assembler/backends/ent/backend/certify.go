@@ -55,7 +55,7 @@ func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed certifyBad query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyBad), nil
@@ -77,7 +77,7 @@ func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed certifyGood query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyGood), nil

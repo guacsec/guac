@@ -264,7 +264,6 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.Certif
 	if spec == nil {
 		spec = &model.CertifyVEXStatementSpec{}
 	}
-	funcName := "CertifyVEXStatement"
 
 	vexQuery := b.client.CertifyVex.Query().
 		Where(certifyVexPredicate(*spec))
@@ -273,7 +272,7 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.Certif
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		return nil, fmt.Errorf("failed CertifyVEXStatement query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyVEXStatement), nil

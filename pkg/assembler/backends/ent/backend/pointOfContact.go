@@ -45,7 +45,7 @@ func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfCo
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve PointOfContact :: %s", err)
+		return nil, fmt.Errorf("failed PointOfContact query with error: %w", err)
 	}
 
 	return collect(records, toModelPointOfContact), nil

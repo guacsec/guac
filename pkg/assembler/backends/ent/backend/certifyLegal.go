@@ -46,7 +46,7 @@ func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalS
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed certifyLegal query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyLegal), nil

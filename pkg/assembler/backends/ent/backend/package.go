@@ -58,7 +58,7 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed package query with error: %w", err)
 	}
 
 	var pkgNames []*ent.PackageName
@@ -642,7 +642,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 	if allowedEdges[model.EdgePackageHasSbom] {
 		query.
 			WithSbom(func(q *ent.BillOfMaterialsQuery) {
-				getSBOMObject(q)
+				getSBOMObjectWithIncludes(q)
 			})
 	}
 	if allowedEdges[model.EdgePackageCertifyVexStatement] {

@@ -44,7 +44,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 	records, err := getOccurrenceObject(occurQuery).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed isOccurrence query with error: %w", err)
 	}
 
 	return collect(records, toModelIsOccurrenceWithSubject), nil

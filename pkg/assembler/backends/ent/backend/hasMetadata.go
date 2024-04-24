@@ -45,7 +45,7 @@ func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve HasMetadata :: %s", err)
+		return nil, fmt.Errorf("failed hasMetadata query with error: %w", err)
 	}
 
 	return collect(records, toModelHasMetadata), nil

@@ -35,7 +35,6 @@ func (b *EntBackend) IsDependencyList(ctx context.Context, isDependencySpec mode
 }
 
 func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	funcName := "IsDependency"
 	if spec == nil {
 		spec = &model.IsDependencySpec{}
 	}
@@ -47,7 +46,7 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, funcName)
+		return nil, fmt.Errorf("failed isDependency query with error: %w", err)
 	}
 
 	return collect(deps, toModelIsDependencyWithBackrefs), nil

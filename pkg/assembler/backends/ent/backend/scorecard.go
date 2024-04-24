@@ -50,7 +50,7 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed scorecard query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyScorecard), nil

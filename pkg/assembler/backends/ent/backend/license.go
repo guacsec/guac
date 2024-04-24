@@ -76,7 +76,7 @@ func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([
 	}
 	records, err := getLicenses(ctx, b.client, *filter)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed license query with error: %w", err)
 	}
 	return collect(records, toModelLicense), nil
 }

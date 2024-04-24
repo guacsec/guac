@@ -206,7 +206,7 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed certifyVuln query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyVulnerability), nil

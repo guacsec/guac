@@ -56,7 +56,7 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed hasSourceAt query with error: %w", err)
 	}
 
 	return collect(records, toModelHasSourceAt), nil
@@ -335,7 +335,7 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed sources query with error: %w", err)
 	}
 
 	return toModelSourceTrie(records), nil

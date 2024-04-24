@@ -53,7 +53,7 @@ func (b *EntBackend) HashEqual(ctx context.Context, spec *model.HashEqualSpec) (
 	records, err := getHashEqualObject(heQuery).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed hashEqual query with error: %w", err)
 	}
 
 	return collect(records, toModelHashEqual), nil

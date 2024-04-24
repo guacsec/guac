@@ -53,7 +53,7 @@ func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed pkgEqual query with error: %w", err)
 	}
 
 	return collect(records, toModelPkgEqual), nil

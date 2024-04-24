@@ -53,7 +53,7 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed vulnEqual query with error: %w", err)
 	}
 
 	return collect(query, toModelVulnEqual), nil

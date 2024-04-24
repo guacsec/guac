@@ -85,7 +85,7 @@ func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 
 	builders, err := query.Limit(MaxPageSize).All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed builder query with error: %w", err)
 	}
 
 	return collect(builders, toModelBuilder), nil

@@ -51,7 +51,7 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed hasSLSA query with error: %w", err)
 	}
 
 	return collect(records, toModelHasSLSA), nil

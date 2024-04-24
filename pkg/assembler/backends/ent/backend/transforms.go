@@ -273,6 +273,25 @@ func dependencyTypeFromEnum(t dependency.DependencyType) model.DependencyType {
 	}
 }
 
+func toModelHasSBOMWithIncluded(sbom *ent.BillOfMaterials, includedSoftwarePackages []*ent.PackageVersion, includedSoftwareArtifacts []*ent.Artifact,
+	includedDependencies []*ent.Dependency, includedOccurrences []*ent.Occurrence) *model.HasSbom {
+
+	return &model.HasSbom{
+		ID:                   toGlobalID(billofmaterials.Table, sbom.ID.String()),
+		Subject:              toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
+		URI:                  sbom.URI,
+		Algorithm:            sbom.Algorithm,
+		Digest:               sbom.Digest,
+		DownloadLocation:     sbom.DownloadLocation,
+		Origin:               sbom.Origin,
+		Collector:            sbom.Collector,
+		DocumentRef:          sbom.DocumentRef,
+		KnownSince:           sbom.KnownSince,
+		IncludedSoftware:     toIncludedSoftware(includedSoftwarePackages, includedSoftwareArtifacts),
+		IncludedDependencies: collect(includedDependencies, toModelIsDependencyWithBackrefs),
+		IncludedOccurrences:  collect(includedOccurrences, toModelIsOccurrenceWithSubject),
+	}
+}
 func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 	return &model.HasSbom{
 		ID:                   toGlobalID(billofmaterials.Table, sbom.ID.String()),

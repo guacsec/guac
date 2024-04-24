@@ -51,7 +51,7 @@ func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve VulnerabilityMetadata :: %w", err)
+		return nil, fmt.Errorf("failed vulnMetadata query with error: %w", err)
 	}
 
 	return collect(records, toModelVulnerabilityMetadata), nil
