@@ -79,9 +79,38 @@ input IsDependencyInputSpec {
   documentRef: String!
 }
 
+"""
+IsDependencyConnection returns the paginated results for IsDependency.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the IsDependencyEdge which contains the current cursor
+and the IsDependency node itself
+"""
+type IsDependencyConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [IsDependencyEdge!]!
+}
+
+"""
+IsDependencyEdge contains the cursor for the resulting node and
+the IsDependency node itself.
+"""
+type IsDependencyEdge {
+  cursor: ID!
+  node: IsDependency!
+}
+
 extend type Query {
   "Returns all package dependencies that match the filter."
   IsDependency(isDependencySpec: IsDependencySpec!): [IsDependency!]!
+  "Returns a paginated results via IsDependencyConnection"
+  IsDependencyList(isDependencySpec: IsDependencySpec!, after: ID, first: Int): IsDependencyConnection
 }
 
 extend type Mutation {

@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -188,6 +189,11 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 }
 
 // Query CertifyGood
+
+func (c *demoClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyGoodList")
+}
+
 func (c *demoClient) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
 	funcName := "CertifyGood"
 

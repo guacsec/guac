@@ -34,6 +34,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (b *EntBackend) ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
+	return nil, fmt.Errorf("not implemented: ScorecardsList")
+}
+
 func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	if filter == nil {
 		filter = &model.CertifyScorecardSpec{}

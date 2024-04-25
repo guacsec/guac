@@ -26,6 +26,10 @@ func (c *neo4jClient) Path(ctx context.Context, subject string, target string, m
 	panic(fmt.Errorf("not implemented: Path - path"))
 }
 
+func (c *neo4jClient) NeighborsList(ctx context.Context, node string, usingOnly []model.Edge, after *string, first *int) (*model.NeighborConnection, error) {
+	return nil, fmt.Errorf("not implemented: NeighborsList")
+}
+
 func (c *neo4jClient) Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error) {
 	panic(fmt.Errorf("not implemented: Neighbors - neighbors"))
 }

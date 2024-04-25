@@ -28,6 +28,11 @@ import (
 )
 
 // Query IsOccurrence
+
+func (c *arangoClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error) {
+	return nil, fmt.Errorf("not implemented: IsOccurrenceList")
+}
+
 func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
 	if isOccurrenceSpec != nil && isOccurrenceSpec.ID != nil {

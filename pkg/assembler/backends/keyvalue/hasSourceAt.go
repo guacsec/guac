@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -148,6 +149,11 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.IDo
 }
 
 // Query HasSourceAt
+
+func (c *demoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSourceAtList")
+}
+
 func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()

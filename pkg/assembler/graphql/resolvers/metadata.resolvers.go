@@ -56,3 +56,11 @@ func (r *queryResolver) HasMetadata(ctx context.Context, hasMetadataSpec model.H
 	}
 	return r.Backend.HasMetadata(ctx, &hasMetadataSpec)
 }
+
+// HasMetadataList is the resolver for the HasMetadataList field.
+func (r *queryResolver) HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
+	if err := validatePackageSourceOrArtifactQueryFilter(hasMetadataSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("HasMetadata ::  %s", err)
+	}
+	return r.Backend.HasMetadataList(ctx, hasMetadataSpec, after, first)
+}

@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -196,6 +197,11 @@ func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.Pac
 }
 
 // Query PointOfContact
+
+func (c *demoClient) PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
+	return nil, fmt.Errorf("not implemented: PointOfContactList")
+}
+
 func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
 	funcName := "PointOfContact"
 

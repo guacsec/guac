@@ -183,6 +183,10 @@ func (c *demoClient) matchArtifacts(ctx context.Context, filter []*model.Artifac
 
 // Query HashEqual
 
+func (c *demoClient) HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: HashEqualList")
+}
+
 func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	funcName := "HashEqual"
 	c.m.RLock()

@@ -97,9 +97,38 @@ input ScanMetadataInput {
   documentRef: String!
 }
 
+"""
+CertifyVulnConnection returns the paginated results for CertifyVuln.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyVulnEdge which contains the current cursor
+and the CertifyVuln node itself
+"""
+type CertifyVulnConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyVulnEdge!]!
+}
+
+"""
+CertifyVulnEdge contains the cursor for the resulting node and
+the CertifyVuln node itself.
+"""
+type CertifyVulnEdge {
+  cursor: ID!
+  node: CertifyVuln!
+}
+
 extend type Query {
   "Returns all vulnerability certifications matching the input filter."
   CertifyVuln(certifyVulnSpec: CertifyVulnSpec!): [CertifyVuln!]!
+  "Returns a paginated results via CertifyVulnConnection"
+  CertifyVulnList(certifyVulnSpec: CertifyVulnSpec!, after: ID, first: Int): CertifyVulnConnection
 }
 
 extend type Mutation {

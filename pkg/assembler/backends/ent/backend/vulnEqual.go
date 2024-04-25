@@ -34,6 +34,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (b *EntBackend) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: VulnEqualList")
+}
+
 func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 	if filter == nil {
 		filter = &model.VulnEqualSpec{}

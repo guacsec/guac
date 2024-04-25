@@ -35,6 +35,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (b *EntBackend) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSLSAList")
+}
+
 func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
 	if spec == nil {
 		spec = &model.HasSLSASpec{}

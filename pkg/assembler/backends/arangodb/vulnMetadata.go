@@ -33,6 +33,10 @@ const (
 	timeStampStr  string = "timestamp"
 )
 
+func (c *arangoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) (*model.VulnerabilityMetadataConnection, error) {
+	return nil, fmt.Errorf("not implemented: VulnerabilityMetadataList")
+}
+
 func (c *arangoClient) VulnerabilityMetadata(ctx context.Context, vulnerabilityMetadataSpec *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
 
 	if vulnerabilityMetadataSpec != nil && vulnerabilityMetadataSpec.ID != nil {

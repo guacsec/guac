@@ -265,6 +265,10 @@ func (c *demoClient) convLegal(ctx context.Context, in *certifyLegalStruct) (*mo
 	return cl, nil
 }
 
+func (c *demoClient) CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyLegalList")
+}
+
 func (c *demoClient) CertifyLegal(ctx context.Context, filter *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
 	funcName := "CertifyLegal"
 

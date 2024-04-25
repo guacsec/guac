@@ -81,9 +81,38 @@ input CertifyGoodInputSpec {
   documentRef: String!
 }
 
+"""
+CertifyGoodConnection returns the paginated results for CertifyGood.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyGoodEdge which contains the current cursor
+and the CertifyGood node itself
+"""
+type CertifyGoodConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyGoodEdge!]!
+}
+
+"""
+CertifyGoodEdge contains the cursor for the resulting node and
+the CertifyGood node itself.
+"""
+type CertifyGoodEdge {
+  cursor: ID!
+  node: CertifyGood!
+}
+
 extend type Query {
   "Returns all CertifyGood attestations matching a filter."
   CertifyGood(certifyGoodSpec: CertifyGoodSpec!): [CertifyGood!]!
+  "Returns a paginated results via CertifyGoodConnection"
+  CertifyGoodList(certifyGoodSpec: CertifyGoodSpec!, after: ID, first: Int): CertifyGoodConnection
 }
 
 extend type Mutation {

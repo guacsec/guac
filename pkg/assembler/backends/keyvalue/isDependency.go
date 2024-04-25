@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -149,6 +150,11 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDor
 }
 
 // Query IsDependency
+
+func (c *demoClient) IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error) {
+	return nil, fmt.Errorf("not implemented: IsDependencyList")
+}
+
 func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()

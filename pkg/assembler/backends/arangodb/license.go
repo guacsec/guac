@@ -25,6 +25,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *arangoClient) LicenseList(ctx context.Context, licenseSpec model.LicenseSpec, after *string, first *int) (*model.LicenseConnection, error) {
+	return nil, fmt.Errorf("not implemented: LicenseList")
+}
+
 func (c *arangoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
 	values := map[string]any{}
 	aqb := setLicenseMatchValues(licenseSpec, values)

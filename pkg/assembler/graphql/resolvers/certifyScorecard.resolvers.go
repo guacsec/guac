@@ -30,3 +30,8 @@ func (r *mutationResolver) IngestScorecards(ctx context.Context, sources []*mode
 func (r *queryResolver) Scorecards(ctx context.Context, scorecardSpec model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	return r.Backend.Scorecards(ctx, &scorecardSpec)
 }
+
+// ScorecardsList is the resolver for the scorecardsList field.
+func (r *queryResolver) ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
+	return r.Backend.ScorecardsList(ctx, scorecardSpec, after, first)
+}

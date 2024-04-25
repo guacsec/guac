@@ -36,3 +36,11 @@ func (r *queryResolver) PkgEqual(ctx context.Context, pkgEqualSpec model.PkgEqua
 	}
 	return r.Backend.PkgEqual(ctx, &pkgEqualSpec)
 }
+
+// PkgEqualList is the resolver for the PkgEqualList field.
+func (r *queryResolver) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error) {
+	if len(pkgEqualSpec.Packages) > 2 {
+		return nil, gqlerror.Errorf("PkgEqual :: too many packages in query, max 2, got: %v", len(pkgEqualSpec.Packages))
+	}
+	return r.Backend.PkgEqualList(ctx, pkgEqualSpec, after, first)
+}

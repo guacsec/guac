@@ -57,9 +57,38 @@ input VulnEqualInputSpec {
   documentRef: String!
 }
 
+"""
+VulnEqualConnection returns the paginated results for VulnEqual.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the VulnEqualEdge which contains the current cursor
+and the VulnEqual node itself
+"""
+type VulnEqualConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [VulnEqualEdge!]!
+}
+
+"""
+VulnEqualEdge contains the cursor for the resulting node and
+the VulnEqual node itself.
+"""
+type VulnEqualEdge {
+  cursor: ID!
+  node: VulnEqual!
+}
+
 extend type Query {
   "Returns all equal vulnerability mappings that match a filter."
   vulnEqual(vulnEqualSpec: VulnEqualSpec!): [VulnEqual!]!
+  "Returns a paginated results via VulnEqualConnection"
+  vulnEqualList(vulnEqualSpec: VulnEqualSpec!, after: ID, first: Int): VulnEqualConnection
 }
 
 extend type Mutation {

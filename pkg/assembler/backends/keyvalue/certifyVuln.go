@@ -18,6 +18,7 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -155,6 +156,11 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.I
 }
 
 // Query CertifyVuln
+
+func (c *demoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyVulnList")
+}
+
 func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()

@@ -28,6 +28,10 @@ import (
 
 // query certifyGood
 
+func (c *neo4jClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
+	return nil, fmt.Errorf("not implemented: BuildersList")
+}
+
 func (c *neo4jClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()

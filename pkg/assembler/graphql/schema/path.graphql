@@ -152,6 +152,35 @@ enum Edge {
   VULN_METADATA_VULNERABILITY
 }
 
+
+"""
+NeighborConnection returns the paginated results for Neighbor.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the NeighborEdge which contains the current cursor
+and the node itself
+"""
+type NeighborConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [NeighborEdge!]!
+}
+
+"""
+NeighborEdge contains the cursor for the resulting node and
+the node itself.
+"""
+type NeighborEdge {
+  cursor: ID!
+  node: Node!
+}
+
+
 extend type Query {
   """
   path query returns a path between subject and target, of a maximum length.
@@ -178,6 +207,8 @@ extend type Query {
   contain the corresponding GUAC evidence trees (GUAC verbs).
   """
   neighbors(node: ID!, usingOnly: [Edge!]!): [Node!]!
+  "Returns a paginated results via NeighborConnection"
+  neighborsList(node: ID!, usingOnly: [Edge!]!, after: ID, first: Int): NeighborConnection
 
   """
   node returns a single node, regardless of type.

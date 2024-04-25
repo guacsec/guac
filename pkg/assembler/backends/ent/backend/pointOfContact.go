@@ -30,6 +30,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (b *EntBackend) PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
+	return nil, fmt.Errorf("not implemented: PointOfContactList")
+}
+
 func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
 	if filter == nil {
 		filter = &model.PointOfContactSpec{}

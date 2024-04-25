@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
@@ -97,4 +98,8 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 	})...)
 
 	return results, nil
+}
+
+func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }

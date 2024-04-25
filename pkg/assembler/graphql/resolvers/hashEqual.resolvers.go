@@ -36,3 +36,11 @@ func (r *queryResolver) HashEqual(ctx context.Context, hashEqualSpec model.HashE
 	}
 	return r.Backend.HashEqual(ctx, &hashEqualSpec)
 }
+
+// HashEqualList is the resolver for the HashEqualList field.
+func (r *queryResolver) HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error) {
+	if hashEqualSpec.Artifacts != nil && len(hashEqualSpec.Artifacts) > 2 {
+		return nil, gqlerror.Errorf("HashEqual :: Provided spec has too many Artifacts")
+	}
+	return r.Backend.HashEqualList(ctx, hashEqualSpec, after, first)
+}

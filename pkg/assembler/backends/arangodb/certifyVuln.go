@@ -34,6 +34,10 @@ const (
 	scannerVersionStr string = "scannerVersion"
 )
 
+func (c *arangoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyVulnList")
+}
+
 func (c *arangoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
 	if certifyVulnSpec != nil && certifyVulnSpec.ID != nil {

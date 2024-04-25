@@ -131,11 +131,40 @@ input VexStatementInputSpec {
   documentRef: String!
 }
 
+"""
+VEXConnection returns the paginated results for CertifyVEXStatement.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the VEXEdge which contains the current cursor
+and the CertifyVEXStatement node itself
+"""
+type VEXConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [VEXEdge!]!
+}
+
+"""
+VEXEdge contains the cursor for the resulting node and
+the CertifyVEXStatement node itself.
+"""
+type VEXEdge {
+  cursor: ID!
+  node: CertifyVEXStatement!
+}
+
 extend type Query {
   "Returns all VEX certifications matching the input filter."
   CertifyVEXStatement(
     certifyVEXStatementSpec: CertifyVEXStatementSpec!
   ): [CertifyVEXStatement!]!
+  "Returns a paginated results via CertifyVexConnection"
+  CertifyVEXStatementList(certifyVEXStatementSpec: CertifyVEXStatementSpec!, after: ID, first: Int): VEXConnection
 }
 
 extend type Mutation {

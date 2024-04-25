@@ -256,6 +256,10 @@ func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArti
 	return &ids, nil
 }
 
+func (b *EntBackend) CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyVEXStatementList")
+}
+
 func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	if spec == nil {
 		spec = &model.CertifyVEXStatementSpec{}

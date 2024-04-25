@@ -30,6 +30,10 @@ const (
 	uri string = "uri"
 )
 
+func (c *neo4jClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSBOMList")
+}
+
 // TODO: noe4j backend does not match the schema. This needs updating before use!
 func (c *neo4jClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 

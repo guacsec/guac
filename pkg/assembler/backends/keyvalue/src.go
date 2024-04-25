@@ -311,6 +311,10 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.IDorSourceInp
 
 // Query Source
 
+func (c *demoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
+	return nil, fmt.Errorf("not implemented: SourcesList")
+}
+
 func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()

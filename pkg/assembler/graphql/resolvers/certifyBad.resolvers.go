@@ -66,3 +66,11 @@ func (r *queryResolver) CertifyBad(ctx context.Context, certifyBadSpec model.Cer
 	}
 	return r.Backend.CertifyBad(ctx, &certifyBadSpec)
 }
+
+// CertifyBadList is the resolver for the CertifyBadList field.
+func (r *queryResolver) CertifyBadList(ctx context.Context, certifyBadSpec model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error) {
+	if err := validatePackageSourceOrArtifactQueryFilter(certifyBadSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("CertifyBad :: %s", err)
+	}
+	return r.Backend.CertifyBadList(ctx, certifyBadSpec, after, first)
+}

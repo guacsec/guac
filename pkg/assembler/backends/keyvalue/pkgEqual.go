@@ -153,6 +153,10 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.IDorPkgInput,
 
 // Query PkgEqual
 
+func (c *demoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: PkgEqualList")
+}
+
 func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 	funcName := "PkgEqual"
 	c.m.RLock()

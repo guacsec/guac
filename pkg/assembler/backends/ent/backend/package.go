@@ -43,6 +43,10 @@ const (
 	pkgNamespaceString = "package_namespaces"
 )
 
+func (b *EntBackend) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: PackagesList")
+}
+
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	if pkgSpec == nil {
 		pkgSpec = &model.PkgSpec{}

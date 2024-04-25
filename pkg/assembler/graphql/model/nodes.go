@@ -52,6 +52,29 @@ func (Artifact) IsPackageOrArtifact() {}
 
 func (Artifact) IsNode() {}
 
+// ArtifactConnection returns the paginated results for artifact.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the ArtifactEdge which contains the current cursor
+// and the artifact node itself
+type ArtifactConnection struct {
+	TotalCount int             `json:"totalCount"`
+	PageInfo   *PageInfo       `json:"pageInfo"`
+	Edges      []*ArtifactEdge `json:"edges"`
+}
+
+// ArtifactEdge contains the cursor for the resulting node and
+// the artifact node itself.
+type ArtifactEdge struct {
+	Cursor string    `json:"cursor"`
+	Node   *Artifact `json:"node"`
+}
+
 // ArtifactInputSpec specifies an artifact for mutations.
 //
 // The checksum fields are canonicalized to be lowercase.
@@ -78,6 +101,29 @@ type Builder struct {
 }
 
 func (Builder) IsNode() {}
+
+// BuilderConnection returns the paginated results for builder.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the BuilderEdge which contains the current cursor
+// and the Builder node itself
+type BuilderConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*BuilderEdge `json:"edges"`
+}
+
+// BuilderEdge contains the cursor for the resulting node and
+// the Builder node itself.
+type BuilderEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *Builder `json:"node"`
+}
 
 // BuilderInputSpec specifies a builder for mutations.
 type BuilderInputSpec struct {
@@ -118,6 +164,29 @@ type CertifyBad struct {
 }
 
 func (CertifyBad) IsNode() {}
+
+// CertifyBadConnection returns the paginated results for CertifyBad.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyBadEdge which contains the current cursor
+// and the CertifyBad node itself
+type CertifyBadConnection struct {
+	TotalCount int               `json:"totalCount"`
+	PageInfo   *PageInfo         `json:"pageInfo"`
+	Edges      []*CertifyBadEdge `json:"edges"`
+}
+
+// CertifyBadEdge contains the cursor for the resulting node and
+// the CertifyBad node itself.
+type CertifyBadEdge struct {
+	Cursor string      `json:"cursor"`
+	Node   *CertifyBad `json:"node"`
+}
 
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
@@ -179,6 +248,29 @@ type CertifyGood struct {
 }
 
 func (CertifyGood) IsNode() {}
+
+// CertifyGoodConnection returns the paginated results for CertifyGood.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyGoodEdge which contains the current cursor
+// and the CertifyGood node itself
+type CertifyGoodConnection struct {
+	TotalCount int                `json:"totalCount"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	Edges      []*CertifyGoodEdge `json:"edges"`
+}
+
+// CertifyGoodEdge contains the cursor for the resulting node and
+// the CertifyGood node itself.
+type CertifyGoodEdge struct {
+	Cursor string       `json:"cursor"`
+	Node   *CertifyGood `json:"node"`
+}
 
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
@@ -253,6 +345,29 @@ type CertifyLegal struct {
 
 func (CertifyLegal) IsNode() {}
 
+// CertifyLegalConnection returns the paginated results for CertifyLegal.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyLegalEdge which contains the current cursor
+// and the CertifyLegal node itself
+type CertifyLegalConnection struct {
+	TotalCount int                 `json:"totalCount"`
+	PageInfo   *PageInfo           `json:"pageInfo"`
+	Edges      []*CertifyLegalEdge `json:"edges"`
+}
+
+// CertifyLegalEdge contains the cursor for the resulting node and
+// the CertifyLegal node itself.
+type CertifyLegalEdge struct {
+	Cursor string        `json:"cursor"`
+	Node   *CertifyLegal `json:"node"`
+}
+
 // CertifyLegalInputSpec represents the input for certifying legal information in
 // mutations.
 type CertifyLegalInputSpec struct {
@@ -297,6 +412,29 @@ type CertifyScorecard struct {
 }
 
 func (CertifyScorecard) IsNode() {}
+
+// CertifyScorecardConnection returns the paginated results for CertifyScorecard.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyScorecardEdge which contains the current cursor
+// and the CertifyScorecard node itself
+type CertifyScorecardConnection struct {
+	TotalCount int                     `json:"totalCount"`
+	PageInfo   *PageInfo               `json:"pageInfo"`
+	Edges      []*CertifyScorecardEdge `json:"edges"`
+}
+
+// CertifyScorecardEdge contains the cursor for the resulting node and
+// the CertifyScorecard node itself.
+type CertifyScorecardEdge struct {
+	Cursor string            `json:"cursor"`
+	Node   *CertifyScorecard `json:"node"`
+}
 
 // CertifyScorecardSpec allows filtering the list of Scorecards to return.
 type CertifyScorecardSpec struct {
@@ -377,6 +515,29 @@ type CertifyVuln struct {
 
 func (CertifyVuln) IsNode() {}
 
+// CertifyVulnConnection returns the paginated results for CertifyVuln.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyVulnEdge which contains the current cursor
+// and the CertifyVuln node itself
+type CertifyVulnConnection struct {
+	TotalCount int                `json:"totalCount"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	Edges      []*CertifyVulnEdge `json:"edges"`
+}
+
+// CertifyVulnEdge contains the cursor for the resulting node and
+// the CertifyVuln node itself.
+type CertifyVulnEdge struct {
+	Cursor string       `json:"cursor"`
+	Node   *CertifyVuln `json:"node"`
+}
+
 // CertifyVulnSpec allows filtering the list of vulnerability certifications to
 // return in a query.
 //
@@ -397,6 +558,22 @@ type CertifyVulnSpec struct {
 	Origin         *string            `json:"origin,omitempty"`
 	Collector      *string            `json:"collector,omitempty"`
 	DocumentRef    *string            `json:"documentRef,omitempty"`
+}
+
+// FindSoftwareConnection returns the paginated results for FindSoftware.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the SoftwareEdge which contains the current cursor
+// and the PackageSourceOrArtifact node itself
+type FindSoftwareConnection struct {
+	TotalCount int             `json:"totalCount"`
+	PageInfo   *PageInfo       `json:"pageInfo"`
+	Edges      []*SoftwareEdge `json:"edges"`
 }
 
 // HasMetadata is an attestation that a package, source, or artifact has a certain
@@ -434,6 +611,29 @@ type HasMetadata struct {
 }
 
 func (HasMetadata) IsNode() {}
+
+// HasMetadataConnection returns the paginated results for HasMetadata.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasMetadataEdge which contains the current cursor
+// and the HasMetadata node itself
+type HasMetadataConnection struct {
+	TotalCount int                `json:"totalCount"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	Edges      []*HasMetadataEdge `json:"edges"`
+}
+
+// HasMetadataEdge contains the cursor for the resulting node and
+// the HasMetadata node itself.
+type HasMetadataEdge struct {
+	Cursor string       `json:"cursor"`
+	Node   *HasMetadata `json:"node"`
+}
 
 // HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type HasMetadataInputSpec struct {
@@ -499,6 +699,29 @@ type HasSbom struct {
 
 func (HasSbom) IsNode() {}
 
+// HasSBOMConnection returns the paginated results for HasSBOM.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSBOMEdge which contains the current cursor
+// and the HasSBOM node itself
+type HasSBOMConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*HasSBOMEdge `json:"edges"`
+}
+
+// HasSBOMEdge contains the cursor for the resulting node and
+// the HasSBOMEdge node itself.
+type HasSBOMEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *HasSbom `json:"node"`
+}
+
 type HasSBOMIncludesInputSpec struct {
 	Packages     []string `json:"packages"`
 	Artifacts    []string `json:"artifacts"`
@@ -551,6 +774,29 @@ type HasSlsa struct {
 
 func (HasSlsa) IsNode() {}
 
+// HasSLSAConnection returns the paginated results for HasSLSA.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSLSAEdge which contains the current cursor
+// and the HasSLSA node itself
+type HasSLSAConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*HasSLSAEdge `json:"edges"`
+}
+
+// HasSLSAEdge contains the cursor for the resulting node and
+// the HasSLSA node itself.
+type HasSLSAEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *HasSlsa `json:"node"`
+}
+
 // HasSLSASpec allows filtering the list of HasSLSA to return.
 type HasSLSASpec struct {
 	ID          *string              `json:"id,omitempty"`
@@ -587,6 +833,29 @@ type HasSourceAt struct {
 }
 
 func (HasSourceAt) IsNode() {}
+
+// HasSourceAtConnection returns the paginated results for HasSourceAt.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSourceAtEdge which contains the current cursor
+// and the HasSourceAt node itself
+type HasSourceAtConnection struct {
+	TotalCount int                `json:"totalCount"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	Edges      []*HasSourceAtEdge `json:"edges"`
+}
+
+// HasSourceAtEdge contains the cursor for the resulting node and
+// the HasSourceAt node itself.
+type HasSourceAtEdge struct {
+	Cursor string       `json:"cursor"`
+	Node   *HasSourceAt `json:"node"`
+}
 
 // HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
 type HasSourceAtInputSpec struct {
@@ -625,6 +894,29 @@ type HashEqual struct {
 }
 
 func (HashEqual) IsNode() {}
+
+// HashEqualConnection returns the paginated results for HashEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HashEqualEdge which contains the current cursor
+// and the HashEqual node itself
+type HashEqualConnection struct {
+	TotalCount int              `json:"totalCount"`
+	PageInfo   *PageInfo        `json:"pageInfo"`
+	Edges      []*HashEqualEdge `json:"edges"`
+}
+
+// HashEqualEdge contains the cursor for the resulting node and
+// the HashEqual node itself.
+type HashEqualEdge struct {
+	Cursor string     `json:"cursor"`
+	Node   *HashEqual `json:"node"`
+}
 
 // HashEqualInputSpec represents the input to certify that packages are similar.
 type HashEqualInputSpec struct {
@@ -737,6 +1029,29 @@ type IsDependency struct {
 
 func (IsDependency) IsNode() {}
 
+// IsDependencyConnection returns the paginated results for IsDependency.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the IsDependencyEdge which contains the current cursor
+// and the IsDependency node itself
+type IsDependencyConnection struct {
+	TotalCount int                 `json:"totalCount"`
+	PageInfo   *PageInfo           `json:"pageInfo"`
+	Edges      []*IsDependencyEdge `json:"edges"`
+}
+
+// IsDependencyEdge contains the cursor for the resulting node and
+// the IsDependency node itself.
+type IsDependencyEdge struct {
+	Cursor string        `json:"cursor"`
+	Node   *IsDependency `json:"node"`
+}
+
 // IsDependencyInputSpec is the input to record a new dependency.
 type IsDependencyInputSpec struct {
 	// versionRange should be specified for depedentPackages that point to PackageName
@@ -786,6 +1101,29 @@ type IsOccurrence struct {
 }
 
 func (IsOccurrence) IsNode() {}
+
+// IsOccurrenceConnection returns the paginated results for IsOccurrence.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the IsOccurrenceEdge which contains the current cursor
+// and the IsOccurrence node itself
+type IsOccurrenceConnection struct {
+	TotalCount int                 `json:"totalCount"`
+	PageInfo   *PageInfo           `json:"pageInfo"`
+	Edges      []*IsOccurrenceEdge `json:"edges"`
+}
+
+// IsOccurrenceEdge contains the cursor for the resulting node and
+// the IsOccurrence node itself.
+type IsOccurrenceEdge struct {
+	Cursor string        `json:"cursor"`
+	Node   *IsOccurrence `json:"node"`
+}
 
 // IsOccurrenceInputSpec represents the input to record an artifact's origin.
 type IsOccurrenceInputSpec struct {
@@ -841,6 +1179,29 @@ type License struct {
 
 func (License) IsNode() {}
 
+// LicenseConnection returns the paginated results for License.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the LicenseEdge which contains the current cursor
+// and the License node itself
+type LicenseConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*LicenseEdge `json:"edges"`
+}
+
+// LicenseEdge contains the cursor for the resulting node and
+// the License node itself.
+type LicenseEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *License `json:"node"`
+}
+
 // LicenseInputSpec specifies an license for mutations. One of inline or
 // listVersion should be empty or missing.
 type LicenseInputSpec struct {
@@ -863,6 +1224,29 @@ type MatchFlags struct {
 }
 
 type Mutation struct {
+}
+
+// NeighborConnection returns the paginated results for Neighbor.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the NeighborEdge which contains the current cursor
+// and the node itself
+type NeighborConnection struct {
+	TotalCount int             `json:"totalCount"`
+	PageInfo   *PageInfo       `json:"pageInfo"`
+	Edges      []*NeighborEdge `json:"edges"`
+}
+
+// NeighborEdge contains the cursor for the resulting node and
+// the node itself.
+type NeighborEdge struct {
+	Cursor string `json:"cursor"`
+	Node   Node   `json:"node"`
 }
 
 // Package represents the root of the package trie/tree.
@@ -892,6 +1276,29 @@ func (Package) IsPackageOrArtifact() {}
 func (Package) IsPackageOrSource() {}
 
 func (Package) IsNode() {}
+
+// PackageConnection returns the paginated results for Package.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PackageEdge which contains the current cursor
+// and the Package node itself
+type PackageConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*PackageEdge `json:"edges"`
+}
+
+// PackageEdge contains the cursor for the resulting node and
+// the Package node itself.
+type PackageEdge struct {
+	Cursor string   `json:"cursor"`
+	Node   *Package `json:"node"`
+}
 
 // The IDs of the ingested package
 type PackageIDs struct {
@@ -1066,6 +1473,21 @@ type PackageVersion struct {
 	Subpath    string              `json:"subpath"`
 }
 
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type PageInfo struct {
+	HasNextPage bool    `json:"hasNextPage"`
+	StartCursor *string `json:"startCursor,omitempty"`
+	EndCursor   *string `json:"endCursor,omitempty"`
+}
+
 // PkgEqual is an attestation that a set of packages are similar.
 type PkgEqual struct {
 	ID string `json:"id"`
@@ -1082,6 +1504,29 @@ type PkgEqual struct {
 }
 
 func (PkgEqual) IsNode() {}
+
+// PkgEqualConnection returns the paginated results for PkgEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PkgEqualEdge which contains the current cursor
+// and the PkgEqual node itself
+type PkgEqualConnection struct {
+	TotalCount int             `json:"totalCount"`
+	PageInfo   *PageInfo       `json:"pageInfo"`
+	Edges      []*PkgEqualEdge `json:"edges"`
+}
+
+// PkgEqualEdge contains the cursor for the resulting node and
+// the PkgEqual node itself.
+type PkgEqualEdge struct {
+	Cursor string    `json:"cursor"`
+	Node   *PkgEqual `json:"node"`
+}
 
 // PkgEqualInputSpec represents the input to certify that packages are similar.
 type PkgEqualInputSpec struct {
@@ -1186,6 +1631,29 @@ type PointOfContact struct {
 }
 
 func (PointOfContact) IsNode() {}
+
+// PointOfContactConnection returns the paginated results for PointOfContact.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PointOfContactEdge which contains the current cursor
+// and the PointOfContact node itself
+type PointOfContactConnection struct {
+	TotalCount int                   `json:"totalCount"`
+	PageInfo   *PageInfo             `json:"pageInfo"`
+	Edges      []*PointOfContactEdge `json:"edges"`
+}
+
+// PointOfContactEdge contains the cursor for the resulting node and
+// the PointOfContact node itself.
+type PointOfContactEdge struct {
+	Cursor string          `json:"cursor"`
+	Node   *PointOfContact `json:"node"`
+}
 
 // PointOfContactInputSpec represents the mutation input to ingest a PointOfContact evidence.
 type PointOfContactInputSpec struct {
@@ -1415,6 +1883,13 @@ type ScorecardInputSpec struct {
 	DocumentRef      string                     `json:"documentRef"`
 }
 
+// SoftwareEdge contains the cursor for the resulting node and
+// the PackageSourceOrArtifact node itself.
+type SoftwareEdge struct {
+	Cursor string                  `json:"cursor"`
+	Node   PackageSourceOrArtifact `json:"node"`
+}
+
 // Source represents the root of the source trie/tree.
 //
 // We map source information to a trie, as a derivative of the pURL specification:
@@ -1437,6 +1912,29 @@ func (Source) IsPackageSourceOrArtifact() {}
 func (Source) IsPackageOrSource() {}
 
 func (Source) IsNode() {}
+
+// SourceConnection returns the paginated results for Source.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the SourceEdge which contains the current cursor
+// and the Source node itself
+type SourceConnection struct {
+	TotalCount int           `json:"totalCount"`
+	PageInfo   *PageInfo     `json:"pageInfo"`
+	Edges      []*SourceEdge `json:"edges"`
+}
+
+// SourceEdge contains the cursor for the resulting node and
+// the Source node itself.
+type SourceEdge struct {
+	Cursor string  `json:"cursor"`
+	Node   *Source `json:"node"`
+}
 
 // The IDs of the ingested source
 type SourceIDs struct {
@@ -1502,6 +2000,29 @@ type SourceSpec struct {
 	Commit    *string `json:"commit,omitempty"`
 }
 
+// VEXConnection returns the paginated results for CertifyVEXStatement.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VEXEdge which contains the current cursor
+// and the CertifyVEXStatement node itself
+type VEXConnection struct {
+	TotalCount int        `json:"totalCount"`
+	PageInfo   *PageInfo  `json:"pageInfo"`
+	Edges      []*VEXEdge `json:"edges"`
+}
+
+// VEXEdge contains the cursor for the resulting node and
+// the CertifyVEXStatement node itself.
+type VEXEdge struct {
+	Cursor string               `json:"cursor"`
+	Node   *CertifyVEXStatement `json:"node"`
+}
+
 // VexStatementInputSpec represents the input to ingest VEX statements.
 type VexStatementInputSpec struct {
 	Status           VexStatus        `json:"status"`
@@ -1532,6 +2053,29 @@ type VulnEqual struct {
 }
 
 func (VulnEqual) IsNode() {}
+
+// VulnEqualConnection returns the paginated results for VulnEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VulnEqualEdge which contains the current cursor
+// and the VulnEqual node itself
+type VulnEqualConnection struct {
+	TotalCount int              `json:"totalCount"`
+	PageInfo   *PageInfo        `json:"pageInfo"`
+	Edges      []*VulnEqualEdge `json:"edges"`
+}
+
+// VulnEqualEdge contains the cursor for the resulting node and
+// the VulnEqual node itself.
+type VulnEqualEdge struct {
+	Cursor string     `json:"cursor"`
+	Node   *VulnEqual `json:"node"`
+}
 
 // VulnEqualInputSpec represents the input to link vulnerabilities to each other.
 type VulnEqualInputSpec struct {
@@ -1584,6 +2128,29 @@ type Vulnerability struct {
 }
 
 func (Vulnerability) IsNode() {}
+
+// VulnerabilityConnection returns the paginated results for Vulnerability.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VulnerabilityEdge which contains the current cursor
+// and the Vulnerability node itself
+type VulnerabilityConnection struct {
+	TotalCount int                  `json:"totalCount"`
+	PageInfo   *PageInfo            `json:"pageInfo"`
+	Edges      []*VulnerabilityEdge `json:"edges"`
+}
+
+// VulnerabilityEdge contains the cursor for the resulting node and
+// the Vulnerability node itself.
+type VulnerabilityEdge struct {
+	Cursor string         `json:"cursor"`
+	Node   *Vulnerability `json:"node"`
+}
 
 // VulnerabilityID is a specific vulnerability ID associated with the type of the vulnerability.
 //
@@ -1650,6 +2217,29 @@ type VulnerabilityMetadata struct {
 }
 
 func (VulnerabilityMetadata) IsNode() {}
+
+// VulnerabilityMetadataConnection returns the paginated results for VulnerabilityMetadata.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VulnerabilityMetadataEdge which contains the current cursor
+// and the VulnerabilityMetadata node itself
+type VulnerabilityMetadataConnection struct {
+	TotalCount int                          `json:"totalCount"`
+	PageInfo   *PageInfo                    `json:"pageInfo"`
+	Edges      []*VulnerabilityMetadataEdge `json:"edges"`
+}
+
+// VulnerabilityMetadataEdge contains the cursor for the resulting node and
+// the VulnerabilityMetadata node itself.
+type VulnerabilityMetadataEdge struct {
+	Cursor string                 `json:"cursor"`
+	Node   *VulnerabilityMetadata `json:"node"`
+}
 
 // VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
 type VulnerabilityMetadataInputSpec struct {

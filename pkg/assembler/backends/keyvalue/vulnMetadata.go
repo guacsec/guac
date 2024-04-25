@@ -131,6 +131,11 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 }
 
 // Query VulnerabilityMetadata
+
+func (c *demoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) (*model.VulnerabilityMetadataConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyBadList")
+}
+
 func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()

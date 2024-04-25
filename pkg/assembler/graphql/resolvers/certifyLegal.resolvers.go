@@ -55,3 +55,12 @@ func (r *queryResolver) CertifyLegal(ctx context.Context, certifyLegalSpec model
 
 	return r.Backend.CertifyLegal(ctx, &certifyLegalSpec)
 }
+
+// CertifyLegalList is the resolver for the CertifyLegalList field.
+func (r *queryResolver) CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
+	if err := validatePackageOrSourceQueryFilter(certifyLegalSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("CertifyLegal :: %v", err)
+	}
+
+	return r.Backend.CertifyLegalList(ctx, certifyLegalSpec, after, first)
+}

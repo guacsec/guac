@@ -55,3 +55,11 @@ func (r *queryResolver) PointOfContact(ctx context.Context, pointOfContactSpec m
 	}
 	return r.Backend.PointOfContact(ctx, &pointOfContactSpec)
 }
+
+// PointOfContactList is the resolver for the PointOfContactList field.
+func (r *queryResolver) PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
+	if err := validatePackageSourceOrArtifactQueryFilter(pointOfContactSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("PointOfContact :: %s", err)
+	}
+	return r.Backend.PointOfContactList(ctx, pointOfContactSpec, after, first)
+}

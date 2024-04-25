@@ -139,3 +139,48 @@ func (r *queryResolver) CertifyVEXStatement(ctx context.Context, certifyVEXState
 		return r.Backend.CertifyVEXStatement(ctx, &certifyVEXStatementSpec)
 	}
 }
+
+// CertifyVEXStatementList is the resolver for the CertifyVEXStatementList field.
+func (r *queryResolver) CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error) {
+	if err := validatePackageOrArtifactQueryFilter(certifyVEXStatementSpec.Subject); err != nil {
+		return nil, gqlerror.Errorf("CertifyVEXStatement :: %s", err)
+	}
+
+	// vulnerability input (type and vulnerability ID) will be enforced to be lowercase
+
+	if certifyVEXStatementSpec.Vulnerability != nil {
+		var typeLowerCase *string = nil
+		var vulnIDLowerCase *string = nil
+		if certifyVEXStatementSpec.Vulnerability.Type != nil {
+			lower := strings.ToLower(*certifyVEXStatementSpec.Vulnerability.Type)
+			typeLowerCase = &lower
+		}
+		if certifyVEXStatementSpec.Vulnerability.VulnerabilityID != nil {
+			lower := strings.ToLower(*certifyVEXStatementSpec.Vulnerability.VulnerabilityID)
+			vulnIDLowerCase = &lower
+		}
+
+		lowercaseVulnFilter := &model.VulnerabilitySpec{
+			ID:              certifyVEXStatementSpec.Vulnerability.ID,
+			Type:            typeLowerCase,
+			VulnerabilityID: vulnIDLowerCase,
+			NoVuln:          certifyVEXStatementSpec.Vulnerability.NoVuln,
+		}
+
+		lowercaseCertifyVexFilter := model.CertifyVEXStatementSpec{
+			ID:               certifyVEXStatementSpec.ID,
+			Subject:          certifyVEXStatementSpec.Subject,
+			Vulnerability:    lowercaseVulnFilter,
+			Status:           certifyVEXStatementSpec.Status,
+			VexJustification: certifyVEXStatementSpec.VexJustification,
+			Statement:        certifyVEXStatementSpec.Statement,
+			StatusNotes:      certifyVEXStatementSpec.StatusNotes,
+			KnownSince:       certifyVEXStatementSpec.KnownSince,
+			Origin:           certifyVEXStatementSpec.Origin,
+			Collector:        certifyVEXStatementSpec.Collector,
+		}
+		return r.Backend.CertifyVEXStatementList(ctx, lowercaseCertifyVexFilter, after, first)
+	} else {
+		return r.Backend.CertifyVEXStatementList(ctx, certifyVEXStatementSpec, after, first)
+	}
+}

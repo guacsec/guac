@@ -142,6 +142,11 @@ func (c *demoClient) certifyScorecard(ctx context.Context, source model.IDorSour
 }
 
 // Query CertifyScorecard
+
+func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
+	return nil, fmt.Errorf("not implemented: ScorecardsList")
+}
+
 func (c *demoClient) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()

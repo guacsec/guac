@@ -135,9 +135,38 @@ input MatchFlags {
   pkg: PkgMatchType!
 }
 
+"""
+CertifyBadConnection returns the paginated results for CertifyBad.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyBadEdge which contains the current cursor
+and the CertifyBad node itself
+"""
+type CertifyBadConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyBadEdge!]!
+}
+
+"""
+CertifyBadEdge contains the cursor for the resulting node and
+the CertifyBad node itself.
+"""
+type CertifyBadEdge {
+  cursor: ID!
+  node: CertifyBad!
+}
+
 extend type Query {
   "Returns all CertifyBad attestations matching a filter."
   CertifyBad(certifyBadSpec: CertifyBadSpec!): [CertifyBad!]!
+  "Returns a paginated results via CertifyBadConnection"
+  CertifyBadList(certifyBadSpec: CertifyBadSpec!, after: ID, first: Int): CertifyBadConnection
 }
 
 extend type Mutation {

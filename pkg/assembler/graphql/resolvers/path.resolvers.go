@@ -25,6 +25,11 @@ func (r *queryResolver) Neighbors(ctx context.Context, node string, usingOnly []
 	return r.Backend.Neighbors(ctx, node, usingOnly)
 }
 
+// NeighborsList is the resolver for the neighborsList field.
+func (r *queryResolver) NeighborsList(ctx context.Context, node string, usingOnly []model.Edge, after *string, first *int) (*model.NeighborConnection, error) {
+	return r.Backend.NeighborsList(ctx, node, usingOnly, after, first)
+}
+
 // Node is the resolver for the node field.
 func (r *queryResolver) Node(ctx context.Context, node string) (model.Node, error) {
 	return r.Backend.Node(ctx, node)

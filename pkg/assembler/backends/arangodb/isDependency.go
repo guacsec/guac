@@ -54,6 +54,10 @@ func checkPkgNameDependency(isDependencySpec *model.IsDependencySpec) bool {
 
 // Query IsDependency
 
+func (c *arangoClient) IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error) {
+	return nil, fmt.Errorf("not implemented: IsDependencyList")
+}
+
 func (c *arangoClient) IsDependency(ctx context.Context, isDependencySpec *model.IsDependencySpec) ([]*model.IsDependency, error) {
 
 	if isDependencySpec != nil && isDependencySpec.ID != nil {

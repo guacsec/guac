@@ -166,12 +166,22 @@ func getPreloadString(prefix, name string) string {
 func (c *neo4jClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
 	panic(fmt.Errorf("not implemented: Licenses"))
 }
+
+func (c *neo4jClient) LicenseList(ctx context.Context, licenseSpec model.LicenseSpec, after *string, first *int) (*model.LicenseConnection, error) {
+	panic(fmt.Errorf("not implemented: LicenseList"))
+}
+
 func (c *neo4jClient) IngestLicense(ctx context.Context, license *model.IDorLicenseInput) (string, error) {
 	panic(fmt.Errorf("not implemented: IngestLicense"))
 }
 func (c *neo4jClient) IngestLicenses(ctx context.Context, licenses []*model.IDorLicenseInput) ([]string, error) {
 	panic(fmt.Errorf("not implemented: IngestLicenses"))
 }
+
+func (c *neo4jClient) CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
+	panic(fmt.Errorf("not implemented: CertifyLegalList"))
+}
+
 func (c *neo4jClient) CertifyLegal(ctx context.Context, certifyLegalSpec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
 	panic(fmt.Errorf("not implemented: CertifyLegal"))
 }

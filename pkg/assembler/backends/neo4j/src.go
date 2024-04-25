@@ -25,6 +25,10 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func (c *neo4jClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
+	return nil, fmt.Errorf("not implemented: SourcesList")
+}
+
 func (c *neo4jClient) Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error) {
 
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.tag namespaces.names.commit]

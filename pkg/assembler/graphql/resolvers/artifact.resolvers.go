@@ -26,6 +26,11 @@ func (r *queryResolver) Artifacts(ctx context.Context, artifactSpec model.Artifa
 	return r.Backend.Artifacts(ctx, &artifactSpec)
 }
 
+// ArtifactsList is the resolver for the artifactsList field.
+func (r *queryResolver) ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error) {
+	return r.Backend.ArtifactsList(ctx, artifactSpec, after, first)
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

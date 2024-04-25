@@ -10,6 +10,32 @@ query ArtifactQ1 {
   }
 }
 
+
+query ArtifactPagination {
+  artifactsList(artifactSpec: {}, first: 10) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...allArtifactTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+
+query ArtifactsStartWithDirective {
+  artifacts(artifactSpec: {}) @filter(keyName: "algorithm", operation: STARTSWITH, value: "sha2") {
+    algorithm
+    digest
+  }
+}
+
 query ArtifactQ2 {
   artifacts(
     artifactSpec: {

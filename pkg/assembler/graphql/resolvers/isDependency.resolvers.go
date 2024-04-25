@@ -49,3 +49,13 @@ func (r *queryResolver) IsDependency(ctx context.Context, isDependencySpec model
 
 	return r.Backend.IsDependency(ctx, &isDependencySpec)
 }
+
+// IsDependencyList is the resolver for the IsDependencyList field.
+func (r *queryResolver) IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error) {
+	funcName := "IsDependency"
+	if isDependencySpec.DependencyType != nil && !isDependencySpec.DependencyType.IsValid() {
+		return nil, gqlerror.Errorf("%s :: dependency type was not valid", funcName)
+	}
+
+	return r.Backend.IsDependencyList(ctx, isDependencySpec, after, first)
+}
