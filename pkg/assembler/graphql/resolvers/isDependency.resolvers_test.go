@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/guacsec/guac/internal/testing/mocks"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"go.uber.org/mock/gomock"
 )
 
 func TestIngestDependency(t *testing.T) {

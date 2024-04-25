@@ -22,12 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/guacsec/guac/internal/testing/mocks"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/ossf/scorecard/v4/pkg"
+	"go.uber.org/mock/gomock"
 )
 
 type mockScorecard struct{}

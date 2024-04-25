@@ -18,17 +18,18 @@ package parser
 import (
 	"context"
 	"errors"
-	"github.com/guacsec/guac/pkg/logging"
 	"reflect"
 	"testing"
+
+	"github.com/guacsec/guac/pkg/logging"
 
 	"github.com/guacsec/guac/pkg/assembler"
 
 	"github.com/guacsec/guac/internal/testing/mocks"
 
-	"github.com/golang/mock/gomock"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"go.uber.org/mock/gomock"
 )
 
 func TestParserHelper(t *testing.T) {

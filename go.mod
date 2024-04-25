@@ -291,7 +291,6 @@ require (
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v50 v50.2.0
 	github.com/google/osv-scanner v1.7.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
@@ -322,6 +321,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/tikv/client-go/v2 v2.0.8-0.20231115083414-7c96dfd783fb
 	github.com/vektah/gqlparser/v2 v2.5.11
+	go.uber.org/mock v0.4.0
 	gocloud.dev v0.37.0
 	gocloud.dev/pubsub/kafkapubsub v0.37.0
 	gocloud.dev/pubsub/rabbitpubsub v0.37.0
