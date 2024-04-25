@@ -20,11 +20,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/guacsec/guac/internal/testing/mocks"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/graphql/resolvers"
+	"go.uber.org/mock/gomock"
 )
 
 func TestIngestHasSLSA(t *testing.T) {

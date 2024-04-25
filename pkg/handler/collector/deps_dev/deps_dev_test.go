@@ -306,7 +306,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 			"pkg:golang/github.com/bradleyfalzon/ghinstallation/v2@v2.6.0",
 			"pkg:golang/github.com/go-git/go-git/v5@v5.8.1",
 			"pkg:golang/github.com/go-logr/logr@v1.2.4",
-			"pkg:golang/github.com/golang/mock@v1.6.0",
+			"pkg:golang/go.uber.org/mock/mockgen@v0.4.0",
 			"pkg:golang/github.com/google/go-cmp@v0.5.9",
 			"pkg:golang/github.com/google/go-containerregistry@v0.16.1",
 			"pkg:golang/github.com/grafeas/kritis@v0.2.3-0.20210120183821-faeba81c520c",
