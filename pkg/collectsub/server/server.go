@@ -88,7 +88,7 @@ func (s *server) GetCollectEntries(in *pb.GetCollectEntriesRequest, out collects
 	}
 	logger.Infof("GetCollectEntries returning %d entries", len(entries))
 
-	err = slice.Chunk(entries, 1000, func(subslice []*pb.CollectEntry) error {
+	err = slice.Chunk(entries, 15_000, func(subslice []*pb.CollectEntry) error {
 		return out.Send(&pb.GetCollectEntriesResponse{Entries: subslice})
 	})
 	if err != nil {
