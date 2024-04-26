@@ -257,6 +257,7 @@ func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 		currentPage = true
 	}
 	hasNextPage := false
+	totalCount := 0
 
 	algorithm := strings.ToLower(nilToEmpty(artifactSpec.Algorithm))
 	digest := strings.ToLower(nilToEmpty(artifactSpec.Digest))
@@ -274,6 +275,8 @@ func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 
 		sort.Strings(artKeys)
 
+		totalCount = len(artKeys)
+
 		for i, ak := range artKeys {
 			a, err := byKeykv[*artStruct](ctx, artCol, ak, c)
 			if err != nil {
@@ -284,10 +287,9 @@ func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 			if after != nil && !currentPage {
 				if convArt.ID == *after {
 					currentPage = true
-					continue
-				} else {
-					continue
+					totalCount = len(artKeys) - (i + 1)
 				}
+				continue
 			}
 
 			if first != nil {
@@ -313,7 +315,7 @@ func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 	}
 	if len(edges) > 0 {
 		return &model.ArtifactConnection{
-			TotalCount: len(artKeys),
+			TotalCount: totalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),

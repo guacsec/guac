@@ -47,6 +47,27 @@ fragment allCertifyVEXStatementTree on CertifyVEXStatement {
   documentRef
 }
 
+fragment AllVexPaginationTree on VEXConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query VexPagination {
+  CertifyVEXStatementList(certifyVEXStatementSpec: {}, first: 10) {
+    ...AllVexPaginationTree
+  }
+}
+
 query CertifyVEXStatementQ1 {
   CertifyVEXStatement(certifyVEXStatementSpec: {}) {
     ...allCertifyVEXStatementTree
