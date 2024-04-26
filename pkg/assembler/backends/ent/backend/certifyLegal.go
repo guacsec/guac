@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -31,8 +32,63 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyLegalList")
+func certifyLegalGlobalID(id string) string {
+	return toGlobalID(certifylegal.Table, id)
+}
+
+func bulkCertifyLegalGlobalID(ids []string) []string {
+	return toGlobalIDs(certifylegal.Table, ids)
+}
+
+func (b *EntBackend) CertifyLegalList(ctx context.Context, spec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifylegal.Table {
+			return nil, fmt.Errorf("after cursor is not type certifyLegal but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	certLegalQuery := b.client.CertifyLegal.Query().
+		Where(certifyLegalQuery(spec))
+
+	certLegalConn, err := getCertifyLegalObject(certLegalQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var edges []*model.CertifyLegalEdge
+	for _, edge := range certLegalConn.Edges {
+		edges = append(edges, &model.CertifyLegalEdge{
+			Cursor: certifyLegalGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyLegal(edge.Node),
+		})
+	}
+
+	if certLegalConn.PageInfo.StartCursor != nil {
+		return &model.CertifyLegalConnection{
+			TotalCount: certLegalConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: certLegalConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(certifyLegalGlobalID(certLegalConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(certifyLegalGlobalID(certLegalConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
@@ -76,7 +132,7 @@ func (b *EntBackend) IngestCertifyLegals(ctx context.Context, subjects model.Pac
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(certifylegal.Table, *ids), nil
+	return bulkCertifyLegalGlobalID(*ids), nil
 }
 
 func certifyLegalConflictColumns() []string {
@@ -140,7 +196,7 @@ func (b *EntBackend) IngestCertifyLegal(ctx context.Context, subject model.Packa
 		return "", gqlerror.Errorf("IngestCertifyLegal :: %s", txErr)
 	}
 
-	return toGlobalID(certifylegal.Table, *recordID), nil
+	return certifyLegalGlobalID(*recordID), nil
 }
 
 func generateCertifyLegalCreate(ctx context.Context, tx *ent.Tx, cl *model.CertifyLegalInputSpec, pkg *model.IDorPkgInput, src *model.IDorSourceInput, declaredLicenses []*model.IDorLicenseInput, discoveredLicenses []*model.IDorLicenseInput) (*ent.CertifyLegalCreate, error) {
