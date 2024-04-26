@@ -32,7 +32,7 @@ const (
 // Returns the result of Paginate with a page size of DefaultPageSize
 func DefaultPaginate[T any](ctx context.Context, lst []T) ([]T, models.PaginationInfo) {
 	logger := logging.FromContext(ctx)
-	page, info, err := Paginate(ctx, lst, models.PaginationSpec{PageSize: PointerOf(DefaultPageSize)})
+	page, info, err := Paginate(ctx, lst, &models.PaginationSpec{PageSize: PointerOf(DefaultPageSize)})
 	if err != nil {
 		// should not occur with the default pagination spec, see contract of Paginate
 		logger.Fatalf("Pagate returned err: %s, but should not have", err)
@@ -43,19 +43,20 @@ func DefaultPaginate[T any](ctx context.Context, lst []T) ([]T, models.Paginatio
 // Returns a single page from the input, selected using the given
 // pagination spec, along with a struct describing the pagination of the
 // returned page. The input result set should be the same for every call that
-// uses chained PaginationSpecs and PaginationInfos.
+// uses chained PaginationSpecs and PaginationInfos. If spec is nil, a default
+// page size is used.
 //
 // Errors are suitable to directly return to clients. An error is returned only if:
 //   - the cursor is the empty string
 //   - the cursor decodes to an out of bounds index in the input
 //   - the cursor can't be decoded
 //   - PageSize < 0
-func Paginate[T any](ctx context.Context, lst []T, spec models.PaginationSpec) ([]T,
+func Paginate[T any](ctx context.Context, lst []T, spec *models.PaginationSpec) ([]T,
 	models.PaginationInfo, error) {
 	logger := logging.FromContext(ctx)
 
 	var pagesize int = DefaultPageSize
-	if spec.PageSize != nil {
+	if spec != nil && spec.PageSize != nil {
 		pagesize = *spec.PageSize
 	}
 	if pagesize < 0 {
@@ -66,7 +67,7 @@ func Paginate[T any](ctx context.Context, lst []T, spec models.PaginationSpec) (
 	var inputLength uint64 = uint64(len(lst))
 	var start uint64 = 0
 
-	if spec.Cursor != nil {
+	if spec != nil && spec.Cursor != nil {
 		if *spec.Cursor == "" {
 			return nil, models.PaginationInfo{},
 				fmt.Errorf("Pagination error: The cursor is the empty string")

@@ -31,7 +31,7 @@ func Test_Cursors(t *testing.T) {
 
 	for i := range inputList {
 		spec := models.PaginationSpec{PageSize: pagination.PointerOf(i)}
-		_, info, err := pagination.Paginate(ctx, inputList, spec)
+		_, info, err := pagination.Paginate(ctx, inputList, &spec)
 		if err != nil {
 			t.Fatalf("Unexpected error when calling Paginate to retrieve a cursor: %s", err)
 		}
@@ -44,7 +44,7 @@ func Test_Cursors(t *testing.T) {
 			PageSize: pagination.PointerOf(100),
 			Cursor:   info.NextCursor,
 		}
-		page, _, err := pagination.Paginate(ctx, inputList, spec)
+		page, _, err := pagination.Paginate(ctx, inputList, &spec)
 		if err != nil {
 			t.Fatalf("Unexpected error (%s) when calling Paginate to retrieve an element"+
 				" at index %d.", err, i)
@@ -56,8 +56,8 @@ func Test_Cursors(t *testing.T) {
 	}
 }
 
-// Paginate is black-box by first retrieving some cursors, and then using them
-// to test different combinations of PaginationSpec. This avoids testing
+// Paginate is black-box tested by first retrieving some cursors, and then using
+// them to test different combinations of PaginationSpec. This avoids testing
 // the implementation of the cursors.
 func Test_Paginate(t *testing.T) {
 	ctx := context.Background()
@@ -68,7 +68,7 @@ func Test_Paginate(t *testing.T) {
 	cursors := []string{}
 	for i := range inputList {
 		spec := models.PaginationSpec{PageSize: pagination.PointerOf(i)}
-		_, info, err := pagination.Paginate(ctx, inputList, spec)
+		_, info, err := pagination.Paginate(ctx, inputList, &spec)
 		if err != nil {
 			t.Fatalf("Unexpected error when calling Paginate to set up the tests: %s", err)
 		}
@@ -81,7 +81,7 @@ func Test_Paginate(t *testing.T) {
 	// generate a cursor that is out of range of inputList
 	longerInputList := append(inputList, 18)
 	spec := models.PaginationSpec{PageSize: pagination.PointerOf(6)}
-	_, info, err := pagination.Paginate(ctx, longerInputList, spec)
+	_, info, err := pagination.Paginate(ctx, longerInputList, &spec)
 	if err != nil {
 		t.Fatalf("Unexpected error when calling Paginate to set up the"+
 			" out-of-range cursor test: %s", err)
@@ -95,14 +95,21 @@ func Test_Paginate(t *testing.T) {
 
 	tests := []struct {
 		name                   string
-		inputSpec              models.PaginationSpec
+		inputSpec              *models.PaginationSpec
 		expectedPage           []int
 		expectedPaginationInfo models.PaginationInfo
 		wantErr                bool
 	}{
 		{
+			name:         "PaginationSpec is nil, default is used",
+			expectedPage: inputList,
+			expectedPaginationInfo: models.PaginationInfo{
+				TotalCount: pagination.PointerOf(6),
+			},
+		},
+		{
 			name:         "Only PageSize specified",
-			inputSpec:    models.PaginationSpec{PageSize: pagination.PointerOf(3)},
+			inputSpec:    &models.PaginationSpec{PageSize: pagination.PointerOf(3)},
 			expectedPage: []int{12, 13, 14},
 			expectedPaginationInfo: models.PaginationInfo{
 				TotalCount: pagination.PointerOf(6),
@@ -111,7 +118,7 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name:         "PageSize is greater than the number of entries",
-			inputSpec:    models.PaginationSpec{PageSize: pagination.PointerOf(10)},
+			inputSpec:    &models.PaginationSpec{PageSize: pagination.PointerOf(10)},
 			expectedPage: inputList,
 			expectedPaginationInfo: models.PaginationInfo{
 				TotalCount: pagination.PointerOf(6),
@@ -119,7 +126,7 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name:         "PageSize is equal to the number of entries",
-			inputSpec:    models.PaginationSpec{PageSize: pagination.PointerOf(6)},
+			inputSpec:    &models.PaginationSpec{PageSize: pagination.PointerOf(6)},
 			expectedPage: inputList,
 			expectedPaginationInfo: models.PaginationInfo{
 				TotalCount: pagination.PointerOf(6),
@@ -127,7 +134,7 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name:         "PageSize is 0",
-			inputSpec:    models.PaginationSpec{PageSize: pagination.PointerOf(0)},
+			inputSpec:    &models.PaginationSpec{PageSize: pagination.PointerOf(0)},
 			expectedPage: []int{},
 			expectedPaginationInfo: models.PaginationInfo{
 				TotalCount: pagination.PointerOf(6),
@@ -136,12 +143,12 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name:      "PageSize is negative",
-			inputSpec: models.PaginationSpec{PageSize: pagination.PointerOf(-1)},
+			inputSpec: &models.PaginationSpec{PageSize: pagination.PointerOf(-1)},
 			wantErr:   true,
 		},
 		{
 			name: "PageSize is in range, Cursor is valid",
-			inputSpec: models.PaginationSpec{
+			inputSpec: &models.PaginationSpec{
 				PageSize: pagination.PointerOf(2),
 				Cursor:   pagination.PointerOf(cursors[2]),
 			},
@@ -153,7 +160,7 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name: "PageSize is 1, Cursor is valid",
-			inputSpec: models.PaginationSpec{
+			inputSpec: &models.PaginationSpec{
 				PageSize: pagination.PointerOf(1),
 				Cursor:   pagination.PointerOf(cursors[5]),
 			},
@@ -164,7 +171,7 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name: "PageSize + Cursor is greater than number of entries",
-			inputSpec: models.PaginationSpec{
+			inputSpec: &models.PaginationSpec{
 				PageSize: pagination.PointerOf(3),
 				Cursor:   pagination.PointerOf(cursors[4]),
 			},
@@ -175,7 +182,7 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name: "PageSize is in range, Cursor is empty string",
-			inputSpec: models.PaginationSpec{
+			inputSpec: &models.PaginationSpec{
 				PageSize: pagination.PointerOf(3),
 				Cursor:   pagination.PointerOf(""),
 			},
@@ -183,7 +190,7 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name: "PageSize is in range, Cursor is invalid base64",
-			inputSpec: models.PaginationSpec{
+			inputSpec: &models.PaginationSpec{
 				PageSize: pagination.PointerOf(3),
 				Cursor:   pagination.PointerOf("$%^"),
 			},
@@ -191,7 +198,7 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name: "PageSize is in range, Cursor is too large",
-			inputSpec: models.PaginationSpec{
+			inputSpec: &models.PaginationSpec{
 				PageSize: pagination.PointerOf(3),
 				Cursor:   pagination.PointerOf("ABCDABCDABCD"),
 			},
@@ -199,7 +206,7 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name: "PageSize is in range, Cursor is too small",
-			inputSpec: models.PaginationSpec{
+			inputSpec: &models.PaginationSpec{
 				PageSize: pagination.PointerOf(3),
 				Cursor:   pagination.PointerOf("ABC"),
 			},
@@ -207,14 +214,14 @@ func Test_Paginate(t *testing.T) {
 		},
 		{
 			name: "Cursor is out of range",
-			inputSpec: models.PaginationSpec{
+			inputSpec: &models.PaginationSpec{
 				Cursor: outOfRangeCursor,
 			},
 			wantErr: true,
 		},
 		{
 			name: "PageSize is not specified",
-			inputSpec: models.PaginationSpec{
+			inputSpec: &models.PaginationSpec{
 				Cursor: pagination.PointerOf(cursors[1]),
 			},
 			expectedPage: []int{13, 14, 15, 16, 17},
