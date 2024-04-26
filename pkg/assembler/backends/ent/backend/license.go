@@ -102,7 +102,7 @@ func (b *EntBackend) LicenseList(ctx context.Context, spec model.LicenseSpec, af
 	var edges []*model.LicenseEdge
 	for _, edge := range licenseConn.Edges {
 		edges = append(edges, &model.LicenseEdge{
-			Cursor: hasMetadataGlobalID(edge.Cursor.ID.String()),
+			Cursor: licenseGlobalID(edge.Cursor.ID.String()),
 			Node:   toModelLicense(edge.Node),
 		})
 	}
@@ -112,8 +112,8 @@ func (b *EntBackend) LicenseList(ctx context.Context, spec model.LicenseSpec, af
 			TotalCount: licenseConn.TotalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: licenseConn.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(hasMetadataGlobalID(licenseConn.PageInfo.StartCursor.ID.String())),
-				EndCursor:   ptrfrom.String(hasMetadataGlobalID(licenseConn.PageInfo.EndCursor.ID.String())),
+				StartCursor: ptrfrom.String(licenseGlobalID(licenseConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(licenseGlobalID(licenseConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil

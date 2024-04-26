@@ -60,7 +60,7 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 	).WithName(func(q *ent.PackageNameQuery) {}).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed package version query with err: %w", err)
 	}
 
 	results = append(results, collect(packages, func(v *ent.PackageVersion) model.PackageSourceOrArtifact {
@@ -76,7 +76,7 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 	).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed source name query with err: %w", err)
 	}
 	results = append(results, collect(sources, func(v *ent.SourceName) model.PackageSourceOrArtifact {
 		return toModelSource(v)
@@ -87,7 +87,7 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 	).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed artifact query with err: %w", err)
 	}
 
 	results = append(results, collect(artifacts, func(v *ent.Artifact) model.PackageSourceOrArtifact {

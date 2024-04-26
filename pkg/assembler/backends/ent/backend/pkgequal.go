@@ -81,8 +81,8 @@ func (b *EntBackend) PkgEqualList(ctx context.Context, spec model.PkgEqualSpec, 
 			TotalCount: peConn.TotalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: peConn.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(occurrenceGlobalID(peConn.PageInfo.StartCursor.ID.String())),
-				EndCursor:   ptrfrom.String(occurrenceGlobalID(peConn.PageInfo.EndCursor.ID.String())),
+				StartCursor: ptrfrom.String(pkgEqualGlobalID(peConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(pkgEqualGlobalID(peConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil

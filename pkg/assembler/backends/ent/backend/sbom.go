@@ -38,6 +38,14 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func hasSBOMGlobalID(id string) string {
+	return toGlobalID(billofmaterials.Table, id)
+}
+
+func bulkHasSBOMGlobalID(ids []string) []string {
+	return toGlobalIDs(billofmaterials.Table, ids)
+}
+
 func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error) {
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
@@ -259,7 +267,7 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 	var edges []*model.HasSBOMEdge
 	for id, edge := range reconstructedSBOMs {
 		edges = append(edges, &model.HasSBOMEdge{
-			Cursor: toGlobalID(billofmaterials.Table, id),
+			Cursor: hasSBOMGlobalID(id),
 			Node:   edge,
 		})
 	}
@@ -269,8 +277,8 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 			TotalCount: hasSBOMConnection.TotalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasSBOMConnection.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(toGlobalID(billofmaterials.Table, hasSBOMConnection.PageInfo.StartCursor.ID.String())),
-				EndCursor:   ptrfrom.String(toGlobalID(billofmaterials.Table, hasSBOMConnection.PageInfo.EndCursor.ID.String())),
+				StartCursor: ptrfrom.String(hasSBOMGlobalID(hasSBOMConnection.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(hasSBOMGlobalID(hasSBOMConnection.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil
@@ -381,7 +389,7 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 		return "", Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalID(billofmaterials.Table, *sbomId), nil
+	return hasSBOMGlobalID(*sbomId), nil
 }
 
 func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
@@ -399,7 +407,7 @@ func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageO
 		}
 		sbomIDs = append(sbomIDs, id)
 	}
-	return toGlobalIDs(billofmaterials.Table, sbomIDs), nil
+	return bulkHasSBOMGlobalID(sbomIDs), nil
 }
 
 func sbomConflictColumns() []string {

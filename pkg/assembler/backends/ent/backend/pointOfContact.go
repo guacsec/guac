@@ -78,8 +78,8 @@ func (b *EntBackend) PointOfContactList(ctx context.Context, spec model.PointOfC
 			TotalCount: pocConn.TotalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: pocConn.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(occurrenceGlobalID(pocConn.PageInfo.StartCursor.ID.String())),
-				EndCursor:   ptrfrom.String(occurrenceGlobalID(pocConn.PageInfo.EndCursor.ID.String())),
+				StartCursor: ptrfrom.String(pointOfContactGlobalID(pocConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(pointOfContactGlobalID(pocConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil
