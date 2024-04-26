@@ -385,8 +385,52 @@ func (b *EntBackend) hasSourceAtNeighbors(ctx context.Context, nodeID string, al
 	return out, nil
 }
 
-func (b *EntBackend) SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
-	return nil, fmt.Errorf("not implemented: SourcesList")
+func (b *EntBackend) SourcesList(ctx context.Context, spec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != sourcename.Table {
+			return nil, fmt.Errorf("after cursor is not type source but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	sourceConn, err := b.client.SourceName.Query().
+		Where(sourceQuery(&spec)).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed sources query with error: %w", err)
+	}
+
+	var edges []*model.SourceEdge
+	for _, edge := range sourceConn.Edges {
+		edges = append(edges, &model.SourceEdge{
+			Cursor: srcNameGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelSource(edge.Node),
+		})
+	}
+
+	if sourceConn.PageInfo.StartCursor != nil {
+		return &model.SourceConnection{
+			TotalCount: sourceConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: sourceConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(srcNameGlobalID(sourceConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(srcNameGlobalID(sourceConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
