@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -30,6 +31,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+func certifyVulnGlobalID(id string) string {
+	return toGlobalID(certifyvuln.Table, id)
+}
+
+func bulkCertifyVulnGlobalID(ids []string) []string {
+	return toGlobalIDs(certifyvuln.Table, ids)
+}
 
 func certifyVulnConflictColumns() []string {
 	return []string{
@@ -73,7 +82,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 		return "", txErr
 	}
 
-	return toGlobalID(certifyvuln.Table, *record), nil
+	return certifyVulnGlobalID(*record), nil
 }
 
 func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
@@ -90,7 +99,7 @@ func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorP
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(certifyvuln.Table, *ids), nil
+	return bulkCertifyVulnGlobalID(*ids), nil
 }
 
 func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput) (*ent.CertifyVulnCreate, error) {
@@ -191,8 +200,55 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 	return &ids, nil
 }
 
-func (b *EntBackend) CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyVulnList")
+func (b *EntBackend) CertifyVulnList(ctx context.Context, spec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyvuln.Table {
+			return nil, fmt.Errorf("after cursor is not type certifyVuln but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	certVulnQuery := b.client.CertifyVuln.Query().
+		Where(certifyVulnPredicate(spec))
+
+	certVulnConn, err := getCertVulnObject(certVulnQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyVuln query with error: %w", err)
+	}
+
+	var edges []*model.CertifyVulnEdge
+	for _, edge := range certVulnConn.Edges {
+		edges = append(edges, &model.CertifyVulnEdge{
+			Cursor: certifyVulnGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyVulnerability(edge.Node),
+		})
+	}
+
+	if certVulnConn.PageInfo.StartCursor != nil {
+		return &model.CertifyVulnConnection{
+			TotalCount: certVulnConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: certVulnConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(certifyVulnGlobalID(certVulnConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(certifyVulnGlobalID(certVulnConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
@@ -247,7 +303,7 @@ func getCertVulnObject(q *ent.CertifyVulnQuery) *ent.CertifyVulnQuery {
 
 func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 	return &model.CertifyVuln{
-		ID:            toGlobalID(certifyvuln.Table, record.ID.String()),
+		ID:            certifyVulnGlobalID(record.ID.String()),
 		Package:       toModelPackage(backReferencePackageVersion(record.Edges.Package)),
 		Vulnerability: toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		Metadata: &model.ScanMetadata{
