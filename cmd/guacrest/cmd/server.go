@@ -33,9 +33,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 )
 
-// TODO: add logging middleware
-// TODO: add context propagation middleware
-
 func startServer() {
 	ctx := logging.WithLogger(context.Background())
 	logger := logging.FromContext(ctx)
@@ -47,10 +44,12 @@ func startServer() {
 
 	httpClient := &http.Client{Transport: transport}
 	gqlClient := getGraphqlServerClientOrExit(ctx, httpClient)
-	handler := server.NewDefaultServer(gqlClient)
-	handlerWrapper := gen.NewStrictHandler(handler, nil)
+
+	restApiHandler  := gen.Handler(gen.NewStrictHandler(server.NewDefaultServer(gqlClient), nil))
+
 	router := chi.NewRouter()
-	router.Mount("/", gen.Handler(handlerWrapper))
+	router.Use(server.AddLoggerToCtxMiddleware, server.LogRequestsMiddleware)
+	router.Mount("/", restApiHandler)
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%d", flags.restAPIServerPort),
 		Handler: router,

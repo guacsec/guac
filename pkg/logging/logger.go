@@ -99,14 +99,20 @@ func ParseLevel(level string) (LogLevel, error) {
 	}
 }
 
-func WithLogger(ctx context.Context) context.Context {
+// Attaches the logger to the input context, optionally adding a number of fields
+// to the logging context. The fields should be key-value pairs.
+func WithLogger(ctx context.Context, fields ...interface{}) context.Context {
 	if logger == nil {
 		// defaults to Debug if InitLogger has not been called.
 		// all cli commands should call InitLogger, so this should mostly be for unit tests
 		InitLogger(Debug)
 		logger.Debugf("InitLogger has not been called. Defaulting to debug log level")
 	}
+	if len(fields) > 0 {
+		return context.WithValue(ctx, loggerKey{}, logger.With(fields...))
+	}
 	return context.WithValue(ctx, loggerKey{}, logger)
+
 }
 
 func FromContext(ctx context.Context) *zap.SugaredLogger {
