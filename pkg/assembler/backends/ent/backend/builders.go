@@ -61,7 +61,7 @@ func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.Builder
 		Where(builderQueryPredicate(&builderSpec)).
 		Paginate(ctx, afterCursor, first, nil, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed builder query with error: %w", err)
 	}
 
 	var edges []*model.BuilderEdge

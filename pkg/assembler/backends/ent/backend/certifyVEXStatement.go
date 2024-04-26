@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -30,6 +31,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+func certifyVEXGlobalID(id string) string {
+	return toGlobalID(certifyvex.Table, id)
+}
+
+func bulkCertifyVEXGlobalID(ids []string) []string {
+	return toGlobalIDs(certifyvex.Table, ids)
+}
 
 func certifyVexConflictColumns() []string {
 	return []string{
@@ -94,7 +103,7 @@ func (b *EntBackend) IngestVEXStatement(ctx context.Context, subject model.Packa
 		return "", txErr
 	}
 
-	return toGlobalID(certifyvex.Table, *recordID), nil
+	return certifyVEXGlobalID(*recordID), nil
 }
 
 func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.PackageOrArtifactInputs, vulnerabilities []*model.IDorVulnerabilityInput, vexStatements []*model.VexStatementInputSpec) ([]string, error) {
@@ -111,7 +120,7 @@ func (b *EntBackend) IngestVEXStatements(ctx context.Context, subjects model.Pac
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(certifyvex.Table, *ids), nil
+	return bulkCertifyVEXGlobalID(*ids), nil
 }
 
 func generateVexCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, vuln *model.IDorVulnerabilityInput, vexStatement *model.VexStatementInputSpec) (*ent.CertifyVexCreate, error) {
@@ -256,8 +265,55 @@ func upsertBulkVEX(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArti
 	return &ids, nil
 }
 
-func (b *EntBackend) CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyVEXStatementList")
+func (b *EntBackend) CertifyVEXStatementList(ctx context.Context, spec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyvex.Table {
+			return nil, fmt.Errorf("after cursor is not type certifyVEX but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	vexQuery := b.client.CertifyVex.Query().
+		Where(certifyVexPredicate(spec))
+
+	certVEXConn, err := getVEXObject(vexQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed CertifyVEXStatement query with error: %w", err)
+	}
+
+	var edges []*model.VEXEdge
+	for _, edge := range certVEXConn.Edges {
+		edges = append(edges, &model.VEXEdge{
+			Cursor: certifyVEXGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyVEXStatement(edge.Node),
+		})
+	}
+
+	if certVEXConn.PageInfo.StartCursor != nil {
+		return &model.VEXConnection{
+			TotalCount: certVEXConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: certVEXConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(certifyVEXGlobalID(certVEXConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(certifyVEXGlobalID(certVEXConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
@@ -290,7 +346,7 @@ func getVEXObject(q *ent.CertifyVexQuery) *ent.CertifyVexQuery {
 
 func toModelCertifyVEXStatement(record *ent.CertifyVex) *model.CertifyVEXStatement {
 	return &model.CertifyVEXStatement{
-		ID:               toGlobalID(certifyvex.Table, record.ID.String()),
+		ID:               certifyVEXGlobalID(record.ID.String()),
 		Subject:          toPackageOrArtifact(record.Edges.Package, record.Edges.Artifact),
 		Vulnerability:    toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		KnownSince:       record.KnownSince,
