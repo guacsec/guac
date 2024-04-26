@@ -22,11 +22,11 @@ import (
 	"fmt"
 	"sort"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -34,8 +34,63 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error) {
-	return nil, fmt.Errorf("not implemented: HashEqualList")
+func hashEqualGlobalID(id string) string {
+	return toGlobalID(hashequal.Table, id)
+}
+
+func bulkHashEqualGlobalID(ids []string) []string {
+	return toGlobalIDs(hashequal.Table, ids)
+}
+
+func (b *EntBackend) HashEqualList(ctx context.Context, spec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != hashequal.Table {
+			return nil, fmt.Errorf("after cursor is not type hashEqual but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	heQuery := b.client.HashEqual.Query().
+		Where(hashEqualQueryPredicates(&spec))
+
+	haConn, err := getHashEqualObject(heQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed hashEqual query with error: %w", err)
+	}
+
+	var edges []*model.HashEqualEdge
+	for _, edge := range haConn.Edges {
+		edges = append(edges, &model.HashEqualEdge{
+			Cursor: hashEqualGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelHashEqual(edge.Node),
+		})
+	}
+
+	if haConn.PageInfo.StartCursor != nil {
+		return &model.HashEqualConnection{
+			TotalCount: haConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: haConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(hashEqualGlobalID(haConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(hashEqualGlobalID(haConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) HashEqual(ctx context.Context, spec *model.HashEqualSpec) ([]*model.HashEqual, error) {
@@ -97,7 +152,7 @@ func (b *EntBackend) IngestHashEqual(ctx context.Context, artifact model.IDorArt
 		return "", txErr
 	}
 
-	return toGlobalID(hashequal.Table, *record), nil
+	return hashEqualGlobalID(*record), nil
 }
 
 func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.IDorArtifactInput, otherArtifacts []*model.IDorArtifactInput, hashEquals []*model.HashEqualInputSpec) ([]string, error) {
@@ -114,7 +169,7 @@ func (b *EntBackend) IngestHashEquals(ctx context.Context, artifacts []*model.ID
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(hashequal.Table, *ids), nil
+	return bulkHashEqualGlobalID(*ids), nil
 }
 
 func hasEqualConflictColumns() []string {
@@ -180,7 +235,7 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		if err != nil {
 			return nil, err
 		}
-		artifactA.ArtifactID = ptrfrom.String(toGlobalID(artifact.Table, foundArt.ID.String()))
+		artifactA.ArtifactID = ptrfrom.String(hashEqualGlobalID(foundArt.ID.String()))
 	}
 
 	if artifactB.ArtifactID == nil {
@@ -188,7 +243,7 @@ func generateHashEqualCreate(ctx context.Context, tx *ent.Tx, artifactA *model.I
 		if err != nil {
 			return nil, err
 		}
-		artifactB.ArtifactID = ptrfrom.String(toGlobalID(artifact.Table, foundArt.ID.String()))
+		artifactB.ArtifactID = ptrfrom.String(hashEqualGlobalID(foundArt.ID.String()))
 	}
 
 	sortedArtifacts := []model.IDorArtifactInput{*artifactA, *artifactB}
@@ -264,7 +319,7 @@ func toModelHashEqual(record *ent.HashEqual) *model.HashEqual {
 	artifacts := []*ent.Artifact{record.Edges.ArtifactA, record.Edges.ArtifactB}
 
 	return &model.HashEqual{
-		ID:            toGlobalID(hashequal.Table, record.ID.String()),
+		ID:            hashEqualGlobalID(record.ID.String()),
 		Artifacts:     collect(artifacts, toModelArtifact),
 		Justification: record.Justification,
 		Collector:     record.Collector,
