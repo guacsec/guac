@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -86,6 +87,10 @@ func (d *s3Bucket) ListFiles(ctx context.Context, bucket string, prefix string, 
 
 	var files []string
 	for _, item := range resp.Contents {
+		// ignore s3 objects that are directories
+		if strings.HasSuffix(*item.Key, "/") {
+			continue
+		}
 		files = append(files, *item.Key)
 	}
 	return files, resp.NextContinuationToken, nil
