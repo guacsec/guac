@@ -42,7 +42,8 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
 	if after != nil {
-		afterUUID, err := uuid.Parse(*after)
+		globalID := fromGlobalID(*after)
+		afterUUID, err := uuid.Parse(globalID.id)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +98,7 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 		pkgVerChan := make(chan pkgVersionResult, 1)
 		artChan := make(chan artResult, 1)
 
-		sbomID := foundSBOM.Node.ID.String()
+		sbomID := foundSBOM.Cursor.ID.String()
 
 		// query included packages
 
@@ -258,7 +259,7 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 	var edges []*model.HasSBOMEdge
 	for id, edge := range reconstructedSBOMs {
 		edges = append(edges, &model.HasSBOMEdge{
-			Cursor: id,
+			Cursor: toGlobalID(billofmaterials.Table, id),
 			Node:   edge,
 		})
 	}
@@ -268,8 +269,8 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 			TotalCount: hasSBOMConnection.TotalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasSBOMConnection.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(hasSBOMConnection.PageInfo.StartCursor.ID.String()),
-				EndCursor:   ptrfrom.String(hasSBOMConnection.PageInfo.EndCursor.ID.String()),
+				StartCursor: ptrfrom.String(toGlobalID(billofmaterials.Table, hasSBOMConnection.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(toGlobalID(billofmaterials.Table, hasSBOMConnection.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil
@@ -289,7 +290,6 @@ func (b *EntBackend) HasSBOM(ctx context.Context, spec *model.HasSBOMSpec) ([]*m
 		Where(hasSBOMQuery(*spec))
 
 	records, err := getSBOMObjectWithIncludes(sbomQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, funcName)
@@ -735,9 +735,6 @@ func (b *EntBackend) hasSbomNeighbors(ctx context.Context, nodeID string, allowe
 				getOccurrenceObject(q)
 			})
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	bills, err := query.All(ctx)
 	if err != nil {

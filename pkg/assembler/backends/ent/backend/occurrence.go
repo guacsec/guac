@@ -372,9 +372,6 @@ func (b *EntBackend) isOccurrenceNeighbors(ctx context.Context, nodeID string, a
 			WithArtifact()
 	}
 
-	query.
-		Limit(MaxPageSize)
-
 	occurs, err := query.All(ctx)
 	if err != nil {
 		return []model.Node{}, fmt.Errorf("failed to query for isOccur with node ID: %s with error: %w", nodeID, err)

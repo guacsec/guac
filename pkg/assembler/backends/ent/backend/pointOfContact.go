@@ -42,7 +42,6 @@ func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfCo
 		Where(pointOfContactPredicate(filter))
 
 	records, err := getPointOfContactObject(pocQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed PointOfContact query with error: %w", err)
@@ -415,9 +414,6 @@ func (b *EntBackend) pointOfContactNeighbors(ctx context.Context, nodeID string,
 		query.
 			WithSource()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	pocs, err := query.All(ctx)
 	if err != nil {

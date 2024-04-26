@@ -84,7 +84,6 @@ func (b *EntBackend) Licenses(ctx context.Context, filter *model.LicenseSpec) ([
 func getLicenses(ctx context.Context, client *ent.Client, filter model.LicenseSpec) ([]*ent.License, error) {
 	results, err := client.License.Query().
 		Where(licenseQuery(filter)).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -188,9 +187,6 @@ func (b *EntBackend) licenseNeighbors(ctx context.Context, nodeID string, allowe
 				getCertifyLegalObject(q)
 			})
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	licenses, err := query.All(ctx)
 	if err != nil {

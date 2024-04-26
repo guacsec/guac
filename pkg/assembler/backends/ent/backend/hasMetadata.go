@@ -42,7 +42,6 @@ func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 		Where(hasMetadataPredicate(filter))
 
 	records, err := getHasMetadataObject(hmQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed hasMetadata query with error: %w", err)
@@ -420,9 +419,6 @@ func (b *EntBackend) hasMetadataNeighbors(ctx context.Context, nodeID string, al
 		query.
 			WithSource()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	hasMetas, err := query.All(ctx)
 	if err != nil {

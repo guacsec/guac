@@ -48,7 +48,6 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 		Where(hasSLSAQuery(*spec))
 
 	records, err := getSLSAObject(slsaQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed hasSLSA query with error: %w", err)
@@ -416,9 +415,6 @@ func (b *EntBackend) hasSlsaNeighbors(ctx context.Context, nodeID string, allowe
 		query.
 			WithBuiltFrom()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	slsaAtts, err := query.All(ctx)
 	if err != nil {

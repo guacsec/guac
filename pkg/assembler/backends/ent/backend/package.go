@@ -55,7 +55,6 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	pkgs, err := b.client.PackageVersion.Query().
 		Where(packageQueryPredicates(pkgSpec)).
 		WithName(func(q *ent.PackageNameQuery) {}).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed package query with error: %w", err)
@@ -411,8 +410,7 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 		query := b.client.PackageName.Query().
 			Where([]predicate.PackageName{
 				optionalPredicate(&nodeID, packagename.TypeEQ),
-			}...).
-			Limit(MaxPageSize)
+			}...)
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
@@ -448,8 +446,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 		Where([]predicate.PackageName{
 			optionalPredicate(&splitQueryValue[0], packagename.TypeEQ),
 			optionalPredicate(&splitQueryValue[1], packagename.NamespaceEQ),
-		}...).
-		Limit(MaxPageSize)
+		}...)
 
 	pkgNames, err := query.All(ctx)
 	if err != nil {
@@ -500,10 +497,6 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 				q.WithName()
 			})
 	}
-	if allowedEdges[model.EdgePackageNamePackageNamespace] {
-		query.
-			Limit(MaxPageSize)
-	}
 	if allowedEdges[model.EdgePackageHasSourceAt] {
 		query.
 			WithHasSourceAt(func(q *ent.HasSourceAtQuery) {
@@ -542,9 +535,6 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 				getPointOfContactObject(q)
 			})
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	pkgNames, err := query.All(ctx)
 	if err != nil {
@@ -692,9 +682,6 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 				getCertifyLegalObject(q)
 			})
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	pkgVersions, err := query.All(ctx)
 	if err != nil {

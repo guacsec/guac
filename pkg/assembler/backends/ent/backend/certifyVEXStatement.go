@@ -269,7 +269,6 @@ func (b *EntBackend) CertifyVEXStatement(ctx context.Context, spec *model.Certif
 		Where(certifyVexPredicate(*spec))
 
 	records, err := getVEXObject(vexQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed CertifyVEXStatement query with error: %w", err)
@@ -365,9 +364,6 @@ func (b *EntBackend) certifyVexNeighbors(ctx context.Context, nodeID string, all
 		query.
 			WithVulnerability()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	certVexs, err := query.All(ctx)
 	if err != nil {

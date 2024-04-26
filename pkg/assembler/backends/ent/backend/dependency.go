@@ -43,7 +43,6 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 		Where(isDependencyQuery(spec))
 
 	deps, err := getIsDepObject(isDepQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed isDependency query with error: %w", err)
@@ -371,9 +370,6 @@ func (b *EntBackend) isDependencyNeighbors(ctx context.Context, nodeID string, a
 			WithDependentPackageVersion(withPackageVersionTree()).
 			WithDependentPackageName()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	deps, err := query.All(ctx)
 	if err != nil {

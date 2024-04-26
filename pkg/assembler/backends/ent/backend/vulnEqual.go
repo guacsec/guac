@@ -50,7 +50,6 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 		Where(vulnEqualQuery(filter))
 
 	query, err := getVulnEqualObject(veQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed vulnEqual query with error: %w", err)
@@ -331,9 +330,6 @@ func (b *EntBackend) vulnEqualNeighbors(ctx context.Context, nodeID string, allo
 			WithVulnerabilityA().
 			WithVulnerabilityB()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	vulnEquals, err := query.All(ctx)
 	if err != nil {

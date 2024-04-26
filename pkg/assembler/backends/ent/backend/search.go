@@ -58,7 +58,6 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 			packagename.NameContainsFold(searchText),
 		),
 	).WithName(func(q *ent.PackageNameQuery) {}).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -75,7 +74,6 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 			sourcename.NamespaceContainsFold(searchText),
 		),
 	).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -87,7 +85,6 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 	artifacts, err := b.client.Artifact.Query().Where(
 		artifact.DigestContains(searchText),
 	).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, err

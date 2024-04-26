@@ -203,7 +203,6 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 		Where(certifyVulnPredicate(*spec))
 
 	records, err := getCertVulnObject(certVulnQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed certifyVuln query with error: %w", err)
@@ -279,9 +278,6 @@ func (b *EntBackend) certifyVulnNeighbors(ctx context.Context, nodeID string, al
 		query.
 			WithVulnerability()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	certVulns, err := query.All(ctx)
 	if err != nil {

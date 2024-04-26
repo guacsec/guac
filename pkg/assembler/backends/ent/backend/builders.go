@@ -36,16 +36,20 @@ func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.Builder
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
 	if after != nil {
-		afterUUID, err := uuid.Parse(*after)
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != builder.Table {
+			return nil, fmt.Errorf("after cursor is not type builder but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
 		}
 		afterCursor = &ent.Cursor{ID: afterUUID}
 	} else {
 		afterCursor = nil
 	}
 
-	query, err := b.client.Builder.Query().
+	buildConn, err := b.client.Builder.Query().
 		Where(builderQueryPredicate(&builderSpec)).
 		Paginate(ctx, afterCursor, first, nil, nil)
 	if err != nil {
@@ -53,20 +57,20 @@ func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.Builder
 	}
 
 	var edges []*model.BuilderEdge
-	for _, edge := range query.Edges {
+	for _, edge := range buildConn.Edges {
 		edges = append(edges, &model.BuilderEdge{
-			Cursor: edge.Cursor.ID.String(),
+			Cursor: toGlobalID(builder.Table, edge.Cursor.ID.String()),
 			Node:   toModelBuilder(edge.Node),
 		})
 	}
 
-	if query.PageInfo.StartCursor != nil {
+	if buildConn.PageInfo.StartCursor != nil {
 		return &model.BuilderConnection{
-			TotalCount: query.TotalCount,
+			TotalCount: buildConn.TotalCount,
 			PageInfo: &model.PageInfo{
-				HasNextPage: query.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(query.PageInfo.StartCursor.ID.String()),
-				EndCursor:   ptrfrom.String(query.PageInfo.EndCursor.ID.String()),
+				HasNextPage: buildConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(toGlobalID(builder.Table, buildConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(toGlobalID(builder.Table, buildConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil
@@ -83,7 +87,7 @@ func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 	query := b.client.Builder.Query().
 		Where(builderQueryPredicate(builderSpec))
 
-	builders, err := query.Limit(MaxPageSize).All(ctx)
+	builders, err := query.All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed builder query with error: %w", err)
 	}
@@ -202,9 +206,6 @@ func (b *EntBackend) builderNeighbors(ctx context.Context, nodeID string, allowe
 				getSLSAObject(q)
 			})
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	builders, err := query.All(ctx)
 	if err != nil {

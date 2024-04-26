@@ -53,7 +53,6 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		Where(hasSourceAtQuery(*filter))
 
 	records, err := getHasSourceAtObject(hasSourceAtQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed hasSourceAt query with error: %w", err)
@@ -299,9 +298,6 @@ func (b *EntBackend) hasSourceAtNeighbors(ctx context.Context, nodeID string, al
 			WithSource()
 	}
 
-	query.
-		Limit(MaxPageSize)
-
 	hasSourceAts, err := query.All(ctx)
 	if err != nil {
 		return []model.Node{}, fmt.Errorf("failed to query for hasSourceAt with node ID: %s with error: %w", nodeID, err)
@@ -332,7 +328,6 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 	}
 	records, err := b.client.SourceName.Query().
 		Where(sourceQuery(filter)).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed sources query with error: %w", err)
@@ -596,8 +591,7 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 	var out []model.Node
 	if allowedEdges[model.EdgeSourceTypeSourceNamespace] {
 		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{Type: &nodeID})).
-			Limit(MaxPageSize)
+			Where(sourceQuery(&model.SourceSpec{Type: &nodeID}))
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
@@ -631,8 +625,7 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 	}
 
 	query := b.client.SourceName.Query().
-		Where(sourceQuery(&model.SourceSpec{Type: &splitQueryValue[0], Namespace: &splitQueryValue[1]})).
-		Limit(MaxPageSize)
+		Where(sourceQuery(&model.SourceSpec{Type: &splitQueryValue[0], Namespace: &splitQueryValue[1]}))
 
 	srcNames, err := query.All(ctx)
 	if err != nil {
@@ -727,9 +720,6 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 				getCertifyLegalObject(q)
 			})
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	srcNames, err := query.All(ctx)
 	if err != nil {

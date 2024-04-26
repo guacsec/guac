@@ -39,18 +39,21 @@ func (b *EntBackend) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
 	if after != nil {
-		afterUUID, err := uuid.Parse(*after)
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != artifact.Table {
+			return nil, fmt.Errorf("after cursor is not type artifact but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
 		}
 		afterCursor = &ent.Cursor{ID: afterUUID}
 	} else {
 		afterCursor = nil
 	}
 
-	query, err := b.client.Artifact.Query().
+	artConn, err := b.client.Artifact.Query().
 		Where(artifactQueryPredicates(&artifactSpec)).
-		Limit(MaxPageSize).
 		Paginate(ctx, afterCursor, first, nil, nil)
 
 	if err != nil {
@@ -58,20 +61,20 @@ func (b *EntBackend) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 	}
 
 	var edges []*model.ArtifactEdge
-	for _, edge := range query.Edges {
+	for _, edge := range artConn.Edges {
 		edges = append(edges, &model.ArtifactEdge{
-			Cursor: edge.Cursor.ID.String(),
+			Cursor: toGlobalID(artifact.Table, edge.Cursor.ID.String()),
 			Node:   toModelArtifact(edge.Node),
 		})
 	}
 
-	if query.PageInfo.StartCursor != nil {
+	if artConn.PageInfo.StartCursor != nil {
 		return &model.ArtifactConnection{
-			TotalCount: query.TotalCount,
+			TotalCount: artConn.TotalCount,
 			PageInfo: &model.PageInfo{
-				HasNextPage: query.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(query.PageInfo.StartCursor.ID.String()),
-				EndCursor:   ptrfrom.String(query.PageInfo.EndCursor.ID.String()),
+				HasNextPage: artConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(toGlobalID(artifact.Table, artConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(toGlobalID(artifact.Table, artConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil
@@ -86,9 +89,7 @@ func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.Artifact
 		artifactSpec = &model.ArtifactSpec{}
 	}
 	query := b.client.Artifact.Query().
-		Where(artifactQueryPredicates(artifactSpec)).
-		Limit(MaxPageSize)
-
+		Where(artifactQueryPredicates(artifactSpec))
 	artifacts, err := query.All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed artifact query with error: %w", err)
@@ -264,9 +265,6 @@ func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allow
 				getPointOfContactObject(q)
 			})
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	artifacts, err := query.All(ctx)
 	if err != nil {

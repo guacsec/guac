@@ -300,9 +300,6 @@ func (b *EntBackend) hashEqualNeighbors(ctx context.Context, nodeID string, allo
 			WithArtifactB()
 	}
 
-	query.
-		Limit(MaxPageSize)
-
 	hasEquals, err := query.All(ctx)
 	if err != nil {
 		return []model.Node{}, fmt.Errorf("failed to query for hashEqual with node ID: %s with error: %w", nodeID, err)

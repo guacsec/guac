@@ -19,10 +19,12 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/builder"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -39,8 +41,55 @@ type certificationInputSpec interface {
 	model.CertifyGoodInputSpec | model.CertifyBadInputSpec
 }
 
-func (b *EntBackend) CertifyBadList(ctx context.Context, certifyBadSpec model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyBadList")
+func (b *EntBackend) CertifyBadList(ctx context.Context, filter model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyBadString {
+			return nil, fmt.Errorf("after cursor is not type certifyBad but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeBAD, &filter))
+
+	records, err := getCertificationObject(certQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var edges []*model.BuilderEdge
+	for _, edge := range buildConn.Edges {
+		edges = append(edges, &model.BuilderEdge{
+			Cursor: toGlobalID(builder.Table, edge.Cursor.ID.String()),
+			Node:   toModelBuilder(edge.Node),
+		})
+	}
+
+	if buildConn.PageInfo.StartCursor != nil {
+		return &model.BuilderConnection{
+			TotalCount: buildConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: buildConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(toGlobalID(builder.Table, buildConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(toGlobalID(builder.Table, buildConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {

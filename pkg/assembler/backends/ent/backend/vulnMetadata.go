@@ -48,7 +48,6 @@ func (b *EntBackend) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 		Where(vulnMetadataPred)
 
 	records, err := getVulnMetadataObject(veQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed vulnMetadata query with error: %w", err)
@@ -269,9 +268,6 @@ func (b *EntBackend) vulnMetadataNeighbors(ctx context.Context, nodeID string, a
 		query.
 			WithVulnerabilityID()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	vulnMetas, err := query.All(ctx)
 	if err != nil {

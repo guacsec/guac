@@ -47,7 +47,6 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 		Where(certifyScorecardQuery(filter))
 
 	records, err := getScorecardObject(scorecardQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed scorecard query with error: %w", err)
@@ -285,9 +284,6 @@ func (b *EntBackend) certifyScorecardNeighbors(ctx context.Context, nodeID strin
 		query.
 			WithSource()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	scorecards, err := query.All(ctx)
 	if err != nil {

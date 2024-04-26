@@ -43,7 +43,6 @@ func (b *EntBackend) CertifyLegal(ctx context.Context, spec *model.CertifyLegalS
 		Where(certifyLegalQuery(*spec))
 
 	records, err := getCertifyLegalObject(certLegalQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed certifyLegal query with error: %w", err)
@@ -420,9 +419,6 @@ func (b *EntBackend) certifyLegalNeighbors(ctx context.Context, nodeID string, a
 			WithDeclaredLicenses().
 			WithDiscoveredLicenses()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	certLegals, err := query.All(ctx)
 	if err != nil {

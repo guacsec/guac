@@ -50,7 +50,6 @@ func (b *EntBackend) PkgEqual(ctx context.Context, spec *model.PkgEqualSpec) ([]
 		Where(pkgEqualQueryPredicates(spec))
 
 	records, err := getPkgEqualObject(peQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed pkgEqual query with error: %w", err)
@@ -296,9 +295,6 @@ func (b *EntBackend) pkgEqualNeighbors(ctx context.Context, nodeID string, allow
 			WithPackageA(withPackageVersionTree()).
 			WithPackageB(withPackageVersionTree())
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	pkgEquals, err := query.All(ctx)
 	if err != nil {
