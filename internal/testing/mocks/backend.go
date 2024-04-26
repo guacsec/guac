@@ -65,7 +65,7 @@ func (m *MockBackend) ArtifactsList(ctx context.Context, artifactSpec model.Arti
 }
 
 // ArtifactsList indicates an expected call of ArtifactsList.
-func (mr *MockBackendMockRecorder) ArtifactsList(ctx, artifactSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) ArtifactsList(ctx, artifactSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ArtifactsList", reflect.TypeOf((*MockBackend)(nil).ArtifactsList), ctx, artifactSpec, after, first)
 }
@@ -95,7 +95,7 @@ func (m *MockBackend) BuildersList(ctx context.Context, builderSpec model.Builde
 }
 
 // BuildersList indicates an expected call of BuildersList.
-func (mr *MockBackendMockRecorder) BuildersList(ctx, builderSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) BuildersList(ctx, builderSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildersList", reflect.TypeOf((*MockBackend)(nil).BuildersList), ctx, builderSpec, after, first)
 }
@@ -125,7 +125,7 @@ func (m *MockBackend) CertifyBadList(ctx context.Context, certifyBadSpec model.C
 }
 
 // CertifyBadList indicates an expected call of CertifyBadList.
-func (mr *MockBackendMockRecorder) CertifyBadList(ctx, certifyBadSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) CertifyBadList(ctx, certifyBadSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyBadList", reflect.TypeOf((*MockBackend)(nil).CertifyBadList), ctx, certifyBadSpec, after, first)
 }
@@ -155,7 +155,7 @@ func (m *MockBackend) CertifyGoodList(ctx context.Context, certifyGoodSpec model
 }
 
 // CertifyGoodList indicates an expected call of CertifyGoodList.
-func (mr *MockBackendMockRecorder) CertifyGoodList(ctx, certifyGoodSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) CertifyGoodList(ctx, certifyGoodSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyGoodList", reflect.TypeOf((*MockBackend)(nil).CertifyGoodList), ctx, certifyGoodSpec, after, first)
 }
@@ -185,7 +185,7 @@ func (m *MockBackend) CertifyLegalList(ctx context.Context, certifyLegalSpec mod
 }
 
 // CertifyLegalList indicates an expected call of CertifyLegalList.
-func (mr *MockBackendMockRecorder) CertifyLegalList(ctx, certifyLegalSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) CertifyLegalList(ctx, certifyLegalSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyLegalList", reflect.TypeOf((*MockBackend)(nil).CertifyLegalList), ctx, certifyLegalSpec, after, first)
 }
@@ -215,7 +215,7 @@ func (m *MockBackend) CertifyVEXStatementList(ctx context.Context, certifyVEXSta
 }
 
 // CertifyVEXStatementList indicates an expected call of CertifyVEXStatementList.
-func (mr *MockBackendMockRecorder) CertifyVEXStatementList(ctx, certifyVEXStatementSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) CertifyVEXStatementList(ctx, certifyVEXStatementSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyVEXStatementList", reflect.TypeOf((*MockBackend)(nil).CertifyVEXStatementList), ctx, certifyVEXStatementSpec, after, first)
 }
@@ -245,7 +245,7 @@ func (m *MockBackend) CertifyVulnList(ctx context.Context, certifyVulnSpec model
 }
 
 // CertifyVulnList indicates an expected call of CertifyVulnList.
-func (mr *MockBackendMockRecorder) CertifyVulnList(ctx, certifyVulnSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) CertifyVulnList(ctx, certifyVulnSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyVulnList", reflect.TypeOf((*MockBackend)(nil).CertifyVulnList), ctx, certifyVulnSpec, after, first)
 }
@@ -275,7 +275,7 @@ func (m *MockBackend) FindSoftwareList(ctx context.Context, searchText string, a
 }
 
 // FindSoftwareList indicates an expected call of FindSoftwareList.
-func (mr *MockBackendMockRecorder) FindSoftwareList(ctx, searchText, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) FindSoftwareList(ctx, searchText, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindSoftwareList", reflect.TypeOf((*MockBackend)(nil).FindSoftwareList), ctx, searchText, after, first)
 }
@@ -305,7 +305,7 @@ func (m *MockBackend) HasMetadataList(ctx context.Context, hasMetadataSpec model
 }
 
 // HasMetadataList indicates an expected call of HasMetadataList.
-func (mr *MockBackendMockRecorder) HasMetadataList(ctx, hasMetadataSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) HasMetadataList(ctx, hasMetadataSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasMetadataList", reflect.TypeOf((*MockBackend)(nil).HasMetadataList), ctx, hasMetadataSpec, after, first)
 }
@@ -335,7 +335,7 @@ func (m *MockBackend) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOM
 }
 
 // HasSBOMList indicates an expected call of HasSBOMList.
-func (mr *MockBackendMockRecorder) HasSBOMList(ctx, hasSBOMSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) HasSBOMList(ctx, hasSBOMSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasSBOMList", reflect.TypeOf((*MockBackend)(nil).HasSBOMList), ctx, hasSBOMSpec, after, first)
 }
@@ -350,7 +350,7 @@ func (m *MockBackend) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSA
 }
 
 // HasSLSAList indicates an expected call of HasSLSAList.
-func (mr *MockBackendMockRecorder) HasSLSAList(ctx, hasSLSASpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) HasSLSAList(ctx, hasSLSASpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasSLSAList", reflect.TypeOf((*MockBackend)(nil).HasSLSAList), ctx, hasSLSASpec, after, first)
 }
@@ -395,7 +395,7 @@ func (m *MockBackend) HasSourceAtList(ctx context.Context, hasSourceAtSpec model
 }
 
 // HasSourceAtList indicates an expected call of HasSourceAtList.
-func (mr *MockBackendMockRecorder) HasSourceAtList(ctx, hasSourceAtSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) HasSourceAtList(ctx, hasSourceAtSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasSourceAtList", reflect.TypeOf((*MockBackend)(nil).HasSourceAtList), ctx, hasSourceAtSpec, after, first)
 }
@@ -425,7 +425,7 @@ func (m *MockBackend) HashEqualList(ctx context.Context, hashEqualSpec model.Has
 }
 
 // HashEqualList indicates an expected call of HashEqualList.
-func (mr *MockBackendMockRecorder) HashEqualList(ctx, hashEqualSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) HashEqualList(ctx, hashEqualSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HashEqualList", reflect.TypeOf((*MockBackend)(nil).HashEqualList), ctx, hashEqualSpec, after, first)
 }
@@ -1145,7 +1145,7 @@ func (m *MockBackend) IsDependencyList(ctx context.Context, isDependencySpec mod
 }
 
 // IsDependencyList indicates an expected call of IsDependencyList.
-func (mr *MockBackendMockRecorder) IsDependencyList(ctx, isDependencySpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) IsDependencyList(ctx, isDependencySpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsDependencyList", reflect.TypeOf((*MockBackend)(nil).IsDependencyList), ctx, isDependencySpec, after, first)
 }
@@ -1175,7 +1175,7 @@ func (m *MockBackend) IsOccurrenceList(ctx context.Context, isOccurrenceSpec mod
 }
 
 // IsOccurrenceList indicates an expected call of IsOccurrenceList.
-func (mr *MockBackendMockRecorder) IsOccurrenceList(ctx, isOccurrenceSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) IsOccurrenceList(ctx, isOccurrenceSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsOccurrenceList", reflect.TypeOf((*MockBackend)(nil).IsOccurrenceList), ctx, isOccurrenceSpec, after, first)
 }
@@ -1190,7 +1190,7 @@ func (m *MockBackend) LicenseList(ctx context.Context, licenseSpec model.License
 }
 
 // LicenseList indicates an expected call of LicenseList.
-func (mr *MockBackendMockRecorder) LicenseList(ctx, licenseSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) LicenseList(ctx, licenseSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LicenseList", reflect.TypeOf((*MockBackend)(nil).LicenseList), ctx, licenseSpec, after, first)
 }
@@ -1235,7 +1235,7 @@ func (m *MockBackend) NeighborsList(ctx context.Context, node string, usingOnly 
 }
 
 // NeighborsList indicates an expected call of NeighborsList.
-func (mr *MockBackendMockRecorder) NeighborsList(ctx, node, usingOnly, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) NeighborsList(ctx, node, usingOnly, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NeighborsList", reflect.TypeOf((*MockBackend)(nil).NeighborsList), ctx, node, usingOnly, after, first)
 }
@@ -1295,7 +1295,7 @@ func (m *MockBackend) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, a
 }
 
 // PackagesList indicates an expected call of PackagesList.
-func (mr *MockBackendMockRecorder) PackagesList(ctx, pkgSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) PackagesList(ctx, pkgSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PackagesList", reflect.TypeOf((*MockBackend)(nil).PackagesList), ctx, pkgSpec, after, first)
 }
@@ -1340,7 +1340,7 @@ func (m *MockBackend) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEq
 }
 
 // PkgEqualList indicates an expected call of PkgEqualList.
-func (mr *MockBackendMockRecorder) PkgEqualList(ctx, pkgEqualSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) PkgEqualList(ctx, pkgEqualSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PkgEqualList", reflect.TypeOf((*MockBackend)(nil).PkgEqualList), ctx, pkgEqualSpec, after, first)
 }
@@ -1370,7 +1370,7 @@ func (m *MockBackend) PointOfContactList(ctx context.Context, pointOfContactSpec
 }
 
 // PointOfContactList indicates an expected call of PointOfContactList.
-func (mr *MockBackendMockRecorder) PointOfContactList(ctx, pointOfContactSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) PointOfContactList(ctx, pointOfContactSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PointOfContactList", reflect.TypeOf((*MockBackend)(nil).PointOfContactList), ctx, pointOfContactSpec, after, first)
 }
@@ -1400,7 +1400,7 @@ func (m *MockBackend) ScorecardsList(ctx context.Context, scorecardSpec model.Ce
 }
 
 // ScorecardsList indicates an expected call of ScorecardsList.
-func (mr *MockBackendMockRecorder) ScorecardsList(ctx, scorecardSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) ScorecardsList(ctx, scorecardSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScorecardsList", reflect.TypeOf((*MockBackend)(nil).ScorecardsList), ctx, scorecardSpec, after, first)
 }
@@ -1430,7 +1430,7 @@ func (m *MockBackend) SourcesList(ctx context.Context, sourceSpec model.SourceSp
 }
 
 // SourcesList indicates an expected call of SourcesList.
-func (mr *MockBackendMockRecorder) SourcesList(ctx, sourceSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) SourcesList(ctx, sourceSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SourcesList", reflect.TypeOf((*MockBackend)(nil).SourcesList), ctx, sourceSpec, after, first)
 }
@@ -1460,7 +1460,7 @@ func (m *MockBackend) VulnEqualList(ctx context.Context, vulnEqualSpec model.Vul
 }
 
 // VulnEqualList indicates an expected call of VulnEqualList.
-func (mr *MockBackendMockRecorder) VulnEqualList(ctx, vulnEqualSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) VulnEqualList(ctx, vulnEqualSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VulnEqualList", reflect.TypeOf((*MockBackend)(nil).VulnEqualList), ctx, vulnEqualSpec, after, first)
 }
@@ -1490,7 +1490,7 @@ func (m *MockBackend) VulnerabilityList(ctx context.Context, vulnSpec model.Vuln
 }
 
 // VulnerabilityList indicates an expected call of VulnerabilityList.
-func (mr *MockBackendMockRecorder) VulnerabilityList(ctx, vulnSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) VulnerabilityList(ctx, vulnSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VulnerabilityList", reflect.TypeOf((*MockBackend)(nil).VulnerabilityList), ctx, vulnSpec, after, first)
 }
@@ -1520,7 +1520,7 @@ func (m *MockBackend) VulnerabilityMetadataList(ctx context.Context, vulnerabili
 }
 
 // VulnerabilityMetadataList indicates an expected call of VulnerabilityMetadataList.
-func (mr *MockBackendMockRecorder) VulnerabilityMetadataList(ctx, vulnerabilityMetadataSpec, after, first interface{}) *gomock.Call {
+func (mr *MockBackendMockRecorder) VulnerabilityMetadataList(ctx, vulnerabilityMetadataSpec, after, first any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VulnerabilityMetadataList", reflect.TypeOf((*MockBackend)(nil).VulnerabilityMetadataList), ctx, vulnerabilityMetadataSpec, after, first)
 }
