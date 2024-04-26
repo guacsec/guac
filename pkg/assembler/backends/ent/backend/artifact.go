@@ -35,6 +35,14 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func artGlobalID(id string) string {
+	return toGlobalID(artifact.Table, id)
+}
+
+func bulkArtGlobalID(ids []string) []string {
+	return toGlobalIDs(artifact.Table, ids)
+}
+
 func (b *EntBackend) ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error) {
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
@@ -63,7 +71,7 @@ func (b *EntBackend) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 	var edges []*model.ArtifactEdge
 	for _, edge := range artConn.Edges {
 		edges = append(edges, &model.ArtifactEdge{
-			Cursor: toGlobalID(artifact.Table, edge.Cursor.ID.String()),
+			Cursor: artGlobalID(edge.Cursor.ID.String()),
 			Node:   toModelArtifact(edge.Node),
 		})
 	}
@@ -73,8 +81,8 @@ func (b *EntBackend) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 			TotalCount: artConn.TotalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: artConn.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(toGlobalID(artifact.Table, artConn.PageInfo.StartCursor.ID.String())),
-				EndCursor:   ptrfrom.String(toGlobalID(artifact.Table, artConn.PageInfo.EndCursor.ID.String())),
+				StartCursor: ptrfrom.String(artGlobalID(artConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(artGlobalID(artConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil
@@ -126,7 +134,7 @@ func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.IDo
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(artifact.Table, *ids), nil
+	return bulkArtGlobalID(*ids), nil
 }
 
 func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifactInput) (string, error) {
@@ -137,7 +145,7 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifact
 	if txErr != nil {
 		return "", txErr
 	}
-	return toGlobalID(artifact.Table, *id), nil
+	return artGlobalID(*id), nil
 }
 
 func artConflictColumns() []string {

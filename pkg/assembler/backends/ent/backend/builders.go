@@ -32,6 +32,14 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func buildGlobalID(id string) string {
+	return toGlobalID(builder.Table, id)
+}
+
+func bulkBuildGlobalID(ids []string) []string {
+	return toGlobalIDs(builder.Table, ids)
+}
+
 func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error) {
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
@@ -59,7 +67,7 @@ func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.Builder
 	var edges []*model.BuilderEdge
 	for _, edge := range buildConn.Edges {
 		edges = append(edges, &model.BuilderEdge{
-			Cursor: toGlobalID(builder.Table, edge.Cursor.ID.String()),
+			Cursor: buildGlobalID(edge.Cursor.ID.String()),
 			Node:   toModelBuilder(edge.Node),
 		})
 	}
@@ -69,8 +77,8 @@ func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.Builder
 			TotalCount: buildConn.TotalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: buildConn.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(toGlobalID(builder.Table, buildConn.PageInfo.StartCursor.ID.String())),
-				EndCursor:   ptrfrom.String(toGlobalID(builder.Table, buildConn.PageInfo.EndCursor.ID.String())),
+				StartCursor: ptrfrom.String(buildGlobalID(buildConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(buildGlobalID(buildConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil
@@ -121,7 +129,7 @@ func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.IDorBuilder
 	if txErr != nil {
 		return "", errors.Wrap(txErr, funcName)
 	}
-	return toGlobalID(builder.Table, *id), nil
+	return buildGlobalID(*id), nil
 }
 
 func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorBuilderInput) ([]string, error) {
@@ -138,7 +146,7 @@ func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorB
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(builder.Table, *ids), nil
+	return bulkBuildGlobalID(*ids), nil
 }
 
 func upsertBulkBuilder(ctx context.Context, tx *ent.Tx, buildInputs []*model.IDorBuilderInput) (*[]string, error) {
