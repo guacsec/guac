@@ -124,8 +124,55 @@ func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 	return collect(records, toModelCertifyBad), nil
 }
 
-func (b *EntBackend) CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyGoodList")
+func (b *EntBackend) CertifyGoodList(ctx context.Context, filter model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyGoodString {
+			return nil, fmt.Errorf("after cursor is not type certifyGood but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeGOOD, (*model.CertifyBadSpec)(&filter)))
+
+	certGoodConn, err := getCertificationObject(certQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var edges []*model.CertifyGoodEdge
+	for _, edge := range certGoodConn.Edges {
+		edges = append(edges, &model.CertifyGoodEdge{
+			Cursor: certifyGoodGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyGood(edge.Node),
+		})
+	}
+
+	if certGoodConn.PageInfo.StartCursor != nil {
+		return &model.CertifyGoodConnection{
+			TotalCount: certGoodConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: certGoodConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(certifyGoodGlobalID(certGoodConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(certifyGoodGlobalID(certGoodConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
