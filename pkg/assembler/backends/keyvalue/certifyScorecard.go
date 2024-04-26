@@ -151,7 +151,7 @@ func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.Cer
 
 	funcName := "Scorecards"
 
-	if &scorecardSpec != nil && scorecardSpec.ID != nil {
+	if scorecardSpec.ID != nil {
 		link, err := byIDkv[*scorecardLink](ctx, *scorecardSpec.ID, c)
 		if err != nil {
 			// Not found
@@ -181,13 +181,12 @@ func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.Cer
 
 	edges := make([]*model.CertifyScorecardEdge, 0)
 	hasNextPage := false
-	var cscKeys []string
 	numNodes := 0
 	totalCount := 0
 
 	var search []string
 	foundOne := false
-	if &scorecardSpec != nil && &scorecardSpec.Source != nil {
+	if scorecardSpec.Source != nil {
 		exactSource, err := c.exactSource(ctx, scorecardSpec.Source)
 		if err != nil {
 			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
@@ -229,6 +228,8 @@ func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.Cer
 		var done bool
 		for !done {
 			var err error
+			var cscKeys []string
+
 			cscKeys, done, err = scn.Scan(ctx)
 			if err != nil {
 				return nil, err
