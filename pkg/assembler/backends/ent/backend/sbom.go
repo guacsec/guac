@@ -71,11 +71,6 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 	// Large SBOMs (50MB+) hit the postgres parameter issue (HasSBOM: pq: got 97137 parameters but PostgreSQL only supports 65535 parameters).
 	// To overcome this, we can breakout the "included" pieces of the hasSBOM node into individual queries and reconstruct the node at the end.
 
-	var includedDeps []*ent.Dependency
-	var includedOccurs []*ent.Occurrence
-	var includedPackages []*ent.PackageVersion
-	var includedArtifacts []*ent.Artifact
-
 	reconstructedSBOMs := map[string]*model.HasSbom{}
 	includedFirst := 60000
 
@@ -100,6 +95,11 @@ func (b *EntBackend) HasSBOMList(ctx context.Context, spec model.HasSBOMSpec, af
 	}
 
 	for _, foundSBOM := range hasSBOMConnection.Edges {
+
+		var includedDeps []*ent.Dependency
+		var includedOccurs []*ent.Occurrence
+		var includedPackages []*ent.PackageVersion
+		var includedArtifacts []*ent.Artifact
 
 		depsChan := make(chan depResult, 1)
 		occursChan := make(chan occurResult, 1)

@@ -28,7 +28,7 @@ import (
 )
 
 func (c *arangoClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyBadList")
+	return nil, fmt.Errorf("not implemented: CertifyGoodList")
 }
 
 func (c *arangoClient) CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
