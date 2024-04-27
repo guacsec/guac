@@ -8177,6 +8177,128 @@ func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns HashEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *HashEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// HashEqualSpec allows filtering the list of artifact equality statements to
+// return in a query.
+//
+// Specifying just one artifact allows to query for all similar artifacts (if any
+// exists).
+type HashEqualSpec struct {
+	Id            *string         `json:"id"`
+	Artifacts     []*ArtifactSpec `json:"artifacts"`
+	Justification *string         `json:"justification"`
+	Origin        *string         `json:"origin"`
+	Collector     *string         `json:"collector"`
+	DocumentRef   *string         `json:"documentRef"`
+}
+
+// GetId returns HashEqualSpec.Id, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetId() *string { return v.Id }
+
+// GetArtifacts returns HashEqualSpec.Artifacts, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetArtifacts() []*ArtifactSpec { return v.Artifacts }
+
+// GetJustification returns HashEqualSpec.Justification, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns HashEqualSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns HashEqualSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns HashEqualSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// HashEqualsHashEqual includes the requested fields of the GraphQL type HashEqual.
+// The GraphQL type's documentation follows.
+//
+// HashEqual is an attestation that a set of artifacts are identical.
+type HashEqualsHashEqual struct {
+	AllHashEqualTree `json:"-"`
+}
+
+// GetId returns HashEqualsHashEqual.Id, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetId() string { return v.AllHashEqualTree.Id }
+
+// GetJustification returns HashEqualsHashEqual.Justification, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetJustification() string { return v.AllHashEqualTree.Justification }
+
+// GetArtifacts returns HashEqualsHashEqual.Artifacts, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetArtifacts() []AllHashEqualTreeArtifactsArtifact {
+	return v.AllHashEqualTree.Artifacts
+}
+
+// GetOrigin returns HashEqualsHashEqual.Origin, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetOrigin() string { return v.AllHashEqualTree.Origin }
+
+// GetCollector returns HashEqualsHashEqual.Collector, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetCollector() string { return v.AllHashEqualTree.Collector }
+
+func (v *HashEqualsHashEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HashEqualsHashEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HashEqualsHashEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHashEqualTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHashEqualsHashEqual struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Artifacts []AllHashEqualTreeArtifactsArtifact `json:"artifacts"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HashEqualsHashEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HashEqualsHashEqual) __premarshalJSON() (*__premarshalHashEqualsHashEqual, error) {
+	var retval __premarshalHashEqualsHashEqual
+
+	retval.Id = v.AllHashEqualTree.Id
+	retval.Justification = v.AllHashEqualTree.Justification
+	retval.Artifacts = v.AllHashEqualTree.Artifacts
+	retval.Origin = v.AllHashEqualTree.Origin
+	retval.Collector = v.AllHashEqualTree.Collector
+	return &retval, nil
+}
+
+// HashEqualsResponse is returned by HashEquals on success.
+type HashEqualsResponse struct {
+	// Returns all artifact equality statements matching a filter.
+	HashEqual []HashEqualsHashEqual `json:"HashEqual"`
+}
+
+// GetHashEqual returns HashEqualsResponse.HashEqual, and is useful for accessing the field via an interface.
+func (v *HashEqualsResponse) GetHashEqual() []HashEqualsHashEqual { return v.HashEqual }
+
 // IDorArtifactInput allows for specifying either the artifact ID or the ArtifactInputSpec.
 //
 // Either the ID or the ArtifactInputSpec must be specified. Both cannot be nil.
@@ -9235,6 +9357,119 @@ func (v *IsOccurrenceSpec) GetCollector() *string { return v.Collector }
 
 // GetDocumentRef returns IsOccurrenceSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *IsOccurrenceSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// IsOccurrencesIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrence is an attestation to link an artifact to a package or source.
+//
+// Attestation must occur at the PackageVersion or at the SourceName.
+type IsOccurrencesIsOccurrence struct {
+	AllIsOccurrencesTree `json:"-"`
+}
+
+// GetId returns IsOccurrencesIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetId() string { return v.AllIsOccurrencesTree.Id }
+
+// GetSubject returns IsOccurrencesIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
+	return v.AllIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns IsOccurrencesIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
+	return v.AllIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns IsOccurrencesIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetJustification() string {
+	return v.AllIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns IsOccurrencesIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetOrigin() string { return v.AllIsOccurrencesTree.Origin }
+
+// GetCollector returns IsOccurrencesIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetCollector() string { return v.AllIsOccurrencesTree.Collector }
+
+func (v *IsOccurrencesIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsOccurrencesIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsOccurrencesIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsOccurrencesIsOccurrence struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *IsOccurrencesIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsOccurrencesIsOccurrence) __premarshalJSON() (*__premarshalIsOccurrencesIsOccurrence, error) {
+	var retval __premarshalIsOccurrencesIsOccurrence
+
+	retval.Id = v.AllIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal IsOccurrencesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.AllIsOccurrencesTree.Artifact
+	retval.Justification = v.AllIsOccurrencesTree.Justification
+	retval.Origin = v.AllIsOccurrencesTree.Origin
+	retval.Collector = v.AllIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// IsOccurrencesResponse is returned by IsOccurrences on success.
+type IsOccurrencesResponse struct {
+	// Returns all artifacts-source/package mappings that match a filter.
+	IsOccurrence []IsOccurrencesIsOccurrence `json:"IsOccurrence"`
+}
+
+// GetIsOccurrence returns IsOccurrencesResponse.IsOccurrence, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesResponse) GetIsOccurrence() []IsOccurrencesIsOccurrence { return v.IsOccurrence }
 
 // LicenseInputSpec specifies an license for mutations. One of inline or
 // listVersion should be empty or missing.
@@ -22694,6 +22929,14 @@ type __HasSBOMsInput struct {
 // GetFilter returns __HasSBOMsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__HasSBOMsInput) GetFilter() HasSBOMSpec { return v.Filter }
 
+// __HashEqualsInput is used internally by genqlient
+type __HashEqualsInput struct {
+	Filter HashEqualSpec `json:"filter"`
+}
+
+// GetFilter returns __HashEqualsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HashEqualsInput) GetFilter() HashEqualSpec { return v.Filter }
+
 // __IngestArtifactInput is used internally by genqlient
 type __IngestArtifactInput struct {
 	Artifact IDorArtifactInput `json:"artifact"`
@@ -23764,6 +24007,14 @@ type __IngestVulnerabilityInput struct {
 // GetVuln returns __IngestVulnerabilityInput.Vuln, and is useful for accessing the field via an interface.
 func (v *__IngestVulnerabilityInput) GetVuln() IDorVulnerabilityInput { return v.Vuln }
 
+// __IsOccurrencesInput is used internally by genqlient
+type __IsOccurrencesInput struct {
+	Filter IsOccurrenceSpec `json:"filter"`
+}
+
+// GetFilter returns __IsOccurrencesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesInput) GetFilter() IsOccurrenceSpec { return v.Filter }
+
 // __LicensesInput is used internally by genqlient
 type __LicensesInput struct {
 	Filter LicenseSpec `json:"filter"`
@@ -24403,6 +24654,55 @@ func HasSBOMs(
 	var err_ error
 
 	var data_ HasSBOMsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HashEquals.
+const HashEquals_Operation = `
+query HashEquals ($filter: HashEqualSpec!) {
+	HashEqual(hashEqualSpec: $filter) {
+		... AllHashEqualTree
+	}
+}
+fragment AllHashEqualTree on HashEqual {
+	id
+	justification
+	artifacts {
+		... AllArtifactTree
+	}
+	origin
+	collector
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HashEquals(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HashEqualSpec,
+) (*HashEqualsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HashEquals",
+		Query:  HashEquals_Operation,
+		Variables: &__HashEqualsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ HashEqualsResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -26949,6 +27249,99 @@ func IngestVulnerability(
 	var err_ error
 
 	var data_ IngestVulnerabilityResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by IsOccurrences.
+const IsOccurrences_Operation = `
+query IsOccurrences ($filter: IsOccurrenceSpec!) {
+	IsOccurrence(isOccurrenceSpec: $filter) {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IsOccurrences(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter IsOccurrenceSpec,
+) (*IsOccurrencesResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "IsOccurrences",
+		Query:  IsOccurrences_Operation,
+		Variables: &__IsOccurrencesInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ IsOccurrencesResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

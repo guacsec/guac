@@ -9,6 +9,12 @@ const (
 	Scorecard AnalyzeDependenciesParamsSort = "scorecard"
 )
 
+// Defines values for RetrieveDependenciesParamsLinkCondition.
+const (
+	Digest RetrieveDependenciesParamsLinkCondition = "digest"
+	Name   RetrieveDependenciesParamsLinkCondition = "name"
+)
+
 // Error defines model for Error.
 type Error struct {
 	Message string `json:"Message"`
@@ -50,7 +56,7 @@ type AnalyzeDependenciesParams struct {
 	// PaginationSpec The pagination configuration for the query.
 	//   * 'PageSize' specifies the number of results returned
 	//   * 'Cursor' is returned by previous calls and specifies what page to return
-	PaginationSpec *PaginationSpec `form:"PaginationSpec,omitempty" json:"PaginationSpec,omitempty"`
+	PaginationSpec *PaginationSpec `form:"paginationSpec,omitempty" json:"paginationSpec,omitempty"`
 
 	// Sort The sort order of the packages
 	//   * 'frequency' - The packages with the highest number of dependents
@@ -66,8 +72,17 @@ type RetrieveDependenciesParams struct {
 	// PaginationSpec The pagination configuration for the query.
 	//   * 'PageSize' specifies the number of results returned
 	//   * 'Cursor' is returned by previous calls and specifies what page to return
-	PaginationSpec *PaginationSpec `form:"PaginationSpec,omitempty" json:"PaginationSpec,omitempty"`
+	PaginationSpec *PaginationSpec `form:"paginationSpec,omitempty" json:"paginationSpec,omitempty"`
 
-	// Purl the purl of the dependent package
-	Purl string `form:"purl" json:"purl"`
+	// LinkCondition Whether links between nouns must be made by digest or if they  can be made just by name (i.e. purl). Specify 'name' to allow using SBOMs that don't provide the digest of the subject. The default is  'digest'. To search by purl, 'name' must be specified.
+	LinkCondition *RetrieveDependenciesParamsLinkCondition `form:"linkCondition,omitempty" json:"linkCondition,omitempty"`
+
+	// Purl The purl of the dependent package.
+	Purl *string `form:"purl,omitempty" json:"purl,omitempty"`
+
+	// Digest The digest of the dependent package.
+	Digest *string `form:"digest,omitempty" json:"digest,omitempty"`
 }
+
+// RetrieveDependenciesParamsLinkCondition defines parameters for RetrieveDependencies.
+type RetrieveDependenciesParamsLinkCondition string
