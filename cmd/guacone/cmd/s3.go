@@ -39,6 +39,7 @@ import (
 type s3Options struct {
 	s3url             string // base url of the s3 to collect from
 	s3bucket          string // name of bucket to collect from
+	s3path            string // path to s3 folder with documents to collect
 	s3item            string // s3 item (only for non-polling behaviour)
 	region            string // AWS region, for s3/sqs configuration (defaults to us-east-1)
 	queues            string // comma-separated list of queues/topics (only for polling behaviour)
@@ -82,6 +83,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetString("csub-addr"),
 			viper.GetString("s3-url"),
 			viper.GetString("s3-bucket"),
+			viper.GetString("s3-path"),
 			viper.GetString("s3-region"),
 			viper.GetString("s3-item"),
 			viper.GetString("s3-mp"),
@@ -108,6 +110,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			S3Url:                   s3Opts.s3url,
 			S3Bucket:                s3Opts.s3bucket,
 			S3Region:                s3Opts.region,
+			S3Path:                  s3Opts.s3path,
 			S3Item:                  s3Opts.s3item,
 			MessageProvider:         s3Opts.mp,
 			MessageProviderEndpoint: s3Opts.mpEndpoint,
@@ -176,7 +179,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 	},
 }
 
-func validateS3Opts(graphqlEndpoint, headerFile, csubAddr, s3url, s3bucket, region, s3item, mp, mpEndpoint, queues string, csubTls, csubTlsSkipVerify, poll bool) (s3Options, error) {
+func validateS3Opts(graphqlEndpoint, headerFile, csubAddr, s3url, s3bucket, s3path, region, s3item, mp, mpEndpoint, queues string, csubTls, csubTlsSkipVerify, poll bool) (s3Options, error) {
 	var opts s3Options
 
 	if poll {
@@ -199,13 +202,13 @@ func validateS3Opts(graphqlEndpoint, headerFile, csubAddr, s3url, s3bucket, regi
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
 
-	opts = s3Options{s3url, s3bucket, s3item, region, queues, mp, mpEndpoint, poll, graphqlEndpoint, headerFile, csubClientOptions}
+	opts = s3Options{s3url, s3bucket, s3path, s3item, region, queues, mp, mpEndpoint, poll, graphqlEndpoint, headerFile, csubClientOptions}
 
 	return opts, nil
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"s3-url", "s3-bucket", "s3-region", "s3-item", "s3-mp", "s3-mp-endpoint", "s3-queues", "poll"})
+	set, err := cli.BuildFlags([]string{"s3-url", "s3-bucket", "s3-region", "s3-path", "s3-item", "s3-mp", "s3-mp-endpoint", "s3-queues", "poll"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %s", err)
 		os.Exit(1)
