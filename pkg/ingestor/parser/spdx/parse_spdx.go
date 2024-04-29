@@ -29,6 +29,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
 	"github.com/guacsec/guac/pkg/logging"
+	"github.com/guacsec/guac/pkg/misc/slice"
 	"github.com/spdx/tools-golang/json"
 	spdx "github.com/spdx/tools-golang/spdx"
 	spdx_common "github.com/spdx/tools-golang/spdx/v2/common"
@@ -217,34 +218,17 @@ func parseSpdxBlob(p []byte) (*spdx.Document, error) {
 	return json.Read(bytes.NewReader(p))
 }
 
-func (s *spdxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
-	if packNode, ok := s.packagePackages[string(elementID)]; ok {
-		return packNode
-	}
-	return nil
-}
-
-func (s *spdxParser) getTopLevelPackageElement(elementID string) []*model.PkgInputSpec {
-	if packNode, ok := s.topLevelPackages[string(elementID)]; ok {
-		return packNode
-	}
-	return nil
-}
-
-func (s *spdxParser) getFileElement(elementID string) []*model.PkgInputSpec {
-	if fileNode, ok := s.filePackages[string(elementID)]; ok {
-		return fileNode
-	}
-	return nil
-}
-
 func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
 	preds := &assembler.IngestPredicates{}
 
-	topLevel := s.getTopLevelPackageElement(string(s.spdxDoc.SPDXIdentifier))
-	if topLevel == nil {
-		logger.Errorf("error getting predicates: unable to find top level package element")
+	docID := string(s.spdxDoc.SPDXIdentifier)
+
+	topLevelArts := slice.NewConcatted(s.fileArtifacts[docID], s.packageArtifacts[docID])
+	topLevelPkgs := s.topLevelPackages[docID]
+
+	if len(topLevelArts) == 0 && len(topLevelPkgs) == 0 {
+		logger.Errorf("error getting predicates: unable to find top level artifact or package element")
 		return preds
 	} else {
 		// adding top level package edge manually for all depends on package
@@ -253,13 +237,20 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 			logger.Errorf("SPDX document had invalid created time %q : %w", s.spdxDoc.CreationInfo.Created, err)
 			return nil
 		}
-		for _, topLevelPkg := range topLevel {
-			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(topLevelPkg, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
+
+		if len(topLevelArts) > 0 {
+			for _, topLevelArt := range topLevelArts {
+				preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromArtifact(topLevelArt, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
+			}
+		} else {
+			for _, topLevelPkg := range topLevelPkgs {
+				preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromPkg(topLevelPkg, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
+			}
 		}
 
 		if s.topLevelIsHeuristic {
 			preds.IsDependency = append(preds.IsDependency,
-				common.CreateTopLevelIsDeps(topLevel[0], s.packagePackages, s.filePackages,
+				common.CreateTopLevelIsDeps(topLevelPkgs[0], s.packagePackages, s.filePackages,
 					"top-level package GUAC heuristic connecting to each file/package")...)
 		}
 	}
@@ -283,10 +274,10 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 			continue
 		}
 
-		foundPackNodes := s.getPackageElement(foundId)
-		foundFileNodes := s.getFileElement(foundId)
-		relatedPackNodes := s.getPackageElement(relatedId)
-		relatedFileNodes := s.getFileElement(relatedId)
+		foundPackNodes := s.packagePackages[foundId]
+		foundFileNodes := s.filePackages[foundId]
+		relatedPackNodes := s.packagePackages[relatedId]
+		relatedFileNodes := s.filePackages[relatedId]
 
 		justification := getJustification(rel)
 
@@ -376,7 +367,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	}
 
 	for _, pkg := range s.spdxDoc.Packages {
-		pkgInputSpecs := s.getPackageElement(string(pkg.PackageSPDXIdentifier))
+		pkgInputSpecs := s.packagePackages[string(pkg.PackageSPDXIdentifier)]
 		for _, extRef := range pkg.PackageExternalReferences {
 			if extRef.Category == spdx_common.CategorySecurity {
 				locator := extRef.Locator

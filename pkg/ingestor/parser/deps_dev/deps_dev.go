@@ -76,7 +76,7 @@ func (d *depsDevParser) GetPredicates(ctx context.Context) *assembler.IngestPred
 			IsDependency:    isDepComp.IsDependency,
 		})
 	}
-	preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(d.packComponent.CurrentPackage, d.doc, helpers.PkgInputSpecToPurl(d.packComponent.CurrentPackage), d.packComponent.UpdateTime))
+	preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromPkg(d.packComponent.CurrentPackage, d.doc, helpers.PkgInputSpecToPurl(d.packComponent.CurrentPackage), d.packComponent.UpdateTime))
 
 	return preds
 }

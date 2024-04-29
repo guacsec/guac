@@ -101,17 +101,27 @@ func CreateTopLevelIsDeps(topLevel *model.PkgInputSpec, packages map[string][]*m
 	return isDeps
 }
 
-func CreateTopLevelHasSBOM(topLevel *model.PkgInputSpec, sbomDoc *processor.Document, uri string, timeStamp time.Time) assembler.HasSBOMIngest {
-	sha256sum := sha256.Sum256(sbomDoc.Blob)
-	hash := hex.EncodeToString(sha256sum[:])
+func CreateTopLevelHasSBOMFromPkg(topLevelPkg *model.PkgInputSpec, sbomDoc *processor.Document, uri string, timestamp time.Time) assembler.HasSBOMIngest {
+	rv := createTopLevelHasSBOM(sbomDoc.Blob, uri, sbomDoc.SourceInformation.Source, timestamp)
+	rv.Pkg = topLevelPkg
+	return rv
+}
+
+func CreateTopLevelHasSBOMFromArtifact(topLevelArt *model.ArtifactInputSpec, sbomDoc *processor.Document, uri string, timestamp time.Time) assembler.HasSBOMIngest {
+	rv := createTopLevelHasSBOM(sbomDoc.Blob, uri, sbomDoc.SourceInformation.Source, timestamp)
+	rv.Artifact = topLevelArt
+	return rv
+}
+
+func createTopLevelHasSBOM(blob []byte, uri string, source string, timestamp time.Time) assembler.HasSBOMIngest {
+	sha256sum := sha256.Sum256(blob)
 	return assembler.HasSBOMIngest{
-		Pkg: topLevel,
 		HasSBOM: &model.HasSBOMInputSpec{
 			Uri:              uri,
 			Algorithm:        "sha256",
-			Digest:           hash,
-			DownloadLocation: sbomDoc.SourceInformation.Source,
-			KnownSince:       timeStamp,
+			Digest:           hex.EncodeToString(sha256sum[:]),
+			DownloadLocation: source,
+			KnownSince:       timestamp,
 		},
 	}
 }
