@@ -4212,12 +4212,12 @@ func (v *AllHasSourceAtSource) __premarshalJSON() (*__premarshalAllHasSourceAtSo
 // AllHashEqualTree includes the GraphQL fields of HashEqual requested by the fragment AllHashEqualTree.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type AllHashEqualTree struct {
 	Id string `json:"id"`
 	// Justification for the claim that the artifacts are similar
 	Justification string `json:"justification"`
-	// Collection of artifacts that are similar
+	// Two artifacts that are similar
 	Artifacts []AllHashEqualTreeArtifactsArtifact `json:"artifacts"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
@@ -5025,12 +5025,12 @@ func (v *AllLicenseTree) GetListVersion() *string { return v.ListVersion }
 // AllPkgEqual includes the GraphQL fields of PkgEqual requested by the fragment AllPkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type AllPkgEqual struct {
 	Id string `json:"id"`
 	// Justification for the claim that the packages are similar
 	Justification string `json:"justification"`
-	// Collection of packages that are similar
+	// Two packages that are similar
 	Packages []AllPkgEqualPackagesPackage `json:"packages"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
@@ -6186,7 +6186,7 @@ func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetCommit() *str
 // Note that setting noVuln vulnerability type is invalid for VulnEqual!
 type AllVulnEqual struct {
 	Id string `json:"id"`
-	// Collection of vulnerabilities that are similar
+	// Two vulnerabilities that are similar
 	Vulnerabilities []AllVulnEqualVulnerabilitiesVulnerability `json:"vulnerabilities"`
 	// Justification for the attested relationship
 	Justification string `json:"justification"`
@@ -8212,7 +8212,7 @@ func (v *HashEqualSpec) GetDocumentRef() *string { return v.DocumentRef }
 // HashEqualsHashEqual includes the requested fields of the GraphQL type HashEqual.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type HashEqualsHashEqual struct {
 	AllHashEqualTree `json:"-"`
 }
@@ -10963,7 +10963,7 @@ func (v *NeighborsNeighborsHasSourceAt) __premarshalJSON() (*__premarshalNeighbo
 // NeighborsNeighborsHashEqual includes the requested fields of the GraphQL type HashEqual.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type NeighborsNeighborsHashEqual struct {
 	Typename         *string `json:"__typename"`
 	AllHashEqualTree `json:"-"`
@@ -11919,7 +11919,7 @@ func (v *NeighborsNeighborsPackage) __premarshalJSON() (*__premarshalNeighborsNe
 // NeighborsNeighborsPkgEqual includes the requested fields of the GraphQL type PkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type NeighborsNeighborsPkgEqual struct {
 	Typename    *string `json:"__typename"`
 	AllPkgEqual `json:"-"`
@@ -14394,7 +14394,7 @@ func (v *NodeNodeHasSourceAt) __premarshalJSON() (*__premarshalNodeNodeHasSource
 // NodeNodeHashEqual includes the requested fields of the GraphQL type HashEqual.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type NodeNodeHashEqual struct {
 	Typename         *string `json:"__typename"`
 	AllHashEqualTree `json:"-"`
@@ -14894,7 +14894,7 @@ func (v *NodeNodePackage) __premarshalJSON() (*__premarshalNodeNodePackage, erro
 // NodeNodePkgEqual includes the requested fields of the GraphQL type PkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type NodeNodePkgEqual struct {
 	Typename    *string `json:"__typename"`
 	AllPkgEqual `json:"-"`
@@ -16903,7 +16903,7 @@ func (v *NodesNodesHasSourceAt) __premarshalJSON() (*__premarshalNodesNodesHasSo
 // NodesNodesHashEqual includes the requested fields of the GraphQL type HashEqual.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type NodesNodesHashEqual struct {
 	Typename         *string `json:"__typename"`
 	AllHashEqualTree `json:"-"`
@@ -17850,7 +17850,7 @@ func (v *NodesNodesPackage) __premarshalJSON() (*__premarshalNodesNodesPackage, 
 // NodesNodesPkgEqual includes the requested fields of the GraphQL type PkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type NodesNodesPkgEqual struct {
 	Typename    *string `json:"__typename"`
 	AllPkgEqual `json:"-"`
@@ -20429,7 +20429,7 @@ func (v *PathPathHasSourceAt) __premarshalJSON() (*__premarshalPathPathHasSource
 // PathPathHashEqual includes the requested fields of the GraphQL type HashEqual.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type PathPathHashEqual struct {
 	Typename         *string `json:"__typename"`
 	AllHashEqualTree `json:"-"`
@@ -21372,7 +21372,7 @@ func (v *PathPathPackage) __premarshalJSON() (*__premarshalPathPathPackage, erro
 // PathPathPkgEqual includes the requested fields of the GraphQL type PkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type PathPathPkgEqual struct {
 	Typename    *string `json:"__typename"`
 	AllPkgEqual `json:"-"`

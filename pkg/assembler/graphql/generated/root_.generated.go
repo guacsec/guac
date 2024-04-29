@@ -6240,10 +6240,10 @@ extend type Mutation {
 
 # Defines a GraphQL schema for the artifact equality
 
-"HashEqual is an attestation that a set of artifacts are identical."
+"HashEqual is an attestation that two artifacts are identical."
 type HashEqual {
   id: ID!
-  "Collection of artifacts that are similar"
+  "Two artifacts that are similar"
   artifacts: [Artifact!]!
   "Justification for the claim that the artifacts are similar"
   justification: String!
@@ -7400,10 +7400,10 @@ extend type Query {
 
 # Defines a GraphQL schema for package equality
 
-"PkgEqual is an attestation that a set of packages are similar."
+"PkgEqual is an attestation that two packages are similar."
 type PkgEqual {
   id: ID!
-  "Collection of packages that are similar"
+  "Two packages that are similar"
   packages: [Package!]!
   "Justification for the claim that the packages are similar"
   justification: String!
@@ -7749,7 +7749,7 @@ Note that setting noVuln vulnerability type is invalid for VulnEqual!
 """
 type VulnEqual {
   id: ID!
-  "Collection of vulnerabilities that are similar"
+  "Two vulnerabilities that are similar"
   vulnerabilities: [Vulnerability!]!
   "Justification for the attested relationship"
   justification: String!

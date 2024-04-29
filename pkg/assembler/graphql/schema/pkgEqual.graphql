@@ -17,10 +17,10 @@
 
 # Defines a GraphQL schema for package equality
 
-"PkgEqual is an attestation that a set of packages are similar."
+"PkgEqual is an attestation that two packages are similar."
 type PkgEqual {
   id: ID!
-  "Collection of packages that are similar"
+  "Two packages that are similar"
   packages: [Package!]!
   "Justification for the claim that the packages are similar"
   justification: String!

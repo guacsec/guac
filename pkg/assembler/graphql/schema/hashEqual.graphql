@@ -17,10 +17,10 @@
 
 # Defines a GraphQL schema for the artifact equality
 
-"HashEqual is an attestation that a set of artifacts are identical."
+"HashEqual is an attestation that two artifacts are identical."
 type HashEqual {
   id: ID!
-  "Collection of artifacts that are similar"
+  "Two artifacts that are similar"
   artifacts: [Artifact!]!
   "Justification for the claim that the artifacts are similar"
   justification: String!
