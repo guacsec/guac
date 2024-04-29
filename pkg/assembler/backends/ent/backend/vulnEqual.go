@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sort"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -34,8 +35,62 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
-	return nil, fmt.Errorf("not implemented: VulnEqualList")
+func vulnEqualGlobalID(id string) string {
+	return toGlobalID(vulnequal.Table, id)
+}
+
+func bulkVulnEqualGlobalID(ids []string) []string {
+	return toGlobalIDs(vulnequal.Table, ids)
+}
+
+func (b *EntBackend) VulnEqualList(ctx context.Context, spec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != vulnequal.Table {
+			return nil, fmt.Errorf("after cursor is not type vulnEqual but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	veQuery := b.client.VulnEqual.Query().
+		Where(vulnEqualQuery(&spec))
+
+	veConn, err := getVulnEqualObject(veQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed vulnEqual query with error: %w", err)
+	}
+
+	var edges []*model.VulnEqualEdge
+	for _, edge := range veConn.Edges {
+		edges = append(edges, &model.VulnEqualEdge{
+			Cursor: vulnEqualGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelVulnEqual(edge.Node),
+		})
+	}
+
+	if veConn.PageInfo.StartCursor != nil {
+		return &model.VulnEqualConnection{
+			TotalCount: veConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: veConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(vulnEqualGlobalID(veConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(vulnEqualGlobalID(veConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
@@ -50,10 +105,9 @@ func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 		Where(vulnEqualQuery(filter))
 
 	query, err := getVulnEqualObject(veQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed vulnEqual query with error: %w", err)
 	}
 
 	return collect(query, toModelVulnEqual), nil
@@ -115,7 +169,7 @@ func (b *EntBackend) IngestVulnEquals(ctx context.Context, vulnerabilities []*mo
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(vulnequal.Table, *ids), nil
+	return bulkVulnEqualGlobalID(*ids), nil
 }
 
 func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec) (string, error) {
@@ -128,7 +182,7 @@ func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.ID
 		return "", txErr
 	}
 
-	return toGlobalID(vulnequal.Table, *id), nil
+	return vulnEqualGlobalID(*id), nil
 }
 
 func vulnEqualConflictColumns() []string {
@@ -200,7 +254,7 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if err != nil {
 			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
 		}
-		vulnerability.VulnerabilityNodeID = ptrfrom.String(toGlobalID(vulnerabilityid.Table, foundVulnID.String()))
+		vulnerability.VulnerabilityNodeID = ptrfrom.String(vulnIDGlobalID(foundVulnID.String()))
 	}
 
 	if otherVulnerability.VulnerabilityNodeID == nil {
@@ -213,7 +267,7 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if err != nil {
 			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
 		}
-		otherVulnerability.VulnerabilityNodeID = ptrfrom.String(toGlobalID(vulnerabilityid.Table, foundVulnID.String()))
+		otherVulnerability.VulnerabilityNodeID = ptrfrom.String(vulnIDGlobalID(foundVulnID.String()))
 	}
 
 	sortedVulns := []model.IDorVulnerabilityInput{*vulnerability, *otherVulnerability}
@@ -288,7 +342,7 @@ func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
 	vulnerabilities := []*ent.VulnerabilityID{record.Edges.VulnerabilityA, record.Edges.VulnerabilityB}
 
 	return &model.VulnEqual{
-		ID:              toGlobalID(vulnequal.Table, record.ID.String()),
+		ID:              vulnEqualGlobalID(record.ID.String()),
 		Vulnerabilities: collect(vulnerabilities, toModelVulnerabilityFromVulnerabilityID),
 		Justification:   record.Justification,
 		Origin:          record.Origin,
@@ -299,7 +353,7 @@ func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
 
 func toModelVulnerabilityFromVulnerabilityID(vulnID *ent.VulnerabilityID) *model.Vulnerability {
 	return &model.Vulnerability{
-		ID:               toGlobalID(vulnTypeString, vulnID.ID.String()),
+		ID:               vulnTypeGlobalID(vulnID.ID.String()),
 		Type:             vulnID.Type,
 		VulnerabilityIDs: []*model.VulnerabilityID{toModelVulnerabilityID(vulnID)},
 	}
@@ -331,9 +385,6 @@ func (b *EntBackend) vulnEqualNeighbors(ctx context.Context, nodeID string, allo
 			WithVulnerabilityA().
 			WithVulnerabilityB()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	vulnEquals, err := query.All(ctx)
 	if err != nil {

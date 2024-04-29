@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -30,8 +31,62 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
-	return nil, fmt.Errorf("not implemented: HasMetadataList")
+func hasMetadataGlobalID(id string) string {
+	return toGlobalID(hasmetadata.Table, id)
+}
+
+func bulkHasMetadataGlobalID(ids []string) []string {
+	return toGlobalIDs(hasmetadata.Table, ids)
+}
+
+func (b *EntBackend) HasMetadataList(ctx context.Context, spec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != hasmetadata.Table {
+			return nil, fmt.Errorf("after cursor is not type hasMetadata but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	hmQuery := b.client.HasMetadata.Query().
+		Where(hasMetadataPredicate(&spec))
+
+	hmConnect, err := getHasMetadataObject(hmQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed hasMetadata query with error: %w", err)
+	}
+
+	var edges []*model.HasMetadataEdge
+	for _, edge := range hmConnect.Edges {
+		edges = append(edges, &model.HasMetadataEdge{
+			Cursor: hasMetadataGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelHasMetadata(edge.Node),
+		})
+	}
+
+	if hmConnect.PageInfo.StartCursor != nil {
+		return &model.HasMetadataConnection{
+			TotalCount: hmConnect.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hmConnect.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(hasMetadataGlobalID(hmConnect.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(hasMetadataGlobalID(hmConnect.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
@@ -42,10 +97,9 @@ func (b *EntBackend) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 		Where(hasMetadataPredicate(filter))
 
 	records, err := getHasMetadataObject(hmQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve HasMetadata :: %s", err)
+		return nil, fmt.Errorf("failed hasMetadata query with error: %w", err)
 	}
 
 	return collect(records, toModelHasMetadata), nil
@@ -68,7 +122,7 @@ func (b *EntBackend) IngestHasMetadata(ctx context.Context, subject model.Packag
 		return "", fmt.Errorf("failed to execute IngestHasMetadata :: %s", txErr)
 	}
 
-	return toGlobalID(hasmetadata.Table, *recordID), nil
+	return hasMetadataGlobalID(*recordID), nil
 }
 
 func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, hasMetadataList []*model.HasMetadataInputSpec) ([]string, error) {
@@ -85,7 +139,7 @@ func (b *EntBackend) IngestBulkHasMetadata(ctx context.Context, subjects model.P
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(hasmetadata.Table, *ids), nil
+	return bulkHasMetadataGlobalID(*ids), nil
 }
 
 func hasMetadataPredicate(filter *model.HasMetadataSpec) predicate.HasMetadata {
@@ -389,7 +443,7 @@ func toModelHasMetadata(v *ent.HasMetadata) *model.HasMetadata {
 	}
 
 	return &model.HasMetadata{
-		ID:            toGlobalID(hasmetadata.Table, v.ID.String()),
+		ID:            hasMetadataGlobalID(v.ID.String()),
 		Subject:       sub,
 		Key:           v.Key,
 		Value:         v.Value,
@@ -420,9 +474,6 @@ func (b *EntBackend) hasMetadataNeighbors(ctx context.Context, nodeID string, al
 		query.
 			WithSource()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	hasMetas, err := query.All(ctx)
 	if err != nil {

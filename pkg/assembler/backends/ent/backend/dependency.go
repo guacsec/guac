@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -30,12 +31,66 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error) {
-	return nil, fmt.Errorf("not implemented: IsDependencyList")
+func dependencyGlobalID(id string) string {
+	return toGlobalID(dependency.Table, id)
+}
+
+func bulkDependencyGlobalID(ids []string) []string {
+	return toGlobalIDs(dependency.Table, ids)
+}
+
+func (b *EntBackend) IsDependencyList(ctx context.Context, spec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != dependency.Table {
+			return nil, fmt.Errorf("after cursor is not type dependency but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	isDepQuery := b.client.Dependency.Query().
+		Where(isDependencyQuery(&spec))
+
+	depConn, err := getIsDepObject(isDepQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed isDependency query with error: %w", err)
+	}
+
+	var edges []*model.IsDependencyEdge
+	for _, edge := range depConn.Edges {
+		edges = append(edges, &model.IsDependencyEdge{
+			Cursor: dependencyGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelIsDependencyWithBackrefs(edge.Node),
+		})
+	}
+
+	if depConn.PageInfo.StartCursor != nil {
+		return &model.IsDependencyConnection{
+			TotalCount: depConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: depConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(dependencyGlobalID(depConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(dependencyGlobalID(depConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencySpec) ([]*model.IsDependency, error) {
-	funcName := "IsDependency"
 	if spec == nil {
 		spec = &model.IsDependencySpec{}
 	}
@@ -44,10 +99,9 @@ func (b *EntBackend) IsDependency(ctx context.Context, spec *model.IsDependencyS
 		Where(isDependencyQuery(spec))
 
 	deps, err := getIsDepObject(isDepQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, funcName)
+		return nil, fmt.Errorf("failed isDependency query with error: %w", err)
 	}
 
 	return collect(deps, toModelIsDependencyWithBackrefs), nil
@@ -76,7 +130,7 @@ func (b *EntBackend) IngestDependencies(ctx context.Context, pkgs []*model.IDorP
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(dependency.Table, *ids), nil
+	return bulkDependencyGlobalID(*ids), nil
 }
 
 func dependencyConflictColumns() []string {
@@ -280,7 +334,7 @@ func (b *EntBackend) IngestDependency(ctx context.Context, pkg model.IDorPkgInpu
 		return "", errors.Wrap(txErr, funcName)
 	}
 
-	return toGlobalID(dependency.Table, *recordID), nil
+	return dependencyGlobalID(*recordID), nil
 }
 
 func dependencyTypeToEnum(t model.DependencyType) dependency.DependencyType {
@@ -372,9 +426,6 @@ func (b *EntBackend) isDependencyNeighbors(ctx context.Context, nodeID string, a
 			WithDependentPackageVersion(withPackageVersionTree()).
 			WithDependentPackageName()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	deps, err := query.All(ctx)
 	if err != nil {

@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strconv"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -34,8 +35,62 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
-	return nil, fmt.Errorf("not implemented: ScorecardsList")
+func scorecardGlobalID(id string) string {
+	return toGlobalID(certifyscorecard.Table, id)
+}
+
+func bulkScorecardGlobalID(ids []string) []string {
+	return toGlobalIDs(certifyscorecard.Table, ids)
+}
+
+func (b *EntBackend) ScorecardsList(ctx context.Context, spec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyscorecard.Table {
+			return nil, fmt.Errorf("after cursor is not type Scorecard but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	scorecardQuery := b.client.CertifyScorecard.Query().
+		Where(certifyScorecardQuery(&spec))
+
+	scorecardConn, err := getScorecardObject(scorecardQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed scorecard query with error: %w", err)
+	}
+
+	var edges []*model.CertifyScorecardEdge
+	for _, edge := range scorecardConn.Edges {
+		edges = append(edges, &model.CertifyScorecardEdge{
+			Cursor: scorecardGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyScorecard(edge.Node),
+		})
+	}
+
+	if scorecardConn.PageInfo.StartCursor != nil {
+		return &model.CertifyScorecardConnection{
+			TotalCount: scorecardConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: scorecardConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(scorecardGlobalID(scorecardConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(scorecardGlobalID(scorecardConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
@@ -47,10 +102,9 @@ func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorec
 		Where(certifyScorecardQuery(filter))
 
 	records, err := getScorecardObject(scorecardQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed scorecard query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyScorecard), nil
@@ -110,7 +164,7 @@ func (b *EntBackend) IngestScorecard(ctx context.Context, source model.IDorSourc
 	if txErr != nil {
 		return "", txErr
 	}
-	return toGlobalID(certifyscorecard.Table, *cscID), nil
+	return scorecardGlobalID(*cscID), nil
 }
 
 func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
@@ -127,7 +181,7 @@ func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDor
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(certifyscorecard.Table, *ids), nil
+	return bulkScorecardGlobalID(*ids), nil
 }
 
 func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSourceInput, scorecard *model.ScorecardInputSpec) (*ent.CertifyScorecardCreate, error) {
@@ -256,7 +310,7 @@ func hashSortedScorecardChecks(checks []*model.ScorecardCheck) string {
 
 func toModelCertifyScorecard(record *ent.CertifyScorecard) *model.CertifyScorecard {
 	return &model.CertifyScorecard{
-		ID:        toGlobalID(certifyscorecard.Table, record.ID.String()),
+		ID:        scorecardGlobalID(record.ID.String()),
 		Source:    toModelSource(record.Edges.Source),
 		Scorecard: toModelScorecard(record),
 	}
@@ -285,9 +339,6 @@ func (b *EntBackend) certifyScorecardNeighbors(ctx context.Context, nodeID strin
 		query.
 			WithSource()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	scorecards, err := query.All(ctx)
 	if err != nil {

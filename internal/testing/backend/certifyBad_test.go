@@ -837,16 +837,22 @@ func TestCertifyBad(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.CertifyBad(ctx, test.Query)
+			got, err := b.CertifyBadList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			slices.SortFunc(got, cmpCB)
+			var returnedObjects []*model.CertifyBad
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			slices.SortFunc(returnedObjects, cmpCB)
 			slices.SortFunc(test.ExpCB, cmpCB)
-			if diff := cmp.Diff(test.ExpCB, got, commonOpts); diff != "" {
+			if diff := cmp.Diff(test.ExpCB, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -1159,16 +1165,22 @@ func TestIngestCertifyBads(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.CertifyBad(ctx, test.Query)
+			got, err := b.CertifyBadList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			slices.SortFunc(got, cmpCB)
+			var returnedObjects []*model.CertifyBad
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			slices.SortFunc(returnedObjects, cmpCB)
 			slices.SortFunc(test.ExpCB, cmpCB)
-			if diff := cmp.Diff(test.ExpCB, got, commonOpts); diff != "" {
+			if diff := cmp.Diff(test.ExpCB, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

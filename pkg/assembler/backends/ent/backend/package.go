@@ -24,8 +24,10 @@ import (
 	"sort"
 	"strings"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
@@ -43,8 +45,69 @@ const (
 	pkgNamespaceString = "package_namespaces"
 )
 
+func pkgTypeGlobalID(id string) string {
+	return toGlobalID(pkgTypeString, id)
+}
+
+func pkgNamespaceGlobalID(id string) string {
+	return toGlobalID(pkgNamespaceString, id)
+}
+
+func pkgNameGlobalID(id string) string {
+	return toGlobalID(packagename.Table, id)
+}
+
+func pkgVersionGlobalID(id string) string {
+	return toGlobalID(packageversion.Table, id)
+}
+
 func (b *EntBackend) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error) {
-	return nil, fmt.Errorf("not implemented: PackagesList")
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != packageversion.Table {
+			return nil, fmt.Errorf("after cursor is not type packageversion but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	pkgConn, err := b.client.PackageVersion.Query().
+		Where(packageQueryPredicates(&pkgSpec)).
+		WithName(func(q *ent.PackageNameQuery) {}).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed package query with error: %w", err)
+	}
+
+	var edges []*model.PackageEdge
+	for _, edge := range pkgConn.Edges {
+		edges = append(edges, &model.PackageEdge{
+			Cursor: pkgVersionGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelPackage(backReferencePackageVersion(edge.Node)),
+		})
+	}
+
+	if pkgConn.PageInfo.StartCursor != nil {
+		return &model.PackageConnection{
+			TotalCount: pkgConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: pkgConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(pkgVersionGlobalID(pkgConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
@@ -55,10 +118,9 @@ func (b *EntBackend) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*m
 	pkgs, err := b.client.PackageVersion.Query().
 		Where(packageQueryPredicates(pkgSpec)).
 		WithName(func(q *ent.PackageNameQuery) {}).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed package query with error: %w", err)
 	}
 
 	var pkgNames []*ent.PackageName
@@ -191,10 +253,10 @@ func upsertBulkPackage(ctx context.Context, tx *ent.Tx, pkgInputs []*model.IDorP
 	var collectedPkgIDs []model.PackageIDs
 	for i := range pkgVersionIDs {
 		collectedPkgIDs = append(collectedPkgIDs, model.PackageIDs{
-			PackageTypeID:      toGlobalID(pkgTypeString, pkgTypes[pkgNameIDs[i]]),
-			PackageNamespaceID: toGlobalID(pkgNamespaceString, pkgNamespaces[pkgNameIDs[i]]),
-			PackageNameID:      toGlobalID(ent.TypePackageName, pkgNameIDs[i]),
-			PackageVersionID:   toGlobalID(ent.TypePackageVersion, pkgVersionIDs[i])})
+			PackageTypeID:      pkgTypeGlobalID(pkgTypes[pkgNameIDs[i]]),
+			PackageNamespaceID: pkgNamespaceGlobalID(pkgNamespaces[pkgNameIDs[i]]),
+			PackageNameID:      pkgNameGlobalID(pkgNameIDs[i]),
+			PackageVersionID:   pkgVersionGlobalID(pkgVersionIDs[i])})
 	}
 
 	return &collectedPkgIDs, nil
@@ -236,10 +298,10 @@ func upsertPackage(ctx context.Context, tx *ent.Tx, pkg model.IDorPkgInput) (*mo
 	}
 
 	return &model.PackageIDs{
-		PackageTypeID:      toGlobalID(pkgTypeString, pkg.PackageInput.Type),
-		PackageNamespaceID: toGlobalID(pkgNamespaceString, strings.Join([]string{pkg.PackageInput.Type, stringOrEmpty(pkg.PackageInput.Namespace)}, guacIDSplit)),
-		PackageNameID:      toGlobalID(packagename.Table, pkgNameID.String()),
-		PackageVersionID:   toGlobalID(packageversion.Table, pkgVersionID.String())}, nil
+		PackageTypeID:      pkgTypeGlobalID(pkg.PackageInput.Type),
+		PackageNamespaceID: pkgNamespaceGlobalID(strings.Join([]string{pkg.PackageInput.Type, stringOrEmpty(pkg.PackageInput.Namespace)}, guacIDSplit)),
+		PackageNameID:      pkgNameGlobalID(pkgNameID.String()),
+		PackageVersionID:   pkgVersionGlobalID(pkgVersionID.String())}, nil
 }
 
 func withPackageVersionTree() func(*ent.PackageVersionQuery) {
@@ -411,8 +473,7 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 		query := b.client.PackageName.Query().
 			Where([]predicate.PackageName{
 				optionalPredicate(&nodeID, packagename.TypeEQ),
-			}...).
-			Limit(MaxPageSize)
+			}...)
 
 		pkgNames, err := query.All(ctx)
 		if err != nil {
@@ -421,11 +482,11 @@ func (b *EntBackend) packageTypeNeighbors(ctx context.Context, nodeID string, al
 
 		for _, foundPkgName := range pkgNames {
 			out = append(out, &model.Package{
-				ID:   toGlobalID(pkgTypeString, foundPkgName.Type),
+				ID:   pkgTypeGlobalID(foundPkgName.Type),
 				Type: foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{
 					{
-						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
+						ID:        pkgNamespaceGlobalID(strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 						Namespace: foundPkgName.Namespace,
 						Names:     []*model.PackageName{},
 					},
@@ -448,8 +509,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 		Where([]predicate.PackageName{
 			optionalPredicate(&splitQueryValue[0], packagename.TypeEQ),
 			optionalPredicate(&splitQueryValue[1], packagename.NamespaceEQ),
-		}...).
-		Limit(MaxPageSize)
+		}...)
 
 	pkgNames, err := query.All(ctx)
 	if err != nil {
@@ -459,14 +519,14 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 	for _, foundPkgName := range pkgNames {
 		if allowedEdges[model.EdgePackageNamespacePackageName] {
 			out = append(out, &model.Package{
-				ID:   toGlobalID(pkgTypeString, foundPkgName.Type),
+				ID:   pkgTypeGlobalID(foundPkgName.Type),
 				Type: foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{
 					{
-						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, ":")),
+						ID:        pkgNamespaceGlobalID(strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, ":")),
 						Namespace: foundPkgName.Namespace,
 						Names: []*model.PackageName{{
-							ID:       toGlobalID(packagename.Table, foundPkgName.ID.String()),
+							ID:       pkgNameGlobalID(foundPkgName.ID.String()),
 							Name:     foundPkgName.Name,
 							Versions: []*model.PackageVersion{},
 						}},
@@ -476,7 +536,7 @@ func (b *EntBackend) packageNamespaceNeighbors(ctx context.Context, nodeID strin
 		}
 		if allowedEdges[model.EdgePackageNamespacePackageType] {
 			out = append(out, &model.Package{
-				ID:         toGlobalID(pkgTypeString, foundPkgName.Type),
+				ID:         pkgTypeGlobalID(foundPkgName.Type),
 				Type:       foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{},
 			})
@@ -499,10 +559,6 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 			WithVersions(func(q *ent.PackageVersionQuery) {
 				q.WithName()
 			})
-	}
-	if allowedEdges[model.EdgePackageNamePackageNamespace] {
-		query.
-			Limit(MaxPageSize)
 	}
 	if allowedEdges[model.EdgePackageHasSourceAt] {
 		query.
@@ -543,9 +599,6 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 			})
 	}
 
-	query.
-		Limit(MaxPageSize)
-
 	pkgNames, err := query.All(ctx)
 	if err != nil {
 		return []model.Node{}, fmt.Errorf("failed to query for pkgName with node ID: %s with error: %w", nodeID, err)
@@ -567,11 +620,11 @@ func (b *EntBackend) packageNameNeighbors(ctx context.Context, nodeID string, al
 	for _, foundPkgName := range pkgNames {
 		if allowedEdges[model.EdgePackageNamePackageNamespace] {
 			out = append(out, &model.Package{
-				ID:   toGlobalID(pkgTypeString, foundPkgName.Type),
+				ID:   pkgTypeGlobalID(foundPkgName.Type),
 				Type: foundPkgName.Type,
 				Namespaces: []*model.PackageNamespace{
 					{
-						ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
+						ID:        pkgNamespaceGlobalID(strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 						Namespace: foundPkgName.Namespace,
 						Names:     []*model.PackageName{},
 					},
@@ -642,7 +695,7 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 	if allowedEdges[model.EdgePackageHasSbom] {
 		query.
 			WithSbom(func(q *ent.BillOfMaterialsQuery) {
-				getSBOMObject(q)
+				getSBOMObjectWithIncludes(q)
 			})
 	}
 	if allowedEdges[model.EdgePackageCertifyVexStatement] {
@@ -693,9 +746,6 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 			})
 	}
 
-	query.
-		Limit(MaxPageSize)
-
 	pkgVersions, err := query.All(ctx)
 	if err != nil {
 		return []model.Node{}, fmt.Errorf("failed to query for packageVersion with node ID: %s with error: %w", nodeID, err)
@@ -707,14 +757,14 @@ func (b *EntBackend) packageVersionNeighbors(ctx context.Context, nodeID string,
 			pkgNames = append(pkgNames, backReferencePackageVersion(foundPkgVersion))
 			for _, foundPkgName := range pkgNames {
 				out = append(out, &model.Package{
-					ID:   toGlobalID(pkgTypeString, foundPkgName.Type),
+					ID:   pkgTypeGlobalID(foundPkgName.Type),
 					Type: foundPkgName.Type,
 					Namespaces: []*model.PackageNamespace{
 						{
-							ID:        toGlobalID(pkgNamespaceString, strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
+							ID:        pkgNamespaceGlobalID(strings.Join([]string{foundPkgName.Type, foundPkgName.Namespace}, guacIDSplit)),
 							Namespace: foundPkgName.Namespace,
 							Names: []*model.PackageName{{
-								ID:       toGlobalID(packagename.Table, foundPkgName.ID.String()),
+								ID:       pkgNameGlobalID(foundPkgName.ID.String()),
 								Name:     foundPkgName.Name,
 								Versions: []*model.PackageVersion{},
 							}},

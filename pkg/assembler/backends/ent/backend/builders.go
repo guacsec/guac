@@ -32,41 +32,53 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func buildGlobalID(id string) string {
+	return toGlobalID(builder.Table, id)
+}
+
+func bulkBuildGlobalID(ids []string) []string {
+	return toGlobalIDs(builder.Table, ids)
+}
+
 func (b *EntBackend) BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error) {
 	var afterCursor *entgql.Cursor[uuid.UUID]
 
 	if after != nil {
-		afterUUID, err := uuid.Parse(*after)
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != builder.Table {
+			return nil, fmt.Errorf("after cursor is not type builder but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
 		}
 		afterCursor = &ent.Cursor{ID: afterUUID}
 	} else {
 		afterCursor = nil
 	}
 
-	query, err := b.client.Builder.Query().
+	buildConn, err := b.client.Builder.Query().
 		Where(builderQueryPredicate(&builderSpec)).
 		Paginate(ctx, afterCursor, first, nil, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed builder query with error: %w", err)
 	}
 
 	var edges []*model.BuilderEdge
-	for _, edge := range query.Edges {
+	for _, edge := range buildConn.Edges {
 		edges = append(edges, &model.BuilderEdge{
-			Cursor: edge.Cursor.ID.String(),
+			Cursor: buildGlobalID(edge.Cursor.ID.String()),
 			Node:   toModelBuilder(edge.Node),
 		})
 	}
 
-	if query.PageInfo.StartCursor != nil {
+	if buildConn.PageInfo.StartCursor != nil {
 		return &model.BuilderConnection{
-			TotalCount: query.TotalCount,
+			TotalCount: buildConn.TotalCount,
 			PageInfo: &model.PageInfo{
-				HasNextPage: query.PageInfo.HasNextPage,
-				StartCursor: ptrfrom.String(query.PageInfo.StartCursor.ID.String()),
-				EndCursor:   ptrfrom.String(query.PageInfo.EndCursor.ID.String()),
+				HasNextPage: buildConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(buildGlobalID(buildConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(buildGlobalID(buildConn.PageInfo.EndCursor.ID.String())),
 			},
 			Edges: edges,
 		}, nil
@@ -83,9 +95,9 @@ func (b *EntBackend) Builders(ctx context.Context, builderSpec *model.BuilderSpe
 	query := b.client.Builder.Query().
 		Where(builderQueryPredicate(builderSpec))
 
-	builders, err := query.Limit(MaxPageSize).All(ctx)
+	builders, err := query.All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed builder query with error: %w", err)
 	}
 
 	return collect(builders, toModelBuilder), nil
@@ -117,7 +129,7 @@ func (b *EntBackend) IngestBuilder(ctx context.Context, build *model.IDorBuilder
 	if txErr != nil {
 		return "", errors.Wrap(txErr, funcName)
 	}
-	return toGlobalID(builder.Table, *id), nil
+	return buildGlobalID(*id), nil
 }
 
 func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorBuilderInput) ([]string, error) {
@@ -134,7 +146,7 @@ func (b *EntBackend) IngestBuilders(ctx context.Context, builders []*model.IDorB
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(builder.Table, *ids), nil
+	return bulkBuildGlobalID(*ids), nil
 }
 
 func upsertBulkBuilder(ctx context.Context, tx *ent.Tx, buildInputs []*model.IDorBuilderInput) (*[]string, error) {
@@ -202,9 +214,6 @@ func (b *EntBackend) builderNeighbors(ctx context.Context, nodeID string, allowe
 				getSLSAObject(q)
 			})
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	builders, err := query.All(ctx)
 	if err != nil {

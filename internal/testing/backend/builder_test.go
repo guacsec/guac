@@ -84,12 +84,18 @@ func TestBuilders(t *testing.T) {
 			if tt.idInFilter {
 				tt.builderSpec.ID = &ingestedBuilderID
 			}
-			got, err := b.Builders(ctx, tt.builderSpec)
+			got, err := b.BuildersList(ctx, *tt.builderSpec, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("demoClient.Builders() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, commonOpts); diff != "" {
+			var returnedObjects []*model.Builder
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(tt.want, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

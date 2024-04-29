@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -30,8 +31,62 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
-	return nil, fmt.Errorf("not implemented: PointOfContactList")
+func pointOfContactGlobalID(id string) string {
+	return toGlobalID(pointofcontact.Table, id)
+}
+
+func bulkPointOfContactGlobalID(ids []string) []string {
+	return toGlobalIDs(pointofcontact.Table, ids)
+}
+
+func (b *EntBackend) PointOfContactList(ctx context.Context, spec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != pointofcontact.Table {
+			return nil, fmt.Errorf("after cursor is not type Point of Contact but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	pocQuery := b.client.PointOfContact.Query().
+		Where(pointOfContactPredicate(&spec))
+
+	pocConn, err := getPointOfContactObject(pocQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed PointOfContact query with error: %w", err)
+	}
+
+	var edges []*model.PointOfContactEdge
+	for _, edge := range pocConn.Edges {
+		edges = append(edges, &model.PointOfContactEdge{
+			Cursor: pointOfContactGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelPointOfContact(edge.Node),
+		})
+	}
+
+	if pocConn.PageInfo.StartCursor != nil {
+		return &model.PointOfContactConnection{
+			TotalCount: pocConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: pocConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(pointOfContactGlobalID(pocConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(pointOfContactGlobalID(pocConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
@@ -42,10 +97,9 @@ func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfCo
 		Where(pointOfContactPredicate(filter))
 
 	records, err := getPointOfContactObject(pocQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve PointOfContact :: %s", err)
+		return nil, fmt.Errorf("failed PointOfContact query with error: %w", err)
 	}
 
 	return collect(records, toModelPointOfContact), nil
@@ -68,7 +122,7 @@ func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.Pac
 		return "", fmt.Errorf("failed to execute IngestPointOfContact :: %s", txErr)
 	}
 
-	return toGlobalID(pointofcontact.Table, *recordID), nil
+	return pointOfContactGlobalID(*recordID), nil
 }
 
 func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) ([]string, error) {
@@ -85,7 +139,7 @@ func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.P
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(pointofcontact.Table, *ids), nil
+	return bulkPointOfContactGlobalID(*ids), nil
 }
 
 func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOfContact {
@@ -384,7 +438,7 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 	}
 
 	return &model.PointOfContact{
-		ID:            toGlobalID(pointofcontact.Table, v.ID.String()),
+		ID:            pointOfContactGlobalID(v.ID.String()),
 		Subject:       sub,
 		Email:         v.Email,
 		Info:          v.Info,
@@ -415,9 +469,6 @@ func (b *EntBackend) pointOfContactNeighbors(ctx context.Context, nodeID string,
 		query.
 			WithSource()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	pocs, err := query.All(ctx)
 	if err != nil {

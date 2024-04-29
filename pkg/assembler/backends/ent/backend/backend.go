@@ -28,10 +28,6 @@ import (
 )
 
 const (
-	// MaxPageSize is the maximum number of results that will be returned in a single query.
-	// const MaxPageSize = 1000
-	MaxPageSize = 999999
-
 	// Batch size for ingesting in bulk. Increasing this could results in "PostgreSQL only supports 65535 parameters" error
 	MaxBatchSize = 5000
 )

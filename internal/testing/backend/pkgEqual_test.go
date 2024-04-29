@@ -592,14 +592,20 @@ func TestPkgEqual(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.PkgEqual(ctx, test.Query)
+			got, err := b.PkgEqualList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHE, got, commonOpts); diff != "" {
+			var returnedObjects []*model.PkgEqual
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHE, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -820,14 +826,20 @@ func TestIngestPkgEquals(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.PkgEqual(ctx, test.Query)
+			got, err := b.PkgEqualList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHE, got, commonOpts); diff != "" {
+			var returnedObjects []*model.PkgEqual
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHE, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

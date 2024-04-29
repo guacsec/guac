@@ -538,14 +538,20 @@ func TestOccurrence(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.IsOccurrence(ctx, test.Query)
+			got, err := b.IsOccurrenceList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpOcc, got, commonOpts); diff != "" {
+			var returnedObjects []*model.IsOccurrence
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpOcc, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -665,14 +671,20 @@ func TestIngestOccurrences(t *testing.T) {
 				if err != nil {
 					return
 				}
-				got, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: ptrfrom.String(ocurID[0])})
+				got, err := b.IsOccurrenceList(ctx, model.IsOccurrenceSpec{ID: ptrfrom.String(ocurID[0])}, nil, nil)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
 				if err != nil {
 					return
 				}
-				if diff := cmp.Diff(test.ExpOcc, got, commonOpts); diff != "" {
+				var returnedObjects []*model.IsOccurrence
+				if got != nil {
+					for _, obj := range got.Edges {
+						returnedObjects = append(returnedObjects, obj.Node)
+					}
+				}
+				if diff := cmp.Diff(test.ExpOcc, returnedObjects, commonOpts); diff != "" {
 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}

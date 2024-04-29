@@ -876,14 +876,20 @@ func TestIsDependency(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.IsDependency(ctx, test.Query)
+			got, err := b.IsDependencyList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpID, got, commonOpts); diff != "" {
+			var returnedObjects []*model.IsDependency
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpID, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -994,14 +1000,20 @@ func TestIsDependencies(t *testing.T) {
 				if err != nil {
 					return
 				}
-				got, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: ptrfrom.String(depID[0])})
+				got, err := b.IsDependencyList(ctx, model.IsDependencySpec{ID: ptrfrom.String(depID[0])}, nil, nil)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
 				if err != nil {
 					return
 				}
-				if diff := cmp.Diff(test.ExpID, got, commonOpts); diff != "" {
+				var returnedObjects []*model.IsDependency
+				if got != nil {
+					for _, obj := range got.Edges {
+						returnedObjects = append(returnedObjects, obj.Node)
+					}
+				}
+				if diff := cmp.Diff(test.ExpID, returnedObjects, commonOpts); diff != "" {
 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}

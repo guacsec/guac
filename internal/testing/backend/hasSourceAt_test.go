@@ -614,14 +614,20 @@ func TestHasSourceAt(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.HasSourceAt(ctx, test.Query)
+			got, err := b.HasSourceAtList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHSA, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasSourceAt
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHSA, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -905,14 +911,20 @@ func TestIngestHasSourceAts(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.HasSourceAt(ctx, test.Query)
+			got, err := b.HasSourceAtList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHSA, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasSourceAt
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHSA, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

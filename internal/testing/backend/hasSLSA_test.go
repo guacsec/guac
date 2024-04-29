@@ -513,14 +513,14 @@ func TestHasSLSA(t *testing.T) {
 			QueryBuilderID: true,
 			ExpHS: []*model.HasSlsa{
 				{
-					Subject: testdata.A1out,
+					Subject: testdata.A3out,
 					Slsa: &model.Slsa{
 						BuiltBy:   testdata.B2out,
 						BuiltFrom: []*model.Artifact{testdata.A2out},
 					},
 				},
 				{
-					Subject: testdata.A3out,
+					Subject: testdata.A1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   testdata.B2out,
 						BuiltFrom: []*model.Artifact{testdata.A2out},
@@ -654,14 +654,20 @@ func TestHasSLSA(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.HasSlsa(ctx, test.Query)
+			got, err := b.HasSLSAList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHS, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasSlsa
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -900,14 +906,20 @@ func TestIngestHasSLSAs(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.HasSlsa(ctx, test.Query)
+			got, err := b.HasSLSAList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHS, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasSlsa
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

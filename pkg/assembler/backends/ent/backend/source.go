@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -40,8 +41,74 @@ const (
 	srcNamespaceString = "source_namespaces"
 )
 
-func (b *EntBackend) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error) {
-	return nil, fmt.Errorf("not implemented: HasSourceAtList")
+func hasSourceAtGlobalID(id string) string {
+	return toGlobalID(hassourceat.Table, id)
+}
+
+func bulkHasSourceAtGlobalID(ids []string) []string {
+	return toGlobalIDs(hassourceat.Table, ids)
+}
+
+func srcTypeGlobalID(id string) string {
+	return toGlobalID(srcTypeString, id)
+}
+
+func srcNamespaceGlobalID(id string) string {
+	return toGlobalID(srcNamespaceString, id)
+}
+
+func srcNameGlobalID(id string) string {
+	return toGlobalID(sourcename.Table, id)
+}
+
+func (b *EntBackend) HasSourceAtList(ctx context.Context, spec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != hassourceat.Table {
+			return nil, fmt.Errorf("after cursor is not type hasSourceAt but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	hasSourceAtQuery := b.client.HasSourceAt.Query().
+		Where(hasSourceAtQuery(spec))
+
+	hsaConn, err := getHasSourceAtObject(hasSourceAtQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed hasSourceAt query with error: %w", err)
+	}
+
+	var edges []*model.HasSourceAtEdge
+	for _, edge := range hsaConn.Edges {
+		edges = append(edges, &model.HasSourceAtEdge{
+			Cursor: hasSourceAtGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelHasSourceAt(edge.Node),
+		})
+	}
+
+	if hsaConn.PageInfo.StartCursor != nil {
+		return &model.HasSourceAtConnection{
+			TotalCount: hsaConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hsaConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(hasSourceAtGlobalID(hsaConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(hasSourceAtGlobalID(hsaConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
@@ -53,10 +120,9 @@ func (b *EntBackend) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 		Where(hasSourceAtQuery(*filter))
 
 	records, err := getHasSourceAtObject(hasSourceAtQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed hasSourceAt query with error: %w", err)
 	}
 
 	return collect(records, toModelHasSourceAt), nil
@@ -103,7 +169,7 @@ func (b *EntBackend) IngestHasSourceAt(ctx context.Context, pkg model.IDorPkgInp
 		return "", txErr
 	}
 
-	return toGlobalID(hassourceat.Table, *record), nil
+	return hasSourceAtGlobalID(*record), nil
 }
 
 func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorPkgInput, pkgMatchType *model.MatchFlags, sources []*model.IDorSourceInput, hasSourceAts []*model.HasSourceAtInputSpec) ([]string, error) {
@@ -120,7 +186,7 @@ func (b *EntBackend) IngestHasSourceAts(ctx context.Context, pkgs []*model.IDorP
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(hassourceat.Table, *ids), nil
+	return bulkHasSourceAtGlobalID(*ids), nil
 }
 
 func hasSourceAtConflictColumns() []string {
@@ -299,9 +365,6 @@ func (b *EntBackend) hasSourceAtNeighbors(ctx context.Context, nodeID string, al
 			WithSource()
 	}
 
-	query.
-		Limit(MaxPageSize)
-
 	hasSourceAts, err := query.All(ctx)
 	if err != nil {
 		return []model.Node{}, fmt.Errorf("failed to query for hasSourceAt with node ID: %s with error: %w", nodeID, err)
@@ -322,8 +385,52 @@ func (b *EntBackend) hasSourceAtNeighbors(ctx context.Context, nodeID string, al
 	return out, nil
 }
 
-func (b *EntBackend) SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
-	return nil, fmt.Errorf("not implemented: SourcesList")
+func (b *EntBackend) SourcesList(ctx context.Context, spec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != sourcename.Table {
+			return nil, fmt.Errorf("after cursor is not type source but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	sourceConn, err := b.client.SourceName.Query().
+		Where(sourceQuery(&spec)).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed sources query with error: %w", err)
+	}
+
+	var edges []*model.SourceEdge
+	for _, edge := range sourceConn.Edges {
+		edges = append(edges, &model.SourceEdge{
+			Cursor: srcNameGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelSource(edge.Node),
+		})
+	}
+
+	if sourceConn.PageInfo.StartCursor != nil {
+		return &model.SourceConnection{
+			TotalCount: sourceConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: sourceConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(srcNameGlobalID(sourceConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(srcNameGlobalID(sourceConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
@@ -332,10 +439,9 @@ func (b *EntBackend) Sources(ctx context.Context, filter *model.SourceSpec) ([]*
 	}
 	records, err := b.client.SourceName.Query().
 		Where(sourceQuery(filter)).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed sources query with error: %w", err)
 	}
 
 	return toModelSourceTrie(records), nil
@@ -414,9 +520,9 @@ func upsertBulkSource(ctx context.Context, tx *ent.Tx, srcInputs []*model.IDorSo
 	var collectedSrcIDs []model.SourceIDs
 	for i := range srcNameIDs {
 		collectedSrcIDs = append(collectedSrcIDs, model.SourceIDs{
-			SourceTypeID:      toGlobalID(srcTypeString, srcTypes[srcNameIDs[i]]),
-			SourceNamespaceID: toGlobalID(srcNamespaceString, srcNamespaces[srcNameIDs[i]]),
-			SourceNameID:      toGlobalID(sourcename.Table, srcNameIDs[i])})
+			SourceTypeID:      srcTypeGlobalID(srcTypes[srcNameIDs[i]]),
+			SourceNamespaceID: srcNamespaceGlobalID(srcNamespaces[srcNameIDs[i]]),
+			SourceNameID:      srcNameGlobalID(srcNameIDs[i])})
 	}
 
 	return &collectedSrcIDs, nil
@@ -456,9 +562,9 @@ func upsertSource(ctx context.Context, tx *ent.Tx, src model.IDorSourceInput) (*
 	}
 
 	return &model.SourceIDs{
-		SourceTypeID:      toGlobalID(srcTypeString, src.SourceInput.Type),
-		SourceNamespaceID: toGlobalID(srcNamespaceString, strings.Join([]string{src.SourceInput.Type, src.SourceInput.Namespace}, guacIDSplit)),
-		SourceNameID:      toGlobalID(sourcename.Table, srcNameID.String())}, nil
+		SourceTypeID:      srcTypeGlobalID(src.SourceInput.Type),
+		SourceNamespaceID: srcNamespaceGlobalID(strings.Join([]string{src.SourceInput.Type, src.SourceInput.Namespace}, guacIDSplit)),
+		SourceNameID:      srcNameGlobalID(srcNameID.String())}, nil
 }
 
 func sourceInputQuery(filter model.SourceInputSpec) predicate.SourceName {
@@ -501,7 +607,7 @@ func toModelHasSourceAt(record *ent.HasSourceAt) *model.HasSourceAt {
 	return &model.HasSourceAt{
 		Source:        toModelSource(record.Edges.Source),
 		Package:       pkg,
-		ID:            toGlobalID(hassourceat.Table, record.ID.String()),
+		ID:            hasSourceAtGlobalID(record.ID.String()),
 		KnownSince:    record.KnownSince,
 		Justification: record.Justification,
 		Origin:        record.Origin,
@@ -515,11 +621,11 @@ func toModelSourceTrie(collectedSrcNames []*ent.SourceName) []*model.Source {
 
 	for _, srcName := range collectedSrcNames {
 
-		namespaceString := srcName.Namespace + "," + toGlobalID(srcNamespaceString, strings.Join([]string{srcName.Type, srcName.Namespace}, guacIDSplit))
-		typeString := srcName.Type + "," + toGlobalID(srcTypeString, srcName.Type)
+		namespaceString := srcName.Namespace + "," + srcNamespaceGlobalID(strings.Join([]string{srcName.Type, srcName.Namespace}, guacIDSplit))
+		typeString := srcName.Type + "," + srcTypeGlobalID(srcName.Type)
 
 		sourceName := &model.SourceName{
-			ID:   toGlobalID(sourcename.Table, srcName.ID.String()),
+			ID:   srcNameGlobalID(srcName.ID.String()),
 			Name: srcName.Name,
 		}
 		if srcName.Tag != "" {
@@ -566,7 +672,7 @@ func toModelSource(s *ent.SourceName) *model.Source {
 	}
 
 	sourceName := &model.SourceName{
-		ID:   toGlobalID(sourcename.Table, s.ID.String()),
+		ID:   srcNameGlobalID(s.ID.String()),
 		Name: s.Name,
 	}
 
@@ -578,10 +684,10 @@ func toModelSource(s *ent.SourceName) *model.Source {
 	}
 
 	return &model.Source{
-		ID:   toGlobalID(srcTypeString, s.Type),
+		ID:   srcTypeGlobalID(s.Type),
 		Type: s.Type,
 		Namespaces: []*model.SourceNamespace{{
-			ID:        toGlobalID(srcNamespaceString, strings.Join([]string{s.Type, s.Namespace}, guacIDSplit)),
+			ID:        srcNamespaceGlobalID(strings.Join([]string{s.Type, s.Namespace}, guacIDSplit)),
 			Namespace: s.Namespace,
 			Names:     []*model.SourceName{sourceName},
 		}},
@@ -596,8 +702,7 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 	var out []model.Node
 	if allowedEdges[model.EdgeSourceTypeSourceNamespace] {
 		query := b.client.SourceName.Query().
-			Where(sourceQuery(&model.SourceSpec{Type: &nodeID})).
-			Limit(MaxPageSize)
+			Where(sourceQuery(&model.SourceSpec{Type: &nodeID}))
 
 		srcNames, err := query.All(ctx)
 		if err != nil {
@@ -606,11 +711,11 @@ func (b *EntBackend) srcTypeNeighbors(ctx context.Context, nodeID string, allowe
 
 		for _, foundSrcName := range srcNames {
 			out = append(out, &model.Source{
-				ID:   toGlobalID(srcTypeString, foundSrcName.Type),
+				ID:   srcTypeGlobalID(foundSrcName.Type),
 				Type: foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{
 					{
-						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, guacIDSplit)),
+						ID:        srcNamespaceGlobalID(strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, guacIDSplit)),
 						Namespace: foundSrcName.Namespace,
 						Names:     []*model.SourceName{},
 					},
@@ -631,8 +736,7 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 	}
 
 	query := b.client.SourceName.Query().
-		Where(sourceQuery(&model.SourceSpec{Type: &splitQueryValue[0], Namespace: &splitQueryValue[1]})).
-		Limit(MaxPageSize)
+		Where(sourceQuery(&model.SourceSpec{Type: &splitQueryValue[0], Namespace: &splitQueryValue[1]}))
 
 	srcNames, err := query.All(ctx)
 	if err != nil {
@@ -642,15 +746,15 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 	if allowedEdges[model.EdgeSourceNamespaceSourceName] {
 		for _, foundSrcName := range srcNames {
 			out = append(out, &model.Source{
-				ID:   toGlobalID(srcTypeString, foundSrcName.Type),
+				ID:   srcTypeGlobalID(foundSrcName.Type),
 				Type: foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{
 					{
-						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, guacIDSplit)),
+						ID:        srcNamespaceGlobalID(strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, guacIDSplit)),
 						Namespace: foundSrcName.Namespace,
 						Names: []*model.SourceName{
 							{
-								ID:   toGlobalID(sourcename.Table, foundSrcName.ID.String()),
+								ID:   srcNameGlobalID(foundSrcName.ID.String()),
 								Name: foundSrcName.Name,
 							},
 						},
@@ -662,7 +766,7 @@ func (b *EntBackend) srcNamespaceNeighbors(ctx context.Context, nodeID string, a
 	if allowedEdges[model.EdgeSourceNamespaceSourceType] {
 		for _, foundSrcName := range srcNames {
 			out = append(out, &model.Source{
-				ID:         toGlobalID(srcTypeString, foundSrcName.Type),
+				ID:         srcTypeGlobalID(foundSrcName.Type),
 				Type:       foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{},
 			})
@@ -728,9 +832,6 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 			})
 	}
 
-	query.
-		Limit(MaxPageSize)
-
 	srcNames, err := query.All(ctx)
 	if err != nil {
 		return []model.Node{}, fmt.Errorf("failed to get source Name for node ID: %s with error: %w", nodeID, err)
@@ -739,11 +840,11 @@ func (b *EntBackend) srcNameNeighbors(ctx context.Context, nodeID string, allowe
 	for _, foundSrcName := range srcNames {
 		if allowedEdges[model.EdgeSourceNameSourceNamespace] {
 			out = append(out, &model.Source{
-				ID:   toGlobalID(srcTypeString, foundSrcName.Type),
+				ID:   srcTypeGlobalID(foundSrcName.Type),
 				Type: foundSrcName.Type,
 				Namespaces: []*model.SourceNamespace{
 					{
-						ID:        toGlobalID(srcNamespaceString, strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, guacIDSplit)),
+						ID:        srcNamespaceGlobalID(strings.Join([]string{foundSrcName.Type, foundSrcName.Namespace}, guacIDSplit)),
 						Namespace: foundSrcName.Namespace,
 						Names:     []*model.SourceName{},
 					},

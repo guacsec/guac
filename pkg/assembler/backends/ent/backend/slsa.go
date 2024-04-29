@@ -23,6 +23,7 @@ import (
 	"sort"
 	"time"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -35,8 +36,62 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error) {
-	return nil, fmt.Errorf("not implemented: HasSLSAList")
+func slsaGlobalID(id string) string {
+	return toGlobalID(slsaattestation.Table, id)
+}
+
+func bulkSLSAGlobalID(ids []string) []string {
+	return toGlobalIDs(slsaattestation.Table, ids)
+}
+
+func (b *EntBackend) HasSLSAList(ctx context.Context, spec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != slsaattestation.Table {
+			return nil, fmt.Errorf("after cursor is not type SLSA but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	slsaQuery := b.client.SLSAAttestation.Query().
+		Where(hasSLSAQuery(spec))
+
+	slsaConn, err := getSLSAObject(slsaQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed hasSLSA query with error: %w", err)
+	}
+
+	var edges []*model.HasSLSAEdge
+	for _, edge := range slsaConn.Edges {
+		edges = append(edges, &model.HasSLSAEdge{
+			Cursor: slsaGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelHasSLSA(edge.Node),
+		})
+	}
+
+	if slsaConn.PageInfo.StartCursor != nil {
+		return &model.HasSLSAConnection{
+			TotalCount: slsaConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: slsaConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(slsaGlobalID(slsaConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(slsaGlobalID(slsaConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
@@ -48,10 +103,9 @@ func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*m
 		Where(hasSLSAQuery(*spec))
 
 	records, err := getSLSAObject(slsaQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed hasSLSA query with error: %w", err)
 	}
 
 	return collect(records, toModelHasSLSA), nil
@@ -99,7 +153,7 @@ func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactI
 		return "", txErr
 	}
 
-	return toGlobalID(slsaattestation.Table, *id), nil
+	return slsaGlobalID(*id), nil
 }
 
 func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) ([]string, error) {
@@ -116,7 +170,7 @@ func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArti
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(slsaattestation.Table, *ids), nil
+	return bulkSLSAGlobalID(*ids), nil
 }
 
 func slsaConflictColumns() []string {
@@ -326,7 +380,7 @@ func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 	}
 
 	return &model.HasSlsa{
-		ID:      toGlobalID(slsaattestation.Table, att.ID.String()),
+		ID:      slsaGlobalID(att.ID.String()),
 		Subject: toModelArtifact(att.Edges.Subject),
 		Slsa:    slsa,
 	}
@@ -416,9 +470,6 @@ func (b *EntBackend) hasSlsaNeighbors(ctx context.Context, nodeID string, allowe
 		query.
 			WithBuiltFrom()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	slsaAtts, err := query.All(ctx)
 	if err != nil {

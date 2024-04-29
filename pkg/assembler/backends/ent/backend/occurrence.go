@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -30,8 +31,62 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error) {
-	return nil, fmt.Errorf("not implemented: IsOccurrenceList")
+func occurrenceGlobalID(id string) string {
+	return toGlobalID(occurrence.Table, id)
+}
+
+func bulkOccurrenceGlobalID(ids []string) []string {
+	return toGlobalIDs(occurrence.Table, ids)
+}
+
+func (b *EntBackend) IsOccurrenceList(ctx context.Context, spec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != occurrence.Table {
+			return nil, fmt.Errorf("after cursor is not type occurrence but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	occurQuery := b.client.Occurrence.Query().
+		Where(isOccurrenceQuery(&spec))
+
+	occurConn, err := getOccurrenceObject(occurQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed isOccurrence query with error: %w", err)
+	}
+
+	var edges []*model.IsOccurrenceEdge
+	for _, edge := range occurConn.Edges {
+		edges = append(edges, &model.IsOccurrenceEdge{
+			Cursor: occurrenceGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelIsOccurrenceWithSubject(edge.Node),
+		})
+	}
+
+	if occurConn.PageInfo.StartCursor != nil {
+		return &model.IsOccurrenceConnection{
+			TotalCount: occurConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: occurConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(occurrenceGlobalID(occurConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(occurrenceGlobalID(occurConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
@@ -44,7 +99,7 @@ func (b *EntBackend) IsOccurrence(ctx context.Context, query *model.IsOccurrence
 	records, err := getOccurrenceObject(occurQuery).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed isOccurrence query with error: %w", err)
 	}
 
 	return collect(records, toModelIsOccurrenceWithSubject), nil
@@ -74,7 +129,7 @@ func (b *EntBackend) IngestOccurrences(ctx context.Context, subjects model.Packa
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(occurrence.Table, *ids), nil
+	return bulkOccurrenceGlobalID(*ids), nil
 }
 
 func occurrenceConflictColumns() []string {
@@ -294,7 +349,7 @@ func (b *EntBackend) IngestOccurrence(ctx context.Context,
 		return "", gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalID(occurrence.Table, *recordID), nil
+	return occurrenceGlobalID(*recordID), nil
 }
 
 func isOccurrenceQuery(filter *model.IsOccurrenceSpec) predicate.Occurrence {
@@ -371,9 +426,6 @@ func (b *EntBackend) isOccurrenceNeighbors(ctx context.Context, nodeID string, a
 		query.
 			WithArtifact()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	occurs, err := query.All(ctx)
 	if err != nil {

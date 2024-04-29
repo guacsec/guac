@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -31,16 +32,79 @@ import (
 )
 
 const (
-	certifyBadString  = "certifyBad"
-	certifyGoodString = "certifyGood"
+	certifyBadString  = "certify_bad"
+	certifyGoodString = "certify_good"
 )
 
 type certificationInputSpec interface {
 	model.CertifyGoodInputSpec | model.CertifyBadInputSpec
 }
 
-func (b *EntBackend) CertifyBadList(ctx context.Context, certifyBadSpec model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyBadList")
+func certifyBadGlobalID(id string) string {
+	return toGlobalID(certifyBadString, id)
+}
+
+func bulkCertifyBadGlobalID(ids []string) []string {
+	return toGlobalIDs(certifyBadString, ids)
+}
+
+func certifyGoodGlobalID(id string) string {
+	return toGlobalID(certifyGoodString, id)
+}
+
+func bulkCertifyGoodGlobalID(ids []string) []string {
+	return toGlobalIDs(certifyGoodString, ids)
+}
+
+func (b *EntBackend) CertifyBadList(ctx context.Context, filter model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyBadString {
+			return nil, fmt.Errorf("after cursor is not type certifyBad but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeBAD, &filter))
+
+	certBadConn, err := getCertificationObject(certQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyBad query with error: %w", err)
+	}
+
+	var edges []*model.CertifyBadEdge
+	for _, edge := range certBadConn.Edges {
+		edges = append(edges, &model.CertifyBadEdge{
+			Cursor: certifyBadGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyBad(edge.Node),
+		})
+	}
+
+	if certBadConn.PageInfo.StartCursor != nil {
+		return &model.CertifyBadConnection{
+			TotalCount: certBadConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: certBadConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(certifyBadGlobalID(certBadConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(certifyBadGlobalID(certBadConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
@@ -52,17 +116,63 @@ func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 		Where(queryCertifications(certification.TypeBAD, filter))
 
 	records, err := getCertificationObject(certQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed certifyBad query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyBad), nil
 }
 
-func (b *EntBackend) CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyGoodList")
+func (b *EntBackend) CertifyGoodList(ctx context.Context, filter model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyGoodString {
+			return nil, fmt.Errorf("after cursor is not type certifyGood but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeGOOD, (*model.CertifyBadSpec)(&filter)))
+
+	certGoodConn, err := getCertificationObject(certQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyGood query with error: %w", err)
+	}
+
+	var edges []*model.CertifyGoodEdge
+	for _, edge := range certGoodConn.Edges {
+		edges = append(edges, &model.CertifyGoodEdge{
+			Cursor: certifyGoodGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyGood(edge.Node),
+		})
+	}
+
+	if certGoodConn.PageInfo.StartCursor != nil {
+		return &model.CertifyGoodConnection{
+			TotalCount: certGoodConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: certGoodConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(certifyGoodGlobalID(certGoodConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(certifyGoodGlobalID(certGoodConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
 }
 
 func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
@@ -74,10 +184,9 @@ func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 		Where(queryCertifications(certification.TypeGOOD, (*model.CertifyBadSpec)(filter)))
 
 	records, err := getCertificationObject(certQuery).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed certifyGood query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyGood), nil
@@ -128,7 +237,7 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 		return "", txErr
 	}
 
-	return toGlobalID(certifyBadString, *certRecord), nil
+	return certifyBadGlobalID(*certRecord), nil
 }
 
 func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
@@ -145,7 +254,7 @@ func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.Packa
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(certifyBadString, *ids), nil
+	return bulkCertifyBadGlobalID(*ids), nil
 }
 
 func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (string, error) {
@@ -156,7 +265,7 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 		return "", txErr
 	}
 
-	return toGlobalID(certifyGoodString, *certRecord), nil
+	return certifyGoodGlobalID(*certRecord), nil
 }
 
 func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
@@ -173,7 +282,7 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return toGlobalIDs(certifyGoodString, *ids), nil
+	return bulkCertifyGoodGlobalID(*ids), nil
 }
 
 func certifyConflictColumns() []string {
@@ -570,9 +679,6 @@ func (b *EntBackend) certifyBadNeighbors(ctx context.Context, nodeID string, all
 			WithSource()
 	}
 
-	query.
-		Limit(MaxPageSize)
-
 	certifications, err := query.All(ctx)
 	if err != nil {
 		return []model.Node{}, fmt.Errorf("failed to query for certifyBad with node ID: %s with error: %w", nodeID, err)
@@ -615,9 +721,6 @@ func (b *EntBackend) certifyGoodNeighbors(ctx context.Context, nodeID string, al
 		query.
 			WithSource()
 	}
-
-	query.
-		Limit(MaxPageSize)
 
 	certifications, err := query.All(ctx)
 	if err != nil {

@@ -28,7 +28,7 @@ import (
 )
 
 func (c *arangoClient) CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyBadList")
+	return nil, fmt.Errorf("not implemented: CertifyLegalList")
 }
 
 func (c *arangoClient) CertifyLegal(ctx context.Context, certifyLegalSpec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
