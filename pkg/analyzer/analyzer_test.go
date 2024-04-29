@@ -16,11 +16,20 @@
 package analyzer_test
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/dominikbraun/graph"
 	analyzer "github.com/guacsec/guac/pkg/analyzer"
+	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
+
+var testfile = "hasSBOMs.json"
+var rearrangedTestFile = "rearrangedHasSBOM.json"
+var diffTestFile = "diffSBOM.json"
 
 func TestSetGetNodeAttribute(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
@@ -40,34 +49,29 @@ func TestSetGetNodeAttribute(t *testing.T) {
 	if value != "value" {
 		t.Errorf("Expected value %s, got %s", "value", value)
 	}
-
 }
 
 func TestHighlightAnalysis(t *testing.T) {
-	//not exhaustive, can be made better
-
-	g := graph.New(analyzer.NodeHash, graph.Directed())
-
-	//create HasSBOM node
-	analyzer.AddGraphNode(g, "HasSBOM", "black")
-
-	if !(analyzer.SetNodeAttribute(g, "HasSBOM", "Algorithm", "hasSBOM.Algorithm") &&
-		analyzer.SetNodeAttribute(g, "HasSBOM", "Collector", "hasSBOM.Collector") &&
-		analyzer.SetNodeAttribute(g, "HasSBOM", "Digest", "hasSBOM.Digest") &&
-		analyzer.SetNodeAttribute(g, "HasSBOM", "DownloadLocation", "hasSBOM.DownloadLocation") &&
-		analyzer.SetNodeAttribute(g, "HasSBOM", "KnownSince", "hasSBOM.KnownSince") &&
-		analyzer.SetNodeAttribute(g, "HasSBOM", "Origin", "hasSBOM.Origin")) {
-		t.Errorf("Test Build fail, error setting metadata attribute")
-
-	}
-
-	_, diff, err := analyzer.HighlightAnalysis(g, g, 0)
+	graphs, err := readTwoSBOM(diffTestFile)
 	if err != nil {
-		t.Errorf("Error running highlight analysis: %v", err)
+		t.Errorf("Error making graph %v ", err.Error())
 	}
-	if len(diff.MetadataMismatch) != 0 && len(diff.MissingAddedRemovedLinks) != 0 && len(diff.MissingAddedRemovedNodes) != 0 {
-		t.Errorf("Expected no diffs, got diffs %+v", diff)
+
+	_, err = analyzer.GraphEqual(graphs[0], graphs[1])
+	if err == nil {
+		t.Errorf("error checking graph equivalence %v", err.Error())
 	}
+
+	_, err = analyzer.GraphEdgesEqual(graphs[0], graphs[1])
+	if err == nil {
+		t.Errorf("Error checking edge equivalence %v", err.Error())
+	}
+
+	_, err = analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
+	if err == nil {
+		t.Errorf("Error highlighting diff %v", err.Error())
+	}
+
 }
 
 func TestAddGraphNode(t *testing.T) {
@@ -87,4 +91,95 @@ func TestAddGraphEdge(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error getting edge from %s to %s: %v", "from", "to", err)
 	}
+
+}
+
+func TestMakeGraph(t *testing.T) {
+	err := testEquivalence(analyzer.GraphEqual)
+	if err != nil {
+		t.Errorf("Fail err: %v", err.Error())
+	}
+
+}
+
+func TestFindPaths(t *testing.T) {
+
+	err := testEquivalence(analyzer.GraphEdgesEqual)
+	if err != nil {
+		t.Errorf("Fail err: %v ", err.Error())
+	}
+}
+
+func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error opening rearranged test file")
+
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error reading test file")
+	}
+	var sboms []model.HasSBOMsHasSBOM
+
+	err = json.Unmarshal(data, &sboms)
+	if err != nil {
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error unmarshaling JSON")
+	}
+
+	graphOne, errOne := analyzer.MakeGraph(sboms[0], false, false, false, false, false)
+
+	graphTwo, errTwo := analyzer.MakeGraph(sboms[1], false, false, false, false, false)
+
+	if errOne != nil || errTwo != nil {
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
+	}
+
+	return []graph.Graph[string, *analyzer.Node]{graphOne, graphTwo}, nil
+
+}
+func testEquivalence(fn func(graph.Graph[string, *analyzer.Node], graph.Graph[string, *analyzer.Node]) (bool, error)) error {
+	file, err := os.Open(testfile)
+	if err != nil {
+		return fmt.Errorf("Error opening hasSBOMs test file")
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return fmt.Errorf("Error reading test file")
+	}
+
+	var sboms []model.HasSBOMsHasSBOM
+
+	err = json.Unmarshal(data, &sboms)
+	if err != nil {
+		return fmt.Errorf("Error unmarshaling JSON")
+	}
+
+	for i, val := range sboms {
+		graphOne, errOne := analyzer.MakeGraph(val, false, false, false, false, false)
+
+		graphTwo, errTwo := analyzer.MakeGraph(val, false, false, false, false, false)
+
+		if errOne != nil || errTwo != nil {
+			return fmt.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
+		}
+		ok, err := fn(graphOne, graphTwo)
+		if !ok {
+			return fmt.Errorf("Reconstructed graph not equal HasSBOMs " + err.Error() + fmt.Sprintf(" Test-%v URI-%v", i, val.Uri))
+		}
+	}
+	graphs, err := readTwoSBOM(rearrangedTestFile)
+	if err != nil {
+		return err
+	}
+
+	ok, err := fn(graphs[0], graphs[1])
+	if !ok {
+		return fmt.Errorf("Reconstructed graph not equal rearranged " + err.Error())
+	}
+	return nil
 }

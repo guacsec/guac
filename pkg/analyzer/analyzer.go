@@ -17,8 +17,11 @@ package analyzer
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
-
+	"sort"
+	"strings"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/dominikbraun/graph"
@@ -29,14 +32,48 @@ import (
 type HighlightedDiff struct {
 	MissingAddedRemovedLinks [][]string
 	MissingAddedRemovedNodes []string
-	MetadataMismatch         []string
+}
+
+type HighlightedIntersect struct {
+	MissingAddedRemovedLinks [][]string
+	MissingAddedRemovedNodes []string
+}
+
+type HighlightedUnion struct {
+	AddedLinks               [][]string
+	MissingAddedRemovedNodes []string
 }
 
 type Node struct {
 	ID         string
 	Attributes map[string]interface{}
 	color      string
+	nodeType   string
 }
+
+type packageNameSpaces []model.AllPkgTreeNamespacesPackageNamespace
+
+type packageNameSpacesNames []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName
+
+type packageNameSpacesNamesVersions []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion
+
+type packageNameSpacesNamesVersionsQualifiers []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier
+
+func (a packageNameSpaces) Len() int           { return len(a) }
+func (a packageNameSpaces) Less(i, j int) bool { return a[i].Namespace < a[j].Namespace }
+func (a packageNameSpaces) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+func (a packageNameSpacesNames) Len() int           { return len(a) }
+func (a packageNameSpacesNames) Less(i, j int) bool { return a[i].Name < a[j].Name }
+func (a packageNameSpacesNames) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+func (a packageNameSpacesNamesVersions) Len() int           { return len(a) }
+func (a packageNameSpacesNamesVersions) Less(i, j int) bool { return a[i].Version < a[j].Version }
+func (a packageNameSpacesNamesVersions) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+func (a packageNameSpacesNamesVersionsQualifiers) Len() int           { return len(a) }
+func (a packageNameSpacesNamesVersionsQualifiers) Less(i, j int) bool { return a[i].Key < a[j].Key }
+func (a packageNameSpacesNamesVersionsQualifiers) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 func NodeHash(n *Node) string {
 	return n.ID
@@ -64,7 +101,6 @@ func GetNodeAttribute(g graph.Graph[string, *Node], ID, key string) (interface{}
 	}
 	return val, nil
 }
-
 
 func getPkgResponseFromPurl(ctx context.Context, gqlclient graphql.Client, purl string) (*model.PackagesResponse, error) {
 	pkgInput, err := helpers.PurlToPkg(purl)
@@ -131,188 +167,132 @@ func FindHasSBOMBy(filter model.HasSBOMSpec, uri, purl, id string, ctx context.C
 	return foundHasSBOMPkg, nil
 }
 
-func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) (graph.Graph[string, *Node], HighlightedDiff, error) {
+func dfsFindPaths(nodeID string, allNodeEdges map[string]map[string]graph.Edge[string], currentPath []string, allPaths *[][]string) {
+	currentPath = append(currentPath, nodeID)
 
-	var big, small graph.Graph[string, *Node]
-	var bigNodes, smallNodes map[string]map[string]graph.Edge[string]
-	var analysisList HighlightedDiff
-	gOneNodes, err := gOne.AdjacencyMap()
+	// Check if the current node has any outgoing edges
+	if val, ok := allNodeEdges[nodeID]; ok && len(val) == 0 {
+		// If not, add the current path to the list of all paths
+		*allPaths = append(*allPaths, currentPath)
+		return
+	}
+
+	// Iterate over the adjacent nodes of the current node
+	for target := range allNodeEdges[nodeID] {
+		// Recursively explore the adjacent node
+		dfsFindPaths(target, allNodeEdges, currentPath, allPaths)
+	}
+}
+
+func FindPathsFromHasSBOMNode(g graph.Graph[string, *Node]) ([][]string, error) {
+
+	var paths [][]string
+	var currentPath []string
+	allNodeEdges, err := g.AdjacencyMap()
 	if err != nil {
-		return small, analysisList, fmt.Errorf("unable to get overlay AdjacencyMap: %v", err)
+		return paths, fmt.Errorf("error getting adjacency map")
 	}
-	gTwoNodes, err := gTwo.AdjacencyMap()
-	if err != nil {
-		return small, analysisList, fmt.Errorf("unable to get base AdjacencyMap: %v", err)
+	if len(allNodeEdges) == 0 {
+		return paths, nil
+	}
+	for nodeID := range allNodeEdges {
+		if nodeID == "HasSBOM" {
+			continue
+		}
+		val, err := GetNodeAttribute(g, nodeID, "nodeType")
+		if err != nil {
+			return paths, fmt.Errorf("error getting node type")
+		}
+		value, ok := val.(string)
+		if !ok {
+			return paths, fmt.Errorf("error casting node type to string")
+		}
+		if value == "Package" {
+			//now start dfs
+			dfsFindPaths(nodeID, allNodeEdges, currentPath, &paths)
+		}
+	}
+	if len(paths) == 0 && len(allNodeEdges) > 1 {
+		return paths, fmt.Errorf("paths 0, nodes > 1")
+	}
+	return paths, nil
+}
+
+func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*Node, error) {
+	pathsOne, errOne := FindPathsFromHasSBOMNode(gOne)
+	pathsTwo, errTwo := FindPathsFromHasSBOMNode(gTwo)
+	if errOne != nil || errTwo != nil {
+		return [][]*Node{}, fmt.Errorf("error getting graph paths errOne-%v, errTwo-%v", errOne.Error(), errTwo.Error())
 	}
 
-	if len(gOneNodes) < len(gTwoNodes) {
-		big = gTwo
-		bigNodes = gTwoNodes
-		small = gOne
-		smallNodes = gOneNodes
-	} else if len(gOneNodes) > len(gTwoNodes) {
-		big = gOne
-		small = gTwo
-		bigNodes = gOneNodes
-		smallNodes = gTwoNodes
-	} else {
-		big = gTwo
-		bigNodes = gTwoNodes
-		small = gOne
-		smallNodes = gOneNodes
+
+
+	pathsOneStrings := concatenateLists(pathsOne)
+	pathsTwoStrings := concatenateLists(pathsTwo)
+
+	pathsOneMap := make(map[string][]*Node)
+	pathsTwoMap := make(map[string][]*Node)
+
+	var analysis [][]*Node
+
+	for i := range pathsOne {
+		nodes, err := nodeIDListToNodeList(gOne, pathsOne[i])
+		if err != nil {
+			return analysis, err
+		}
+		pathsOneMap[pathsOneStrings[i]] = nodes
 	}
 
-  // var smallkeys, bigkeys []string
-  // for key := range smallNodes {
-	// 	smallkeys = append(smallkeys, key)
-	// }
-  // for key := range bigNodes {
-	// 	bigkeys = append(bigkeys, key)
-	// }
-
-  // sort.Strings(smallkeys)
-  // sort.Strings(bigkeys)
-
-  // for i := range smallkeys {
-  //   fmt.Println(smallkeys[i], bigkeys[i])
-  // }
-  // os.Exit(1)
-
+	for i := range pathsTwo {
+		nodes, err := nodeIDListToNodeList(gTwo, pathsTwo[i])
+		if err != nil {
+			return analysis, err
+		}
+		pathsTwoMap[pathsTwoStrings[i]] = nodes
+	}
 
 	switch action {
 	//0 is diff
 	case 0:
-		var diffList HighlightedDiff
-		//check nodes and their data
-		for bigNodeId := range bigNodes {
-
-			if _, err = small.Vertex(bigNodeId); err == nil {
-				nodeBig, _ := big.Vertex(bigNodeId)
-				nodeSmall, _ := small.Vertex(bigNodeId)
-				//TODO: if nodes are not equal we need to highlight which attribute is different
-				for key := range nodeBig.Attributes {
-
-					if key != "InclSoft" && nodeBig.ID == "HasSBOM" {
-						overlay, ok1 := nodeBig.Attributes[key].(string)
-						g, ok2 := nodeSmall.Attributes[key].(string)
-						if ok1 && ok2 && g != overlay {
-							//TODO: change color of node here,
-
-							diffList.MetadataMismatch = append(diffList.MetadataMismatch, key+"->"+g+"<->"+overlay)
-						}
-					} else {
-						overlay, ok1 := nodeBig.Attributes[key].(map[string]bool)
-						g, ok2 := nodeSmall.Attributes[key].(map[string]bool)
-						if ok1 && ok2 {
-							//compare here
-
-							for _key := range overlay {
-								_, _ok1 := g[_key]
-								_, _ok2 := overlay[_key]
-								if !(_ok1 && _ok2) {
-									diffList.MetadataMismatch = append(diffList.MetadataMismatch, "IncludedSoftware"+"-Missing->"+_key)
-								}
-							}
-						}
-					}
-				}
-			} else {
-				AddGraphNode(small, bigNodeId, "red") //change color to red
-				diffList.MissingAddedRemovedNodes = append(diffList.MissingAddedRemovedNodes, bigNodeId)
+		for key, val := range pathsOneMap {
+			_, ok := pathsTwoMap[key]
+			if !ok {
+				//common
+				analysis = append(analysis, val)
 			}
 		}
 
-		//add edges not in diff but from g2
-		edges, err := big.Edges()
-		if err != nil {
-			return small, analysisList, fmt.Errorf("error getting edges: %v", err)
-		}
-
-		for _, edge := range edges {
-			_, errOne := small.Edge(edge.Source, edge.Target)
-			_, errTwo := small.Edge(edge.Target, edge.Source)
-			if errOne != nil && errTwo != nil { //missing edge, add with red color
-				AddGraphEdge(small, edge.Source, edge.Target, "red") // how to add color?
-				diffList.MissingAddedRemovedLinks = append(diffList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
+		for key, val := range pathsTwoMap {
+			_, ok := pathsOneMap[key]
+			if !ok {
+				//common
+				analysis = append(analysis, val)
 			}
 		}
-		return small, diffList, nil
 	case 1:
 		// 1 is intersect
-
-		//remove edges present in small but not in big
-		edges, err := small.Edges()
-		if err != nil {
-			return small, analysisList, fmt.Errorf("error getting edges: %v", err)
-		}
-
-		for _, edge := range edges {
-			if edge.Source == "HasSBOM" || edge.Target == "HasSBOM" {
-				continue
-			}
-			_, errOne := big.Edge(edge.Source, edge.Target)
-			_, errTwo := big.Edge(edge.Source, edge.Target)
-			if errOne != nil && errTwo != nil {
-
-				if small.RemoveEdge(edge.Source, edge.Target) != nil {
-					continue
-				}
-			} else {
-				analysisList.MissingAddedRemovedLinks = append(analysisList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
+		for key := range pathsOneMap {
+			val, ok := pathsTwoMap[key]
+			if ok {
+				//common
+				analysis = append(analysis, val)
 			}
 		}
-
-		//remove nodes present in small but not in big
-		for smallNodeId := range smallNodes {
-			if smallNodeId == "HasSBOM" {
-				continue
-			}
-			if _, err = big.Vertex(smallNodeId); err != nil {
-
-				if small.RemoveVertex(smallNodeId) != nil {
-					continue
-				}
-
-			} else {
-				analysisList.MissingAddedRemovedNodes = append(analysisList.MissingAddedRemovedNodes, smallNodeId)
-			}
-		}
-
-		return small, analysisList, nil
 	case 2:
 		//2 is union
-
-		//check if nodes are present in small but not in big
-		for smallNodeId := range smallNodes {
-			if smallNodeId == "HasSBOM" {
-				continue
-			}
-			if _, err = big.Vertex(smallNodeId); err != nil {
-				AddGraphNode(big, smallNodeId, "red") //change color to red
-				analysisList.MissingAddedRemovedNodes = append(analysisList.MissingAddedRemovedNodes, smallNodeId)
-			}
+		for _, val := range pathsOneMap {
+			analysis = append(analysis, val)
 		}
 
-		//add edges not in big but in small
-		edges, err := small.Edges()
-		if err != nil {
-			return small, analysisList, fmt.Errorf("error getting edges: %v", err)
-		}
-
-		for _, edge := range edges {
-			if edge.Source == "HasSBOM" || edge.Target == "HasSBOM" {
-				continue
-			}
-			_, errOne := big.Edge(edge.Source, edge.Target)
-			_, errTwo := big.Edge(edge.Target, edge.Source)
-			if errOne != nil && errTwo != nil { //missing edge, add with red color
-				AddGraphEdge(big, edge.Source, edge.Target, "red") 
-				analysisList.MissingAddedRemovedLinks = append(analysisList.MissingAddedRemovedLinks, []string{edge.Source, edge.Target})
+		for key, val := range pathsTwoMap {
+			_, ok := pathsOneMap[key]
+			if !ok {
+				//common
+				analysis = append(analysis, val)
 			}
 		}
-		return big, analysisList, nil
 	}
-	return nil, HighlightedDiff{}, nil
+	return analysis, nil
 }
 
 func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, inclOccur, namespaces bool) (graph.Graph[string, *Node], error) {
@@ -327,85 +307,96 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 	if metadata || compareAll {
 		//add metadata
 		if !(SetNodeAttribute(g, "HasSBOM", "Algorithm", hasSBOM.Algorithm) &&
-			SetNodeAttribute(g, "HasSBOM", "Collector", hasSBOM.Collector) &&
 			SetNodeAttribute(g, "HasSBOM", "Digest", hasSBOM.Digest) &&
-			SetNodeAttribute(g, "HasSBOM", "DownloadLocation", hasSBOM.DownloadLocation) &&
-			SetNodeAttribute(g, "HasSBOM", "KnownSince", hasSBOM.KnownSince.String()) &&
-			SetNodeAttribute(g, "HasSBOM", "Origin", hasSBOM.Origin) &&
-			SetNodeAttribute(g, "HasSBOM", "Subject", *hasSBOM.Subject.GetTypename())) {
-			return g, fmt.Errorf("error setting metadata attribute")
+			SetNodeAttribute(g, "HasSBOM", "Uri", hasSBOM.Uri)) {
+			return g, fmt.Errorf("error setting metadata attribute(s)")
 		}
 	}
-
-	if inclOccur || compareAll {
-		//add included occurrences
-		for _, occurrence := range hasSBOM.IncludedOccurrences {
-			if !(SetNodeAttribute(g, "HasSBOM", "InclOccur-"+occurrence.Id+"-Subject", occurrence.Subject) &&
-				SetNodeAttribute(g, "HasSBOM", "InclOccur-"+occurrence.Id+"-Artifact-Id", occurrence.Artifact.Id) &&
-				SetNodeAttribute(g, "HasSBOM", "InclOccur-"+occurrence.Id+"-Artifact-Algorithm", occurrence.Artifact.Algorithm) &&
-				SetNodeAttribute(g, "HasSBOM", "InclOccur-"+occurrence.Id+"-Artifact-Digest", occurrence.Artifact.Digest) &&
-				SetNodeAttribute(g, "HasSBOM", "InclOccur-"+occurrence.Id+"-Justification", occurrence.Justification) &&
-				SetNodeAttribute(g, "HasSBOM", "InclOccur-"+occurrence.Id+"-Origin", occurrence.Origin) &&
-				SetNodeAttribute(g, "HasSBOM", "InclOccur-"+occurrence.Id+"-Collector", occurrence.Collector)) {
-				return g, fmt.Errorf("error setting occurrence attributes" + occurrence.Id)
-			}
-		}
-	}
-
-	if inclSoft || compareAll {
-		//add included software
-		inclSoftMap := make(map[string]bool)
-
-		for _, software := range hasSBOM.IncludedSoftware {
-			inclSoftMap[*software.GetTypename()] = true
-		}
-		if !SetNodeAttribute(g, "HasSBOM", "InclSoft", inclSoftMap) {
-			return g, fmt.Errorf("error setting included software attributes")
-		}
-	}
+	//TODO: inclSoft and inclOccur
 
 	if inclDeps || compareAll {
 		//add included dependencies
 		for _, dependency := range hasSBOM.IncludedDependencies {
-      //TODO instead of comparing package and dependencypackage, compare isdep change this code
-
-
-       
-			packageId := dependency.Package.Id
-			AddGraphEdge(g, "HasSBOM", packageId, "black")
-			includedDepsId := dependency.Id
-			AddGraphEdge(g, packageId, includedDepsId, "black")
-
-			SetNodeAttribute(g, packageId, "Type", dependency.Package.Type)
-
-			if namespaces || compareAll {
-				//add namespaces
-				if !SetNodeAttribute(g, packageId, "Namespace", dependency.Package.Namespaces[0].Names[0].Name) {
-					return g, fmt.Errorf("error setting namespace attribute")
+			//package node
+			//sort namespaces
+			sort.Sort(packageNameSpaces(dependency.Package.Namespaces))
+			message := dependency.Package.Type
+			for _, namespace := range dependency.Package.Namespaces {
+				message += namespace.Namespace
+				sort.Sort(packageNameSpacesNames(namespace.Names))
+				for _, name := range namespace.Names {
+					message += name.Name
+					sort.Sort(packageNameSpacesNamesVersions(name.Versions))
+					for _, version := range name.Versions {
+						message += version.Version
+						message += version.Subpath
+						sort.Sort(packageNameSpacesNamesVersionsQualifiers(version.Qualifiers))
+						for _, outlier := range version.Qualifiers {
+							message += outlier.Key
+							message += outlier.Value
+						}
+					}
 				}
 			}
 
-			if !(SetNodeAttribute(g, includedDepsId, "Justification", dependency.Justification) &&
-				SetNodeAttribute(g, includedDepsId, "DependencyType", dependency.DependencyType) &&
-				SetNodeAttribute(g, includedDepsId, "VersionRange", dependency.VersionRange) &&
-				SetNodeAttribute(g, includedDepsId, "Origin", dependency.Origin) &&
-				SetNodeAttribute(g, includedDepsId, "Collector", dependency.Collector)) {
-				return g, fmt.Errorf("error setting dependency attributes")
+			if message == "" {
+				return g, fmt.Errorf("encountered empty message for hashing")
 			}
 
-			if dependency.DependencyPackage.Id != "" {
-				dependPkgId := dependency.DependencyPackage.Id
-				AddGraphEdge(g, includedDepsId, dependPkgId, "black")
-				SetNodeAttribute(g, dependPkgId, "Type", dependency.DependencyPackage.Type)
+			hashValPackage := nodeHasher([]byte(message))
+			_, err := g.Vertex(hashValPackage)
 
-				if namespaces || compareAll {
-					//add namespaces
-					SetNodeAttribute(g, dependPkgId, "Namespace", dependency.DependencyPackage.Namespaces[0].Names[0].Name)
+			if err != nil { //node does not exist
+				AddGraphNode(g, hashValPackage, "black") // so, create a node
+				AddGraphEdge(g, "HasSBOM", hashValPackage, "black")
+				//set attributes here
+				if !(SetNodeAttribute(g, hashValPackage, "nodeType", "Package") &&
+					SetNodeAttribute(g, hashValPackage, "data", dependency.Package)) {
+					return g, fmt.Errorf("error setting package node attribute(s)")
 				}
 			}
+
+			//dependencyPackage node
+			sort.Sort(packageNameSpaces(dependency.DependencyPackage.Namespaces))
+			message = dependency.DependencyPackage.Type
+			for _, namespace := range dependency.DependencyPackage.Namespaces {
+				message += namespace.Namespace
+				sort.Sort(packageNameSpacesNames(namespace.Names))
+				for _, name := range namespace.Names {
+					message += name.Name
+					sort.Sort(packageNameSpacesNamesVersions(name.Versions))
+					for _, version := range name.Versions {
+						message += version.Version
+						message += version.Subpath
+						sort.Sort(packageNameSpacesNamesVersionsQualifiers(version.Qualifiers))
+						for _, outlier := range version.Qualifiers {
+							message += outlier.Key
+							message += outlier.Value
+						}
+					}
+				}
+			}
+
+			hashValDependencyPackage := nodeHasher([]byte(message))
+			_, err = g.Vertex(hashValDependencyPackage)
+
+			if err != nil { //node does not exist
+				AddGraphNode(g, hashValDependencyPackage, "black")
+				if !(SetNodeAttribute(g, hashValDependencyPackage, "nodeType", "DependencyPackage") &&
+					SetNodeAttribute(g, hashValDependencyPackage, "data", dependency.DependencyPackage)) {
+					return g, fmt.Errorf("error setting dependency package node attribute(s)")
+				}
+			}
+
+			AddGraphEdge(g, hashValPackage, hashValDependencyPackage, "black")
+
 		}
 	}
 	return g, nil
+}
+func nodeHasher(value []byte) string {
+	hash := sha256.Sum256(value)
+	return hex.EncodeToString(hash[:])
 }
 
 func AddGraphNode(g graph.Graph[string, *Node], _ID, color string) {
@@ -438,4 +429,91 @@ func AddGraphEdge(g graph.Graph[string, *Node], from, to, color string) {
 	if g.AddEdge(from, to, graph.EdgeAttribute("color", color)) != nil {
 		return
 	}
+}
+
+func GraphEqual(graphOne, graphTwo graph.Graph[string, *Node]) (bool, error) {
+	gOneMap, errOne := graphOne.AdjacencyMap()
+
+	gTwoMap, errTwo := graphTwo.AdjacencyMap()
+
+	if errOne != nil || errTwo != nil {
+		return false, fmt.Errorf("error getting graph nodes")
+	}
+
+	if len(gTwoMap) != len(gOneMap) {
+		return false, fmt.Errorf("number of nodes not equal")
+	}
+
+	for key := range gOneMap {
+		_, ok := gTwoMap[key]
+		if !ok {
+			return false, fmt.Errorf("missing key in map")
+		}
+	}
+
+	edgesOne, errOne := graphOne.Edges()
+	edgesTwo, errTwo := graphTwo.Edges()
+	if errOne != nil || errTwo != nil {
+		return false, fmt.Errorf("error getting edges")
+	}
+
+	if len(edgesOne) != len(edgesTwo) {
+		return false, fmt.Errorf("edges not equal")
+	}
+
+	for _, edge := range edgesOne {
+		_, err := graphTwo.Edge(edge.Source, edge.Target)
+		if err != nil {
+			return false, fmt.Errorf("edge not found Source - %s Target - %s", edge.Source, edge.Target)
+		}
+	}
+	return true, nil
+
+}
+
+func GraphEdgesEqual(graphOne, graphTwo graph.Graph[string, *Node]) (bool, error) {
+
+	pathsOne, errOne := FindPathsFromHasSBOMNode(graphOne)
+	pathsTwo, errTwo := FindPathsFromHasSBOMNode(graphTwo)
+	if errOne != nil || errTwo != nil {
+		return false, fmt.Errorf("error getting graph paths errOne-%v, errTwo-%v", errOne.Error(), errTwo.Error())
+	}
+
+	if len(pathsOne) != len(pathsTwo) {
+		return false, fmt.Errorf("paths not of equal length %v %v", len(pathsOne), len(pathsTwo))
+	}
+
+	pathsOneStrings := concatenateLists(pathsOne)
+	pathsTwoStrings := concatenateLists(pathsTwo)
+
+	sort.Strings(pathsTwoStrings)
+	sort.Strings(pathsOneStrings)
+
+	for i := range pathsOneStrings {
+		if pathsOneStrings[i] != pathsTwoStrings[i] {
+			return false, fmt.Errorf("paths differ %v", fmt.Sprintf("%v", i))
+		}
+	}
+
+	return true, nil
+}
+
+func concatenateLists(list [][]string) []string {
+	var concatenated []string
+	for _, l := range list {
+		concatenated = append(concatenated, strings.Join(l, ""))
+	}
+	return concatenated
+}
+func nodeIDListToNodeList(g graph.Graph[string, *Node], list []string) ([]*Node, error) {
+
+	var nodeList []*Node
+	for _, item := range list {
+		nd, err := g.Vertex(item)
+		if err != nil {
+			return nodeList, err
+		}
+		nodeList = append(nodeList, nd)
+	}
+	return nodeList, nil
 }
