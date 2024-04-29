@@ -24,15 +24,12 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/dominikbraun/graph"
-	"github.com/dominikbraun/graph/draw"
 	analyzer "github.com/guacsec/guac/pkg/analyzer"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 type AnalyzeOpts struct {
