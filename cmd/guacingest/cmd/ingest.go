@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -25,6 +26,7 @@ import (
 	"syscall"
 
 	"github.com/guacsec/guac/pkg/blob"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -41,17 +43,18 @@ type options struct {
 	blobAddr          string
 	csubClientOptions client.CsubClientOptions
 	graphqlEndpoint   string
+	headerFile        string
 }
 
 func ingest(cmd *cobra.Command, args []string) {
-
 	opts, err := validateFlags(
 		viper.GetString("pubsub-addr"),
 		viper.GetString("blob-addr"),
 		viper.GetString("csub-addr"),
+		viper.GetString("gql-addr"),
+		viper.GetString("header-file"),
 		viper.GetBool("csub-tls"),
 		viper.GetBool("csub-tls-skip-verify"),
-		viper.GetString("gql-addr"),
 		args)
 	if err != nil {
 		fmt.Printf("unable to validate flags: %v\n", err)
@@ -61,6 +64,7 @@ func ingest(cmd *cobra.Command, args []string) {
 
 	ctx, cf := context.WithCancel(logging.WithLogger(context.Background()))
 	logger := logging.FromContext(ctx)
+	transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 	if strings.HasPrefix(opts.pubsubAddr, "nats://") {
 		// initialize jetstream
@@ -90,7 +94,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	defer csubClient.Close()
 
 	emit := func(d *processor.Document) error {
-		if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient); err != nil {
+		if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient); err != nil {
 			logger.Errorf("unable to ingest document %q : %v", d.SourceInformation.Source, err)
 		}
 		return nil
@@ -116,7 +120,7 @@ func ingest(cmd *cobra.Command, args []string) {
 	wg.Wait()
 }
 
-func validateFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, graphqlEndpoint string, args []string) (options, error) {
+func validateFlags(pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile string, csubTls, csubTlsSkipVerify bool, args []string) (options, error) {
 	var opts options
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
@@ -126,6 +130,7 @@ func validateFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls 
 	}
 	opts.csubClientOptions = csubOpts
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 
 	return opts, nil
 }

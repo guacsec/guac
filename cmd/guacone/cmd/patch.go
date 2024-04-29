@@ -62,12 +62,7 @@ var queryPatchCmd = &cobra.Command{
 			logger.Fatalf("unable to validate flags: %s\n", err)
 		}
 
-		transport, err := cli.NewHTTPHeaderTransport(opts.headerFile, http.DefaultTransport)
-		if err != nil {
-			logger.Fatalf("unable to create HTTP transport: %v", err)
-		}
-
-		httpClient := http.Client{Transport: transport}
+		httpClient := http.Client{Transport: cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)}
 		gqlClient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		var startID string
@@ -304,7 +299,6 @@ func validateQueryPatchFlags(
 
 func init() {
 	set, err := cli.BuildFlags([]string{
-		"header-file",
 		"start-purl",
 		"stop-purl",
 		"search-depth",

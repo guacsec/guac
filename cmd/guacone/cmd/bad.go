@@ -57,12 +57,7 @@ var queryBadCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		transport, err := cli.NewHTTPHeaderTransport(opts.headerFile, http.DefaultTransport)
-		if err != nil {
-			logger.Fatalf("unable to create HTTP transport: %v", err)
-		}
-
-		httpClient := http.Client{Transport: transport}
+		httpClient := http.Client{Transport: cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		certifyBadResponse, err := model.CertifyBads(ctx, gqlclient, model.CertifyBadSpec{})
@@ -258,7 +253,7 @@ func validateQueryBadFlags(graphqlEndpoint, headerFile string, depth int) (query
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"header-file", "search-depth"})
+	set, err := cli.BuildFlags([]string{"search-depth"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

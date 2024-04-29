@@ -15,10 +15,12 @@
 package cli
 
 import (
+	"context"
 	"net/http"
 	"os"
 
 	"github.com/ProtonMail/gluon/rfc822"
+	"github.com/guacsec/guac/pkg/logging"
 )
 
 type httpHeaderTransport struct {
@@ -26,19 +28,21 @@ type httpHeaderTransport struct {
 	http.RoundTripper
 }
 
-func NewHTTPHeaderTransport(filename string, transport http.RoundTripper) (http.RoundTripper, error) {
+func HTTPHeaderTransport(ctx context.Context, filename string, transport http.RoundTripper) http.RoundTripper {
 	if filename == "" {
-		return transport, nil
+		return transport
 	}
+
+	logger := logging.FromContext(ctx)
 
 	b, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		logger.Fatalf("error reading header file: %v", err)
 	}
 
 	rh, err := rfc822.NewHeader(b)
 	if err != nil {
-		return nil, err
+		logger.Fatalf("error parsing header file: %v", err)
 	}
 
 	h := make(map[string][]string)
@@ -46,7 +50,7 @@ func NewHTTPHeaderTransport(filename string, transport http.RoundTripper) (http.
 		h[k] = append(h[k], v)
 	})
 
-	return &httpHeaderTransport{h, transport}, nil
+	return &httpHeaderTransport{h, transport}
 }
 
 func (t *httpHeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {

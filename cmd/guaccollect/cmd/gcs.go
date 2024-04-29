@@ -20,7 +20,6 @@ import (
 type gcsOptions struct {
 	pubSubAddr        string
 	blobAddr          string
-	graphqlEndpoint   string
 	csubClientOptions csub_client.CsubClientOptions
 	bucket            string
 }
@@ -39,7 +38,6 @@ var gcsCmd = &cobra.Command{
 		opts, err := validateGCSFlags(
 			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
-			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
 			viper.GetString(gcsCredentialsPathFlag),
 			viper.GetBool("csub-tls"),
@@ -93,7 +91,6 @@ var gcsCmd = &cobra.Command{
 func validateGCSFlags(
 	pubSubAddr,
 	blobAddr,
-	gqlEndpoint,
 	csubAddr,
 	credentialsPath string,
 	csubTls,
@@ -101,9 +98,8 @@ func validateGCSFlags(
 	args []string,
 ) (gcsOptions, error) {
 	opts := gcsOptions{
-		pubSubAddr:      pubSubAddr,
-		blobAddr:        blobAddr,
-		graphqlEndpoint: gqlEndpoint,
+		pubSubAddr: pubSubAddr,
+		blobAddr:   blobAddr,
 	}
 
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

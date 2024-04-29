@@ -53,9 +53,6 @@ var osvCmd = &cobra.Command{
 	Use:   "osv [flags]",
 	Short: "runs the osv certifier",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateOSVFlags(
 			viper.GetString("gql-addr"),
 			viper.GetString("header-file"),
@@ -71,6 +68,10 @@ var osvCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
 		if err := certify.RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV); err != nil {
 			logger.Fatalf("unable to register certifier: %v", err)
 		}
@@ -82,11 +83,6 @@ var osvCmd = &cobra.Command{
 			csubClient = nil
 		} else {
 			defer csubClient.Close()
-		}
-
-		transport, err := cli.NewHTTPHeaderTransport(opts.headerFile, http.DefaultTransport)
-		if err != nil {
-			logger.Fatalf("unable to create HTTP transport: %v", err)
 		}
 
 		httpClient := http.Client{Transport: transport}
@@ -110,7 +106,7 @@ var osvCmd = &cobra.Command{
 				select {
 				case <-ticker.C:
 					if len(totalDocs) > 0 {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -123,7 +119,7 @@ var osvCmd = &cobra.Command{
 					totalNum += 1
 					totalDocs = append(totalDocs, d)
 					if len(totalDocs) >= threshold {
-						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+						err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
 						if err != nil {
 							stop = true
 							atomic.StoreInt32(&gotErr, 1)
@@ -142,7 +138,7 @@ var osvCmd = &cobra.Command{
 				totalNum += 1
 				totalDocs = append(totalDocs, <-docChan)
 				if len(totalDocs) >= threshold {
-					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+					err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
 					if err != nil {
 						atomic.StoreInt32(&gotErr, 1)
 						logger.Errorf("unable to ingest documents: %v", err)
@@ -151,7 +147,7 @@ var osvCmd = &cobra.Command{
 				}
 			}
 			if len(totalDocs) > 0 {
-				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, csubClient)
+				err = ingestor.MergedIngest(ctx, totalDocs, opts.graphqlEndpoint, transport, csubClient)
 				if err != nil {
 					atomic.StoreInt32(&gotErr, 1)
 					logger.Errorf("unable to ingest documents: %v", err)
@@ -239,16 +235,5 @@ func validateOSVFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"header-file"})
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
-		os.Exit(1)
-	}
-	osvCmd.Flags().AddFlagSet(set)
-	if err := viper.BindPFlags(osvCmd.Flags()); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to bind flags: %v", err)
-		os.Exit(1)
-	}
-
 	certifierCmd.AddCommand(osvCmd)
 }

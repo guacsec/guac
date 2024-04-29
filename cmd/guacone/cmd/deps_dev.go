@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
@@ -48,21 +49,23 @@ type depsDevOptions struct {
 	retrieveDependencies bool
 	// gql endpoint
 	graphqlEndpoint string
+	headerFile      string
 }
 
 var depsDevCmd = &cobra.Command{
 	Use:   "deps_dev [flags] <purl1> <purl2>...",
 	Short: "takes purls and queries them against deps.dev to find additional metadata to add to GUAC graph utilizing Nats pubsub and blob store",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, csc, err := validateDepsDevFlags(args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// Register collector
 		depsDevCollector, err := deps_dev.NewDepsCollector(ctx, opts.dataSource, opts.poll, opts.retrieveDependencies, 30*time.Second)
@@ -80,7 +83,7 @@ var depsDevCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 
-			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csc); err != nil {
+			if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csc); err != nil {
 				gotErr = true
 				return fmt.Errorf("unable to ingest document: %w", err)
 			}
@@ -135,6 +138,7 @@ func validateDepsDevFlags(args []string) (*depsDevOptions, client.Client, error)
 		poll:                 viper.GetBool("poll"),
 		retrieveDependencies: viper.GetBool("retrieve-dependencies"),
 		graphqlEndpoint:      viper.GetString("gql-addr"),
+		headerFile:           viper.GetString("header-file"),
 	}
 	useCsub := viper.GetBool("use-csub")
 	if useCsub {
