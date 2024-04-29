@@ -154,7 +154,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	sub, err := emPubSub.Subscribe(ctx, uuidString)
+	sub, err := emPubSub.Subscribe(ctx)
 	if err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return nil
 	}
 
-	if err := sub.GetDataFromSubscriber(ctx, processFunc); err != nil {
+	if err := sub.GetDataFromSubscriber(ctx, processFunc, uuidString); err != nil {
 		return fmt.Errorf("failed to get data from subscriber with error: %w", err)
 	}
 	if err := sub.CloseSubscriber(ctx); err != nil {

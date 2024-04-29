@@ -846,9 +846,7 @@ func testPublish(ctx context.Context, d *processor.Document, blobStore *blob.Blo
 	}
 
 	if err := pubsub.Publish(ctx, keyByte); err != nil {
-		if err != nil {
-			return fmt.Errorf("failed to publish event with error: %w", err)
-		}
+		return fmt.Errorf("failed to publish event with error: %w", err)
 	}
 
 	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
