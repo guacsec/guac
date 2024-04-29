@@ -15,6 +15,8 @@
 
 package slice
 
+import "fmt"
+
 func Chunk[T any](slice []T, maxChunkSize int, cb func([]T) error) error {
 	for start := 0; start < len(slice); start += maxChunkSize {
 		end := start + maxChunkSize
@@ -23,7 +25,7 @@ func Chunk[T any](slice []T, maxChunkSize int, cb func([]T) error) error {
 		}
 
 		if err := cb(slice[start:end]); err != nil {
-			return err
+			return fmt.Errorf("error running chunk callback on input slice[%d:%d]: %w", start, end, err)
 		}
 	}
 

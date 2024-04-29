@@ -23,11 +23,13 @@ import (
 
 func TestChunk(t *testing.T) {
 	t.Run("error case", func(t *testing.T) {
+		wantErr := errors.New("some error")
 		err := Chunk([]uint{0, 1, 2}, 2, func([]uint) error {
-			return errors.New("some error")
+			return wantErr
 		})
 
-		assert.Equal(t, errors.New("some error"), err)
+		assert.Equal(t, "error running chunk callback on input slice[0:2]: some error", err.Error())
+		assert.True(t, errors.Is(err, wantErr))
 	})
 
 	tests := []struct {
