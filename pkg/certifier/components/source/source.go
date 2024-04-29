@@ -39,7 +39,7 @@ type SourceNode struct {
 	Tag    string
 }
 
-var getSources func(ctx context.Context, client graphql.Client, filter generated.SourceSpec) (*generated.SourcesResponse, error)
+var getSources func(ctx context.Context, client graphql.Client, filter generated.SourceSpec, after *string, first *int) (*generated.SourcesListResponse, error)
 var getNeighbors func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 
 // GetComponents get all the sources that do not have a certify scorecard attached or last scanned is more than daysSinceLastScan
@@ -47,51 +47,60 @@ func (s sourceQuery) GetComponents(ctx context.Context, compChan chan<- interfac
 	if compChan == nil {
 		return fmt.Errorf("compChan cannot be nil")
 	}
-	response, err := getSources(ctx, s.client, generated.SourceSpec{})
-	if err != nil {
-		return fmt.Errorf("failed sources query: %w", err)
-	}
-	sources := response.GetSources()
 
-	for _, src := range sources {
-		for _, namespace := range src.Namespaces {
-			for _, names := range namespace.Names {
-				response, err := getNeighbors(ctx, s.client, names.Id, []generated.Edge{generated.EdgeSourceCertifyScorecard})
-				if err != nil {
-					return fmt.Errorf("failed neighbors query: %w", err)
-				}
-				scorecardList := []*generated.NeighborsNeighborsCertifyScorecard{}
-				scoreCardFound := false
-				for _, neighbor := range response.Neighbors {
-					scorecardNode, ok := neighbor.(*generated.NeighborsNeighborsCertifyScorecard)
-					if ok {
-						scorecardList = append(scorecardList, scorecardNode)
+	var afterCursor *string
+	first := 60000
+	for {
+		srcConn, err := getSources(ctx, s.client, generated.SourceSpec{}, afterCursor, &first)
+		if err != nil {
+			return fmt.Errorf("failed to query packages with error: %w", err)
+		}
+		srcEdges := srcConn.SourcesList.Edges
+
+		for _, srcNode := range srcEdges {
+			for _, namespace := range srcNode.Node.Namespaces {
+				for _, names := range namespace.Names {
+					response, err := getNeighbors(ctx, s.client, names.Id, []generated.Edge{generated.EdgeSourceCertifyScorecard})
+					if err != nil {
+						return fmt.Errorf("failed neighbors query: %w", err)
 					}
-				}
-				// collect all scorecardNodes and then check timestamp else if not checking timestamp,
-				// if a scorecard is found break out
-				for _, scorecardNode := range scorecardList {
-					if s.daysSinceLastScan != 0 {
-						now := time.Now()
-						difference := scorecardNode.Scorecard.TimeScanned.Sub(now)
-						if math.Abs(difference.Hours()) < float64(s.daysSinceLastScan*24) {
-							scoreCardFound = true
+					scorecardList := []*generated.NeighborsNeighborsCertifyScorecard{}
+					scoreCardFound := false
+					for _, neighbor := range response.Neighbors {
+						scorecardNode, ok := neighbor.(*generated.NeighborsNeighborsCertifyScorecard)
+						if ok {
+							scorecardList = append(scorecardList, scorecardNode)
 						}
-					} else {
-						scoreCardFound = true
-						break
 					}
-				}
-				if !scoreCardFound {
-					sourceNode := SourceNode{
-						Repo:   path.Join(namespace.Namespace, names.Name),
-						Commit: trimAlgorithm(nilOrEmpty(names.Commit)),
-						Tag:    nilOrEmpty(names.Tag),
+					// collect all scorecardNodes and then check timestamp else if not checking timestamp,
+					// if a scorecard is found break out
+					for _, scorecardNode := range scorecardList {
+						if s.daysSinceLastScan != 0 {
+							now := time.Now()
+							difference := scorecardNode.Scorecard.TimeScanned.Sub(now)
+							if math.Abs(difference.Hours()) < float64(s.daysSinceLastScan*24) {
+								scoreCardFound = true
+							}
+						} else {
+							scoreCardFound = true
+							break
+						}
 					}
-					compChan <- &sourceNode
+					if !scoreCardFound {
+						sourceNode := SourceNode{
+							Repo:   path.Join(namespace.Namespace, names.Name),
+							Commit: trimAlgorithm(nilOrEmpty(names.Commit)),
+							Tag:    nilOrEmpty(names.Tag),
+						}
+						compChan <- &sourceNode
+					}
 				}
 			}
 		}
+		if !srcConn.SourcesList.PageInfo.HasNextPage {
+			break
+		}
+		afterCursor = srcConn.SourcesList.PageInfo.EndCursor
 	}
 	return nil
 }
@@ -123,7 +132,7 @@ func NewCertifier(client graphql.Client, daysSinceLastScan int) (certifier.Query
 	if client == nil {
 		return nil, fmt.Errorf("client cannot be nil")
 	}
-	getSources = generated.Sources
+	getSources = generated.SourcesList
 	getNeighbors = generated.Neighbors
 	return &sourceQuery{
 		client:            client,
