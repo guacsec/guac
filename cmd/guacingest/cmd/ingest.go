@@ -95,7 +95,7 @@ func ingest(cmd *cobra.Command, args []string) {
 
 	emit := func(d *processor.Document) error {
 		if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient); err != nil {
-			logger.Errorf("unable to ingest document %q : %v", d.SourceInformation.Source, err)
+			return fmt.Errorf("unable to ingest document %q : %v", d.SourceInformation.Source, err)
 		}
 		return nil
 	}
