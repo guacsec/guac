@@ -18,6 +18,7 @@ package helpers
 import (
 	"context"
 	"fmt"
+
 	"go.uber.org/zap"
 
 	"github.com/Khan/genqlient/graphql"
@@ -40,7 +41,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorPkgInputs, err := ingestPackages(ctx, gqlclient, packages)
 			if err != nil {
-				return fmt.Errorf("ingestPackages failed with error: %v", err)
+				return fmt.Errorf("ingestPackages failed with error: %w", err)
 			}
 
 			var pkgVersionIDs []string
@@ -56,7 +57,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorSrcInputs, err := ingestSources(ctx, gqlclient, sources)
 			if err != nil {
-				return fmt.Errorf("ingestSources failed with error: %v", err)
+				return fmt.Errorf("ingestSources failed with error: %w", err)
 			}
 
 			// Ingest Artifacts
@@ -66,7 +67,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorArtInputs, err := ingestArtifacts(ctx, gqlclient, artifacts)
 			if err != nil {
-				return fmt.Errorf("ingestArtifacts failed with error: %v", err)
+				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
 			}
 			var artIDs []string
 			for _, artID := range collectedIDorArtInputs {
@@ -81,7 +82,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorMatInputs, err := ingestArtifacts(ctx, gqlclient, materials)
 			if err != nil {
-				return fmt.Errorf("ingestArtifacts failed with error: %v", err)
+				return fmt.Errorf("ingestArtifacts failed with error: %w", err)
 			}
 
 			// Ingest Builders
@@ -90,7 +91,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorBuilderInputs, err := ingestBuilders(ctx, gqlclient, builders)
 			if err != nil {
-				return fmt.Errorf("ingestBuilders failed with error: %v", err)
+				return fmt.Errorf("ingestBuilders failed with error: %w", err)
 			}
 
 			// Ingest Vulnerabilities
@@ -99,7 +100,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorVulnInputs, err := ingestVulnerabilities(ctx, gqlclient, vulns)
 			if err != nil {
-				return fmt.Errorf("ingestVulnerabilities failed with error: %v", err)
+				return fmt.Errorf("ingestVulnerabilities failed with error: %w", err)
 			}
 
 			// Ingest Licenses
@@ -108,7 +109,7 @@ func GetBulkAssembler(ctx context.Context, logger *zap.SugaredLogger, gqlclient 
 
 			collectedIDorLicenseInputs, err := ingestLicenses(ctx, gqlclient, licenses)
 			if err != nil {
-				return fmt.Errorf("ingestLicenses failed with error: %v", err)
+				return fmt.Errorf("ingestLicenses failed with error: %w", err)
 			}
 
 			logger.Infof("assembling CertifyScorecard: %v", len(p.CertifyScorecard))

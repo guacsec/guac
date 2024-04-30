@@ -17,8 +17,10 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -27,7 +29,6 @@ import (
 
 	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/emitter"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -41,7 +42,7 @@ import (
 type options struct {
 	pubsubAddr        string
 	blobAddr          string
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions csub_client.CsubClientOptions
 	graphqlEndpoint   string
 	headerFile        string
 }
@@ -95,7 +96,11 @@ func ingest(cmd *cobra.Command, args []string) {
 
 	emit := func(d *processor.Document) error {
 		if err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient); err != nil {
-			return fmt.Errorf("unable to ingest document %q : %v", d.SourceInformation.Source, err)
+			var urlErr *url.Error
+			if errors.As(err, &urlErr) {
+				return fmt.Errorf("unable to ingest document due to connection error with graphQL %q : %w", d.SourceInformation.Source, urlErr)
+			}
+			logger.Errorf("unable to ingest document %q : %v", d.SourceInformation.Source, err)
 		}
 		return nil
 	}
@@ -124,7 +129,7 @@ func validateFlags(pubsubAddr, blobAddr, csubAddr, graphqlEndpoint, headerFile s
 	var opts options
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}
