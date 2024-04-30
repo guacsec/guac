@@ -120,7 +120,8 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 		doc.ChildLogger = childLogger
 
 		if err := em(&doc); err != nil {
-			childLogger.Error("[processor: %s] failed transportFunc: %v", uuidString, err)
+			childLogger.Errorf("[processor: %s] failed transportFunc: %v", uuidString, err)
+			childLogger.Errorf("[processor: %s] message id: %s not acknowledged in pusbub", uuidString, d.LoggableID)
 			return nil
 		}
 		// ack the message from the queue once the ingestion has occurred via the Emitter (em) function specified above
