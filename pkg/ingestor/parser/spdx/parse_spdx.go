@@ -151,6 +151,9 @@ func (s *spdxParser) getPackages() error {
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
+			if slices.Contains(topLevelSpdxIds, string(pac.PackageSPDXIdentifier)) {
+				s.packageArtifacts[string(s.spdxDoc.SPDXIdentifier)] = append(s.packageArtifacts[string(s.spdxDoc.SPDXIdentifier)], artifact)
+			}
 			s.packageArtifacts[string(pac.PackageSPDXIdentifier)] = append(s.packageArtifacts[string(pac.PackageSPDXIdentifier)], artifact)
 		}
 
