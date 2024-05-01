@@ -20,6 +20,27 @@ fragment allPkgTree on Package {
   }
 }
 
+fragment AllPkgPaginationTree on PackageConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query PkgPagination {
+  packagesList(pkgSpec: {}, first: 10) {
+    ...AllPkgPaginationTree
+  }
+}
+
 query PkgQ1 {
   packages(pkgSpec: {}) {
     type

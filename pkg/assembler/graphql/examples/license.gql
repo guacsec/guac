@@ -1,0 +1,20 @@
+fragment AllLicensePaginationTree on LicenseConnection {
+    totalCount
+    edges {
+        cursor
+        node {
+            id
+        }
+    }
+    pageInfo {
+        startCursor
+        endCursor
+        hasNextPage
+    }
+}
+
+query LicensePagination {
+    licenseList(licenseSpec: {}, first: 10) {
+        ...AllLicensePaginationTree
+    }
+}

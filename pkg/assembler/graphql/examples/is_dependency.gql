@@ -50,6 +50,27 @@ fragment allIsDependencyTree on IsDependency {
   documentRef
 }
 
+fragment AllIsDependencyPaginationTree on IsDependencyConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query IsDependencyPagination {
+  IsDependencyList(isDependencySpec: {}, first: 10) {
+    ...AllIsDependencyPaginationTree
+  }
+}
+
 query IsDependencyQ1 {
   IsDependency(isDependencySpec: {}) {
     ...allIsDependencyTree
