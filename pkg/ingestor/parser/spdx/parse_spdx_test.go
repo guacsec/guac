@@ -1097,7 +1097,7 @@ func Test_spdxParser(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "SPDX v2.3 with a checksum for the SBOM subject",
+			name: "SPDX v2.3 with package with a checksum described by the SBOM",
 			additionalOpts: []cmp.Option{
 				cmpopts.IgnoreFields(generated.HasSBOMInputSpec{},
 					"KnownSince"),
@@ -1114,13 +1114,17 @@ func Test_spdxParser(t *testing.T) {
 					"documentNamespace": "https://example.com/for-testing-with-checksum",
 					"packages": [
 					  {
-						"name": "for-testing-with-checksum",
-						"SPDXID": "SPDXRef-Package-for-testing-with-checksum",
-						"downloadLocation": "https://example.com/for-testing-with-checksum",
+						"name": "for-testing-with-checksum-pkg",
+						"SPDXID": "SPDXRef-Package-for-testing-with-checksum-pkg",
+						"downloadLocation": "https://example.com/for-testing-with-checksum-pkg",
 						"checksums": [
 							{
 								"algorithm": "SHA1",
-								"checksumValue": "22596363b3de40b06f981fb85d82312e8c0ed511"
+								"checksumValue": "pkgsha1"
+							},
+							{
+								"algorithm": "SHA3-384",
+								"checksumValue": "pkgsha3-384"
 							}
 						]
 					}
@@ -1129,7 +1133,7 @@ func Test_spdxParser(t *testing.T) {
 						{
 							"spdxElementId": "SPDXRef-DOCUMENT",
 							"relationshipType": "DESCRIBES",
-							"relatedSpdxElement": "SPDXRef-Package-for-testing-with-checksum"
+							"relatedSpdxElement": "SPDXRef-Package-for-testing-with-checksum-pkg"
 						}
 					]
 				  }
@@ -1144,11 +1148,20 @@ func Test_spdxParser(t *testing.T) {
 			wantPredicates: &assembler.IngestPredicates{
 				HasSBOM: []assembler.HasSBOMIngest{
 					{
-						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "22596363b3de40b06f981fb85d82312e8c0ed511"},
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "pkgsha1"},
 						HasSBOM: &generated.HasSBOMInputSpec{
 							Uri:              "https://example.com/for-testing-with-checksum",
 							Algorithm:        "sha256",
-							Digest:           "247359f8e0b7b4ce1c512589b250081899e61fc5db513f43ed5a7beadae2245b",
+							Digest:           "7730c88882d68eb23a8613065acaf43575ad0aaf7497330acc35163b1121f06f",
+							DownloadLocation: "TestSource",
+						},
+					},
+					{
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "pkgsha3-384"},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing-with-checksum",
+							Algorithm:        "sha256",
+							Digest:           "7730c88882d68eb23a8613065acaf43575ad0aaf7497330acc35163b1121f06f",
 							DownloadLocation: "TestSource",
 						},
 					},
@@ -1158,12 +1171,166 @@ func Test_spdxParser(t *testing.T) {
 						Pkg: &generated.PkgInputSpec{
 							Type:      "guac",
 							Namespace: ptrfrom.String("pkg"),
-							Name:      "for-testing-with-checksum",
+							Name:      "for-testing-with-checksum-pkg",
 							Version:   &packageOfEmptyString,
 							Subpath:   &packageOfEmptyString,
 						},
-						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "22596363b3de40b06f981fb85d82312e8c0ed511"},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "pkgsha1"},
 						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "for-testing-with-checksum-pkg",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "pkgsha3-384"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX v2.3 with a file with a checksum described by the SBOM",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(generated.HasSBOMInputSpec{},
+					"KnownSince"),
+			}, doc: &processor.Document{
+				Blob: []byte(`
+				{
+					"spdxVersion": "SPDX-2.3",
+					"dataLicense": "CC0-1.0",
+					"SPDXID": "SPDXRef-DOCUMENT",
+					"creationInfo": {
+					  "created": "2024-04-30T01:12:27Z"
+					},
+					"name": "for-testing-with-checksum",
+					"documentNamespace": "https://example.com/for-testing-with-checksum",
+					"files": [
+					  {
+						"filename": "for-testing-with-checksum-file",
+						"SPDXID": "SPDXRef-File-for-testing-with-checksum",
+						"downloadLocation": "https://example.com/for-testing-with-checksum",
+						"checksums": [
+							{
+								"algorithm": "SHA1",
+								"checksumValue": "filesha1"
+							},
+							{
+								"algorithm": "SHA3-384",
+								"checksumValue": "filesha3-384"
+							}
+						]
+					}
+					],
+					"relationships": [
+						{
+							"spdxElementId": "SPDXRef-DOCUMENT",
+							"relationshipType": "DESCRIBES",
+							"relatedSpdxElement": "SPDXRef-File-for-testing-with-checksum"
+						}
+					]
+				  }
+							  `),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "filesha1"},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing-with-checksum",
+							Algorithm:        "sha256",
+							Digest:           "23fa6ec15fc0875f750611eeb8de117c240e254987637e7f0fa094039ab9d4d4",
+							DownloadLocation: "TestSource",
+						},
+					},
+					{
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "filesha3-384"},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing-with-checksum",
+							Algorithm:        "sha256",
+							Digest:           "23fa6ec15fc0875f750611eeb8de117c240e254987637e7f0fa094039ab9d4d4",
+							DownloadLocation: "TestSource",
+						},
+					},
+				},
+				IsOccurrence: []assembler.IsOccurrenceIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("files"),
+							Name:      "sha1:filesha1",
+							Version:   &packageOfEmptyString,
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{
+									Key:   "filename",
+									Value: "for-testing-with-checksum-file",
+								},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "filesha1"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("files"),
+							Name:      "sha1:filesha1",
+							Version:   &packageOfEmptyString,
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{
+									Key:   "filename",
+									Value: "for-testing-with-checksum-file",
+								},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "filesha3-384"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("files"),
+							Name:      "sha3-384:filesha3-384",
+							Version:   &packageOfEmptyString,
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{
+									Key:   "filename",
+									Value: "for-testing-with-checksum-file",
+								},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "filesha1"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("files"),
+							Name:      "sha3-384:filesha3-384",
+							Version:   &packageOfEmptyString,
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{
+									Key:   "filename",
+									Value: "for-testing-with-checksum-file",
+								},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "filesha3-384"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
 					},
 				},
 			},

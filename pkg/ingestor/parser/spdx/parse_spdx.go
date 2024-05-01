@@ -78,10 +78,10 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("SPDX document had invalid created time %q : %w", spdxDoc.CreationInfo.Created, err)
 	}
 	s.timeScanned = time
-	if err := s.getPackages(); err != nil {
+	if err := s.getFiles(); err != nil {
 		return err
 	}
-	if err := s.getFiles(); err != nil {
+	if err := s.getPackages(); err != nil {
 		return err
 	}
 	return nil
@@ -192,6 +192,11 @@ func (s *spdxParser) getPackages() error {
 }
 
 func (s *spdxParser) getFiles() error {
+	topLevelSpdxIds, err := s.getTopLevelPackageSpdxIds()
+	if err != nil {
+		return err
+	}
+
 	for _, file := range s.spdxDoc.Files {
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range file.Checksums {
@@ -204,6 +209,9 @@ func (s *spdxParser) getFiles() error {
 			if err != nil {
 				return err
 			}
+			if slices.Contains(topLevelSpdxIds, string(file.FileSPDXIdentifier)) {
+				s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)], pkg)
+			}
 			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.filePackages[string(file.FileSPDXIdentifier)], pkg)
 
 			artifact := &model.ArtifactInputSpec{
@@ -211,6 +219,9 @@ func (s *spdxParser) getFiles() error {
 				Digest:    checksum.Value,
 			}
 
+			if slices.Contains(topLevelSpdxIds, string(file.FileSPDXIdentifier)) {
+				s.fileArtifacts[string(s.spdxDoc.SPDXIdentifier)] = append(s.fileArtifacts[string(s.spdxDoc.SPDXIdentifier)], artifact)
+			}
 			s.fileArtifacts[string(file.FileSPDXIdentifier)] = append(s.fileArtifacts[string(file.FileSPDXIdentifier)], artifact)
 		}
 	}
