@@ -1,0 +1,20 @@
+fragment AllHasMetadataPaginationTree on HasMetadataConnection {
+    totalCount
+    edges {
+        cursor
+        node {
+            id
+        }
+    }
+    pageInfo {
+        startCursor
+        endCursor
+        hasNextPage
+    }
+}
+
+query HasMetadataPagination {
+    HasMetadataList(hasMetadataSpec: {}, first: 10) {
+        ...AllHasMetadataPaginationTree
+    }
+}
