@@ -18,7 +18,8 @@ package keyvalue
 import (
 	"context"
 	"errors"
-	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 	"time"
 
@@ -199,7 +200,154 @@ func (c *demoClient) ingestPointOfContact(ctx context.Context, subject model.Pac
 // Query PointOfContact
 
 func (c *demoClient) PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
-	return nil, fmt.Errorf("not implemented: PointOfContactList")
+	funcName := "PointOfContact"
+
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	if pointOfContactSpec.ID != nil {
+		link, err := byIDkv[*pointOfContactLink](ctx, *pointOfContactSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		found, err := c.buildPointOfContact(ctx, link, &pointOfContactSpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+
+		return &model.PointOfContactConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(found.ID),
+				EndCursor:   ptrfrom.String(found.ID),
+			},
+			Edges: []*model.PointOfContactEdge{
+				{
+					Cursor: found.ID,
+					Node:   found,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.PointOfContactEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+
+	// Cant really search for an exact Pkg, as these can be linked to either
+	// names or versions, and version could be empty.
+	var search []string
+	foundOne := false
+	if pointOfContactSpec.Subject != nil && pointOfContactSpec.Subject.Artifact != nil {
+		exactArtifact, err := c.artifactExact(ctx, pointOfContactSpec.Subject.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactArtifact != nil {
+			search = append(search, exactArtifact.PointOfContactLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && pointOfContactSpec.Subject != nil && pointOfContactSpec.Subject.Source != nil {
+		exactSource, err := c.exactSource(ctx, pointOfContactSpec.Subject.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.PointOfContactLinks...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*pointOfContactLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			poc, err := c.pointOfContactIfMatch(ctx, &pointOfContactSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+
+			edges = append(edges, &model.PointOfContactEdge{
+				Cursor: poc.ID,
+				Node:   poc,
+			})
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(pocCol)
+		for !done {
+			var pocKeys []string
+			var err error
+			pocKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(pocKeys)
+			totalCount = len(pocKeys)
+
+			for i, pk := range pocKeys {
+				link, err := byKeykv[*pointOfContactLink](ctx, pocCol, pk, c)
+				if err != nil {
+					return nil, err
+				}
+				poc, err := c.pointOfContactIfMatch(ctx, &pointOfContactSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+				if after != nil && !currentPage {
+					if poc.ID == *after {
+						totalCount = len(pocKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.PointOfContactEdge{
+							Cursor: poc.ID,
+							Node:   poc,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.PointOfContactEdge{
+						Cursor: poc.ID,
+						Node:   poc,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.PointOfContactConnection{
+			TotalCount: totalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
@@ -253,10 +401,11 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addPOCIfMatch(ctx, out, filter, link)
+			poc, err := c.pointOfContactIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			out = append(out, poc)
 		}
 	} else {
 		var done bool
@@ -273,40 +422,41 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addPOCIfMatch(ctx, out, filter, link)
+				poc, err := c.pointOfContactIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				out = append(out, poc)
 			}
 		}
 	}
 	return out, nil
 }
 
-func (c *demoClient) addPOCIfMatch(ctx context.Context, out []*model.PointOfContact, filter *model.PointOfContactSpec, link *pointOfContactLink) (
-	[]*model.PointOfContact, error) {
+func (c *demoClient) pointOfContactIfMatch(ctx context.Context, filter *model.PointOfContactSpec, link *pointOfContactLink) (
+	*model.PointOfContact, error) {
 
 	if filter != nil && noMatch(filter.Justification, link.Justification) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Collector, link.Collector) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Origin, link.Origin) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Email, link.Email) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Info, link.Info) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
-		return out, nil
+		return nil, nil
 	}
 	// no match if filter time since is after the timestamp
 	if filter != nil && filter.Since != nil && filter.Since.After(link.Since) {
-		return out, nil
+		return nil, nil
 	}
 
 	found, err := c.buildPointOfContact(ctx, link, filter, false)
@@ -314,9 +464,9 @@ func (c *demoClient) addPOCIfMatch(ctx context.Context, out []*model.PointOfCont
 		return nil, err
 	}
 	if found == nil {
-		return out, nil
+		return nil, nil
 	}
-	return append(out, found), nil
+	return found, nil
 }
 
 func (c *demoClient) buildPointOfContact(ctx context.Context, link *pointOfContactLink, filter *model.PointOfContactSpec, ingestOrIDProvided bool) (*model.PointOfContact, error) {

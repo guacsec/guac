@@ -1,0 +1,20 @@
+fragment AllPointOfContactPaginationTree on PointOfContactConnection {
+    totalCount
+    edges {
+        cursor
+        node {
+            id
+        }
+    }
+    pageInfo {
+        startCursor
+        endCursor
+        hasNextPage
+    }
+}
+
+query PointOfContactPagination {
+    PointOfContactList(pointOfContactSpec: {}, first: 10) {
+        ...AllPointOfContactPaginationTree
+    }
+}
