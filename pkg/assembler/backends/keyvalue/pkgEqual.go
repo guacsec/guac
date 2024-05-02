@@ -19,7 +19,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -154,7 +156,138 @@ func (c *demoClient) ingestPkgEqual(ctx context.Context, pkg model.IDorPkgInput,
 // Query PkgEqual
 
 func (c *demoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error) {
-	return nil, fmt.Errorf("not implemented: PkgEqualList")
+	funcName := "PkgEqual"
+	c.m.RLock()
+	defer c.m.RUnlock()
+	if pkgEqualSpec.ID != nil {
+		link, err := byIDkv[*pkgEqualStruct](ctx, *pkgEqualSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		pe, err := c.convPkgEqual(ctx, link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return &model.PkgEqualConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(pe.ID),
+				EndCursor:   ptrfrom.String(pe.ID),
+			},
+			Edges: []*model.PkgEqualEdge{
+				{
+					Cursor: pe.ID,
+					Node:   pe,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.PkgEqualEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+
+	var search []string
+	for _, p := range pkgEqualSpec.Packages {
+		pkgs, err := c.findPackageVersion(ctx, p)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		for _, pkg := range pkgs {
+			search = append(search, pkg.PkgEquals...)
+		}
+	}
+
+	if len(search) > 0 {
+		for _, id := range search {
+			link, err := byIDkv[*pkgEqualStruct](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			pe, err := c.peIfMatch(ctx, &pkgEqualSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+
+			edges = append(edges, &model.PkgEqualEdge{
+				Cursor: pe.ID,
+				Node:   pe,
+			})
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(pkgEqCol)
+		for !done {
+			var peKeys []string
+			var err error
+			peKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(peKeys)
+			totalCount = len(peKeys)
+
+			for i, pek := range peKeys {
+				link, err := byKeykv[*pkgEqualStruct](ctx, pkgEqCol, pek, c)
+				if err != nil {
+					return nil, err
+				}
+				pe, err := c.peIfMatch(ctx, &pkgEqualSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+				if after != nil && !currentPage {
+					if pe.ID == *after {
+						totalCount = len(peKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.PkgEqualEdge{
+							Cursor: pe.ID,
+							Node:   pe,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.PkgEqualEdge{
+						Cursor: pe.ID,
+						Node:   pe,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.PkgEqualConnection{
+			TotalCount: totalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
@@ -193,10 +326,11 @@ func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) (
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addCPIfMatch(ctx, out, filter, link)
+			pe, err := c.peIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			out = append(out, pe)
 		}
 	} else {
 		var done bool
@@ -213,25 +347,25 @@ func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) (
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addCPIfMatch(ctx, out, filter, link)
+				pe, err := c.peIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				out = append(out, pe)
 			}
 		}
 	}
 	return out, nil
 }
 
-func (c *demoClient) addCPIfMatch(ctx context.Context, out []*model.PkgEqual,
-	filter *model.PkgEqualSpec, link *pkgEqualStruct) (
-	[]*model.PkgEqual, error,
+func (c *demoClient) peIfMatch(ctx context.Context, filter *model.PkgEqualSpec, link *pkgEqualStruct) (
+	*model.PkgEqual, error,
 ) {
 	if noMatch(filter.Justification, link.Justification) ||
 		noMatch(filter.Origin, link.Origin) ||
 		noMatch(filter.Collector, link.Collector) ||
 		noMatch(filter.DocumentRef, link.DocumentRef) {
-		return out, nil
+		return nil, nil
 	}
 	for _, ps := range filter.Packages {
 		if ps == nil {
@@ -250,12 +384,12 @@ func (c *demoClient) addCPIfMatch(ctx context.Context, out []*model.PkgEqual,
 			}
 		}
 		if !found {
-			return out, nil
+			return nil, nil
 		}
 	}
 	pe, err := c.convPkgEqual(ctx, link)
 	if err != nil {
 		return nil, err
 	}
-	return append(out, pe), nil
+	return pe, nil
 }
