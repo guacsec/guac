@@ -67,7 +67,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "sbom_unique_package",
+				Name:    "sbom_package_id",
 				Unique:  true,
 				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[8], BillOfMaterialsColumns[9], BillOfMaterialsColumns[10], BillOfMaterialsColumns[11], BillOfMaterialsColumns[12], BillOfMaterialsColumns[5], BillOfMaterialsColumns[6], BillOfMaterialsColumns[7], BillOfMaterialsColumns[13]},
 				Annotation: &entsql.IndexAnnotation{
@@ -75,7 +75,7 @@ var (
 				},
 			},
 			{
-				Name:    "sbom_unique_artifact",
+				Name:    "sbom_artifact_id",
 				Unique:  true,
 				Columns: []*schema.Column{BillOfMaterialsColumns[2], BillOfMaterialsColumns[3], BillOfMaterialsColumns[1], BillOfMaterialsColumns[4], BillOfMaterialsColumns[8], BillOfMaterialsColumns[9], BillOfMaterialsColumns[10], BillOfMaterialsColumns[11], BillOfMaterialsColumns[12], BillOfMaterialsColumns[5], BillOfMaterialsColumns[6], BillOfMaterialsColumns[7], BillOfMaterialsColumns[14]},
 				Annotation: &entsql.IndexAnnotation{
@@ -313,7 +313,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certifyvex_known_since_justification_status_statement_status_notes_origin_collector_document_ref_vulnerability_id_package_id",
+				Name:    "vex_artifact_id",
 				Unique:  true,
 				Columns: []*schema.Column{CertifyVexesColumns[1], CertifyVexesColumns[5], CertifyVexesColumns[2], CertifyVexesColumns[3], CertifyVexesColumns[4], CertifyVexesColumns[6], CertifyVexesColumns[7], CertifyVexesColumns[8], CertifyVexesColumns[11], CertifyVexesColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
@@ -321,7 +321,7 @@ var (
 				},
 			},
 			{
-				Name:    "certifyvex_known_since_justification_status_statement_status_notes_origin_collector_document_ref_vulnerability_id_artifact_id",
+				Name:    "vex_package_id",
 				Unique:  true,
 				Columns: []*schema.Column{CertifyVexesColumns[1], CertifyVexesColumns[5], CertifyVexesColumns[2], CertifyVexesColumns[3], CertifyVexesColumns[4], CertifyVexesColumns[6], CertifyVexesColumns[7], CertifyVexesColumns[8], CertifyVexesColumns[11], CertifyVexesColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
@@ -411,7 +411,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "dep_package_name",
+				Name:    "dep_package_name_id",
 				Unique:  true,
 				Columns: []*schema.Column{DependenciesColumns[1], DependenciesColumns[2], DependenciesColumns[3], DependenciesColumns[4], DependenciesColumns[5], DependenciesColumns[6], DependenciesColumns[7], DependenciesColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
@@ -419,7 +419,7 @@ var (
 				},
 			},
 			{
-				Name:    "dep_package_version",
+				Name:    "dep_package_version_id",
 				Unique:  true,
 				Columns: []*schema.Column{DependenciesColumns[1], DependenciesColumns[2], DependenciesColumns[3], DependenciesColumns[4], DependenciesColumns[5], DependenciesColumns[6], DependenciesColumns[7], DependenciesColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
@@ -476,7 +476,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "hasmetadata_key_value_justification_origin_collector_timestamp_document_ref_source_id",
+				Name:    "has_metadata_source_id",
 				Unique:  true,
 				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[1], HasMetadataColumns[7], HasMetadataColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
@@ -484,7 +484,7 @@ var (
 				},
 			},
 			{
-				Name:    "hasmetadata_key_value_justification_origin_collector_timestamp_document_ref_package_version_id",
+				Name:    "has_metadata_package_version_id",
 				Unique:  true,
 				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[1], HasMetadataColumns[7], HasMetadataColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
@@ -492,7 +492,7 @@ var (
 				},
 			},
 			{
-				Name:    "hasmetadata_key_value_justification_origin_collector_timestamp_document_ref_package_name_id",
+				Name:    "has_metadata_package_name_id",
 				Unique:  true,
 				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[1], HasMetadataColumns[7], HasMetadataColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
@@ -500,7 +500,7 @@ var (
 				},
 			},
 			{
-				Name:    "hasmetadata_key_value_justification_origin_collector_timestamp_document_ref_artifact_id",
+				Name:    "has_metadata_artifact_id",
 				Unique:  true,
 				Columns: []*schema.Column{HasMetadataColumns[2], HasMetadataColumns[3], HasMetadataColumns[4], HasMetadataColumns[5], HasMetadataColumns[6], HasMetadataColumns[1], HasMetadataColumns[7], HasMetadataColumns[11]},
 				Annotation: &entsql.IndexAnnotation{
@@ -661,7 +661,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "occurrence_unique_package",
+				Name:    "occurrence_package_id",
 				Unique:  true,
 				Columns: []*schema.Column{OccurrencesColumns[1], OccurrencesColumns[2], OccurrencesColumns[3], OccurrencesColumns[4], OccurrencesColumns[5], OccurrencesColumns[6]},
 				Annotation: &entsql.IndexAnnotation{
@@ -669,7 +669,7 @@ var (
 				},
 			},
 			{
-				Name:    "occurrence_unique_source",
+				Name:    "occurrence_source_id",
 				Unique:  true,
 				Columns: []*schema.Column{OccurrencesColumns[1], OccurrencesColumns[2], OccurrencesColumns[3], OccurrencesColumns[4], OccurrencesColumns[5], OccurrencesColumns[7]},
 				Annotation: &entsql.IndexAnnotation{
@@ -829,7 +829,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "pointofcontact_since_email_info_justification_origin_collector_document_ref_source_id",
+				Name:    "poc_source_id",
 				Unique:  true,
 				Columns: []*schema.Column{PointOfContactsColumns[3], PointOfContactsColumns[1], PointOfContactsColumns[2], PointOfContactsColumns[4], PointOfContactsColumns[5], PointOfContactsColumns[6], PointOfContactsColumns[7], PointOfContactsColumns[8]},
 				Annotation: &entsql.IndexAnnotation{
@@ -837,7 +837,7 @@ var (
 				},
 			},
 			{
-				Name:    "pointofcontact_since_email_info_justification_origin_collector_document_ref_package_version_id",
+				Name:    "poc_package_version_id",
 				Unique:  true,
 				Columns: []*schema.Column{PointOfContactsColumns[3], PointOfContactsColumns[1], PointOfContactsColumns[2], PointOfContactsColumns[4], PointOfContactsColumns[5], PointOfContactsColumns[6], PointOfContactsColumns[7], PointOfContactsColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
@@ -845,7 +845,7 @@ var (
 				},
 			},
 			{
-				Name:    "pointofcontact_since_email_info_justification_origin_collector_document_ref_package_name_id",
+				Name:    "poc_package_name_id",
 				Unique:  true,
 				Columns: []*schema.Column{PointOfContactsColumns[3], PointOfContactsColumns[1], PointOfContactsColumns[2], PointOfContactsColumns[4], PointOfContactsColumns[5], PointOfContactsColumns[6], PointOfContactsColumns[7], PointOfContactsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
@@ -853,7 +853,7 @@ var (
 				},
 			},
 			{
-				Name:    "pointofcontact_since_email_info_justification_origin_collector_document_ref_artifact_id",
+				Name:    "poc_artifact_id",
 				Unique:  true,
 				Columns: []*schema.Column{PointOfContactsColumns[3], PointOfContactsColumns[1], PointOfContactsColumns[2], PointOfContactsColumns[4], PointOfContactsColumns[5], PointOfContactsColumns[6], PointOfContactsColumns[7], PointOfContactsColumns[11]},
 				Annotation: &entsql.IndexAnnotation{

@@ -62,9 +62,17 @@ func (PointOfContact) Edges() []ent.Edge {
 
 func (PointOfContact) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("since", "email", "info", "justification", "origin", "collector", "document_ref", "source_id").Unique().Annotations(entsql.IndexWhere("source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
-		index.Fields("since", "email", "info", "justification", "origin", "collector", "document_ref", "package_version_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
-		index.Fields("since", "email", "info", "justification", "origin", "collector", "document_ref", "package_name_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL")),
-		index.Fields("since", "email", "info", "justification", "origin", "collector", "document_ref", "artifact_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL")),
+		index.Fields("since", "email", "info", "justification", "origin", "collector", "document_ref", "source_id").Unique().
+			Annotations(entsql.IndexWhere("source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL")).
+			StorageKey("poc_source_id"),
+		index.Fields("since", "email", "info", "justification", "origin", "collector", "document_ref", "package_version_id").Unique().
+			Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL")).
+			StorageKey("poc_package_version_id"),
+		index.Fields("since", "email", "info", "justification", "origin", "collector", "document_ref", "package_name_id").Unique().
+			Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL")).
+			StorageKey("poc_package_name_id"),
+		index.Fields("since", "email", "info", "justification", "origin", "collector", "document_ref", "artifact_id").Unique().
+			Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL")).
+			StorageKey("poc_artifact_id"),
 	}
 }
