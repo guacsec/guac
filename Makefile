@@ -70,7 +70,7 @@ generated_up_to_date: generate
 
 # Run all the linters
 .PHONY: lint
-lint: check-golangci-lint-tool-check atlas-lint
+lint: check-golangci-lint-tool-check
 	golangci-lint run ./...
 
 .PHONY: proto
@@ -117,7 +117,7 @@ fmt-md:
 
 # generate code from autogen tools (gqlgen, genqlclient, mockgen, ent)
 .PHONY: generate
-generate:
+generate: atlas-diff
 	go generate ./...
 
 # build bins for goos/goarch of current host

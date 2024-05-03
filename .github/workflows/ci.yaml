@@ -45,6 +45,8 @@ jobs:
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Install atlas
+        uses: ariga/setup-atlas@v0
       - name: Setup the project
         run: go mod download
       - name: Run backends
@@ -74,6 +76,8 @@ jobs:
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Install atlas
+        uses: ariga/setup-atlas@v0
       - name: Setup the project
         run: go mod download
       - name: Run tests
@@ -89,6 +93,8 @@ jobs:
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v3.2.1
         with:
           go-version: '1.21'
+      - name: Install atlas
+        uses: ariga/setup-atlas@v0
       - name: Install formatter
         run: go install golang.org/x/tools/cmd/goimports@latest
       - name: Check format
@@ -105,6 +111,8 @@ jobs:
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v5.0.0
         with:
           go-version: '1.21'
+      - name: Install atlas
+        uses: ariga/setup-atlas@v0
       - name: golangci-lint
         uses: golangci/golangci-lint-action@9d1e0624a798bb64f6c3cea93db47765312263dc # tag=v3.2.0
         with:
@@ -114,6 +122,8 @@ jobs:
         run: make format
       - name: Check that all linted text is up to date
         run: make generated_up_to_date
+      - name: Run atlas Lint
+        run: make atlas-lint
 
   end-to-end:
     name: E2E
