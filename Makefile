@@ -70,7 +70,7 @@ generated_up_to_date: generate
 
 # Run all the linters
 .PHONY: lint
-lint: check-golangci-lint-tool-check
+lint: check-golangci-lint-tool-check atlas-lint
 	golangci-lint run ./...
 
 .PHONY: proto
@@ -78,6 +78,23 @@ proto:
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		pkg/collectsub/collectsub/collectsub.proto
+
+# Run atlas to generate ent migration diff for postgres
+.PHONY: atlas-diff
+atlas-diff: check-atlas-tool-check
+	atlas migrate diff ent_diff \
+  	  --dir "file://pkg/assembler/backends/ent/migrate/migrations" \
+  	  --to "ent://pkg/assembler/backends/ent/schema" \
+	  --dev-url "docker://postgres/15/test?search_path=public"
+
+
+# Run atlas lint to validate and analayze the contents of the migration
+.PHONY: atlas-lint
+atlas-lint: check-atlas-tool-check
+	atlas migrate lint \
+  	  --dir "file://pkg/assembler/backends/ent/migrate/migrations" \
+	  --dev-url "docker://postgres/15/test?search_path=public" \
+	  --latest=1
 
 # Remove temporary files
 .PHONY: clean
@@ -283,6 +300,15 @@ check-goreleaser-tool-check:
 		exit 1; \
 	fi
 
+# Check if atlas is installed
+.PHONY: check-atlas-tool-check
+check-atlas-tool-check:
+	@if ! command -v atlas >/dev/null 2>&1; then \
+		echo "atlas is not installed. Please install atlas (https://atlasgo.io/getting-started#installation) and try again."; \
+		exit 1; \
+	fi
+
+
 # Check that all the tools are installed.
 .PHONY: check-tools
-check-tools: check-docker-tool-check check-docker-buildx-tool-check check-docker-compose-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check check-goreleaser-tool-check
+check-tools: check-docker-tool-check check-docker-buildx-tool-check check-docker-compose-tool-check check-protoc-tool-check check-golangci-lint-tool-check check-mockgen-tool-check check-goreleaser-tool-check check-atlas-tool-check
