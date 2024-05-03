@@ -878,10 +878,10 @@ type HasSourceAtSpec struct {
 	DocumentRef   *string     `json:"documentRef,omitempty"`
 }
 
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type HashEqual struct {
 	ID string `json:"id"`
-	// Collection of artifacts that are similar
+	// Two artifacts that are similar
 	Artifacts []*Artifact `json:"artifacts"`
 	// Justification for the claim that the artifacts are similar
 	Justification string `json:"justification"`
@@ -1488,10 +1488,10 @@ type PageInfo struct {
 	EndCursor   *string `json:"endCursor,omitempty"`
 }
 
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type PkgEqual struct {
 	ID string `json:"id"`
-	// Collection of packages that are similar
+	// Two packages that are similar
 	Packages []*Package `json:"packages"`
 	// Justification for the claim that the packages are similar
 	Justification string `json:"justification"`
@@ -2040,7 +2040,7 @@ type VexStatementInputSpec struct {
 // Note that setting noVuln vulnerability type is invalid for VulnEqual!
 type VulnEqual struct {
 	ID string `json:"id"`
-	// Collection of vulnerabilities that are similar
+	// Two vulnerabilities that are similar
 	Vulnerabilities []*Vulnerability `json:"vulnerabilities"`
 	// Justification for the attested relationship
 	Justification string `json:"justification"`

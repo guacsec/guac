@@ -24,7 +24,7 @@ Note that setting noVuln vulnerability type is invalid for VulnEqual!
 """
 type VulnEqual {
   id: ID!
-  "Collection of vulnerabilities that are similar"
+  "Two vulnerabilities that are similar"
   vulnerabilities: [Vulnerability!]!
   "Justification for the attested relationship"
   justification: String!
