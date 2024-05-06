@@ -196,14 +196,18 @@ func (c *demoClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSAS
 			sort.Strings(slsaKeys)
 			totalCount = len(slsaKeys)
 
-			for i, slsak := range slsaKeys {
-				link, err := byKeykv[*hasSLSAStruct](ctx, slsaCol, slsak, c)
+			for i, slsaKey := range slsaKeys {
+				link, err := byKeykv[*hasSLSAStruct](ctx, slsaCol, slsaKey, c)
 				if err != nil {
 					return nil, err
 				}
 				hs, err := c.addSLSAIfMatch(ctx, &hasSLSASpec, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if hs == nil {
+					continue
 				}
 
 				if after != nil && !currentPage {
@@ -240,7 +244,7 @@ func (c *demoClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSAS
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

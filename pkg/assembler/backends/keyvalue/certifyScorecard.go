@@ -252,7 +252,7 @@ func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.Cer
 				}
 
 				if scorecardOut == nil {
-					return nil, fmt.Errorf("the scorecard link doesn't match the specification")
+					continue
 				}
 
 				if after != nil && !currentPage {
@@ -289,7 +289,7 @@ func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.Cer
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

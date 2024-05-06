@@ -565,15 +565,34 @@ func (c *demoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, af
 		pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
 		if err == nil {
 			pNamespaces := c.buildPkgNamespace(ctx, pkgTypeNode, &pkgSpec)
-			if len(pNamespaces) > 0 {
-				edges = append(edges, &model.PackageEdge{
-					Cursor: pNamespaces[0].Names[0].Versions[0].ID,
-					Node: &model.Package{
-						ID:         pkgTypeNode.ThisID,
-						Type:       pkgTypeNode.Type,
-						Namespaces: pNamespaces,
-					},
-				})
+			for _, namespace := range pNamespaces {
+				for _, name := range namespace.Names {
+					for _, version := range name.Versions {
+						p := &model.Package{
+							ID:   pkgTypeNode.ThisID,
+							Type: pkgTypeNode.Type,
+							Namespaces: []*model.PackageNamespace{
+								{
+									ID:        namespace.ID,
+									Namespace: namespace.Namespace,
+									Names: []*model.PackageName{
+										{
+											ID:   name.ID,
+											Name: name.Name,
+											Versions: []*model.PackageVersion{
+												version,
+											},
+										},
+									},
+								},
+							},
+						}
+						edges = append(edges, &model.PackageEdge{
+							Cursor: pNamespaces[0].Names[0].Versions[0].ID,
+							Node:   p,
+						})
+					}
+				}
 			}
 		}
 	} else {
@@ -607,35 +626,55 @@ func (c *demoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, af
 					continue
 				}
 
-				p := &model.Package{
-					ID:         pkgTypeNode.ThisID,
-					Type:       pkgTypeNode.Type,
-					Namespaces: pNamespaces,
-				}
+				for _, namespace := range pNamespaces {
+					for _, name := range namespace.Names {
+						for _, version := range name.Versions {
+							p := &model.Package{
+								ID:   pkgTypeNode.ThisID,
+								Type: pkgTypeNode.Type,
+								Namespaces: []*model.PackageNamespace{
+									{
+										ID:        namespace.ID,
+										Namespace: namespace.Namespace,
+										Names: []*model.PackageName{
+											{
+												ID:   name.ID,
+												Name: name.Name,
+												Versions: []*model.PackageVersion{
+													version,
+												},
+											},
+										},
+									},
+								},
+							}
 
-				if after != nil && !currentPage {
-					if p.Namespaces[0].Names[0].Versions[0].ID == *after {
-						totalCount = len(typeKeys) - (i + 1)
-						currentPage = true
-					}
-					continue
-				}
+							if after != nil && !currentPage {
+								if p.Namespaces[0].Names[0].Versions[0].ID == *after {
+									totalCount = len(typeKeys) - (i + 1)
+									currentPage = true
+								}
+								continue
+							}
 
-				if first != nil {
-					if numNodes < *first {
-						edges = append(edges, &model.PackageEdge{
-							Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
-							Node:   p,
-						})
-						numNodes++
-					} else if numNodes == *first {
-						hasNextPage = true
+							if first != nil {
+								if numNodes < *first {
+									edges = append(edges, &model.PackageEdge{
+										Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
+										Node:   p,
+									})
+									numNodes++
+								} else if numNodes == *first {
+									hasNextPage = true
+								}
+							} else {
+								edges = append(edges, &model.PackageEdge{
+									Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
+									Node:   p,
+								})
+							}
+						}
 					}
-				} else {
-					edges = append(edges, &model.PackageEdge{
-						Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
-						Node:   p,
-					})
 				}
 			}
 		}
@@ -647,7 +686,7 @@ func (c *demoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, af
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

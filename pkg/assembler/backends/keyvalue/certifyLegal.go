@@ -388,6 +388,10 @@ func (c *demoClient) CertifyLegalList(ctx context.Context, certifyLegalSpec mode
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if legal == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if legal.ID == *after {
 						totalCount = len(clKeys) - (i + 1)
@@ -422,7 +426,7 @@ func (c *demoClient) CertifyLegalList(ctx context.Context, certifyLegalSpec mode
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

@@ -310,6 +310,10 @@ func (c *demoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if hm == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if hm.ID == *after {
 						totalCount = len(hmKeys) - (i + 1)
@@ -344,7 +348,7 @@ func (c *demoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil
