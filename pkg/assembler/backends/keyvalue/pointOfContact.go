@@ -272,6 +272,9 @@ func (c *demoClient) PointOfContactList(ctx context.Context, pointOfContactSpec 
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if poc == nil {
+				continue
+			}
 
 			edges = append(edges, &model.PointOfContactEdge{
 				Cursor: poc.ID,
@@ -308,6 +311,11 @@ func (c *demoClient) PointOfContactList(ctx context.Context, pointOfContactSpec 
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if poc == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if poc.ID == *after {
 						totalCount = len(pocKeys) - (i + 1)
@@ -342,7 +350,7 @@ func (c *demoClient) PointOfContactList(ctx context.Context, pointOfContactSpec 
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

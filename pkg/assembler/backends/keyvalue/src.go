@@ -354,15 +354,26 @@ func (c *demoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpe
 		srcTypeNode, err := byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
 		if err == nil {
 			sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, &sourceSpec)
-			if len(sNamespaces) > 0 {
-				edges = append(edges, &model.SourceEdge{
-					Cursor: sNamespaces[0].Names[0].ID,
-					Node: &model.Source{
-						ID:         srcTypeNode.ThisID,
-						Type:       srcTypeNode.Type,
-						Namespaces: sNamespaces,
-					},
-				})
+			for _, namespace := range sNamespaces {
+				for _, name := range namespace.Names {
+					s := &model.Source{
+						ID:   srcTypeNode.ThisID,
+						Type: srcTypeNode.Type,
+						Namespaces: []*model.SourceNamespace{
+							{
+								ID:        namespace.ID,
+								Namespace: namespace.Namespace,
+								Names: []*model.SourceName{
+									name,
+								},
+							},
+						},
+					}
+					edges = append(edges, &model.SourceEdge{
+						Cursor: sNamespaces[0].Names[0].ID,
+						Node:   s,
+					})
+				}
 			}
 		}
 	} else {
@@ -392,36 +403,46 @@ func (c *demoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpe
 					return nil, err
 				}
 				sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, &sourceSpec)
-				if len(sNamespaces) > 0 {
-					s := &model.Source{
-						ID:         srcTypeNode.ThisID,
-						Type:       srcTypeNode.Type,
-						Namespaces: sNamespaces,
-					}
-
-					if after != nil && !currentPage {
-						if s.Namespaces[0].Names[0].ID == *after {
-							totalCount = len(typeKeys) - (i + 1)
-							currentPage = true
+				for _, namespace := range sNamespaces {
+					for _, name := range namespace.Names {
+						s := &model.Source{
+							ID:   srcTypeNode.ThisID,
+							Type: srcTypeNode.Type,
+							Namespaces: []*model.SourceNamespace{
+								{
+									ID:        namespace.ID,
+									Namespace: namespace.Namespace,
+									Names: []*model.SourceName{
+										name,
+									},
+								},
+							},
 						}
-						continue
-					}
 
-					if first != nil {
-						if numNodes < *first {
+						if after != nil && !currentPage {
+							if s.Namespaces[0].Names[0].ID == *after {
+								totalCount = len(typeKeys) - (i + 1)
+								currentPage = true
+							}
+							continue
+						}
+
+						if first != nil {
+							if numNodes < *first {
+								edges = append(edges, &model.SourceEdge{
+									Cursor: s.Namespaces[0].Names[0].ID,
+									Node:   s,
+								})
+								numNodes++
+							} else if numNodes == *first {
+								hasNextPage = true
+							}
+						} else {
 							edges = append(edges, &model.SourceEdge{
 								Cursor: s.Namespaces[0].Names[0].ID,
 								Node:   s,
 							})
-							numNodes++
-						} else if numNodes == *first {
-							hasNextPage = true
 						}
-					} else {
-						edges = append(edges, &model.SourceEdge{
-							Cursor: s.Namespaces[0].Names[0].ID,
-							Node:   s,
-						})
 					}
 				}
 			}
@@ -434,7 +455,7 @@ func (c *demoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpe
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

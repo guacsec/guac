@@ -319,6 +319,9 @@ func (c *demoClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec mode
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if occ == nil {
+				continue
+			}
 
 			edges = append(edges, &model.IsOccurrenceEdge{
 				Cursor: occ.ID,
@@ -356,6 +359,10 @@ func (c *demoClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec mode
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if occ == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if occ.ID == *after {
 						totalCount = len(occKeys) - (i + 1)
@@ -390,7 +397,7 @@ func (c *demoClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec mode
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

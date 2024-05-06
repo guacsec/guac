@@ -218,6 +218,9 @@ func (c *demoClient) VulnEqualList(ctx context.Context, vulnEqualSpec model.Vuln
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if ve == nil {
+				continue
+			}
 
 			edges = append(edges, &model.VulnEqualEdge{
 				Cursor: ve.ID,
@@ -255,6 +258,10 @@ func (c *demoClient) VulnEqualList(ctx context.Context, vulnEqualSpec model.Vuln
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if ve == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if ve.ID == *after {
 						totalCount = len(veKeys) - (i + 1)
@@ -289,7 +296,7 @@ func (c *demoClient) VulnEqualList(ctx context.Context, vulnEqualSpec model.Vuln
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

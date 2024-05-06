@@ -135,7 +135,7 @@ jobs:
         go-version: '~1.21'
     - uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
       with:
-        python-version: '3.10'
+        python-version: '3.12.3'
     - run: ./internal/testing/e2e/e2e
 
   tilt-ci:

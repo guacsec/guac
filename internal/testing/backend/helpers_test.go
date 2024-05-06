@@ -59,6 +59,7 @@ var commonOpts = cmp.Options{
 	cmpopts.SortSlices(lessHM),
 	cmpopts.SortSlices(lessPackageOrArtifact),
 	cmpopts.SortSlices(lessSLSAPred),
+	cmpopts.SortSlices(hasSlsaLess),
 	cmpopts.SortSlices(lessHSA),
 	cmpopts.SortSlices(lessIsDep),
 	cmpopts.SortSlices(lessIsOcc),
@@ -584,6 +585,10 @@ func lessSLSAPred(a, b *model.SLSAPredicate) bool {
 		return d < 0
 	}
 	return false
+}
+
+func hasSlsaLess(a, b *model.HasSlsa) bool {
+	return cmpArt(a.Subject, b.Subject) < 0
 }
 
 func lessPackageOrArtifact(a, b model.PackageOrArtifact) bool {

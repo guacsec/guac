@@ -221,6 +221,10 @@ func (c *demoClient) LicenseList(ctx context.Context, licenseSpec model.LicenseS
 
 			license := c.convLicense(l)
 
+			if license == nil {
+				continue
+			}
+
 			if after != nil && !currentPage {
 				if license.ID == *after {
 					totalCount = len(lKeys) - (i + 1)
@@ -254,7 +258,7 @@ func (c *demoClient) LicenseList(ctx context.Context, licenseSpec model.LicenseS
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

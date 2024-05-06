@@ -283,6 +283,10 @@ func (c *demoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if cv == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if cv.ID == *after {
 						totalCount = len(keys) - (i + 1)
@@ -317,7 +321,7 @@ func (c *demoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

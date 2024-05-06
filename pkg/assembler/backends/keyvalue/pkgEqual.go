@@ -212,6 +212,9 @@ func (c *demoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqu
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if pe == nil {
+				continue
+			}
 
 			edges = append(edges, &model.PkgEqualEdge{
 				Cursor: pe.ID,
@@ -248,6 +251,11 @@ func (c *demoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqu
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if pe == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if pe.ID == *after {
 						totalCount = len(peKeys) - (i + 1)
@@ -282,7 +290,7 @@ func (c *demoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqu
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

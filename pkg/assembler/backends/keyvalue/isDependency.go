@@ -213,6 +213,9 @@ func (c *demoClient) IsDependencyList(ctx context.Context, isDependencySpec mode
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if dep == nil {
+				continue
+			}
 
 			edges = append(edges, &model.IsDependencyEdge{
 				Cursor: dep.ID,
@@ -250,6 +253,10 @@ func (c *demoClient) IsDependencyList(ctx context.Context, isDependencySpec mode
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if dep == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if dep.ID == *after {
 						totalCount = len(depKeys) - (i + 1)
@@ -284,7 +291,7 @@ func (c *demoClient) IsDependencyList(ctx context.Context, isDependencySpec mode
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

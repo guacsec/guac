@@ -212,6 +212,10 @@ func (c *demoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 
+			if src == nil {
+				continue
+			}
+
 			edges = append(edges, &model.HasSourceAtEdge{
 				Cursor: src.ID,
 				Node:   src,
@@ -245,6 +249,10 @@ func (c *demoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.
 				src, err := c.srcIfMatch(ctx, &hasSourceAtSpec, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if src == nil {
+					continue
 				}
 
 				if after != nil && !currentPage {
@@ -281,7 +289,7 @@ func (c *demoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

@@ -167,6 +167,11 @@ func (c *demoClient) BuildersList(ctx context.Context, builderSpec model.Builder
 				return nil, err
 			}
 			convBuild := c.convBuilder(b)
+
+			if convBuild == nil {
+				continue
+			}
+
 			if after != nil && !currentPage {
 				if convBuild.ID == *after {
 					currentPage = true
@@ -201,7 +206,7 @@ func (c *demoClient) BuildersList(ctx context.Context, builderSpec model.Builder
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[count-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(0, count-1)].Node.ID),
 			},
 			Edges: edges}, nil
 	}

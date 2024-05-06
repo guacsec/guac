@@ -430,6 +430,10 @@ func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMS
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if hs == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if hs.ID == *after {
 						totalCount = len(hsKeys) - (i + 1)
@@ -464,7 +468,7 @@ func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMS
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

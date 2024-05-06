@@ -303,6 +303,10 @@ func (c *demoClient) CertifyBadList(ctx context.Context, certifyBadSpec model.Ce
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if cbOut == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if cbOut.ID == *after {
 						totalCount = len(cbKeys) - (i + 1)
@@ -312,7 +316,7 @@ func (c *demoClient) CertifyBadList(ctx context.Context, certifyBadSpec model.Ce
 				}
 
 				if first != nil {
-					if numNodes < *first {
+					if numNodes < *first && currentPage {
 						edges = append(edges, &model.CertifyBadEdge{
 							Cursor: cbOut.ID,
 							Node:   cbOut,
@@ -337,7 +341,7 @@ func (c *demoClient) CertifyBadList(ctx context.Context, certifyBadSpec model.Ce
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(0, numNodes-1)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

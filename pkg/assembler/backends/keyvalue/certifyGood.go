@@ -303,6 +303,10 @@ func (c *demoClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if cgOut == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if cgOut.ID == *after {
 						totalCount = len(cgKeys) - (i + 1)
@@ -337,7 +341,7 @@ func (c *demoClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(0, numNodes-1)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

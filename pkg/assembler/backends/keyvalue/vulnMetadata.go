@@ -195,6 +195,9 @@ func (c *demoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilit
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if vmd == nil {
+				continue
+			}
 
 			edges = append(edges, &model.VulnerabilityMetadataEdge{
 				Cursor: vmd.ID,
@@ -232,6 +235,10 @@ func (c *demoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilit
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
 
+				if vmd == nil {
+					continue
+				}
+
 				if after != nil && !currentPage {
 					if vmd.ID == *after {
 						totalCount = len(vmdKeys) - (i + 1)
@@ -266,7 +273,7 @@ func (c *demoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilit
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[numNodes-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
 			},
 			Edges: edges,
 		}, nil

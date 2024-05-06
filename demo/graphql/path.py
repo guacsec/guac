@@ -21,7 +21,7 @@ import os
 import sys
 
 from gql import Client, gql
-from gql.transport.requests import RequestsHTTPTransport
+from gql.transport.aiohttp import AIOHTTPTransport
 
 # deepID extracts the ID of a GUAC noun, it looks for the deepest nested object
 # with an ID
@@ -145,7 +145,7 @@ queries = gql(queriesTxt)
 f.close()
 
 # Open the client and store as a global
-transport = RequestsHTTPTransport(url='http://localhost:8080/query')
+transport = AIOHTTPTransport(url='http://localhost:8080/query')
 client = Client(transport=transport, fetch_schema_from_transport=True)
 
 main(sys.argv[1:])
