@@ -37,7 +37,7 @@ require (
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/oauth2 v0.19.0
-	golang.org/x/sync v0.6.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
@@ -191,7 +191,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc5 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/owenrumney/go-sarif/v2 v2.3.0 // indirect
+	github.com/owenrumney/go-sarif/v2 v2.3.1 // indirect
 	github.com/pandatix/go-cvss v0.6.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
@@ -249,10 +249,10 @@ require (
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
-	golang.org/x/mod v0.16.0 // indirect
+	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/term v0.19.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	golang.org/x/tools v0.19.0 // indirect
+	golang.org/x/tools v0.20.0 // indirect
 	golang.org/x/vuln v1.0.4 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240314234333-6e1732d8331c // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240415180920-8c6c420018be // indirect
@@ -267,7 +267,7 @@ require (
 )
 
 require (
-	deps.dev/api/v3alpha v0.0.0-20240312000934-38ffc8dd1d92
+	deps.dev/api/v3 v3.0.0-20240503042720-6166138ce783
 	entgo.io/contrib v0.4.5
 	entgo.io/ent v0.13.0
 	github.com/99designs/gqlgen v0.17.45
@@ -292,10 +292,10 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/go-github/v50 v50.2.0
-	github.com/google/osv-scanner v1.7.1
+	github.com/google/osv-scanner v1.7.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/jedib0t/go-pretty/v6 v6.5.5
+	github.com/jedib0t/go-pretty/v6 v6.5.8
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/json-iterator/go v1.1.12
 	github.com/klauspost/compress v1.17.8
@@ -325,6 +325,6 @@ require (
 	gocloud.dev v0.37.0
 	gocloud.dev/pubsub/kafkapubsub v0.37.0
 	gocloud.dev/pubsub/rabbitpubsub v0.37.0
-	golang.org/x/exp v0.0.0-20240314144324-c7f7c6466f7f
+	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
 	gopkg.in/yaml.v3 v3.0.1
 )

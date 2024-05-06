@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	pb "deps.dev/api/v3alpha"
+	pb "deps.dev/api/v3"
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
