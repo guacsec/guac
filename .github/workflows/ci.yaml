@@ -36,7 +36,7 @@ jobs:
     name: CI for integration tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # tag=v3
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # tag=v3
       - name: setup-go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v3.2.1
         with:
@@ -67,7 +67,7 @@ jobs:
     name: CI for unit tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # tag=v3
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # tag=v3
       - name: setup-go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v3.2.1
         with:
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # tag=v3
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # tag=v3
       - name: setup-go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v3.2.1
         with:
@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # tag=v3
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # tag=v3
       - name: setup-go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v5.0.0
         with:
@@ -129,7 +129,7 @@ jobs:
     name: E2E
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
+    - uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b
     - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491
       with:
         go-version: '~1.21'
@@ -184,7 +184,7 @@ jobs:
         with:
           install-only: true
       - name: Checkout code
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # tag=v3
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # tag=v3
       - name: setup-go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # tag=v3.2.1
         with:
