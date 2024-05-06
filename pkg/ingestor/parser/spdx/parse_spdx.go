@@ -78,17 +78,25 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("SPDX document had invalid created time %q : %w", spdxDoc.CreationInfo.Created, err)
 	}
 	s.timeScanned = time
-	if err := s.getFiles(); err != nil {
+
+	topLevelSPDXIDs, err := s.getTopLevelSPDXIDs()
+	if err != nil {
 		return err
 	}
-	if err := s.getPackages(); err != nil {
+
+	if err := s.getFiles(topLevelSPDXIDs); err != nil {
 		return err
 	}
+
+	if err := s.getPackages(topLevelSPDXIDs); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// creating top level package manually until https://github.com/anchore/syft/issues/1241 is resolved
-func (s *spdxParser) getTopLevelPackageSpdxIds() ([]string, error) {
+// creating top level IDs manually until https://github.com/anchore/syft/issues/1241 is resolved
+func (s *spdxParser) getTopLevelSPDXIDs() ([]string, error) {
 	// TODO: Add CertifyPkg to make a connection from GUAC purl to OCI purl guessed
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
 	var spdxIds []string
@@ -115,12 +123,7 @@ func (s *spdxParser) getTopLevelPackageSpdxIds() ([]string, error) {
 	return spdxIds, nil
 }
 
-func (s *spdxParser) getPackages() error {
-	topLevelSpdxIds, err := s.getTopLevelPackageSpdxIds()
-	if err != nil {
-		return err
-	}
-
+func (s *spdxParser) getPackages(topLevelSPDXIDs []string) error {
 	for _, pac := range s.spdxDoc.Packages {
 		// for each package create a package for each of them
 		purl := ""
@@ -140,7 +143,7 @@ func (s *spdxParser) getPackages() error {
 			return err
 		}
 
-		if slices.Contains(topLevelSpdxIds, string(pac.PackageSPDXIdentifier)) {
+		if slices.Contains(topLevelSPDXIDs, string(pac.PackageSPDXIdentifier)) {
 			s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)], pkg)
 		}
 		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
@@ -151,7 +154,7 @@ func (s *spdxParser) getPackages() error {
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
-			if slices.Contains(topLevelSpdxIds, string(pac.PackageSPDXIdentifier)) {
+			if slices.Contains(topLevelSPDXIDs, string(pac.PackageSPDXIdentifier)) {
 				s.packageArtifacts[string(s.spdxDoc.SPDXIdentifier)] = append(s.packageArtifacts[string(s.spdxDoc.SPDXIdentifier)], artifact)
 			}
 			s.packageArtifacts[string(pac.PackageSPDXIdentifier)] = append(s.packageArtifacts[string(pac.PackageSPDXIdentifier)], artifact)
@@ -191,12 +194,7 @@ func (s *spdxParser) getPackages() error {
 	return nil
 }
 
-func (s *spdxParser) getFiles() error {
-	topLevelSpdxIds, err := s.getTopLevelPackageSpdxIds()
-	if err != nil {
-		return err
-	}
-
+func (s *spdxParser) getFiles(topLevelSPDXIDs []string) error {
 	for _, file := range s.spdxDoc.Files {
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range file.Checksums {
@@ -209,7 +207,7 @@ func (s *spdxParser) getFiles() error {
 			if err != nil {
 				return err
 			}
-			if slices.Contains(topLevelSpdxIds, string(file.FileSPDXIdentifier)) {
+			if slices.Contains(topLevelSPDXIDs, string(file.FileSPDXIdentifier)) {
 				s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)], pkg)
 			}
 			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.filePackages[string(file.FileSPDXIdentifier)], pkg)
@@ -219,7 +217,7 @@ func (s *spdxParser) getFiles() error {
 				Digest:    checksum.Value,
 			}
 
-			if slices.Contains(topLevelSpdxIds, string(file.FileSPDXIdentifier)) {
+			if slices.Contains(topLevelSPDXIDs, string(file.FileSPDXIdentifier)) {
 				s.fileArtifacts[string(s.spdxDoc.SPDXIdentifier)] = append(s.fileArtifacts[string(s.spdxDoc.SPDXIdentifier)], artifact)
 			}
 			s.fileArtifacts[string(file.FileSPDXIdentifier)] = append(s.fileArtifacts[string(file.FileSPDXIdentifier)], artifact)
