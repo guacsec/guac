@@ -66,13 +66,8 @@ func (Occurrence) Edges() []ent.Edge {
 func (Occurrence) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("justification", "origin", "collector", "document_ref").Edges("artifact", "package").Unique().
-			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")).StorageKey("occurrence_unique_package"),
+			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")).StorageKey("occurrence_package_id"),
 		index.Fields("justification", "origin", "collector", "document_ref").Edges("artifact", "source").Unique().
-			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")).StorageKey("occurrence_unique_source"),
-
-		// index.Fields("justification", "origin", "collector").Edges("source", "artifact").Unique().
-		// Annotations(entsql.IndexWhere("source_id <> NULL AND package_id is NULL")).
-		// StorageKey("occurrence_unique_source"),
-		//index.Fields("justification", "origin", "collector").Edges("package", "source", "artifact").Unique(),
+			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")).StorageKey("occurrence_source_id"),
 	}
 }

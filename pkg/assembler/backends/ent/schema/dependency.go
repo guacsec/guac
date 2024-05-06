@@ -80,10 +80,12 @@ func (Dependency) Indexes() []ent.Index {
 		index.Fields("version_range", "dependency_type", "justification", "origin", "collector", "document_ref").
 			Edges("package", "dependent_package_name").
 			Unique().
-			Annotations(entsql.IndexWhere("dependent_package_name_id IS NOT NULL AND dependent_package_version_id IS NULL")).StorageKey("dep_package_name"),
+			Annotations(entsql.IndexWhere("dependent_package_name_id IS NOT NULL AND dependent_package_version_id IS NULL")).
+			StorageKey("dep_package_name_id"),
 		index.Fields("version_range", "dependency_type", "justification", "origin", "collector", "document_ref").
 			Edges("package", "dependent_package_version").
 			Unique().
-			Annotations(entsql.IndexWhere("dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL")).StorageKey("dep_package_version"),
+			Annotations(entsql.IndexWhere("dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL")).
+			StorageKey("dep_package_version_id"),
 	}
 }
