@@ -57,6 +57,8 @@ $ guaccollect s3 --s3-url play.min.io --s3-bucket guac-test --s3-item alpine-cyc
 Ingest from AWS using default url:
 
 $ guaccollect s3 --s3-bucket guac-test --s3-region eu-north-1
+$ guaccollect s3 --s3-bucket guac-test --s3-region eu-north-1 --s3-path sboms/
+
 
 For the polling option, you need to define event bus endpoint for bucket notifications:
 
