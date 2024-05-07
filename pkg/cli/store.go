@@ -112,6 +112,7 @@ func init() {
 
 	// S3 flags
 	set.String("s3-url", "", "url of the s3 endpoint")
+	set.String("s3-path", "", "path to folder containing documents in the s3 bucket")
 	set.String("s3-bucket", "", "bucket in the s3 provider")
 	set.String("s3-item", "", "item in the s3 provider")
 	set.String("s3-mp", "kafka", "message provider (sqs or kafka)")

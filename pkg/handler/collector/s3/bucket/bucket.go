@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -42,7 +43,7 @@ func (bd *BucketBuilder) GetBucket(url string, region string) Bucket {
 }
 
 type Bucket interface {
-	ListFiles(ctx context.Context, bucket string, token *string, max int32) ([]string, *string, error)
+	ListFiles(ctx context.Context, bucket string, prefix string, token *string, max int32) ([]string, *string, error)
 	DownloadFile(ctx context.Context, bucket string, item string) ([]byte, error)
 	GetEncoding(ctx context.Context, bucket string, item string) (string, error)
 }
@@ -56,7 +57,7 @@ func GetDefaultBucket(url string, region string) Bucket {
 	return &s3Bucket{url, region}
 }
 
-func (d *s3Bucket) ListFiles(ctx context.Context, bucket string, token *string, max int32) ([]string, *string, error) {
+func (d *s3Bucket) ListFiles(ctx context.Context, bucket string, prefix string, token *string, max int32) ([]string, *string, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error loading AWS SDK config: %w", err)
@@ -75,6 +76,7 @@ func (d *s3Bucket) ListFiles(ctx context.Context, bucket string, token *string, 
 
 	input := &s3.ListObjectsV2Input{
 		Bucket:            &bucket,
+		Prefix:            &prefix,
 		ContinuationToken: token,
 		MaxKeys:           aws.Int32(max),
 	}
@@ -85,6 +87,10 @@ func (d *s3Bucket) ListFiles(ctx context.Context, bucket string, token *string, 
 
 	var files []string
 	for _, item := range resp.Contents {
+		// ignore s3 objects that are directories
+		if strings.HasSuffix(*item.Key, "/") {
+			continue
+		}
 		files = append(files, *item.Key)
 	}
 	return files, resp.NextContinuationToken, nil
