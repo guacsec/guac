@@ -48,7 +48,7 @@ Since GUAC is a complex project, there are 5 topic areas of interest:
 
 - Ingestion: ingest software security metadata. Needs to write parsers for
   documents, maintain ingestion logic, write new collectors, etc.
-- GraphQL: define the GraphQL interface used between ingestion pipeline and
+- API: define the GraphQL/REST interface used between ingestion pipeline and
   backend, and between backend and GUAC-based applications and front-ends.
 - Backends: define efficient code to interface with database backends (Neo4j,
   etc.).
@@ -140,6 +140,14 @@ GUAC contributors are happy to help you advance along the contributor ladder!
 
 ### Reviewers list
 
-| Reviewer                            | Area                                                                                                                       | Vote                                                       |
-|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| Reviewer | Area | Vote |
+|-|-|-|
+| [dejanb](https://github.com/dejanb) | Ingestion | [issues/1885](https://github.com/guacsec/guac/issues/1885) |
+| [mdeicas](https://github.com/mdeicas) | API | [issues/1885](https://github.com/guacsec/guac/issues/1885) |
+
+
+### Owners list
+
+| Owner | Area | Vote |
+|-|-|-|
 | [mrizzi](https://github.com/mrizzi) | [Backends (ent)](https://github.com/guacsec/guac/tree/4012842fab5d738f9bebf03f0cb44fc7ce39438b/pkg/assembler/backends/ent) | [issues/1310](https://github.com/guacsec/guac/issues/1310) |
