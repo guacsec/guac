@@ -117,7 +117,7 @@ jobs:
         uses: golangci/golangci-lint-action@38e1018663fa5173f3968ea0777460d3de38f256 # tag=v3.2.0
         with:
           only-new-issues: true
-          skip-pkg-cache: true
+          skip-cache: true
       - name: Check markdown format
         run: make format
       - name: Check that all linted text is up to date

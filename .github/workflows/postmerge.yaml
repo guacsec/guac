@@ -37,6 +37,8 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
       - name: Setup the project
         run: go mod download
+      - name: Install atlas
+        uses: ariga/setup-atlas@v0
       - name: Run integration merge test
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
