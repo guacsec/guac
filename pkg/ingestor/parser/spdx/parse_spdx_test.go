@@ -1110,13 +1110,13 @@ func Test_spdxParser(t *testing.T) {
 					"creationInfo": {
 					  "created": "2024-04-30T01:12:27Z"
 					},
-					"name": "for-testing-with-checksum",
-					"documentNamespace": "https://example.com/for-testing-with-checksum",
+					"name": "for-testing-a-pkg-with-checksum",
+					"documentNamespace": "https://example.com/for-testing-a-pkg-with-checksum",
 					"packages": [
 					  {
-						"name": "for-testing-with-checksum-pkg",
-						"SPDXID": "SPDXRef-Package-for-testing-with-checksum-pkg",
-						"downloadLocation": "https://example.com/for-testing-with-checksum-pkg",
+						"name": "for-testing-a-pkg-with-checksum-pkg",
+						"SPDXID": "SPDXRef-Package-for-testing-a-pkg-with-checksum-pkg",
+						"downloadLocation": "https://example.com/for-testing-a-pkg-with-checksum-pkg",
 						"checksums": [
 							{
 								"algorithm": "SHA1",
@@ -1133,7 +1133,7 @@ func Test_spdxParser(t *testing.T) {
 						{
 							"spdxElementId": "SPDXRef-DOCUMENT",
 							"relationshipType": "DESCRIBES",
-							"relatedSpdxElement": "SPDXRef-Package-for-testing-with-checksum-pkg"
+							"relatedSpdxElement": "SPDXRef-Package-for-testing-a-pkg-with-checksum-pkg"
 						}
 					]
 				  }
@@ -1150,18 +1150,18 @@ func Test_spdxParser(t *testing.T) {
 					{
 						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "pkgsha1"},
 						HasSBOM: &generated.HasSBOMInputSpec{
-							Uri:              "https://example.com/for-testing-with-checksum",
+							Uri:              "https://example.com/for-testing-a-pkg-with-checksum",
 							Algorithm:        "sha256",
-							Digest:           "7730c88882d68eb23a8613065acaf43575ad0aaf7497330acc35163b1121f06f",
+							Digest:           "1a8c41553b593172ff06e036ca8dc411aa228ab4c266d162640df69f7414e2c1",
 							DownloadLocation: "TestSource",
 						},
 					},
 					{
 						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "pkgsha3-384"},
 						HasSBOM: &generated.HasSBOMInputSpec{
-							Uri:              "https://example.com/for-testing-with-checksum",
+							Uri:              "https://example.com/for-testing-a-pkg-with-checksum",
 							Algorithm:        "sha256",
-							Digest:           "7730c88882d68eb23a8613065acaf43575ad0aaf7497330acc35163b1121f06f",
+							Digest:           "1a8c41553b593172ff06e036ca8dc411aa228ab4c266d162640df69f7414e2c1",
 							DownloadLocation: "TestSource",
 						},
 					},
@@ -1171,7 +1171,7 @@ func Test_spdxParser(t *testing.T) {
 						Pkg: &generated.PkgInputSpec{
 							Type:      "guac",
 							Namespace: ptrfrom.String("pkg"),
-							Name:      "for-testing-with-checksum-pkg",
+							Name:      "for-testing-a-pkg-with-checksum-pkg",
 							Version:   &packageOfEmptyString,
 							Subpath:   &packageOfEmptyString,
 						},
@@ -1182,7 +1182,7 @@ func Test_spdxParser(t *testing.T) {
 						Pkg: &generated.PkgInputSpec{
 							Type:      "guac",
 							Namespace: ptrfrom.String("pkg"),
-							Name:      "for-testing-with-checksum-pkg",
+							Name:      "for-testing-a-pkg-with-checksum-pkg",
 							Version:   &packageOfEmptyString,
 							Subpath:   &packageOfEmptyString,
 						},
@@ -1207,13 +1207,13 @@ func Test_spdxParser(t *testing.T) {
 					"creationInfo": {
 					  "created": "2024-04-30T01:12:27Z"
 					},
-					"name": "for-testing-with-checksum",
-					"documentNamespace": "https://example.com/for-testing-with-checksum",
+					"name": "for-testing-an-art-with-checksum",
+					"documentNamespace": "https://example.com/for-testing-an-art-with-checksum",
 					"files": [
 					  {
-						"filename": "for-testing-with-checksum-file",
-						"SPDXID": "SPDXRef-File-for-testing-with-checksum",
-						"downloadLocation": "https://example.com/for-testing-with-checksum",
+						"filename": "for-testing-an-art-with-checksum-file",
+						"SPDXID": "SPDXRef-File-for-testing-an-art-with-checksum",
+						"downloadLocation": "https://example.com/for-testing-an-art-with-checksum-file",
 						"checksums": [
 							{
 								"algorithm": "SHA1",
@@ -1230,7 +1230,7 @@ func Test_spdxParser(t *testing.T) {
 						{
 							"spdxElementId": "SPDXRef-DOCUMENT",
 							"relationshipType": "DESCRIBES",
-							"relatedSpdxElement": "SPDXRef-File-for-testing-with-checksum"
+							"relatedSpdxElement": "SPDXRef-File-for-testing-an-art-with-checksum"
 						}
 					]
 				  }
@@ -1247,18 +1247,18 @@ func Test_spdxParser(t *testing.T) {
 					{
 						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "filesha1"},
 						HasSBOM: &generated.HasSBOMInputSpec{
-							Uri:              "https://example.com/for-testing-with-checksum",
+							Uri:              "https://example.com/for-testing-an-art-with-checksum",
 							Algorithm:        "sha256",
-							Digest:           "23fa6ec15fc0875f750611eeb8de117c240e254987637e7f0fa094039ab9d4d4",
+							Digest:           "7c809829c97c7f0b2941830013233ccf14b2ada200cdf77c54b95021961a0aa3",
 							DownloadLocation: "TestSource",
 						},
 					},
 					{
 						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "filesha3-384"},
 						HasSBOM: &generated.HasSBOMInputSpec{
-							Uri:              "https://example.com/for-testing-with-checksum",
+							Uri:              "https://example.com/for-testing-an-art-with-checksum",
 							Algorithm:        "sha256",
-							Digest:           "23fa6ec15fc0875f750611eeb8de117c240e254987637e7f0fa094039ab9d4d4",
+							Digest:           "7c809829c97c7f0b2941830013233ccf14b2ada200cdf77c54b95021961a0aa3",
 							DownloadLocation: "TestSource",
 						},
 					},
@@ -1273,7 +1273,7 @@ func Test_spdxParser(t *testing.T) {
 							Qualifiers: []generated.PackageQualifierInputSpec{
 								{
 									Key:   "filename",
-									Value: "for-testing-with-checksum-file",
+									Value: "for-testing-an-art-with-checksum-file",
 								},
 							},
 							Subpath: &packageOfEmptyString,
@@ -1290,7 +1290,7 @@ func Test_spdxParser(t *testing.T) {
 							Qualifiers: []generated.PackageQualifierInputSpec{
 								{
 									Key:   "filename",
-									Value: "for-testing-with-checksum-file",
+									Value: "for-testing-an-art-with-checksum-file",
 								},
 							},
 							Subpath: &packageOfEmptyString,
@@ -1307,7 +1307,7 @@ func Test_spdxParser(t *testing.T) {
 							Qualifiers: []generated.PackageQualifierInputSpec{
 								{
 									Key:   "filename",
-									Value: "for-testing-with-checksum-file",
+									Value: "for-testing-an-art-with-checksum-file",
 								},
 							},
 							Subpath: &packageOfEmptyString,
@@ -1324,7 +1324,7 @@ func Test_spdxParser(t *testing.T) {
 							Qualifiers: []generated.PackageQualifierInputSpec{
 								{
 									Key:   "filename",
-									Value: "for-testing-with-checksum-file",
+									Value: "for-testing-an-art-with-checksum-file",
 								},
 							},
 							Subpath: &packageOfEmptyString,
