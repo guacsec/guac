@@ -19,7 +19,7 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"reflect"
+	"slices"
 	"strings"
 	"time"
 
@@ -234,18 +234,16 @@ func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
 	preds := &assembler.IngestPredicates{}
-	var topLevelArts []*model.ArtifactInputSpec
-	var topLevelPkgs []*model.PkgInputSpec
+	var toplevel []*model.PkgInputSpec
 
 	if c.cdxBom.Metadata != nil && c.cdxBom.Metadata.Component != nil {
-		topLevelArts = c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef]
-		topLevelPkgs = c.packagePackages[c.cdxBom.Metadata.Component.BOMRef]
+		toplevel = c.getPackageElement(c.cdxBom.Metadata.Component.BOMRef)
 	}
 
 	// adding top level package edge manually for all depends on package
 	// TODO: This is not based on the relationship so that can be inaccurate (can capture both direct and in-direct)...Remove this and be done below by the *c.cdxBom.Dependencies?
 	// see https://github.com/CycloneDX/specification/issues/33
-	if len(topLevelArts) > 0 || len(topLevelPkgs) > 0 {
+	if toplevel != nil {
 		var timestamp time.Time
 		var err error
 		if c.cdxBom.Metadata.Timestamp == "" {
@@ -259,15 +257,10 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 			}
 		}
 
-		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(topLevelPkgs[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
-
-		if len(topLevelArts) > 0 {
-			for _, topLevelArt := range topLevelArts {
-				preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromArtifact(topLevelArt, c.doc, c.cdxBom.SerialNumber, timestamp))
-			}
-		} else {
-			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromPkg(topLevelPkgs[0], c.doc, c.cdxBom.SerialNumber, timestamp))
+		if c.cdxBom.Dependencies == nil {
+			preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
 		}
+		preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(toplevel[0], c.doc, c.cdxBom.SerialNumber, timestamp))
 	}
 
 	for id := range c.packagePackages {
@@ -291,25 +284,61 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 		return preds
 	}
 
+	var directDependencies, indirectDependencies []string
+
 	for _, deps := range *c.cdxBom.Dependencies {
+		dependencyType := model.DependencyTypeUnknown
 		currPkg, found := c.packagePackages[deps.Ref]
 		if !found {
 			continue
 		}
-		if reflect.DeepEqual(currPkg, topLevelPkgs) {
-			continue
+		if deps.Ref == c.cdxBom.Metadata.Component.BOMRef {
+			dependencyType = model.DependencyTypeDirect
+		} else if slices.Contains(directDependencies, deps.Ref) || slices.Contains(indirectDependencies, deps.Ref) {
+			dependencyType = model.DependencyTypeIndirect
+		} else {
+			p, err := common.GetIsDep(toplevel[0], currPkg, []*model.PkgInputSpec{}, "top-level package GUAC heuristic connecting to each file/package", model.DependencyTypeUnknown)
+			if err != nil {
+				logger.Errorf("error generating CycloneDX edge %v", err)
+				continue
+			}
+			if p != nil {
+				preds.IsDependency = append(preds.IsDependency, *p)
+			}
 		}
 		if deps.Dependencies != nil {
-			for _, depPkg := range *deps.Dependencies {
-				if depPkg, exist := c.packagePackages[depPkg]; exist {
+			for _, depPkgRef := range *deps.Dependencies {
+				if depPkg, exist := c.packagePackages[depPkgRef]; exist {
 					for _, packNode := range currPkg {
-						p, err := common.GetIsDep(packNode, depPkg, []*model.PkgInputSpec{}, "CDX BOM Dependency")
+						p, err := common.GetIsDep(packNode, depPkg, []*model.PkgInputSpec{}, "CDX BOM Dependency", model.DependencyTypeDirect)
 						if err != nil {
 							logger.Errorf("error generating CycloneDX edge %v", err)
 							continue
 						}
 						if p != nil {
 							preds.IsDependency = append(preds.IsDependency, *p)
+						}
+
+						switch dependencyType {
+						case model.DependencyTypeDirect:
+							directDependencies = append(directDependencies, depPkgRef)
+						case model.DependencyTypeIndirect:
+							indirectDependencies = append(indirectDependencies, depPkgRef)
+						}
+
+						if deps.Ref != c.cdxBom.Metadata.Component.BOMRef {
+							justificationStr := "CDX BOM Dependency"
+							if dependencyType == model.DependencyTypeUnknown {
+								justificationStr = "top-level package GUAC heuristic connecting to each file/package"
+							}
+							p, err := common.GetIsDep(toplevel[0], depPkg, []*model.PkgInputSpec{}, justificationStr, dependencyType)
+							if err != nil {
+								logger.Errorf("error generating CycloneDX edge %v", err)
+								continue
+							}
+							if p != nil {
+								preds.IsDependency = append(preds.IsDependency, *p)
+							}
 						}
 					}
 				}
@@ -424,7 +453,9 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 
 	var foundVexIngest []assembler.VexIngest
 
-	for _, foundPkgElement := range c.packagePackages[affectsObj.Ref] {
+	foundPkgElements := c.getPackageElement(affectsObj.Ref)
+
+	for _, foundPkgElement := range foundPkgElements {
 		foundVexIngest = append(foundVexIngest, assembler.VexIngest{VexData: &vexData, Vulnerability: vulnInput, Pkg: foundPkgElement})
 	}
 
@@ -480,6 +511,13 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 	}
 
 	return &viList, nil
+}
+
+func (c *cyclonedxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
+	if packNode, ok := c.packagePackages[elementID]; ok {
+		return packNode
+	}
+	return nil
 }
 
 func guacCDXFilePurl(fileName string, version string, topLevel bool) string {
