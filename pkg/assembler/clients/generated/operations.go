@@ -5247,6 +5247,7 @@ func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageName) GetVersions() []A
 // the trie.
 type AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion struct {
 	Id         string                                                                                                 `json:"id"`
+	Purl       string                                                                                                 `json:"purl"`
 	Version    string                                                                                                 `json:"version"`
 	Qualifiers []AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier `json:"qualifiers"`
 	Subpath    string                                                                                                 `json:"subpath"`
@@ -5255,6 +5256,11 @@ type AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion 
 // GetId returns AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Id, and is useful for accessing the field via an interface.
 func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetId() string {
 	return v.Id
+}
+
+// GetPurl returns AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Purl, and is useful for accessing the field via an interface.
+func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion) GetPurl() string {
+	return v.Purl
 }
 
 // GetVersion returns AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion.Version, and is useful for accessing the field via an interface.
@@ -24212,6 +24218,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -24312,6 +24319,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -24402,6 +24410,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -24467,6 +24476,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -24581,6 +24591,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -27296,6 +27307,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -27484,6 +27496,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -27961,6 +27974,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -28436,6 +28450,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -29012,6 +29027,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -29140,6 +29156,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key

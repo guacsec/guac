@@ -527,8 +527,7 @@ func (c *cyclonedxParser) findCDXPkgVersionIDs(ctx context.Context, pkgIdentifie
 	var pkgVersions []string
 	for _, depPkgVersion := range pkgResponse.Packages[0].Namespaces[0].Names[0].Versions {
 		pkgVersions = append(pkgVersions, depPkgVersion.Version)
-		// TODO (nathannaveen): use depPkgVersion.Purl instead of creating a new purl.
-		pkgVersionsMap[depPkgVersion.Version] = guacCDXPkgPurl(typeGUAC, depPkgVersion.Version, "", false)
+		pkgVersionsMap[depPkgVersion.Version] = depPkgVersion.Purl
 	}
 
 	matchingDepPkgVersions, err := WhichVersionMatches(pkgVersions, versionRange)
