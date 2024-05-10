@@ -1033,19 +1033,9 @@ var (
 			DepPkg:          cdxResteasyPack,
 			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeUnknown,
+				DependencyType: model.DependencyTypeDirect,
 				VersionRange:   "2.13.4.Final",
-				Justification:  isDepJustifyTopPkgJustification,
-			},
-		},
-		{
-			Pkg:             cdxTopQuarkusPack,
-			DepPkg:          cdxReactiveCommonPack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
-			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "2.13.4.Final",
-				Justification:  isDepJustifyTopPkgJustification,
+				Justification:  isCDXDepJustifyDependsJustification,
 			},
 		},
 		{
@@ -1053,7 +1043,7 @@ var (
 			DepPkg:          cdxReactiveCommonPack,
 			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeUnknown,
+				DependencyType: model.DependencyTypeIndirect,
 				VersionRange:   "2.13.4.Final",
 				Justification:  isCDXDepJustifyDependsJustification,
 			},
@@ -1123,19 +1113,6 @@ var (
 
 	cdxBootstrapPackage, _ = asmhelpers.PurlToPkg("pkg:npm/bootstrap@4.0.0-beta.2")
 
-	CdxNpmDeps = []assembler.IsDependencyIngest{
-		{
-			Pkg:             cdxWebAppPackage,
-			DepPkg:          cdxBootstrapPackage,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
-			IsDependency: &model.IsDependencyInputSpec{
-				DependencyType: model.DependencyTypeUnknown,
-				VersionRange:   "4.0.0-beta.2",
-				Justification:  isDepJustifyTopPkgJustification,
-			},
-		},
-	}
-
 	cdxNpmTime, _ = time.Parse(time.RFC3339, "2022-11-22T17:14:57Z")
 
 	CdxNpmHasSBOM = []assembler.HasSBOMIngest{
@@ -1152,7 +1129,7 @@ var (
 	}
 
 	CdxNpmIngestionPredicates = assembler.IngestPredicates{
-		IsDependency: CdxNpmDeps,
+		IsDependency: nil,
 		HasSBOM:      CdxNpmHasSBOM,
 	}
 
