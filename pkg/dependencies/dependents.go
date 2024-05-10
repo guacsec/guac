@@ -89,7 +89,6 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 	idToName := make(map[string]string)
 
 	sboms, err := model.HasSBOMs(ctx, gqlClient, model.HasSBOMSpec{})
-
 	if err != nil {
 		return nil, fmt.Errorf("error getting dependencies: %v", err)
 	}
@@ -100,29 +99,34 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 			continue
 		}
 		// Iterate through the included dependencies of each SBOM.
-		for _, dependency := range resp.IncludedDependencies {
+		for _, isDependency := range resp.IncludedDependencies {
 			// Construct unique names for the dependency package and the package itself.
-			depPkgName := helpers.AllPkgTreeToPurl(&dependency.DependencyPackage.AllPkgTree)
-			pkgName := helpers.AllPkgTreeToPurl(&dependency.Package.AllPkgTree)
+			depPkgName := helpers.PkgToPurl(isDependency.DependencyPackage.Type, isDependency.DependencyPackage.Namespaces[0].Namespace, isDependency.DependencyPackage.Namespaces[0].Names[0].Name, "", "", []string{})
+			pkgName := helpers.PkgToPurl(isDependency.Package.Type, isDependency.Package.Namespaces[0].Namespace, isDependency.Package.Namespaces[0].Names[0].Name, "", "", []string{})
 
 			var depPkgIds []string
-			pkgId := dependency.Package.Namespaces[0].Names[0].Versions[0].Id
+			pkgId := isDependency.Package.Namespaces[0].Names[0].Versions[0].Id
 
-			if len(dependency.DependencyPackage.Namespaces[0].Names[0].Versions) == 0 {
-				findMatchingDepPkgVersionIDs, err := FindDepPkgVersionIDs(ctx, gqlClient, dependency.DependencyPackage.Type,
-					dependency.DependencyPackage.Namespaces[0].Namespace,
-					dependency.DependencyPackage.Namespaces[0].Names[0].Name, dependency.VersionRange)
+			if len(isDependency.DependencyPackage.Namespaces[0].Names[0].Versions) == 0 {
+				findMatchingDepPkgVersionIDs, err := FindDepPkgVersionIDs(ctx, gqlClient, isDependency.DependencyPackage.Type,
+					isDependency.DependencyPackage.Namespaces[0].Namespace,
+					isDependency.DependencyPackage.Namespaces[0].Names[0].Name, isDependency.VersionRange)
 				if err != nil {
 					return nil, fmt.Errorf("error from FindMatchingDepPkgVersionIDs:%w", err)
 				}
 				depPkgIds = append(depPkgIds, findMatchingDepPkgVersionIDs...)
 			} else {
-				depPkgIds = append(depPkgIds, dependency.DependencyPackage.Namespaces[0].Names[0].Versions[0].Id)
+				depPkgIds = append(depPkgIds, isDependency.DependencyPackage.Namespaces[0].Names[0].Versions[0].Id)
 			}
 
 			for _, depPkgId := range depPkgIds {
+				// Skip "guac" files.
+				if isDependency.DependencyPackage.Type == "guac" && isDependency.DependencyPackage.Namespaces[0].Namespace == "files" {
+					continue
+				}
+
 				// Inside the loop where you iterate through dependencies
-				updatePackagesAndNames(idToName, packages, depPkgId, pkgId, depPkgName, pkgName, dependency.DependencyPackage.Type, dependency.DependencyPackage.Namespaces[0].Namespace, dependencyEdges, dependentEdges)
+				updatePackagesAndNames(idToName, packages, depPkgId, pkgId, depPkgName, pkgName, dependencyEdges, dependentEdges)
 
 				// Update the edges with pkgId and depPkgId.
 				dependentEdges[depPkgId] = append(dependentEdges[depPkgId], pkgId) // pkgId is dependent on depPkgId
@@ -140,25 +144,19 @@ func findDependentsOfDependencies(ctx context.Context, gqlClient graphql.Client)
 // This function skips processing for "guac" files in the "files" namespace and updates the provided maps with
 // the relationships between packages and their dependencies. It leverages traverseGraph to find all packages
 // that are either dependencies of or dependents on the given package, and updates the packages map accordingly.
-func updatePackagesAndNames(idToName map[string]string, packages map[string]dependencyNode, depPkgId, pkgId, depPkgName, pkgName, depPkgType, depPkgNamespace string, dependencyEdges, dependentEdges map[string][]string) {
-	// Skip "guac" files.
-	if depPkgType == "guac" && depPkgNamespace == "files" {
-		return
-	}
-
+func updatePackagesAndNames(idToName map[string]string, packages map[string]dependencyNode, depPkgId, pkgId, depPkgName, pkgName string, dependencyEdges, dependentEdges map[string][]string) {
 	// Map the IDs to their names.
 	idToName[depPkgId] = depPkgName
 	idToName[pkgId] = pkgName
 
-	// First, we need to find all the packages that have pkgName as a dependency.
-	// Note that we are only searching of packages with pkgName as a dependency from the packages that have scanned so far.
-
-	// This dependencyPackages map finds all packages that have pkgName as a dependent out of our pre-scanned packages.
+	// First, we need to find all the packages that are dependencies of pkgName.
+	// We need to add them all to the dependencies of all nodes that have pkgName as a dependent.
+	// Note that we are only searching for dependencies of pkgName from the edges that have scanned so far
 	dependencyPackages := traverseGraph(depPkgId, dependencyEdges)
 
-	// Next we want to find all the packages that are dependencies of pkgName.
-	// We need to add them all to the dependencies of all nodes that have pkgName as a dependent.
-	// Note that we are only searching for dependencies of pkgName from the packages that have scanned so far
+	// Next we want to find all the packages that have pkgName as a dependency.
+	// Note that we are only searching of packages with pkgName as a dependency from the edges that have scanned so far.
+	// This dependentPackages map finds all packages that have pkgName as a dependency out of our pre-scanned packages.
 	dependentPackages := traverseGraph(pkgId, dependentEdges)
 
 	for depPkgNodeId := range dependencyPackages {

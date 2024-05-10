@@ -20,7 +20,7 @@ package dependencies
 import (
 	"context"
 	"fmt"
-	"net/http"
+	clients "github.com/guacsec/guac/internal/testing/graphqlClients"
 	"testing"
 	"time"
 
@@ -48,14 +48,11 @@ type specInfo struct {
 }
 
 func Test_findAllDependencies(t *testing.T) {
-	graphqlEndpoint := "http://localhost:8080/query"
-
-	httpClient := http.Client{}
-	gqlClient := graphql.NewClient(graphqlEndpoint, &httpClient)
-
-	ctx := context.Background()
 
 	t.Run("default", func(t *testing.T) {
+		gqlClient := clients.SetupTest(t)
+		ctx := context.Background()
+
 		createNodes(t, ctx, gqlClient,
 			[]specInfo{{"A1", "1", "test"}, {"B1", "1", "test"}, {"C1", "1", "test"},
 				{"D1", "1", "test"}, {"E1", "1", "test"}, {"F1", "1", "test"}, {"G1", "1", "test"}},
@@ -82,10 +79,13 @@ func Test_findAllDependencies(t *testing.T) {
 			D1, E1, F1, G1, B1 and C1 all depend on A1
 		*/
 
-		check(t, false, map[string]int{"test__A1": 6, "test__B1": 2, "test__C1": 2})
+		check(t, false, map[string]int{"pkg:test/A1": 6, "pkg:test/B1": 2, "pkg:test/C1": 2}, gqlClient)
 	})
 
 	t.Run("two separate graphs", func(t *testing.T) {
+		gqlClient := clients.SetupTest(t)
+		ctx := context.Background()
+
 		createNodes(t, ctx, gqlClient,
 			[]specInfo{{"A2", "1", "test"}, {"B2", "1", "test"}, {"C2", "1", "test"}, {"D2", "1", "test"},
 				{"E2", "1", "test"}, {"F2", "1", "test"}, {"G2", "1", "test"}, {"B2", "2", "test"}, {"I2", "1", "test"}},
@@ -121,10 +121,13 @@ func Test_findAllDependencies(t *testing.T) {
 			they have the same Name.
 		*/
 
-		check(t, false, map[string]int{"test__A2": 6, "test__B2": 3, "test__C2": 2})
+		check(t, false, map[string]int{"pkg:test/A2": 6, "pkg:test/B2": 3, "pkg:test/C2": 2}, gqlClient)
 	})
 
 	t.Run("two different versions in same graph", func(t *testing.T) {
+		gqlClient := clients.SetupTest(t)
+		ctx := context.Background()
+
 		createNodes(t, ctx, gqlClient,
 			[]specInfo{
 				{"A3", "1", "test"},
@@ -158,10 +161,13 @@ func Test_findAllDependencies(t *testing.T) {
 			        A3 -------+
 		*/
 
-		check(t, false, map[string]int{"test__A3": 7, "test__B3": 3, "test__C3": 2})
+		check(t, false, map[string]int{"pkg:test/A3": 8, "pkg:test/B3": 3, "pkg:test/C3": 2}, gqlClient)
 	})
 
 	t.Run("different versions same graph 2", func(t *testing.T) {
+		gqlClient := clients.SetupTest(t)
+		ctx := context.Background()
+
 		createNodes(t, ctx, gqlClient,
 			[]specInfo{
 				{"A4", "1", "test"},
@@ -199,7 +205,7 @@ func Test_findAllDependencies(t *testing.T) {
 			        A4
 		*/
 
-		check(t, false, map[string]int{"test__A4": 7, "test__B4": 3, "test__C4": 4, "test__F4": 2})
+		check(t, false, map[string]int{"pkg:test/A4": 8, "pkg:test/B4": 3, "pkg:test/C4": 4, "pkg:test/F4": 2}, gqlClient)
 
 	})
 }
@@ -326,10 +332,7 @@ func createOccurrenceAndArtifact(t *testing.T, ctx context.Context, gqlClient gr
 	return err, id
 }
 
-func check(t *testing.T, wantErr bool, want map[string]int) {
-	endpoint := "http://localhost:8080/query"
-	httpClient := http.Client{}
-	gqlClient := graphql.NewClient(endpoint, &httpClient)
+func check(t *testing.T, wantErr bool, want map[string]int, gqlClient graphql.Client) {
 	ctx := context.Background()
 
 	got, err := findDependentsOfDependencies(ctx, gqlClient)
