@@ -317,13 +317,12 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 						}
 						if p != nil {
 							preds.IsDependency = append(preds.IsDependency, *p)
-						}
-
-						switch dependencyType {
-						case model.DependencyTypeDirect:
-							directDependencies = append(directDependencies, depPkgRef)
-						case model.DependencyTypeIndirect:
-							indirectDependencies = append(indirectDependencies, depPkgRef)
+							switch dependencyType {
+							case model.DependencyTypeDirect:
+								directDependencies = append(directDependencies, depPkgRef)
+							case model.DependencyTypeIndirect:
+								indirectDependencies = append(indirectDependencies, depPkgRef)
+							}
 						}
 
 						if deps.Ref != c.cdxBom.Metadata.Component.BOMRef {
