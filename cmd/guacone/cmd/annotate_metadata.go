@@ -34,7 +34,6 @@ import (
 )
 
 type annotateMetadataOptions struct {
-	// gql endpoint
 	graphqlEndpoint string
 	headerFile      string
 	subjectType     string
