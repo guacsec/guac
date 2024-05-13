@@ -98,6 +98,8 @@ func init() {
 	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")
 	set.BoolP("package-name", "n", false, "if type is package, enable if attestation is at package-name level (for all versions), defaults to specific version")
 
+	set.StringP("justification", "j", "", "justification for the metadata")
+
 	set.IntP("search-depth", "d", 0, "depth to search, 0 has no limit")
 
 	set.StringP("vuln-id", "v", "", "vulnerability ID to check")
