@@ -139,7 +139,7 @@ func validateMetadataFlags(graphqlEndpoint, headerFile string, pkgName bool, jus
 	opts.pkgName = pkgName
 	opts.justification = justification
 	if opts.justification == "" {
-		justification = "Added by user via guacone"
+		opts.justification = "Added by user via guacone"
 	}
 	if len(args) != 4 {
 		return opts, fmt.Errorf("expected positional arguments for <type> <subject> <key> <value>")
