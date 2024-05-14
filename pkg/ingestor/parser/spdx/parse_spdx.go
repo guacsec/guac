@@ -43,7 +43,7 @@ type spdxParser struct {
 	filePackages        map[string][]*model.PkgInputSpec
 	fileArtifacts       map[string][]*model.ArtifactInputSpec
 	topLevelPackages    []*model.PkgInputSpec
-	topLevelArtifacts   []*model.ArtifactInputSpec
+	topLevelArtifacts   map[string][]*model.ArtifactInputSpec
 	identifierStrings   *common.IdentifierStrings
 	spdxDoc             *spdx.Document
 	topLevelIsHeuristic bool
@@ -57,6 +57,7 @@ func NewSpdxParser() common.DocumentParser {
 		packageLegals:       map[string][]*model.CertifyLegalInputSpec{},
 		filePackages:        map[string][]*model.PkgInputSpec{},
 		fileArtifacts:       map[string][]*model.ArtifactInputSpec{},
+		topLevelArtifacts:   make(map[string][]*model.ArtifactInputSpec),
 		identifierStrings:   &common.IdentifierStrings{},
 		topLevelIsHeuristic: false,
 	}
@@ -149,14 +150,15 @@ func (s *spdxParser) getPackages(topLevelSPDXIDs []string) error {
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range pac.PackageChecksums {
-			artifact := &model.ArtifactInputSpec{
+			art := &model.ArtifactInputSpec{
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
-			if slices.Contains(topLevelSPDXIDs, string(pac.PackageSPDXIdentifier)) {
-				s.topLevelArtifacts = append(s.topLevelArtifacts, artifact)
+			id := string(pac.PackageSPDXIdentifier)
+			if slices.Contains(topLevelSPDXIDs, id) {
+				s.topLevelArtifacts[id] = append(s.topLevelArtifacts[id], art)
 			}
-			s.packageArtifacts[string(pac.PackageSPDXIdentifier)] = append(s.packageArtifacts[string(pac.PackageSPDXIdentifier)], artifact)
+			s.packageArtifacts[id] = append(s.packageArtifacts[id], art)
 		}
 
 		if pac.PackageLicenseDeclared != "" ||
@@ -211,15 +213,16 @@ func (s *spdxParser) getFiles(topLevelSPDXIDs []string) error {
 			}
 			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.filePackages[string(file.FileSPDXIdentifier)], pkg)
 
-			artifact := &model.ArtifactInputSpec{
+			art := &model.ArtifactInputSpec{
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
 
-			if slices.Contains(topLevelSPDXIDs, string(file.FileSPDXIdentifier)) {
-				s.topLevelArtifacts = append(s.topLevelArtifacts, artifact)
+			id := string(file.FileSPDXIdentifier)
+			if slices.Contains(topLevelSPDXIDs, id) {
+				s.topLevelArtifacts[id] = append(s.topLevelArtifacts[id], art)
 			}
-			s.fileArtifacts[string(file.FileSPDXIdentifier)] = append(s.fileArtifacts[string(file.FileSPDXIdentifier)], artifact)
+			s.fileArtifacts[id] = append(s.fileArtifacts[id], art)
 		}
 	}
 	return nil
@@ -245,8 +248,15 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 
 		if len(s.topLevelArtifacts) > 0 {
-			for _, topLevelArt := range s.topLevelArtifacts {
-				preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromArtifact(topLevelArt, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
+			for _, arts := range s.topLevelArtifacts {
+				for _, art := range arts {
+					preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromArtifact(art, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
+				}
+			}
+
+			if len(s.topLevelArtifacts) != len(s.topLevelPackages) {
+				logger.Warnf("Top-level unique artifact count (%d) and top-level package count (%d) are mismatched. SBOM ingestion may not be as expected.",
+					len(s.topLevelArtifacts), len(s.topLevelPackages))
 			}
 		} else {
 			for _, topLevelPkg := range s.topLevelPackages {

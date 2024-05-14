@@ -128,3 +128,7 @@ func FromContext(ctx context.Context) *zap.SugaredLogger {
 
 	return zap.NewNop().Sugar()
 }
+
+func SetLogger(l *zap.Logger) {
+	logger = l.Sugar()
+}
