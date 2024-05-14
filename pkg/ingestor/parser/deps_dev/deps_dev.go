@@ -18,6 +18,7 @@ package deps_dev
 import (
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -37,7 +38,7 @@ type depsDevParser struct {
 	packComponent *deps_dev.PackageComponent
 }
 
-func NewDepsDevParser() common.DocumentParser {
+func NewDepsDevParser(gqlClient graphql.Client) common.DocumentParser {
 	return &depsDevParser{}
 }
 

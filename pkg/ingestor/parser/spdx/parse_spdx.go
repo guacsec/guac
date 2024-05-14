@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 	"slices"
 	"strings"
 	"time"
@@ -49,7 +50,7 @@ type spdxParser struct {
 	timeScanned         time.Time
 }
 
-func NewSpdxParser() common.DocumentParser {
+func NewSpdxParser(gqlClient graphql.Client) common.DocumentParser {
 	return &spdxParser{
 		packagePackages:     map[string][]*model.PkgInputSpec{},
 		packageArtifacts:    map[string][]*model.ArtifactInputSpec{},

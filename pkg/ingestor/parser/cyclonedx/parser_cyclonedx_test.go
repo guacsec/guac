@@ -17,6 +17,7 @@ package cyclonedx
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
@@ -130,7 +131,7 @@ func Test_cyclonedxParser(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewCycloneDXParser()
+			s := NewCycloneDXParser(nil)
 			err := s.Parse(ctx, tt.doc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("cyclonedxParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
@@ -558,5 +559,186 @@ func noAnalysisVexPredicates() *assembler.IngestPredicates {
 				},
 			},
 		},
+	}
+}
+
+func Test_parseVersionRange(t *testing.T) {
+	type args struct {
+		rangeStr string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []VersionMatchObject
+		want1   []string
+		wantErr bool
+	}{
+		{
+			name: "Single Version Implicit Equal",
+			args: args{
+				rangeStr: "1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.3",
+					MaxVersion:   "1.2.3",
+					MinInclusive: true,
+					MaxInclusive: true,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Single Version Explicit Equal",
+			args: args{
+				rangeStr: "=1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.3",
+					MaxVersion:   "1.2.3",
+					MinInclusive: true,
+					MaxInclusive: true,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Greater Than",
+			args: args{
+				rangeStr: ">1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.3",
+					MaxVersion:   "",
+					MinInclusive: false,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Greater Than or Equal",
+			args: args{
+				rangeStr: ">=1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.3",
+					MaxVersion:   "",
+					MinInclusive: true,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Less Than",
+			args: args{
+				rangeStr: "<1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "",
+					MaxVersion:   "1.2.3",
+					MinInclusive: false,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Less Than or Equal",
+			args: args{
+				rangeStr: "<=1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "",
+					MaxVersion:   "1.2.3",
+					MinInclusive: false,
+					MaxInclusive: true,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Range Inclusive",
+			args: args{
+				rangeStr: ">=1.2.0,<=1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.0",
+					MaxVersion:   "1.2.3",
+					MinInclusive: true,
+					MaxInclusive: true,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Range Exclusive",
+			args: args{
+				rangeStr: ">1.2.0,<1.2.3",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.2.0",
+					MaxVersion:   "1.2.3",
+					MinInclusive: false,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+		{
+			name: "Complex Range",
+			args: args{
+				rangeStr: ">=1.0.0,<1.0.5 | >=1.1.0,<1.1.5",
+			},
+			want: []VersionMatchObject{
+				{
+					MinVersion:   "1.0.0",
+					MaxVersion:   "1.0.5",
+					MinInclusive: true,
+					MaxInclusive: false,
+				},
+				{
+					MinVersion:   "1.1.0",
+					MaxVersion:   "1.1.5",
+					MinInclusive: true,
+					MaxInclusive: false,
+				},
+			},
+			want1:   []string{},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := parseVersionRange(tt.args.rangeStr)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseVersionRange() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("parseVersionRange() got = %v, want %v", got, tt.want)
+			}
+			if len(got1) == 0 && len(tt.want1) == 0 {
+				// Both slices are empty, consider this a match.
+			} else if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("parseVersionRange() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
 	}
 }

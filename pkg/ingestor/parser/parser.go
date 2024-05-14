@@ -18,6 +18,7 @@ package parser
 import (
 	"context"
 	"fmt"
+	"github.com/Khan/genqlient/graphql"
 
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -46,7 +47,7 @@ func init() {
 }
 
 var (
-	documentParser = map[processor.DocumentType]func() common.DocumentParser{}
+	documentParser = map[processor.DocumentType]func(gqlClient graphql.Client) common.DocumentParser{}
 )
 
 type docTreeBuilder struct {
@@ -61,7 +62,7 @@ func newDocTreeBuilder() *docTreeBuilder {
 	}
 }
 
-func RegisterDocumentParser(p func() common.DocumentParser, d processor.DocumentType) error {
+func RegisterDocumentParser(p func(gqlClient graphql.Client) common.DocumentParser, d processor.DocumentType) error {
 	if _, ok := documentParser[d]; ok {
 		documentParser[d] = p
 		return fmt.Errorf("the document parser is being overwritten: %s", d)
@@ -71,14 +72,14 @@ func RegisterDocumentParser(p func() common.DocumentParser, d processor.Document
 }
 
 // ParseDocumentTree takes the DocumentTree and create graph inputs (nodes and edges) per document node.
-func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
+func ParseDocumentTree(ctx context.Context, docTree processor.DocumentTree, gqlClient graphql.Client) ([]assembler.IngestPredicates, []*common.IdentifierStrings, error) {
 	assemblerInputs := []assembler.IngestPredicates{}
 	identifierStrings := []*common.IdentifierStrings{}
 	logger := docTree.Document.ChildLogger
 	docTreeBuilder := newDocTreeBuilder()
 
 	logger.Infof("parsing document tree with root type: %v", docTree.Document.Type)
-	err := docTreeBuilder.parse(ctx, docTree, map[visitedKey]bool{})
+	err := docTreeBuilder.parse(ctx, docTree, map[visitedKey]bool{}, gqlClient)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -107,8 +108,8 @@ type visitedKey struct {
 }
 
 // The visited map is used to keep track of the document nodes that have already been visited to avoid infinite loops.
-func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree, visited map[visitedKey]bool) error {
-	builder, err := parseHelper(ctx, root.Document)
+func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree, visited map[visitedKey]bool, gqlClient graphql.Client) error {
+	builder, err := parseHelper(ctx, root.Document, gqlClient)
 	if err != nil {
 		return err
 	}
@@ -123,20 +124,20 @@ func (t *docTreeBuilder) parse(ctx context.Context, root processor.DocumentTree,
 	t.identities = append(t.identities, builder.GetIdentities()...)
 
 	for _, c := range root.Children {
-		if err := t.parse(ctx, c, visited); err != nil {
+		if err := t.parse(ctx, c, visited, gqlClient); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func parseHelper(ctx context.Context, doc *processor.Document) (*common.GraphBuilder, error) {
+func parseHelper(ctx context.Context, doc *processor.Document, gqlClient graphql.Client) (*common.GraphBuilder, error) {
 	pFunc, ok := documentParser[doc.Type]
 	if !ok {
 		return nil, fmt.Errorf("no document parser registered for type: %s", doc.Type)
 	}
 
-	p := pFunc()
+	p := pFunc(gqlClient)
 	err := p.Parse(ctx, doc)
 	if err != nil {
 		return nil, err
