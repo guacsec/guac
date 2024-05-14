@@ -52,7 +52,7 @@ func Test_cyclonedxParser(t *testing.T) {
 		wantPredicates: &testdata.CdxIngestionPredicates,
 		wantErr:        false,
 	}, {
-		name: "valid small CycloneDX document with package dependencies",
+		name: "valid small CycloneDX document with package dependencies and a hash",
 		doc: &processor.Document{
 			Blob:   testdata.CycloneDXExampleSmallDeps,
 			Format: processor.FormatJSON,
