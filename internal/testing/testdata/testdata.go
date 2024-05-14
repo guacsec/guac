@@ -1099,7 +1099,10 @@ var (
 
 	CdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
 		{
-			Pkg: cdxTopQuarkusPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
+			},
 			HasSBOM: &model.HasSBOMInputSpec{
 				Uri:              "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
 				Algorithm:        "sha256",

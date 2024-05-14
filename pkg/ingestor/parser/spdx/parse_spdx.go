@@ -42,7 +42,8 @@ type spdxParser struct {
 	packageLegals       map[string][]*model.CertifyLegalInputSpec
 	filePackages        map[string][]*model.PkgInputSpec
 	fileArtifacts       map[string][]*model.ArtifactInputSpec
-	topLevelPackages    map[string][]*model.PkgInputSpec
+	topLevelPackages    []*model.PkgInputSpec
+	topLevelArtifacts   map[string][]*model.ArtifactInputSpec
 	identifierStrings   *common.IdentifierStrings
 	spdxDoc             *spdx.Document
 	topLevelIsHeuristic bool
@@ -56,7 +57,7 @@ func NewSpdxParser() common.DocumentParser {
 		packageLegals:       map[string][]*model.CertifyLegalInputSpec{},
 		filePackages:        map[string][]*model.PkgInputSpec{},
 		fileArtifacts:       map[string][]*model.ArtifactInputSpec{},
-		topLevelPackages:    map[string][]*model.PkgInputSpec{},
+		topLevelArtifacts:   make(map[string][]*model.ArtifactInputSpec),
 		identifierStrings:   &common.IdentifierStrings{},
 		topLevelIsHeuristic: false,
 	}
@@ -77,17 +78,25 @@ func (s *spdxParser) Parse(ctx context.Context, doc *processor.Document) error {
 		return fmt.Errorf("SPDX document had invalid created time %q : %w", spdxDoc.CreationInfo.Created, err)
 	}
 	s.timeScanned = time
-	if err := s.getPackages(); err != nil {
+
+	topLevelSPDXIDs, err := s.getTopLevelSPDXIDs()
+	if err != nil {
 		return err
 	}
-	if err := s.getFiles(); err != nil {
+
+	if err := s.getFiles(topLevelSPDXIDs); err != nil {
 		return err
 	}
+
+	if err := s.getPackages(topLevelSPDXIDs); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// creating top level package manually until https://github.com/anchore/syft/issues/1241 is resolved
-func (s *spdxParser) getTopLevelPackageSpdxIds() ([]string, error) {
+// creating top level IDs manually until https://github.com/anchore/syft/issues/1241 is resolved
+func (s *spdxParser) getTopLevelSPDXIDs() ([]string, error) {
 	// TODO: Add CertifyPkg to make a connection from GUAC purl to OCI purl guessed
 	// oci purl: pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io/debian&tag=bullseye
 	var spdxIds []string
@@ -114,12 +123,7 @@ func (s *spdxParser) getTopLevelPackageSpdxIds() ([]string, error) {
 	return spdxIds, nil
 }
 
-func (s *spdxParser) getPackages() error {
-	topLevelSpdxIds, err := s.getTopLevelPackageSpdxIds()
-	if err != nil {
-		return err
-	}
-
+func (s *spdxParser) getPackages(topLevelSPDXIDs []string) error {
 	for _, pac := range s.spdxDoc.Packages {
 		// for each package create a package for each of them
 		purl := ""
@@ -139,18 +143,22 @@ func (s *spdxParser) getPackages() error {
 			return err
 		}
 
-		if slices.Contains(topLevelSpdxIds, string(pac.PackageSPDXIdentifier)) {
-			s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)], pkg)
+		if slices.Contains(topLevelSPDXIDs, string(pac.PackageSPDXIdentifier)) {
+			s.topLevelPackages = append(s.topLevelPackages, pkg)
 		}
 		s.packagePackages[string(pac.PackageSPDXIdentifier)] = append(s.packagePackages[string(pac.PackageSPDXIdentifier)], pkg)
 
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range pac.PackageChecksums {
-			artifact := &model.ArtifactInputSpec{
+			art := &model.ArtifactInputSpec{
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
-			s.packageArtifacts[string(pac.PackageSPDXIdentifier)] = append(s.packageArtifacts[string(pac.PackageSPDXIdentifier)], artifact)
+			id := string(pac.PackageSPDXIdentifier)
+			if slices.Contains(topLevelSPDXIDs, id) {
+				s.topLevelArtifacts[id] = append(s.topLevelArtifacts[id], art)
+			}
+			s.packageArtifacts[id] = append(s.packageArtifacts[id], art)
 		}
 
 		if pac.PackageLicenseDeclared != "" ||
@@ -173,13 +181,13 @@ func (s *spdxParser) getPackages() error {
 	}
 
 	// If there is no top level Spdx Id that can be derived from the relationships, we take a best guess for the SpdxId.
-	if _, ok := s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)]; !ok {
+	if len(s.topLevelPackages) == 0 {
 		purl := "pkg:guac/spdx/" + asmhelpers.SanitizeString(s.spdxDoc.DocumentName)
 		topPackage, err := asmhelpers.PurlToPkg(purl)
 		if err != nil {
 			return err
 		}
-		s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)] = append(s.topLevelPackages[string(s.spdxDoc.SPDXIdentifier)], topPackage)
+		s.topLevelPackages = append(s.topLevelPackages, topPackage)
 		s.identifierStrings.PurlStrings = append(s.identifierStrings.PurlStrings, purl)
 		s.topLevelIsHeuristic = true
 	}
@@ -187,7 +195,7 @@ func (s *spdxParser) getPackages() error {
 	return nil
 }
 
-func (s *spdxParser) getFiles() error {
+func (s *spdxParser) getFiles(topLevelSPDXIDs []string) error {
 	for _, file := range s.spdxDoc.Files {
 		// if checksums exists create an artifact for each of them
 		for _, checksum := range file.Checksums {
@@ -200,14 +208,21 @@ func (s *spdxParser) getFiles() error {
 			if err != nil {
 				return err
 			}
+			if slices.Contains(topLevelSPDXIDs, string(file.FileSPDXIdentifier)) {
+				s.topLevelPackages = append(s.topLevelPackages, pkg)
+			}
 			s.filePackages[string(file.FileSPDXIdentifier)] = append(s.filePackages[string(file.FileSPDXIdentifier)], pkg)
 
-			artifact := &model.ArtifactInputSpec{
+			art := &model.ArtifactInputSpec{
 				Algorithm: strings.ToLower(string(checksum.Algorithm)),
 				Digest:    checksum.Value,
 			}
 
-			s.fileArtifacts[string(file.FileSPDXIdentifier)] = append(s.fileArtifacts[string(file.FileSPDXIdentifier)], artifact)
+			id := string(file.FileSPDXIdentifier)
+			if slices.Contains(topLevelSPDXIDs, id) {
+				s.topLevelArtifacts[id] = append(s.topLevelArtifacts[id], art)
+			}
+			s.fileArtifacts[id] = append(s.fileArtifacts[id], art)
 		}
 	}
 	return nil
@@ -217,34 +232,12 @@ func parseSpdxBlob(p []byte) (*spdx.Document, error) {
 	return json.Read(bytes.NewReader(p))
 }
 
-func (s *spdxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
-	if packNode, ok := s.packagePackages[string(elementID)]; ok {
-		return packNode
-	}
-	return nil
-}
-
-func (s *spdxParser) getTopLevelPackageElement(elementID string) []*model.PkgInputSpec {
-	if packNode, ok := s.topLevelPackages[string(elementID)]; ok {
-		return packNode
-	}
-	return nil
-}
-
-func (s *spdxParser) getFileElement(elementID string) []*model.PkgInputSpec {
-	if fileNode, ok := s.filePackages[string(elementID)]; ok {
-		return fileNode
-	}
-	return nil
-}
-
 func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
 	preds := &assembler.IngestPredicates{}
 
-	topLevel := s.getTopLevelPackageElement(string(s.spdxDoc.SPDXIdentifier))
-	if topLevel == nil {
-		logger.Errorf("error getting predicates: unable to find top level package element")
+	if len(s.topLevelArtifacts) == 0 && len(s.topLevelPackages) == 0 {
+		logger.Errorf("error getting predicates: unable to find top level artifact or package element")
 		return preds
 	} else {
 		// adding top level package edge manually for all depends on package
@@ -253,13 +246,27 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 			logger.Errorf("SPDX document had invalid created time %q : %w", s.spdxDoc.CreationInfo.Created, err)
 			return nil
 		}
-		for _, topLevelPkg := range topLevel {
-			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(topLevelPkg, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
+
+		if len(s.topLevelArtifacts) > 0 {
+			for _, arts := range s.topLevelArtifacts {
+				for _, art := range arts {
+					preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromArtifact(art, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
+				}
+			}
+
+			if len(s.topLevelArtifacts) != len(s.topLevelPackages) {
+				logger.Warnf("Top-level unique artifact count (%d) and top-level package count (%d) are mismatched. SBOM ingestion may not be as expected.",
+					len(s.topLevelArtifacts), len(s.topLevelPackages))
+			}
+		} else {
+			for _, topLevelPkg := range s.topLevelPackages {
+				preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromPkg(topLevelPkg, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
+			}
 		}
 
 		if s.topLevelIsHeuristic {
 			preds.IsDependency = append(preds.IsDependency,
-				common.CreateTopLevelIsDeps(topLevel[0], s.packagePackages, s.filePackages,
+				common.CreateTopLevelIsDeps(s.topLevelPackages[0], s.packagePackages, s.filePackages,
 					"top-level package GUAC heuristic connecting to each file/package")...)
 		}
 	}
@@ -283,10 +290,10 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 			continue
 		}
 
-		foundPackNodes := s.getPackageElement(foundId)
-		foundFileNodes := s.getFileElement(foundId)
-		relatedPackNodes := s.getPackageElement(relatedId)
-		relatedFileNodes := s.getFileElement(relatedId)
+		foundPackNodes := s.packagePackages[foundId]
+		foundFileNodes := s.filePackages[foundId]
+		relatedPackNodes := s.packagePackages[relatedId]
+		relatedFileNodes := s.filePackages[relatedId]
 
 		justification := getJustification(rel)
 
@@ -376,7 +383,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 	}
 
 	for _, pkg := range s.spdxDoc.Packages {
-		pkgInputSpecs := s.getPackageElement(string(pkg.PackageSPDXIdentifier))
+		pkgInputSpecs := s.packagePackages[string(pkg.PackageSPDXIdentifier)]
 		for _, extRef := range pkg.PackageExternalReferences {
 			if extRef.Category == spdx_common.CategorySecurity {
 				locator := extRef.Locator

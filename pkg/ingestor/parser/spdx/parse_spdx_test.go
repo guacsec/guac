@@ -17,6 +17,7 @@ package spdx
 
 import (
 	"context"
+	"slices"
 	"testing"
 	"time"
 
@@ -29,6 +30,9 @@ import (
 	asmhelpers "github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 func pUrlToPkgDiscardError(pUrl string) *generated.PkgInputSpec {
@@ -41,13 +45,13 @@ func Test_spdxParser(t *testing.T) {
 	packageXns := "pkg/golang.org/x"
 	depPackageOfVersion := "sha256:a743268cd3c56f921f3fb706cc0425c8ab78119fd433e38bb7c5dcd5635b0d10"
 	packageOfEmptyString := ""
-	ctx := logging.WithLogger(context.Background())
 	tests := []struct {
 		name           string
 		additionalOpts []cmp.Option
 		doc            *processor.Document
 		wantPredicates *assembler.IngestPredicates
 		wantErr        bool
+		wantWarning    string
 	}{
 		{
 			name: "valid big SPDX document",
@@ -1096,9 +1100,371 @@ func Test_spdxParser(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "SPDX v2.3 with package with a checksum described by the SBOM",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(generated.HasSBOMInputSpec{},
+					"KnownSince"),
+			}, doc: &processor.Document{
+				Blob: []byte(`
+				{
+					"spdxVersion": "SPDX-2.3",
+					"dataLicense": "CC0-1.0",
+					"SPDXID": "SPDXRef-DOCUMENT",
+					"creationInfo": {
+					  "created": "2024-04-30T01:12:27Z"
+					},
+					"name": "for-testing-a-pkg-with-checksum",
+					"documentNamespace": "https://example.com/for-testing-a-pkg-with-checksum",
+					"packages": [
+					  {
+						"name": "for-testing-a-pkg-with-checksum-pkg",
+						"SPDXID": "SPDXRef-Package-for-testing-a-pkg-with-checksum-pkg",
+						"downloadLocation": "https://example.com/for-testing-a-pkg-with-checksum-pkg",
+						"checksums": [
+							{
+								"algorithm": "SHA1",
+								"checksumValue": "pkgsha1"
+							},
+							{
+								"algorithm": "SHA3-384",
+								"checksumValue": "pkgsha3-384"
+							}
+						]
+					}
+					],
+					"relationships": [
+						{
+							"spdxElementId": "SPDXRef-DOCUMENT",
+							"relationshipType": "DESCRIBES",
+							"relatedSpdxElement": "SPDXRef-Package-for-testing-a-pkg-with-checksum-pkg"
+						}
+					]
+				  }
+							  `),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "pkgsha1"},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing-a-pkg-with-checksum",
+							Algorithm:        "sha256",
+							Digest:           "1a8c41553b593172ff06e036ca8dc411aa228ab4c266d162640df69f7414e2c1",
+							DownloadLocation: "TestSource",
+						},
+					},
+					{
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "pkgsha3-384"},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing-a-pkg-with-checksum",
+							Algorithm:        "sha256",
+							Digest:           "1a8c41553b593172ff06e036ca8dc411aa228ab4c266d162640df69f7414e2c1",
+							DownloadLocation: "TestSource",
+						},
+					},
+				},
+				IsOccurrence: []assembler.IsOccurrenceIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "for-testing-a-pkg-with-checksum-pkg",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "pkgsha1"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "for-testing-a-pkg-with-checksum-pkg",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "pkgsha3-384"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX v2.3 with a file with a checksum described by the SBOM",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(generated.HasSBOMInputSpec{},
+					"KnownSince"),
+			}, doc: &processor.Document{
+				Blob: []byte(`
+				{
+					"spdxVersion": "SPDX-2.3",
+					"dataLicense": "CC0-1.0",
+					"SPDXID": "SPDXRef-DOCUMENT",
+					"creationInfo": {
+					  "created": "2024-04-30T01:12:27Z"
+					},
+					"name": "for-testing-an-art-with-checksum",
+					"documentNamespace": "https://example.com/for-testing-an-art-with-checksum",
+					"files": [
+					  {
+						"filename": "for-testing-an-art-with-checksum-file",
+						"SPDXID": "SPDXRef-File-for-testing-an-art-with-checksum",
+						"downloadLocation": "https://example.com/for-testing-an-art-with-checksum-file",
+						"checksums": [
+							{
+								"algorithm": "SHA1",
+								"checksumValue": "filesha1"
+							},
+							{
+								"algorithm": "SHA3-384",
+								"checksumValue": "filesha3-384"
+							}
+						]
+					}
+					],
+					"relationships": [
+						{
+							"spdxElementId": "SPDXRef-DOCUMENT",
+							"relationshipType": "DESCRIBES",
+							"relatedSpdxElement": "SPDXRef-File-for-testing-an-art-with-checksum"
+						}
+					]
+				  }
+							  `),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "filesha1"},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing-an-art-with-checksum",
+							Algorithm:        "sha256",
+							Digest:           "7c809829c97c7f0b2941830013233ccf14b2ada200cdf77c54b95021961a0aa3",
+							DownloadLocation: "TestSource",
+						},
+					},
+					{
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "filesha3-384"},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing-an-art-with-checksum",
+							Algorithm:        "sha256",
+							Digest:           "7c809829c97c7f0b2941830013233ccf14b2ada200cdf77c54b95021961a0aa3",
+							DownloadLocation: "TestSource",
+						},
+					},
+				},
+				IsOccurrence: []assembler.IsOccurrenceIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("files"),
+							Name:      "sha1:filesha1",
+							Version:   &packageOfEmptyString,
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{
+									Key:   "filename",
+									Value: "for-testing-an-art-with-checksum-file",
+								},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "filesha1"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("files"),
+							Name:      "sha1:filesha1",
+							Version:   &packageOfEmptyString,
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{
+									Key:   "filename",
+									Value: "for-testing-an-art-with-checksum-file",
+								},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "filesha3-384"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("files"),
+							Name:      "sha3-384:filesha3-384",
+							Version:   &packageOfEmptyString,
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{
+									Key:   "filename",
+									Value: "for-testing-an-art-with-checksum-file",
+								},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "filesha1"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("files"),
+							Name:      "sha3-384:filesha3-384",
+							Version:   &packageOfEmptyString,
+							Qualifiers: []generated.PackageQualifierInputSpec{
+								{
+									Key:   "filename",
+									Value: "for-testing-an-art-with-checksum-file",
+								},
+							},
+							Subpath: &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "filesha3-384"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx file with checksum"},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SPDX v2.3 with package with a checksum described by the SBOM, and a package is DESCRIBED_BY the doc, but has no checksum",
+			additionalOpts: []cmp.Option{
+				cmpopts.IgnoreFields(generated.HasSBOMInputSpec{},
+					"KnownSince"),
+			}, doc: &processor.Document{
+				Blob: []byte(`
+				{
+					"spdxVersion": "SPDX-2.3",
+					"dataLicense": "CC0-1.0",
+					"SPDXID": "SPDXRef-DOCUMENT",
+					"creationInfo": {
+					  "created": "2024-04-30T01:12:27Z"
+					},
+					"name": "for-testing-with-checksum",
+					"documentNamespace": "https://example.com/for-testing-with-checksum",
+					"packages": [
+					  {
+						"name": "for-testing-with-checksum-pkg",
+						"SPDXID": "SPDXRef-Package-for-testing-with-checksum-pkg",
+						"downloadLocation": "https://example.com/for-testing-with-checksum-pkg",
+						"checksums": [
+							{
+								"algorithm": "SHA1",
+								"checksumValue": "pkgsha1"
+							},
+							{
+								"algorithm": "SHA3-384",
+								"checksumValue": "pkgsha3-384"
+							}
+						]
+					},
+					{
+						"name": "for-testing-without-checksum-pkg",
+						"SPDXID": "SPDXRef-Package-for-testing-without-checksum-pkg",
+						"downloadLocation": "https://example.com/for-testing-without-checksum-pkg"
+					}
+					],
+					"relationships": [
+						{
+							"spdxElementId": "SPDXRef-DOCUMENT",
+							"relationshipType": "DESCRIBES",
+							"relatedSpdxElement": "SPDXRef-Package-for-testing-with-checksum-pkg"
+						},
+						{
+							"spdxElementId": "SPDXRef-Package-for-testing-with-checksum-pkg",
+							"relationshipType": "DESCRIBED_BY",
+							"relatedSpdxElement": "SPDXRef-DOCUMENT"
+						},
+						{
+							"spdxElementId": "SPDXRef-Package-for-testing-without-checksum-pkg",
+							"relationshipType": "DESCRIBED_BY",
+							"relatedSpdxElement": "SPDXRef-DOCUMENT"
+						}
+					]
+				  }
+							  `),
+				Format: processor.FormatJSON,
+				Type:   processor.DocumentSPDX,
+				SourceInformation: processor.SourceInformation{
+					Collector: "TestCollector",
+					Source:    "TestSource",
+				},
+			},
+			wantPredicates: &assembler.IngestPredicates{
+				HasSBOM: []assembler.HasSBOMIngest{
+					{
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "pkgsha1"},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing-with-checksum",
+							Algorithm:        "sha256",
+							Digest:           "a9d161aa15f725b2a4ff31c940b8662a2444bae9cc8705dedc911dfee6e5b680",
+							DownloadLocation: "TestSource",
+						},
+					},
+					{
+						Artifact: &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "pkgsha3-384"},
+						HasSBOM: &generated.HasSBOMInputSpec{
+							Uri:              "https://example.com/for-testing-with-checksum",
+							Algorithm:        "sha256",
+							Digest:           "a9d161aa15f725b2a4ff31c940b8662a2444bae9cc8705dedc911dfee6e5b680",
+							DownloadLocation: "TestSource",
+						},
+					},
+				},
+				IsOccurrence: []assembler.IsOccurrenceIngest{
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "for-testing-with-checksum-pkg",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha1", Digest: "pkgsha1"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+					{
+						Pkg: &generated.PkgInputSpec{
+							Type:      "guac",
+							Namespace: ptrfrom.String("pkg"),
+							Name:      "for-testing-with-checksum-pkg",
+							Version:   &packageOfEmptyString,
+							Subpath:   &packageOfEmptyString,
+						},
+						Artifact:     &generated.ArtifactInputSpec{Algorithm: "sha3-384", Digest: "pkgsha3-384"},
+						IsOccurrence: &generated.IsOccurrenceInputSpec{Justification: "spdx package with checksum"},
+					},
+				},
+			},
+			wantErr:     false,
+			wantWarning: "Top-level unique artifact count (1) and top-level package count (2) are mismatched. SBOM ingestion may not be as expected.",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var logger zapcore.Core
+			var logs *observer.ObservedLogs
+			logging.InitLogger(logging.Debug)
+			if tt.wantWarning != "" {
+				logger, logs = observer.New(zap.DebugLevel)
+				logging.SetLogger(zap.New(logger))
+			}
+			ctx := logging.WithLogger(context.Background())
+
 			s := NewSpdxParser()
 			err := s.Parse(ctx, tt.doc)
 			if (err != nil) != tt.wantErr {
@@ -1112,7 +1478,15 @@ func Test_spdxParser(t *testing.T) {
 			preds := s.GetPredicates(ctx)
 			opts := append(testdata.IngestPredicatesCmpOpts, tt.additionalOpts...)
 			if d := cmp.Diff(tt.wantPredicates, preds, opts...); len(d) != 0 {
-				t.Errorf("spdx.GetPredicate mismatch values (+got, -expected): %s", d)
+				t.Errorf("spdx.GetPredicates() mismatch values (+got, -expected): %s", d)
+			}
+
+			if tt.wantWarning != "" {
+				if !slices.ContainsFunc(logs.All(), func(e observer.LoggedEntry) bool {
+					return e.Message == tt.wantWarning
+				}) {
+					t.Errorf("spdx.GetPredicates() did not log the expected warning (wanted '%s')", tt.wantWarning)
+				}
 			}
 		})
 	}
