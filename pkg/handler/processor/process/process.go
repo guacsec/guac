@@ -90,8 +90,12 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}
+
+	retries := 0
+
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d *pubsub.Message) error {
+		retries++
 
 		blobStoreKey, err := events.DecodeEventSubject(ctx, d.Body)
 		if err != nil {
@@ -124,9 +128,20 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 			childLogger.Errorf("[processor: %s] message id: %s not acknowledged in pusbub", uuidString, d.LoggableID)
 			return nil
 		}
+
 		// ack the message from the queue once the ingestion has occurred via the Emitter (em) function specified above
 		d.Ack()
 		childLogger.Infof("[processor: %s] message acknowledged in pusbub", uuidString)
+
+		childLogger.Info("Processing complete",
+			zap.String("file_name", doc.SourceInformation.Source),
+			zap.String("document_hash", blobStoreKey),
+			zap.String("status", "success"),
+			zap.Int("file_size", len(d.Body)),
+			zap.Int("retries", retries-1),
+		)
+
+		retries = 0
 
 		return nil
 	}
