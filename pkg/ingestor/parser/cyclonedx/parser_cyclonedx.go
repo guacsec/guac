@@ -285,13 +285,20 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 	}
 
 	var directDependencies, indirectDependencies []string
+	accountForPackages := map[string]bool{}
 
+	// Note: some sboms do not account for all packages via c.cdxBom.Dependencies.
+	// in that case they need to map to the top level package dependency.
+	// accountForPackages is used to keep track of the packages that have been accounted for (isDep created).
+	// These will be deleted from packagePackages map once complete and the remainder will be added as a dependency to the
+	// top level package.
 	for _, deps := range *c.cdxBom.Dependencies {
 		dependencyType := model.DependencyTypeUnknown
 		currPkg, found := c.packagePackages[deps.Ref]
 		if !found {
 			continue
 		}
+		accountForPackages[deps.Ref] = true
 		if deps.Ref == c.cdxBom.Metadata.Component.BOMRef {
 			dependencyType = model.DependencyTypeDirect
 		} else if slices.Contains(directDependencies, deps.Ref) || slices.Contains(indirectDependencies, deps.Ref) {
@@ -309,6 +316,7 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 		if deps.Dependencies != nil {
 			for _, depPkgRef := range *deps.Dependencies {
 				if depPkg, exist := c.packagePackages[depPkgRef]; exist {
+					accountForPackages[depPkgRef] = true
 					for _, packNode := range currPkg {
 						p, err := common.GetIsDep(packNode, depPkg, []*model.PkgInputSpec{}, "CDX BOM Dependency", model.DependencyTypeDirect)
 						if err != nil {
@@ -344,6 +352,13 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 			}
 		}
 	}
+
+	// remove all accounted for packages from packagePackages map to determine if there are any that still need to be accounted for
+	for pkgRef := range accountForPackages {
+		delete(c.packagePackages, pkgRef)
+	}
+	// create a isDependency with the remainder to the top level as an unknown dependency type.
+	preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
 
 	return preds
 }
