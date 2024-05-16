@@ -128,6 +128,7 @@ func (c *demoClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSAS
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	var search []string
 	foundOne := false
@@ -168,6 +169,16 @@ func (c *demoClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSAS
 			hs, err := c.addSLSAIfMatch(ctx, &hasSLSASpec, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if hs == nil {
+				continue
+			}
+
+			if after != nil {
+				if hs.ID > *after {
+					addToCount += 1
+				}
+				continue
 			}
 
 			edges = append(edges, &model.HasSLSAEdge{
@@ -240,7 +251,7 @@ func (c *demoClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSAS
 
 	if len(edges) != 0 {
 		return &model.HasSLSAConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -312,6 +323,10 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if hs == nil {
+				continue
+			}
+
 			out = append(out, hs)
 		}
 	} else {
@@ -333,6 +348,10 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if hs == nil {
+					continue
+				}
+
 				out = append(out, hs)
 			}
 		}

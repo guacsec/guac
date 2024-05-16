@@ -220,6 +220,7 @@ func (c *demoClient) HashEqualList(ctx context.Context, hashEqualSpec model.Hash
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	var search []string
 	foundOne := false
@@ -248,6 +249,13 @@ func (c *demoClient) HashEqualList(ctx context.Context, hashEqualSpec model.Hash
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if he == nil {
+				continue
+			}
+
+			if after != nil {
+				if he.ID > *after {
+					addToCount += 1
+				}
 				continue
 			}
 
@@ -321,7 +329,7 @@ func (c *demoClient) HashEqualList(ctx context.Context, hashEqualSpec model.Hash
 
 	if len(edges) != 0 {
 		return &model.HashEqualConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -378,6 +386,11 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if he == nil {
+				continue
+			}
+
 			out = append(out, he)
 		}
 	} else {
@@ -399,6 +412,11 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if he == nil {
+					continue
+				}
+
 				out = append(out, he)
 			}
 		}

@@ -346,6 +346,7 @@ func (c *demoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpe
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	if sourceSpec.Type != nil {
 		inType := &srcType{
@@ -369,6 +370,14 @@ func (c *demoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpe
 							},
 						},
 					}
+
+					if after != nil {
+						if sNamespaces[0].Names[0].ID > *after {
+							addToCount += 1
+						}
+						continue
+					}
+
 					edges = append(edges, &model.SourceEdge{
 						Cursor: sNamespaces[0].Names[0].ID,
 						Node:   s,
@@ -451,7 +460,7 @@ func (c *demoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpe
 
 	if len(edges) != 0 {
 		return &model.SourceConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),

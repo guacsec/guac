@@ -183,6 +183,7 @@ func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.Cer
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	var search []string
 	foundOne := false
@@ -210,6 +211,13 @@ func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.Cer
 			}
 
 			for _, scorecardOut := range out {
+				if after != nil {
+					if scorecardOut.ID > *after {
+						addToCount += 1
+					}
+					continue
+				}
+
 				edges = append(edges, &model.CertifyScorecardEdge{
 					Cursor: scorecardOut.ID,
 					Node:   scorecardOut,
@@ -285,7 +293,7 @@ func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.Cer
 
 	if len(edges) != 0 {
 		return &model.CertifyScorecardConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),

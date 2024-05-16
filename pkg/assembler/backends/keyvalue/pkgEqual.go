@@ -190,6 +190,7 @@ func (c *demoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqu
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	var search []string
 	for _, p := range pkgEqualSpec.Packages {
@@ -213,6 +214,13 @@ func (c *demoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqu
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if pe == nil {
+				continue
+			}
+
+			if after != nil {
+				if pe.ID > *after {
+					addToCount += 1
+				}
 				continue
 			}
 
@@ -286,7 +294,7 @@ func (c *demoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqu
 
 	if len(edges) != 0 {
 		return &model.PkgEqualConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -338,6 +346,10 @@ func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) (
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if pe == nil {
+				continue
+			}
+
 			out = append(out, pe)
 		}
 	} else {
@@ -359,6 +371,10 @@ func (c *demoClient) PkgEqual(ctx context.Context, filter *model.PkgEqualSpec) (
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if pe == nil {
+					continue
+				}
+
 				out = append(out, pe)
 			}
 		}

@@ -231,6 +231,7 @@ func (c *demoClient) CertifyVEXStatementList(ctx context.Context, certifyVEXStat
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	var search []string
 	foundOne := false
@@ -277,6 +278,13 @@ func (c *demoClient) CertifyVEXStatementList(ctx context.Context, certifyVEXStat
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if vex == nil {
+				continue
+			}
+
+			if after != nil {
+				if vex.ID > *after {
+					addToCount += 1
+				}
 				continue
 			}
 
@@ -351,7 +359,7 @@ func (c *demoClient) CertifyVEXStatementList(ctx context.Context, certifyVEXStat
 
 	if len(edges) != 0 {
 		return &model.VEXConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -427,6 +435,11 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if v == nil {
+				continue
+			}
+
 			out = append(out, v)
 		}
 	} else {
@@ -448,6 +461,11 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if v == nil {
+					continue
+				}
+
 				out = append(out, v)
 			}
 		}

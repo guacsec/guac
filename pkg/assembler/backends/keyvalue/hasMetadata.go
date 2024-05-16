@@ -237,6 +237,7 @@ func (c *demoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	// Cant really search for an exact Pkg, as these can be linked to either
 	// names or versions, and version could be empty.
@@ -272,6 +273,16 @@ func (c *demoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.
 			hm, err := c.hasMetadataIfMatch(ctx, &hasMetadataSpec, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if hm == nil {
+				continue
+			}
+
+			if after != nil {
+				if hm.ID > *after {
+					addToCount += 1
+				}
+				continue
 			}
 
 			edges = append(edges, &model.HasMetadataEdge{
@@ -344,7 +355,7 @@ func (c *demoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.
 
 	if len(edges) != 0 {
 		return &model.HasMetadataConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -411,6 +422,11 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if hm == nil {
+				continue
+			}
+
 			out = append(out, hm)
 		}
 	} else {
@@ -432,6 +448,11 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if hm == nil {
+					continue
+				}
+
 				out = append(out, hm)
 			}
 		}

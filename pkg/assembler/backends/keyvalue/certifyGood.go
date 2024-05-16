@@ -229,6 +229,7 @@ func (c *demoClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	// Cant really search for an exact Pkg, as these can be linked to either
 	// names or versions, and version could be empty.
@@ -264,6 +265,16 @@ func (c *demoClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.
 			cg, err := c.CGIfMatch(ctx, &certifyGoodSpec, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if cg == nil {
+				continue
+			}
+
+			if after != nil {
+				if cg.ID > *after {
+					addToCount += 1
+				}
+				continue
 			}
 
 			edges = append(edges, &model.CertifyGoodEdge{
@@ -337,7 +348,7 @@ func (c *demoClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.
 
 	if len(edges) != 0 {
 		return &model.CertifyGoodConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -403,6 +414,9 @@ func (c *demoClient) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 			cg, err := c.CGIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if cg == nil {
+				continue
 			}
 
 			out = append(out, cg)

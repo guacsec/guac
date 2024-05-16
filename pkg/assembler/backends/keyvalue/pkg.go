@@ -557,6 +557,7 @@ func (c *demoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, af
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	if pkgSpec.Type != nil {
 		inType := &pkgType{
@@ -587,6 +588,14 @@ func (c *demoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, af
 								},
 							},
 						}
+
+						if after != nil {
+							if pNamespaces[0].Names[0].Versions[0].ID > *after {
+								addToCount += 1
+							}
+							continue
+						}
+
 						edges = append(edges, &model.PackageEdge{
 							Cursor: pNamespaces[0].Names[0].Versions[0].ID,
 							Node:   p,
@@ -682,7 +691,7 @@ func (c *demoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, af
 
 	if len(edges) != 0 {
 		return &model.PackageConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),

@@ -171,6 +171,7 @@ func (c *demoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilit
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	var search []string
 	foundOne := false
@@ -196,6 +197,13 @@ func (c *demoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilit
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if vmd == nil {
+				continue
+			}
+
+			if after != nil {
+				if vmd.ID > *after {
+					addToCount += 1
+				}
 				continue
 			}
 
@@ -269,7 +277,7 @@ func (c *demoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilit
 
 	if len(edges) != 0 {
 		return &model.VulnerabilityMetadataConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -325,6 +333,10 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if vmd == nil {
+				continue
+			}
+
 			out = append(out, vmd)
 		}
 	} else {
@@ -346,6 +358,10 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if vmd == nil {
+					continue
+				}
+
 				out = append(out, vmd)
 			}
 		}

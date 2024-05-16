@@ -185,6 +185,7 @@ func (c *demoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	// Cant really search for an exact Pkg, as these can be linked to either
 	// names or versions, only search Source backedges.
@@ -211,8 +212,14 @@ func (c *demoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-
 			if src == nil {
+				continue
+			}
+
+			if after != nil {
+				if src.ID > *after {
+					addToCount += 1
+				}
 				continue
 			}
 
@@ -285,7 +292,7 @@ func (c *demoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.
 
 	if len(edges) != 0 {
 		return &model.HasSourceAtConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -340,6 +347,10 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if src == nil {
+				continue
+			}
+
 			out = append(out, src)
 		}
 	} else {
@@ -361,6 +372,10 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if src == nil {
+					continue
+				}
+
 				out = append(out, src)
 			}
 		}

@@ -188,6 +188,7 @@ func (c *demoClient) IsDependencyList(ctx context.Context, isDependencySpec mode
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	var search []string
 	foundOne := false
@@ -214,6 +215,13 @@ func (c *demoClient) IsDependencyList(ctx context.Context, isDependencySpec mode
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if dep == nil {
+				continue
+			}
+
+			if after != nil {
+				if dep.ID > *after {
+					addToCount += 1
+				}
 				continue
 			}
 
@@ -287,7 +295,7 @@ func (c *demoClient) IsDependencyList(ctx context.Context, isDependencySpec mode
 
 	if len(edges) != 0 {
 		return &model.IsDependencyConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -342,6 +350,10 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if dep == nil {
+				continue
+			}
+
 			out = append(out, dep)
 		}
 	} else {
@@ -363,6 +375,10 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if dep == nil {
+					continue
+				}
+
 				out = append(out, dep)
 			}
 		}

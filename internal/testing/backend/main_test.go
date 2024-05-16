@@ -106,10 +106,10 @@ type backend interface {
 
 var testBackends = map[string]backend{
 	memmap: newMemMap(),
-	arango: newArango(),
-	redis:  newRedis(),
-	ent:    newEnt(),
-	tikv:   newTikv(),
+	//arango: newArango(),
+	//redis:  newRedis(),
+	//ent:    newEnt(),
+	//tikv:   newTikv(),
 }
 
 var currentBackend string

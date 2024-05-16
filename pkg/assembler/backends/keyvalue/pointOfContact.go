@@ -236,6 +236,7 @@ func (c *demoClient) PointOfContactList(ctx context.Context, pointOfContactSpec 
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	// Cant really search for an exact Pkg, as these can be linked to either
 	// names or versions, and version could be empty.
@@ -273,6 +274,13 @@ func (c *demoClient) PointOfContactList(ctx context.Context, pointOfContactSpec 
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
 			if poc == nil {
+				continue
+			}
+
+			if after != nil {
+				if poc.ID > *after {
+					addToCount += 1
+				}
 				continue
 			}
 
@@ -346,7 +354,7 @@ func (c *demoClient) PointOfContactList(ctx context.Context, pointOfContactSpec 
 
 	if len(edges) != 0 {
 		return &model.PointOfContactConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -413,6 +421,10 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if poc == nil {
+				continue
+			}
+
 			out = append(out, poc)
 		}
 	} else {
@@ -434,6 +446,10 @@ func (c *demoClient) PointOfContact(ctx context.Context, filter *model.PointOfCo
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if poc == nil {
+					continue
+				}
+
 				out = append(out, poc)
 			}
 		}

@@ -193,6 +193,7 @@ func (c *demoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.
 	hasNextPage := false
 	numNodes := 0
 	totalCount := 0
+	addToCount := 0
 
 	var search []string
 	foundOne := false
@@ -246,6 +247,17 @@ func (c *demoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.
 			cv, err := c.certifyVulnIfMatch(ctx, &certifyVulnSpec, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+
+			if cv == nil {
+				continue
+			}
+
+			if after != nil {
+				if cv.ID > *after {
+					addToCount += 1
+				}
+				continue
 			}
 
 			edges = append(edges, &model.CertifyVulnEdge{
@@ -317,7 +329,7 @@ func (c *demoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.
 
 	if len(edges) != 0 {
 		return &model.CertifyVulnConnection{
-			TotalCount: totalCount,
+			TotalCount: totalCount + addToCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
@@ -402,6 +414,11 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if cv == nil {
+				continue
+			}
+
 			out = append(out, cv)
 		}
 	} else {
@@ -423,6 +440,11 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if cv == nil {
+					continue
+				}
+
 				out = append(out, cv)
 			}
 		}
