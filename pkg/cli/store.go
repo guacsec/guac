@@ -35,7 +35,6 @@ func init() {
 
 	// Set of all flags used across GUAC clis and subcommands. Use consistent
 	// names for config file.
-	set.String("pubsub-addr", "nats://127.0.0.1:4222", "gocloud connection string for pubsub configured via https://gocloud.dev/howto/pubsub/ (default is nats://127.0.0.1:4222)")
 	set.String("csub-addr", "localhost:2782", "address to connect to collect-sub service")
 	set.Bool("csub-tls", false, "enable tls connection to the server")
 	set.Bool("csub-tls-skip-verify", false, "skip verifying server certificate (for self-signed certificates for example)")
@@ -59,6 +58,12 @@ func init() {
 
 	// blob store address
 	set.String("blob-addr", "file:///tmp/blobstore?no_tmp_dir=true", "gocloud connection string for blob store configured via https://gocloud.dev/howto/blob/ (default: filesystem)")
+
+	// pubsub address
+	set.String("pubsub-addr", "nats://127.0.0.1:4222", "gocloud connection string for pubsub configured via https://gocloud.dev/howto/pubsub/ (default is nats://127.0.0.1:4222)")
+
+	// enable/disable publish to queue
+	set.Bool("publish-to-queue", true, "enable/disable message publish to queue")
 
 	set.String("neptune-endpoint", "localhost", "address to neptune db")
 	set.Int("neptune-port", 8182, "port used for neptune db connection")

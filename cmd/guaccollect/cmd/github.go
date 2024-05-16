@@ -60,6 +60,8 @@ type githubOptions struct {
 	workflowFileName string
 	// the owner/repo name to use for the collector
 	ownerRepoName string
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 var githubCmd = &cobra.Command{
@@ -99,6 +101,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
+			viper.GetBool("publish-to-queue"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -150,7 +153,7 @@ you have access to read and write to the respective blob store.`,
 			logger.Fatalf("unable to register Github collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
@@ -165,6 +168,7 @@ func validateGithubFlags(
 	csubTlsSkipVerify,
 	useCsub,
 	poll bool,
+	pubToQueue bool,
 	args []string,
 ) (githubOptions, error) {
 	var opts githubOptions
@@ -174,6 +178,7 @@ func validateGithubFlags(
 	opts.githubMode = githubMode
 	opts.sbomName = sbomName
 	opts.workflowFileName = workflowFileName
+	opts.publishToQueue = pubToQueue
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

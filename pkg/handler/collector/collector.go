@@ -131,7 +131,7 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 // retrieval by the processor/ingestor. A CDEvent is created to transmit the key (which is the
 // sha256 of the collected "document"). This also fixes the issues where the "document" was too large
 // to be sent across the event stream.
-func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
+func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub, pubToQueue bool) error {
 	logger := d.ChildLogger
 
 	docByte, err := json.Marshal(d)
@@ -145,7 +145,12 @@ func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobSto
 	if err = blobStore.Write(ctx, key, docByte); err != nil {
 		return fmt.Errorf("failed write document to blob store: %w", err)
 	}
-	logger.Infof("Successfully wrote document to blob store.")
+	logger.Infof("Successfully wrote document to blob store: %+v", d.SourceInformation.Source)
+
+	if !pubToQueue {
+		logger.Infof("Publish to queue flag is set to false, skipping cdEvent creation and publish to queue")
+		return nil
+	}
 
 	cdEvent, err := events.CreateArtifactPubEvent(ctx, key)
 	if err != nil {

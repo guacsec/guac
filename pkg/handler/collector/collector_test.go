@@ -168,7 +168,7 @@ func Test_Publish(t *testing.T) {
 
 	logBuffer.Reset()
 
-	err = Publish(ctx, &Ite6SLSADocWithLogger, blobStore, pubsub)
+	err = Publish(ctx, &Ite6SLSADocWithLogger, blobStore, pubsub, true)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
