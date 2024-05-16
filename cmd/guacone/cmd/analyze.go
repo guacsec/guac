@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/dominikbraun/graph"
@@ -55,13 +56,13 @@ var analyzeCmd = &cobra.Command{
   $ guacone collect files guac-data-main/docs/spdx/spdx_vuln.json 
 
   Difference
-  $ guacone analyze --diff --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
+  $ guacone analyze diff --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
   
   Union
-  $ guacone analyze --union --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
+  $ guacone analyze union --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
   
   Intersection
-  $ guacone analyze --intersect --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
+  $ guacone analyze intersect --uri --sboms=https://anchore.com/syft/image/ghcr.io/guacsec/vul-image-latest-6fd9de7b-9bec-4ae7-99d9-4b5e5ef6b869,https://anchore.com/syft/image/k8s.gcr.io/kube-apiserver-v1.24.4-b15339bc-a146-476e-a789-6a65e4e22e54
   `,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -81,8 +82,8 @@ var analyzeCmd = &cobra.Command{
 		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
 
 		//get necessary flags
-		all, _ := cmd.Flags().GetBool("all")
-		maxprint, _ := cmd.Flags().GetInt("maxprint")
+		// all, _ := cmd.Flags().GetBool("all")
+		// maxprint, _ := cmd.Flags().GetInt("maxprint")
 
 		slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
 		sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
@@ -95,98 +96,238 @@ var analyzeCmd = &cobra.Command{
 		inclOccur, _ := cmd.Flags().GetBool("incl-occur")
 		namespaces, _ := cmd.Flags().GetBool("namespaces")
 		id, _ := cmd.Flags().GetBool("id")
-		test, _ := cmd.Flags().GetString("test") 
+		test, _ := cmd.Flags().GetString("test")
 
 		var graphs []graph.Graph[string, *analyzer.Node]
 		var err error
 
-		if test == ""{
+		if test == "" {
 			if err = verifyAnalyzeFlags(slsas, sboms, errSlsa, errSbom, uri, purl, id); err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %s", err)
 				_ = cmd.Help()
 				os.Exit(1)
 			}
-	
+
 			//create graphs
 			graphs, err = hasSBOMToGraph(ctx, gqlclient, sboms, AnalyzeOpts{
 				Metadata: metadata, InclSoft: inclSoft, InclDeps: inclDeps, InclOccur: inclOccur, Namespaces: namespaces, URI: uri, PURL: purl, ID: id})
-	
+
 			if err != nil {
 				logger.Fatalf("Unable to generate graphs: %v", err)
 			}
 
-		}else {
+		} else {
 			graphs, err = readTwoSBOM(test)
 			if err != nil {
 				logger.Fatalf("Unable to generate graphs: %v", err)
 			}
 		}
 
-
-
 		if args[0] == "diff" {
-			analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
+			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
 			if err != nil {
-				logger.Fatalf("Unable to generate diff analysis: %v", err)
+				logger.Fatalf("unable to generate diff analysis: %v", err)
 			}
 
-			if printHighlightedAnalysis(analysisList, all, maxprint, 0) != nil {
-				logger.Fatalf("Unable to generate diff analysis output: %v", err)
+			diffs, err := analyzer.CompareAllPaths(analysisOne, analysisTwo)
+			if err != nil {
+				logger.Fatalf("unable to generate diff analysis: %v", err)
 			}
+
+			if err = printDiffedPathTable(diffs); err != nil {
+				logger.Fatalf("unable to print diff analysis: %v", err)
+			}
+
 		} else if args[0] == "intersect" {
-			analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 1)
+			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 1)
 			if err != nil {
 				logger.Fatalf("Unable to generate intersect analysis: %v", err)
 			}
-			if printHighlightedAnalysis(analysisList, all, maxprint, 1) != nil {
-				logger.Fatalf("Unable to generate diff analysis output: %v", err)
+			if err = printPathTable("Common Paths", analysisOne, analysisTwo); err != nil {
+				logger.Fatalf("unable to print intersect analysis: %v", err)
 			}
 		} else if args[0] == "union" {
-			analysisList, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 2)
+			analysisOne, analysisTwo, err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 2)
 			if err != nil {
-				logger.Fatalf("Unable to generate union analysis: %v", err)
+				logger.Fatalf("unable to generate union analysis: %v", err)
 			}
-			if printHighlightedAnalysis(analysisList, all, maxprint, 2) != nil {
-				logger.Fatalf("Unable to generate diff analysis output: %v", err)
+			if err = printPathTable("All Paths", analysisOne, analysisTwo); err != nil {
+				logger.Fatalf("unable to print union analysis: %v", err)
 			}
 		}
 	},
 }
 
-
-func printHighlightedAnalysis(diffList [][]*analyzer.Node, all bool, maxprint, action int) error {
-
-	//use action here to do different things
+func printDiffedPathTable(diffs []analyzer.DiffedPath) error {
 
 	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAutoWrapText(false)
 
-	switch action {
-	case 0:
-		table.SetHeader([]string{"Missing Paths"})
-	case 1:
-		table.SetHeader([]string{"Common Paths"})
-	case 2:
-		table.SetHeader([]string{"All Paths"})
-	}
-	for i := 0; i < len(diffList); i++ {
+	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
 
-		if !all && i+1 == maxprint {
-			break
+	table.SetNoWhiteSpace(true)
+
+	table.SetColumnSeparator("\t\t")
+	table.SetAutoMergeCells(false)
+
+	table.SetHeader([]string{"Path Differences"})
+
+	for _, diff := range diffs {
+		var row []string
+
+		for i, nodeOne := range diff.PathOne {
+
+			if len(row) != 0 {
+				row = append(row, "--->")
+				table.SetColMinWidth(i+1, 90)
+			} else {
+				table.SetColMinWidth(i, 90)
+			}
+
+			if nodeOne.Attributes["nodeType"] == "Package" {
+				s, err := analyzer.GetNodeString(1, nodeOne.Attributes["data"])
+				if err != nil {
+					return fmt.Errorf("unable to print diffs: %v", err)
+				}
+				row = append(row, s)
+
+			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
+				s, err := analyzer.GetNodeString(2, nodeOne.Attributes["data"])
+				if err != nil {
+					return fmt.Errorf("unable to print diffs: %v", err)
+				}
+				row = append(row, s)
+			}
 		}
 
-		var appendList []string
-		for _, val := range diffList[i] {
-			appendList = append(appendList, val.ID)
-		}
+		table.Append(row)
+		row = []string{}
 
-		table.Append(appendList)
+		for i, nodeOne := range diff.PathTwo {
+
+			if len(row) != 0 {
+				row = append(row, "--->")
+				table.SetColMinWidth(i+1, 50)
+			} else {
+				table.SetColMinWidth(i, 50)
+			}
+
+			if nodeOne.Attributes["nodeType"] == "Package" {
+				s, err := analyzer.GetNodeString(1, nodeOne.Attributes["data"])
+				if err != nil {
+					return fmt.Errorf("unable to print diffs: %v", err)
+				}
+				row = append(row, s)
+			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
+				s, err := analyzer.GetNodeString(2, nodeOne.Attributes["data"])
+				if err != nil {
+					return fmt.Errorf("unable to print diffs: %v", err)
+				}
+				row = append(row, s)
+			}
+		}
+		table.Append(row)
+
+		table.Append([]string{"================================="})
+
+		row  = []string{}
+		for i, diff := range diff.Diffs {
+			
+			if len(row) != 0 {
+				row = append(row, "    ")
+				table.SetColMinWidth(i+1, 50)
+			}else{
+				table.SetColMinWidth(i, 50)
+			}
+			
+			row = append(row, strings.Join(diff, "\n"))
+		}
+		table.Append(row)
+
+
+		table.Append([]string{"================================="})
 	}
 
+	
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.Render()
-	if !all && len(diffList) > maxprint {
-		fmt.Println("Run with --all to see full list")
+	return nil
+
+}
+
+func printPathTable(header string, analysisOne, analysisTwo [][]*analyzer.Node) error {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAutoWrapText(false)
+
+	table.SetBorders(tablewriter.Border{Left: true, Bottom: true})
+
+	table.SetNoWhiteSpace(true)
+
+	table.SetColumnSeparator("\t\t")
+	table.SetAutoMergeCells(false)
+
+	table.SetHeader([]string{header})
+
+	for _, pathOne := range analysisOne {
+		var row []string
+		for i, nodeOne := range pathOne {
+
+			if len(row) != 0 {
+				row = append(row, "--->")
+				table.SetColMinWidth(i+1, 50)
+			} else {
+				table.SetColMinWidth(i, 50)
+			}
+
+			if nodeOne.Attributes["nodeType"] == "Package" {
+				s, err := analyzer.GetNodeString(1, nodeOne.Attributes["data"])
+				if err != nil {
+					return fmt.Errorf("unable to print diffs: %v", err)
+				}
+
+				row = append(row, s)
+
+			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
+				s, err := analyzer.GetNodeString(2, nodeOne.Attributes["data"])
+				if err != nil {
+					return fmt.Errorf("unable to print diffs: %v", err)
+				}
+				row = append(row, s)
+			}
+		}
+		table.Append(row)
+
 	}
+
+	for _, pathTwo := range analysisTwo {
+		var row []string
+		for i, nodeOne := range pathTwo {
+			if len(row) != 0 {
+				row = append(row, "--->")
+				table.SetColMinWidth(i+1, 50)
+			} else {
+				table.SetColMinWidth(i, 50)
+			}
+
+			if nodeOne.Attributes["nodeType"] == "Package" {
+				s, err := analyzer.GetNodeString(1, nodeOne.Attributes["data"])
+				if err != nil {
+					return fmt.Errorf("unable to print diffs: %v", err)
+				}
+				row = append(row, s)
+
+			} else if nodeOne.Attributes["nodeType"] == "DependencyPackage" {
+				s, err := analyzer.GetNodeString(2, nodeOne.Attributes["data"])
+				if err != nil {
+					return fmt.Errorf("unable to print diffs: %v", err)
+				}
+				row = append(row, s)
+			}
+		}
+		table.Append(row)
+	}
+
+	table.Render()
 	return nil
 }
 
@@ -224,8 +365,8 @@ func hasSBOMToGraph(ctx context.Context, gqlclient graphql.Client, sboms []strin
 		if err != nil {
 			return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("(id)failed to lookup sbom: %v %v", sboms[1], err)
 		}
-
 	}
+
 	if hasSBOMResponseOne == nil || hasSBOMResponseTwo == nil {
 		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("failed to lookup sboms: nil")
 	}
@@ -288,25 +429,22 @@ func verifyAnalyzeFlags(slsas, sboms []string, errSlsa, errSbom error, uri, purl
 	return nil
 }
 
-
-
-func readTwoSBOM(filename string)([]graph.Graph[string, *analyzer.Node], error){
+func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error opening rearranged test file")
-
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error opening test file")
 	}
 	defer file.Close()
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error reading test file")
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error reading test file")
 	}
 	var sboms []model.HasSBOMsHasSBOM
 
 	err = json.Unmarshal(data, &sboms)
 	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error unmarshaling JSON")
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error unmarshaling JSON")
 	}
 
 	graphOne, errOne := analyzer.MakeGraph(sboms[0], false, false, false, false, false)
@@ -314,7 +452,7 @@ func readTwoSBOM(filename string)([]graph.Graph[string, *analyzer.Node], error){
 	graphTwo, errTwo := analyzer.MakeGraph(sboms[1], false, false, false, false, false)
 
 	if errOne != nil || errTwo != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
+		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("error making graph %v %v", errOne.Error(), errTwo.Error())
 	}
 
 	return []graph.Graph[string, *analyzer.Node]{graphOne, graphTwo}, nil
@@ -337,9 +475,6 @@ func init() {
 	analyzeCmd.PersistentFlags().Bool("all", false, " lists all")
 	analyzeCmd.PersistentFlags().Int("maxprint", 20, "max number of items to print")
 	analyzeCmd.PersistentFlags().String("test", "", "test file with sbom")
-	
 
 	rootCmd.AddCommand(analyzeCmd)
 }
-
-

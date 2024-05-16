@@ -67,7 +67,7 @@ func TestHighlightAnalysis(t *testing.T) {
 		t.Errorf("Error checking edge equivalence %v", err.Error())
 	}
 
-	_, err = analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
+	_, _,err = analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
 	if err == nil {
 		t.Errorf("Error highlighting diff %v", err.Error())
 	}

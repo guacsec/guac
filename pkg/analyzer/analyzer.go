@@ -20,6 +20,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 
@@ -46,9 +47,15 @@ type HighlightedUnion struct {
 
 type Node struct {
 	ID         string
+	Message    string
 	Attributes map[string]interface{}
-	color      string
-	nodeType   string
+	Color      string
+}
+
+type DiffedPath struct {
+	PathOne []*Node
+	PathTwo []*Node
+	Diffs   [][]string
 }
 
 type packageNameSpaces []model.AllPkgTreeNamespacesPackageNamespace
@@ -218,14 +225,13 @@ func FindPathsFromHasSBOMNode(g graph.Graph[string, *Node]) ([][]string, error) 
 	return paths, nil
 }
 
-func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*Node, error) {
+func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*Node, [][]*Node, error) {
 	pathsOne, errOne := FindPathsFromHasSBOMNode(gOne)
 	pathsTwo, errTwo := FindPathsFromHasSBOMNode(gTwo)
+	var analysisOne, analysisTwo [][]*Node
 	if errOne != nil || errTwo != nil {
-		return [][]*Node{}, fmt.Errorf("error getting graph paths errOne-%v, errTwo-%v", errOne.Error(), errTwo.Error())
+		return analysisOne, analysisTwo, fmt.Errorf("error getting graph paths errOne-%v, errTwo-%v", errOne.Error(), errTwo.Error())
 	}
-
-
 
 	pathsOneStrings := concatenateLists(pathsOne)
 	pathsTwoStrings := concatenateLists(pathsTwo)
@@ -233,12 +239,10 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*
 	pathsOneMap := make(map[string][]*Node)
 	pathsTwoMap := make(map[string][]*Node)
 
-	var analysis [][]*Node
-
 	for i := range pathsOne {
 		nodes, err := nodeIDListToNodeList(gOne, pathsOne[i])
 		if err != nil {
-			return analysis, err
+			return analysisOne, analysisTwo, err
 		}
 		pathsOneMap[pathsOneStrings[i]] = nodes
 	}
@@ -246,9 +250,10 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*
 	for i := range pathsTwo {
 		nodes, err := nodeIDListToNodeList(gTwo, pathsTwo[i])
 		if err != nil {
-			return analysis, err
+			return analysisOne, analysisTwo, err
 		}
 		pathsTwoMap[pathsTwoStrings[i]] = nodes
+
 	}
 
 	switch action {
@@ -257,42 +262,47 @@ func HighlightAnalysis(gOne, gTwo graph.Graph[string, *Node], action int) ([][]*
 		for key, val := range pathsOneMap {
 			_, ok := pathsTwoMap[key]
 			if !ok {
-				//common
-				analysis = append(analysis, val)
+				//missing
+				analysisOne = append(analysisOne, val)
 			}
 		}
 
 		for key, val := range pathsTwoMap {
 			_, ok := pathsOneMap[key]
 			if !ok {
-				//common
-				analysis = append(analysis, val)
+				//missing
+				analysisTwo = append(analysisTwo, val)
 			}
 		}
+
+		//do the compare here
 	case 1:
 		// 1 is intersect
 		for key := range pathsOneMap {
 			val, ok := pathsTwoMap[key]
 			if ok {
 				//common
-				analysis = append(analysis, val)
+				analysisOne = append(analysisOne, val)
 			}
 		}
+		//do the compare here
 	case 2:
 		//2 is union
 		for _, val := range pathsOneMap {
-			analysis = append(analysis, val)
+			analysisOne = append(analysisOne, val)
 		}
 
 		for key, val := range pathsTwoMap {
 			_, ok := pathsOneMap[key]
 			if !ok {
 				//common
-				analysis = append(analysis, val)
+				analysisTwo = append(analysisTwo, val)
 			}
 		}
+		//do the compare here
 	}
-	return analysis, nil
+
+	return analysisOne, analysisTwo, nil
 }
 
 func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, inclOccur, namespaces bool) (graph.Graph[string, *Node], error) {
@@ -316,6 +326,7 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 
 	if inclDeps || compareAll {
 		//add included dependencies
+		//TODO: sort dependencies as well here
 		for _, dependency := range hasSBOM.IncludedDependencies {
 			//package node
 			//sort namespaces
@@ -389,7 +400,6 @@ func MakeGraph(hasSBOM model.HasSBOMsHasSBOM, metadata, inclSoft, inclDeps, incl
 			}
 
 			AddGraphEdge(g, hashValPackage, hashValDependencyPackage, "black")
-
 		}
 	}
 	return g, nil
@@ -407,7 +417,7 @@ func AddGraphNode(g graph.Graph[string, *Node], _ID, color string) {
 
 	newNode := &Node{
 		ID:         _ID,
-		color:      color,
+		Color:      color,
 		Attributes: make(map[string]interface{}),
 	}
 
@@ -505,6 +515,7 @@ func concatenateLists(list [][]string) []string {
 	}
 	return concatenated
 }
+
 func nodeIDListToNodeList(g graph.Graph[string, *Node], list []string) ([]*Node, error) {
 
 	var nodeList []*Node
@@ -516,4 +527,478 @@ func nodeIDListToNodeList(g graph.Graph[string, *Node], list []string) ([]*Node,
 		nodeList = append(nodeList, nd)
 	}
 	return nodeList, nil
+}
+
+func compareNodes(nodeOne, nodeTwo Node, nodeType string) ([]string, error) {
+	var diffs []string
+	var namespaceBig, namespaceSmall []model.AllPkgTreeNamespacesPackageNamespace
+
+	var namesBig, namesSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageName
+	var versionBig, versionSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersion
+	var qualifierBig, qualifierSmall []model.AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVersionQualifiersPackageQualifier
+	dataOne, ok := nodeOne.Attributes["data"]
+
+	if !ok {
+		return []string{}, fmt.Errorf("could not get data attributes")
+	}
+	dataTwo, ok := nodeTwo.Attributes["data"]
+
+	if !ok {
+		return []string{}, fmt.Errorf("could not get data attributes")
+	}
+
+	switch nodeType {
+
+	case "Package":
+
+		nOne, ok := dataOne.(model.AllIsDependencyTreePackage)
+		if !ok {
+			return []string{}, fmt.Errorf("could not cast node to tree pkg")
+		}
+
+		nTwo, ok := dataTwo.(model.AllIsDependencyTreePackage)
+		if !ok {
+			return []string{}, fmt.Errorf("could not cast node to tree pkg")
+		}
+
+		if nodeOne.ID == nodeTwo.ID {
+			return []string{}, nil
+		}
+
+		if nOne.Type != nTwo.Type {
+			diffs = append(diffs, "Type: "+nOne.Type+" != "+nTwo.Type)
+
+		}
+		sort.Sort(packageNameSpaces(nOne.Namespaces))
+		sort.Sort(packageNameSpaces(nTwo.Namespaces))
+
+		if len(nTwo.Namespaces) > len(nOne.Namespaces) {
+			namespaceBig = nTwo.Namespaces
+			namespaceSmall = nOne.Namespaces
+		} else if len(nTwo.Namespaces) < len(nOne.Namespaces) {
+			namespaceBig = nOne.Namespaces
+			namespaceSmall = nTwo.Namespaces
+		} else {
+			namespaceBig = nTwo.Namespaces
+			namespaceSmall = nOne.Namespaces
+		}
+
+		// Compare namespaces
+		for i, namespace1 := range namespaceBig {
+			if i >= len(namespaceSmall) {
+				diffs = append(diffs, fmt.Sprintf("Namespace %s not present", namespace1.Namespace))
+				continue
+			}
+			namespace2 := namespaceSmall[i]
+
+			sort.Sort(packageNameSpacesNames(namespace1.Names))
+			sort.Sort(packageNameSpacesNames(namespace2.Names))
+
+			// Compare namespace fields
+			if namespace1.Namespace != namespace2.Namespace {
+				diffs = append(diffs, fmt.Sprintf("Namespace %s != %s", namespace1.Namespace, namespace2.Namespace))
+			}
+
+			if len(namespace1.Names) > len(namespace2.Names) {
+				namesBig = namespace1.Names
+				namesSmall = namespace2.Names
+			} else if len(namespace1.Names) < len(namespace2.Names) {
+				namesBig = namespace2.Names
+				namesSmall = namespace1.Names
+			} else {
+				namesBig = namespace1.Names
+				namesSmall = namespace2.Names
+			}
+
+			// Compare names
+			for j, name1 := range namesBig {
+
+				if j >= len(namesSmall) {
+					diffs = append(diffs, fmt.Sprintf("Name %s not present in namespace %s", name1.Name, namespace1.Namespace))
+					continue
+				}
+				name2 := namesSmall[j]
+
+				sort.Sort(packageNameSpacesNamesVersions(name1.Versions))
+				sort.Sort(packageNameSpacesNamesVersions(name2.Versions))
+
+				// Compare name fields
+				if name1.Name != name2.Name {
+					diffs = append(diffs, fmt.Sprintf("Name %s != %s in Namespace %s", name1.Name, name2.Name, namespace1.Namespace))
+
+				}
+
+				if len(name1.Versions) > len(name2.Versions) {
+					versionBig = name1.Versions
+					versionSmall = name2.Versions
+				} else if len(name1.Versions) < len(name2.Versions) {
+					versionBig = name2.Versions
+					versionSmall = name1.Versions
+				} else {
+					versionBig = name1.Versions
+					versionSmall = name2.Versions
+				}
+
+				// Compare versions
+				for k, version1 := range versionBig {
+					if k >= len(versionSmall) {
+						diffs = append(diffs, fmt.Sprintf("Version %s not present for name %s in namespace %s,", version1.Version, name1.Name, namespace1.Namespace))
+						continue
+
+					}
+
+					version2 := versionSmall[k]
+					sort.Sort(packageNameSpacesNamesVersionsQualifiers(version1.Qualifiers))
+					sort.Sort(packageNameSpacesNamesVersionsQualifiers(version2.Qualifiers))
+
+					if version1.Version != version2.Version {
+						diffs = append(diffs, fmt.Sprintf("Version %s != %s for name %s in namespace %s", version1.Version, version2.Version, name1.Name, namespace1.Namespace))
+					}
+
+					if version1.Subpath != version2.Subpath {
+						diffs = append(diffs, fmt.Sprintf("Subpath %s != %s for version %s for name %s in namespace %s", version1.Subpath, version2.Subpath, version1.Version, name1.Name, namespace1.Namespace))
+					}
+
+					if len(version1.Qualifiers) > len(version2.Qualifiers) {
+						qualifierBig = version1.Qualifiers
+						qualifierSmall = version2.Qualifiers
+					} else if len(version1.Qualifiers) < len(version2.Qualifiers) {
+						qualifierBig = version2.Qualifiers
+						qualifierSmall = version1.Qualifiers
+					} else {
+						qualifierBig = version1.Qualifiers
+						qualifierSmall = version2.Qualifiers
+					}
+
+					for l, qualifier1 := range qualifierBig {
+						if l >= len(qualifierSmall) {
+							diffs = append(diffs, fmt.Sprintf("Qualifier %s:%s not present for version %s in name %s in namespace %s,", qualifier1.Key, qualifier1.Value, version1.Version, name1.Name, namespace1.Namespace))
+							continue
+						}
+
+						qualifier2 := qualifierSmall[l]
+						if qualifier2.Key != qualifier1.Key || qualifier1.Value != qualifier2.Value {
+
+							diffs = append(diffs, fmt.Sprintf("Qualifier unequal for version %s in name %s in namespace %s:  %s:%s | %s:%s", version1.Version, name1.Name, namespace1.Namespace, qualifier1.Key, qualifier1.Value, qualifier2.Key, qualifier2.Value))
+
+						}
+					}
+				}
+			}
+		}
+	case "DependencyPackage":
+		nOne, ok := dataOne.(model.AllIsDependencyTreeDependencyPackage)
+		if !ok {
+			return []string{}, fmt.Errorf("could not case node to tree dePkg")
+		}
+
+		nTwo, ok := dataTwo.(model.AllIsDependencyTreeDependencyPackage)
+		if !ok {
+			return []string{}, fmt.Errorf("could not case node to tree depPkg")
+		}
+
+		if nodeOne.ID == nodeTwo.ID {
+
+			return []string{}, nil
+		}
+
+		if nOne.Type != nTwo.Type {
+			diffs = append(diffs, "Type: "+nOne.Type+" != "+nTwo.Type)
+		}
+		sort.Sort(packageNameSpaces(nOne.Namespaces))
+		sort.Sort(packageNameSpaces(nTwo.Namespaces))
+
+		if len(nTwo.Namespaces) > len(nOne.Namespaces) {
+			namespaceBig = nTwo.Namespaces
+			namespaceSmall = nOne.Namespaces
+		} else if len(nTwo.Namespaces) < len(nOne.Namespaces) {
+			namespaceBig = nOne.Namespaces
+			namespaceSmall = nTwo.Namespaces
+		} else {
+			namespaceBig = nTwo.Namespaces
+			namespaceSmall = nOne.Namespaces
+		}
+
+		// Compare namespaces
+		for i, namespace1 := range namespaceBig {
+			if i >= len(namespaceSmall) {
+				diffs = append(diffs, fmt.Sprintf("Namespace %s not present", namespace1.Namespace))
+				continue
+			}
+			namespace2 := namespaceSmall[i]
+
+			sort.Sort(packageNameSpacesNames(namespace1.Names))
+			sort.Sort(packageNameSpacesNames(namespace2.Names))
+
+			// Compare namespace fields
+			if namespace1.Namespace != namespace2.Namespace {
+				diffs = append(diffs, fmt.Sprintf("Namespace %s != %s", namespace1.Namespace, namespace2.Namespace))
+
+			}
+
+			if len(namespace1.Names) > len(namespace2.Names) {
+				namesBig = namespace1.Names
+				namesSmall = namespace2.Names
+			} else if len(namespace1.Names) < len(namespace2.Names) {
+				namesBig = namespace2.Names
+				namesSmall = namespace1.Names
+			} else {
+				namesBig = namespace1.Names
+				namesSmall = namespace2.Names
+			}
+
+			// Compare names
+			for j, name1 := range namesBig {
+
+				if j >= len(namesSmall) {
+					diffs = append(diffs, fmt.Sprintf("Name %s not present in namespace %s", name1.Name, namespace1.Namespace))
+					continue
+				}
+				name2 := namesSmall[j]
+
+				sort.Sort(packageNameSpacesNamesVersions(name1.Versions))
+				sort.Sort(packageNameSpacesNamesVersions(name2.Versions))
+
+				// Compare name fields
+				if name1.Name != name2.Name {
+					diffs = append(diffs, fmt.Sprintf("Name %s != %s in Namespace %s", name1.Name, name2.Name, namespace1.Namespace))
+
+				}
+
+				if len(name1.Versions) > len(name2.Versions) {
+					versionBig = name1.Versions
+					versionSmall = name2.Versions
+				} else if len(name1.Versions) < len(name2.Versions) {
+					versionBig = name2.Versions
+					versionSmall = name1.Versions
+				} else {
+					versionBig = name1.Versions
+					versionSmall = name2.Versions
+				}
+
+				// Compare versions
+				for k, version1 := range versionBig {
+					if k >= len(versionSmall) {
+						diffs = append(diffs, fmt.Sprintf("Version %s not present for name %s in namespace %s,", version1.Version, name1.Name, namespace1.Namespace))
+						continue
+					}
+
+					version2 := versionSmall[k]
+					sort.Sort(packageNameSpacesNamesVersionsQualifiers(version1.Qualifiers))
+					sort.Sort(packageNameSpacesNamesVersionsQualifiers(version2.Qualifiers))
+
+					if version1.Version != version2.Version {
+						diffs = append(diffs, fmt.Sprintf("Version %s != %s for name %s in namespace %s", version1.Version, version2.Version, name1.Name, namespace1.Namespace))
+
+					}
+
+					if version1.Subpath != version2.Subpath {
+						diffs = append(diffs, fmt.Sprintf("Subpath %s != %s for version %s for name %s in namespace %s,", version1.Subpath, version2.Subpath, version1.Version, name1.Name, namespace1.Namespace))
+
+					}
+
+					if len(version1.Qualifiers) > len(version2.Qualifiers) {
+						qualifierBig = version1.Qualifiers
+						qualifierSmall = version2.Qualifiers
+					} else if len(version1.Qualifiers) < len(version2.Qualifiers) {
+						qualifierBig = version2.Qualifiers
+						qualifierSmall = version1.Qualifiers
+					} else {
+						qualifierBig = version1.Qualifiers
+						qualifierSmall = version2.Qualifiers
+					}
+
+					for l, qualifier1 := range qualifierBig {
+						if l >= len(qualifierSmall) {
+							diffs = append(diffs, fmt.Sprintf("Qualifier %s:%s not present for version %s in name %s in namespace %s,", qualifier1.Key, qualifier1.Value, version1.Version, name1.Name, namespace1.Namespace))
+							continue
+						}
+						qualifier2 := qualifierSmall[l]
+						if qualifier2.Key != qualifier1.Key || qualifier1.Value != qualifier2.Value {
+
+							diffs = append(diffs, fmt.Sprintf("Qualifier unequal for version %s in name %s in namespace %s:  %s:%s | %s:%s", version1.Version, name1.Name, namespace1.Namespace, qualifier1.Key, qualifier1.Value, qualifier2.Key, qualifier2.Value))
+						}
+					}
+				}
+			}
+		}
+
+	}
+	return diffs, nil
+
+}
+
+func CompareTwoPaths(analysisListOne, analysisListTwo []*Node) ([][]string, int, error) {
+
+	var longerPath, shorterPath []*Node
+	var pathDiff [][]string
+	var diffCount int
+
+	if len(analysisListOne) > len(analysisListTwo) {
+		longerPath = analysisListOne
+		shorterPath = analysisListTwo
+	} else if len(analysisListOne) < len(analysisListTwo) {
+		longerPath = analysisListTwo
+		shorterPath = analysisListOne
+	} else {
+		longerPath = analysisListOne
+		shorterPath = analysisListTwo
+	}
+
+	for i, node := range longerPath {
+		nodeType, ok := node.Attributes["nodeType"].(string)
+		if !ok {
+			return pathDiff, 0, fmt.Errorf("cannot case nodeType to string")
+		}
+		if i >= len(shorterPath) {
+			dumnode := &Node{Attributes: make(map[string]interface{})}
+			if nodeType == "Package" {
+				dumnode.Attributes["data"] = model.AllIsDependencyTreePackage{}
+			} else if nodeType == "DependencyPackage" {
+				dumnode.Attributes["data"] = model.AllIsDependencyTreeDependencyPackage{}
+			}
+
+			diff, err := compareNodes(*node, *dumnode, nodeType)
+			if err != nil {
+				return pathDiff, 0, fmt.Errorf(err.Error())
+			}
+
+			pathDiff = append(pathDiff, diff)
+			diffCount += len(diff)
+
+		} else {
+			diff, err := compareNodes(*node, *shorterPath[i], nodeType)
+			if err != nil {
+				return pathDiff, 0, fmt.Errorf(err.Error())
+			}
+			pathDiff = append(pathDiff, diff)
+			diffCount += len(diff)
+		}
+	}
+
+	return pathDiff, diffCount, nil
+
+}
+
+func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
+	if len(listTwo) != len(listOne) {
+		//do something?
+	}
+
+	// var small, big [][]*Node
+	// if len(listOne) > len(listTwo) {
+	// 	small= listTwo
+	// 	big = listOne
+	// } else if  len(listTwo) > len(listOne) {
+	// 	small= listOne
+	// 	big = listTwo
+	// } else {
+	// 	small= listTwo
+	// 	big = listOne
+	// }
+
+	var results []DiffedPath
+	for _, pathOne := range listOne {
+
+		var diff DiffedPath
+		diff.PathOne = pathOne
+		min := math.MaxInt64
+		for _, pathTwo := range listTwo {
+			diffs, diffNum, err := CompareTwoPaths(pathOne, pathTwo)
+			if err != nil {
+				return results, fmt.Errorf(err.Error())
+			}
+			if diffNum < min {
+				diff.PathTwo = pathTwo
+				min = diffNum
+				diff.Diffs = diffs
+			}
+		}
+		results = append(results, diff)
+	}
+	return results, nil
+}
+
+func GetNodeString(option int, node interface{}) (string, error) {
+	switch option {
+
+	case 1:
+		pkg, ok := node.(model.AllIsDependencyTreePackage)
+		if !ok {
+			return "", fmt.Errorf("could not case node to tree Pkg")
+		}
+
+		sort.Sort(packageNameSpaces(pkg.Namespaces))
+		message := "Type:" + pkg.Type + "\n"
+		for _, namespace := range pkg.Namespaces {
+			message += "Namespace: " + namespace.Namespace + "\n"
+
+			for _, name := range namespace.Names {
+				message += "\t"
+				message += "Name: " + name.Name
+				message += "\n"
+
+				for _, version := range name.Versions {
+					message += "\t\t"
+					message += "Version: " + version.Version + "\n"
+					message += "\t\t"
+					message += "Subpath: " + version.Subpath + "\n"
+					message += "\t\tQualifiers: {\n"
+
+					for _, outlier := range version.Qualifiers {
+						message += "\t\t\t"
+						message += outlier.Key + ": " + outlier.Value + "\n"
+					}
+					message += "\t\t}\n"
+				}
+			}
+			message += "\n"
+		}
+		return message, nil
+	case 2:
+		depPkg, ok := node.(model.AllIsDependencyTreeDependencyPackage)
+		if !ok {
+			return "", fmt.Errorf("could not case node to tree depPkg")
+		}
+
+		message := "Type:" + CheckEmpty(depPkg.Type) + "\n"
+		for _, namespace := range depPkg.Namespaces {
+			message += "Namespace: " + CheckEmpty(namespace.Namespace) + "\n"
+
+			for _, name := range namespace.Names {
+				message += "\t"
+				message += "Name: " + CheckEmpty(name.Name)
+				message += "\n"
+
+				for _, version := range name.Versions {
+					message += "\t\t"
+					message += "Version: " + CheckEmpty(version.Version) + "\n"
+					message += "\t\t"
+					message += "Subpath: " + CheckEmpty(version.Subpath) + "\n"
+					message += "\t\tQualifiers: {\n"
+
+					for _, outlier := range version.Qualifiers {
+						message += "\t\t\t"
+						message += CheckEmpty(outlier.Key) + ": " + CheckEmpty(outlier.Value) + "\n"
+					}
+					message += "\t\t}\n"
+				}
+			}
+			message += "\n"
+		}
+		return message, nil
+
+	}
+
+	return "", nil
+}
+
+func CheckEmpty(value string) string {
+	if len(value) > 20 {
+		return value[:20] + "..."
+	}
+	if value == "" {
+		return "\"\""
+	}
+	return value
 }
