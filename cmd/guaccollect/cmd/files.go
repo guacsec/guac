@@ -111,13 +111,13 @@ func validateFilesFlags(pubsubAddr, blobAddr string, poll bool, pubToQueue bool,
 	return opts, nil
 }
 
-func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub, pubToQueue bool) (func(*processor.Document) error, error) {
+func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub, publishToQueue bool) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return collector.Publish(ctx, d, blobStore, pubsub, pubToQueue)
+		return collector.Publish(ctx, d, blobStore, pubsub, publishToQueue)
 	}, nil
 }
 
-func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string, pubToQueue bool) {
+func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string, publishToQueue bool) {
 	logger := logging.FromContext(ctx)
 
 	// initialize blob store
@@ -127,7 +127,7 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 	}
 
 	var pubsub *emitter.EmitterPubSub
-	if !pubToQueue {
+	if publishToQueue {
 		if strings.HasPrefix(pubsubAddr, "nats://") {
 			// initialize jetstream
 			// TODO: pass in credentials file for NATS secure login
@@ -142,7 +142,7 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 	}
 
 	// Get pipeline of components
-	collectorPubFunc, err := getCollectorPublish(ctx, blobStore, pubsub, pubToQueue)
+	collectorPubFunc, err := getCollectorPublish(ctx, blobStore, pubsub, publishToQueue)
 	if err != nil {
 		logger.Errorf("error: %v", err)
 		os.Exit(1)
