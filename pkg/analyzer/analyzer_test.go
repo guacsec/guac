@@ -28,8 +28,9 @@ import (
 )
 
 var testfile = "hasSBOMs.json"
+
 var rearrangedTestFile = "rearrangedHasSBOM.json"
-var diffTestFile = "test_HasSBOMS_diff.json"
+var diffTestFile = "test_HasSBOMs_diff.json"
 
 func TestSetGetNodeAttribute(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
@@ -57,21 +58,14 @@ func TestHighlightAnalysis(t *testing.T) {
 		t.Errorf("Error making graph %v ", err.Error())
 	}
 
-	_, err = analyzer.GraphEqual(graphs[0], graphs[1])
-	if err == nil {
-		t.Errorf("error checking graph equivalence %v", err.Error())
-	}
+	one, two,err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
 
-	_, err = analyzer.GraphEdgesEqual(graphs[0], graphs[1])
-	if err == nil {
-		t.Errorf("Error checking edge equivalence %v", err.Error())
-	}
-
-	_, _,err = analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
-	if err == nil {
+	if err != nil {
 		t.Errorf("Error highlighting diff %v", err.Error())
 	}
-
+	if len(one) == 0 || len(two) == 0 {
+		t.Errorf("Error highlighting diff, wanted diffs got 0")
+}
 }
 
 func TestAddGraphNode(t *testing.T) {

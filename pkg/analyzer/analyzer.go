@@ -30,21 +30,6 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
-type HighlightedDiff struct {
-	MissingAddedRemovedLinks [][]string
-	MissingAddedRemovedNodes []string
-}
-
-type HighlightedIntersect struct {
-	MissingAddedRemovedLinks [][]string
-	MissingAddedRemovedNodes []string
-}
-
-type HighlightedUnion struct {
-	AddedLinks               [][]string
-	MissingAddedRemovedNodes []string
-}
-
 type Node struct {
 	ID         string
 	Message    string
