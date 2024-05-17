@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	stdsql "database/sql"
 	"fmt"
 	"strings"
 
@@ -542,8 +543,9 @@ func upsertBulkSBOM(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArt
 			).
 			DoNothing().
 			Exec(ctx)
-		if err != nil {
-			return nil, errors.Wrap(err, "bulk upsert sbom node")
+		if err != nil && err != stdsql.ErrNoRows {
+			// err "no rows in select set" appear when ingesting and the node already exists. This is non-error produced by "DoNothing"
+			return nil, errors.Wrap(err, "upsert hasSBOM node")
 		}
 
 		for _, id := range listOfSBOMIDs {
@@ -643,15 +645,24 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, subject model.PackageOrArtif
 		return nil, gqlerror.Errorf("generateSLSACreate :: %s", err)
 	}
 
-	id, err := sbomCreate.
+	if _, err := sbomCreate.
 		OnConflict(
 			sql.ConflictColumns(conflictColumns...),
 			sql.ConflictWhere(conflictWhere),
 		).
 		DoNothing().
-		ID(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "upsert slsa node")
+		ID(ctx); err != nil {
+		// err "no rows in select set" appear when ingesting and the node already exists. This is non-error produced by "DoNothing"
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert hasSBOM node")
+		}
+	}
+
+	var id uuid.UUID
+	if hasSBOMNodeID, exist := sbomCreate.Mutation().ID(); exist {
+		id = hasSBOMNodeID
+	} else {
+		return nil, fmt.Errorf("failed to get hasSBOM ID to attach includes")
 	}
 
 	if err := updateHasSBOMWithIncludePackageIDs(ctx, tx.Client(), id, sortedPkgUUIDs); err != nil {
