@@ -379,10 +379,11 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 	sbomId, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
-		id, err := upsertHasSBOM(ctx, tx, subject.Package, subject.Artifact, &includes, &spec)
+		id, err := upsertHasSBOM(ctx, tx, subject, spec, includes)
 		if err != nil {
 			return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
 		}
+
 		return id, nil
 	})
 	if txErr != nil {
@@ -393,21 +394,20 @@ func (b *EntBackend) IngestHasSbom(ctx context.Context, subject model.PackageOrA
 }
 
 func (b *EntBackend) IngestHasSBOMs(ctx context.Context, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) ([]string, error) {
-	var sbomIDs []string
-	for i, hasSbom := range hasSBOMs {
-		var subject model.PackageOrArtifactInput
-		if len(subjects.Artifacts) > 0 {
-			subject = model.PackageOrArtifactInput{Artifact: subjects.Artifacts[i]}
-		} else {
-			subject = model.PackageOrArtifactInput{Package: subjects.Packages[i]}
-		}
-		id, err := b.IngestHasSbom(ctx, subject, *hasSbom, *includes[i])
+	funcName := "IngestHasSBOMs"
+	ids, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*[]string, error) {
+		client := ent.TxFromContext(ctx)
+		hsl, err := upsertBulkSBOM(ctx, client, subjects, hasSBOMs, includes)
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestHasSBOMs failed with err: %v", err)
+			return nil, err
 		}
-		sbomIDs = append(sbomIDs, id)
+		return hsl, nil
+	})
+	if txErr != nil {
+		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
-	return bulkHasSBOMGlobalID(sbomIDs), nil
+
+	return bulkHasSBOMGlobalID(*ids), nil
 }
 
 func sbomConflictColumns() []string {
@@ -427,20 +427,163 @@ func sbomConflictColumns() []string {
 	}
 }
 
-func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, includes *model.HasSBOMIncludesInputSpec, hasSBOM *model.HasSBOMInputSpec) (*string, error) {
+func upsertBulkSBOM(ctx context.Context, tx *ent.Tx, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := sbomConflictColumns()
+	var conflictWhere *sql.Predicate
+
+	switch {
+	case len(subjects.Artifacts) > 0:
+		conflictColumns = append(conflictColumns, billofmaterials.FieldArtifactID)
+		conflictWhere = sql.And(
+			sql.IsNull(billofmaterials.FieldPackageID),
+			sql.NotNull(billofmaterials.FieldArtifactID),
+		)
+	case len(subjects.Packages) > 0:
+		conflictColumns = append(conflictColumns, billofmaterials.FieldPackageID)
+		conflictWhere = sql.And(
+			sql.NotNull(billofmaterials.FieldPackageID),
+			sql.IsNull(billofmaterials.FieldArtifactID),
+		)
+	}
+
+	var listOfSBOMIDs []uuid.UUID
+	withIncludePackageIDs := make(map[uuid.UUID][]uuid.UUID)
+	withIncludeArtifactsIDs := make(map[uuid.UUID][]uuid.UUID)
+	withIncludeDependencyIDs := make(map[uuid.UUID][]uuid.UUID)
+	withIncludeOccurrenceIDs := make(map[uuid.UUID][]uuid.UUID)
+
+	batches := chunk(hasSBOMs, MaxBatchSize)
+
+	index := 0
+	for _, hss := range batches {
+		creates := make([]*ent.BillOfMaterialsCreate, len(hss))
+		for i, sbom := range hss {
+			sbom := sbom
+			var err error
+
+			sortedPkgIDs := helper.SortAndRemoveDups(includes[index].Packages)
+			sortedArtIDs := helper.SortAndRemoveDups(includes[index].Artifacts)
+			sortedDependencyIDs := helper.SortAndRemoveDups(includes[index].Dependencies)
+			sortedOccurrenceIDs := helper.SortAndRemoveDups(includes[index].Occurrences)
+
+			var sortedPkgUUIDs []uuid.UUID
+			var sortedArtUUIDs []uuid.UUID
+			var sortedIsDepUUIDs []uuid.UUID
+			var sortedIsOccurrenceUUIDs []uuid.UUID
+
+			for _, pkgID := range sortedPkgIDs {
+				pkgGlobalID := fromGlobalID(pkgID)
+				pkgIncludesID, err := uuid.Parse(pkgGlobalID.id)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+				}
+				sortedPkgUUIDs = append(sortedPkgUUIDs, pkgIncludesID)
+			}
+
+			for _, artID := range sortedArtIDs {
+				artGlobalID := fromGlobalID(artID)
+				artIncludesID, err := uuid.Parse(artGlobalID.id)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+				}
+				sortedArtUUIDs = append(sortedArtUUIDs, artIncludesID)
+			}
+
+			for _, isDependencyID := range sortedDependencyIDs {
+				depGlobalID := fromGlobalID(isDependencyID)
+				isDepIncludesID, err := uuid.Parse(depGlobalID.id)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
+				}
+				sortedIsDepUUIDs = append(sortedIsDepUUIDs, isDepIncludesID)
+			}
+
+			for _, isOccurrenceID := range sortedOccurrenceIDs {
+				occurGlobalID := fromGlobalID(isOccurrenceID)
+				isOccurIncludesID, err := uuid.Parse(occurGlobalID.id)
+				if err != nil {
+					return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
+				}
+				sortedIsOccurrenceUUIDs = append(sortedIsOccurrenceUUIDs, isOccurIncludesID)
+			}
+
+			switch {
+			case len(subjects.Artifacts) > 0:
+				creates[i], err = generateSBOMCreate(ctx, tx, nil, subjects.Artifacts[index], sortedPkgIDs, sortedArtIDs,
+					sortedDependencyIDs, sortedOccurrenceIDs, sbom)
+				if err != nil {
+					return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
+				}
+			case len(subjects.Packages) > 0:
+				creates[i], err = generateSBOMCreate(ctx, tx, subjects.Packages[index], nil, sortedPkgIDs, sortedArtIDs,
+					sortedDependencyIDs, sortedOccurrenceIDs, sbom)
+				if err != nil {
+					return nil, gqlerror.Errorf("generateSBOMCreate :: %s", err)
+				}
+			}
+
+			if hasSBOMNodeID, exist := creates[i].Mutation().ID(); exist {
+				listOfSBOMIDs = append(listOfSBOMIDs, hasSBOMNodeID)
+				withIncludePackageIDs[hasSBOMNodeID] = sortedPkgUUIDs
+				withIncludeArtifactsIDs[hasSBOMNodeID] = sortedArtUUIDs
+				withIncludeDependencyIDs[hasSBOMNodeID] = sortedIsDepUUIDs
+				withIncludeOccurrenceIDs[hasSBOMNodeID] = sortedIsOccurrenceUUIDs
+			} else {
+				return nil, fmt.Errorf("failed to get hasSBOM ID to attach includes")
+			}
+			index++
+		}
+
+		err := tx.BillOfMaterials.CreateBulk(creates...).
+			OnConflict(
+				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictWhere(conflictWhere),
+			).
+			DoNothing().
+			Exec(ctx)
+		if err != nil && err != stdsql.ErrNoRows {
+			// err "no rows in select set" appear when ingesting and the node already exists. This is non-error produced by "DoNothing"
+			return nil, errors.Wrap(err, "upsert hasSBOM node")
+		}
+
+		for _, id := range listOfSBOMIDs {
+			if err := updateHasSBOMWithIncludePackageIDs(ctx, tx.Client(), id, withIncludePackageIDs[id]); err != nil {
+				return nil, errors.Wrap(err, "updateHasSBOMWithIncludePackageIDs")
+			}
+
+			if err := updateHasSBOMWithIncludeArtifacts(ctx, tx.Client(), id, withIncludeArtifactsIDs[id]); err != nil {
+				return nil, errors.Wrap(err, "updateHasSBOMWithIncludeArtifacts")
+			}
+
+			if err := updateHasSBOMWithIncludeDependencies(ctx, tx.Client(), id, withIncludeDependencyIDs[id]); err != nil {
+				return nil, errors.Wrap(err, "updateHasSBOMWithIncludeDependencies")
+			}
+
+			if err := updateHasSBOMWithIncludeOccurrences(ctx, tx.Client(), id, withIncludeOccurrenceIDs[id]); err != nil {
+				return nil, errors.Wrap(err, "updateHasSBOMWithIncludeOccurrences")
+			}
+			ids = append(ids, id.String())
+		}
+	}
+	return &ids, nil
+}
+
+func upsertHasSBOM(ctx context.Context, tx *ent.Tx, subject model.PackageOrArtifactInput, spec model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) (*string, error) {
 
 	// If a new column is included in the conflict columns, it must be added to the Indexes() function in the schema
 	conflictColumns := sbomConflictColumns()
 
 	var conflictWhere *sql.Predicate
 
-	if pkg != nil {
+	if subject.Package != nil {
 		conflictColumns = append(conflictColumns, billofmaterials.FieldPackageID)
 		conflictWhere = sql.And(
 			sql.NotNull(billofmaterials.FieldPackageID),
 			sql.IsNull(billofmaterials.FieldArtifactID),
 		)
-	} else if art != nil {
+	} else if subject.Artifact != nil {
 		conflictColumns = append(conflictColumns, billofmaterials.FieldArtifactID)
 		conflictWhere = sql.And(
 			sql.IsNull(billofmaterials.FieldPackageID),
@@ -449,6 +592,100 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 	} else {
 		return nil, Errorf("%v :: %s", "upsertHasSBOM", "subject must be either a package or artifact")
 	}
+
+	sortedPkgIDs := helper.SortAndRemoveDups(includes.Packages)
+	sortedArtIDs := helper.SortAndRemoveDups(includes.Artifacts)
+	sortedDependencyIDs := helper.SortAndRemoveDups(includes.Dependencies)
+	sortedOccurrenceIDs := helper.SortAndRemoveDups(includes.Occurrences)
+
+	var sortedPkgUUIDs []uuid.UUID
+	var sortedArtUUIDs []uuid.UUID
+	var sortedIsDepUUIDs []uuid.UUID
+	var sortedIsOccurrenceUUIDs []uuid.UUID
+
+	for _, pkgID := range sortedPkgIDs {
+		pkgGlobalID := fromGlobalID(pkgID)
+		pkgIncludesID, err := uuid.Parse(pkgGlobalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
+		}
+		sortedPkgUUIDs = append(sortedPkgUUIDs, pkgIncludesID)
+	}
+
+	for _, artID := range sortedArtIDs {
+		artGlobalID := fromGlobalID(artID)
+		artIncludesID, err := uuid.Parse(artGlobalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
+		}
+		sortedArtUUIDs = append(sortedArtUUIDs, artIncludesID)
+	}
+
+	for _, isDependencyID := range sortedDependencyIDs {
+		depGlobalID := fromGlobalID(isDependencyID)
+		isDepIncludesID, err := uuid.Parse(depGlobalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
+		}
+		sortedIsDepUUIDs = append(sortedIsDepUUIDs, isDepIncludesID)
+	}
+
+	for _, isOccurrenceID := range sortedOccurrenceIDs {
+		occurGlobalID := fromGlobalID(isOccurrenceID)
+		isOccurIncludesID, err := uuid.Parse(occurGlobalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
+		}
+		sortedIsOccurrenceUUIDs = append(sortedIsOccurrenceUUIDs, isOccurIncludesID)
+	}
+
+	sbomCreate, err := generateSBOMCreate(ctx, tx, subject.Package, subject.Artifact, sortedPkgIDs, sortedArtIDs,
+		sortedDependencyIDs, sortedOccurrenceIDs, &spec)
+	if err != nil {
+		return nil, gqlerror.Errorf("generateSLSACreate :: %s", err)
+	}
+
+	if _, err := sbomCreate.
+		OnConflict(
+			sql.ConflictColumns(conflictColumns...),
+			sql.ConflictWhere(conflictWhere),
+		).
+		DoNothing().
+		ID(ctx); err != nil {
+		// err "no rows in select set" appear when ingesting and the node already exists. This is non-error produced by "DoNothing"
+		if err != stdsql.ErrNoRows {
+			return nil, errors.Wrap(err, "upsert hasSBOM node")
+		}
+	}
+
+	var id uuid.UUID
+	if hasSBOMNodeID, exist := sbomCreate.Mutation().ID(); exist {
+		id = hasSBOMNodeID
+	} else {
+		return nil, fmt.Errorf("failed to get hasSBOM ID to attach includes")
+	}
+
+	if err := updateHasSBOMWithIncludePackageIDs(ctx, tx.Client(), id, sortedPkgUUIDs); err != nil {
+		return nil, errors.Wrap(err, "updateHasSBOMWithIncludePackageIDs")
+	}
+
+	if err := updateHasSBOMWithIncludeArtifacts(ctx, tx.Client(), id, sortedArtUUIDs); err != nil {
+		return nil, errors.Wrap(err, "updateHasSBOMWithIncludeArtifacts")
+	}
+
+	if err := updateHasSBOMWithIncludeDependencies(ctx, tx.Client(), id, sortedIsDepUUIDs); err != nil {
+		return nil, errors.Wrap(err, "updateHasSBOMWithIncludeDependencies")
+	}
+
+	if err := updateHasSBOMWithIncludeOccurrences(ctx, tx.Client(), id, sortedIsOccurrenceUUIDs); err != nil {
+		return nil, errors.Wrap(err, "updateHasSBOMWithIncludeOccurrences")
+	}
+
+	return ptrfrom.String(id.String()), nil
+}
+
+func generateSBOMCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art *model.IDorArtifactInput, sortedPkgIDs,
+	sortedArtIDs, sortedDependencyIDs, sortedOccurrenceIDs []string, hasSBOM *model.HasSBOMInputSpec) (*ent.BillOfMaterialsCreate, error) {
 
 	sbomCreate := tx.BillOfMaterials.Create().
 		SetURI(hasSBOM.URI).
@@ -460,29 +697,12 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		SetDocumentRef(hasSBOM.DocumentRef).
 		SetKnownSince(hasSBOM.KnownSince.UTC())
 
-	sortedPkgIDs := helper.SortAndRemoveDups(includes.Packages)
-	sortedArtIDs := helper.SortAndRemoveDups(includes.Artifacts)
-	sortedDependencyIDs := helper.SortAndRemoveDups(includes.Dependencies)
-	sortedOccurrenceIDs := helper.SortAndRemoveDups(includes.Occurrences)
 	var sortedPkgHash string
 	var sortedArtHash string
 	var sortedDepHash string
 	var sortedOccurHash string
 
-	var sortedPkgUUIDs []uuid.UUID
-	var sortedArtUUIDs []uuid.UUID
-	var sortedIsDepUUIDs []uuid.UUID
-	var sortedIsOccurrenceUUIDs []uuid.UUID
-
 	if len(sortedPkgIDs) > 0 {
-		for _, pkgID := range sortedPkgIDs {
-			pkgGlobalID := fromGlobalID(pkgID)
-			pkgIncludesID, err := uuid.Parse(pkgGlobalID.id)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
-			}
-			sortedPkgUUIDs = append(sortedPkgUUIDs, pkgIncludesID)
-		}
 		sortedPkgHash = hashListOfSortedKeys(sortedPkgIDs)
 		sbomCreate.SetIncludedPackagesHash(sortedPkgHash)
 	} else {
@@ -491,15 +711,6 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 	}
 
 	if len(sortedArtIDs) > 0 {
-		for _, artID := range sortedArtIDs {
-			artGlobalID := fromGlobalID(artID)
-			artIncludesID, err := uuid.Parse(artGlobalID.id)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
-			}
-			sortedArtUUIDs = append(sortedArtUUIDs, artIncludesID)
-		}
-
 		sortedArtHash = hashListOfSortedKeys(sortedArtIDs)
 		sbomCreate.SetIncludedArtifactsHash(sortedArtHash)
 	} else {
@@ -508,15 +719,6 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 	}
 
 	if len(sortedDependencyIDs) > 0 {
-		for _, isDependencyID := range sortedDependencyIDs {
-			depGlobalID := fromGlobalID(isDependencyID)
-			isDepIncludesID, err := uuid.Parse(depGlobalID.id)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from isDependencyID failed with error: %w", err)
-			}
-			sortedIsDepUUIDs = append(sortedIsDepUUIDs, isDepIncludesID)
-		}
-
 		sortedDepHash = hashListOfSortedKeys(sortedDependencyIDs)
 		sbomCreate.SetIncludedDependenciesHash(sortedDepHash)
 	} else {
@@ -525,23 +727,12 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 	}
 
 	if len(sortedOccurrenceIDs) > 0 {
-		for _, isOccurrenceID := range sortedOccurrenceIDs {
-			occurGlobalID := fromGlobalID(isOccurrenceID)
-			isOccurIncludesID, err := uuid.Parse(occurGlobalID.id)
-			if err != nil {
-				return nil, fmt.Errorf("uuid conversion from isOccurrenceID failed with error: %w", err)
-			}
-			sortedIsOccurrenceUUIDs = append(sortedIsOccurrenceUUIDs, isOccurIncludesID)
-		}
-
 		sortedOccurHash = hashListOfSortedKeys(sortedOccurrenceIDs)
 		sbomCreate.SetIncludedOccurrencesHash(sortedOccurHash)
 	} else {
 		sortedOccurHash = hashListOfSortedKeys([]string{""})
 		sbomCreate.SetIncludedOccurrencesHash(sortedOccurHash)
 	}
-
-	var createdHasSBOMID uuid.UUID
 
 	if pkg != nil {
 		var pkgVersionID uuid.UUID
@@ -563,7 +754,6 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		if err != nil {
 			return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
 		}
-		createdHasSBOMID = *hasSBOMID
 		sbomCreate.SetID(*hasSBOMID)
 		sbomCreate.SetPackageID(pkgVersionID)
 	} else if art != nil {
@@ -586,44 +776,13 @@ func upsertHasSBOM(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, art
 		if err != nil {
 			return nil, fmt.Errorf("failed to create hasSBOM uuid with error: %w", err)
 		}
-		createdHasSBOMID = *hasSBOMID
 		sbomCreate.SetID(*hasSBOMID)
 		sbomCreate.SetArtifactID(artID)
 	} else {
 		return nil, Errorf("%v :: %s", "generateSBOMCreate", "subject must be either a package or artifact")
 	}
 
-	_, err := sbomCreate.
-		OnConflict(
-			sql.ConflictColumns(conflictColumns...),
-			sql.ConflictWhere(conflictWhere),
-		).
-		DoNothing().
-		ID(ctx)
-	if err != nil {
-		// err "no rows in select set" appear when ingesting and the node already exists. This is non-error produced by "DoNothing"
-		if err != stdsql.ErrNoRows {
-			return nil, errors.Wrap(err, "upsert hasSBOM node")
-		}
-	}
-
-	if err := updateHasSBOMWithIncludePackageIDs(ctx, tx.Client(), createdHasSBOMID, sortedPkgUUIDs); err != nil {
-		return nil, errors.Wrap(err, "updateHasSBOMWithIncludePackageIDs")
-	}
-
-	if err := updateHasSBOMWithIncludeArtifacts(ctx, tx.Client(), createdHasSBOMID, sortedArtUUIDs); err != nil {
-		return nil, errors.Wrap(err, "updateHasSBOMWithIncludeArtifacts")
-	}
-
-	if err := updateHasSBOMWithIncludeDependencies(ctx, tx.Client(), createdHasSBOMID, sortedIsDepUUIDs); err != nil {
-		return nil, errors.Wrap(err, "updateHasSBOMWithIncludeDependencies")
-	}
-
-	if err := updateHasSBOMWithIncludeOccurrences(ctx, tx.Client(), createdHasSBOMID, sortedIsOccurrenceUUIDs); err != nil {
-		return nil, errors.Wrap(err, "updateHasSBOMWithIncludeOccurrences")
-	}
-
-	return ptrfrom.String(createdHasSBOMID.String()), nil
+	return sbomCreate, nil
 }
 
 func updateHasSBOMWithIncludePackageIDs(ctx context.Context, client *ent.Client, hasSBOMID uuid.UUID, sortedPkgUUIDs []uuid.UUID) error {
