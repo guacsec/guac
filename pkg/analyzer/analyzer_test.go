@@ -29,7 +29,7 @@ import (
 
 var testfile = "hasSBOMs.json"
 var rearrangedTestFile = "rearrangedHasSBOM.json"
-var diffTestFile = "diffSBOM.json"
+var diffTestFile = "test_HasSBOMS_diff.json"
 
 func TestSetGetNodeAttribute(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
