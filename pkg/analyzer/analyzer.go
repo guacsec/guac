@@ -881,41 +881,65 @@ func CompareTwoPaths(analysisListOne, analysisListTwo []*Node) ([][]string, int,
 }
 
 func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
-	if len(listTwo) != len(listOne) {
-		//do something?
+
+	var small, big [][]*Node
+	if len(listOne) > len(listTwo) {
+		small= listTwo
+		big = listOne
+	} else if  len(listTwo) > len(listOne) {
+		small= listOne
+		big = listTwo
+	} else {
+		small= listTwo
+		big = listOne
 	}
 
-	// var small, big [][]*Node
-	// if len(listOne) > len(listTwo) {
-	// 	small= listTwo
-	// 	big = listOne
-	// } else if  len(listTwo) > len(listOne) {
-	// 	small= listOne
-	// 	big = listTwo
-	// } else {
-	// 	small= listTwo
-	// 	big = listOne
-	// }
-
 	var results []DiffedPath
-	for _, pathOne := range listOne {
+	used := make(map[int]bool)
+	
+	for _, pathOne := range  small {
 
 		var diff DiffedPath
 		diff.PathOne = pathOne
 		min := math.MaxInt64
-		for _, pathTwo := range listTwo {
+		var index int
+
+		for i, pathTwo := range big {
+			_, ok := used[i]
+			if ok{
+				continue
+			}
+			
 			diffs, diffNum, err := CompareTwoPaths(pathOne, pathTwo)
+
 			if err != nil {
 				return results, fmt.Errorf(err.Error())
 			}
+
+			// if diffNum > //some number {
+			// 	continue
+			// }
+			
+
 			if diffNum < min {
 				diff.PathTwo = pathTwo
 				min = diffNum
 				diff.Diffs = diffs
+				index = i
 			}
 		}
+		used[index] = true
 		results = append(results, diff)
 	}
+
+	for i, val := range big {
+		_, ok := used[i] 
+		if !ok {
+			results = append(results, DiffedPath{PathOne: val, })
+		}
+	}
+
+
 	return results, nil
 }
 
