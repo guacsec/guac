@@ -22,6 +22,8 @@ type gcsOptions struct {
 	blobAddr          string
 	csubClientOptions csub_client.CsubClientOptions
 	bucket            string
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 const gcsCredentialsPathFlag = "gcp-credentials-path"
@@ -42,6 +44,7 @@ var gcsCmd = &cobra.Command{
 			viper.GetString(gcsCredentialsPathFlag),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
+			viper.GetBool("publish-to-queue"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -84,7 +87,7 @@ var gcsCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		initializeNATsandCollector(ctx, opts.pubSubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubSubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
@@ -95,11 +98,13 @@ func validateGCSFlags(
 	credentialsPath string,
 	csubTls,
 	csubTlsSkipVerify bool,
+	pubToQueue bool,
 	args []string,
 ) (gcsOptions, error) {
 	opts := gcsOptions{
-		pubSubAddr: pubSubAddr,
-		blobAddr:   blobAddr,
+		pubSubAddr:     pubSubAddr,
+		blobAddr:       blobAddr,
+		publishToQueue: pubToQueue,
 	}
 
 	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

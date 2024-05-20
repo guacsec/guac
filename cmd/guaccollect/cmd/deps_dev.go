@@ -49,6 +49,8 @@ type depsDevOptions struct {
 	enablePrometheus bool
 	// prometheus address
 	prometheusPort int
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 var depsDevCmd = &cobra.Command{
@@ -84,6 +86,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("retrieve-dependencies"),
 			viper.GetBool("enable-prometheus"),
 			viper.GetInt("prometheus-port"),
+			viper.GetBool("publish-to-queue"),
 			args,
 		)
 		if err != nil {
@@ -110,7 +113,7 @@ you have access to read and write to the respective blob store.`,
 			}()
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
@@ -125,6 +128,7 @@ func validateDepsDevFlags(
 	retrieveDependencies,
 	enablePrometheus bool,
 	prometheusPort int,
+	pubToQueue bool,
 	args []string,
 ) (depsDevOptions, error) {
 	var opts depsDevOptions
@@ -134,6 +138,7 @@ func validateDepsDevFlags(
 	opts.retrieveDependencies = retrieveDependencies
 	opts.enablePrometheus = enablePrometheus
 	opts.prometheusPort = prometheusPort
+	opts.publishToQueue = pubToQueue
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 		if err != nil {

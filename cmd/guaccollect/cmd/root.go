@@ -36,6 +36,7 @@ func init() {
 		"use-csub",
 		"service-poll",
 		"enable-prometheus",
+		"publish-to-queue",
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)

@@ -30,6 +30,8 @@ type s3Options struct {
 	mpEndpoint        string                        // endpoint for the message provider (only for polling behaviour)
 	poll              bool                          // polling or non-polling behaviour? (defaults to non-polling)
 	csubClientOptions csub_client.CsubClientOptions // options for the collectsub client
+	publishToQueue    bool                          // enable/disable message publish to queue
+
 }
 
 var s3Cmd = &cobra.Command{
@@ -84,6 +86,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
+			viper.GetBool("publish-to-queue"),
 		)
 		if err != nil {
 			fmt.Printf("failed to validate flags: %v\n", err)
@@ -118,7 +121,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			defer csubClient.Close()
 		}
 
-		initializeNATsandCollector(ctx, s3Opts.pubSubAddr, s3Opts.blobAddr)
+		initializeNATsandCollector(ctx, s3Opts.pubSubAddr, s3Opts.blobAddr, s3Opts.publishToQueue)
 	},
 }
 
@@ -137,6 +140,7 @@ func validateS3Opts(
 	csubTls,
 	csubTlsSkipVerify,
 	poll bool,
+	pubToQueue bool,
 ) (s3Options, error) {
 	var opts s3Options
 
@@ -173,6 +177,7 @@ func validateS3Opts(
 		mpEndpoint:        mpEndpoint,
 		poll:              poll,
 		csubClientOptions: csubClientOptions,
+		publishToQueue:    pubToQueue,
 	}
 
 	return opts, nil
