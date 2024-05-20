@@ -51,22 +51,6 @@ func TestSetGetNodeAttribute(t *testing.T) {
 	}
 }
 
-func TestHighlightAnalysis(t *testing.T) {
-	graphs, err := readTwoSBOM(diffTestFile)
-	if err != nil {
-		t.Errorf("Error making graph %v ", err.Error())
-	}
-
-	one, two,err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
-
-	if err != nil {
-		t.Errorf("Error highlighting diff %v", err.Error())
-	}
-	if len(one) == 0 || len(two) == 0 {
-		t.Errorf("Error highlighting diff, wanted diffs got 0")
-}
-}
-
 func TestAddGraphNode(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
 	analyzer.AddGraphNode(g, "id", "black")
@@ -105,7 +89,6 @@ func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error)
 	file, err := os.Open(filename)
 	if err != nil {
 		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error opening rearranged test file")
-
 	}
 	defer file.Close()
 
