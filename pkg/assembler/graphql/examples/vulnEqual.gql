@@ -14,6 +14,27 @@ fragment allVulnEqualTree on VulnEqual {
   documentRef
 }
 
+fragment AllVulnEqualPaginationTree on VulnEqualConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query VulnEqualPagination {
+  vulnEqualList(vulnEqualSpec: {}, first: 10) {
+    ...AllVulnEqualPaginationTree
+  }
+}
+
 query IsVulnerabilityQ1 {
   vulnEqual(vulnEqualSpec: {}) {
     ...allVulnEqualTree

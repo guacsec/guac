@@ -18,7 +18,8 @@ package keyvalue
 import (
 	"context"
 	"errors"
-	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 	"time"
 
@@ -201,7 +202,178 @@ func (c *demoClient) ingestHasMetadata(ctx context.Context, subject model.Packag
 // Query HasMetadata
 
 func (c *demoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
-	return nil, fmt.Errorf("not implemented: HasMetadataList")
+	funcName := "HasMetadata"
+
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	if hasMetadataSpec.ID != nil {
+		link, err := byIDkv[*hasMetadataLink](ctx, *hasMetadataSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		found, err := c.buildHasMetadata(ctx, link, &hasMetadataSpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return &model.HasMetadataConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(found.ID),
+				EndCursor:   ptrfrom.String(found.ID),
+			},
+			Edges: []*model.HasMetadataEdge{
+				{
+					Cursor: found.ID,
+					Node:   found,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.HasMetadataEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	// Cant really search for an exact Pkg, as these can be linked to either
+	// names or versions, and version could be empty.
+	var search []string
+	foundOne := false
+	if hasMetadataSpec.Subject != nil && hasMetadataSpec.Subject.Artifact != nil {
+		exactArtifact, err := c.artifactExact(ctx, hasMetadataSpec.Subject.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactArtifact != nil {
+			search = append(search, exactArtifact.HasMetadataLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && hasMetadataSpec.Subject != nil && hasMetadataSpec.Subject.Source != nil {
+		exactSource, err := c.exactSource(ctx, hasMetadataSpec.Subject.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.HasMetadataLinks...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*hasMetadataLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			hm, err := c.hasMetadataIfMatch(ctx, &hasMetadataSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if hm == nil {
+				continue
+			}
+
+			if (after != nil && hm.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasMetadataEdge{
+							Cursor: hm.ID,
+							Node:   hm,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasMetadataEdge{
+						Cursor: hm.ID,
+						Node:   hm,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(hasMDCol)
+		for !done {
+			var hmKeys []string
+			var err error
+			hmKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(hmKeys)
+			totalCount = len(hmKeys)
+
+			for i, hmKey := range hmKeys {
+				link, err := byKeykv[*hasMetadataLink](ctx, hasMDCol, hmKey, c)
+				if err != nil {
+					return nil, err
+				}
+				hm, err := c.hasMetadataIfMatch(ctx, &hasMetadataSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if hm == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if hm.ID == *after {
+						totalCount = len(hmKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasMetadataEdge{
+							Cursor: hm.ID,
+							Node:   hm,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasMetadataEdge{
+						Cursor: hm.ID,
+						Node:   hm,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.HasMetadataConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
@@ -255,10 +427,16 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addHMIfMatch(ctx, out, filter, link)
+			hm, err := c.hasMetadataIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if hm == nil {
+				continue
+			}
+
+			out = append(out, hm)
 		}
 	} else {
 		var done bool
@@ -275,40 +453,46 @@ func (c *demoClient) HasMetadata(ctx context.Context, filter *model.HasMetadataS
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addHMIfMatch(ctx, out, filter, link)
+				hm, err := c.hasMetadataIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if hm == nil {
+					continue
+				}
+
+				out = append(out, hm)
 			}
 		}
 	}
 	return out, nil
 }
 
-func (c *demoClient) addHMIfMatch(ctx context.Context, out []*model.HasMetadata, filter *model.HasMetadataSpec, link *hasMetadataLink) (
-	[]*model.HasMetadata, error) {
+func (c *demoClient) hasMetadataIfMatch(ctx context.Context, filter *model.HasMetadataSpec, link *hasMetadataLink) (
+	*model.HasMetadata, error) {
 
 	if filter != nil && noMatch(filter.Justification, link.Justification) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Collector, link.Collector) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Origin, link.Origin) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Key, link.MDKey) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Value, link.Value) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
-		return out, nil
+		return nil, nil
 	}
 	// no match if filter time since is after the timestamp
 	if filter != nil && filter.Since != nil && filter.Since.After(link.Timestamp) {
-		return out, nil
+		return nil, nil
 	}
 
 	found, err := c.buildHasMetadata(ctx, link, filter, false)
@@ -316,9 +500,9 @@ func (c *demoClient) addHMIfMatch(ctx context.Context, out []*model.HasMetadata,
 		return nil, err
 	}
 	if found == nil {
-		return out, nil
+		return nil, nil
 	}
-	return append(out, found), nil
+	return found, nil
 }
 
 func (c *demoClient) buildHasMetadata(ctx context.Context, link *hasMetadataLink, filter *model.HasMetadataSpec, ingestOrIDProvided bool) (*model.HasMetadata, error) {

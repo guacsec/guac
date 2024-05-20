@@ -19,7 +19,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -133,7 +135,167 @@ func (c *demoClient) ingestVulnerabilityMetadata(ctx context.Context, vulnerabil
 // Query VulnerabilityMetadata
 
 func (c *demoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) (*model.VulnerabilityMetadataConnection, error) {
-	return nil, fmt.Errorf("not implemented: CertifyBadList")
+	c.m.RLock()
+	defer c.m.RUnlock()
+	funcName := "VulnerabilityMetadata"
+
+	if vulnerabilityMetadataSpec.ID != nil {
+		link, err := byIDkv[*vulnerabilityMetadataLink](ctx, *vulnerabilityMetadataSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		foundVulnMetadata, err := c.buildVulnerabilityMetadata(ctx, link, &vulnerabilityMetadataSpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+
+		return &model.VulnerabilityMetadataConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(foundVulnMetadata.ID),
+				EndCursor:   ptrfrom.String(foundVulnMetadata.ID),
+			},
+			Edges: []*model.VulnerabilityMetadataEdge{
+				{
+					Cursor: foundVulnMetadata.ID,
+					Node:   foundVulnMetadata,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.VulnerabilityMetadataEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	var search []string
+	foundOne := false
+	if !foundOne && vulnerabilityMetadataSpec.Vulnerability != nil {
+		exactVuln, err := c.exactVulnerability(ctx, vulnerabilityMetadataSpec.Vulnerability)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactVuln != nil {
+			search = append(search, exactVuln.VulnMetadataLinks...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*vulnerabilityMetadataLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			vmd, err := c.vulnMetadataIfMatch(ctx, &vulnerabilityMetadataSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if vmd == nil {
+				continue
+			}
+
+			if (after != nil && vmd.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.VulnerabilityMetadataEdge{
+							Cursor: vmd.ID,
+							Node:   vmd,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.VulnerabilityMetadataEdge{
+						Cursor: vmd.ID,
+						Node:   vmd,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(vulnMDCol)
+		for !done {
+			var vmdKeys []string
+			var err error
+			vmdKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(vmdKeys)
+			totalCount = len(vmdKeys)
+
+			for i, vmdk := range vmdKeys {
+				link, err := byKeykv[*vulnerabilityMetadataLink](ctx, vulnMDCol, vmdk, c)
+				if err != nil {
+					return nil, err
+				}
+				vmd, err := c.vulnMetadataIfMatch(ctx, &vulnerabilityMetadataSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if vmd == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if vmd.ID == *after {
+						totalCount = len(vmdKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.VulnerabilityMetadataEdge{
+							Cursor: vmd.ID,
+							Node:   vmd,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.VulnerabilityMetadataEdge{
+						Cursor: vmd.ID,
+						Node:   vmd,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.VulnerabilityMetadataConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error) {
@@ -176,10 +338,15 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addVulnMetadataMatch(ctx, out, filter, link)
+			vmd, err := c.vulnMetadataIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if vmd == nil {
+				continue
+			}
+
+			out = append(out, vmd)
 		}
 	} else {
 		var done bool
@@ -196,10 +363,15 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addVulnMetadataMatch(ctx, out, filter, link)
+				vmd, err := c.vulnMetadataIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if vmd == nil {
+					continue
+				}
+
+				out = append(out, vmd)
 			}
 		}
 	}
@@ -207,44 +379,43 @@ func (c *demoClient) VulnerabilityMetadata(ctx context.Context, filter *model.Vu
 	return out, nil
 }
 
-func (c *demoClient) addVulnMetadataMatch(ctx context.Context, out []*model.VulnerabilityMetadata,
-	filter *model.VulnerabilityMetadataSpec,
-	link *vulnerabilityMetadataLink) ([]*model.VulnerabilityMetadata, error) {
+func (c *demoClient) vulnMetadataIfMatch(ctx context.Context, filter *model.VulnerabilityMetadataSpec,
+	link *vulnerabilityMetadataLink) (*model.VulnerabilityMetadata, error) {
 
 	if filter != nil && filter.Comparator != nil {
 		if filter.ScoreValue == nil {
-			return out, gqlerror.Errorf("comparator set without a vulnerability score being specified")
+			return nil, gqlerror.Errorf("comparator set without a vulnerability score being specified")
 		}
 		switch *filter.Comparator {
 		case model.ComparatorEqual:
 			if link.ScoreValue != *filter.ScoreValue {
-				return out, nil
+				return nil, nil
 			}
 		case model.ComparatorGreater, model.ComparatorGreaterEqual:
 			if link.ScoreValue < *filter.ScoreValue {
-				return out, nil
+				return nil, nil
 			}
 		case model.ComparatorLess, model.ComparatorLessEqual:
 			if link.ScoreValue > *filter.ScoreValue {
-				return out, nil
+				return nil, nil
 			}
 		}
 	} else {
 		if filter != nil && noMatchFloat(filter.ScoreValue, link.ScoreValue) {
-			return out, nil
+			return nil, nil
 		}
 	}
 	if filter != nil && filter.ScoreType != nil && *filter.ScoreType != link.ScoreType {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Collector, link.Collector) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Origin, link.Origin) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
-		return out, nil
+		return nil, nil
 	}
 
 	foundVulnMetadata, err := c.buildVulnerabilityMetadata(ctx, link, filter, false)
@@ -252,9 +423,9 @@ func (c *demoClient) addVulnMetadataMatch(ctx context.Context, out []*model.Vuln
 		return nil, fmt.Errorf("failed to build vuln metadata node from link")
 	}
 	if foundVulnMetadata == nil || reflect.ValueOf(foundVulnMetadata.Vulnerability).IsNil() {
-		return out, nil
+		return nil, nil
 	}
-	return append(out, foundVulnMetadata), nil
+	return foundVulnMetadata, nil
 }
 
 func (c *demoClient) buildVulnerabilityMetadata(ctx context.Context, link *vulnerabilityMetadataLink, filter *model.VulnerabilityMetadataSpec, ingestOrIDProvided bool) (*model.VulnerabilityMetadata, error) {

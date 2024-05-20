@@ -19,7 +19,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -155,7 +157,168 @@ func (c *demoClient) convVulnEqual(ctx context.Context, in *vulnerabilityEqualLi
 // Query VulnEqual
 
 func (c *demoClient) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
-	return nil, fmt.Errorf("not implemented: VulnEqualList")
+	funcName := "VulnEqual"
+	c.m.RLock()
+	defer c.m.RUnlock()
+	if vulnEqualSpec.ID != nil {
+		link, err := byIDkv[*vulnerabilityEqualLink](ctx, *vulnEqualSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		ve, err := c.convVulnEqual(ctx, link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return &model.VulnEqualConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(ve.ID),
+				EndCursor:   ptrfrom.String(ve.ID),
+			},
+			Edges: []*model.VulnEqualEdge{
+				{
+					Cursor: ve.ID,
+					Node:   ve,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.VulnEqualEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	var search []string
+	foundOne := false
+	for _, v := range vulnEqualSpec.Vulnerabilities {
+		if !foundOne {
+			exactVuln, err := c.exactVulnerability(ctx, v)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if exactVuln != nil {
+				search = append(search, exactVuln.VulnEqualLinks...)
+				foundOne = true
+				break
+			}
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*vulnerabilityEqualLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			ve, err := c.vulnIfMatch(ctx, &vulnEqualSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if ve == nil {
+				continue
+			}
+
+			if (after != nil && ve.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.VulnEqualEdge{
+							Cursor: ve.ID,
+							Node:   ve,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.VulnEqualEdge{
+						Cursor: ve.ID,
+						Node:   ve,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(vulnEqCol)
+		for !done {
+			var veKeys []string
+			var err error
+			veKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(veKeys)
+			totalCount = len(veKeys)
+
+			for i, vek := range veKeys {
+				link, err := byKeykv[*vulnerabilityEqualLink](ctx, vulnEqCol, vek, c)
+				if err != nil {
+					return nil, err
+				}
+				ve, err := c.vulnIfMatch(ctx, &vulnEqualSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if ve == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if ve.ID == *after {
+						totalCount = len(veKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.VulnEqualEdge{
+							Cursor: ve.ID,
+							Node:   ve,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.VulnEqualEdge{
+						Cursor: ve.ID,
+						Node:   ve,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.VulnEqualConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
@@ -199,10 +362,15 @@ func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addVulnIfMatch(ctx, out, filter, link)
+			ve, err := c.vulnIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if ve == nil {
+				continue
+			}
+
+			out = append(out, ve)
 		}
 	} else {
 		var done bool
@@ -219,25 +387,29 @@ func (c *demoClient) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec)
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addVulnIfMatch(ctx, out, filter, link)
+				ve, err := c.vulnIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if ve == nil {
+					continue
+				}
+
+				out = append(out, ve)
 			}
 		}
 	}
 	return out, nil
 }
 
-func (c *demoClient) addVulnIfMatch(ctx context.Context, out []*model.VulnEqual,
-	filter *model.VulnEqualSpec, link *vulnerabilityEqualLink) (
-	[]*model.VulnEqual, error,
+func (c *demoClient) vulnIfMatch(ctx context.Context, filter *model.VulnEqualSpec, link *vulnerabilityEqualLink) (
+	*model.VulnEqual, error,
 ) {
 	if noMatch(filter.Justification, link.Justification) ||
 		noMatch(filter.Origin, link.Origin) ||
 		noMatch(filter.Collector, link.Collector) ||
 		noMatch(filter.DocumentRef, link.DocumentRef) {
-		return out, nil
+		return nil, nil
 	}
 	for _, vs := range filter.Vulnerabilities {
 		if vs == nil {
@@ -254,12 +426,12 @@ func (c *demoClient) addVulnIfMatch(ctx context.Context, out []*model.VulnEqual,
 			}
 		}
 		if !found {
-			return out, nil
+			return nil, nil
 		}
 	}
 	ve, err := c.convVulnEqual(ctx, link)
 	if err != nil {
 		return nil, err
 	}
-	return append(out, ve), nil
+	return ve, nil
 }

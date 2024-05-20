@@ -146,6 +146,8 @@ func (c *demoClient) BuildersList(ctx context.Context, builderSpec model.Builder
 		currentPage = true
 	}
 	hasNextPage := false
+	totalCount := 0
+
 	var done bool
 
 	scn := c.kv.Keys(builderCol)
@@ -156,19 +158,26 @@ func (c *demoClient) BuildersList(ctx context.Context, builderSpec model.Builder
 			return nil, err
 		}
 		sort.Strings(bKeys)
+
+		totalCount = len(bKeys)
+
 		for i, bk := range bKeys {
 			b, err := byKeykv[*builderStruct](ctx, builderCol, bk, c)
 			if err != nil {
 				return nil, err
 			}
 			convBuild := c.convBuilder(b)
+
+			if convBuild == nil {
+				continue
+			}
+
 			if after != nil && !currentPage {
 				if convBuild.ID == *after {
 					currentPage = true
-					continue
-				} else {
-					continue
+					totalCount = len(bKeys) - (i + 1)
 				}
+				continue
 			}
 			if first != nil {
 				if currentPage && count < *first {
@@ -193,16 +202,15 @@ func (c *demoClient) BuildersList(ctx context.Context, builderSpec model.Builder
 	}
 	if len(edges) > 0 {
 		return &model.BuilderConnection{
-			TotalCount: len(bKeys),
+			TotalCount: totalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[count-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(0, count-1)].Node.ID),
 			},
 			Edges: edges}, nil
-	} else {
-		return nil, nil
 	}
+	return nil, nil
 }
 
 func (c *demoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {

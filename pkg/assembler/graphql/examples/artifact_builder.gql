@@ -4,6 +4,21 @@ fragment allArtifactTree on Artifact {
   digest
 }
 
+fragment allArtifactPaginationTree on ArtifactConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
 query ArtifactQ1 {
   artifacts(artifactSpec: {}) {
     ...allArtifactTree
@@ -13,18 +28,7 @@ query ArtifactQ1 {
 
 query ArtifactPagination {
   artifactsList(artifactSpec: {}, first: 10) {
-    totalCount
-    edges {
-      cursor
-      node {
-        ...allArtifactTree
-      }
-    }
-    pageInfo {
-      startCursor
-      endCursor
-      hasNextPage
-    }
+    ...allArtifactPaginationTree
   }
 }
 

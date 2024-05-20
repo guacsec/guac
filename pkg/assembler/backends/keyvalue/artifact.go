@@ -257,60 +257,73 @@ func (c *demoClient) ArtifactsList(ctx context.Context, artifactSpec model.Artif
 		currentPage = true
 	}
 	hasNextPage := false
+	totalCount := 0
 
 	algorithm := strings.ToLower(nilToEmpty(artifactSpec.Algorithm))
 	digest := strings.ToLower(nilToEmpty(artifactSpec.Digest))
+
 	var done bool
 	scn := c.kv.Keys(artCol)
+
 	var artKeys []string
+
 	for !done {
 		artKeys, done, err = scn.Scan(ctx)
 		if err != nil {
 			return nil, err
 		}
+
 		sort.Strings(artKeys)
+
+		totalCount = len(artKeys)
+
 		for i, ak := range artKeys {
 			a, err := byKeykv[*artStruct](ctx, artCol, ak, c)
 			if err != nil {
 				return nil, err
 			}
+
 			convArt := c.convArtifact(a)
 			if after != nil && !currentPage {
 				if convArt.ID == *after {
 					currentPage = true
-					continue
-				} else {
-					continue
+					totalCount = len(artKeys) - (i + 1)
 				}
+				continue
 			}
+
+			if convArt == nil {
+				continue
+			}
+
+			artEdge := createArtifactEdges(algorithm, a, digest, convArt)
+
+			if artEdge == nil {
+				continue
+			}
+
 			if first != nil {
 				if currentPage && count < *first {
-					artEdge := createArtifactEdges(algorithm, a, digest, convArt)
-					if artEdge != nil {
-						edges = append(edges, artEdge)
-						count++
-					}
+					edges = append(edges, artEdge)
+					count++
 				}
 				// If there are any elements left after the current page we indicate that in the response
 				if count == *first && i < len(artKeys) {
 					hasNextPage = true
 				}
 			} else {
-				artEdge := createArtifactEdges(algorithm, a, digest, convArt)
-				if artEdge != nil {
-					edges = append(edges, artEdge)
-					count++
-				}
+				edges = append(edges, artEdge)
+				count++
 			}
 		}
 	}
 	if len(edges) > 0 {
 		return &model.ArtifactConnection{
-			TotalCount: len(artKeys),
+			TotalCount: totalCount,
 			PageInfo: &model.PageInfo{
 				HasNextPage: hasNextPage,
 				StartCursor: ptrfrom.String(edges[0].Node.ID),
-				EndCursor:   ptrfrom.String(edges[count-1].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(count-1, 0)].Node.ID),
 			},
 			Edges: edges}, nil
 	} else {

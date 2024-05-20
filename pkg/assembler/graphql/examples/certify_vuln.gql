@@ -41,6 +41,27 @@ fragment allCertifyVulnTree on CertifyVuln {
   }
 }
 
+fragment AllCertifyVulnPaginationTree on CertifyVulnConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query CertifyVulnPagination {
+  CertifyVulnList(certifyVulnSpec: {}, first: 10) {
+    ...AllCertifyVulnPaginationTree
+  }
+}
+
 query CertifyVulnQ1 {
   CertifyVuln(certifyVulnSpec: {}) {
     ...allCertifyVulnTree

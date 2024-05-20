@@ -18,7 +18,8 @@ package keyvalue
 import (
 	"context"
 	"errors"
-	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 	"time"
 
@@ -151,7 +152,165 @@ func (c *demoClient) ingestHasSourceAt(ctx context.Context, packageArg model.IDo
 // Query HasSourceAt
 
 func (c *demoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error) {
-	return nil, fmt.Errorf("not implemented: HasSourceAtList")
+	c.m.RLock()
+	defer c.m.RUnlock()
+	funcName := "HasSourceAt"
+	if hasSourceAtSpec.ID != nil {
+		link, err := byIDkv[*srcMapLink](ctx, *hasSourceAtSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		foundHasSourceAt, err := c.buildHasSourceAt(ctx, link, &hasSourceAtSpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return &model.HasSourceAtConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(foundHasSourceAt.ID),
+				EndCursor:   ptrfrom.String(foundHasSourceAt.ID),
+			},
+			Edges: []*model.HasSourceAtEdge{
+				{
+					Cursor: foundHasSourceAt.ID,
+					Node:   foundHasSourceAt,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.HasSourceAtEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	// Cant really search for an exact Pkg, as these can be linked to either
+	// names or versions, only search Source backedges.
+	var search []string
+	foundOne := false
+	if hasSourceAtSpec.Source != nil {
+		exactSource, err := c.exactSource(ctx, hasSourceAtSpec.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.SrcMapLinks...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*srcMapLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			src, err := c.srcIfMatch(ctx, &hasSourceAtSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if src == nil {
+				continue
+			}
+
+			if (after != nil && src.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasSourceAtEdge{
+							Cursor: src.ID,
+							Node:   src,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasSourceAtEdge{
+						Cursor: src.ID,
+						Node:   src,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+		var done bool
+		scn := c.kv.Keys(hsaCol)
+		for !done {
+			var hsaKeys []string
+			var err error
+			hsaKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(hsaKeys)
+			totalCount = len(hsaKeys)
+
+			for i, hsak := range hsaKeys {
+				link, err := byKeykv[*srcMapLink](ctx, hsaCol, hsak, c)
+				if err != nil {
+					return nil, err
+				}
+				src, err := c.srcIfMatch(ctx, &hasSourceAtSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if src == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if src.ID == *after {
+						totalCount = len(hsaKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasSourceAtEdge{
+							Cursor: src.ID,
+							Node:   src,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasSourceAtEdge{
+						Cursor: src.ID,
+						Node:   src,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.HasSourceAtConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtSpec) ([]*model.HasSourceAt, error) {
@@ -193,10 +352,15 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addSrcIfMatch(ctx, out, filter, link)
+			src, err := c.srcIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if src == nil {
+				continue
+			}
+
+			out = append(out, src)
 		}
 	} else {
 		var done bool
@@ -213,10 +377,15 @@ func (c *demoClient) HasSourceAt(ctx context.Context, filter *model.HasSourceAtS
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addSrcIfMatch(ctx, out, filter, link)
+				src, err := c.srcIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if src == nil {
+					continue
+				}
+
+				out = append(out, src)
 			}
 		}
 	}
@@ -273,30 +442,29 @@ func (c *demoClient) buildHasSourceAt(ctx context.Context, link *srcMapLink, fil
 	return &newHSA, nil
 }
 
-func (c *demoClient) addSrcIfMatch(ctx context.Context, out []*model.HasSourceAt,
-	filter *model.HasSourceAtSpec, link *srcMapLink) (
-	[]*model.HasSourceAt, error) {
+func (c *demoClient) srcIfMatch(ctx context.Context, filter *model.HasSourceAtSpec, link *srcMapLink) (
+	*model.HasSourceAt, error) {
 	if filter != nil && noMatch(filter.Justification, link.Justification) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Origin, link.Origin) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Collector, link.Collector) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && filter.KnownSince != nil && !filter.KnownSince.Equal(link.KnownSince) {
-		return out, nil
+		return nil, nil
 	}
 	foundHasSourceAt, err := c.buildHasSourceAt(ctx, link, filter, false)
 	if err != nil {
 		return nil, err
 	}
 	if foundHasSourceAt == nil {
-		return out, nil
+		return nil, nil
 	}
-	return append(out, foundHasSourceAt), nil
+	return foundHasSourceAt, nil
 }

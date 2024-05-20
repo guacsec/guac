@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"slices"
 	"sort"
 	"strings"
@@ -92,7 +93,183 @@ func (n *hasSLSAStruct) BuildModelNode(ctx context.Context, c *demoClient) (mode
 // Query HasSlsa
 
 func (c *demoClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error) {
-	return nil, fmt.Errorf("not implemented: HasSLSAList")
+	funcName := "HasSlsa"
+	c.m.RLock()
+	defer c.m.RUnlock()
+	if hasSLSASpec.ID != nil {
+		link, err := byIDkv[*hasSLSAStruct](ctx, *hasSLSASpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		hs, err := c.convSLSA(ctx, link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+
+		return &model.HasSLSAConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(hs.ID),
+				EndCursor:   ptrfrom.String(hs.ID),
+			},
+			Edges: []*model.HasSLSAEdge{
+				{
+					Cursor: hs.ID,
+					Node:   hs,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.HasSLSAEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	var search []string
+	foundOne := false
+	var arts []*model.ArtifactSpec
+	arts = append(arts, hasSLSASpec.Subject)
+	arts = append(arts, hasSLSASpec.BuiltFrom...)
+
+	for _, a := range arts {
+		if !foundOne && a != nil {
+			exactArtifact, err := c.artifactExact(ctx, a)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if exactArtifact != nil {
+				search = append(search, exactArtifact.HasSLSAs...)
+				foundOne = true
+				break
+			}
+		}
+	}
+	if !foundOne && hasSLSASpec.BuiltBy != nil {
+		exactBuilder, err := c.exactBuilder(ctx, hasSLSASpec.BuiltBy)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactBuilder != nil {
+			search = append(search, exactBuilder.HasSLSAs...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*hasSLSAStruct](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			hs, err := c.addSLSAIfMatch(ctx, &hasSLSASpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if hs == nil {
+				continue
+			}
+
+			if (after != nil && hs.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasSLSAEdge{
+							Cursor: hs.ID,
+							Node:   hs,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasSLSAEdge{
+						Cursor: hs.ID,
+						Node:   hs,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(slsaCol)
+		for !done {
+			var slsaKeys []string
+			var err error
+			slsaKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(slsaKeys)
+			totalCount = len(slsaKeys)
+
+			for i, slsaKey := range slsaKeys {
+				link, err := byKeykv[*hasSLSAStruct](ctx, slsaCol, slsaKey, c)
+				if err != nil {
+					return nil, err
+				}
+				hs, err := c.addSLSAIfMatch(ctx, &hasSLSASpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if hs == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if hs.ID == *after {
+						totalCount = len(slsaKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasSLSAEdge{
+							Cursor: hs.ID,
+							Node:   hs,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasSLSAEdge{
+						Cursor: hs.ID,
+						Node:   hs,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.HasSLSAConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]*model.HasSlsa, error) {
@@ -151,10 +328,15 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addSLSAIfMatch(ctx, out, filter, link)
+			hs, err := c.addSLSAIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if hs == nil {
+				continue
+			}
+
+			out = append(out, hs)
 		}
 	} else {
 		var done bool
@@ -171,10 +353,15 @@ func (c *demoClient) HasSlsa(ctx context.Context, filter *model.HasSLSASpec) ([]
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addSLSAIfMatch(ctx, out, filter, link)
+				hs, err := c.addSLSAIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if hs == nil {
+					continue
+				}
+
+				out = append(out, hs)
 			}
 		}
 	}
@@ -351,9 +538,8 @@ func (c *demoClient) convSLSA(ctx context.Context, in *hasSLSAStruct) (*model.Ha
 	}, nil
 }
 
-func (c *demoClient) addSLSAIfMatch(ctx context.Context, out []*model.HasSlsa,
-	filter *model.HasSLSASpec, link *hasSLSAStruct) (
-	[]*model.HasSlsa, error,
+func (c *demoClient) addSLSAIfMatch(ctx context.Context, filter *model.HasSLSASpec, link *hasSLSAStruct) (
+	*model.HasSlsa, error,
 ) {
 	bb, err := byIDkv[*builderStruct](ctx, link.BuiltBy, c)
 	if err != nil {
@@ -371,11 +557,11 @@ func (c *demoClient) addSLSAIfMatch(ctx context.Context, out []*model.HasSlsa,
 		!matchSLSAPreds(link.Predicates, filter.Predicate) ||
 		!c.matchArtifacts(ctx, []*model.ArtifactSpec{filter.Subject}, []string{link.Subject}) ||
 		!c.matchArtifacts(ctx, filter.BuiltFrom, link.BuiltFrom) {
-		return out, nil
+		return nil, nil
 	}
 	hs, err := c.convSLSA(ctx, link)
 	if err != nil {
 		return nil, err
 	}
-	return append(out, hs), nil
+	return hs, nil
 }

@@ -18,7 +18,8 @@ package keyvalue
 import (
 	"context"
 	"errors"
-	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -237,7 +238,188 @@ func (c *demoClient) artifactMatch(ctx context.Context, aID string, artifactSpec
 // Query IsOccurrence
 
 func (c *demoClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error) {
-	return nil, fmt.Errorf("not implemented: IsOccurrenceList")
+	funcName := "IsOccurrence"
+
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	if isOccurrenceSpec.ID != nil {
+		link, err := byIDkv[*isOccurrenceStruct](ctx, *isOccurrenceSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		o, err := c.convOccurrence(ctx, link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+
+		return &model.IsOccurrenceConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(o.ID),
+				EndCursor:   ptrfrom.String(o.ID),
+			},
+			Edges: []*model.IsOccurrenceEdge{
+				{
+					Cursor: o.ID,
+					Node:   o,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.IsOccurrenceEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	var search []string
+	foundOne := false
+	if isOccurrenceSpec.Artifact != nil {
+		exactArtifact, err := c.artifactExact(ctx, isOccurrenceSpec.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactArtifact != nil {
+			search = append(search, exactArtifact.Occurrences...)
+			foundOne = true
+		}
+	}
+	if !foundOne && isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Package != nil {
+		pkgs, err := c.findPackageVersion(ctx, isOccurrenceSpec.Subject.Package)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.Occurrences...)
+		}
+	}
+	if !foundOne && isOccurrenceSpec.Subject != nil && isOccurrenceSpec.Subject.Source != nil {
+		exactSource, err := c.exactSource(ctx, isOccurrenceSpec.Subject.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.Occurrences...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*isOccurrenceStruct](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			occ, err := c.occIfMatch(ctx, &isOccurrenceSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if occ == nil {
+				continue
+			}
+
+			if (after != nil && occ.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.IsOccurrenceEdge{
+							Cursor: occ.ID,
+							Node:   occ,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.IsOccurrenceEdge{
+						Cursor: occ.ID,
+						Node:   occ,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(occCol)
+		for !done {
+			var occKeys []string
+			var err error
+			occKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(occKeys)
+			totalCount = len(occKeys)
+
+			for i, ok := range occKeys {
+				link, err := byKeykv[*isOccurrenceStruct](ctx, occCol, ok, c)
+				if err != nil {
+					return nil, err
+				}
+				occ, err := c.occIfMatch(ctx, &isOccurrenceSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if occ == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if occ.ID == *after {
+						totalCount = len(occKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.IsOccurrenceEdge{
+							Cursor: occ.ID,
+							Node:   occ,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.IsOccurrenceEdge{
+						Cursor: occ.ID,
+						Node:   occ,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.IsOccurrenceConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
 }
 
 func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
@@ -300,10 +482,15 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addOccIfMatch(ctx, out, filter, link)
+			occ, err := c.occIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if occ == nil {
+				continue
+			}
+
+			out = append(out, occ)
 		}
 	} else {
 		var done bool
@@ -320,51 +507,55 @@ func (c *demoClient) IsOccurrence(ctx context.Context, filter *model.IsOccurrenc
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addOccIfMatch(ctx, out, filter, link)
+				occ, err := c.occIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if occ == nil {
+					continue
+				}
+
+				out = append(out, occ)
 			}
 		}
 	}
 	return out, nil
 }
 
-func (c *demoClient) addOccIfMatch(ctx context.Context, out []*model.IsOccurrence,
-	filter *model.IsOccurrenceSpec, link *isOccurrenceStruct) (
-	[]*model.IsOccurrence, error) {
+func (c *demoClient) occIfMatch(ctx context.Context, filter *model.IsOccurrenceSpec, link *isOccurrenceStruct) (
+	*model.IsOccurrence, error) {
 
 	if noMatch(filter.Justification, link.Justification) ||
 		noMatch(filter.Origin, link.Origin) ||
 		noMatch(filter.Collector, link.Collector) ||
 		noMatch(filter.DocumentRef, link.DocumentRef) {
-		return out, nil
+		return nil, nil
 	}
 	if filter.Artifact != nil && !c.artifactMatch(ctx, link.Artifact, filter.Artifact) {
-		return out, nil
+		return nil, nil
 	}
 	if filter.Subject != nil {
 		if filter.Subject.Package != nil {
 			if link.Pkg == "" {
-				return out, nil
+				return nil, nil
 			}
 			p, err := c.buildPackageResponse(ctx, link.Pkg, filter.Subject.Package)
 			if err != nil {
 				return nil, err
 			}
 			if p == nil {
-				return out, nil
+				return nil, nil
 			}
 		} else if filter.Subject.Source != nil {
 			if link.Source == "" {
-				return out, nil
+				return nil, nil
 			}
 			s, err := c.buildSourceResponse(ctx, link.Source, filter.Subject.Source)
 			if err != nil {
 				return nil, err
 			}
 			if s == nil {
-				return out, nil
+				return nil, nil
 			}
 		}
 	}
@@ -372,7 +563,7 @@ func (c *demoClient) addOccIfMatch(ctx context.Context, out []*model.IsOccurrenc
 	if err != nil {
 		return nil, err
 	}
-	return append(out, o), nil
+	return o, nil
 }
 
 func (c *demoClient) matchOccurrences(ctx context.Context, filters []*model.IsOccurrenceSpec, occLinkIDs []string) bool {
