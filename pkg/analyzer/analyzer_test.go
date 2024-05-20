@@ -28,7 +28,6 @@ import (
 )
 
 var testfile = "hasSBOMs.json"
-
 var rearrangedTestFile = "rearrangedHasSBOM.json"
 var diffTestFile = "test_HasSBOMs_diff.json"
 
@@ -85,7 +84,6 @@ func TestAddGraphEdge(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error getting edge from %s to %s: %v", "from", "to", err)
 	}
-
 }
 
 func TestMakeGraph(t *testing.T) {
@@ -93,7 +91,6 @@ func TestMakeGraph(t *testing.T) {
 	if err != nil {
 		t.Errorf("Fail err: %v", err.Error())
 	}
-
 }
 
 func TestFindPaths(t *testing.T) {
@@ -139,12 +136,13 @@ func testEquivalence(fn func(graph.Graph[string, *analyzer.Node], graph.Graph[st
 	if err != nil {
 		return fmt.Errorf("Error opening hasSBOMs test file")
 	}
-	defer file.Close()
+	
 
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return fmt.Errorf("Error reading test file")
 	}
+	file.Close()
 
 	var sboms []model.HasSBOMsHasSBOM
 
