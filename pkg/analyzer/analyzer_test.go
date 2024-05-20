@@ -28,7 +28,7 @@ import (
 )
 
 var testfile = "hasSBOMs.json"
-var rearrangedTestFile = "rearrangedHasSBOM.json"
+var diffTestFile = "test_HasSBOMs_diff.json"
 
 func TestSetGetNodeAttribute(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
@@ -50,6 +50,22 @@ func TestSetGetNodeAttribute(t *testing.T) {
 	}
 }
 
+func TestHighlightAnalysis(t *testing.T) {
+	graphs, err := readTwoSBOM(diffTestFile)
+	if err != nil {
+		t.Errorf("Error making graph %v ", err.Error())
+	}
+
+	one, two,err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
+
+	if err != nil {
+		t.Errorf("Error highlighting diff %v", err.Error())
+	}
+	if len(one) == 0 || len(two) == 0 {
+		t.Errorf("Error highlighting diff, wanted diffs got 0")
+}
+}
+
 func TestAddGraphNode(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
 	analyzer.AddGraphNode(g, "id", "black")
@@ -69,20 +85,7 @@ func TestAddGraphEdge(t *testing.T) {
 	}
 }
 
-func TestMakeGraph(t *testing.T) {
-	err := testEquivalence(analyzer.GraphEqual)
-	if err != nil {
-		t.Errorf("Fail err: %v", err.Error())
-	}
-}
 
-func TestFindPaths(t *testing.T) {
-
-	err := testEquivalence(analyzer.GraphEdgesEqual)
-	if err != nil {
-		t.Errorf("Fail err: %v ", err.Error())
-	}
-}
 
 func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error) {
 	file, err := os.Open(filename)
@@ -113,16 +116,16 @@ func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error)
 	return []graph.Graph[string, *analyzer.Node]{graphOne, graphTwo}, nil
 
 }
-func testEquivalence(fn func(graph.Graph[string, *analyzer.Node], graph.Graph[string, *analyzer.Node]) (bool, error)) error {
+func TestEquivalence(t *testing.T){
 	file, err := os.Open(testfile)
 	if err != nil {
-		return fmt.Errorf("Error opening hasSBOMs test file")
+		t.Errorf("Error opening hasSBOMs test file")
 	}
 	
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return fmt.Errorf("Error reading test file")
+		t.Errorf("Error reading test file")
 	}
 	file.Close()
 
@@ -130,30 +133,29 @@ func testEquivalence(fn func(graph.Graph[string, *analyzer.Node], graph.Graph[st
 
 	err = json.Unmarshal(data, &sboms)
 	if err != nil {
-		return fmt.Errorf("Error unmarshaling JSON")
+		t.Errorf("Error unmarshaling JSON")
 	}
 
-	for i, val := range sboms {
+	for _, val := range sboms {
 		graphOne, errOne := analyzer.MakeGraph(val, false, false, false, false, false)
 
 		graphTwo, errTwo := analyzer.MakeGraph(val, false, false, false, false, false)
 
 		if errOne != nil || errTwo != nil {
-			return fmt.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
+			t.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
 		}
-		ok, err := fn(graphOne, graphTwo)
+
+		ok, err := analyzer.GraphEqual(graphOne, graphTwo)
 		if !ok {
-			return fmt.Errorf("Reconstructed graph not equal HasSBOMs " + err.Error() + fmt.Sprintf(" Test-%v URI-%v", i, val.Uri))
+			t.Errorf("Reconstructed graph not equal " + err.Error())
 		}
-	}
-	graphs, err := readTwoSBOM(rearrangedTestFile)
-	if err != nil {
-		return err
+
+
+		ok, err = analyzer.GraphEdgesEqual(graphOne, graphTwo)
+		if !ok {
+			t.Errorf("Reconstructed graph edges not equal  " + err.Error())
+		}
 	}
 
-	ok, err := fn(graphs[0], graphs[1])
-	if !ok {
-		return fmt.Errorf("Reconstructed graph not equal rearranged " + err.Error())
-	}
-	return nil
+	
 }
