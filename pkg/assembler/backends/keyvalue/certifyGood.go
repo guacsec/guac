@@ -270,17 +270,26 @@ func (c *demoClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.
 				continue
 			}
 
-			if after != nil {
-				if cg.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && cg.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.CertifyGoodEdge{
-				Cursor: cg.ID,
-				Node:   cg,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyGoodEdge{
+							Cursor: cg.ID,
+							Node:   cg,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyGoodEdge{
+						Cursor: cg.ID,
+						Node:   cg,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

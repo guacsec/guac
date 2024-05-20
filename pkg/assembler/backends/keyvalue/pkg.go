@@ -589,17 +589,26 @@ func (c *demoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, af
 							},
 						}
 
-						if after != nil {
-							if pNamespaces[0].Names[0].Versions[0].ID > *after {
-								addToCount += 1
-							}
-							continue
-						}
+						if (after != nil && pNamespaces[0].Names[0].Versions[0].ID > *after) || after == nil {
+							addToCount += 1
 
-						edges = append(edges, &model.PackageEdge{
-							Cursor: pNamespaces[0].Names[0].Versions[0].ID,
-							Node:   p,
-						})
+							if first != nil {
+								if numNodes < *first {
+									edges = append(edges, &model.PackageEdge{
+										Cursor: pNamespaces[0].Names[0].Versions[0].ID,
+										Node:   p,
+									})
+									numNodes++
+								} else if numNodes == *first {
+									hasNextPage = true
+								}
+							} else {
+								edges = append(edges, &model.PackageEdge{
+									Cursor: pNamespaces[0].Names[0].Versions[0].ID,
+									Node:   p,
+								})
+							}
+						}
 					}
 				}
 			}

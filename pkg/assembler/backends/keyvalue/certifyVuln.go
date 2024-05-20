@@ -253,17 +253,26 @@ func (c *demoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.
 				continue
 			}
 
-			if after != nil {
-				if cv.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && cv.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.CertifyVulnEdge{
-				Cursor: cv.ID,
-				Node:   cv,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyVulnEdge{
+							Cursor: cv.ID,
+							Node:   cv,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyVulnEdge{
+						Cursor: cv.ID,
+						Node:   cv,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

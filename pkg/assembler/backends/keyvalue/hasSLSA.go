@@ -174,17 +174,26 @@ func (c *demoClient) HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSAS
 				continue
 			}
 
-			if after != nil {
-				if hs.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && hs.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.HasSLSAEdge{
-				Cursor: hs.ID,
-				Node:   hs,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasSLSAEdge{
+							Cursor: hs.ID,
+							Node:   hs,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasSLSAEdge{
+						Cursor: hs.ID,
+						Node:   hs,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

@@ -223,17 +223,26 @@ func (c *demoClient) VulnEqualList(ctx context.Context, vulnEqualSpec model.Vuln
 				continue
 			}
 
-			if after != nil {
-				if ve.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && ve.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.VulnEqualEdge{
-				Cursor: ve.ID,
-				Node:   ve,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.VulnEqualEdge{
+							Cursor: ve.ID,
+							Node:   ve,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.VulnEqualEdge{
+						Cursor: ve.ID,
+						Node:   ve,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

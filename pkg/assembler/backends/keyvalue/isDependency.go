@@ -218,17 +218,26 @@ func (c *demoClient) IsDependencyList(ctx context.Context, isDependencySpec mode
 				continue
 			}
 
-			if after != nil {
-				if dep.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && dep.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.IsDependencyEdge{
-				Cursor: dep.ID,
-				Node:   dep,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.IsDependencyEdge{
+							Cursor: dep.ID,
+							Node:   dep,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.IsDependencyEdge{
+						Cursor: dep.ID,
+						Node:   dep,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

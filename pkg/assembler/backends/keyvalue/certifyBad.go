@@ -269,17 +269,26 @@ func (c *demoClient) CertifyBadList(ctx context.Context, certifyBadSpec model.Ce
 				continue
 			}
 
-			if after != nil {
-				if cb.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && cb.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.CertifyBadEdge{
-				Cursor: cb.ID,
-				Node:   cb,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyBadEdge{
+							Cursor: cb.ID,
+							Node:   cb,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyBadEdge{
+						Cursor: cb.ID,
+						Node:   cb,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

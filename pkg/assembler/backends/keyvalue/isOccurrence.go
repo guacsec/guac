@@ -324,17 +324,26 @@ func (c *demoClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec mode
 				continue
 			}
 
-			if after != nil {
-				if occ.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && occ.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.IsOccurrenceEdge{
-				Cursor: occ.ID,
-				Node:   occ,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.IsOccurrenceEdge{
+							Cursor: occ.ID,
+							Node:   occ,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.IsOccurrenceEdge{
+						Cursor: occ.ID,
+						Node:   occ,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

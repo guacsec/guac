@@ -281,17 +281,26 @@ func (c *demoClient) CertifyVEXStatementList(ctx context.Context, certifyVEXStat
 				continue
 			}
 
-			if after != nil {
-				if vex.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && vex.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.VEXEdge{
-				Cursor: vex.ID,
-				Node:   vex,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.VEXEdge{
+							Cursor: vex.ID,
+							Node:   vex,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.VEXEdge{
+						Cursor: vex.ID,
+						Node:   vex,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

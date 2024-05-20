@@ -356,17 +356,26 @@ func (c *demoClient) CertifyLegalList(ctx context.Context, certifyLegalSpec mode
 				continue
 			}
 
-			if after != nil {
-				if legal.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && legal.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.CertifyLegalEdge{
-				Cursor: legal.ID,
-				Node:   legal,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyLegalEdge{
+							Cursor: legal.ID,
+							Node:   legal,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyLegalEdge{
+						Cursor: legal.ID,
+						Node:   legal,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

@@ -278,17 +278,26 @@ func (c *demoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.
 				continue
 			}
 
-			if after != nil {
-				if hm.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && hm.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.HasMetadataEdge{
-				Cursor: hm.ID,
-				Node:   hm,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasMetadataEdge{
+							Cursor: hm.ID,
+							Node:   hm,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasMetadataEdge{
+						Cursor: hm.ID,
+						Node:   hm,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

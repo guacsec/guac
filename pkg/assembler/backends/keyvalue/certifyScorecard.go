@@ -211,17 +211,26 @@ func (c *demoClient) ScorecardsList(ctx context.Context, scorecardSpec model.Cer
 			}
 
 			for _, scorecardOut := range out {
-				if after != nil {
-					if scorecardOut.ID > *after {
-						addToCount += 1
-					}
-					continue
-				}
+				if (after != nil && scorecardOut.ID > *after) || after == nil {
+					addToCount += 1
 
-				edges = append(edges, &model.CertifyScorecardEdge{
-					Cursor: scorecardOut.ID,
-					Node:   scorecardOut,
-				})
+					if first != nil {
+						if numNodes < *first {
+							edges = append(edges, &model.CertifyScorecardEdge{
+								Cursor: scorecardOut.ID,
+								Node:   scorecardOut,
+							})
+							numNodes++
+						} else if numNodes == *first {
+							hasNextPage = true
+						}
+					} else {
+						edges = append(edges, &model.CertifyScorecardEdge{
+							Cursor: scorecardOut.ID,
+							Node:   scorecardOut,
+						})
+					}
+				}
 			}
 		}
 	} else {

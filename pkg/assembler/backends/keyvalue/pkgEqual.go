@@ -217,17 +217,26 @@ func (c *demoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqu
 				continue
 			}
 
-			if after != nil {
-				if pe.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && pe.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.PkgEqualEdge{
-				Cursor: pe.ID,
-				Node:   pe,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.PkgEqualEdge{
+							Cursor: pe.ID,
+							Node:   pe,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.PkgEqualEdge{
+						Cursor: pe.ID,
+						Node:   pe,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

@@ -216,17 +216,26 @@ func (c *demoClient) HasSourceAtList(ctx context.Context, hasSourceAtSpec model.
 				continue
 			}
 
-			if after != nil {
-				if src.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && src.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.HasSourceAtEdge{
-				Cursor: src.ID,
-				Node:   src,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasSourceAtEdge{
+							Cursor: src.ID,
+							Node:   src,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasSourceAtEdge{
+						Cursor: src.ID,
+						Node:   src,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

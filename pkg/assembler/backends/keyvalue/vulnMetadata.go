@@ -200,17 +200,26 @@ func (c *demoClient) VulnerabilityMetadataList(ctx context.Context, vulnerabilit
 				continue
 			}
 
-			if after != nil {
-				if vmd.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && vmd.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.VulnerabilityMetadataEdge{
-				Cursor: vmd.ID,
-				Node:   vmd,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.VulnerabilityMetadataEdge{
+							Cursor: vmd.ID,
+							Node:   vmd,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.VulnerabilityMetadataEdge{
+						Cursor: vmd.ID,
+						Node:   vmd,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

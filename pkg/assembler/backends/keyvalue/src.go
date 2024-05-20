@@ -371,17 +371,26 @@ func (c *demoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpe
 						},
 					}
 
-					if after != nil {
-						if sNamespaces[0].Names[0].ID > *after {
-							addToCount += 1
-						}
-						continue
-					}
+					if (after != nil && sNamespaces[0].Names[0].ID > *after) || after == nil {
+						addToCount += 1
 
-					edges = append(edges, &model.SourceEdge{
-						Cursor: sNamespaces[0].Names[0].ID,
-						Node:   s,
-					})
+						if first != nil {
+							if numNodes < *first {
+								edges = append(edges, &model.SourceEdge{
+									Cursor: sNamespaces[0].Names[0].ID,
+									Node:   s,
+								})
+								numNodes++
+							} else if numNodes == *first {
+								hasNextPage = true
+							}
+						} else {
+							edges = append(edges, &model.SourceEdge{
+								Cursor: sNamespaces[0].Names[0].ID,
+								Node:   s,
+							})
+						}
+					}
 				}
 			}
 		}

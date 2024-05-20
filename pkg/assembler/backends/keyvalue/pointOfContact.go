@@ -277,17 +277,26 @@ func (c *demoClient) PointOfContactList(ctx context.Context, pointOfContactSpec 
 				continue
 			}
 
-			if after != nil {
-				if poc.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && poc.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.PointOfContactEdge{
-				Cursor: poc.ID,
-				Node:   poc,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.PointOfContactEdge{
+							Cursor: poc.ID,
+							Node:   poc,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.PointOfContactEdge{
+						Cursor: poc.ID,
+						Node:   poc,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false

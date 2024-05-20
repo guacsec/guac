@@ -252,17 +252,26 @@ func (c *demoClient) HashEqualList(ctx context.Context, hashEqualSpec model.Hash
 				continue
 			}
 
-			if after != nil {
-				if he.ID > *after {
-					addToCount += 1
-				}
-				continue
-			}
+			if (after != nil && he.ID > *after) || after == nil {
+				addToCount += 1
 
-			edges = append(edges, &model.HashEqualEdge{
-				Cursor: he.ID,
-				Node:   he,
-			})
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HashEqualEdge{
+							Cursor: he.ID,
+							Node:   he,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HashEqualEdge{
+						Cursor: he.ID,
+						Node:   he,
+					})
+				}
+			}
 		}
 	} else {
 		currentPage := false
