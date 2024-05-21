@@ -1,8 +1,7 @@
 module github.com/guacsec/guac
 
 go 1.21.8
-
-toolchain go1.22.1
+toolchain go1.22.2
 
 require (
 	cloud.google.com/go/storage v1.40.0
@@ -105,7 +104,7 @@ require (
 	github.com/containerd/typeurl/v2 v2.1.1 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -232,13 +231,13 @@ require (
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/twmb/murmur3 v1.1.3 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
-	github.com/urfave/cli/v2 v2.27.1 // indirect
+	github.com/urfave/cli/v2 v2.27.2 // indirect
 	github.com/vbatts/tar-split v0.11.5 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xanzy/go-gitlab v0.93.1 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	github.com/xrash/smetrics v0.0.0-20231213231151-1d8dd44e695e // indirect
+	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.10 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.10 // indirect
@@ -292,7 +291,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/go-github/v50 v50.2.0
-	github.com/google/osv-scanner v1.7.2
+	github.com/google/osv-scanner v1.7.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jedib0t/go-pretty/v6 v6.5.9
