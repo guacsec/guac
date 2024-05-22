@@ -23069,6 +23069,201 @@ func (v *VulnerabilityInputSpec) GetType() string { return v.Type }
 // GetVulnerabilityID returns VulnerabilityInputSpec.VulnerabilityID, and is useful for accessing the field via an interface.
 func (v *VulnerabilityInputSpec) GetVulnerabilityID() string { return v.VulnerabilityID }
 
+// VulnerabilityListResponse is returned by VulnerabilityList on success.
+type VulnerabilityListResponse struct {
+	// Returns a paginated results via VulnerabilityConnection
+	VulnerabilityList *VulnerabilityListVulnerabilityListVulnerabilityConnection `json:"vulnerabilityList"`
+}
+
+// GetVulnerabilityList returns VulnerabilityListResponse.VulnerabilityList, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListResponse) GetVulnerabilityList() *VulnerabilityListVulnerabilityListVulnerabilityConnection {
+	return v.VulnerabilityList
+}
+
+// VulnerabilityListVulnerabilityListVulnerabilityConnection includes the requested fields of the GraphQL type VulnerabilityConnection.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityConnection returns the paginated results for Vulnerability.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VulnerabilityEdge which contains the current cursor
+// and the Vulnerability node itself
+type VulnerabilityListVulnerabilityListVulnerabilityConnection struct {
+	TotalCount int                                                                               `json:"totalCount"`
+	Edges      []VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge `json:"edges"`
+	PageInfo   VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo                 `json:"pageInfo"`
+}
+
+// GetTotalCount returns VulnerabilityListVulnerabilityListVulnerabilityConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns VulnerabilityListVulnerabilityListVulnerabilityConnection.Edges, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnection) GetEdges() []VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns VulnerabilityListVulnerabilityListVulnerabilityConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnection) GetPageInfo() VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo {
+	return v.PageInfo
+}
+
+// VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge includes the requested fields of the GraphQL type VulnerabilityEdge.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityEdge contains the cursor for the resulting node and
+// the Vulnerability node itself.
+type VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge struct {
+	Cursor string                                                                                           `json:"cursor"`
+	Node   VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability `json:"node"`
+}
+
+// GetCursor returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge.Node, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge) GetNode() VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability {
+	return v.Node
+}
+
+// VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability includes the requested fields of the GraphQL type Vulnerability.
+// The GraphQL type's documentation follows.
+//
+// Vulnerability represents the root of the vulnerability trie/tree.
+//
+// We map vulnerability information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type and a vulnerability ID. This allows for generic
+// representation of the various vulnerabilities and does not limit to just cve, ghsa or osv.
+// This would be in the general format: vuln://<general-type>/<vuln-id>
+//
+// Examples:
+//
+// CVE, using path separator: vuln://cve/cve-2023-20753
+// OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
+// Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
+//
+// This node represents the type part of the trie path. It is used to represent
+// the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
+//
+// Since this node is at the root of the vulnerability trie, it is named Vulnerability, not
+// VulnerabilityType.
+//
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
+// for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
+type VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability struct {
+	AllVulnerabilityTree `json:"-"`
+}
+
+// GetId returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability.Id, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) GetId() string {
+	return v.AllVulnerabilityTree.Id
+}
+
+// GetType returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability.Type, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) GetType() string {
+	return v.AllVulnerabilityTree.Type
+}
+
+// GetVulnerabilityIDs returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability.VulnerabilityIDs, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) GetVulnerabilityIDs() []AllVulnerabilityTreeVulnerabilityIDsVulnerabilityID {
+	return v.AllVulnerabilityTree.VulnerabilityIDs
+}
+
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnerabilityTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	VulnerabilityIDs []AllVulnerabilityTreeVulnerabilityIDsVulnerabilityID `json:"vulnerabilityIDs"`
+}
+
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) __premarshalJSON() (*__premarshalVulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability, error) {
+	var retval __premarshalVulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability
+
+	retval.Id = v.AllVulnerabilityTree.Id
+	retval.Type = v.AllVulnerabilityTree.Type
+	retval.VulnerabilityIDs = v.AllVulnerabilityTree.VulnerabilityIDs
+	return &retval, nil
+}
+
+// VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
 // VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
 type VulnerabilityMetadataInputSpec struct {
 	ScoreType   VulnerabilityScoreType `json:"scoreType"`
@@ -24410,6 +24605,22 @@ type __VulnerabilitiesInput struct {
 
 // GetFilter returns __VulnerabilitiesInput.Filter, and is useful for accessing the field via an interface.
 func (v *__VulnerabilitiesInput) GetFilter() VulnerabilitySpec { return v.Filter }
+
+// __VulnerabilityListInput is used internally by genqlient
+type __VulnerabilityListInput struct {
+	Filter VulnerabilitySpec `json:"filter"`
+	After  *string           `json:"after"`
+	First  *int              `json:"first"`
+}
+
+// GetFilter returns __VulnerabilityListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityListInput) GetFilter() VulnerabilitySpec { return v.Filter }
+
+// GetAfter returns __VulnerabilityListInput.After, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __VulnerabilityListInput.First, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityListInput) GetFirst() *int { return v.First }
 
 // The query or mutation executed by Artifacts.
 const Artifacts_Operation = `
@@ -30111,6 +30322,64 @@ func Vulnerabilities(
 	var err_ error
 
 	var data_ VulnerabilitiesResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VulnerabilityList.
+const VulnerabilityList_Operation = `
+query VulnerabilityList ($filter: VulnerabilitySpec!, $after: ID, $first: Int) {
+	vulnerabilityList(vulnSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllVulnerabilityTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VulnerabilityList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnerabilitySpec,
+	after *string,
+	first *int,
+) (*VulnerabilityListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnerabilityList",
+		Query:  VulnerabilityList_Operation,
+		Variables: &__VulnerabilityListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ VulnerabilityListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
