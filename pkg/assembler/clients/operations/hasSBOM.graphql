@@ -51,7 +51,6 @@ query HasSBOMs($filter: HasSBOMSpec!) {
   }
 }
 
-
 query HasSBOMList($filter: HasSBOMSpec!, $after: ID, $first: Int) {
   HasSBOMList(hasSBOMSpec: $filter, after: $after, first: $first) {
     totalCount
