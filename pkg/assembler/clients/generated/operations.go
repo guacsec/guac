@@ -7909,6 +7909,266 @@ func (v *HasSBOMInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns HasSBOMInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// HasSBOMListHasSBOMListHasSBOMConnection includes the requested fields of the GraphQL type HasSBOMConnection.
+// The GraphQL type's documentation follows.
+//
+// HasSBOMConnection returns the paginated results for HasSBOM.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSBOMEdge which contains the current cursor
+// and the HasSBOM node itself
+type HasSBOMListHasSBOMListHasSBOMConnection struct {
+	TotalCount int                                                       `json:"totalCount"`
+	Edges      []HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge `json:"edges"`
+	PageInfo   HasSBOMListHasSBOMListHasSBOMConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns HasSBOMListHasSBOMListHasSBOMConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns HasSBOMListHasSBOMListHasSBOMConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnection) GetEdges() []HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HasSBOMListHasSBOMListHasSBOMConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnection) GetPageInfo() HasSBOMListHasSBOMListHasSBOMConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge includes the requested fields of the GraphQL type HasSBOMEdge.
+// The GraphQL type's documentation follows.
+//
+// HasSBOMEdge contains the cursor for the resulting node and
+// the HasSBOMEdge node itself.
+type HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge struct {
+	Cursor string                                                             `json:"cursor"`
+	Node   HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM `json:"node"`
+}
+
+// GetCursor returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge) GetCursor() string { return v.Cursor }
+
+// GetNode returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge.Node, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge) GetNode() HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM {
+	return v.Node
+}
+
+// HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM includes the requested fields of the GraphQL type HasSBOM.
+type HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM struct {
+	AllHasSBOMTree `json:"-"`
+}
+
+// GetId returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetId() string {
+	return v.AllHasSBOMTree.Id
+}
+
+// GetSubject returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Subject, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetSubject() AllHasSBOMTreeSubjectPackageOrArtifact {
+	return v.AllHasSBOMTree.Subject
+}
+
+// GetUri returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Uri, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetUri() string {
+	return v.AllHasSBOMTree.Uri
+}
+
+// GetAlgorithm returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Algorithm, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetAlgorithm() string {
+	return v.AllHasSBOMTree.Algorithm
+}
+
+// GetDigest returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Digest, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetDigest() string {
+	return v.AllHasSBOMTree.Digest
+}
+
+// GetDownloadLocation returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetDownloadLocation() string {
+	return v.AllHasSBOMTree.DownloadLocation
+}
+
+// GetOrigin returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Origin, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetOrigin() string {
+	return v.AllHasSBOMTree.Origin
+}
+
+// GetCollector returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Collector, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetCollector() string {
+	return v.AllHasSBOMTree.Collector
+}
+
+// GetKnownSince returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetKnownSince() time.Time {
+	return v.AllHasSBOMTree.KnownSince
+}
+
+// GetIncludedSoftware returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
+	return v.AllHasSBOMTree.IncludedSoftware
+}
+
+// GetIncludedDependencies returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.IncludedDependencies, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetIncludedDependencies() []AllHasSBOMTreeIncludedDependenciesIsDependency {
+	return v.AllHasSBOMTree.IncludedDependencies
+}
+
+// GetIncludedOccurrences returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.IncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetIncludedOccurrences() []AllHasSBOMTreeIncludedOccurrencesIsOccurrence {
+	return v.AllHasSBOMTree.IncludedOccurrences
+}
+
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSBOMTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Uri string `json:"uri"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+
+	DownloadLocation string `json:"downloadLocation"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
+
+	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
+
+	IncludedOccurrences []AllHasSBOMTreeIncludedOccurrencesIsOccurrence `json:"includedOccurrences"`
+}
+
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) __premarshalJSON() (*__premarshalHasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM, error) {
+	var retval __premarshalHasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM
+
+	retval.Id = v.AllHasSBOMTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasSBOMTree.Subject
+		var err error
+		*dst, err = __marshalAllHasSBOMTreeSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.AllHasSBOMTree.Subject: %w", err)
+		}
+	}
+	retval.Uri = v.AllHasSBOMTree.Uri
+	retval.Algorithm = v.AllHasSBOMTree.Algorithm
+	retval.Digest = v.AllHasSBOMTree.Digest
+	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
+	retval.Origin = v.AllHasSBOMTree.Origin
+	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	{
+
+		dst := &retval.IncludedSoftware
+		src := v.AllHasSBOMTree.IncludedSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.AllHasSBOMTree.IncludedSoftware: %w", err)
+			}
+		}
+	}
+	retval.IncludedDependencies = v.AllHasSBOMTree.IncludedDependencies
+	retval.IncludedOccurrences = v.AllHasSBOMTree.IncludedOccurrences
+	return &retval, nil
+}
+
+// HasSBOMListHasSBOMListHasSBOMConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HasSBOMListHasSBOMListHasSBOMConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HasSBOMListHasSBOMListHasSBOMConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HasSBOMListHasSBOMListHasSBOMConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// GetHasNextPage returns HasSBOMListHasSBOMListHasSBOMConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionPageInfo) GetHasNextPage() bool { return v.HasNextPage }
+
+// HasSBOMListResponse is returned by HasSBOMList on success.
+type HasSBOMListResponse struct {
+	// Returns a paginated results via HasSBOMConnection
+	HasSBOMList *HasSBOMListHasSBOMListHasSBOMConnection `json:"HasSBOMList"`
+}
+
+// GetHasSBOMList returns HasSBOMListResponse.HasSBOMList, and is useful for accessing the field via an interface.
+func (v *HasSBOMListResponse) GetHasSBOMList() *HasSBOMListHasSBOMListHasSBOMConnection {
+	return v.HasSBOMList
+}
+
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
 //
 // Only the package or artifact can be added, not both.
@@ -22921,6 +23181,22 @@ type __FindSoftwareInput struct {
 // GetSearchText returns __FindSoftwareInput.SearchText, and is useful for accessing the field via an interface.
 func (v *__FindSoftwareInput) GetSearchText() string { return v.SearchText }
 
+// __HasSBOMListInput is used internally by genqlient
+type __HasSBOMListInput struct {
+	Filter HasSBOMSpec `json:"filter"`
+	After  *string     `json:"after"`
+	First  *int        `json:"first"`
+}
+
+// GetFilter returns __HasSBOMListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSBOMListInput) GetFilter() HasSBOMSpec { return v.Filter }
+
+// GetAfter returns __HasSBOMListInput.After, and is useful for accessing the field via an interface.
+func (v *__HasSBOMListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HasSBOMListInput.First, and is useful for accessing the field via an interface.
+func (v *__HasSBOMListInput) GetFirst() *int { return v.First }
+
 // __HasSBOMsInput is used internally by genqlient
 type __HasSBOMsInput struct {
 	Filter HasSBOMSpec `json:"filter"`
@@ -24513,6 +24789,162 @@ func FindSoftware(
 	var err_ error
 
 	var data_ FindSoftwareResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasSBOMList.
+const HasSBOMList_Operation = `
+query HasSBOMList ($filter: HasSBOMSpec!, $after: ID, $first: Int) {
+	HasSBOMList(hasSBOMSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHasSBOMTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHasSBOMTree on HasSBOM {
+	id
+	subject {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	uri
+	algorithm
+	digest
+	downloadLocation
+	origin
+	collector
+	knownSince
+	includedSoftware {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	includedDependencies {
+		... AllIsDependencyTree
+	}
+	includedOccurrences {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... AllPkgTree
+	}
+	dependencyPackage {
+		... AllPkgTree
+	}
+	dependencyType
+	versionRange
+	origin
+	collector
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func HasSBOMList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSBOMSpec,
+	after *string,
+	first *int,
+) (*HasSBOMListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSBOMList",
+		Query:  HasSBOMList_Operation,
+		Variables: &__HasSBOMListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HasSBOMListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

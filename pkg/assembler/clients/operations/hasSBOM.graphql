@@ -50,3 +50,21 @@ query HasSBOMs($filter: HasSBOMSpec!) {
     ...AllHasSBOMTree
   }
 }
+
+
+query HasSBOMList($filter: HasSBOMSpec!, $after: ID, $first: Int) {
+  HasSBOMList(hasSBOMSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllHasSBOMTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}
