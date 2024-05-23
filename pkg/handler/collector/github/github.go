@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/internal/client/githubclient"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
@@ -286,8 +287,9 @@ func (g *githubCollector) collectAssetsForRelease(ctx context.Context, release c
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
-					Collector: GithubCollector,
-					Source:    asset.URL,
+					Collector:   GithubCollector,
+					Source:      asset.URL,
+					DocumentRef: events.GetDocRef(content.Bytes),
 				},
 			}
 			docChannel <- doc
@@ -336,8 +338,9 @@ func (g *githubCollector) fetchWorkflowRunArtifacts(ctx context.Context, docChan
 				Type:   processor.DocumentUnknown,
 				Format: processor.FormatUnknown,
 				SourceInformation: processor.SourceInformation{
-					Collector: GithubCollector,
-					Source:    artifact.Name,
+					Collector:   GithubCollector,
+					Source:      artifact.Name,
+					DocumentRef: events.GetDocRef(artifact.Bytes),
 				},
 			}
 
@@ -383,7 +386,7 @@ func ParseGithubReleaseDataSource(source datasource.Source) (*client.Repo, TagOr
 	if len(path) < 3 || len(path) > 5 {
 		return nil, "", fmt.Errorf("invalid github url path: %v invalid number of subpaths: %v", u.Path, len(path))
 	}
-	if path[2] != "releases" || (len(path) == 5 && path[3] != "tags") {
+	if path[2] != "releases" || (len(path) == 5 && path[3] != "tag") {
 		return nil, "", fmt.Errorf("invalid github path: %v", u.Path)
 	}
 	var tol TagOrLatest

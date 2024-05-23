@@ -526,6 +526,27 @@ func TestPkgEqual(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:    []*model.Package{testdata.P1out, testdata.P2out},
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -571,14 +592,20 @@ func TestPkgEqual(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.PkgEqual(ctx, test.Query)
+			got, err := b.PkgEqualList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHE, got, commonOpts); diff != "" {
+			var returnedObjects []*model.PkgEqual
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHE, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -754,6 +781,32 @@ func TestIngestPkgEquals(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P1}},
+					P2: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P2}},
+					PE: []*model.PkgEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHE: []*model.PkgEqual{
+				{
+					Packages:    []*model.Package{testdata.P1out, testdata.P2out},
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -773,14 +826,20 @@ func TestIngestPkgEquals(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.PkgEqual(ctx, test.Query)
+			got, err := b.PkgEqualList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHE, got, commonOpts); diff != "" {
+			var returnedObjects []*model.PkgEqual
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHE, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

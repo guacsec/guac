@@ -90,6 +90,12 @@ func (csc *CertifyScorecardCreate) SetCollector(s string) *CertifyScorecardCreat
 	return csc
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (csc *CertifyScorecardCreate) SetDocumentRef(s string) *CertifyScorecardCreate {
+	csc.mutation.SetDocumentRef(s)
+	return csc
+}
+
 // SetChecksHash sets the "checks_hash" field.
 func (csc *CertifyScorecardCreate) SetChecksHash(s string) *CertifyScorecardCreate {
 	csc.mutation.SetChecksHash(s)
@@ -190,6 +196,9 @@ func (csc *CertifyScorecardCreate) check() error {
 	if _, ok := csc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyScorecard.collector"`)}
 	}
+	if _, ok := csc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "CertifyScorecard.document_ref"`)}
+	}
 	if _, ok := csc.mutation.ChecksHash(); !ok {
 		return &ValidationError{Name: "checks_hash", err: errors.New(`ent: missing required field "CertifyScorecard.checks_hash"`)}
 	}
@@ -259,6 +268,10 @@ func (csc *CertifyScorecardCreate) createSpec() (*CertifyScorecard, *sqlgraph.Cr
 	if value, ok := csc.mutation.Collector(); ok {
 		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := csc.mutation.DocumentRef(); ok {
+		_spec.SetField(certifyscorecard.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if value, ok := csc.mutation.ChecksHash(); ok {
 		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)
@@ -432,6 +445,18 @@ func (u *CertifyScorecardUpsert) SetCollector(v string) *CertifyScorecardUpsert 
 // UpdateCollector sets the "collector" field to the value that was provided on create.
 func (u *CertifyScorecardUpsert) UpdateCollector() *CertifyScorecardUpsert {
 	u.SetExcluded(certifyscorecard.FieldCollector)
+	return u
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyScorecardUpsert) SetDocumentRef(v string) *CertifyScorecardUpsert {
+	u.Set(certifyscorecard.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyScorecardUpsert) UpdateDocumentRef() *CertifyScorecardUpsert {
+	u.SetExcluded(certifyscorecard.FieldDocumentRef)
 	return u
 }
 
@@ -611,6 +636,20 @@ func (u *CertifyScorecardUpsertOne) SetCollector(v string) *CertifyScorecardUpse
 func (u *CertifyScorecardUpsertOne) UpdateCollector() *CertifyScorecardUpsertOne {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyScorecardUpsertOne) SetDocumentRef(v string) *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertOne) UpdateDocumentRef() *CertifyScorecardUpsertOne {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -959,6 +998,20 @@ func (u *CertifyScorecardUpsertBulk) SetCollector(v string) *CertifyScorecardUps
 func (u *CertifyScorecardUpsertBulk) UpdateCollector() *CertifyScorecardUpsertBulk {
 	return u.Update(func(s *CertifyScorecardUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyScorecardUpsertBulk) SetDocumentRef(v string) *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyScorecardUpsertBulk) UpdateDocumentRef() *CertifyScorecardUpsertBulk {
+	return u.Update(func(s *CertifyScorecardUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

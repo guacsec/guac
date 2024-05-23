@@ -5,7 +5,6 @@ package ent
 import (
 	"context"
 
-	"entgo.io/ent/dialect/sql"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
@@ -38,13 +37,13 @@ func (a *ArtifactQuery) CollectFields(ctx context.Context, satisfies ...string) 
 	if fc == nil {
 		return a, nil
 	}
-	if err := a.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := a.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return a, nil
 }
 
-func (a *ArtifactQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (a *ArtifactQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -53,73 +52,144 @@ func (a *ArtifactQuery) collectField(ctx context.Context, opCtx *graphql.Operati
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "occurrences":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&OccurrenceClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, occurrenceImplementors)...); err != nil {
 				return err
 			}
 			a.WithNamedOccurrences(alias, func(wq *OccurrenceQuery) {
 				*wq = *query
 			})
+
 		case "sbom":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&BillOfMaterialsClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, billofmaterialsImplementors)...); err != nil {
 				return err
 			}
 			a.WithNamedSbom(alias, func(wq *BillOfMaterialsQuery) {
 				*wq = *query
 			})
+
 		case "attestations":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&SLSAAttestationClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, slsaattestationImplementors)...); err != nil {
 				return err
 			}
 			a.WithNamedAttestations(alias, func(wq *SLSAAttestationQuery) {
 				*wq = *query
 			})
+
+		case "attestationsSubject":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&SLSAAttestationClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, slsaattestationImplementors)...); err != nil {
+				return err
+			}
+			a.WithNamedAttestationsSubject(alias, func(wq *SLSAAttestationQuery) {
+				*wq = *query
+			})
+
 		case "hashEqualArtA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&HashEqualClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, hashequalImplementors)...); err != nil {
 				return err
 			}
 			a.WithNamedHashEqualArtA(alias, func(wq *HashEqualQuery) {
 				*wq = *query
 			})
+
 		case "hashEqualArtB":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&HashEqualClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, hashequalImplementors)...); err != nil {
 				return err
 			}
 			a.WithNamedHashEqualArtB(alias, func(wq *HashEqualQuery) {
 				*wq = *query
 			})
+
+		case "vex":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVexClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifyvexImplementors)...); err != nil {
+				return err
+			}
+			a.WithNamedVex(alias, func(wq *CertifyVexQuery) {
+				*wq = *query
+			})
+
+		case "certification":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertificationClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certificationImplementors)...); err != nil {
+				return err
+			}
+			a.WithNamedCertification(alias, func(wq *CertificationQuery) {
+				*wq = *query
+			})
+
+		case "metadata":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasMetadataClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, hasmetadataImplementors)...); err != nil {
+				return err
+			}
+			a.WithNamedMetadata(alias, func(wq *HasMetadataQuery) {
+				*wq = *query
+			})
+
+		case "poc":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PointOfContactClient{config: a.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, pointofcontactImplementors)...); err != nil {
+				return err
+			}
+			a.WithNamedPoc(alias, func(wq *PointOfContactQuery) {
+				*wq = *query
+			})
+
 		case "includedInSboms":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&BillOfMaterialsClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, billofmaterialsImplementors)...); err != nil {
 				return err
 			}
 			a.WithNamedIncludedInSboms(alias, func(wq *BillOfMaterialsQuery) {
@@ -179,13 +249,13 @@ func (bom *BillOfMaterialsQuery) CollectFields(ctx context.Context, satisfies ..
 	if fc == nil {
 		return bom, nil
 	}
-	if err := bom.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := bom.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return bom, nil
 }
 
-func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -194,13 +264,14 @@ func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphq
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "package":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: bom.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			bom.withPackage = query
@@ -208,13 +279,14 @@ func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphq
 				selectedFields = append(selectedFields, billofmaterials.FieldPackageID)
 				fieldSeen[billofmaterials.FieldPackageID] = struct{}{}
 			}
+
 		case "artifact":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: bom.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			bom.withArtifact = query
@@ -222,49 +294,53 @@ func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphq
 				selectedFields = append(selectedFields, billofmaterials.FieldArtifactID)
 				fieldSeen[billofmaterials.FieldArtifactID] = struct{}{}
 			}
+
 		case "includedSoftwarePackages":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: bom.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			bom.WithNamedIncludedSoftwarePackages(alias, func(wq *PackageVersionQuery) {
 				*wq = *query
 			})
+
 		case "includedSoftwareArtifacts":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: bom.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			bom.WithNamedIncludedSoftwareArtifacts(alias, func(wq *ArtifactQuery) {
 				*wq = *query
 			})
+
 		case "includedDependencies":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&DependencyClient{config: bom.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, dependencyImplementors)...); err != nil {
 				return err
 			}
 			bom.WithNamedIncludedDependencies(alias, func(wq *DependencyQuery) {
 				*wq = *query
 			})
+
 		case "includedOccurrences":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&OccurrenceClient{config: bom.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, occurrenceImplementors)...); err != nil {
 				return err
 			}
 			bom.WithNamedIncludedOccurrences(alias, func(wq *OccurrenceQuery) {
@@ -309,6 +385,11 @@ func (bom *BillOfMaterialsQuery) collectField(ctx context.Context, opCtx *graphq
 			if _, ok := fieldSeen[billofmaterials.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, billofmaterials.FieldCollector)
 				fieldSeen[billofmaterials.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[billofmaterials.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, billofmaterials.FieldDocumentRef)
+				fieldSeen[billofmaterials.FieldDocumentRef] = struct{}{}
 			}
 		case "knownSince":
 			if _, ok := fieldSeen[billofmaterials.FieldKnownSince]; !ok {
@@ -379,13 +460,13 @@ func (b *BuilderQuery) CollectFields(ctx context.Context, satisfies ...string) (
 	if fc == nil {
 		return b, nil
 	}
-	if err := b.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := b.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return b, nil
 }
 
-func (b *BuilderQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (b *BuilderQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -394,13 +475,14 @@ func (b *BuilderQuery) collectField(ctx context.Context, opCtx *graphql.Operatio
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "slsaAttestations":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&SLSAAttestationClient{config: b.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, slsaattestationImplementors)...); err != nil {
 				return err
 			}
 			b.WithNamedSlsaAttestations(alias, func(wq *SLSAAttestationQuery) {
@@ -455,13 +537,13 @@ func (c *CertificationQuery) CollectFields(ctx context.Context, satisfies ...str
 	if fc == nil {
 		return c, nil
 	}
-	if err := c.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := c.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return c, nil
 }
 
-func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (c *CertificationQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -470,13 +552,14 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "source":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&SourceNameClient{config: c.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, sourcenameImplementors)...); err != nil {
 				return err
 			}
 			c.withSource = query
@@ -484,13 +567,14 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certification.FieldSourceID)
 				fieldSeen[certification.FieldSourceID] = struct{}{}
 			}
+
 		case "packageVersion":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: c.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			c.withPackageVersion = query
@@ -498,13 +582,14 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certification.FieldPackageVersionID)
 				fieldSeen[certification.FieldPackageVersionID] = struct{}{}
 			}
+
 		case "allVersions":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageNameClient{config: c.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packagenameImplementors)...); err != nil {
 				return err
 			}
 			c.withAllVersions = query
@@ -512,13 +597,14 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certification.FieldPackageNameID)
 				fieldSeen[certification.FieldPackageNameID] = struct{}{}
 			}
+
 		case "artifact":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: c.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			c.withArtifact = query
@@ -556,6 +642,11 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certification.FieldJustification)
 				fieldSeen[certification.FieldJustification] = struct{}{}
 			}
+		case "knownSince":
+			if _, ok := fieldSeen[certification.FieldKnownSince]; !ok {
+				selectedFields = append(selectedFields, certification.FieldKnownSince)
+				fieldSeen[certification.FieldKnownSince] = struct{}{}
+			}
 		case "origin":
 			if _, ok := fieldSeen[certification.FieldOrigin]; !ok {
 				selectedFields = append(selectedFields, certification.FieldOrigin)
@@ -566,10 +657,10 @@ func (c *CertificationQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certification.FieldCollector)
 				fieldSeen[certification.FieldCollector] = struct{}{}
 			}
-		case "knownSince":
-			if _, ok := fieldSeen[certification.FieldKnownSince]; !ok {
-				selectedFields = append(selectedFields, certification.FieldKnownSince)
-				fieldSeen[certification.FieldKnownSince] = struct{}{}
+		case "documentRef":
+			if _, ok := fieldSeen[certification.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certification.FieldDocumentRef)
+				fieldSeen[certification.FieldDocumentRef] = struct{}{}
 			}
 		case "id":
 		case "__typename":
@@ -615,13 +706,13 @@ func (cl *CertifyLegalQuery) CollectFields(ctx context.Context, satisfies ...str
 	if fc == nil {
 		return cl, nil
 	}
-	if err := cl.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := cl.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return cl, nil
 }
 
-func (cl *CertifyLegalQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (cl *CertifyLegalQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -630,13 +721,14 @@ func (cl *CertifyLegalQuery) collectField(ctx context.Context, opCtx *graphql.Op
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "package":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: cl.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			cl.withPackage = query
@@ -644,13 +736,14 @@ func (cl *CertifyLegalQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certifylegal.FieldPackageID)
 				fieldSeen[certifylegal.FieldPackageID] = struct{}{}
 			}
+
 		case "source":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&SourceNameClient{config: cl.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, sourcenameImplementors)...); err != nil {
 				return err
 			}
 			cl.withSource = query
@@ -658,25 +751,27 @@ func (cl *CertifyLegalQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, certifylegal.FieldSourceID)
 				fieldSeen[certifylegal.FieldSourceID] = struct{}{}
 			}
+
 		case "declaredLicenses":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&LicenseClient{config: cl.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, licenseImplementors)...); err != nil {
 				return err
 			}
 			cl.WithNamedDeclaredLicenses(alias, func(wq *LicenseQuery) {
 				*wq = *query
 			})
+
 		case "discoveredLicenses":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&LicenseClient{config: cl.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, licenseImplementors)...); err != nil {
 				return err
 			}
 			cl.WithNamedDiscoveredLicenses(alias, func(wq *LicenseQuery) {
@@ -726,6 +821,11 @@ func (cl *CertifyLegalQuery) collectField(ctx context.Context, opCtx *graphql.Op
 			if _, ok := fieldSeen[certifylegal.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, certifylegal.FieldCollector)
 				fieldSeen[certifylegal.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[certifylegal.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certifylegal.FieldDocumentRef)
+				fieldSeen[certifylegal.FieldDocumentRef] = struct{}{}
 			}
 		case "declaredLicensesHash":
 			if _, ok := fieldSeen[certifylegal.FieldDeclaredLicensesHash]; !ok {
@@ -781,13 +881,13 @@ func (cs *CertifyScorecardQuery) CollectFields(ctx context.Context, satisfies ..
 	if fc == nil {
 		return cs, nil
 	}
-	if err := cs.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := cs.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return cs, nil
 }
 
-func (cs *CertifyScorecardQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (cs *CertifyScorecardQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -796,13 +896,14 @@ func (cs *CertifyScorecardQuery) collectField(ctx context.Context, opCtx *graphq
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "source":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&SourceNameClient{config: cs.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, sourcenameImplementors)...); err != nil {
 				return err
 			}
 			cs.withSource = query
@@ -849,6 +950,11 @@ func (cs *CertifyScorecardQuery) collectField(ctx context.Context, opCtx *graphq
 			if _, ok := fieldSeen[certifyscorecard.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, certifyscorecard.FieldCollector)
 				fieldSeen[certifyscorecard.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[certifyscorecard.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certifyscorecard.FieldDocumentRef)
+				fieldSeen[certifyscorecard.FieldDocumentRef] = struct{}{}
 			}
 		case "checksHash":
 			if _, ok := fieldSeen[certifyscorecard.FieldChecksHash]; !ok {
@@ -899,13 +1005,13 @@ func (cv *CertifyVexQuery) CollectFields(ctx context.Context, satisfies ...strin
 	if fc == nil {
 		return cv, nil
 	}
-	if err := cv.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := cv.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return cv, nil
 }
 
-func (cv *CertifyVexQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (cv *CertifyVexQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -914,13 +1020,14 @@ func (cv *CertifyVexQuery) collectField(ctx context.Context, opCtx *graphql.Oper
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "package":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: cv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			cv.withPackage = query
@@ -928,13 +1035,14 @@ func (cv *CertifyVexQuery) collectField(ctx context.Context, opCtx *graphql.Oper
 				selectedFields = append(selectedFields, certifyvex.FieldPackageID)
 				fieldSeen[certifyvex.FieldPackageID] = struct{}{}
 			}
+
 		case "artifact":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: cv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			cv.withArtifact = query
@@ -942,13 +1050,14 @@ func (cv *CertifyVexQuery) collectField(ctx context.Context, opCtx *graphql.Oper
 				selectedFields = append(selectedFields, certifyvex.FieldArtifactID)
 				fieldSeen[certifyvex.FieldArtifactID] = struct{}{}
 			}
+
 		case "vulnerability":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&VulnerabilityIDClient{config: cv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, vulnerabilityidImplementors)...); err != nil {
 				return err
 			}
 			cv.withVulnerability = query
@@ -1006,6 +1115,11 @@ func (cv *CertifyVexQuery) collectField(ctx context.Context, opCtx *graphql.Oper
 				selectedFields = append(selectedFields, certifyvex.FieldCollector)
 				fieldSeen[certifyvex.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[certifyvex.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certifyvex.FieldDocumentRef)
+				fieldSeen[certifyvex.FieldDocumentRef] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -1050,13 +1164,13 @@ func (cv *CertifyVulnQuery) CollectFields(ctx context.Context, satisfies ...stri
 	if fc == nil {
 		return cv, nil
 	}
-	if err := cv.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := cv.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return cv, nil
 }
 
-func (cv *CertifyVulnQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (cv *CertifyVulnQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -1065,13 +1179,14 @@ func (cv *CertifyVulnQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "vulnerability":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&VulnerabilityIDClient{config: cv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, vulnerabilityidImplementors)...); err != nil {
 				return err
 			}
 			cv.withVulnerability = query
@@ -1079,13 +1194,14 @@ func (cv *CertifyVulnQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 				selectedFields = append(selectedFields, certifyvuln.FieldVulnerabilityID)
 				fieldSeen[certifyvuln.FieldVulnerabilityID] = struct{}{}
 			}
+
 		case "package":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: cv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			cv.withPackage = query
@@ -1138,6 +1254,11 @@ func (cv *CertifyVulnQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 				selectedFields = append(selectedFields, certifyvuln.FieldCollector)
 				fieldSeen[certifyvuln.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[certifyvuln.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, certifyvuln.FieldDocumentRef)
+				fieldSeen[certifyvuln.FieldDocumentRef] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -1182,13 +1303,13 @@ func (d *DependencyQuery) CollectFields(ctx context.Context, satisfies ...string
 	if fc == nil {
 		return d, nil
 	}
-	if err := d.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := d.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return d, nil
 }
 
-func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (d *DependencyQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -1197,13 +1318,14 @@ func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "package":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: d.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			d.withPackage = query
@@ -1211,13 +1333,14 @@ func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, dependency.FieldPackageID)
 				fieldSeen[dependency.FieldPackageID] = struct{}{}
 			}
+
 		case "dependentPackageName":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageNameClient{config: d.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packagenameImplementors)...); err != nil {
 				return err
 			}
 			d.withDependentPackageName = query
@@ -1225,13 +1348,14 @@ func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, dependency.FieldDependentPackageNameID)
 				fieldSeen[dependency.FieldDependentPackageNameID] = struct{}{}
 			}
+
 		case "dependentPackageVersion":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: d.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			d.withDependentPackageVersion = query
@@ -1239,13 +1363,14 @@ func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, dependency.FieldDependentPackageVersionID)
 				fieldSeen[dependency.FieldDependentPackageVersionID] = struct{}{}
 			}
+
 		case "includedInSboms":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&BillOfMaterialsClient{config: d.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, billofmaterialsImplementors)...); err != nil {
 				return err
 			}
 			d.WithNamedIncludedInSboms(alias, func(wq *BillOfMaterialsQuery) {
@@ -1291,6 +1416,11 @@ func (d *DependencyQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, dependency.FieldCollector)
 				fieldSeen[dependency.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[dependency.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, dependency.FieldDocumentRef)
+				fieldSeen[dependency.FieldDocumentRef] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -1335,13 +1465,13 @@ func (hm *HasMetadataQuery) CollectFields(ctx context.Context, satisfies ...stri
 	if fc == nil {
 		return hm, nil
 	}
-	if err := hm.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := hm.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return hm, nil
 }
 
-func (hm *HasMetadataQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (hm *HasMetadataQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -1350,13 +1480,14 @@ func (hm *HasMetadataQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "source":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&SourceNameClient{config: hm.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, sourcenameImplementors)...); err != nil {
 				return err
 			}
 			hm.withSource = query
@@ -1364,13 +1495,14 @@ func (hm *HasMetadataQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 				selectedFields = append(selectedFields, hasmetadata.FieldSourceID)
 				fieldSeen[hasmetadata.FieldSourceID] = struct{}{}
 			}
+
 		case "packageVersion":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: hm.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			hm.withPackageVersion = query
@@ -1378,13 +1510,14 @@ func (hm *HasMetadataQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 				selectedFields = append(selectedFields, hasmetadata.FieldPackageVersionID)
 				fieldSeen[hasmetadata.FieldPackageVersionID] = struct{}{}
 			}
+
 		case "allVersions":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageNameClient{config: hm.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packagenameImplementors)...); err != nil {
 				return err
 			}
 			hm.withAllVersions = query
@@ -1392,13 +1525,14 @@ func (hm *HasMetadataQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 				selectedFields = append(selectedFields, hasmetadata.FieldPackageNameID)
 				fieldSeen[hasmetadata.FieldPackageNameID] = struct{}{}
 			}
+
 		case "artifact":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: hm.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			hm.withArtifact = query
@@ -1456,6 +1590,11 @@ func (hm *HasMetadataQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 				selectedFields = append(selectedFields, hasmetadata.FieldCollector)
 				fieldSeen[hasmetadata.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[hasmetadata.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, hasmetadata.FieldDocumentRef)
+				fieldSeen[hasmetadata.FieldDocumentRef] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -1500,13 +1639,13 @@ func (hsa *HasSourceAtQuery) CollectFields(ctx context.Context, satisfies ...str
 	if fc == nil {
 		return hsa, nil
 	}
-	if err := hsa.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := hsa.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return hsa, nil
 }
 
-func (hsa *HasSourceAtQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (hsa *HasSourceAtQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -1515,13 +1654,14 @@ func (hsa *HasSourceAtQuery) collectField(ctx context.Context, opCtx *graphql.Op
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "packageVersion":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: hsa.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			hsa.withPackageVersion = query
@@ -1529,13 +1669,14 @@ func (hsa *HasSourceAtQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, hassourceat.FieldPackageVersionID)
 				fieldSeen[hassourceat.FieldPackageVersionID] = struct{}{}
 			}
+
 		case "allVersions":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageNameClient{config: hsa.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packagenameImplementors)...); err != nil {
 				return err
 			}
 			hsa.withAllVersions = query
@@ -1543,13 +1684,14 @@ func (hsa *HasSourceAtQuery) collectField(ctx context.Context, opCtx *graphql.Op
 				selectedFields = append(selectedFields, hassourceat.FieldPackageNameID)
 				fieldSeen[hassourceat.FieldPackageNameID] = struct{}{}
 			}
+
 		case "source":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&SourceNameClient{config: hsa.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, sourcenameImplementors)...); err != nil {
 				return err
 			}
 			hsa.withSource = query
@@ -1591,6 +1733,11 @@ func (hsa *HasSourceAtQuery) collectField(ctx context.Context, opCtx *graphql.Op
 			if _, ok := fieldSeen[hassourceat.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, hassourceat.FieldCollector)
 				fieldSeen[hassourceat.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[hassourceat.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, hassourceat.FieldDocumentRef)
+				fieldSeen[hassourceat.FieldDocumentRef] = struct{}{}
 			}
 		case "id":
 		case "__typename":
@@ -1636,13 +1783,13 @@ func (he *HashEqualQuery) CollectFields(ctx context.Context, satisfies ...string
 	if fc == nil {
 		return he, nil
 	}
-	if err := he.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := he.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return he, nil
 }
 
-func (he *HashEqualQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (he *HashEqualQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -1651,13 +1798,14 @@ func (he *HashEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "artifactA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: he.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			he.withArtifactA = query
@@ -1665,13 +1813,14 @@ func (he *HashEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, hashequal.FieldArtID)
 				fieldSeen[hashequal.FieldArtID] = struct{}{}
 			}
+
 		case "artifactB":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: he.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			he.withArtifactB = query
@@ -1703,6 +1852,11 @@ func (he *HashEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if _, ok := fieldSeen[hashequal.FieldJustification]; !ok {
 				selectedFields = append(selectedFields, hashequal.FieldJustification)
 				fieldSeen[hashequal.FieldJustification] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[hashequal.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, hashequal.FieldDocumentRef)
+				fieldSeen[hashequal.FieldDocumentRef] = struct{}{}
 			}
 		case "artifactsHash":
 			if _, ok := fieldSeen[hashequal.FieldArtifactsHash]; !ok {
@@ -1753,13 +1907,13 @@ func (l *LicenseQuery) CollectFields(ctx context.Context, satisfies ...string) (
 	if fc == nil {
 		return l, nil
 	}
-	if err := l.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := l.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return l, nil
 }
 
-func (l *LicenseQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (l *LicenseQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -1768,25 +1922,27 @@ func (l *LicenseQuery) collectField(ctx context.Context, opCtx *graphql.Operatio
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "declaredInCertifyLegals":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&CertifyLegalClient{config: l.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifylegalImplementors)...); err != nil {
 				return err
 			}
 			l.WithNamedDeclaredInCertifyLegals(alias, func(wq *CertifyLegalQuery) {
 				*wq = *query
 			})
+
 		case "discoveredInCertifyLegals":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&CertifyLegalClient{config: l.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifylegalImplementors)...); err != nil {
 				return err
 			}
 			l.WithNamedDiscoveredInCertifyLegals(alias, func(wq *CertifyLegalQuery) {
@@ -1851,13 +2007,13 @@ func (o *OccurrenceQuery) CollectFields(ctx context.Context, satisfies ...string
 	if fc == nil {
 		return o, nil
 	}
-	if err := o.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := o.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return o, nil
 }
 
-func (o *OccurrenceQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (o *OccurrenceQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -1866,13 +2022,14 @@ func (o *OccurrenceQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "artifact":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: o.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			o.withArtifact = query
@@ -1880,13 +2037,14 @@ func (o *OccurrenceQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, occurrence.FieldArtifactID)
 				fieldSeen[occurrence.FieldArtifactID] = struct{}{}
 			}
+
 		case "package":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: o.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			o.withPackage = query
@@ -1894,13 +2052,14 @@ func (o *OccurrenceQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, occurrence.FieldPackageID)
 				fieldSeen[occurrence.FieldPackageID] = struct{}{}
 			}
+
 		case "source":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&SourceNameClient{config: o.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, sourcenameImplementors)...); err != nil {
 				return err
 			}
 			o.withSource = query
@@ -1908,13 +2067,14 @@ func (o *OccurrenceQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, occurrence.FieldSourceID)
 				fieldSeen[occurrence.FieldSourceID] = struct{}{}
 			}
+
 		case "includedInSboms":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&BillOfMaterialsClient{config: o.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, billofmaterialsImplementors)...); err != nil {
 				return err
 			}
 			o.WithNamedIncludedInSboms(alias, func(wq *BillOfMaterialsQuery) {
@@ -1939,6 +2099,11 @@ func (o *OccurrenceQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if _, ok := fieldSeen[occurrence.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, occurrence.FieldCollector)
 				fieldSeen[occurrence.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[occurrence.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, occurrence.FieldDocumentRef)
+				fieldSeen[occurrence.FieldDocumentRef] = struct{}{}
 			}
 		case "sourceID":
 			if _, ok := fieldSeen[occurrence.FieldSourceID]; !ok {
@@ -1994,13 +2159,13 @@ func (pn *PackageNameQuery) CollectFields(ctx context.Context, satisfies ...stri
 	if fc == nil {
 		return pn, nil
 	}
-	if err := pn.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := pn.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return pn, nil
 }
 
-func (pn *PackageNameQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (pn *PackageNameQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -2009,16 +2174,82 @@ func (pn *PackageNameQuery) collectField(ctx context.Context, opCtx *graphql.Ope
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "versions":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: pn.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			pn.WithNamedVersions(alias, func(wq *PackageVersionQuery) {
+				*wq = *query
+			})
+
+		case "hasSourceAt":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasSourceAtClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, hassourceatImplementors)...); err != nil {
+				return err
+			}
+			pn.WithNamedHasSourceAt(alias, func(wq *HasSourceAtQuery) {
+				*wq = *query
+			})
+
+		case "dependency":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&DependencyClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, dependencyImplementors)...); err != nil {
+				return err
+			}
+			pn.WithNamedDependency(alias, func(wq *DependencyQuery) {
+				*wq = *query
+			})
+
+		case "certification":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertificationClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certificationImplementors)...); err != nil {
+				return err
+			}
+			pn.WithNamedCertification(alias, func(wq *CertificationQuery) {
+				*wq = *query
+			})
+
+		case "metadata":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasMetadataClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, hasmetadataImplementors)...); err != nil {
+				return err
+			}
+			pn.WithNamedMetadata(alias, func(wq *HasMetadataQuery) {
+				*wq = *query
+			})
+
+		case "poc":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PointOfContactClient{config: pn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, pointofcontactImplementors)...); err != nil {
+				return err
+			}
+			pn.WithNamedPoc(alias, func(wq *PointOfContactQuery) {
 				*wq = *query
 			})
 		case "type":
@@ -2080,13 +2311,13 @@ func (pv *PackageVersionQuery) CollectFields(ctx context.Context, satisfies ...s
 	if fc == nil {
 		return pv, nil
 	}
-	if err := pv.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := pv.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return pv, nil
 }
 
-func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (pv *PackageVersionQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -2095,13 +2326,14 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "name":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageNameClient{config: pv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packagenameImplementors)...); err != nil {
 				return err
 			}
 			pv.withName = query
@@ -2109,64 +2341,186 @@ func (pv *PackageVersionQuery) collectField(ctx context.Context, opCtx *graphql.
 				selectedFields = append(selectedFields, packageversion.FieldNameID)
 				fieldSeen[packageversion.FieldNameID] = struct{}{}
 			}
+
 		case "occurrences":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&OccurrenceClient{config: pv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, occurrenceImplementors)...); err != nil {
 				return err
 			}
 			pv.WithNamedOccurrences(alias, func(wq *OccurrenceQuery) {
 				*wq = *query
 			})
+
 		case "sbom":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&BillOfMaterialsClient{config: pv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, billofmaterialsImplementors)...); err != nil {
 				return err
 			}
 			pv.WithNamedSbom(alias, func(wq *BillOfMaterialsQuery) {
 				*wq = *query
 			})
+
+		case "vuln":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVulnClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifyvulnImplementors)...); err != nil {
+				return err
+			}
+			pv.WithNamedVuln(alias, func(wq *CertifyVulnQuery) {
+				*wq = *query
+			})
+
+		case "vex":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVexClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifyvexImplementors)...); err != nil {
+				return err
+			}
+			pv.WithNamedVex(alias, func(wq *CertifyVexQuery) {
+				*wq = *query
+			})
+
+		case "hasSourceAt":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasSourceAtClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, hassourceatImplementors)...); err != nil {
+				return err
+			}
+			pv.WithNamedHasSourceAt(alias, func(wq *HasSourceAtQuery) {
+				*wq = *query
+			})
+
+		case "certification":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertificationClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certificationImplementors)...); err != nil {
+				return err
+			}
+			pv.WithNamedCertification(alias, func(wq *CertificationQuery) {
+				*wq = *query
+			})
+
+		case "metadata":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasMetadataClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, hasmetadataImplementors)...); err != nil {
+				return err
+			}
+			pv.WithNamedMetadata(alias, func(wq *HasMetadataQuery) {
+				*wq = *query
+			})
+
+		case "dependency":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&DependencyClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, dependencyImplementors)...); err != nil {
+				return err
+			}
+			pv.WithNamedDependency(alias, func(wq *DependencyQuery) {
+				*wq = *query
+			})
+
+		case "dependencySubject":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&DependencyClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, dependencyImplementors)...); err != nil {
+				return err
+			}
+			pv.WithNamedDependencySubject(alias, func(wq *DependencyQuery) {
+				*wq = *query
+			})
+
 		case "includedInSboms":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&BillOfMaterialsClient{config: pv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, billofmaterialsImplementors)...); err != nil {
 				return err
 			}
 			pv.WithNamedIncludedInSboms(alias, func(wq *BillOfMaterialsQuery) {
 				*wq = *query
 			})
+
 		case "pkgEqualPkgA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PkgEqualClient{config: pv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, pkgequalImplementors)...); err != nil {
 				return err
 			}
 			pv.WithNamedPkgEqualPkgA(alias, func(wq *PkgEqualQuery) {
 				*wq = *query
 			})
+
 		case "pkgEqualPkgB":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PkgEqualClient{config: pv.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, pkgequalImplementors)...); err != nil {
 				return err
 			}
 			pv.WithNamedPkgEqualPkgB(alias, func(wq *PkgEqualQuery) {
+				*wq = *query
+			})
+
+		case "poc":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PointOfContactClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, pointofcontactImplementors)...); err != nil {
+				return err
+			}
+			pv.WithNamedPoc(alias, func(wq *PointOfContactQuery) {
+				*wq = *query
+			})
+
+		case "certifyLegal":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyLegalClient{config: pv.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifylegalImplementors)...); err != nil {
+				return err
+			}
+			pv.WithNamedCertifyLegal(alias, func(wq *CertifyLegalQuery) {
 				*wq = *query
 			})
 		case "nameID":
@@ -2238,13 +2592,13 @@ func (pe *PkgEqualQuery) CollectFields(ctx context.Context, satisfies ...string)
 	if fc == nil {
 		return pe, nil
 	}
-	if err := pe.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := pe.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return pe, nil
 }
 
-func (pe *PkgEqualQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (pe *PkgEqualQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -2253,13 +2607,14 @@ func (pe *PkgEqualQuery) collectField(ctx context.Context, opCtx *graphql.Operat
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "packageA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: pe.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			pe.withPackageA = query
@@ -2267,13 +2622,14 @@ func (pe *PkgEqualQuery) collectField(ctx context.Context, opCtx *graphql.Operat
 				selectedFields = append(selectedFields, pkgequal.FieldPkgID)
 				fieldSeen[pkgequal.FieldPkgID] = struct{}{}
 			}
+
 		case "packageB":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: pe.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			pe.withPackageB = query
@@ -2300,6 +2656,11 @@ func (pe *PkgEqualQuery) collectField(ctx context.Context, opCtx *graphql.Operat
 			if _, ok := fieldSeen[pkgequal.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, pkgequal.FieldCollector)
 				fieldSeen[pkgequal.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[pkgequal.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, pkgequal.FieldDocumentRef)
+				fieldSeen[pkgequal.FieldDocumentRef] = struct{}{}
 			}
 		case "justification":
 			if _, ok := fieldSeen[pkgequal.FieldJustification]; !ok {
@@ -2355,13 +2716,13 @@ func (poc *PointOfContactQuery) CollectFields(ctx context.Context, satisfies ...
 	if fc == nil {
 		return poc, nil
 	}
-	if err := poc.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := poc.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return poc, nil
 }
 
-func (poc *PointOfContactQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (poc *PointOfContactQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -2370,13 +2731,14 @@ func (poc *PointOfContactQuery) collectField(ctx context.Context, opCtx *graphql
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "source":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&SourceNameClient{config: poc.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, sourcenameImplementors)...); err != nil {
 				return err
 			}
 			poc.withSource = query
@@ -2384,13 +2746,14 @@ func (poc *PointOfContactQuery) collectField(ctx context.Context, opCtx *graphql
 				selectedFields = append(selectedFields, pointofcontact.FieldSourceID)
 				fieldSeen[pointofcontact.FieldSourceID] = struct{}{}
 			}
+
 		case "packageVersion":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageVersionClient{config: poc.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packageversionImplementors)...); err != nil {
 				return err
 			}
 			poc.withPackageVersion = query
@@ -2398,13 +2761,14 @@ func (poc *PointOfContactQuery) collectField(ctx context.Context, opCtx *graphql
 				selectedFields = append(selectedFields, pointofcontact.FieldPackageVersionID)
 				fieldSeen[pointofcontact.FieldPackageVersionID] = struct{}{}
 			}
+
 		case "allVersions":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&PackageNameClient{config: poc.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, packagenameImplementors)...); err != nil {
 				return err
 			}
 			poc.withAllVersions = query
@@ -2412,13 +2776,14 @@ func (poc *PointOfContactQuery) collectField(ctx context.Context, opCtx *graphql
 				selectedFields = append(selectedFields, pointofcontact.FieldPackageNameID)
 				fieldSeen[pointofcontact.FieldPackageNameID] = struct{}{}
 			}
+
 		case "artifact":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: poc.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			poc.withArtifact = query
@@ -2476,6 +2841,11 @@ func (poc *PointOfContactQuery) collectField(ctx context.Context, opCtx *graphql
 				selectedFields = append(selectedFields, pointofcontact.FieldCollector)
 				fieldSeen[pointofcontact.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[pointofcontact.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, pointofcontact.FieldDocumentRef)
+				fieldSeen[pointofcontact.FieldDocumentRef] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:
@@ -2520,13 +2890,13 @@ func (sa *SLSAAttestationQuery) CollectFields(ctx context.Context, satisfies ...
 	if fc == nil {
 		return sa, nil
 	}
-	if err := sa.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := sa.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return sa, nil
 }
 
-func (sa *SLSAAttestationQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (sa *SLSAAttestationQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -2535,25 +2905,27 @@ func (sa *SLSAAttestationQuery) collectField(ctx context.Context, opCtx *graphql
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "builtFrom":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: sa.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			sa.WithNamedBuiltFrom(alias, func(wq *ArtifactQuery) {
 				*wq = *query
 			})
+
 		case "builtBy":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&BuilderClient{config: sa.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, builderImplementors)...); err != nil {
 				return err
 			}
 			sa.withBuiltBy = query
@@ -2561,13 +2933,14 @@ func (sa *SLSAAttestationQuery) collectField(ctx context.Context, opCtx *graphql
 				selectedFields = append(selectedFields, slsaattestation.FieldBuiltByID)
 				fieldSeen[slsaattestation.FieldBuiltByID] = struct{}{}
 			}
+
 		case "subject":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&ArtifactClient{config: sa.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, artifactImplementors)...); err != nil {
 				return err
 			}
 			sa.withSubject = query
@@ -2620,6 +2993,11 @@ func (sa *SLSAAttestationQuery) collectField(ctx context.Context, opCtx *graphql
 				selectedFields = append(selectedFields, slsaattestation.FieldCollector)
 				fieldSeen[slsaattestation.FieldCollector] = struct{}{}
 			}
+		case "documentRef":
+			if _, ok := fieldSeen[slsaattestation.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, slsaattestation.FieldDocumentRef)
+				fieldSeen[slsaattestation.FieldDocumentRef] = struct{}{}
+			}
 		case "builtFromHash":
 			if _, ok := fieldSeen[slsaattestation.FieldBuiltFromHash]; !ok {
 				selectedFields = append(selectedFields, slsaattestation.FieldBuiltFromHash)
@@ -2669,13 +3047,13 @@ func (sn *SourceNameQuery) CollectFields(ctx context.Context, satisfies ...strin
 	if fc == nil {
 		return sn, nil
 	}
-	if err := sn.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := sn.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return sn, nil
 }
 
-func (sn *SourceNameQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (sn *SourceNameQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -2684,16 +3062,95 @@ func (sn *SourceNameQuery) collectField(ctx context.Context, opCtx *graphql.Oper
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "occurrences":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&OccurrenceClient{config: sn.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, occurrenceImplementors)...); err != nil {
 				return err
 			}
 			sn.WithNamedOccurrences(alias, func(wq *OccurrenceQuery) {
+				*wq = *query
+			})
+
+		case "hasSourceAt":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasSourceAtClient{config: sn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, hassourceatImplementors)...); err != nil {
+				return err
+			}
+			sn.WithNamedHasSourceAt(alias, func(wq *HasSourceAtQuery) {
+				*wq = *query
+			})
+
+		case "scorecard":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyScorecardClient{config: sn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifyscorecardImplementors)...); err != nil {
+				return err
+			}
+			sn.WithNamedScorecard(alias, func(wq *CertifyScorecardQuery) {
+				*wq = *query
+			})
+
+		case "certification":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertificationClient{config: sn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certificationImplementors)...); err != nil {
+				return err
+			}
+			sn.WithNamedCertification(alias, func(wq *CertificationQuery) {
+				*wq = *query
+			})
+
+		case "metadata":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&HasMetadataClient{config: sn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, hasmetadataImplementors)...); err != nil {
+				return err
+			}
+			sn.WithNamedMetadata(alias, func(wq *HasMetadataQuery) {
+				*wq = *query
+			})
+
+		case "poc":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&PointOfContactClient{config: sn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, pointofcontactImplementors)...); err != nil {
+				return err
+			}
+			sn.WithNamedPoc(alias, func(wq *PointOfContactQuery) {
+				*wq = *query
+			})
+
+		case "certifyLegal":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyLegalClient{config: sn.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifylegalImplementors)...); err != nil {
+				return err
+			}
+			sn.WithNamedCertifyLegal(alias, func(wq *CertifyLegalQuery) {
 				*wq = *query
 			})
 		case "type":
@@ -2765,13 +3222,13 @@ func (ve *VulnEqualQuery) CollectFields(ctx context.Context, satisfies ...string
 	if fc == nil {
 		return ve, nil
 	}
-	if err := ve.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := ve.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return ve, nil
 }
 
-func (ve *VulnEqualQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (ve *VulnEqualQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -2780,13 +3237,14 @@ func (ve *VulnEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "vulnerabilityA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&VulnerabilityIDClient{config: ve.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, vulnerabilityidImplementors)...); err != nil {
 				return err
 			}
 			ve.withVulnerabilityA = query
@@ -2794,13 +3252,14 @@ func (ve *VulnEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 				selectedFields = append(selectedFields, vulnequal.FieldVulnID)
 				fieldSeen[vulnequal.FieldVulnID] = struct{}{}
 			}
+
 		case "vulnerabilityB":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&VulnerabilityIDClient{config: ve.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, vulnerabilityidImplementors)...); err != nil {
 				return err
 			}
 			ve.withVulnerabilityB = query
@@ -2832,6 +3291,11 @@ func (ve *VulnEqualQuery) collectField(ctx context.Context, opCtx *graphql.Opera
 			if _, ok := fieldSeen[vulnequal.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, vulnequal.FieldCollector)
 				fieldSeen[vulnequal.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[vulnequal.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, vulnequal.FieldDocumentRef)
+				fieldSeen[vulnequal.FieldDocumentRef] = struct{}{}
 			}
 		case "vulnerabilitiesHash":
 			if _, ok := fieldSeen[vulnequal.FieldVulnerabilitiesHash]; !ok {
@@ -2882,13 +3346,13 @@ func (vi *VulnerabilityIDQuery) CollectFields(ctx context.Context, satisfies ...
 	if fc == nil {
 		return vi, nil
 	}
-	if err := vi.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := vi.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return vi, nil
 }
 
-func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -2897,40 +3361,69 @@ func (vi *VulnerabilityIDQuery) collectField(ctx context.Context, opCtx *graphql
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "vulnEqualVulnA":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&VulnEqualClient{config: vi.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, vulnequalImplementors)...); err != nil {
 				return err
 			}
 			vi.WithNamedVulnEqualVulnA(alias, func(wq *VulnEqualQuery) {
 				*wq = *query
 			})
+
 		case "vulnEqualVulnB":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&VulnEqualClient{config: vi.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, vulnequalImplementors)...); err != nil {
 				return err
 			}
 			vi.WithNamedVulnEqualVulnB(alias, func(wq *VulnEqualQuery) {
 				*wq = *query
 			})
-		case "vulnerabilityMetadata":
+
+		case "metadata":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&VulnerabilityMetadataClient{config: vi.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, vulnerabilitymetadataImplementors)...); err != nil {
 				return err
 			}
-			vi.WithNamedVulnerabilityMetadata(alias, func(wq *VulnerabilityMetadataQuery) {
+			vi.WithNamedMetadata(alias, func(wq *VulnerabilityMetadataQuery) {
+				*wq = *query
+			})
+
+		case "certifyVuln":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVulnClient{config: vi.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifyvulnImplementors)...); err != nil {
+				return err
+			}
+			vi.WithNamedCertifyVuln(alias, func(wq *CertifyVulnQuery) {
+				*wq = *query
+			})
+
+		case "vex":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&CertifyVexClient{config: vi.config}).Query()
+			)
+			if err := query.collectField(ctx, false, opCtx, field, path, mayAddCondition(satisfies, certifyvexImplementors)...); err != nil {
+				return err
+			}
+			vi.WithNamedVex(alias, func(wq *CertifyVexQuery) {
 				*wq = *query
 			})
 		case "vulnerabilityID":
@@ -2987,13 +3480,13 @@ func (vm *VulnerabilityMetadataQuery) CollectFields(ctx context.Context, satisfi
 	if fc == nil {
 		return vm, nil
 	}
-	if err := vm.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+	if err := vm.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
 		return nil, err
 	}
 	return vm, nil
 }
 
-func (vm *VulnerabilityMetadataQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+func (vm *VulnerabilityMetadataQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
 	var (
 		unknownSeen    bool
@@ -3002,13 +3495,14 @@ func (vm *VulnerabilityMetadataQuery) collectField(ctx context.Context, opCtx *g
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
+
 		case "vulnerabilityID":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
 				query = (&VulnerabilityIDClient{config: vm.config}).Query()
 			)
-			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, oneNode, opCtx, field, path, mayAddCondition(satisfies, vulnerabilityidImplementors)...); err != nil {
 				return err
 			}
 			vm.withVulnerabilityID = query
@@ -3045,6 +3539,11 @@ func (vm *VulnerabilityMetadataQuery) collectField(ctx context.Context, opCtx *g
 			if _, ok := fieldSeen[vulnerabilitymetadata.FieldCollector]; !ok {
 				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldCollector)
 				fieldSeen[vulnerabilitymetadata.FieldCollector] = struct{}{}
+			}
+		case "documentRef":
+			if _, ok := fieldSeen[vulnerabilitymetadata.FieldDocumentRef]; !ok {
+				selectedFields = append(selectedFields, vulnerabilitymetadata.FieldDocumentRef)
+				fieldSeen[vulnerabilitymetadata.FieldDocumentRef] = struct{}{}
 			}
 		case "id":
 		case "__typename":
@@ -3136,39 +3635,17 @@ func unmarshalArgs(ctx context.Context, whereInput any, args map[string]any) map
 	return args
 }
 
-func limitRows(partitionBy string, limit int, orderBy ...sql.Querier) func(s *sql.Selector) {
-	return func(s *sql.Selector) {
-		d := sql.Dialect(s.Dialect())
-		s.SetDistinct(false)
-		with := d.With("src_query").
-			As(s.Clone()).
-			With("limited_query").
-			As(
-				d.Select("*").
-					AppendSelectExprAs(
-						sql.RowNumber().PartitionBy(partitionBy).OrderExpr(orderBy...),
-						"row_number",
-					).
-					From(d.Table("src_query")),
-			)
-		t := d.Table("limited_query").As(s.TableName())
-		*s = *d.Select(s.UnqualifiedColumns()...).
-			From(t).
-			Where(sql.LTE(t.C("row_number"), limit)).
-			Prefix(with)
-	}
-}
-
 // mayAddCondition appends another type condition to the satisfies list
-// if condition is enabled (Node/Nodes) and it does not exist in the list.
-func mayAddCondition(satisfies []string, typeCond string) []string {
-	if len(satisfies) == 0 {
-		return satisfies
-	}
-	for _, s := range satisfies {
-		if typeCond == s {
-			return satisfies
+// if it does not exist in the list.
+func mayAddCondition(satisfies []string, typeCond []string) []string {
+Cond:
+	for _, c := range typeCond {
+		for _, s := range satisfies {
+			if c == s {
+				continue Cond
+			}
 		}
+		satisfies = append(satisfies, c)
 	}
-	return append(satisfies, typeCond)
+	return satisfies
 }

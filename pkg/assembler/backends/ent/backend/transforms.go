@@ -16,7 +16,7 @@
 package backend
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
@@ -26,7 +26,7 @@ import (
 
 func toModelArtifact(a *ent.Artifact) *model.Artifact {
 	return &model.Artifact{
-		ID:        a.ID.String(),
+		ID:        artGlobalID(a.ID.String()),
 		Algorithm: a.Algorithm,
 		Digest:    a.Digest,
 	}
@@ -34,9 +34,69 @@ func toModelArtifact(a *ent.Artifact) *model.Artifact {
 
 func toModelBuilder(b *ent.Builder) *model.Builder {
 	return &model.Builder{
-		ID:  b.ID.String(),
+		ID:  buildGlobalID(b.ID.String()),
 		URI: b.URI,
 	}
+}
+
+func toModelPackageTrie(collectedPkgNames []*ent.PackageName) []*model.Package {
+	pkgTypes := map[string]map[string]map[string][]*model.PackageVersion{}
+
+	for _, pkgName := range collectedPkgNames {
+		nameString := pkgName.Name + "," + pkgNameGlobalID(pkgName.ID.String())
+
+		namespaceString := pkgName.Namespace + "," + pkgNamespaceGlobalID(strings.Join([]string{pkgName.Type, pkgName.Namespace}, guacIDSplit))
+		typeString := pkgName.Type + "," + pkgTypeGlobalID(pkgName.Type)
+
+		if pkgNamespaces, ok := pkgTypes[typeString]; ok {
+			if pkgNames, ok := pkgNamespaces[namespaceString]; ok {
+				pkgNames[nameString] = append(pkgNames[nameString], collect(pkgName.Edges.Versions, toModelPackageVersion)...)
+			} else {
+				pkgNames := map[string][]*model.PackageVersion{}
+				pkgNames[nameString] = append(pkgNames[nameString], collect(pkgName.Edges.Versions, toModelPackageVersion)...)
+				pkgNamespaces[namespaceString] = pkgNames
+				pkgTypes[typeString] = pkgNamespaces
+			}
+		} else {
+			pkgNames := map[string][]*model.PackageVersion{}
+			pkgNames[nameString] = append(pkgNames[nameString], collect(pkgName.Edges.Versions, toModelPackageVersion)...)
+			pkgNamespaces := map[string]map[string][]*model.PackageVersion{}
+			pkgNamespaces[namespaceString] = pkgNames
+			pkgTypes[typeString] = pkgNamespaces
+		}
+	}
+	var packages []*model.Package
+	for pkgType, pkgNamespaces := range pkgTypes {
+		collectedPkgNamespaces := []*model.PackageNamespace{}
+		for namespace, pkgNames := range pkgNamespaces {
+			var collectedPkgNames []*model.PackageName
+			for name, versions := range pkgNames {
+				nameValues := strings.Split(name, ",")
+				pkgName := &model.PackageName{
+					ID:       nameValues[1],
+					Name:     nameValues[0],
+					Versions: versions,
+				}
+				collectedPkgNames = append(collectedPkgNames, pkgName)
+			}
+			namespaceValues := strings.Split(namespace, ",")
+			pkgNamespace := &model.PackageNamespace{
+				ID:        namespaceValues[1],
+				Namespace: namespaceValues[0],
+				Names:     collectedPkgNames,
+			}
+			collectedPkgNamespaces = append(collectedPkgNamespaces, pkgNamespace)
+		}
+		typeValues := strings.Split(pkgType, ",")
+		collectedPackage := &model.Package{
+			ID:         typeValues[1],
+			Type:       typeValues[0],
+			Namespaces: collectedPkgNamespaces,
+		}
+		packages = append(packages, collectedPackage)
+	}
+
+	return packages
 }
 
 func toModelPackage(p *ent.PackageName) *model.Package {
@@ -44,7 +104,7 @@ func toModelPackage(p *ent.PackageName) *model.Package {
 		return nil
 	}
 	return &model.Package{
-		ID:         fmt.Sprintf("%s:%s", pkgTypeString, p.ID.String()),
+		ID:         pkgTypeGlobalID(p.Type),
 		Type:       p.Type,
 		Namespaces: collect([]*ent.PackageName{p}, toModelNamespace),
 	}
@@ -55,7 +115,7 @@ func toModelNamespace(n *ent.PackageName) *model.PackageNamespace {
 		return nil
 	}
 	return &model.PackageNamespace{
-		ID:        fmt.Sprintf("%s:%s", pkgNamespaceString, n.ID.String()),
+		ID:        pkgNamespaceGlobalID(strings.Join([]string{n.Type, n.Namespace}, guacIDSplit)),
 		Namespace: n.Namespace,
 		Names:     collect([]*ent.PackageName{n}, toModelPackageName),
 	}
@@ -66,7 +126,7 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 		return nil
 	}
 	return &model.PackageName{
-		ID:       n.ID.String(),
+		ID:       pkgNameGlobalID(n.ID.String()),
 		Name:     n.Name,
 		Versions: collect(n.Edges.Versions, toModelPackageVersion),
 	}
@@ -75,7 +135,7 @@ func toModelPackageName(n *ent.PackageName) *model.PackageName {
 func toModelPackageVersion(v *ent.PackageVersion) *model.PackageVersion {
 
 	return &model.PackageVersion{
-		ID:         v.ID.String(),
+		ID:         pkgVersionGlobalID(v.ID.String()),
 		Version:    v.Version,
 		Qualifiers: toPtrSlice(v.Qualifiers),
 		Subpath:    v.Subpath,
@@ -115,12 +175,13 @@ func valueOrDefault[T any](v *T, def T) T {
 
 func toModelIsOccurrenceWithSubject(o *ent.Occurrence) *model.IsOccurrence {
 	return &model.IsOccurrence{
-		ID:            o.ID.String(),
+		ID:            occurrenceGlobalID(o.ID.String()),
 		Subject:       toModelPackageOrSource(o.Edges.Package, o.Edges.Source),
 		Artifact:      toModelArtifact(o.Edges.Artifact),
 		Justification: o.Justification,
 		Origin:        o.Origin,
 		Collector:     o.Collector,
+		DocumentRef:   o.DocumentRef,
 	}
 }
 
@@ -181,7 +242,7 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 	}
 
 	return &model.IsDependency{
-		ID:                id.ID.String(),
+		ID:                dependencyGlobalID(id.ID.String()),
 		Package:           pkg,
 		DependencyPackage: depPkg,
 		VersionRange:      id.VersionRange,
@@ -189,6 +250,7 @@ func toModelIsDependency(id *ent.Dependency, backrefs bool) *model.IsDependency 
 		Justification:     id.Justification,
 		Origin:            id.Origin,
 		Collector:         id.Collector,
+		DocumentRef:       id.DocumentRef,
 	}
 }
 
@@ -203,9 +265,11 @@ func dependencyTypeFromEnum(t dependency.DependencyType) model.DependencyType {
 	}
 }
 
-func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
+func toModelHasSBOMWithIncluded(sbom *ent.BillOfMaterials, includedSoftwarePackages []*ent.PackageVersion, includedSoftwareArtifacts []*ent.Artifact,
+	includedDependencies []*ent.Dependency, includedOccurrences []*ent.Occurrence) *model.HasSbom {
+
 	return &model.HasSbom{
-		ID:                   sbom.ID.String(),
+		ID:                   hasSBOMGlobalID(sbom.ID.String()),
 		Subject:              toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
 		URI:                  sbom.URI,
 		Algorithm:            sbom.Algorithm,
@@ -213,6 +277,24 @@ func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
 		DownloadLocation:     sbom.DownloadLocation,
 		Origin:               sbom.Origin,
 		Collector:            sbom.Collector,
+		DocumentRef:          sbom.DocumentRef,
+		KnownSince:           sbom.KnownSince,
+		IncludedSoftware:     toIncludedSoftware(includedSoftwarePackages, includedSoftwareArtifacts),
+		IncludedDependencies: collect(includedDependencies, toModelIsDependencyWithBackrefs),
+		IncludedOccurrences:  collect(includedOccurrences, toModelIsOccurrenceWithSubject),
+	}
+}
+func toModelHasSBOM(sbom *ent.BillOfMaterials) *model.HasSbom {
+	return &model.HasSbom{
+		ID:                   hasSBOMGlobalID(sbom.ID.String()),
+		Subject:              toPackageOrArtifact(sbom.Edges.Package, sbom.Edges.Artifact),
+		URI:                  sbom.URI,
+		Algorithm:            sbom.Algorithm,
+		Digest:               sbom.Digest,
+		DownloadLocation:     sbom.DownloadLocation,
+		Origin:               sbom.Origin,
+		Collector:            sbom.Collector,
+		DocumentRef:          sbom.DocumentRef,
 		KnownSince:           sbom.KnownSince,
 		IncludedSoftware:     toIncludedSoftware(sbom.Edges.IncludedSoftwarePackages, sbom.Edges.IncludedSoftwareArtifacts),
 		IncludedDependencies: collect(sbom.Edges.IncludedDependencies, toModelIsDependencyWithBackrefs),
@@ -240,20 +322,20 @@ func toIncludedSoftware(pkgs []*ent.PackageVersion, artifacts []*ent.Artifact) [
 	return result
 }
 
-func toModelLicense(license *ent.License) *model.License {
+func toModelLicense(entLicense *ent.License) *model.License {
 
 	var dbInLine *string
-	if license.Inline != "" {
-		dbInLine = ptrfrom.String(license.Inline)
+	if entLicense.Inline != "" {
+		dbInLine = ptrfrom.String(entLicense.Inline)
 	}
 	var dbListVersion *string
-	if license.ListVersion != "" {
-		dbListVersion = ptrfrom.String(license.ListVersion)
+	if entLicense.ListVersion != "" {
+		dbListVersion = ptrfrom.String(entLicense.ListVersion)
 	}
 
 	return &model.License{
-		ID:          license.ID.String(),
-		Name:        license.Name,
+		ID:          licenseGlobalID(entLicense.ID.String()),
+		Name:        entLicense.Name,
 		Inline:      dbInLine,
 		ListVersion: dbListVersion,
 	}
@@ -261,7 +343,7 @@ func toModelLicense(license *ent.License) *model.License {
 
 func toModelCertifyLegal(cl *ent.CertifyLegal) *model.CertifyLegal {
 	return &model.CertifyLegal{
-		ID:                 cl.ID.String(),
+		ID:                 certifyLegalGlobalID(cl.ID.String()),
 		Subject:            toModelPackageOrSource(cl.Edges.Package, cl.Edges.Source),
 		DeclaredLicense:    cl.DeclaredLicense,
 		DeclaredLicenses:   collect(cl.Edges.DeclaredLicenses, toModelLicense),
@@ -272,6 +354,7 @@ func toModelCertifyLegal(cl *ent.CertifyLegal) *model.CertifyLegal {
 		TimeScanned:        cl.TimeScanned,
 		Origin:             cl.Origin,
 		Collector:          cl.Collector,
+		DocumentRef:        cl.DocumentRef,
 	}
 }
 

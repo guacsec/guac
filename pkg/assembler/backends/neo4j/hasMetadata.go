@@ -22,6 +22,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *neo4jClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasMetadataList")
+}
+
 func (c *neo4jClient) IngestHasMetadata(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, hasMetadata model.HasMetadataInputSpec) (string, error) {
 	return "", fmt.Errorf("not implemented: IngestHasMetadata")
 }

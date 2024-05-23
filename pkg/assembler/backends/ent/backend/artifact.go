@@ -18,13 +18,16 @@ package backend
 import (
 	"context"
 	stdsql "database/sql"
+	"fmt"
 	"strings"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
@@ -32,14 +35,72 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
-	query := b.client.Artifact.Query().
-		Where(artifactQueryPredicates(artifactSpec)).
-		Limit(MaxPageSize)
+func artGlobalID(id string) string {
+	return toGlobalID(artifact.Table, id)
+}
 
+func bulkArtGlobalID(ids []string) []string {
+	return toGlobalIDs(artifact.Table, ids)
+}
+
+func (b *EntBackend) ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != artifact.Table {
+			return nil, fmt.Errorf("after cursor is not type artifact but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	artConn, err := b.client.Artifact.Query().
+		Where(artifactQueryPredicates(&artifactSpec)).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed artifact query with error: %w", err)
+	}
+
+	var edges []*model.ArtifactEdge
+	for _, edge := range artConn.Edges {
+		edges = append(edges, &model.ArtifactEdge{
+			Cursor: artGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelArtifact(edge.Node),
+		})
+	}
+
+	if artConn.PageInfo.StartCursor != nil {
+		return &model.ArtifactConnection{
+			TotalCount: artConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: artConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(artGlobalID(artConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(artGlobalID(artConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
+}
+
+func (b *EntBackend) Artifacts(ctx context.Context, artifactSpec *model.ArtifactSpec) ([]*model.Artifact, error) {
+	if artifactSpec == nil {
+		artifactSpec = &model.ArtifactSpec{}
+	}
+	query := b.client.Artifact.Query().
+		Where(artifactQueryPredicates(artifactSpec))
 	artifacts, err := query.All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed artifact query with error: %w", err)
 	}
 	return collect(artifacts, toModelArtifact), nil
 }
@@ -73,7 +134,7 @@ func (b *EntBackend) IngestArtifacts(ctx context.Context, artifacts []*model.IDo
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return bulkArtGlobalID(*ids), nil
 }
 
 func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifactInput) (string, error) {
@@ -84,7 +145,11 @@ func (b *EntBackend) IngestArtifact(ctx context.Context, art *model.IDorArtifact
 	if txErr != nil {
 		return "", txErr
 	}
-	return *id, nil
+	return artGlobalID(*id), nil
+}
+
+func artConflictColumns() []string {
+	return []string{artifact.FieldAlgorithm, artifact.FieldDigest}
 }
 
 func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDorArtifactInput) (*[]string, error) {
@@ -103,7 +168,7 @@ func upsertBulkArtifact(ctx context.Context, tx *ent.Tx, artInputs []*model.IDor
 
 		err := tx.Artifact.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(artifact.FieldDigest),
+				sql.ConflictColumns(artConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -123,11 +188,12 @@ func generateArtifactCreate(tx *ent.Tx, artifactID *uuid.UUID, art *model.IDorAr
 }
 
 func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInput) (*string, error) {
+
 	artifactID := generateUUIDKey([]byte(helpers.GetKey[*model.ArtifactInputSpec, string](art.ArtifactInput, helpers.ArtifactServerKey)))
 	insert := generateArtifactCreate(tx, &artifactID, art)
 	err := insert.
 		OnConflict(
-			sql.ConflictColumns(artifact.FieldDigest),
+			sql.ConflictColumns(artConflictColumns()...),
 		).
 		DoNothing().
 		Exec(ctx)
@@ -137,4 +203,119 @@ func upsertArtifact(ctx context.Context, tx *ent.Tx, art *model.IDorArtifactInpu
 		}
 	}
 	return ptrfrom.String(artifactID.String()), nil
+}
+
+func (b *EntBackend) artifactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.Artifact.Query().
+		Where(artifactQueryPredicates(&model.ArtifactSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeArtifactHashEqual] {
+		query.
+			WithHashEqualArtA(func(q *ent.HashEqualQuery) {
+				getHashEqualObject(q)
+			}).
+			WithHashEqualArtB(func(q *ent.HashEqualQuery) {
+				getHashEqualObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactIsOccurrence] {
+		query.
+			WithOccurrences(func(q *ent.OccurrenceQuery) {
+				getOccurrenceObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactHasSbom] {
+		query.
+			WithSbom(func(q *ent.BillOfMaterialsQuery) {
+				getSBOMObjectWithIncludes(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactHasSlsa] {
+		query.
+			WithAttestations(func(q *ent.SLSAAttestationQuery) {
+				getSLSAObject(q)
+			}).
+			WithAttestationsSubject(func(q *ent.SLSAAttestationQuery) {
+				getSLSAObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactCertifyVexStatement] {
+		query.
+			WithVex(func(q *ent.CertifyVexQuery) {
+				getVEXObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactCertifyBad] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeBAD))
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactCertifyGood] {
+		query.
+			WithCertification(func(q *ent.CertificationQuery) {
+				q.Where(certification.TypeEQ(certification.TypeGOOD))
+				getCertificationObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactHasMetadata] {
+		query.
+			WithMetadata(func(q *ent.HasMetadataQuery) {
+				getHasMetadataObject(q)
+			})
+	}
+	if allowedEdges[model.EdgeArtifactPointOfContact] {
+		query.
+			WithPoc(func(q *ent.PointOfContactQuery) {
+				getPointOfContactObject(q)
+			})
+	}
+
+	artifacts, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed query artifact with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundArt := range artifacts {
+		for _, hashEqualA := range foundArt.Edges.HashEqualArtA {
+			out = append(out, toModelHashEqual(hashEqualA))
+		}
+		for _, hashEqualB := range foundArt.Edges.HashEqualArtB {
+			out = append(out, toModelHashEqual(hashEqualB))
+		}
+		for _, foundOccur := range foundArt.Edges.Occurrences {
+			out = append(out, toModelIsOccurrenceWithSubject(foundOccur))
+		}
+		for _, foundSBOM := range foundArt.Edges.Sbom {
+			out = append(out, toModelHasSBOM(foundSBOM))
+		}
+		for _, foundSLSA := range foundArt.Edges.Attestations {
+			out = append(out, toModelHasSLSA(foundSLSA))
+		}
+		for _, foundSLSA := range foundArt.Edges.AttestationsSubject {
+			out = append(out, toModelHasSLSA(foundSLSA))
+		}
+		for _, foundVex := range foundArt.Edges.Vex {
+			out = append(out, toModelCertifyVEXStatement(foundVex))
+		}
+		for _, foundCert := range foundArt.Edges.Certification {
+			if foundCert.Type == certification.TypeBAD {
+				out = append(out, toModelCertifyBad(foundCert))
+			}
+			if foundCert.Type == certification.TypeGOOD {
+				out = append(out, toModelCertifyGood(foundCert))
+			}
+		}
+		for _, foundMeta := range foundArt.Edges.Metadata {
+			out = append(out, toModelHasMetadata(foundMeta))
+		}
+		for _, foundPOC := range foundArt.Edges.Poc {
+			out = append(out, toModelPointOfContact(foundPOC))
+		}
+	}
+
+	return out, nil
 }

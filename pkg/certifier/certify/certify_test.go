@@ -18,23 +18,16 @@ package certify
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
-	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/internal/testing/dochelper"
-	nats_test "github.com/guacsec/guac/internal/testing/nats"
 	"github.com/guacsec/guac/internal/testing/testdata"
-	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/certifier/osv"
-	"github.com/guacsec/guac/pkg/emitter"
-	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
-	"gocloud.dev/pubsub"
 )
 
 type mockQuery struct {
@@ -212,124 +205,4 @@ func TestCertify(t *testing.T) {
 			}
 		})
 	}
-}
-
-func Test_Publish(t *testing.T) {
-	err := RegisterCertifier(osv.NewOSVCertificationParser, certifier.CertifierOSV)
-	if err != nil && !errors.Is(err, errCertifierOverwrite) {
-		t.Errorf("unexpected error: %v", err)
-	}
-	expectedDocTree := dochelper.DocNode(&testdata.Ite6SLSADoc)
-
-	natsTest := nats_test.NewNatsTestServer()
-	url, err := natsTest.EnableJetStreamForTest()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer natsTest.Shutdown()
-
-	ctx := context.Background()
-	jetStream := emitter.NewJetStream(url, "", "")
-	if err := jetStream.JetStreamInit(ctx); err != nil {
-		t.Fatalf("unexpected error initializing jetstream: %v", err)
-	}
-	err = jetStream.RecreateStream(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error recreating jetstream: %v", err)
-	}
-	defer jetStream.Close()
-
-	blobStore, err := blob.NewBlobStore(ctx, "mem://")
-	if err != nil {
-		t.Fatalf("unable to connect to blob store: %v", err)
-	}
-
-	pubsub := emitter.NewEmitterPubSub(ctx, url)
-
-	err = Publish(ctx, &testdata.Ite6SLSADoc, blobStore, pubsub)
-	if err != nil {
-		t.Fatalf("unexpected error on emit: %v", err)
-	}
-
-	var cancel context.CancelFunc
-
-	ctx, cancel = context.WithTimeout(ctx, time.Second)
-	defer cancel()
-
-	transportFunc := func(d processor.DocumentTree) error {
-		if !dochelper.DocTreeEqual(d, expectedDocTree) {
-			t.Errorf("doc tree did not match up, got\n%s, \nexpected\n%s", dochelper.StringTree(d), dochelper.StringTree(expectedDocTree))
-		}
-		return nil
-	}
-
-	err = testSubscribe(ctx, transportFunc, blobStore, pubsub)
-	if err != nil {
-		if !errors.Is(err, context.DeadlineExceeded) {
-			t.Errorf("nats emitter Subscribe test errored = %v", err)
-		}
-	}
-}
-
-func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTree) error, blobStore *blob.BlobStore, emPubSub *emitter.EmitterPubSub) error {
-	logger := logging.FromContext(ctx)
-
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		return fmt.Errorf("failed to get uuid with the following error: %w", err)
-	}
-	uuidString := uuid.String()
-	sub, err := emPubSub.Subscribe(ctx, uuidString)
-	if err != nil {
-		return err
-	}
-	processFunc := func(d *pubsub.Message) error {
-
-		blobStoreKey, err := events.DecodeEventSubject(ctx, d.Body)
-		if err != nil {
-			logger.Errorf("[processor: %s] failed decode event: %v", uuidString, err)
-			return nil
-		}
-
-		documentBytes, err := blobStore.Read(ctx, blobStoreKey)
-		if err != nil {
-			return fmt.Errorf("failed read document to blob store: %w", err)
-		}
-
-		doc := processor.Document{}
-		err = json.Unmarshal(documentBytes, &doc)
-		if err != nil {
-			fmtErrString := fmt.Sprintf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
-			logger.Errorf(fmtErrString+": %v", err)
-			return fmt.Errorf(fmtErrString+": %w", err)
-		}
-
-		docNode := &processor.DocumentNode{
-			Document: &doc,
-			Children: nil,
-		}
-
-		docTree := processor.DocumentTree(docNode)
-		err = transportFunc(docTree)
-		if err != nil {
-			fmtErrString := fmt.Sprintf("[processor: %s] failed transportFunc", uuidString)
-			logger.Errorf(fmtErrString+": %v", err)
-			return fmt.Errorf(fmtErrString+": %w", err)
-		}
-
-		logger.Infof("[processor: %s] docTree Processed: %+v", uuidString, docTree.Document.SourceInformation)
-		// ack the message from the queue once the ingestion has occurred
-		d.Ack()
-		logger.Infof("[processor: %s] message acknowledged in pusbub", uuidString)
-
-		return nil
-	}
-
-	if err := sub.GetDataFromSubscriber(ctx, processFunc); err != nil {
-		return fmt.Errorf("failed to get data from subscriber with error: %w", err)
-	}
-	if err := sub.CloseSubscriber(ctx); err != nil {
-		return fmt.Errorf("failed to close subscriber with error: %w", err)
-	}
-	return nil
 }

@@ -59,6 +59,7 @@ var commonOpts = cmp.Options{
 	cmpopts.SortSlices(lessHM),
 	cmpopts.SortSlices(lessPackageOrArtifact),
 	cmpopts.SortSlices(lessSLSAPred),
+	cmpopts.SortSlices(hasSlsaLess),
 	cmpopts.SortSlices(lessHSA),
 	cmpopts.SortSlices(lessIsDep),
 	cmpopts.SortSlices(lessIsOcc),
@@ -86,6 +87,10 @@ func certifyVexLess(e1, e2 *model.CertifyVEXStatement) bool {
 
 	if e1.VexJustification != e2.VexJustification {
 		return e1.VexJustification < e2.VexJustification
+	}
+
+	if e1.Vulnerability.Type != e2.Vulnerability.Type {
+		return e1.Vulnerability.Type < e2.Vulnerability.Type
 	}
 
 	ap, oka := e1.Subject.(*model.Package)
@@ -580,6 +585,10 @@ func lessSLSAPred(a, b *model.SLSAPredicate) bool {
 		return d < 0
 	}
 	return false
+}
+
+func hasSlsaLess(a, b *model.HasSlsa) bool {
+	return cmpArt(a.Subject, b.Subject) < 0
 }
 
 func lessPackageOrArtifact(a, b model.PackageOrArtifact) bool {

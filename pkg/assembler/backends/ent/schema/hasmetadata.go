@@ -46,6 +46,7 @@ func (HasMetadata) Fields() []ent.Field {
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
+		field.String("document_ref"),
 	}
 }
 
@@ -61,9 +62,17 @@ func (HasMetadata) Edges() []ent.Edge {
 
 func (HasMetadata) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("key", "value", "justification", "origin", "collector", "timestamp", "source_id").Unique().Annotations(entsql.IndexWhere("source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
-		index.Fields("key", "value", "justification", "origin", "collector", "timestamp", "package_version_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL")),
-		index.Fields("key", "value", "justification", "origin", "collector", "timestamp", "package_name_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL")),
-		index.Fields("key", "value", "justification", "origin", "collector", "timestamp", "artifact_id").Unique().Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL")),
+		index.Fields("key", "value", "justification", "origin", "collector", "timestamp", "document_ref", "source_id").Unique().
+			Annotations(entsql.IndexWhere("source_id IS NOT NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NULL")).
+			StorageKey("has_metadata_source_id"),
+		index.Fields("key", "value", "justification", "origin", "collector", "timestamp", "document_ref", "package_version_id").Unique().
+			Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NOT NULL AND package_name_id IS NULL AND artifact_id IS NULL")).
+			StorageKey("has_metadata_package_version_id"),
+		index.Fields("key", "value", "justification", "origin", "collector", "timestamp", "document_ref", "package_name_id").Unique().
+			Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NOT NULL AND artifact_id IS NULL")).
+			StorageKey("has_metadata_package_name_id"),
+		index.Fields("key", "value", "justification", "origin", "collector", "timestamp", "document_ref", "artifact_id").Unique().
+			Annotations(entsql.IndexWhere("source_id IS NULL AND package_version_id IS NULL AND package_name_id IS NULL AND artifact_id IS NOT NULL")).
+			StorageKey("has_metadata_artifact_id"),
 	}
 }

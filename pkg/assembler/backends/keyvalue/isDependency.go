@@ -18,6 +18,8 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -37,6 +39,7 @@ type isDependencyLink struct {
 	Justification  string
 	Origin         string
 	Collector      string
+	DocumentRef    string
 }
 
 func (n *isDependencyLink) ID() string { return n.ThisID }
@@ -49,6 +52,7 @@ func (n *isDependencyLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -93,6 +97,7 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDor
 		Justification:  dependency.Justification,
 		Origin:         dependency.Origin,
 		Collector:      dependency.Collector,
+		DocumentRef:    dependency.DocumentRef,
 	}
 	helper.FixDependencyType(&inLink.DependencyType)
 
@@ -146,6 +151,171 @@ func (c *demoClient) ingestDependency(ctx context.Context, packageArg model.IDor
 }
 
 // Query IsDependency
+
+func (c *demoClient) IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+	funcName := "IsDependency"
+
+	if isDependencySpec.ID != nil {
+		link, err := byIDkv[*isDependencyLink](ctx, *isDependencySpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		foundIsDependency, err := c.buildIsDependency(ctx, link, &isDependencySpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+
+		return &model.IsDependencyConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(foundIsDependency.ID),
+				EndCursor:   ptrfrom.String(foundIsDependency.ID),
+			},
+			Edges: []*model.IsDependencyEdge{
+				{
+					Cursor: foundIsDependency.ID,
+					Node:   foundIsDependency,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.IsDependencyEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	var search []string
+	foundOne := false
+	if isDependencySpec.Package != nil {
+		pkgs, err := c.findPackageVersion(ctx, isDependencySpec.Package)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.IsDependencyLinks...)
+		}
+	}
+	// Dont search on DependencyPackage as it can be either package-name or package-version
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*isDependencyLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			dep, err := c.depIfMatch(ctx, &isDependencySpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if dep == nil {
+				continue
+			}
+
+			if (after != nil && dep.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.IsDependencyEdge{
+							Cursor: dep.ID,
+							Node:   dep,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.IsDependencyEdge{
+						Cursor: dep.ID,
+						Node:   dep,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(isDepCol)
+		for !done {
+			var depKeys []string
+			var err error
+			depKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(depKeys)
+			totalCount = len(depKeys)
+
+			for i, depKey := range depKeys {
+				link, err := byKeykv[*isDependencyLink](ctx, isDepCol, depKey, c)
+				if err != nil {
+					return nil, err
+				}
+				dep, err := c.depIfMatch(ctx, &isDependencySpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if dep == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if dep.ID == *after {
+						totalCount = len(depKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.IsDependencyEdge{
+							Cursor: dep.ID,
+							Node:   dep,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.IsDependencyEdge{
+						Cursor: dep.ID,
+						Node:   dep,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.IsDependencyConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
+
 func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependencySpec) ([]*model.IsDependency, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
@@ -185,10 +355,15 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addDepIfMatch(ctx, out, filter, link)
+			dep, err := c.depIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if dep == nil {
+				continue
+			}
+
+			out = append(out, dep)
 		}
 	} else {
 		var done bool
@@ -205,10 +380,15 @@ func (c *demoClient) IsDependency(ctx context.Context, filter *model.IsDependenc
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addDepIfMatch(ctx, out, filter, link)
+				dep, err := c.depIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+				if dep == nil {
+					continue
+				}
+
+				out = append(out, dep)
 			}
 		}
 	}
@@ -259,15 +439,15 @@ func (c *demoClient) buildIsDependency(ctx context.Context, link *isDependencyLi
 		Justification:     link.Justification,
 		Origin:            link.Origin,
 		Collector:         link.Collector,
+		DocumentRef:       link.DocumentRef,
 	}
 	return &foundIsDependency, nil
 }
 
-func (c *demoClient) addDepIfMatch(ctx context.Context, out []*model.IsDependency,
-	filter *model.IsDependencySpec, link *isDependencyLink) (
-	[]*model.IsDependency, error) {
+func (c *demoClient) depIfMatch(ctx context.Context, filter *model.IsDependencySpec, link *isDependencyLink) (
+	*model.IsDependency, error) {
 	if noMatchIsDep(filter, link) {
-		return out, nil
+		return nil, nil
 	}
 
 	foundIsDependency, err := c.buildIsDependency(ctx, link, filter, false)
@@ -275,9 +455,9 @@ func (c *demoClient) addDepIfMatch(ctx context.Context, out []*model.IsDependenc
 		return nil, err
 	}
 	if foundIsDependency == nil {
-		return out, nil
+		return nil, nil
 	}
-	return append(out, foundIsDependency), nil
+	return foundIsDependency, nil
 }
 
 func noMatchIsDep(filter *model.IsDependencySpec, link *isDependencyLink) bool {
@@ -285,6 +465,7 @@ func noMatchIsDep(filter *model.IsDependencySpec, link *isDependencyLink) bool {
 		return noMatch(filter.Justification, link.Justification) ||
 			noMatch(filter.Origin, link.Origin) ||
 			noMatch(filter.Collector, link.Collector) ||
+			noMatch(filter.DocumentRef, link.DocumentRef) ||
 			noMatch(filter.VersionRange, link.VersionRange) ||
 			(filter.DependencyType != nil && *filter.DependencyType != link.DependencyType)
 	} else {

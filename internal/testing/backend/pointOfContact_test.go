@@ -741,6 +741,37 @@ func TestPointOfContact(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					POC: &model.PointOfContactInputSpec{
+						Email:       "a@b.com",
+						Info:        "info1",
+						Since:       time.Unix(1e9, 0),
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpPoc: []*model.PointOfContact{
+				{
+					Subject:     testdata.P1out,
+					Email:       "a@b.com",
+					Info:        "info1",
+					Since:       time.Unix(1e9, 0),
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -804,14 +835,20 @@ func TestPointOfContact(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.PointOfContact(ctx, test.Query)
+			got, err := b.PointOfContactList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpPoc, got, commonOpts); diff != "" {
+			var returnedObjects []*model.PointOfContact
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpPoc, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -1073,6 +1110,33 @@ func TestIngestPointOfContacts(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					PC: []*model.PointOfContactInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.PointOfContactSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpPC: []*model.PointOfContact{
+				{
+					Subject:     testdata.P1out,
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -1101,14 +1165,20 @@ func TestIngestPointOfContacts(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.PointOfContact(ctx, test.Query)
+			got, err := b.PointOfContactList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpPC, got, commonOpts); diff != "" {
+			var returnedObjects []*model.PointOfContact
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpPC, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

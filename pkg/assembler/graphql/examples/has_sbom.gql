@@ -36,6 +36,28 @@ fragment allHasSBOMTree on HasSBOM {
   origin
   collector
   knownSince
+  documentRef
+}
+
+fragment AllHasSBOMPaginationTree on HasSBOMConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query HasSBOMPagination {
+  HasSBOMList(hasSBOMSpec: {}, first: 10) {
+    ...AllHasSBOMPaginationTree
+  }
 }
 
 query HasSBOMQ1 {

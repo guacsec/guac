@@ -16,6 +16,7 @@ const (
 	vulnerabilityID string        = "vulnerabilityIDs"
 	origin          string        = "origin"
 	collector       string        = "collector"
+	docRef          string        = "documentRef"
 	justification   string        = "justification"
 	knownSince      string        = "knownSince"
 	maxRetires      int           = 100
@@ -216,7 +217,7 @@ var mapEdgeToArangoEdgeCollection = map[model.Edge][]string{
 	model.EdgeCertifyVexStatementPackage:       {certifyVexPkgEdgesStr},
 	model.EdgeCertifyVexStatementVulnerability: {certifyVexVulnEdgesStr},
 	model.EdgeCertifyVulnPackage:               {certifyVulnPkgEdgesStr},
-	model.EdgeCertifyVulnVulnerability:         {certifyVulnsStr},
+	model.EdgeCertifyVulnVulnerability:         {certifyVulnEdgesStr},
 	model.EdgeHashEqualArtifact:                {hashEqualArtEdgesStr},
 	model.EdgeHasMetadataArtifact:              {hasMetadataArtEdgesStr},
 	model.EdgeHasMetadataPackage:               {hasMetadataPkgVersionEdgesStr, hasMetadataPkgNameEdgesStr},

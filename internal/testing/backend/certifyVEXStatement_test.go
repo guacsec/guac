@@ -838,6 +838,38 @@ func TestVEX(t *testing.T) {
 					KnownSince:       time.Unix(1e9, 0),
 				},
 			},
+		}, {
+			Name:   "docref",
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Vuln: testdata.O1,
+					In: &model.VexStatementInputSpec{
+						VexJustification: "test justification",
+						KnownSince:       time.Unix(1e9, 0),
+						DocumentRef:      "test",
+					},
+				},
+			},
+			Query: &model.CertifyVEXStatementSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVEX: []*model.CertifyVEXStatement{
+				{
+					Subject: testdata.P1out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "osv",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+					},
+					VexJustification: "test justification",
+					KnownSince:       time.Unix(1e9, 0),
+					DocumentRef:      "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -899,14 +931,20 @@ func TestVEX(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.CertifyVEXStatement(ctx, test.Query)
+			got, err := b.CertifyVEXStatementList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpVEX, got, commonOpts); diff != "" {
+			var returnedObjects []*model.CertifyVEXStatement
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpVEX, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -1256,6 +1294,40 @@ func TestVEXBulkIngest(t *testing.T) {
 					KnownSince:       time.Unix(1e9, 0),
 				},
 			},
+		}, {
+			Name:   "docref",
+			InPkg:  []*model.PkgInputSpec{testdata.P1},
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1},
+			Calls: []call{
+				{
+					Subs: model.PackageOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}},
+					Vexs: []*model.VexStatementInputSpec{
+						{
+							VexJustification: "test justification",
+							KnownSince:       time.Unix(1e9, 0),
+							DocumentRef:      "test",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyVEXStatementSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVEX: []*model.CertifyVEXStatement{
+				{
+					Subject: testdata.P1out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "osv",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+					},
+					VexJustification: "test justification",
+					KnownSince:       time.Unix(1e9, 0),
+					DocumentRef:      "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -1284,14 +1356,20 @@ func TestVEXBulkIngest(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.CertifyVEXStatement(ctx, test.Query)
+			got, err := b.CertifyVEXStatementList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpVEX, got, commonOpts); diff != "" {
+			var returnedObjects []*model.CertifyVEXStatement
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpVEX, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

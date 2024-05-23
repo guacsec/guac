@@ -71,11 +71,18 @@ SourceName.
 """
 type CertifyBad {
   id: ID!
+  "The package, source or artifact that is attested"
   subject: PackageSourceOrArtifact!
+  "The justification for the subject being certified bad"
   justification: String!
-  origin: String!
-  collector: String!
+  "Timestamp when the certification was created (in RFC 3339 format)"
   knownSince: Time!
+  "Document from which this attestation is generated from"
+  origin: String!
+  "GUAC collector for the document"
+  collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -96,9 +103,10 @@ input CertifyBadSpec {
   id: ID
   subject: PackageSourceOrArtifactSpec
   justification: String
+  knownSince: Time
   origin: String
   collector: String
-  knownSince: Time
+  documentRef: String
 }
 
 """
@@ -107,9 +115,10 @@ evidence.
 """
 input CertifyBadInputSpec {
   justification: String!
+  knownSince: Time!
   origin: String!
   collector: String!
-  knownSince: Time!
+  documentRef: String!
 }
 
 """
@@ -126,9 +135,38 @@ input MatchFlags {
   pkg: PkgMatchType!
 }
 
+"""
+CertifyBadConnection returns the paginated results for CertifyBad.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the CertifyBadEdge which contains the current cursor
+and the CertifyBad node itself
+"""
+type CertifyBadConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [CertifyBadEdge!]!
+}
+
+"""
+CertifyBadEdge contains the cursor for the resulting node and
+the CertifyBad node itself.
+"""
+type CertifyBadEdge {
+  cursor: ID!
+  node: CertifyBad!
+}
+
 extend type Query {
   "Returns all CertifyBad attestations matching a filter."
   CertifyBad(certifyBadSpec: CertifyBadSpec!): [CertifyBad!]!
+  "Returns a paginated results via CertifyBadConnection"
+  CertifyBadList(certifyBadSpec: CertifyBadSpec!, after: ID, first: Int): CertifyBadConnection
 }
 
 extend type Mutation {

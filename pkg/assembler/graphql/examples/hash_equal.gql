@@ -8,6 +8,28 @@ fragment allHashEqualTree on HashEqual {
   }
   origin
   collector
+  documentRef
+}
+
+fragment AllHashEqualsPaginationTree on HashEqualConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query HashEqualsPagination {
+  HashEqualList(hashEqualSpec: {}, first: 10) {
+    ...AllHashEqualsPaginationTree
+  }
 }
 
 query HashEqualQ1 {

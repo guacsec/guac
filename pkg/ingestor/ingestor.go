@@ -21,6 +21,8 @@ import (
 	"net/http"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler"
 	"github.com/guacsec/guac/pkg/assembler/clients/helpers"
@@ -34,13 +36,19 @@ import (
 )
 
 // Synchronously ingest document using GraphQL endpoint
-func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
-	logger := logging.FromContext(ctx)
+func Ingest(
+	ctx context.Context,
+	d *processor.Document,
+	graphqlEndpoint string,
+	transport http.RoundTripper,
+	csubClient csub_client.Client,
+) error {
+	logger := d.ChildLogger
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
 	ingestorFunc := GetIngestor(ctx)
 	collectSubEmitFunc := GetCollectSubEmit(ctx, csubClient)
-	assemblerFunc := GetAssembler(ctx, graphqlEndpoint)
+	assemblerFunc := GetAssembler(ctx, d.ChildLogger, graphqlEndpoint, transport)
 
 	start := time.Now()
 
@@ -54,28 +62,33 @@ func Ingest(ctx context.Context, d *processor.Document, graphqlEndpoint string, 
 		return fmt.Errorf("unable to ingest doc tree: %v", err)
 	}
 
-	err = collectSubEmitFunc(idstrings)
-	if err != nil {
+	if err := collectSubEmitFunc(idstrings); err != nil {
 		logger.Infof("unable to create entries in collectsub server, but continuing: %v", err)
 	}
 
-	err = assemblerFunc(predicates)
-	if err != nil {
-		return fmt.Errorf("unable to assemble graphs: %v", err)
+	if err := assemblerFunc(predicates); err != nil {
+		return fmt.Errorf("error assembling graphs for %q : %w", d.SourceInformation.Source, err)
 	}
+
 	t := time.Now()
 	elapsed := t.Sub(start)
 	logger.Infof("[%v] completed doc %+v", elapsed, d.SourceInformation)
 	return nil
 }
 
-func MergedIngest(ctx context.Context, docs []*processor.Document, graphqlEndpoint string, csubClient csub_client.Client) error {
+func MergedIngest(
+	ctx context.Context,
+	docs []*processor.Document,
+	graphqlEndpoint string,
+	transport http.RoundTripper,
+	csubClient csub_client.Client,
+) error {
 	logger := logging.FromContext(ctx)
 	// Get pipeline of components
 	processorFunc := GetProcessor(ctx)
 	ingestorFunc := GetIngestor(ctx)
 	collectSubEmitFunc := GetCollectSubEmit(ctx, csubClient)
-	assemblerFunc := GetAssembler(ctx, graphqlEndpoint)
+	assemblerFunc := GetAssembler(ctx, logger, graphqlEndpoint, transport)
 
 	start := time.Now()
 
@@ -152,10 +165,15 @@ func GetIngestor(ctx context.Context) func(processor.DocumentTree) ([]assembler.
 	}
 }
 
-func GetAssembler(ctx context.Context, graphqlEndpoint string) func([]assembler.IngestPredicates) error {
-	httpClient := http.Client{}
+func GetAssembler(
+	ctx context.Context,
+	childLogger *zap.SugaredLogger,
+	graphqlEndpoint string,
+	transport http.RoundTripper,
+) func([]assembler.IngestPredicates) error {
+	httpClient := http.Client{Transport: transport}
 	gqlclient := graphql.NewClient(graphqlEndpoint, &httpClient)
-	f := helpers.GetBulkAssembler(ctx, gqlclient)
+	f := helpers.GetBulkAssembler(ctx, childLogger, gqlclient)
 	return f
 }
 

@@ -113,12 +113,18 @@ func TestSources(t *testing.T) {
 			if tt.idInFilter {
 				tt.srcFilter.ID = ptrfrom.String(ingestedSrcIDs.SourceNameID)
 			}
-			got, err := b.Sources(ctx, tt.srcFilter)
+			got, err := b.SourcesList(ctx, *tt.srcFilter, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Sources() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, commonOpts); diff != "" {
+			var returnedObjects []*model.Source
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(tt.want, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

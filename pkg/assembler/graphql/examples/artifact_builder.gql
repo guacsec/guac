@@ -4,9 +4,39 @@ fragment allArtifactTree on Artifact {
   digest
 }
 
+fragment allArtifactPaginationTree on ArtifactConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
 query ArtifactQ1 {
   artifacts(artifactSpec: {}) {
     ...allArtifactTree
+  }
+}
+
+
+query ArtifactPagination {
+  artifactsList(artifactSpec: {}, first: 10) {
+    ...allArtifactPaginationTree
+  }
+}
+
+
+query ArtifactsStartWithDirective {
+  artifacts(artifactSpec: {}) @filter(keyName: "algorithm", operation: STARTSWITH, value: "sha2") {
+    algorithm
+    digest
   }
 }
 

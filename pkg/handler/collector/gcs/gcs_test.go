@@ -24,6 +24,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/fsouza/fake-gcs-server/fakestorage"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -31,6 +32,7 @@ import (
 func TestGCS_RetrieveArtifacts(t *testing.T) {
 	const bucketName = "some-bucket"
 	ctx := context.Background()
+	blob := []byte("inside the file")
 	server := fakestorage.NewServer([]fakestorage.Object{
 		{
 			ObjectAttrs: fakestorage.ObjectAttrs{
@@ -38,19 +40,20 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 				Name:       "some/object/file.txt",
 				Updated:    time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 			},
-			Content: []byte("inside the file"),
+			Content: blob,
 		},
 	})
 	defer server.Stop()
 	client := server.Client()
 
 	var doc *processor.Document = &processor.Document{
-		Blob:   []byte("inside the file"),
+		Blob:   blob,
 		Type:   processor.DocumentUnknown,
 		Format: processor.FormatUnknown,
 		SourceInformation: processor.SourceInformation{
-			Collector: string(CollectorGCS),
-			Source:    bucketName + "/some/object/file.txt",
+			Collector:   string(CollectorGCS),
+			Source:      bucketName + "/some/object/file.txt",
+			DocumentRef: events.GetDocRef(blob),
 		},
 	}
 
@@ -130,7 +133,7 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 				t.Fatalf("Collector error handler error: %v", err)
 			}
 
-			if !reflect.DeepEqual(docs, tt.want) {
+			if !checkWhileIgnoringLogger(docs, tt.want) {
 				t.Errorf("g.RetrieveArtifacts() = %v, want %v", docs, tt.want)
 			}
 			if g.Type() != CollectorGCS {
@@ -138,6 +141,28 @@ func TestGCS_RetrieveArtifacts(t *testing.T) {
 			}
 		})
 	}
+}
+
+// checkWhileIgnoringLogger works like a regular reflect.DeepEqual(), but ignores the loggers.
+func checkWhileIgnoringLogger(collectedDoc, want []*processor.Document) bool {
+	if len(collectedDoc) != len(want) {
+		return false
+	}
+
+	for i := 0; i < len(collectedDoc); i++ {
+		// Store the loggers, and then set the loggers to nil so that can ignore them.
+		a, b := collectedDoc[i].ChildLogger, want[i].ChildLogger
+		collectedDoc[i].ChildLogger, want[i].ChildLogger = nil, nil
+
+		if !reflect.DeepEqual(collectedDoc[i], want[i]) {
+			return false
+		}
+
+		// Re-assign the loggers so that they remain the same
+		collectedDoc[i].ChildLogger, want[i].ChildLogger = a, b
+	}
+
+	return true
 }
 
 func TestNewGCSCollector(t *testing.T) {

@@ -24,6 +24,28 @@ fragment allPkgEqualTree on PkgEqual {
   }
   origin
   collector
+  documentRef
+}
+
+fragment AllPkgEqualPaginationTree on PkgEqualConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query PkgEqualPagination {
+  PkgEqualList(pkgEqualSpec: {}, first: 10) {
+    ...AllPkgEqualPaginationTree
+  }
 }
 
 query PkgEqualQ1 {

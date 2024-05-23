@@ -25,6 +25,28 @@ fragment allHasSLSATree on HasSLSA {
     finishedOn
     origin
     collector
+    documentRef
+  }
+}
+
+fragment AllHasSLSAPaginationTree on HasSLSAConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query HasSLSAPagination {
+  HasSLSAList(hasSLSASpec: {}, first: 10) {
+    ...AllHasSLSAPaginationTree
   }
 }
 

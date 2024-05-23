@@ -13,6 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+"""
+FindSoftwareConnection returns the paginated results for FindSoftware.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the SoftwareEdge which contains the current cursor
+and the PackageSourceOrArtifact node itself
+"""
+type FindSoftwareConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [SoftwareEdge!]!
+}
+
+"""
+SoftwareEdge contains the cursor for the resulting node and
+the PackageSourceOrArtifact node itself.
+"""
+type SoftwareEdge {
+  cursor: ID!
+  node: PackageSourceOrArtifact!
+}
+
 extend type Query {
   """
   findSoftware takes in a searchText string and looks for software
@@ -34,4 +62,6 @@ extend type Query {
   implement this API.
   """
   findSoftware(searchText: String!): [PackageSourceOrArtifact!]!
+  "Returns a paginated results via CertifyBadConnection"
+  findSoftwareList(searchText: String!, after: ID, first: Int): FindSoftwareConnection
 }

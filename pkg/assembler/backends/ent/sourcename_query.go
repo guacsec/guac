@@ -12,7 +12,13 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
@@ -20,14 +26,26 @@ import (
 // SourceNameQuery is the builder for querying SourceName entities.
 type SourceNameQuery struct {
 	config
-	ctx                  *QueryContext
-	order                []sourcename.OrderOption
-	inters               []Interceptor
-	predicates           []predicate.SourceName
-	withOccurrences      *OccurrenceQuery
-	modifiers            []func(*sql.Selector)
-	loadTotal            []func(context.Context, []*SourceName) error
-	withNamedOccurrences map[string]*OccurrenceQuery
+	ctx                    *QueryContext
+	order                  []sourcename.OrderOption
+	inters                 []Interceptor
+	predicates             []predicate.SourceName
+	withOccurrences        *OccurrenceQuery
+	withHasSourceAt        *HasSourceAtQuery
+	withScorecard          *CertifyScorecardQuery
+	withCertification      *CertificationQuery
+	withMetadata           *HasMetadataQuery
+	withPoc                *PointOfContactQuery
+	withCertifyLegal       *CertifyLegalQuery
+	modifiers              []func(*sql.Selector)
+	loadTotal              []func(context.Context, []*SourceName) error
+	withNamedOccurrences   map[string]*OccurrenceQuery
+	withNamedHasSourceAt   map[string]*HasSourceAtQuery
+	withNamedScorecard     map[string]*CertifyScorecardQuery
+	withNamedCertification map[string]*CertificationQuery
+	withNamedMetadata      map[string]*HasMetadataQuery
+	withNamedPoc           map[string]*PointOfContactQuery
+	withNamedCertifyLegal  map[string]*CertifyLegalQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,6 +97,138 @@ func (snq *SourceNameQuery) QueryOccurrences() *OccurrenceQuery {
 			sqlgraph.From(sourcename.Table, sourcename.FieldID, selector),
 			sqlgraph.To(occurrence.Table, occurrence.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.OccurrencesTable, sourcename.OccurrencesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryHasSourceAt chains the current query on the "has_source_at" edge.
+func (snq *SourceNameQuery) QueryHasSourceAt() *HasSourceAtQuery {
+	query := (&HasSourceAtClient{config: snq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := snq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := snq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, selector),
+			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.HasSourceAtTable, sourcename.HasSourceAtColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryScorecard chains the current query on the "scorecard" edge.
+func (snq *SourceNameQuery) QueryScorecard() *CertifyScorecardQuery {
+	query := (&CertifyScorecardClient{config: snq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := snq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := snq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, selector),
+			sqlgraph.To(certifyscorecard.Table, certifyscorecard.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.ScorecardTable, sourcename.ScorecardColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCertification chains the current query on the "certification" edge.
+func (snq *SourceNameQuery) QueryCertification() *CertificationQuery {
+	query := (&CertificationClient{config: snq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := snq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := snq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, selector),
+			sqlgraph.To(certification.Table, certification.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.CertificationTable, sourcename.CertificationColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMetadata chains the current query on the "metadata" edge.
+func (snq *SourceNameQuery) QueryMetadata() *HasMetadataQuery {
+	query := (&HasMetadataClient{config: snq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := snq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := snq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, selector),
+			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.MetadataTable, sourcename.MetadataColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPoc chains the current query on the "poc" edge.
+func (snq *SourceNameQuery) QueryPoc() *PointOfContactQuery {
+	query := (&PointOfContactClient{config: snq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := snq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := snq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, selector),
+			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.PocTable, sourcename.PocColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCertifyLegal chains the current query on the "certify_legal" edge.
+func (snq *SourceNameQuery) QueryCertifyLegal() *CertifyLegalQuery {
+	query := (&CertifyLegalClient{config: snq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := snq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := snq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcename.Table, sourcename.FieldID, selector),
+			sqlgraph.To(certifylegal.Table, certifylegal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, sourcename.CertifyLegalTable, sourcename.CertifyLegalColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(snq.driver.Dialect(), step)
 		return fromU, nil
@@ -273,12 +423,18 @@ func (snq *SourceNameQuery) Clone() *SourceNameQuery {
 		return nil
 	}
 	return &SourceNameQuery{
-		config:          snq.config,
-		ctx:             snq.ctx.Clone(),
-		order:           append([]sourcename.OrderOption{}, snq.order...),
-		inters:          append([]Interceptor{}, snq.inters...),
-		predicates:      append([]predicate.SourceName{}, snq.predicates...),
-		withOccurrences: snq.withOccurrences.Clone(),
+		config:            snq.config,
+		ctx:               snq.ctx.Clone(),
+		order:             append([]sourcename.OrderOption{}, snq.order...),
+		inters:            append([]Interceptor{}, snq.inters...),
+		predicates:        append([]predicate.SourceName{}, snq.predicates...),
+		withOccurrences:   snq.withOccurrences.Clone(),
+		withHasSourceAt:   snq.withHasSourceAt.Clone(),
+		withScorecard:     snq.withScorecard.Clone(),
+		withCertification: snq.withCertification.Clone(),
+		withMetadata:      snq.withMetadata.Clone(),
+		withPoc:           snq.withPoc.Clone(),
+		withCertifyLegal:  snq.withCertifyLegal.Clone(),
 		// clone intermediate query.
 		sql:  snq.sql.Clone(),
 		path: snq.path,
@@ -293,6 +449,72 @@ func (snq *SourceNameQuery) WithOccurrences(opts ...func(*OccurrenceQuery)) *Sou
 		opt(query)
 	}
 	snq.withOccurrences = query
+	return snq
+}
+
+// WithHasSourceAt tells the query-builder to eager-load the nodes that are connected to
+// the "has_source_at" edge. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithHasSourceAt(opts ...func(*HasSourceAtQuery)) *SourceNameQuery {
+	query := (&HasSourceAtClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	snq.withHasSourceAt = query
+	return snq
+}
+
+// WithScorecard tells the query-builder to eager-load the nodes that are connected to
+// the "scorecard" edge. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithScorecard(opts ...func(*CertifyScorecardQuery)) *SourceNameQuery {
+	query := (&CertifyScorecardClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	snq.withScorecard = query
+	return snq
+}
+
+// WithCertification tells the query-builder to eager-load the nodes that are connected to
+// the "certification" edge. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithCertification(opts ...func(*CertificationQuery)) *SourceNameQuery {
+	query := (&CertificationClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	snq.withCertification = query
+	return snq
+}
+
+// WithMetadata tells the query-builder to eager-load the nodes that are connected to
+// the "metadata" edge. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithMetadata(opts ...func(*HasMetadataQuery)) *SourceNameQuery {
+	query := (&HasMetadataClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	snq.withMetadata = query
+	return snq
+}
+
+// WithPoc tells the query-builder to eager-load the nodes that are connected to
+// the "poc" edge. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithPoc(opts ...func(*PointOfContactQuery)) *SourceNameQuery {
+	query := (&PointOfContactClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	snq.withPoc = query
+	return snq
+}
+
+// WithCertifyLegal tells the query-builder to eager-load the nodes that are connected to
+// the "certify_legal" edge. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithCertifyLegal(opts ...func(*CertifyLegalQuery)) *SourceNameQuery {
+	query := (&CertifyLegalClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	snq.withCertifyLegal = query
 	return snq
 }
 
@@ -374,8 +596,14 @@ func (snq *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	var (
 		nodes       = []*SourceName{}
 		_spec       = snq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [7]bool{
 			snq.withOccurrences != nil,
+			snq.withHasSourceAt != nil,
+			snq.withScorecard != nil,
+			snq.withCertification != nil,
+			snq.withMetadata != nil,
+			snq.withPoc != nil,
+			snq.withCertifyLegal != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -406,10 +634,94 @@ func (snq *SourceNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			return nil, err
 		}
 	}
+	if query := snq.withHasSourceAt; query != nil {
+		if err := snq.loadHasSourceAt(ctx, query, nodes,
+			func(n *SourceName) { n.Edges.HasSourceAt = []*HasSourceAt{} },
+			func(n *SourceName, e *HasSourceAt) { n.Edges.HasSourceAt = append(n.Edges.HasSourceAt, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := snq.withScorecard; query != nil {
+		if err := snq.loadScorecard(ctx, query, nodes,
+			func(n *SourceName) { n.Edges.Scorecard = []*CertifyScorecard{} },
+			func(n *SourceName, e *CertifyScorecard) { n.Edges.Scorecard = append(n.Edges.Scorecard, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := snq.withCertification; query != nil {
+		if err := snq.loadCertification(ctx, query, nodes,
+			func(n *SourceName) { n.Edges.Certification = []*Certification{} },
+			func(n *SourceName, e *Certification) { n.Edges.Certification = append(n.Edges.Certification, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := snq.withMetadata; query != nil {
+		if err := snq.loadMetadata(ctx, query, nodes,
+			func(n *SourceName) { n.Edges.Metadata = []*HasMetadata{} },
+			func(n *SourceName, e *HasMetadata) { n.Edges.Metadata = append(n.Edges.Metadata, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := snq.withPoc; query != nil {
+		if err := snq.loadPoc(ctx, query, nodes,
+			func(n *SourceName) { n.Edges.Poc = []*PointOfContact{} },
+			func(n *SourceName, e *PointOfContact) { n.Edges.Poc = append(n.Edges.Poc, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := snq.withCertifyLegal; query != nil {
+		if err := snq.loadCertifyLegal(ctx, query, nodes,
+			func(n *SourceName) { n.Edges.CertifyLegal = []*CertifyLegal{} },
+			func(n *SourceName, e *CertifyLegal) { n.Edges.CertifyLegal = append(n.Edges.CertifyLegal, e) }); err != nil {
+			return nil, err
+		}
+	}
 	for name, query := range snq.withNamedOccurrences {
 		if err := snq.loadOccurrences(ctx, query, nodes,
 			func(n *SourceName) { n.appendNamedOccurrences(name) },
 			func(n *SourceName, e *Occurrence) { n.appendNamedOccurrences(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range snq.withNamedHasSourceAt {
+		if err := snq.loadHasSourceAt(ctx, query, nodes,
+			func(n *SourceName) { n.appendNamedHasSourceAt(name) },
+			func(n *SourceName, e *HasSourceAt) { n.appendNamedHasSourceAt(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range snq.withNamedScorecard {
+		if err := snq.loadScorecard(ctx, query, nodes,
+			func(n *SourceName) { n.appendNamedScorecard(name) },
+			func(n *SourceName, e *CertifyScorecard) { n.appendNamedScorecard(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range snq.withNamedCertification {
+		if err := snq.loadCertification(ctx, query, nodes,
+			func(n *SourceName) { n.appendNamedCertification(name) },
+			func(n *SourceName, e *Certification) { n.appendNamedCertification(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range snq.withNamedMetadata {
+		if err := snq.loadMetadata(ctx, query, nodes,
+			func(n *SourceName) { n.appendNamedMetadata(name) },
+			func(n *SourceName, e *HasMetadata) { n.appendNamedMetadata(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range snq.withNamedPoc {
+		if err := snq.loadPoc(ctx, query, nodes,
+			func(n *SourceName) { n.appendNamedPoc(name) },
+			func(n *SourceName, e *PointOfContact) { n.appendNamedPoc(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range snq.withNamedCertifyLegal {
+		if err := snq.loadCertifyLegal(ctx, query, nodes,
+			func(n *SourceName) { n.appendNamedCertifyLegal(name) },
+			func(n *SourceName, e *CertifyLegal) { n.appendNamedCertifyLegal(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -436,6 +748,198 @@ func (snq *SourceNameQuery) loadOccurrences(ctx context.Context, query *Occurren
 	}
 	query.Where(predicate.Occurrence(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(sourcename.OccurrencesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SourceID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "source_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "source_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (snq *SourceNameQuery) loadHasSourceAt(ctx context.Context, query *HasSourceAtQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *HasSourceAt)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*SourceName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(hassourceat.FieldSourceID)
+	}
+	query.Where(predicate.HasSourceAt(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(sourcename.HasSourceAtColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SourceID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "source_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (snq *SourceNameQuery) loadScorecard(ctx context.Context, query *CertifyScorecardQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *CertifyScorecard)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*SourceName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(certifyscorecard.FieldSourceID)
+	}
+	query.Where(predicate.CertifyScorecard(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(sourcename.ScorecardColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SourceID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "source_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (snq *SourceNameQuery) loadCertification(ctx context.Context, query *CertificationQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *Certification)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*SourceName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(certification.FieldSourceID)
+	}
+	query.Where(predicate.Certification(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(sourcename.CertificationColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SourceID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "source_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "source_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (snq *SourceNameQuery) loadMetadata(ctx context.Context, query *HasMetadataQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *HasMetadata)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*SourceName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(hasmetadata.FieldSourceID)
+	}
+	query.Where(predicate.HasMetadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(sourcename.MetadataColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SourceID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "source_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "source_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (snq *SourceNameQuery) loadPoc(ctx context.Context, query *PointOfContactQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *PointOfContact)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*SourceName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pointofcontact.FieldSourceID)
+	}
+	query.Where(predicate.PointOfContact(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(sourcename.PocColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.SourceID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "source_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "source_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (snq *SourceNameQuery) loadCertifyLegal(ctx context.Context, query *CertifyLegalQuery, nodes []*SourceName, init func(*SourceName), assign func(*SourceName, *CertifyLegal)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*SourceName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(certifylegal.FieldSourceID)
+	}
+	query.Where(predicate.CertifyLegal(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(sourcename.CertifyLegalColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -550,6 +1054,90 @@ func (snq *SourceNameQuery) WithNamedOccurrences(name string, opts ...func(*Occu
 		snq.withNamedOccurrences = make(map[string]*OccurrenceQuery)
 	}
 	snq.withNamedOccurrences[name] = query
+	return snq
+}
+
+// WithNamedHasSourceAt tells the query-builder to eager-load the nodes that are connected to the "has_source_at"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithNamedHasSourceAt(name string, opts ...func(*HasSourceAtQuery)) *SourceNameQuery {
+	query := (&HasSourceAtClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if snq.withNamedHasSourceAt == nil {
+		snq.withNamedHasSourceAt = make(map[string]*HasSourceAtQuery)
+	}
+	snq.withNamedHasSourceAt[name] = query
+	return snq
+}
+
+// WithNamedScorecard tells the query-builder to eager-load the nodes that are connected to the "scorecard"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithNamedScorecard(name string, opts ...func(*CertifyScorecardQuery)) *SourceNameQuery {
+	query := (&CertifyScorecardClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if snq.withNamedScorecard == nil {
+		snq.withNamedScorecard = make(map[string]*CertifyScorecardQuery)
+	}
+	snq.withNamedScorecard[name] = query
+	return snq
+}
+
+// WithNamedCertification tells the query-builder to eager-load the nodes that are connected to the "certification"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithNamedCertification(name string, opts ...func(*CertificationQuery)) *SourceNameQuery {
+	query := (&CertificationClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if snq.withNamedCertification == nil {
+		snq.withNamedCertification = make(map[string]*CertificationQuery)
+	}
+	snq.withNamedCertification[name] = query
+	return snq
+}
+
+// WithNamedMetadata tells the query-builder to eager-load the nodes that are connected to the "metadata"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithNamedMetadata(name string, opts ...func(*HasMetadataQuery)) *SourceNameQuery {
+	query := (&HasMetadataClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if snq.withNamedMetadata == nil {
+		snq.withNamedMetadata = make(map[string]*HasMetadataQuery)
+	}
+	snq.withNamedMetadata[name] = query
+	return snq
+}
+
+// WithNamedPoc tells the query-builder to eager-load the nodes that are connected to the "poc"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithNamedPoc(name string, opts ...func(*PointOfContactQuery)) *SourceNameQuery {
+	query := (&PointOfContactClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if snq.withNamedPoc == nil {
+		snq.withNamedPoc = make(map[string]*PointOfContactQuery)
+	}
+	snq.withNamedPoc[name] = query
+	return snq
+}
+
+// WithNamedCertifyLegal tells the query-builder to eager-load the nodes that are connected to the "certify_legal"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (snq *SourceNameQuery) WithNamedCertifyLegal(name string, opts ...func(*CertifyLegalQuery)) *SourceNameQuery {
+	query := (&CertifyLegalClient{config: snq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if snq.withNamedCertifyLegal == nil {
+		snq.withNamedCertifyLegal = make(map[string]*CertifyLegalQuery)
+	}
+	snq.withNamedCertifyLegal[name] = query
 	return snq
 }
 

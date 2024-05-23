@@ -28,6 +28,10 @@ import (
 	purl "github.com/package-url/packageurl-go"
 )
 
+func (c *arangoClient) PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: PkgEqualList")
+}
+
 func (c *arangoClient) PkgEqual(ctx context.Context, pkgEqualSpec *model.PkgEqualSpec) ([]*model.PkgEqual, error) {
 
 	if pkgEqualSpec != nil && pkgEqualSpec.ID != nil {
@@ -222,7 +226,8 @@ func getPkgEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuilde
 		'pkgEqual_id': pkgEqual._id,
 		'justification': pkgEqual.justification,
 		'collector': pkgEqual.collector,
-		'origin': pkgEqual.origin
+		'origin': pkgEqual.origin,
+		'documentRef': pkgEqual.documentRef
 	}`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "pkgEqual")
@@ -250,6 +255,10 @@ func setPkgEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, pkgEqualSpec
 	if pkgEqualSpec.Collector != nil {
 		arangoQueryBuilder.filter("pkgEqual", collector, "==", "@"+collector)
 		queryValues[collector] = *pkgEqualSpec.Collector
+	}
+	if pkgEqualSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("pkgEqual", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *pkgEqualSpec.DocumentRef
 	}
 }
 
@@ -334,6 +343,7 @@ func getPkgEqualQueryValues(currentPkg *model.PkgInputSpec, otherPkg *model.PkgI
 	values[justification] = pkgEqual.Justification
 	values[origin] = pkgEqual.Origin
 	values[collector] = pkgEqual.Collector
+	values[docRef] = pkgEqual.DocumentRef
 
 	return values
 }
@@ -387,8 +397,8 @@ func (c *arangoClient) IngestPkgEquals(ctx context.Context, pkgs []*model.IDorPk
 	)
 	
 	LET pkgEqual = FIRST(
-		UPSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-			INSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+		UPSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+			INSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 			UPDATE {} IN pkgEquals
 			RETURN {
 				'_id': NEW._id,
@@ -443,8 +453,8 @@ func (c *arangoClient) IngestPkgEqual(ctx context.Context, pkg model.IDorPkgInpu
 	)
 	
 	LET pkgEqual = FIRST(
-		UPSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:@justification, collector:@collector, origin:@origin } 
-			INSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:@justification, collector:@collector, origin:@origin } 
+		UPSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+			INSERT { packageID:firstPkg.version_id, equalPackageID:equalPkg.version_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 			UPDATE {} IN pkgEquals
 			RETURN {
 				'_id': NEW._id,
@@ -483,6 +493,7 @@ func getPkgEqualFromCursor(ctx context.Context, cursor driver.Cursor, ingestion 
 		Justification   string        `json:"justification"`
 		Collector       string        `json:"collector"`
 		Origin          string        `json:"origin"`
+		DocumentRef     string        `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -516,6 +527,7 @@ func getPkgEqualFromCursor(ctx context.Context, cursor driver.Cursor, ingestion 
 				Justification: createdValue.Justification,
 				Origin:        createdValue.Origin,
 				Collector:     createdValue.Collector,
+				DocumentRef:   createdValue.DocumentRef,
 			}
 		} else {
 			pkgEqual = &model.PkgEqual{ID: createdValue.PkgEqualId}
@@ -572,6 +584,7 @@ func (c *arangoClient) queryPkgEqualNodeByID(ctx context.Context, filter *model.
 		Justification  string `json:"justification"`
 		Collector      string `json:"collector"`
 		Origin         string `json:"origin"`
+		DocumentRef    string `json:"documentRef"`
 	}
 
 	var collectedValues []dbPkgEqual
@@ -609,6 +622,7 @@ func (c *arangoClient) queryPkgEqualNodeByID(ctx context.Context, filter *model.
 		Justification: collectedValues[0].Justification,
 		Origin:        collectedValues[0].Collector,
 		Collector:     collectedValues[0].Origin,
+		DocumentRef:   collectedValues[0].DocumentRef,
 	}, nil
 }
 

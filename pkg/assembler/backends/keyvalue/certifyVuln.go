@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -41,6 +42,7 @@ type certifyVulnerabilityLink struct {
 	ScannerVersion  string
 	Origin          string
 	Collector       string
+	DocumentRef     string
 }
 
 func (n *certifyVulnerabilityLink) ID() string { return n.ThisID }
@@ -55,6 +57,7 @@ func (n *certifyVulnerabilityLink) Key() string {
 		n.ScannerVersion,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -101,6 +104,7 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.I
 		ScannerVersion: certifyVuln.ScannerVersion,
 		Origin:         certifyVuln.Origin,
 		Collector:      certifyVuln.Collector,
+		DocumentRef:    certifyVuln.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -152,6 +156,200 @@ func (c *demoClient) ingestVulnerability(ctx context.Context, packageArg model.I
 }
 
 // Query CertifyVuln
+
+func (c *demoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+	funcName := "CertifyVuln"
+
+	if certifyVulnSpec.ID != nil {
+		link, err := byIDkv[*certifyVulnerabilityLink](ctx, *certifyVulnSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		foundCertifyVuln, err := c.buildCertifyVulnerability(ctx, link, &certifyVulnSpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return &model.CertifyVulnConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(foundCertifyVuln.ID),
+				EndCursor:   ptrfrom.String(foundCertifyVuln.ID),
+			},
+			Edges: []*model.CertifyVulnEdge{
+				{
+					Cursor: foundCertifyVuln.ID,
+					Node:   foundCertifyVuln,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.CertifyVulnEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	var search []string
+	foundOne := false
+
+	if certifyVulnSpec.Package != nil {
+		pkgs, err := c.findPackageVersion(ctx, certifyVulnSpec.Package)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.CertifyVulnLinks...)
+		}
+	}
+
+	if !foundOne && certifyVulnSpec.Vulnerability != nil &&
+		certifyVulnSpec.Vulnerability.NoVuln != nil && *certifyVulnSpec.Vulnerability.NoVuln {
+		exactVuln, err := c.exactVulnerability(ctx, &model.VulnerabilitySpec{
+			Type:            ptrfrom.String(noVulnType),
+			VulnerabilityID: ptrfrom.String(""),
+		})
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactVuln != nil {
+			search = append(search, exactVuln.CertifyVulnLinks...)
+			foundOne = true
+		}
+	} else if !foundOne && certifyVulnSpec.Vulnerability != nil {
+		if certifyVulnSpec.Vulnerability.NoVuln != nil && !*certifyVulnSpec.Vulnerability.NoVuln {
+			if certifyVulnSpec.Vulnerability.Type != nil && *certifyVulnSpec.Vulnerability.Type == noVulnType {
+				return nil, gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")
+			}
+		}
+		exactVuln, err := c.exactVulnerability(ctx, certifyVulnSpec.Vulnerability)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactVuln != nil {
+			search = append(search, exactVuln.CertifyVulnLinks...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*certifyVulnerabilityLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			cv, err := c.certifyVulnIfMatch(ctx, &certifyVulnSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+
+			if cv == nil {
+				continue
+			}
+
+			if (after != nil && cv.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyVulnEdge{
+							Cursor: cv.ID,
+							Node:   cv,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyVulnEdge{
+						Cursor: cv.ID,
+						Node:   cv,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+		var done bool
+		scn := c.kv.Keys(cVulnCol)
+		for !done {
+			var keys []string
+			var err error
+			keys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(keys)
+			totalCount = len(keys)
+
+			for i, key := range keys {
+				link, err := byKeykv[*certifyVulnerabilityLink](ctx, cVulnCol, key, c)
+				if err != nil {
+					return nil, err
+				}
+				cv, err := c.certifyVulnIfMatch(ctx, &certifyVulnSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if cv == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if cv.ID == *after {
+						totalCount = len(keys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyVulnEdge{
+							Cursor: cv.ID,
+							Node:   cv,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyVulnEdge{
+						Cursor: cv.ID,
+						Node:   cv,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.CertifyVulnConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
+
 func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
@@ -201,7 +399,7 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	} else if !foundOne && filter != nil && filter.Vulnerability != nil {
 		if filter.Vulnerability.NoVuln != nil && !*filter.Vulnerability.NoVuln {
 			if filter.Vulnerability.Type != nil && *filter.Vulnerability.Type == noVulnType {
-				return []*model.CertifyVuln{}, gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")
+				return nil, gqlerror.Errorf("novuln boolean set to false, cannot specify vulnerability type to be novuln")
 			}
 		}
 		exactVuln, err := c.exactVulnerability(ctx, filter.Vulnerability)
@@ -221,10 +419,16 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addCVIfMatch(ctx, out, filter, link)
+			cv, err := c.certifyVulnIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if cv == nil {
+				continue
+			}
+
+			out = append(out, cv)
 		}
 	} else {
 		var done bool
@@ -241,10 +445,16 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addCVIfMatch(ctx, out, filter, link)
+				cv, err := c.certifyVulnIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if cv == nil {
+					continue
+				}
+
+				out = append(out, cv)
 			}
 		}
 	}
@@ -252,29 +462,31 @@ func (c *demoClient) CertifyVuln(ctx context.Context, filter *model.CertifyVulnS
 	return out, nil
 }
 
-func (c *demoClient) addCVIfMatch(ctx context.Context, out []*model.CertifyVuln,
-	filter *model.CertifyVulnSpec,
-	link *certifyVulnerabilityLink) ([]*model.CertifyVuln, error) {
+func (c *demoClient) certifyVulnIfMatch(ctx context.Context, filter *model.CertifyVulnSpec, link *certifyVulnerabilityLink) (
+	*model.CertifyVuln, error) {
 	if filter != nil && filter.TimeScanned != nil && !filter.TimeScanned.Equal(link.TimeScanned) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.DbURI, link.DBURI) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.DbVersion, link.DBVersion) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.ScannerURI, link.ScannerURI) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.ScannerVersion, link.ScannerVersion) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Collector, link.Collector) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Origin, link.Origin) {
-		return out, nil
+		return nil, nil
+	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
+		return nil, nil
 	}
 
 	foundCertifyVuln, err := c.buildCertifyVulnerability(ctx, link, filter, false)
@@ -282,9 +494,9 @@ func (c *demoClient) addCVIfMatch(ctx context.Context, out []*model.CertifyVuln,
 		return nil, err
 	}
 	if foundCertifyVuln == nil || reflect.ValueOf(foundCertifyVuln.Vulnerability).IsNil() {
-		return out, nil
+		return nil, nil
 	}
-	return append(out, foundCertifyVuln), nil
+	return foundCertifyVuln, nil
 }
 
 func (c *demoClient) buildCertifyVulnerability(ctx context.Context, link *certifyVulnerabilityLink, filter *model.CertifyVulnSpec, ingestOrIDProvided bool) (*model.CertifyVuln, error) {
@@ -353,6 +565,7 @@ func (c *demoClient) buildCertifyVulnerability(ctx context.Context, link *certif
 			ScannerVersion: link.ScannerVersion,
 			Origin:         link.Origin,
 			Collector:      link.Collector,
+			DocumentRef:    link.DocumentRef,
 		},
 	}, nil
 }

@@ -55,6 +55,8 @@ type SLSA {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -102,6 +104,7 @@ input HasSLSASpec {
   finishedOn: Time
   origin: String
   collector: String
+  documentRef: String
 }
 
 "SLSAPredicateSpec is the same as SLSAPredicate, but usable as query input."
@@ -119,6 +122,7 @@ input SLSAInputSpec {
   finishedOn: Time
   origin: String!
   collector: String!
+  documentRef: String!
 }
 
 "SLSAPredicateInputSpec allows ingesting SLSAPredicateSpec."
@@ -127,9 +131,38 @@ input SLSAPredicateInputSpec {
   value: String!
 }
 
+"""
+HasSLSAConnection returns the paginated results for HasSLSA.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasSLSAEdge which contains the current cursor
+and the HasSLSA node itself
+"""
+type HasSLSAConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasSLSAEdge!]!
+}
+
+"""
+HasSLSAEdge contains the cursor for the resulting node and
+the HasSLSA node itself.
+"""
+type HasSLSAEdge {
+  cursor: ID!
+  node: HasSLSA!
+}
+
 extend type Query {
   "Returns all SLSA attestations matching the filter."
   HasSLSA(hasSLSASpec: HasSLSASpec!): [HasSLSA!]!
+  "Returns a paginated results via HasSLSAConnection"
+  HasSLSAList(hasSLSASpec: HasSLSASpec!, after: ID, first: Int): HasSLSAConnection
 }
 
 extend type Mutation {

@@ -38,6 +38,8 @@ type CertifyLegal struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// An opaque hash of the declared license IDs to ensure uniqueness
 	DeclaredLicensesHash string `json:"declared_licenses_hash,omitempty"`
 	// An opaque hash of the discovered license IDs to ensure uniqueness
@@ -119,7 +121,7 @@ func (*CertifyLegal) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case certifylegal.FieldPackageID, certifylegal.FieldSourceID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case certifylegal.FieldDeclaredLicense, certifylegal.FieldDiscoveredLicense, certifylegal.FieldAttribution, certifylegal.FieldJustification, certifylegal.FieldOrigin, certifylegal.FieldCollector, certifylegal.FieldDeclaredLicensesHash, certifylegal.FieldDiscoveredLicensesHash:
+		case certifylegal.FieldDeclaredLicense, certifylegal.FieldDiscoveredLicense, certifylegal.FieldAttribution, certifylegal.FieldJustification, certifylegal.FieldOrigin, certifylegal.FieldCollector, certifylegal.FieldDocumentRef, certifylegal.FieldDeclaredLicensesHash, certifylegal.FieldDiscoveredLicensesHash:
 			values[i] = new(sql.NullString)
 		case certifylegal.FieldTimeScanned:
 			values[i] = new(sql.NullTime)
@@ -201,6 +203,12 @@ func (cl *CertifyLegal) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				cl.Collector = value.String
+			}
+		case certifylegal.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				cl.DocumentRef = value.String
 			}
 		case certifylegal.FieldDeclaredLicensesHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -300,6 +308,9 @@ func (cl *CertifyLegal) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(cl.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(cl.DocumentRef)
 	builder.WriteString(", ")
 	builder.WriteString("declared_licenses_hash=")
 	builder.WriteString(cl.DeclaredLicensesHash)

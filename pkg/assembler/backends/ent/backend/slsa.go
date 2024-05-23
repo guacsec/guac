@@ -23,6 +23,7 @@ import (
 	"sort"
 	"time"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -35,41 +36,113 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func slsaGlobalID(id string) string {
+	return toGlobalID(slsaattestation.Table, id)
+}
+
+func bulkSLSAGlobalID(ids []string) []string {
+	return toGlobalIDs(slsaattestation.Table, ids)
+}
+
+func (b *EntBackend) HasSLSAList(ctx context.Context, spec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != slsaattestation.Table {
+			return nil, fmt.Errorf("after cursor is not type SLSA but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	slsaQuery := b.client.SLSAAttestation.Query().
+		Where(hasSLSAQuery(spec))
+
+	slsaConn, err := getSLSAObject(slsaQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed hasSLSA query with error: %w", err)
+	}
+
+	var edges []*model.HasSLSAEdge
+	for _, edge := range slsaConn.Edges {
+		edges = append(edges, &model.HasSLSAEdge{
+			Cursor: slsaGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelHasSLSA(edge.Node),
+		})
+	}
+
+	if slsaConn.PageInfo.StartCursor != nil {
+		return &model.HasSLSAConnection{
+			TotalCount: slsaConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: slsaConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(slsaGlobalID(slsaConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(slsaGlobalID(slsaConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
+}
+
 func (b *EntBackend) HasSlsa(ctx context.Context, spec *model.HasSLSASpec) ([]*model.HasSlsa, error) {
-	query := []predicate.SLSAAttestation{
+	if spec == nil {
+		spec = &model.HasSLSASpec{}
+	}
+
+	slsaQuery := b.client.SLSAAttestation.Query().
+		Where(hasSLSAQuery(*spec))
+
+	records, err := getSLSAObject(slsaQuery).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed hasSLSA query with error: %w", err)
+	}
+
+	return collect(records, toModelHasSLSA), nil
+}
+
+func hasSLSAQuery(spec model.HasSLSASpec) predicate.SLSAAttestation {
+	predicates := []predicate.SLSAAttestation{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.BuildType, slsaattestation.BuildTypeEQ),
 		optionalPredicate(spec.SlsaVersion, slsaattestation.SlsaVersionEQ),
 		optionalPredicate(spec.Collector, slsaattestation.CollectorEQ),
 		optionalPredicate(spec.Origin, slsaattestation.OriginEQ),
+		optionalPredicate(spec.DocumentRef, slsaattestation.DocumentRefEQ),
 		optionalPredicate(spec.FinishedOn, slsaattestation.FinishedOnEQ),
 		optionalPredicate(spec.StartedOn, slsaattestation.StartedOnEQ),
 	}
 
 	if spec.BuiltBy != nil {
-		query = append(query, slsaattestation.HasBuiltByWith(builderQueryPredicate(spec.BuiltBy)))
+		predicates = append(predicates, slsaattestation.HasBuiltByWith(builderQueryPredicate(spec.BuiltBy)))
 	}
 
 	if spec.Subject != nil {
-		query = append(query, slsaattestation.HasSubjectWith(artifactQueryPredicates(spec.Subject)))
+		predicates = append(predicates, slsaattestation.HasSubjectWith(artifactQueryPredicates(spec.Subject)))
 	}
 
 	for _, art := range spec.BuiltFrom {
-		query = append(query, slsaattestation.HasBuiltFromWith(artifactQueryPredicates(art)))
+		predicates = append(predicates, slsaattestation.HasBuiltFromWith(artifactQueryPredicates(art)))
 	}
+	return slsaattestation.And(predicates...)
+}
 
-	records, err := b.client.SLSAAttestation.Query().
-		Where(query...).
+// getSLSAObject is used recreate the hasSLSA object be eager loading the edges
+func getSLSAObject(q *ent.SLSAAttestationQuery) *ent.SLSAAttestationQuery {
+	return q.
 		WithSubject().
 		WithBuiltBy().
-		WithBuiltFrom().
-		Limit(MaxPageSize).
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return collect(records, toModelHasSLSA), nil
+		WithBuiltFrom()
 }
 
 func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactInput, builtFrom []*model.IDorArtifactInput, builtBy model.IDorBuilderInput, slsa model.SLSAInputSpec) (string, error) {
@@ -80,7 +153,7 @@ func (b *EntBackend) IngestSLSA(ctx context.Context, subject model.IDorArtifactI
 		return "", txErr
 	}
 
-	return *id, nil
+	return slsaGlobalID(*id), nil
 }
 
 func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) ([]string, error) {
@@ -97,13 +170,11 @@ func (b *EntBackend) IngestSLSAs(ctx context.Context, subjects []*model.IDorArti
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return bulkSLSAGlobalID(*ids), nil
 }
 
-func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func slsaConflictColumns() []string {
+	return []string{
 		slsaattestation.FieldSubjectID,
 		slsaattestation.FieldOrigin,
 		slsaattestation.FieldCollector,
@@ -112,7 +183,13 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 		slsaattestation.FieldBuiltByID,
 		slsaattestation.FieldStartedOn,
 		slsaattestation.FieldFinishedOn,
-		slsaattestation.FieldBuiltFromHash}
+		slsaattestation.FieldBuiltFromHash,
+		slsaattestation.FieldDocumentRef,
+	}
+}
+
+func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtifactInput, builtFromList [][]*model.IDorArtifactInput, builtByList []*model.IDorBuilderInput, slsaList []*model.SLSAInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	batches := chunk(slsaList, MaxBatchSize)
 
@@ -131,7 +208,7 @@ func upsertBulkSLSA(ctx context.Context, tx *ent.Tx, subjects []*model.IDorArtif
 
 		err := tx.SLSAAttestation.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(slsaConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -158,6 +235,7 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 		SetBuildType(slsa.BuildType).
 		SetCollector(slsa.Collector).
 		SetOrigin(slsa.Origin).
+		SetDocumentRef(slsa.DocumentRef).
 		SetSlsaVersion(slsa.SlsaVersion).
 		SetSlsaPredicate(toSLSAInputPredicate(slsa.SlsaPredicate)).
 		SetStartedOn(setDefaultTime(slsa.StartedOn)).
@@ -169,7 +247,8 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 	var buildID uuid.UUID
 	if builtBy.BuilderID != nil {
 		var err error
-		buildID, err = uuid.Parse(*builtBy.BuilderID)
+		builtGlobalID := fromGlobalID(*builtBy.BuilderID)
+		buildID, err = uuid.Parse(builtGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from BuilderID failed with error: %w", err)
 		}
@@ -185,7 +264,8 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 	var subjectArtifactID uuid.UUID
 	if subject.ArtifactID != nil {
 		var err error
-		subjectArtifactID, err = uuid.Parse(*subject.ArtifactID)
+		artGlobalID := fromGlobalID(*subject.ArtifactID)
+		subjectArtifactID, err = uuid.Parse(artGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 		}
@@ -204,7 +284,8 @@ func generateSLSACreate(ctx context.Context, tx *ent.Tx, subject *model.IDorArti
 	if len(builtFrom) > 0 {
 		for _, bf := range builtFrom {
 			if bf.ArtifactID != nil {
-				builtFromIDs = append(builtFromIDs, *bf.ArtifactID)
+				artGlobalID := fromGlobalID(*bf.ArtifactID)
+				builtFromIDs = append(builtFromIDs, artGlobalID.id)
 			} else {
 				foundArt, err := tx.Artifact.Query().Where(artifactQueryInputPredicates(*bf.ArtifactInput)).Only(ctx)
 				if err != nil {
@@ -250,17 +331,7 @@ func upsertSLSA(ctx context.Context, tx *ent.Tx, subject model.IDorArtifactInput
 
 	if id, err := slsaCreate.
 		OnConflict(
-			sql.ConflictColumns(
-				slsaattestation.FieldSubjectID,
-				slsaattestation.FieldOrigin,
-				slsaattestation.FieldCollector,
-				slsaattestation.FieldBuildType,
-				slsaattestation.FieldSlsaVersion,
-				slsaattestation.FieldBuiltByID,
-				slsaattestation.FieldStartedOn,
-				slsaattestation.FieldFinishedOn,
-				slsaattestation.FieldBuiltFromHash,
-			),
+			sql.ConflictColumns(slsaConflictColumns()...),
 		).
 		Ignore().
 		ID(ctx); err != nil {
@@ -297,6 +368,7 @@ func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 		SlsaVersion:   att.SlsaVersion,
 		Origin:        att.Origin,
 		Collector:     att.Collector,
+		DocumentRef:   att.DocumentRef,
 	}
 
 	if !att.StartedOn.Equal(time.Unix(0, 0).UTC()) {
@@ -308,7 +380,7 @@ func toModelHasSLSA(att *ent.SLSAAttestation) *model.HasSlsa {
 	}
 
 	return &model.HasSlsa{
-		ID:      att.ID.String(),
+		ID:      slsaGlobalID(att.ID.String()),
 		Subject: toModelArtifact(att.Edges.Subject),
 		Slsa:    slsa,
 	}
@@ -366,7 +438,7 @@ func canonicalSLSAString(slsa model.SLSAInputSpec) string {
 		finishedOn = time.Unix(0, 0).UTC()
 	}
 
-	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s", slsa.BuildType, fmt.Sprintf("%x", hash.Sum(nil)), slsa.SlsaVersion, startedOn, finishedOn, slsa.Origin, slsa.Collector)
+	return fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s:%s", slsa.BuildType, fmt.Sprintf("%x", hash.Sum(nil)), slsa.SlsaVersion, startedOn, finishedOn, slsa.Origin, slsa.Collector, slsa.DocumentRef)
 }
 
 // guacSLSAKey generates an uuid based on the hash of the inputspec and inputs. slsa ID has to be set for bulk ingestion
@@ -378,4 +450,44 @@ func guacSLSAKey(subjectID *string, builtFromHash string, builderID *string, sls
 
 	depID := generateUUIDKey([]byte(depIDString))
 	return &depID, nil
+}
+
+func (b *EntBackend) hasSlsaNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.SLSAAttestation.Query().
+		Where(hasSLSAQuery(model.HasSLSASpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeHasSlsaSubject] {
+		query.
+			WithSubject()
+	}
+	if allowedEdges[model.EdgeHasSlsaBuiltBy] {
+		query.
+			WithBuiltBy()
+	}
+	if allowedEdges[model.EdgeHasSlsaMaterials] {
+		query.
+			WithBuiltFrom()
+	}
+
+	slsaAtts, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for hasSLSA with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, s := range slsaAtts {
+		if s.Edges.Subject != nil {
+			out = append(out, toModelArtifact(s.Edges.Subject))
+		}
+		if s.Edges.BuiltBy != nil {
+			out = append(out, toModelBuilder(s.Edges.BuiltBy))
+		}
+		if len(s.Edges.BuiltFrom) > 0 {
+			for _, bf := range s.Edges.BuiltFrom {
+				out = append(out, toModelArtifact(bf))
+			}
+		}
+	}
+	return out, nil
 }

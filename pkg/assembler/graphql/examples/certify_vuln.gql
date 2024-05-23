@@ -37,6 +37,28 @@ fragment allCertifyVulnTree on CertifyVuln {
     timeScanned
     origin
     collector
+    documentRef
+  }
+}
+
+fragment AllCertifyVulnPaginationTree on CertifyVulnConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query CertifyVulnPagination {
+  CertifyVulnList(certifyVulnSpec: {}, first: 10) {
+    ...AllCertifyVulnPaginationTree
   }
 }
 

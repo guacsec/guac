@@ -19,13 +19,12 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
-	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -33,22 +32,35 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func certifyVulnGlobalID(id string) string {
+	return toGlobalID(certifyvuln.Table, id)
+}
+
+func bulkCertifyVulnGlobalID(ids []string) []string {
+	return toGlobalIDs(certifyvuln.Table, ids)
+}
+
+func certifyVulnConflictColumns() []string {
+	return []string{
+		certifyvuln.FieldPackageID,
+		certifyvuln.FieldVulnerabilityID,
+		certifyvuln.FieldCollector,
+		certifyvuln.FieldScannerURI,
+		certifyvuln.FieldScannerVersion,
+		certifyvuln.FieldOrigin,
+		certifyvuln.FieldDbURI,
+		certifyvuln.FieldDbVersion,
+		certifyvuln.FieldTimeScanned,
+		certifyvuln.FieldDocumentRef,
+	}
+}
+
 func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInput, vulnerability model.IDorVulnerabilityInput, certifyVuln model.ScanMetadataInput) (string, error) {
 
 	record, txErr := WithinTX(ctx, b.client, func(ctx context.Context) (*string, error) {
 		tx := ent.TxFromContext(ctx)
 
-		conflictColumns := []string{
-			certifyvuln.FieldPackageID,
-			certifyvuln.FieldVulnerabilityID,
-			certifyvuln.FieldCollector,
-			certifyvuln.FieldScannerURI,
-			certifyvuln.FieldScannerVersion,
-			certifyvuln.FieldOrigin,
-			certifyvuln.FieldDbURI,
-			certifyvuln.FieldDbVersion,
-			certifyvuln.FieldTimeScanned,
-		}
+		conflictColumns := certifyVulnConflictColumns()
 
 		insert, err := generateCertifyVulnCreate(ctx, tx, &pkg, &vulnerability, &certifyVuln)
 		if err != nil {
@@ -70,7 +82,7 @@ func (b *EntBackend) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgInp
 		return "", txErr
 	}
 
-	return *record, nil
+	return certifyVulnGlobalID(*record), nil
 }
 
 func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) ([]string, error) {
@@ -87,7 +99,7 @@ func (b *EntBackend) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDorP
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return bulkCertifyVulnGlobalID(*ids), nil
 }
 
 func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgInput, vuln *model.IDorVulnerabilityInput, certifyVuln *model.ScanMetadataInput) (*ent.CertifyVulnCreate, error) {
@@ -101,7 +113,8 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 	var vulnID uuid.UUID
 	if vuln.VulnerabilityNodeID != nil {
 		var err error
-		vulnID, err = uuid.Parse(*vuln.VulnerabilityNodeID)
+		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
+		vulnID, err = uuid.Parse(vulnGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
@@ -126,7 +139,8 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 	var pkgVersionID uuid.UUID
 	if pkg.PackageVersionID != nil {
 		var err error
-		pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+		pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+		pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 		}
@@ -146,7 +160,8 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 		SetOrigin(certifyVuln.Origin).
 		SetScannerURI(certifyVuln.ScannerURI).
 		SetScannerVersion(certifyVuln.ScannerVersion).
-		SetTimeScanned(certifyVuln.TimeScanned)
+		SetTimeScanned(certifyVuln.TimeScanned).
+		SetDocumentRef(certifyVuln.DocumentRef)
 
 	return certifyVulnCreate, nil
 }
@@ -154,17 +169,7 @@ func generateCertifyVulnCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorP
 func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPkgInput, vulnerabilities []*model.IDorVulnerabilityInput, certifyVulns []*model.ScanMetadataInput) (*[]string, error) {
 	ids := make([]string, 0)
 
-	conflictColumns := []string{
-		certifyvuln.FieldPackageID,
-		certifyvuln.FieldVulnerabilityID,
-		certifyvuln.FieldCollector,
-		certifyvuln.FieldScannerURI,
-		certifyvuln.FieldScannerVersion,
-		certifyvuln.FieldOrigin,
-		certifyvuln.FieldDbURI,
-		certifyvuln.FieldDbVersion,
-		certifyvuln.FieldTimeScanned,
-	}
+	conflictColumns := certifyVulnConflictColumns()
 
 	batches := chunk(certifyVulns, MaxBatchSize)
 
@@ -195,7 +200,74 @@ func upsertBulkCertifyVuln(ctx context.Context, tx *ent.Tx, pkgs []*model.IDorPk
 	return &ids, nil
 }
 
+func (b *EntBackend) CertifyVulnList(ctx context.Context, spec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyvuln.Table {
+			return nil, fmt.Errorf("after cursor is not type certifyVuln but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	certVulnQuery := b.client.CertifyVuln.Query().
+		Where(certifyVulnPredicate(spec))
+
+	certVulnConn, err := getCertVulnObject(certVulnQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyVuln query with error: %w", err)
+	}
+
+	var edges []*model.CertifyVulnEdge
+	for _, edge := range certVulnConn.Edges {
+		edges = append(edges, &model.CertifyVulnEdge{
+			Cursor: certifyVulnGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyVulnerability(edge.Node),
+		})
+	}
+
+	if certVulnConn.PageInfo.StartCursor != nil {
+		return &model.CertifyVulnConnection{
+			TotalCount: certVulnConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: certVulnConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(certifyVulnGlobalID(certVulnConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(certifyVulnGlobalID(certVulnConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
+}
+
 func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
+	if spec == nil {
+		spec = &model.CertifyVulnSpec{}
+	}
+	certVulnQuery := b.client.CertifyVuln.Query().
+		Where(certifyVulnPredicate(*spec))
+
+	records, err := getCertVulnObject(certVulnQuery).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyVuln query with error: %w", err)
+	}
+
+	return collect(records, toModelCertifyVulnerability), nil
+}
+
+func certifyVulnPredicate(spec model.CertifyVulnSpec) predicate.CertifyVuln {
 	predicates := []predicate.CertifyVuln{
 		optionalPredicate(spec.ID, IDEQ),
 		optionalPredicate(spec.Collector, certifyvuln.CollectorEQ),
@@ -205,62 +277,33 @@ func (b *EntBackend) CertifyVuln(ctx context.Context, spec *model.CertifyVulnSpe
 		optionalPredicate(spec.ScannerURI, certifyvuln.ScannerURIEQ),
 		optionalPredicate(spec.ScannerVersion, certifyvuln.ScannerVersionEQ),
 		optionalPredicate(spec.TimeScanned, certifyvuln.TimeScannedEQ),
+		optionalPredicate(spec.DocumentRef, certifyvuln.DocumentRefEQ),
 		optionalPredicate(spec.Package, func(pkg model.PkgSpec) predicate.CertifyVuln {
 			return certifyvuln.HasPackageWith(
-				optionalPredicate(pkg.ID, IDEQ),
-				optionalPredicate(pkg.Version, packageversion.VersionEQ),
-				optionalPredicate(pkg.Subpath, packageversion.SubpathEQ),
-				packageversion.QualifiersMatch(pkg.Qualifiers, ptrWithDefault(pkg.MatchOnlyEmptyQualifiers, false)),
-				packageversion.HasNameWith(
-					optionalPredicate(pkg.Name, packagename.NameEQ),
-					optionalPredicate(pkg.Namespace, packagename.NamespaceEQ),
-					optionalPredicate(pkg.Type, packagename.TypeEQ),
-				),
+				packageVersionQuery(spec.Package),
 			)
 		}),
 		optionalPredicate(spec.Vulnerability, func(vuln model.VulnerabilitySpec) predicate.CertifyVuln {
 			return certifyvuln.HasVulnerabilityWith(
-				optionalPredicate(vuln.ID, IDEQ),
-				optionalPredicate(vuln.VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold),
-				optionalPredicate(vuln.Type, vulnerabilityid.TypeEqualFold),
+				vulnerabilityQueryPredicates(*spec.Vulnerability)...,
 			)
 		}),
 	}
+	return certifyvuln.And(predicates...)
+}
 
-	if spec.Vulnerability != nil &&
-		spec.Vulnerability.NoVuln != nil {
-		if *spec.Vulnerability.NoVuln {
-			predicates = append(predicates,
-				certifyvuln.HasVulnerabilityWith(
-					vulnerabilityid.TypeEqualFold(NoVuln),
-				),
-			)
-		} else {
-			predicates = append(predicates,
-				certifyvuln.HasVulnerabilityWith(
-					vulnerabilityid.TypeNEQ(NoVuln),
-				),
-			)
-		}
-	}
-
-	records, err := b.client.CertifyVuln.Query().
-		Where(predicates...).
+// getCertVulnObject is used recreate the CertifyVuln object be eager loading the edges
+func getCertVulnObject(q *ent.CertifyVulnQuery) *ent.CertifyVulnQuery {
+	return q.
 		WithPackage(func(q *ent.PackageVersionQuery) {
 			q.WithName(func(q *ent.PackageNameQuery) {})
 		}).
-		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {}).
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return collect(records, toModelCertifyVulnerability), nil
+		WithVulnerability(func(query *ent.VulnerabilityIDQuery) {})
 }
 
 func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 	return &model.CertifyVuln{
-		ID:            record.ID.String(),
+		ID:            certifyVulnGlobalID(record.ID.String()),
 		Package:       toModelPackage(backReferencePackageVersion(record.Edges.Package)),
 		Vulnerability: toModelVulnerabilityFromVulnerabilityID(record.Edges.Vulnerability),
 		Metadata: &model.ScanMetadata{
@@ -271,7 +314,40 @@ func toModelCertifyVulnerability(record *ent.CertifyVuln) *model.CertifyVuln {
 			ScannerVersion: record.ScannerVersion,
 			Origin:         record.Origin,
 			Collector:      record.Collector,
+			DocumentRef:    record.DocumentRef,
 		},
 	}
 
+}
+
+func (b *EntBackend) certifyVulnNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.CertifyVuln.Query().
+		Where(certifyVulnPredicate(model.CertifyVulnSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyVulnPackage] {
+		query.
+			WithPackage(withPackageVersionTree())
+	}
+	if allowedEdges[model.EdgeCertifyVulnVulnerability] {
+		query.
+			WithVulnerability()
+	}
+
+	certVulns, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyVuln with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundVuln := range certVulns {
+		if foundVuln.Edges.Package != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundVuln.Edges.Package)))
+		}
+		if foundVuln.Edges.Vulnerability != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(foundVuln.Edges.Vulnerability))
+		}
+	}
+
+	return out, nil
 }

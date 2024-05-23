@@ -26,6 +26,7 @@ import (
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	"github.com/guacsec/guac/pkg/assembler/helpers"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
@@ -52,6 +53,7 @@ const (
 type queryKnownOptions struct {
 	// gql endpoint
 	graphqlEndpoint string
+	headerFile      string
 	// package, source or artifact
 	subjectType string
 	// purl / source (<vcs_tool>+<transport>) / artifact (algorithm:digest)
@@ -91,16 +93,16 @@ var queryKnownCmd = &cobra.Command{
 
 		opts, err := validateQueryKnownFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			args,
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
 
-		httpClient := http.Client{}
+		httpClient := http.Client{Transport: cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		t := table.NewWriter()
@@ -447,9 +449,10 @@ func getOutputBasedOnNode(ctx context.Context, gqlclient graphql.Client, collect
 	return tableRows
 }
 
-func validateQueryKnownFlags(graphqlEndpoint string, args []string) (queryKnownOptions, error) {
+func validateQueryKnownFlags(graphqlEndpoint, headerFile string, args []string) (queryKnownOptions, error) {
 	var opts queryKnownOptions
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 
 	if len(args) != 2 {
 		return opts, fmt.Errorf("expected positional arguments for <type> <subject>")

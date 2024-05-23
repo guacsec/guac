@@ -31,6 +31,8 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldDocumentRef holds the string denoting the document_ref field in the database.
+	FieldDocumentRef = "document_ref"
 	// FieldChecksHash holds the string denoting the checks_hash field in the database.
 	FieldChecksHash = "checks_hash"
 	// EdgeSource holds the string denoting the source edge name in mutations.
@@ -57,6 +59,7 @@ var Columns = []string{
 	FieldScorecardCommit,
 	FieldOrigin,
 	FieldCollector,
+	FieldDocumentRef,
 	FieldChecksHash,
 }
 
@@ -120,6 +123,11 @@ func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 // ByCollector orders the results by the collector field.
 func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
+}
+
+// ByDocumentRef orders the results by the document_ref field.
+func ByDocumentRef(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentRef, opts...).ToFunc()
 }
 
 // ByChecksHash orders the results by the checks_hash field.

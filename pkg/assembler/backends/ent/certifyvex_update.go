@@ -184,6 +184,20 @@ func (cvu *CertifyVexUpdate) SetNillableCollector(s *string) *CertifyVexUpdate {
 	return cvu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (cvu *CertifyVexUpdate) SetDocumentRef(s string) *CertifyVexUpdate {
+	cvu.mutation.SetDocumentRef(s)
+	return cvu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (cvu *CertifyVexUpdate) SetNillableDocumentRef(s *string) *CertifyVexUpdate {
+	if s != nil {
+		cvu.SetDocumentRef(*s)
+	}
+	return cvu
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (cvu *CertifyVexUpdate) SetPackage(p *PackageVersion) *CertifyVexUpdate {
 	return cvu.SetPackageID(p.ID)
@@ -289,6 +303,9 @@ func (cvu *CertifyVexUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cvu.mutation.Collector(); ok {
 		_spec.SetField(certifyvex.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := cvu.mutation.DocumentRef(); ok {
+		_spec.SetField(certifyvex.FieldDocumentRef, field.TypeString, value)
 	}
 	if cvu.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -549,6 +566,20 @@ func (cvuo *CertifyVexUpdateOne) SetNillableCollector(s *string) *CertifyVexUpda
 	return cvuo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (cvuo *CertifyVexUpdateOne) SetDocumentRef(s string) *CertifyVexUpdateOne {
+	cvuo.mutation.SetDocumentRef(s)
+	return cvuo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (cvuo *CertifyVexUpdateOne) SetNillableDocumentRef(s *string) *CertifyVexUpdateOne {
+	if s != nil {
+		cvuo.SetDocumentRef(*s)
+	}
+	return cvuo
+}
+
 // SetPackage sets the "package" edge to the PackageVersion entity.
 func (cvuo *CertifyVexUpdateOne) SetPackage(p *PackageVersion) *CertifyVexUpdateOne {
 	return cvuo.SetPackageID(p.ID)
@@ -684,6 +715,9 @@ func (cvuo *CertifyVexUpdateOne) sqlSave(ctx context.Context) (_node *CertifyVex
 	}
 	if value, ok := cvuo.mutation.Collector(); ok {
 		_spec.SetField(certifyvex.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := cvuo.mutation.DocumentRef(); ok {
+		_spec.SetField(certifyvex.FieldDocumentRef, field.TypeString, value)
 	}
 	if cvuo.mutation.PackageCleared() {
 		edge := &sqlgraph.EdgeSpec{

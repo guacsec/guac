@@ -53,6 +53,7 @@ func (Dependency) Fields() []ent.Field {
 		field.String("justification"),
 		field.String("origin"),
 		field.String("collector"),
+		field.String("document_ref"),
 	}
 }
 
@@ -76,13 +77,15 @@ func (Dependency) Edges() []ent.Edge {
 // Indexes of the Dependency.
 func (Dependency) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("version_range", "dependency_type", "justification", "origin", "collector").
+		index.Fields("version_range", "dependency_type", "justification", "origin", "collector", "document_ref").
 			Edges("package", "dependent_package_name").
 			Unique().
-			Annotations(entsql.IndexWhere("dependent_package_name_id IS NOT NULL AND dependent_package_version_id IS NULL")).StorageKey("dep_package_name"),
-		index.Fields("version_range", "dependency_type", "justification", "origin", "collector").
+			Annotations(entsql.IndexWhere("dependent_package_name_id IS NOT NULL AND dependent_package_version_id IS NULL")).
+			StorageKey("dep_package_name_id"),
+		index.Fields("version_range", "dependency_type", "justification", "origin", "collector", "document_ref").
 			Edges("package", "dependent_package_version").
 			Unique().
-			Annotations(entsql.IndexWhere("dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL")).StorageKey("dep_package_version"),
+			Annotations(entsql.IndexWhere("dependent_package_name_id IS NULL AND dependent_package_version_id IS NOT NULL")).
+			StorageKey("dep_package_version_id"),
 	}
 }

@@ -170,8 +170,237 @@ func (ec *executionContext) fieldContext_CertifyScorecard_scorecard(ctx context.
 				return ec.fieldContext_Scorecard_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_Scorecard_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_Scorecard_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Scorecard", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyScorecardConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.CertifyScorecardConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyScorecardConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyScorecardConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyScorecardConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyScorecardConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.CertifyScorecardConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyScorecardConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyScorecardConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyScorecardConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyScorecardConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.CertifyScorecardConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyScorecardConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CertifyScorecardEdge)
+	fc.Result = res
+	return ec.marshalNCertifyScorecardEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyScorecardConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyScorecardConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_CertifyScorecardEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_CertifyScorecardEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyScorecardEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyScorecardEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.CertifyScorecardEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyScorecardEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyScorecardEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyScorecardEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyScorecardEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.CertifyScorecardEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyScorecardEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyScorecard)
+	fc.Result = res
+	return ec.marshalNCertifyScorecard2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecard(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyScorecardEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyScorecardEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyScorecard_id(ctx, field)
+			case "source":
+				return ec.fieldContext_CertifyScorecard_source(ctx, field)
+			case "scorecard":
+				return ec.fieldContext_CertifyScorecard_scorecard(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyScorecard", field.Name)
 		},
 	}
 	return fc, nil
@@ -470,6 +699,47 @@ func (ec *executionContext) fieldContext_Scorecard_collector(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Scorecard_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.Scorecard) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Scorecard_documentRef(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DocumentRef, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Scorecard_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Scorecard",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ScorecardCheck_check(ctx context.Context, field graphql.CollectedField, obj *model.ScorecardCheck) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ScorecardCheck_check(ctx, field)
 	if err != nil {
@@ -567,7 +837,7 @@ func (ec *executionContext) unmarshalInputCertifyScorecardSpec(ctx context.Conte
 		asMap["checks"] = []interface{}{}
 	}
 
-	fieldsInOrder := [...]string{"id", "source", "timeScanned", "aggregateScore", "checks", "scorecardVersion", "scorecardCommit", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "source", "timeScanned", "aggregateScore", "checks", "scorecardVersion", "scorecardCommit", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -637,6 +907,13 @@ func (ec *executionContext) unmarshalInputCertifyScorecardSpec(ctx context.Conte
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -718,7 +995,7 @@ func (ec *executionContext) unmarshalInputScorecardInputSpec(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"checks", "aggregateScore", "timeScanned", "scorecardVersion", "scorecardCommit", "origin", "collector"}
+	fieldsInOrder := [...]string{"checks", "aggregateScore", "timeScanned", "scorecardVersion", "scorecardCommit", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -774,6 +1051,13 @@ func (ec *executionContext) unmarshalInputScorecardInputSpec(ctx context.Context
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -811,6 +1095,99 @@ func (ec *executionContext) _CertifyScorecard(ctx context.Context, sel ast.Selec
 			}
 		case "scorecard":
 			out.Values[i] = ec._CertifyScorecard_scorecard(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var certifyScorecardConnectionImplementors = []string{"CertifyScorecardConnection"}
+
+func (ec *executionContext) _CertifyScorecardConnection(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyScorecardConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, certifyScorecardConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CertifyScorecardConnection")
+		case "totalCount":
+			out.Values[i] = ec._CertifyScorecardConnection_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._CertifyScorecardConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "edges":
+			out.Values[i] = ec._CertifyScorecardConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var certifyScorecardEdgeImplementors = []string{"CertifyScorecardEdge"}
+
+func (ec *executionContext) _CertifyScorecardEdge(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyScorecardEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, certifyScorecardEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CertifyScorecardEdge")
+		case "cursor":
+			out.Values[i] = ec._CertifyScorecardEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "node":
+			out.Values[i] = ec._CertifyScorecardEdge_node(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -880,6 +1257,11 @@ func (ec *executionContext) _Scorecard(ctx context.Context, sel ast.SelectionSet
 			}
 		case "collector":
 			out.Values[i] = ec._Scorecard_collector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "documentRef":
+			out.Values[i] = ec._Scorecard_documentRef(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1006,6 +1388,60 @@ func (ec *executionContext) marshalNCertifyScorecard2ᚖgithubᚗcomᚋguacsec�
 		return graphql.Null
 	}
 	return ec._CertifyScorecard(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCertifyScorecardEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyScorecardEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCertifyScorecardEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNCertifyScorecardEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardEdge(ctx context.Context, sel ast.SelectionSet, v *model.CertifyScorecardEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CertifyScorecardEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx context.Context, v interface{}) (model.CertifyScorecardSpec, error) {
@@ -1144,6 +1580,13 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalOCertifyScorecardConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardConnection(ctx context.Context, sel ast.SelectionSet, v *model.CertifyScorecardConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CertifyScorecardConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOScorecardCheckSpec2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScorecardCheckSpecᚄ(ctx context.Context, v interface{}) ([]*model.ScorecardCheckSpec, error) {

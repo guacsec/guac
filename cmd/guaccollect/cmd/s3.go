@@ -3,6 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/guacsec/guac/pkg/cli"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
@@ -10,9 +14,6 @@ import (
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 // s3Options flags for configuring the command
@@ -21,20 +22,24 @@ type s3Options struct {
 	blobAddr          string                        // address for the blob store to connect to
 	s3url             string                        // base url of the s3 to collect from
 	s3bucket          string                        // name of bucket to collect from
+	s3path            string                        // path to s3 folder with documents to collect
 	s3item            string                        // s3 item (only for non-polling behaviour)
 	region            string                        // AWS region, for s3/sqs configuration (defaults to us-east-1)
 	queues            string                        // comma-separated list of queues/topics (only for polling behaviour)
 	mp                string                        // message provider name (sqs or kafka, will default to kafka)
 	mpEndpoint        string                        // endpoint for the message provider (only for polling behaviour)
 	poll              bool                          // polling or non-polling behaviour? (defaults to non-polling)
-	graphqlEndpoint   string                        // endpoint for the graphql server
 	csubClientOptions csub_client.CsubClientOptions // options for the collectsub client
+	publishToQueue    bool                          // enable/disable message publish to queue
+
 }
 
 var s3Cmd = &cobra.Command{
 	Use:   "s3 [flags]",
 	Short: "takes SBOMs and attestations from S3 compatible bucket and injects them to GUAC graph",
-	Long: `S3 collector can download one item from the storage, the whole bucket or listen to storage events using sqs/kafka (poll) and download the files as they are uploaded.
+	Long: `
+guaccollect S3 collector can download one item from the storage, all items from a folder, a whole bucket
+or listen to storage events using sqs/kafka (poll) and download the files as they are uploaded.
 Make sure that access credentials variables are properly set.`,
 	Example: `Create example bucket:
 
@@ -48,8 +53,14 @@ $ export AWS_SECRET_ACCESS_KEY=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
 
 Ingest:
 
-$ guacone collect s3 --s3-url https://play.min.io --s3-bucket guac-test
-$ guacone collect s3 --s3-url play.min.io --s3-bucket guac-test --s3-item alpine-cyclonedx.json
+$ guaccollect s3 --s3-url https://play.min.io --s3-bucket guac-test
+$ guaccollect s3 --s3-url play.min.io --s3-bucket guac-test --s3-item alpine-cyclonedx.json
+
+Ingest from AWS using default url:
+
+$ guaccollect s3 --s3-bucket guac-test --s3-region eu-north-1
+$ guaccollect s3 --s3-bucket guac-test --s3-region eu-north-1 --s3-path sboms/
+
 
 For the polling option, you need to define event bus endpoint for bucket notifications:
 
@@ -63,18 +74,19 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 		s3Opts, err := validateS3Opts(
 			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
-			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
-			viper.GetBool("csub-tls"),
-			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetString("s3-url"),
 			viper.GetString("s3-bucket"),
+			viper.GetString("s3-path"),
 			viper.GetString("s3-region"),
 			viper.GetString("s3-item"),
 			viper.GetString("s3-mp"),
 			viper.GetString("s3-mp-endpoint"),
 			viper.GetString("s3-queues"),
+			viper.GetBool("csub-tls"),
+			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
+			viper.GetBool("publish-to-queue"),
 		)
 		if err != nil {
 			fmt.Printf("failed to validate flags: %v\n", err)
@@ -89,6 +101,7 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			S3Url:                   s3Opts.s3url,
 			S3Bucket:                s3Opts.s3bucket,
 			S3Region:                s3Opts.region,
+			S3Path:                  s3Opts.s3path,
 			S3Item:                  s3Opts.s3item,
 			MessageProvider:         s3Opts.mp,
 			MessageProviderEndpoint: s3Opts.mpEndpoint,
@@ -108,11 +121,27 @@ $ guacone collect s3 --s3-url http://localhost:9000 --s3-bucket guac-test --poll
 			defer csubClient.Close()
 		}
 
-		initializeNATsandCollector(ctx, s3Opts.pubSubAddr, s3Opts.blobAddr)
+		initializeNATsandCollector(ctx, s3Opts.pubSubAddr, s3Opts.blobAddr, s3Opts.publishToQueue)
 	},
 }
 
-func validateS3Opts(pubSubAddr, blobAddr, graphqlEndpoint, csubAddr string, csubTls, csubTlsSkipVerify bool, s3url, s3bucket, region, s3item, mp, mpEndpoint, queues string, poll bool) (s3Options, error) {
+func validateS3Opts(
+	pubSubAddr,
+	blobAddr,
+	csubAddr,
+	s3url,
+	s3bucket,
+	s3path,
+	region,
+	s3item,
+	mp,
+	mpEndpoint,
+	queues string,
+	csubTls,
+	csubTlsSkipVerify,
+	poll bool,
+	pubToQueue bool,
+) (s3Options, error) {
 	var opts s3Options
 
 	if poll {
@@ -140,21 +169,22 @@ func validateS3Opts(pubSubAddr, blobAddr, graphqlEndpoint, csubAddr string, csub
 		blobAddr:          blobAddr,
 		s3url:             s3url,
 		s3bucket:          s3bucket,
+		s3path:            s3path,
 		s3item:            s3item,
 		region:            region,
 		queues:            queues,
 		mp:                mp,
 		mpEndpoint:        mpEndpoint,
 		poll:              poll,
-		graphqlEndpoint:   graphqlEndpoint,
 		csubClientOptions: csubClientOptions,
+		publishToQueue:    pubToQueue,
 	}
 
 	return opts, nil
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"s3-url", "s3-bucket", "s3-item", "s3-region", "s3-queues", "s3-mp", "s3-mp-endpoint"})
+	set, err := cli.BuildFlags([]string{"s3-url", "s3-bucket", "s3-path", "s3-item", "s3-region", "s3-queues", "s3-mp", "s3-mp-endpoint"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

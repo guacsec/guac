@@ -149,6 +149,20 @@ func (csu *CertifyScorecardUpdate) SetNillableCollector(s *string) *CertifyScore
 	return csu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (csu *CertifyScorecardUpdate) SetDocumentRef(s string) *CertifyScorecardUpdate {
+	csu.mutation.SetDocumentRef(s)
+	return csu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (csu *CertifyScorecardUpdate) SetNillableDocumentRef(s *string) *CertifyScorecardUpdate {
+	if s != nil {
+		csu.SetDocumentRef(*s)
+	}
+	return csu
+}
+
 // SetChecksHash sets the "checks_hash" field.
 func (csu *CertifyScorecardUpdate) SetChecksHash(s string) *CertifyScorecardUpdate {
 	csu.mutation.SetChecksHash(s)
@@ -254,6 +268,9 @@ func (csu *CertifyScorecardUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if value, ok := csu.mutation.Collector(); ok {
 		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := csu.mutation.DocumentRef(); ok {
+		_spec.SetField(certifyscorecard.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := csu.mutation.ChecksHash(); ok {
 		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)
@@ -424,6 +441,20 @@ func (csuo *CertifyScorecardUpdateOne) SetNillableCollector(s *string) *CertifyS
 	return csuo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (csuo *CertifyScorecardUpdateOne) SetDocumentRef(s string) *CertifyScorecardUpdateOne {
+	csuo.mutation.SetDocumentRef(s)
+	return csuo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (csuo *CertifyScorecardUpdateOne) SetNillableDocumentRef(s *string) *CertifyScorecardUpdateOne {
+	if s != nil {
+		csuo.SetDocumentRef(*s)
+	}
+	return csuo
+}
+
 // SetChecksHash sets the "checks_hash" field.
 func (csuo *CertifyScorecardUpdateOne) SetChecksHash(s string) *CertifyScorecardUpdateOne {
 	csuo.mutation.SetChecksHash(s)
@@ -559,6 +590,9 @@ func (csuo *CertifyScorecardUpdateOne) sqlSave(ctx context.Context) (_node *Cert
 	}
 	if value, ok := csuo.mutation.Collector(); ok {
 		_spec.SetField(certifyscorecard.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := csuo.mutation.DocumentRef(); ok {
+		_spec.SetField(certifyscorecard.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := csuo.mutation.ChecksHash(); ok {
 		_spec.SetField(certifyscorecard.FieldChecksHash, field.TypeString, value)

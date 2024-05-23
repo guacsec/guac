@@ -47,6 +47,28 @@ fragment allCertifyGoodTree on CertifyGood {
   }
   origin
   collector
+  documentRef
+}
+
+fragment allCertifyGoodPaginationTree on CertifyGoodConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query CertifyGoodPagination {
+  C(scorecardSpec: {}, first: 10) {
+    ...allCertifyScorecardPaginationTree
+  }
 }
 
 query CertifactGoodQ1 {

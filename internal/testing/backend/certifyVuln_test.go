@@ -919,6 +919,49 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					Metadata: vmd1,
 				},
 			},
+		}, {
+			Name:   "docref",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.C1},
+			InPkg:  []*model.IDorPkgInput{{PackageInput: testdata.P2}},
+			Calls: []call{
+				{
+					Pkg:  testdata.P2,
+					Vuln: testdata.C1,
+					CertifyVuln: &model.ScanMetadataInput{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+						DocumentRef:    "test",
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVuln: []*model.CertifyVuln{
+				{
+					ID:      "1",
+					Package: testdata.P2out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+					},
+					Metadata: &model.ScanMetadata{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+						DocumentRef:    "test",
+					},
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -971,14 +1014,20 @@ func TestIngestCertifyVulnerability(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.CertifyVuln(ctx, test.Query)
+			got, err := b.CertifyVulnList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpVuln, got, commonOpts); diff != "" {
+			var returnedObjects []*model.CertifyVuln
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpVuln, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -1368,6 +1417,60 @@ func TestIngestCertifyVulns(t *testing.T) {
 					Metadata: vmd1,
 				},
 			},
+		}, {
+			Name:   "HappyPath",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
+			InPkg:  []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					Pkgs:  []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P1}},
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
+					CertifyVulns: []*model.ScanMetadataInput{
+						{
+							Collector:      "test collector",
+							Origin:         "test origin",
+							ScannerVersion: "v1.0.0",
+							ScannerURI:     "test scanner uri",
+							DbVersion:      "2023.01.01",
+							DbURI:          "test db uri",
+							TimeScanned:    testdata.T1,
+						},
+						{
+							Collector:      "test collector",
+							Origin:         "test origin",
+							ScannerVersion: "v1.0.0",
+							ScannerURI:     "test scanner uri",
+							DbVersion:      "2023.01.01",
+							DbURI:          "test db uri",
+							TimeScanned:    testdata.T1,
+							DocumentRef:    "test",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyVulnSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVuln: []*model.CertifyVuln{
+				{
+					ID:      "10",
+					Package: testdata.P1out,
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
+					},
+					Metadata: &model.ScanMetadata{
+						Collector:      "test collector",
+						Origin:         "test origin",
+						ScannerVersion: "v1.0.0",
+						ScannerURI:     "test scanner uri",
+						DbVersion:      "2023.01.01",
+						DbURI:          "test db uri",
+						TimeScanned:    testdata.T1,
+						DocumentRef:    "test",
+					},
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -1392,14 +1495,20 @@ func TestIngestCertifyVulns(t *testing.T) {
 				}
 
 			}
-			got, err := b.CertifyVuln(ctx, test.Query)
+			got, err := b.CertifyVulnList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpVuln, got, commonOpts); diff != "" {
+			var returnedObjects []*model.CertifyVuln
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpVuln, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

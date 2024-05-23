@@ -13,10 +13,18 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/billofmaterials"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvex"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
@@ -123,6 +131,111 @@ func (pvc *PackageVersionCreate) AddSbom(b ...*BillOfMaterials) *PackageVersionC
 	return pvc.AddSbomIDs(ids...)
 }
 
+// AddVulnIDs adds the "vuln" edge to the CertifyVuln entity by IDs.
+func (pvc *PackageVersionCreate) AddVulnIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddVulnIDs(ids...)
+	return pvc
+}
+
+// AddVuln adds the "vuln" edges to the CertifyVuln entity.
+func (pvc *PackageVersionCreate) AddVuln(c ...*CertifyVuln) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvc.AddVulnIDs(ids...)
+}
+
+// AddVexIDs adds the "vex" edge to the CertifyVex entity by IDs.
+func (pvc *PackageVersionCreate) AddVexIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddVexIDs(ids...)
+	return pvc
+}
+
+// AddVex adds the "vex" edges to the CertifyVex entity.
+func (pvc *PackageVersionCreate) AddVex(c ...*CertifyVex) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvc.AddVexIDs(ids...)
+}
+
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (pvc *PackageVersionCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddHasSourceAtIDs(ids...)
+	return pvc
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (pvc *PackageVersionCreate) AddHasSourceAt(h ...*HasSourceAt) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvc.AddHasSourceAtIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (pvc *PackageVersionCreate) AddCertificationIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddCertificationIDs(ids...)
+	return pvc
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (pvc *PackageVersionCreate) AddCertification(c ...*Certification) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvc.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (pvc *PackageVersionCreate) AddMetadatumIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddMetadatumIDs(ids...)
+	return pvc
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (pvc *PackageVersionCreate) AddMetadata(h ...*HasMetadata) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return pvc.AddMetadatumIDs(ids...)
+}
+
+// AddDependencyIDs adds the "dependency" edge to the Dependency entity by IDs.
+func (pvc *PackageVersionCreate) AddDependencyIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddDependencyIDs(ids...)
+	return pvc
+}
+
+// AddDependency adds the "dependency" edges to the Dependency entity.
+func (pvc *PackageVersionCreate) AddDependency(d ...*Dependency) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvc.AddDependencyIDs(ids...)
+}
+
+// AddDependencySubjectIDs adds the "dependency_subject" edge to the Dependency entity by IDs.
+func (pvc *PackageVersionCreate) AddDependencySubjectIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddDependencySubjectIDs(ids...)
+	return pvc
+}
+
+// AddDependencySubject adds the "dependency_subject" edges to the Dependency entity.
+func (pvc *PackageVersionCreate) AddDependencySubject(d ...*Dependency) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return pvc.AddDependencySubjectIDs(ids...)
+}
+
 // AddIncludedInSbomIDs adds the "included_in_sboms" edge to the BillOfMaterials entity by IDs.
 func (pvc *PackageVersionCreate) AddIncludedInSbomIDs(ids ...uuid.UUID) *PackageVersionCreate {
 	pvc.mutation.AddIncludedInSbomIDs(ids...)
@@ -166,6 +279,36 @@ func (pvc *PackageVersionCreate) AddPkgEqualPkgB(p ...*PkgEqual) *PackageVersion
 		ids[i] = p[i].ID
 	}
 	return pvc.AddPkgEqualPkgBIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (pvc *PackageVersionCreate) AddPocIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddPocIDs(ids...)
+	return pvc
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (pvc *PackageVersionCreate) AddPoc(p ...*PointOfContact) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pvc.AddPocIDs(ids...)
+}
+
+// AddCertifyLegalIDs adds the "certify_legal" edge to the CertifyLegal entity by IDs.
+func (pvc *PackageVersionCreate) AddCertifyLegalIDs(ids ...uuid.UUID) *PackageVersionCreate {
+	pvc.mutation.AddCertifyLegalIDs(ids...)
+	return pvc
+}
+
+// AddCertifyLegal adds the "certify_legal" edges to the CertifyLegal entity.
+func (pvc *PackageVersionCreate) AddCertifyLegal(c ...*CertifyLegal) *PackageVersionCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pvc.AddCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the PackageVersionMutation object of the builder.
@@ -335,6 +478,118 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := pvc.mutation.VulnIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VulnTable,
+			Columns: []string{packageversion.VulnColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvuln.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.VexIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.VexTable,
+			Columns: []string{packageversion.VexColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyvex.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.HasSourceAtTable,
+			Columns: []string{packageversion.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertificationTable,
+			Columns: []string{packageversion.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.MetadataTable,
+			Columns: []string{packageversion.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.DependencyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencyTable,
+			Columns: []string{packageversion.DependencyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.DependencySubjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.DependencySubjectTable,
+			Columns: []string{packageversion.DependencySubjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dependency.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := pvc.mutation.IncludedInSbomsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -376,6 +631,38 @@ func (pvc *PackageVersionCreate) createSpec() (*PackageVersion, *sqlgraph.Create
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pkgequal.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.PocTable,
+			Columns: []string{packageversion.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pvc.mutation.CertifyLegalIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   packageversion.CertifyLegalTable,
+			Columns: []string{packageversion.CertifyLegalColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

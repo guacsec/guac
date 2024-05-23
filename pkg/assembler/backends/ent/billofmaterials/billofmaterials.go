@@ -29,6 +29,8 @@ const (
 	FieldOrigin = "origin"
 	// FieldCollector holds the string denoting the collector field in the database.
 	FieldCollector = "collector"
+	// FieldDocumentRef holds the string denoting the document_ref field in the database.
+	FieldDocumentRef = "document_ref"
 	// FieldKnownSince holds the string denoting the known_since field in the database.
 	FieldKnownSince = "known_since"
 	// FieldIncludedPackagesHash holds the string denoting the included_packages_hash field in the database.
@@ -100,6 +102,7 @@ var Columns = []string{
 	FieldDownloadLocation,
 	FieldOrigin,
 	FieldCollector,
+	FieldDocumentRef,
 	FieldKnownSince,
 	FieldIncludedPackagesHash,
 	FieldIncludedArtifactsHash,
@@ -183,6 +186,11 @@ func ByOrigin(opts ...sql.OrderTermOption) OrderOption {
 // ByCollector orders the results by the collector field.
 func ByCollector(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCollector, opts...).ToFunc()
+}
+
+// ByDocumentRef orders the results by the document_ref field.
+func ByDocumentRef(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentRef, opts...).ToFunc()
 }
 
 // ByKnownSince orders the results by the known_since field.

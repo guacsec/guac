@@ -170,6 +170,20 @@ func (clu *CertifyLegalUpdate) SetNillableCollector(s *string) *CertifyLegalUpda
 	return clu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (clu *CertifyLegalUpdate) SetDocumentRef(s string) *CertifyLegalUpdate {
+	clu.mutation.SetDocumentRef(s)
+	return clu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (clu *CertifyLegalUpdate) SetNillableDocumentRef(s *string) *CertifyLegalUpdate {
+	if s != nil {
+		clu.SetDocumentRef(*s)
+	}
+	return clu
+}
+
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
 func (clu *CertifyLegalUpdate) SetDeclaredLicensesHash(s string) *CertifyLegalUpdate {
 	clu.mutation.SetDeclaredLicensesHash(s)
@@ -353,6 +367,9 @@ func (clu *CertifyLegalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := clu.mutation.Collector(); ok {
 		_spec.SetField(certifylegal.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := clu.mutation.DocumentRef(); ok {
+		_spec.SetField(certifylegal.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := clu.mutation.DeclaredLicensesHash(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicensesHash, field.TypeString, value)
@@ -666,6 +683,20 @@ func (cluo *CertifyLegalUpdateOne) SetNillableCollector(s *string) *CertifyLegal
 	return cluo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (cluo *CertifyLegalUpdateOne) SetDocumentRef(s string) *CertifyLegalUpdateOne {
+	cluo.mutation.SetDocumentRef(s)
+	return cluo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (cluo *CertifyLegalUpdateOne) SetNillableDocumentRef(s *string) *CertifyLegalUpdateOne {
+	if s != nil {
+		cluo.SetDocumentRef(*s)
+	}
+	return cluo
+}
+
 // SetDeclaredLicensesHash sets the "declared_licenses_hash" field.
 func (cluo *CertifyLegalUpdateOne) SetDeclaredLicensesHash(s string) *CertifyLegalUpdateOne {
 	cluo.mutation.SetDeclaredLicensesHash(s)
@@ -879,6 +910,9 @@ func (cluo *CertifyLegalUpdateOne) sqlSave(ctx context.Context) (_node *CertifyL
 	}
 	if value, ok := cluo.mutation.Collector(); ok {
 		_spec.SetField(certifylegal.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := cluo.mutation.DocumentRef(); ok {
+		_spec.SetField(certifylegal.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := cluo.mutation.DeclaredLicensesHash(); ok {
 		_spec.SetField(certifylegal.FieldDeclaredLicensesHash, field.TypeString, value)

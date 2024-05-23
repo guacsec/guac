@@ -21,13 +21,15 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/guacsec/guac/pkg/logging"
+
 	"github.com/guacsec/guac/pkg/assembler"
 
 	"github.com/guacsec/guac/internal/testing/mocks"
 
-	"github.com/golang/mock/gomock"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	"go.uber.org/mock/gomock"
 )
 
 func TestParserHelper(t *testing.T) {
@@ -214,6 +216,8 @@ func Test_docTreeBuilder_parse(t *testing.T) {
 }
 
 func TestParseDocumentTree(t *testing.T) {
+	logger := logging.FromContext(context.Background())
+
 	tests := []struct {
 		name            string
 		docTree         processor.DocumentTree
@@ -229,7 +233,8 @@ func TestParseDocumentTree(t *testing.T) {
 			name: "default",
 			docTree: &processor.DocumentNode{
 				Document: &processor.Document{
-					Type: "test",
+					Type:        "test",
+					ChildLogger: logger,
 				},
 			},
 			registerDocType: "test",
@@ -240,7 +245,8 @@ func TestParseDocumentTree(t *testing.T) {
 			name: "parse error",
 			docTree: &processor.DocumentNode{
 				Document: &processor.Document{
-					Type: "invalid",
+					Type:        "invalid",
+					ChildLogger: logger,
 				},
 			},
 			registerDocType: "test",
@@ -250,7 +256,8 @@ func TestParseDocumentTree(t *testing.T) {
 			name: "get identities error",
 			docTree: &processor.DocumentNode{
 				Document: &processor.Document{
-					Type: "test",
+					Type:        "test",
+					ChildLogger: logger,
 				},
 			},
 			registerDocType:         "test",

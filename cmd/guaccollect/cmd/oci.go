@@ -42,6 +42,8 @@ type ociOptions struct {
 	blobAddr string
 	// run as poll collector
 	poll bool
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 var ociCmd = &cobra.Command{
@@ -74,6 +76,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
+			viper.GetBool("publish-to-queue"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -91,15 +94,26 @@ you have access to read and write to the respective blob store.`,
 			logger.Fatalf("unable to register oci collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
-func validateOCIFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, args []string) (ociOptions, error) {
+func validateOCIFlags(
+	pubsubAddr,
+	blobAddr,
+	csubAddr string,
+	csubTls,
+	csubTlsSkipVerify,
+	useCsub,
+	poll bool,
+	pubToQueue bool,
+	args []string,
+) (ociOptions, error) {
 	var opts ociOptions
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
+	opts.publishToQueue = pubToQueue
 
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)

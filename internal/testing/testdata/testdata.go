@@ -18,7 +18,6 @@ package testdata
 import (
 	_ "embed"
 	"encoding/base64"
-	"fmt"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -111,6 +110,9 @@ var (
 	//go:embed exampledata/cyclonedx-vex-affected.json
 	CycloneDXVEXAffected []byte
 
+	//go:embed exampledata/cyclonedx-vex-no-analysis.json
+	CycloneDXVEXWithoutAnalysis []byte
+
 	//go:embed exampledata/cyclonedx-vex.xml
 	CyloneDXVEXExampleXML []byte
 
@@ -186,8 +188,8 @@ var (
 			VexData: &generated.VexStatementInputSpec{
 				Status:           generated.VexStatusNotAffected,
 				VexJustification: generated.VexJustificationVulnerableCodeNotInExecutePath,
-				Statement:        "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly.",
-				StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusNotAffected, generated.VexJustificationVulnerableCodeNotInExecutePath),
+				Statement:        "com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.\n\nAffected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.",
+				StatusNotes:      "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly.",
 				KnownSince:       parseUTCTime("2020-12-03T00:00:00.000Z"),
 			},
 		},
@@ -231,11 +233,28 @@ var (
 	VexDataAffected = &generated.VexStatementInputSpec{
 		Status:           generated.VexStatusAffected,
 		VexJustification: generated.VexJustificationNotProvided,
-		Statement:        "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
-		StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusAffected, generated.VexJustificationNotProvided),
+		Statement:        "",
+		StatusNotes:      "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
+		KnownSince:       time.Unix(0, 0),
+	}
+	VexDataNoAnalysis = &generated.VexStatementInputSpec{
+		Status:           generated.VexStatusAffected,
+		VexJustification: generated.VexJustificationNotProvided,
+		Statement:        "com.fasterxml.jackson.core:jackson-databind is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.\n\nAffected versions of this package are vulnerable to XML External Entity (XXE) Injection. A flaw was found in FasterXML Jackson Databind, where it does not have entity expansion secured properly in the DOMDeserializer class. The highest threat from this vulnerability is data integrity.",
+		StatusNotes:      "",
 		KnownSince:       time.Unix(0, 0),
 	}
 	CycloneDXAffectedVulnMetadata = []assembler.VulnMetadataIngest{
+		{
+			Vulnerability: VulnSpecAffected,
+			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
+				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
+				ScoreValue: 10,
+				Timestamp:  time.Unix(0, 0),
+			},
+		},
+	}
+	CycloneDXNoAnalysisVulnMetadata = []assembler.VulnMetadataIngest{
 		{
 			Vulnerability: VulnSpecAffected,
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
@@ -253,6 +272,16 @@ var (
 			HasSBOM: &model.HasSBOMInputSpec{
 				Algorithm:  "sha256",
 				Digest:     "eb62836ed6339a2d57f66d2e42509718fd480a1befea83f925e918444c369114",
+				KnownSince: parseRfc3339("2022-03-03T00:00:00Z"),
+			},
+		},
+	}
+	HasSBOMVexNoAnalysis = []assembler.HasSBOMIngest{
+		{
+			Pkg: topLevelPkg,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Algorithm:  "sha256",
+				Digest:     "265c99f1f9a09b7fc10c14c97ca1a07fc52ae470f5cbcddd9baf5585fb28221c",
 				KnownSince: parseRfc3339("2022-03-03T00:00:00Z"),
 			},
 		},
@@ -1070,7 +1099,10 @@ var (
 
 	CdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
 		{
-			Pkg: cdxTopQuarkusPack,
+			Artifact: &model.ArtifactInputSpec{
+				Algorithm: "sha3-512",
+				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
+			},
 			HasSBOM: &model.HasSBOMInputSpec{
 				Uri:              "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
 				Algorithm:        "sha256",
@@ -1378,7 +1410,12 @@ var (
 			"scanner": {
 				"uri": "osv.dev",
 				"version": "0.0.14",
-				"db": {}
+				"db": {},
+				"result": [
+					{
+						"vulnerability_id": "GHSA-9ph3-v2vh-3qx7"
+					}
+				]
 			},
 			"metadata": {
 				"scannedOn": "2023-02-15T11:10:08.986506-08:00"

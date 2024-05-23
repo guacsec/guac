@@ -42,6 +42,8 @@ type HasMetadata struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the HasMetadataQuery when eager-loading is set.
 	Edges        HasMetadataEdges `json:"edges"`
@@ -124,7 +126,7 @@ func (*HasMetadata) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case hasmetadata.FieldSourceID, hasmetadata.FieldPackageVersionID, hasmetadata.FieldPackageNameID, hasmetadata.FieldArtifactID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case hasmetadata.FieldKey, hasmetadata.FieldValue, hasmetadata.FieldJustification, hasmetadata.FieldOrigin, hasmetadata.FieldCollector:
+		case hasmetadata.FieldKey, hasmetadata.FieldValue, hasmetadata.FieldJustification, hasmetadata.FieldOrigin, hasmetadata.FieldCollector, hasmetadata.FieldDocumentRef:
 			values[i] = new(sql.NullString)
 		case hasmetadata.FieldTimestamp:
 			values[i] = new(sql.NullTime)
@@ -214,6 +216,12 @@ func (hm *HasMetadata) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				hm.Collector = value.String
+			}
+		case hasmetadata.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				hm.DocumentRef = value.String
 			}
 		default:
 			hm.selectValues.Set(columns[i], values[i])
@@ -308,6 +316,9 @@ func (hm *HasMetadata) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(hm.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(hm.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

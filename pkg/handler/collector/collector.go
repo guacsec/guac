@@ -25,6 +25,7 @@ import (
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 	jsoniter "github.com/json-iterator/go"
+	"go.uber.org/zap"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -72,6 +73,12 @@ func RegisterDocumentCollector(c Collector, collectorType string) error {
 	return nil
 }
 
+func AddChildLogger(logger *zap.SugaredLogger, d *processor.Document) {
+	key := events.GetKey(d.Blob)
+	childLogger := logger.With(zap.String(logging.DocumentHash, key))
+	d.ChildLogger = childLogger
+}
+
 // Collect takes all the collectors and starts collecting artifacts
 // after Collect is called, no calls to RegisterDocumentCollector should happen.
 func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
@@ -94,8 +101,11 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	for collectorsDone < numCollectors {
 		select {
 		case d := <-docChan:
+			AddChildLogger(logger, d)
+			logger.Debugf("starting up the child logger: %+v", d.SourceInformation.Source)
+
 			if err := emitter(d); err != nil {
-				logger.Errorf("emit error: %v", err)
+				d.ChildLogger.Errorf("emit error: %v", err)
 			}
 		case err := <-errChan:
 			if !handleErr(err) {
@@ -108,8 +118,10 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 	}
 	for len(docChan) > 0 {
 		d := <-docChan
+		AddChildLogger(logger, d)
+		logger.Debugf("starting up the child logger: %+v", d.SourceInformation.Source)
 		if err := emitter(d); err != nil {
-			logger.Errorf("emit error: %v", err)
+			d.ChildLogger.Errorf("emit error: %v", err)
 		}
 	}
 	return nil
@@ -119,36 +131,45 @@ func Collect(ctx context.Context, emitter Emitter, handleErr ErrHandler) error {
 // retrieval by the processor/ingestor. A CDEvent is created to transmit the key (which is the
 // sha256 of the collected "document"). This also fixes the issues where the "document" was too large
 // to be sent across the event stream.
-func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
-	logger := logging.FromContext(ctx)
+func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub, pubToQueue bool) error {
+	logger := d.ChildLogger
 
 	docByte, err := json.Marshal(d)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document: %w", err)
 	}
+	logger.Infof("Successfully marshaled document.")
 
 	key := events.GetKey(d.Blob)
 
 	if err = blobStore.Write(ctx, key, docByte); err != nil {
 		return fmt.Errorf("failed write document to blob store: %w", err)
 	}
+	logger.Infof("Successfully wrote document to blob store: %+v", d.SourceInformation.Source)
+
+	if !pubToQueue {
+		logger.Infof("Publish to queue flag is set to false, skipping cdEvent creation and publish to queue")
+		return nil
+	}
 
 	cdEvent, err := events.CreateArtifactPubEvent(ctx, key)
 	if err != nil {
 		return fmt.Errorf("failed create an event: %w", err)
 	}
+	logger.Infof("Successfully created an event.")
 
 	keyByte, err := json.Marshal(cdEvent)
 	if err != nil {
 		return fmt.Errorf("failed marshal of document key: %w", err)
 	}
+	logger.Infof("Successfully marshaled document key.")
 
 	if err := pubsub.Publish(ctx, keyByte); err != nil {
-		if err != nil {
-			return fmt.Errorf("failed to publish event with error: %w", err)
-		}
+		return fmt.Errorf("failed to publish event with error: %w", err)
 	}
+	logger.Infof("Successfully published event.")
 
-	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
+	logger.Infof("doc published: %+v", d.SourceInformation.Source)
+
 	return nil
 }

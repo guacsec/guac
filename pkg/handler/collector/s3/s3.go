@@ -21,6 +21,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/bucket"
 	"github.com/guacsec/guac/pkg/handler/collector/s3/messaging"
 	"github.com/guacsec/guac/pkg/handler/processor"
@@ -40,6 +41,7 @@ type S3CollectorConfig struct {
 	MessageProviderEndpoint string                           // optional if using the sqs message provider
 	S3Url                   string                           // optional (uses aws sdk defaults)
 	S3Bucket                string                           // bucket name to collect from
+	S3Path                  string                           // optional (only for non-polling) s3 folder path to collect from
 	S3Item                  string                           // optional (only for non-polling behaviour)
 	S3Region                string                           // optional (defaults to us-east-1, assumes same region for s3 and sqs)
 	Queues                  string                           // optional (comma-separated list of queues/topics)
@@ -89,8 +91,9 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 			Format:   processor.FormatUnknown,
 			Encoding: bucket.ExtractEncoding(enc, item),
 			SourceInformation: processor.SourceInformation{
-				Collector: S3CollectorType,
-				Source:    "S3",
+				Collector:   S3CollectorType,
+				Source:      item,
+				DocumentRef: events.GetDocRef(blob),
 			},
 		}
 		docChannel <- doc
@@ -98,7 +101,7 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 		var token *string
 		const MaxKeys = 100
 		for {
-			files, t, err := downloader.ListFiles(ctx, s.config.S3Bucket, token, MaxKeys)
+			files, t, err := downloader.ListFiles(ctx, s.config.S3Bucket, s.config.S3Path, token, MaxKeys)
 			if err != nil {
 				logger.Errorf("could not list files %v: %v", item, err)
 				return err
@@ -124,8 +127,9 @@ func retrieve(s S3Collector, ctx context.Context, docChannel chan<- *processor.D
 					Format:   processor.FormatUnknown,
 					Encoding: bucket.ExtractEncoding(enc, item),
 					SourceInformation: processor.SourceInformation{
-						Collector: S3CollectorType,
-						Source:    "S3",
+						Collector:   S3CollectorType,
+						Source:      item,
+						DocumentRef: events.GetDocRef(blob),
 					},
 				}
 				docChannel <- doc
@@ -214,8 +218,9 @@ func retrieveWithPoll(s S3Collector, ctx context.Context, docChannel chan<- *pro
 						Format:   processor.FormatUnknown,
 						Encoding: bucket.ExtractEncoding(enc, item),
 						SourceInformation: processor.SourceInformation{
-							Collector: S3CollectorType,
-							Source:    "S3",
+							Collector:   S3CollectorType,
+							Source:      item,
+							DocumentRef: events.GetDocRef(blob),
 						},
 					}
 					select {
@@ -240,9 +245,6 @@ func getMessageProvider(s S3Collector, queue string) (messaging.MessageProvider,
 		mpBuilder = s.config.MpBuilder
 	} else {
 		mpBuilder = messaging.GetDefaultMessageProviderBuilder()
-		if err != nil {
-			return nil, fmt.Errorf("error getting message provider: %w", err)
-		}
 	}
 
 	mp, err := mpBuilder.GetMessageProvider(messaging.MessageProviderConfig{

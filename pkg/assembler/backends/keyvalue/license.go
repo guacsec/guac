@@ -18,6 +18,8 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -156,6 +158,113 @@ func (c *demoClient) licenseExact(ctx context.Context, licenseSpec *model.Licens
 }
 
 // Query Licenses
+
+func (c *demoClient) LicenseList(ctx context.Context, licenseSpec model.LicenseSpec, after *string, first *int) (*model.LicenseConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+	a, err := c.licenseExact(ctx, &licenseSpec)
+	if err != nil {
+		return nil, gqlerror.Errorf("Licenses :: invalid spec %s", err)
+	}
+	if a != nil {
+		license := c.convLicense(a)
+		return &model.LicenseConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(license.ID),
+				EndCursor:   ptrfrom.String(license.ID),
+			},
+			Edges: []*model.LicenseEdge{
+				{
+					Cursor: license.ID,
+					Node:   license,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.LicenseEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+
+	var done bool
+	scn := c.kv.Keys(licenseCol)
+	currentPage := false
+
+	// If no cursor present start from the top
+	if after == nil {
+		currentPage = true
+	}
+
+	for !done {
+		var lKeys []string
+		lKeys, done, err = scn.Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		sort.Strings(lKeys)
+		totalCount = len(lKeys)
+
+		for i, lk := range lKeys {
+			l, err := byKeykv[*licStruct](ctx, licenseCol, lk, c)
+			if err != nil {
+				return nil, err
+			}
+			if noMatch(licenseSpec.Name, l.Name) ||
+				noMatch(licenseSpec.ListVersion, l.ListVersion) ||
+				noMatch(licenseSpec.Inline, l.Inline) {
+				continue
+			}
+
+			license := c.convLicense(l)
+
+			if license == nil {
+				continue
+			}
+
+			if after != nil && !currentPage {
+				if license.ID == *after {
+					totalCount = len(lKeys) - (i + 1)
+					currentPage = true
+				}
+				continue
+			}
+
+			if first != nil {
+				if numNodes < *first {
+					edges = append(edges, &model.LicenseEdge{
+						Cursor: license.ID,
+						Node:   license,
+					})
+					numNodes++
+				} else if numNodes == *first {
+					hasNextPage = true
+				}
+			} else {
+				edges = append(edges, &model.LicenseEdge{
+					Cursor: license.ID,
+					Node:   license,
+				})
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.LicenseConnection{
+			TotalCount: totalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
 
 func (c *demoClient) Licenses(ctx context.Context, licenseSpec *model.LicenseSpec) ([]*model.License, error) {
 	c.m.RLock()

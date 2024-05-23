@@ -63,53 +63,93 @@ func addMetadata(predicates *assembler.IngestPredicates, foundIdentities []Trust
 	// and added here.
 	_ = foundIdentities
 
+	for _, v := range predicates.CertifyBad {
+		v.CertifyBad.Collector = srcInfo.Collector
+		v.CertifyBad.Origin = srcInfo.Source
+		v.CertifyBad.DocumentRef = srcInfo.DocumentRef
+	}
+
+	for _, v := range predicates.CertifyGood {
+		v.CertifyGood.Collector = srcInfo.Collector
+		v.CertifyGood.Origin = srcInfo.Source
+		v.CertifyGood.DocumentRef = srcInfo.DocumentRef
+	}
+
+	for _, v := range predicates.CertifyLegal {
+		v.CertifyLegal.Collector = srcInfo.Collector
+		v.CertifyLegal.Origin = srcInfo.Source
+		v.CertifyLegal.DocumentRef = srcInfo.DocumentRef
+	}
+
+	for _, v := range predicates.HashEqual {
+		v.HashEqual.Collector = srcInfo.Collector
+		v.HashEqual.Origin = srcInfo.Source
+		v.HashEqual.DocumentRef = srcInfo.DocumentRef
+	}
+
+	for _, v := range predicates.PkgEqual {
+		v.PkgEqual.Collector = srcInfo.Collector
+		v.PkgEqual.Origin = srcInfo.Source
+		v.PkgEqual.DocumentRef = srcInfo.DocumentRef
+	}
+
 	for _, v := range predicates.CertifyScorecard {
 		v.Scorecard.Collector = srcInfo.Collector
 		v.Scorecard.Origin = srcInfo.Source
+		v.Scorecard.DocumentRef = srcInfo.DocumentRef
 	}
 
 	for _, v := range predicates.IsDependency {
 		v.IsDependency.Collector = srcInfo.Collector
 		v.IsDependency.Origin = srcInfo.Source
+		v.IsDependency.DocumentRef = srcInfo.DocumentRef
 	}
 
 	for _, v := range predicates.IsOccurrence {
 		v.IsOccurrence.Collector = srcInfo.Collector
 		v.IsOccurrence.Origin = srcInfo.Source
+		v.IsOccurrence.DocumentRef = srcInfo.DocumentRef
 	}
 
 	for _, v := range predicates.HasSlsa {
 		v.HasSlsa.Collector = srcInfo.Collector
 		v.HasSlsa.Origin = srcInfo.Source
+		v.HasSlsa.DocumentRef = srcInfo.DocumentRef
 	}
 
 	for _, v := range predicates.HasSBOM {
 		v.HasSBOM.Collector = srcInfo.Collector
 		v.HasSBOM.Origin = srcInfo.Source
+		v.HasSBOM.DocumentRef = srcInfo.DocumentRef
 	}
 
 	for _, v := range predicates.CertifyVuln {
 		v.VulnData.Collector = srcInfo.Collector
 		v.VulnData.Origin = srcInfo.Source
+		v.VulnData.DocumentRef = srcInfo.DocumentRef
 	}
 
 	for _, v := range predicates.VulnEqual {
 		v.VulnEqual.Collector = srcInfo.Collector
 		v.VulnEqual.Origin = srcInfo.Source
+		v.VulnEqual.DocumentRef = srcInfo.DocumentRef
 	}
 
 	for _, v := range predicates.HasSourceAt {
 		v.HasSourceAt.Collector = srcInfo.Collector
 		v.HasSourceAt.Origin = srcInfo.Source
+		v.HasSourceAt.DocumentRef = srcInfo.DocumentRef
 	}
 
 	for _, v := range predicates.VulnMetadata {
 		v.VulnMetadata.Collector = srcInfo.Collector
 		v.VulnMetadata.Origin = srcInfo.Source
+		v.VulnMetadata.DocumentRef = srcInfo.DocumentRef
 	}
 
 	for _, v := range predicates.Vex {
 		v.VexData.Collector = srcInfo.Collector
 		v.VexData.Origin = srcInfo.Source
+		v.VexData.DocumentRef = srcInfo.DocumentRef
 	}
 }

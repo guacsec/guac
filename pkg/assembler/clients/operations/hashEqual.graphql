@@ -15,6 +15,12 @@
 
 # NOTE: This is experimental and might change in the future!
 
+query HashEquals($filter: HashEqualSpec!) {
+  HashEqual(hashEqualSpec: $filter) {
+    ...AllHashEqualTree
+  }
+}
+
 # Defines the GraphQL operations to certify that two artifacts are identical
 
 mutation IngestHashEqual(

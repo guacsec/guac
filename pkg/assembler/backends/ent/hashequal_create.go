@@ -54,6 +54,12 @@ func (hec *HashEqualCreate) SetJustification(s string) *HashEqualCreate {
 	return hec
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (hec *HashEqualCreate) SetDocumentRef(s string) *HashEqualCreate {
+	hec.mutation.SetDocumentRef(s)
+	return hec
+}
+
 // SetArtifactsHash sets the "artifacts_hash" field.
 func (hec *HashEqualCreate) SetArtifactsHash(s string) *HashEqualCreate {
 	hec.mutation.SetArtifactsHash(s)
@@ -154,6 +160,9 @@ func (hec *HashEqualCreate) check() error {
 	if _, ok := hec.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "HashEqual.justification"`)}
 	}
+	if _, ok := hec.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "HashEqual.document_ref"`)}
+	}
 	if _, ok := hec.mutation.ArtifactsHash(); !ok {
 		return &ValidationError{Name: "artifacts_hash", err: errors.New(`ent: missing required field "HashEqual.artifacts_hash"`)}
 	}
@@ -210,6 +219,10 @@ func (hec *HashEqualCreate) createSpec() (*HashEqual, *sqlgraph.CreateSpec) {
 	if value, ok := hec.mutation.Justification(); ok {
 		_spec.SetField(hashequal.FieldJustification, field.TypeString, value)
 		_node.Justification = value
+	}
+	if value, ok := hec.mutation.DocumentRef(); ok {
+		_spec.SetField(hashequal.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if value, ok := hec.mutation.ArtifactsHash(); ok {
 		_spec.SetField(hashequal.FieldArtifactsHash, field.TypeString, value)
@@ -361,6 +374,18 @@ func (u *HashEqualUpsert) UpdateJustification() *HashEqualUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *HashEqualUpsert) SetDocumentRef(v string) *HashEqualUpsert {
+	u.Set(hashequal.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *HashEqualUpsert) UpdateDocumentRef() *HashEqualUpsert {
+	u.SetExcluded(hashequal.FieldDocumentRef)
+	return u
+}
+
 // SetArtifactsHash sets the "artifacts_hash" field.
 func (u *HashEqualUpsert) SetArtifactsHash(v string) *HashEqualUpsert {
 	u.Set(hashequal.FieldArtifactsHash, v)
@@ -488,6 +513,20 @@ func (u *HashEqualUpsertOne) SetJustification(v string) *HashEqualUpsertOne {
 func (u *HashEqualUpsertOne) UpdateJustification() *HashEqualUpsertOne {
 	return u.Update(func(s *HashEqualUpsert) {
 		s.UpdateJustification()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *HashEqualUpsertOne) SetDocumentRef(v string) *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *HashEqualUpsertOne) UpdateDocumentRef() *HashEqualUpsertOne {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -787,6 +826,20 @@ func (u *HashEqualUpsertBulk) SetJustification(v string) *HashEqualUpsertBulk {
 func (u *HashEqualUpsertBulk) UpdateJustification() *HashEqualUpsertBulk {
 	return u.Update(func(s *HashEqualUpsert) {
 		s.UpdateJustification()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *HashEqualUpsertBulk) SetDocumentRef(v string) *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *HashEqualUpsertBulk) UpdateDocumentRef() *HashEqualUpsertBulk {
+	return u.Update(func(s *HashEqualUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

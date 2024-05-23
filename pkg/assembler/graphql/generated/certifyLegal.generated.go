@@ -501,6 +501,292 @@ func (ec *executionContext) fieldContext_CertifyLegal_collector(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _CertifyLegal_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.CertifyLegal) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyLegal_documentRef(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DocumentRef, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyLegal_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyLegal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyLegalConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.CertifyLegalConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyLegalConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyLegalConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyLegalConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyLegalConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.CertifyLegalConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyLegalConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyLegalConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyLegalConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyLegalConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.CertifyLegalConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyLegalConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CertifyLegalEdge)
+	fc.Result = res
+	return ec.marshalNCertifyLegalEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyLegalConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyLegalConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_CertifyLegalEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_CertifyLegalEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyLegalEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyLegalEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.CertifyLegalEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyLegalEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyLegalEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyLegalEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyLegalEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.CertifyLegalEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyLegalEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyLegal)
+	fc.Result = res
+	return ec.marshalNCertifyLegal2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegal(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyLegalEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyLegalEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyLegal_id(ctx, field)
+			case "subject":
+				return ec.fieldContext_CertifyLegal_subject(ctx, field)
+			case "declaredLicense":
+				return ec.fieldContext_CertifyLegal_declaredLicense(ctx, field)
+			case "declaredLicenses":
+				return ec.fieldContext_CertifyLegal_declaredLicenses(ctx, field)
+			case "discoveredLicense":
+				return ec.fieldContext_CertifyLegal_discoveredLicense(ctx, field)
+			case "discoveredLicenses":
+				return ec.fieldContext_CertifyLegal_discoveredLicenses(ctx, field)
+			case "attribution":
+				return ec.fieldContext_CertifyLegal_attribution(ctx, field)
+			case "justification":
+				return ec.fieldContext_CertifyLegal_justification(ctx, field)
+			case "timeScanned":
+				return ec.fieldContext_CertifyLegal_timeScanned(ctx, field)
+			case "origin":
+				return ec.fieldContext_CertifyLegal_origin(ctx, field)
+			case "collector":
+				return ec.fieldContext_CertifyLegal_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyLegal_documentRef(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -512,7 +798,7 @@ func (ec *executionContext) unmarshalInputCertifyLegalInputSpec(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"declaredLicense", "discoveredLicense", "attribution", "justification", "timeScanned", "origin", "collector"}
+	fieldsInOrder := [...]string{"declaredLicense", "discoveredLicense", "attribution", "justification", "timeScanned", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -568,6 +854,13 @@ func (ec *executionContext) unmarshalInputCertifyLegalInputSpec(ctx context.Cont
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -581,7 +874,7 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "subject", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "subject", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -665,6 +958,13 @@ func (ec *executionContext) unmarshalInputCertifyLegalSpec(ctx context.Context, 
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -742,6 +1042,104 @@ func (ec *executionContext) _CertifyLegal(ctx context.Context, sel ast.Selection
 			}
 		case "collector":
 			out.Values[i] = ec._CertifyLegal_collector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "documentRef":
+			out.Values[i] = ec._CertifyLegal_documentRef(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var certifyLegalConnectionImplementors = []string{"CertifyLegalConnection"}
+
+func (ec *executionContext) _CertifyLegalConnection(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyLegalConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, certifyLegalConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CertifyLegalConnection")
+		case "totalCount":
+			out.Values[i] = ec._CertifyLegalConnection_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._CertifyLegalConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "edges":
+			out.Values[i] = ec._CertifyLegalConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var certifyLegalEdgeImplementors = []string{"CertifyLegalEdge"}
+
+func (ec *executionContext) _CertifyLegalEdge(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyLegalEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, certifyLegalEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CertifyLegalEdge")
+		case "cursor":
+			out.Values[i] = ec._CertifyLegalEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "node":
+			out.Values[i] = ec._CertifyLegalEdge_node(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -826,6 +1224,60 @@ func (ec *executionContext) marshalNCertifyLegal2ᚖgithubᚗcomᚋguacsecᚋgua
 	return ec._CertifyLegal(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNCertifyLegalEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyLegalEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCertifyLegalEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNCertifyLegalEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalEdge(ctx context.Context, sel ast.SelectionSet, v *model.CertifyLegalEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CertifyLegalEdge(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNCertifyLegalInputSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalInputSpec(ctx context.Context, v interface{}) (model.CertifyLegalInputSpec, error) {
 	res, err := ec.unmarshalInputCertifyLegalInputSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -856,6 +1308,13 @@ func (ec *executionContext) unmarshalNCertifyLegalInputSpec2ᚖgithubᚗcomᚋgu
 func (ec *executionContext) unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx context.Context, v interface{}) (model.CertifyLegalSpec, error) {
 	res, err := ec.unmarshalInputCertifyLegalSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOCertifyLegalConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalConnection(ctx context.Context, sel ast.SelectionSet, v *model.CertifyLegalConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CertifyLegalConnection(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

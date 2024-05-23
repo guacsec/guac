@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -61,8 +62,9 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollector),
-				Source:    "file:///testdata/hello",
+				Collector:   string(FileCollector),
+				Source:      "file:///testdata/hello",
+				DocumentRef: events.GetDocRef([]byte("hello\n")),
 			}},
 		},
 		wantErr: false,
@@ -79,8 +81,9 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollector),
-				Source:    "file:///testdata/hello",
+				Collector:   string(FileCollector),
+				Source:      "file:///testdata/hello",
+				DocumentRef: events.GetDocRef([]byte("hello\n")),
 			}},
 		},
 		wantErr: true,
@@ -126,7 +129,7 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 				t.Fatalf("Collector error handler error: %v", err)
 			}
 
-			if !reflect.DeepEqual(s, tt.want) {
+			if !checkWhileIgnoringLogger(s, tt.want) {
 				t.Errorf("fileCollector.RetrieveArtifacts() = %v, want %v", s, tt.want)
 			}
 			if f.Type() != FileCollector {
@@ -134,4 +137,26 @@ func Test_fileCollector_RetrieveArtifacts(t *testing.T) {
 			}
 		})
 	}
+}
+
+// checkWhileIgnoringLogger works like a regular reflect.DeepEqual(), but ignores the loggers.
+func checkWhileIgnoringLogger(collectedDoc, want []*processor.Document) bool {
+	if len(collectedDoc) != len(want) {
+		return false
+	}
+
+	for i := 0; i < len(collectedDoc); i++ {
+		// Store the loggers, and then set the loggers to nil so that can ignore them.
+		a, b := collectedDoc[i].ChildLogger, want[i].ChildLogger
+		collectedDoc[i].ChildLogger, want[i].ChildLogger = nil, nil
+
+		if !reflect.DeepEqual(collectedDoc[i], want[i]) {
+			return false
+		}
+
+		// Re-assign the loggers so that they remain the same
+		collectedDoc[i].ChildLogger, want[i].ChildLogger = a, b
+	}
+
+	return true
 }

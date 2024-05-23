@@ -49,10 +49,17 @@ func DocTreeEqual(a, b processor.DocumentTree) bool {
 		return false
 	}
 
+	// we use this so that we don't check the logger when using reflect.DeepEqual
+	aLogger, bLogger := a.Document.ChildLogger, b.Document.ChildLogger
+
+	a.Document.ChildLogger, b.Document.ChildLogger = nil, nil
+
 	// check if a and b Docuemnts are equal
 	if !docEqual(a.Document, b.Document) {
 		return false
 	}
+
+	a.Document.ChildLogger, b.Document.ChildLogger = aLogger, bLogger
 
 	// check if len of children are equal
 	if len(a.Children) != len(b.Children) {
@@ -73,7 +80,7 @@ func DocTreeEqual(a, b processor.DocumentTree) bool {
 		}
 	}
 
-	return true
+	return reflect.DeepEqual(a.Document.SourceInformation, b.Document.SourceInformation)
 }
 
 // ConsistentJsonBytes makes sure that the blob byte comparison

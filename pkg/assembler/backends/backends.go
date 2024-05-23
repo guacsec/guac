@@ -33,6 +33,32 @@ type Backend interface {
 	Sources(ctx context.Context, sourceSpec *model.SourceSpec) ([]*model.Source, error)
 	Vulnerabilities(ctx context.Context, vulnSpec *model.VulnerabilitySpec) ([]*model.Vulnerability, error)
 
+	// Paginated Retrieval read-only queries for software trees
+	ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error)
+	BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error)
+	LicenseList(ctx context.Context, licenseSpec model.LicenseSpec, after *string, first *int) (*model.LicenseConnection, error)
+	PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error)
+	SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error)
+	VulnerabilityList(ctx context.Context, vulnSpec model.VulnerabilitySpec, after *string, first *int) (*model.VulnerabilityConnection, error)
+
+	CertifyBadList(ctx context.Context, certifyBadSpec model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error)
+	CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error)
+	CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error)
+	ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error)
+	CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error)
+	CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error)
+	PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error)
+	HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error)
+	HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error)
+	HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error)
+	HasSourceAtList(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error)
+	IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error)
+	IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error)
+	HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error)
+	PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error)
+	VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error)
+	VulnerabilityMetadataList(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) (*model.VulnerabilityMetadataConnection, error)
+
 	// Retrieval read-only queries for evidence trees
 	CertifyBad(ctx context.Context, certifyBadSpec *model.CertifyBadSpec) ([]*model.CertifyBad, error)
 	CertifyGood(ctx context.Context, certifyGoodSpec *model.CertifyGoodSpec) ([]*model.CertifyGood, error)
@@ -104,12 +130,14 @@ type Backend interface {
 
 	// Topological queries: queries where node connectivity matters more than node type
 	Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error)
+	NeighborsList(ctx context.Context, node string, usingOnly []model.Edge, after *string, first *int) (*model.NeighborConnection, error)
 	Node(ctx context.Context, node string) (model.Node, error)
 	Nodes(ctx context.Context, nodes []string) ([]model.Node, error)
 	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
 
 	// Search queries: queries to help find data in GUAC based on text search
 	FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error)
+	FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error)
 }
 
 // BackendArgs interface allows each backend to specify the arguments needed to

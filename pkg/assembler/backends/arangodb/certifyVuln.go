@@ -34,6 +34,10 @@ const (
 	scannerVersionStr string = "scannerVersion"
 )
 
+func (c *arangoClient) CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyVulnList")
+}
+
 func (c *arangoClient) CertifyVuln(ctx context.Context, certifyVulnSpec *model.CertifyVulnSpec) ([]*model.CertifyVuln, error) {
 
 	if certifyVulnSpec != nil && certifyVulnSpec.ID != nil {
@@ -95,7 +99,8 @@ func getPkgCertifyVulnForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'scannerUri': certifyVuln.scannerUri,
 		'scannerVersion': certifyVuln.scannerVersion,
 		'collector': certifyVuln.collector,
-		'origin': certifyVuln.origin
+		'origin': certifyVuln.origin,
+		'documentRef': certifyVuln.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "CertifyVuln")
@@ -139,6 +144,10 @@ func setCertifyVulnMatchValues(arangoQueryBuilder *arangoQueryBuilder, certifyVu
 	if certifyVulnSpec.Collector != nil {
 		arangoQueryBuilder.filter("certifyVuln", collector, "==", "@"+collector)
 		queryValues[collector] = *certifyVulnSpec.Collector
+	}
+	if certifyVulnSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("certifyVuln", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *certifyVulnSpec.DocumentRef
 	}
 	if certifyVulnSpec.Vulnerability != nil {
 
@@ -186,6 +195,7 @@ func getCertifyVulnQueryValues(pkg *model.PkgInputSpec, vulnerability *model.Vul
 	values[scannerVersionStr] = certifyVuln.ScannerVersion
 	values[origin] = certifyVuln.Origin
 	values[collector] = certifyVuln.Collector
+	values[docRef] = certifyVuln.DocumentRef
 
 	return values
 }
@@ -239,8 +249,8 @@ func (c *arangoClient) IngestCertifyVulns(ctx context.Context, pkgs []*model.IDo
 		)
 		  
 		  LET certifyVuln = FIRST(
-			  UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
-				  INSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin } 
+			  UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				  INSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:doc.timeScanned, dbUri:doc.dbUri, dbVersion:doc.dbVersion, scannerUri:doc.scannerUri, scannerVersion:doc.scannerVersion, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				  UPDATE {} IN certifyVulns
 				RETURN {
 					'_id': NEW._id,
@@ -295,8 +305,8 @@ func (c *arangoClient) IngestCertifyVuln(ctx context.Context, pkg model.IDorPkgI
 		)
 		  
 		  LET certifyVuln = FIRST(
-			  UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
-				  INSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin } 
+			  UPSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				  INSERT { packageID:firstPkg.version_id, vulnerabilityID:firstVuln.vuln_id, timeScanned:@timeScanned, dbUri:@dbUri, dbVersion:@dbVersion, scannerUri:@scannerUri, scannerVersion:@scannerVersion, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				  UPDATE {} IN certifyVulns
 				  RETURN {
 					'_id': NEW._id,
@@ -339,6 +349,7 @@ func geCertifyVulnFromCursor(ctx context.Context, cursor driver.Cursor, ingestio
 		ScannerVersion string        `json:"scannerVersion"`
 		Collector      string        `json:"collector"`
 		Origin         string        `json:"origin"`
+		DocumentRef    string        `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -368,6 +379,7 @@ func geCertifyVulnFromCursor(ctx context.Context, cursor driver.Cursor, ingestio
 				ScannerVersion: createdValue.ScannerVersion,
 				Origin:         createdValue.Origin,
 				Collector:      createdValue.Collector,
+				DocumentRef:    createdValue.DocumentRef,
 			},
 		}
 		if createdValue.PkgVersion != nil {
@@ -451,6 +463,7 @@ func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *mod
 		ScannerVersion  string    `json:"scannerVersion"`
 		Collector       string    `json:"collector"`
 		Origin          string    `json:"origin"`
+		DocumentRef     string    `json:"documentRef"`
 	}
 
 	var collectedValues []dbVuln
@@ -482,6 +495,7 @@ func (c *arangoClient) queryCertifyVulnNodeByID(ctx context.Context, filter *mod
 			ScannerVersion: collectedValues[0].ScannerVersion,
 			Origin:         collectedValues[0].Origin,
 			Collector:      collectedValues[0].Collector,
+			DocumentRef:    collectedValues[0].DocumentRef,
 		},
 	}
 

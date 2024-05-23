@@ -204,9 +204,38 @@ input IDorPkgInput {
   packageInput: PkgInputSpec
 }
 
+"""
+PackageConnection returns the paginated results for Package.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the PackageEdge which contains the current cursor
+and the Package node itself
+"""
+type PackageConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [PackageEdge!]!
+}
+
+"""
+PackageEdge contains the cursor for the resulting node and
+the Package node itself.
+"""
+type PackageEdge {
+  cursor: ID!
+  node: Package!
+}
+
 extend type Query {
   "Returns all packages matching a filter."
   packages(pkgSpec: PkgSpec!): [Package!]!
+  "Returns a paginated results via PackageConnection"
+  packagesList(pkgSpec: PkgSpec!, after: ID, first: Int): PackageConnection
 }
 
 extend type Mutation {

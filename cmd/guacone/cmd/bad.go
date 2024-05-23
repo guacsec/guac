@@ -35,6 +35,7 @@ import (
 type queryBadOptions struct {
 	// gql endpoint
 	graphqlEndpoint string
+	headerFile      string
 	depth           int
 }
 
@@ -47,16 +48,16 @@ var queryBadCmd = &cobra.Command{
 
 		opts, err := validateQueryBadFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetInt("search-depth"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
 
-		httpClient := http.Client{}
+		httpClient := http.Client{Transport: cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		certifyBadResponse, err := model.CertifyBads(ctx, gqlclient, model.CertifyBadSpec{})
@@ -242,10 +243,12 @@ var queryBadCmd = &cobra.Command{
 	},
 }
 
-func validateQueryBadFlags(graphqlEndpoint string, depth int) (queryBadOptions, error) {
+func validateQueryBadFlags(graphqlEndpoint, headerFile string, depth int) (queryBadOptions, error) {
 	var opts queryBadOptions
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 	opts.depth = depth
+
 	return opts, nil
 }
 

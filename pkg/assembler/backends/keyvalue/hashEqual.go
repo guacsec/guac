@@ -19,7 +19,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
@@ -35,6 +37,7 @@ type hashEqualStruct struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 }
 
 func (n *hashEqualStruct) ID() string { return n.ThisID }
@@ -44,6 +47,7 @@ func (n *hashEqualStruct) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -81,6 +85,7 @@ func (c *demoClient) ingestHashEqual(ctx context.Context, artifact model.IDorArt
 		Justification: hashEqual.Justification,
 		Origin:        hashEqual.Origin,
 		Collector:     hashEqual.Collector,
+		DocumentRef:   hashEqual.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -180,6 +185,171 @@ func (c *demoClient) matchArtifacts(ctx context.Context, filter []*model.Artifac
 
 // Query HashEqual
 
+func (c *demoClient) HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error) {
+	funcName := "HashEqual"
+	c.m.RLock()
+	defer c.m.RUnlock()
+	if hashEqualSpec.ID != nil {
+		link, err := byIDkv[*hashEqualStruct](ctx, *hashEqualSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		he, err := c.convHashEqual(ctx, link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return &model.HashEqualConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(he.ID),
+				EndCursor:   ptrfrom.String(he.ID),
+			},
+			Edges: []*model.HashEqualEdge{
+				{
+					Cursor: he.ID,
+					Node:   he,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.HashEqualEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	var search []string
+	foundOne := false
+	for _, a := range hashEqualSpec.Artifacts {
+		if !foundOne && a != nil {
+			exactArtifact, err := c.artifactExact(ctx, a)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if exactArtifact != nil {
+				search = append(search, exactArtifact.HashEquals...)
+				foundOne = true
+				break
+			}
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*hashEqualStruct](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			he, err := c.hashEqualsIfMatch(ctx, &hashEqualSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if he == nil {
+				continue
+			}
+
+			if (after != nil && he.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HashEqualEdge{
+							Cursor: he.ID,
+							Node:   he,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HashEqualEdge{
+						Cursor: he.ID,
+						Node:   he,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(hashEqCol)
+		for !done {
+			var heKeys []string
+			var err error
+			heKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(heKeys)
+			totalCount = len(heKeys)
+
+			for i, hek := range heKeys {
+				link, err := byKeykv[*hashEqualStruct](ctx, hashEqCol, hek, c)
+				if err != nil {
+					return nil, err
+				}
+				he, err := c.hashEqualsIfMatch(ctx, &hashEqualSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if he == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if he.ID == *after {
+						totalCount = len(heKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HashEqualEdge{
+							Cursor: he.ID,
+							Node:   he,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HashEqualEdge{
+						Cursor: he.ID,
+						Node:   he,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.HashEqualConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
+
 func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec) ([]*model.HashEqual, error) {
 	funcName := "HashEqual"
 	c.m.RLock()
@@ -221,10 +391,16 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addHEIfMatch(ctx, out, filter, link)
+			he, err := c.hashEqualsIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if he == nil {
+				continue
+			}
+
+			out = append(out, he)
 		}
 	} else {
 		var done bool
@@ -241,10 +417,16 @@ func (c *demoClient) HashEqual(ctx context.Context, filter *model.HashEqualSpec)
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addHEIfMatch(ctx, out, filter, link)
+				he, err := c.hashEqualsIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if he == nil {
+					continue
+				}
+
+				out = append(out, he)
 			}
 		}
 	}
@@ -266,22 +448,23 @@ func (c *demoClient) convHashEqual(ctx context.Context, h *hashEqualStruct) (*mo
 		Artifacts:     artifacts,
 		Origin:        h.Origin,
 		Collector:     h.Collector,
+		DocumentRef:   h.DocumentRef,
 	}, nil
 }
 
-func (c *demoClient) addHEIfMatch(ctx context.Context, out []*model.HashEqual,
-	filter *model.HashEqualSpec, link *hashEqualStruct) (
-	[]*model.HashEqual, error,
+func (c *demoClient) hashEqualsIfMatch(ctx context.Context, filter *model.HashEqualSpec, link *hashEqualStruct) (
+	*model.HashEqual, error,
 ) {
 	if noMatch(filter.Justification, link.Justification) ||
 		noMatch(filter.Origin, link.Origin) ||
 		noMatch(filter.Collector, link.Collector) ||
+		noMatch(filter.DocumentRef, link.DocumentRef) ||
 		!c.matchArtifacts(ctx, filter.Artifacts, link.Artifacts) {
-		return out, nil
+		return nil, nil
 	}
 	he, err := c.convHashEqual(ctx, link)
 	if err != nil {
 		return nil, err
 	}
-	return append(out, he), nil
+	return he, nil
 }

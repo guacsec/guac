@@ -17,10 +17,10 @@
 
 # Defines a GraphQL schema for the artifact equality
 
-"HashEqual is an attestation that a set of artifacts are identical."
+"HashEqual is an attestation that two artifacts are identical."
 type HashEqual {
   id: ID!
-  "Collection of artifacts that are similar"
+  "Two artifacts that are similar"
   artifacts: [Artifact!]!
   "Justification for the claim that the artifacts are similar"
   justification: String!
@@ -28,6 +28,8 @@ type HashEqual {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -43,6 +45,7 @@ input HashEqualSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 "HashEqualInputSpec represents the input to certify that packages are similar."
@@ -50,11 +53,41 @@ input HashEqualInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
+}
+
+"""
+HashEqualConnection returns the paginated results for HashEqual.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HashEqualEdge which contains the current cursor
+and the HashEqual node itself
+"""
+type HashEqualConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HashEqualEdge!]!
+}
+
+"""
+HashEqualEdge contains the cursor for the resulting node and
+the HashEqual node itself.
+"""
+type HashEqualEdge {
+  cursor: ID!
+  node: HashEqual!
 }
 
 extend type Query {
   "Returns all artifact equality statements matching a filter."
   HashEqual(hashEqualSpec: HashEqualSpec!): [HashEqual!]!
+  "Returns a paginated results via HashEqualConnection"
+  HashEqualList(hashEqualSpec: HashEqualSpec!, after: ID, first: Int): HashEqualConnection
 }
 
 extend type Mutation {

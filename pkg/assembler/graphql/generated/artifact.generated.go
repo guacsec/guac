@@ -68,33 +68,58 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Artifacts(ctx context.Context, artifactSpec model.ArtifactSpec) ([]*model.Artifact, error)
+	ArtifactsList(ctx context.Context, artifactSpec model.ArtifactSpec, after *string, first *int) (*model.ArtifactConnection, error)
 	Builders(ctx context.Context, builderSpec model.BuilderSpec) ([]*model.Builder, error)
+	BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error)
 	CertifyBad(ctx context.Context, certifyBadSpec model.CertifyBadSpec) ([]*model.CertifyBad, error)
+	CertifyBadList(ctx context.Context, certifyBadSpec model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error)
 	CertifyGood(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec) ([]*model.CertifyGood, error)
+	CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error)
 	CertifyLegal(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec) ([]*model.CertifyLegal, error)
+	CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error)
 	Scorecards(ctx context.Context, scorecardSpec model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error)
+	ScorecardsList(ctx context.Context, scorecardSpec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error)
 	CertifyVEXStatement(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error)
+	CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error)
 	CertifyVuln(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec) ([]*model.CertifyVuln, error)
+	CertifyVulnList(ctx context.Context, certifyVulnSpec model.CertifyVulnSpec, after *string, first *int) (*model.CertifyVulnConnection, error)
 	PointOfContact(ctx context.Context, pointOfContactSpec model.PointOfContactSpec) ([]*model.PointOfContact, error)
+	PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error)
 	HasSbom(ctx context.Context, hasSBOMSpec model.HasSBOMSpec) ([]*model.HasSbom, error)
+	HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error)
 	HasSlsa(ctx context.Context, hasSLSASpec model.HasSLSASpec) ([]*model.HasSlsa, error)
+	HasSLSAList(ctx context.Context, hasSLSASpec model.HasSLSASpec, after *string, first *int) (*model.HasSLSAConnection, error)
 	HasSourceAt(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec) ([]*model.HasSourceAt, error)
+	HasSourceAtList(ctx context.Context, hasSourceAtSpec model.HasSourceAtSpec, after *string, first *int) (*model.HasSourceAtConnection, error)
 	HashEqual(ctx context.Context, hashEqualSpec model.HashEqualSpec) ([]*model.HashEqual, error)
+	HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error)
 	IsDependency(ctx context.Context, isDependencySpec model.IsDependencySpec) ([]*model.IsDependency, error)
+	IsDependencyList(ctx context.Context, isDependencySpec model.IsDependencySpec, after *string, first *int) (*model.IsDependencyConnection, error)
 	IsOccurrence(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec) ([]*model.IsOccurrence, error)
+	IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error)
 	Licenses(ctx context.Context, licenseSpec model.LicenseSpec) ([]*model.License, error)
+	LicenseList(ctx context.Context, licenseSpec model.LicenseSpec, after *string, first *int) (*model.LicenseConnection, error)
 	HasMetadata(ctx context.Context, hasMetadataSpec model.HasMetadataSpec) ([]*model.HasMetadata, error)
+	HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error)
 	Packages(ctx context.Context, pkgSpec model.PkgSpec) ([]*model.Package, error)
+	PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error)
 	Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error)
 	Neighbors(ctx context.Context, node string, usingOnly []model.Edge) ([]model.Node, error)
+	NeighborsList(ctx context.Context, node string, usingOnly []model.Edge, after *string, first *int) (*model.NeighborConnection, error)
 	Node(ctx context.Context, node string) (model.Node, error)
 	Nodes(ctx context.Context, nodes []string) ([]model.Node, error)
 	PkgEqual(ctx context.Context, pkgEqualSpec model.PkgEqualSpec) ([]*model.PkgEqual, error)
+	PkgEqualList(ctx context.Context, pkgEqualSpec model.PkgEqualSpec, after *string, first *int) (*model.PkgEqualConnection, error)
 	FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error)
+	FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error)
 	Sources(ctx context.Context, sourceSpec model.SourceSpec) ([]*model.Source, error)
+	SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error)
 	VulnEqual(ctx context.Context, vulnEqualSpec model.VulnEqualSpec) ([]*model.VulnEqual, error)
+	VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error)
 	VulnerabilityMetadata(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec) ([]*model.VulnerabilityMetadata, error)
+	VulnerabilityMetadataList(ctx context.Context, vulnerabilityMetadataSpec model.VulnerabilityMetadataSpec, after *string, first *int) (*model.VulnerabilityMetadataConnection, error)
 	Vulnerabilities(ctx context.Context, vulnSpec model.VulnerabilitySpec) ([]*model.Vulnerability, error)
+	VulnerabilityList(ctx context.Context, vulnSpec model.VulnerabilitySpec, after *string, first *int) (*model.VulnerabilityConnection, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -1439,6 +1464,39 @@ func (ec *executionContext) field_Mutation_ingestVulnerability_args(ctx context.
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_CertifyBadList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyBadSpec
+	if tmp, ok := rawArgs["certifyBadSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyBadSpec"))
+		arg0, err = ec.unmarshalNCertifyBadSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyBadSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1451,6 +1509,39 @@ func (ec *executionContext) field_Query_CertifyBad_args(ctx context.Context, raw
 		}
 	}
 	args["certifyBadSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_CertifyGoodList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyGoodSpec
+	if tmp, ok := rawArgs["certifyGoodSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyGoodSpec"))
+		arg0, err = ec.unmarshalNCertifyGoodSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyGoodSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1469,6 +1560,39 @@ func (ec *executionContext) field_Query_CertifyGood_args(ctx context.Context, ra
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_CertifyLegalList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyLegalSpec
+	if tmp, ok := rawArgs["certifyLegalSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyLegalSpec"))
+		arg0, err = ec.unmarshalNCertifyLegalSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyLegalSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_CertifyLegal_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1481,6 +1605,39 @@ func (ec *executionContext) field_Query_CertifyLegal_args(ctx context.Context, r
 		}
 	}
 	args["certifyLegalSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_CertifyVEXStatementList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyVEXStatementSpec
+	if tmp, ok := rawArgs["certifyVEXStatementSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVEXStatementSpec"))
+		arg0, err = ec.unmarshalNCertifyVEXStatementSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVEXStatementSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyVEXStatementSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1499,6 +1656,39 @@ func (ec *executionContext) field_Query_CertifyVEXStatement_args(ctx context.Con
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_CertifyVulnList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyVulnSpec
+	if tmp, ok := rawArgs["certifyVulnSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certifyVulnSpec"))
+		arg0, err = ec.unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["certifyVulnSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1511,6 +1701,39 @@ func (ec *executionContext) field_Query_CertifyVuln_args(ctx context.Context, ra
 		}
 	}
 	args["certifyVulnSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_HasMetadataList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.HasMetadataSpec
+	if tmp, ok := rawArgs["hasMetadataSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasMetadataSpec"))
+		arg0, err = ec.unmarshalNHasMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hasMetadataSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1529,6 +1752,39 @@ func (ec *executionContext) field_Query_HasMetadata_args(ctx context.Context, ra
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_HasSBOMList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.HasSBOMSpec
+	if tmp, ok := rawArgs["hasSBOMSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSBOMSpec"))
+		arg0, err = ec.unmarshalNHasSBOMSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hasSBOMSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1541,6 +1797,39 @@ func (ec *executionContext) field_Query_HasSBOM_args(ctx context.Context, rawArg
 		}
 	}
 	args["hasSBOMSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_HasSLSAList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.HasSLSASpec
+	if tmp, ok := rawArgs["hasSLSASpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSLSASpec"))
+		arg0, err = ec.unmarshalNHasSLSASpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSASpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hasSLSASpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1559,6 +1848,39 @@ func (ec *executionContext) field_Query_HasSLSA_args(ctx context.Context, rawArg
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_HasSourceAtList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.HasSourceAtSpec
+	if tmp, ok := rawArgs["hasSourceAtSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSourceAtSpec"))
+		arg0, err = ec.unmarshalNHasSourceAtSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hasSourceAtSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1571,6 +1893,39 @@ func (ec *executionContext) field_Query_HasSourceAt_args(ctx context.Context, ra
 		}
 	}
 	args["hasSourceAtSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_HashEqualList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.HashEqualSpec
+	if tmp, ok := rawArgs["hashEqualSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hashEqualSpec"))
+		arg0, err = ec.unmarshalNHashEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hashEqualSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1589,6 +1944,39 @@ func (ec *executionContext) field_Query_HashEqual_args(ctx context.Context, rawA
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_IsDependencyList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.IsDependencySpec
+	if tmp, ok := rawArgs["isDependencySpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isDependencySpec"))
+		arg0, err = ec.unmarshalNIsDependencySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencySpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["isDependencySpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1601,6 +1989,39 @@ func (ec *executionContext) field_Query_IsDependency_args(ctx context.Context, r
 		}
 	}
 	args["isDependencySpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_IsOccurrenceList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.IsOccurrenceSpec
+	if tmp, ok := rawArgs["isOccurrenceSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isOccurrenceSpec"))
+		arg0, err = ec.unmarshalNIsOccurrenceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["isOccurrenceSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1619,6 +2040,39 @@ func (ec *executionContext) field_Query_IsOccurrence_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_PkgEqualList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PkgEqualSpec
+	if tmp, ok := rawArgs["pkgEqualSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgEqualSpec"))
+		arg0, err = ec.unmarshalNPkgEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkgEqualSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1631,6 +2085,39 @@ func (ec *executionContext) field_Query_PkgEqual_args(ctx context.Context, rawAr
 		}
 	}
 	args["pkgEqualSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_PointOfContactList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PointOfContactSpec
+	if tmp, ok := rawArgs["pointOfContactSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pointOfContactSpec"))
+		arg0, err = ec.unmarshalNPointOfContactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pointOfContactSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1664,6 +2151,39 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_artifactsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.ArtifactSpec
+	if tmp, ok := rawArgs["artifactSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("artifactSpec"))
+		arg0, err = ec.unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["artifactSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1676,6 +2196,39 @@ func (ec *executionContext) field_Query_artifacts_args(ctx context.Context, rawA
 		}
 	}
 	args["artifactSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_buildersList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.BuilderSpec
+	if tmp, ok := rawArgs["builderSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("builderSpec"))
+		arg0, err = ec.unmarshalNBuilderSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["builderSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1694,6 +2247,39 @@ func (ec *executionContext) field_Query_builders_args(ctx context.Context, rawAr
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_findSoftwareList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["searchText"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("searchText"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["searchText"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1709,6 +2295,39 @@ func (ec *executionContext) field_Query_findSoftware_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_licenseList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.LicenseSpec
+	if tmp, ok := rawArgs["licenseSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("licenseSpec"))
+		arg0, err = ec.unmarshalNLicenseSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["licenseSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_licenses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1721,6 +2340,48 @@ func (ec *executionContext) field_Query_licenses_args(ctx context.Context, rawAr
 		}
 	}
 	args["licenseSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_neighborsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["node"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("node"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["node"] = arg0
+	var arg1 []model.Edge
+	if tmp, ok := rawArgs["usingOnly"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usingOnly"))
+		arg1, err = ec.unmarshalNEdge2ᚕgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐEdgeᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["usingOnly"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg2, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg2
+	var arg3 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg3
 	return args, nil
 }
 
@@ -1775,6 +2436,39 @@ func (ec *executionContext) field_Query_nodes_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["nodes"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_packagesList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PkgSpec
+	if tmp, ok := rawArgs["pkgSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pkgSpec"))
+		arg0, err = ec.unmarshalNPkgSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pkgSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1835,6 +2529,39 @@ func (ec *executionContext) field_Query_path_args(ctx context.Context, rawArgs m
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_scorecardsList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CertifyScorecardSpec
+	if tmp, ok := rawArgs["scorecardSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scorecardSpec"))
+		arg0, err = ec.unmarshalNCertifyScorecardSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["scorecardSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1850,6 +2577,39 @@ func (ec *executionContext) field_Query_scorecards_args(ctx context.Context, raw
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_sourcesList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SourceSpec
+	if tmp, ok := rawArgs["sourceSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sourceSpec"))
+		arg0, err = ec.unmarshalNSourceSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sourceSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1862,6 +2622,39 @@ func (ec *executionContext) field_Query_sources_args(ctx context.Context, rawArg
 		}
 	}
 	args["sourceSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_vulnEqualList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.VulnEqualSpec
+	if tmp, ok := rawArgs["vulnEqualSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnEqualSpec"))
+		arg0, err = ec.unmarshalNVulnEqualSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnEqualSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1892,6 +2685,72 @@ func (ec *executionContext) field_Query_vulnerabilities_args(ctx context.Context
 		}
 	}
 	args["vulnSpec"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_vulnerabilityList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.VulnerabilitySpec
+	if tmp, ok := rawArgs["vulnSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnSpec"))
+		arg0, err = ec.unmarshalNVulnerabilitySpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilitySpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_vulnerabilityMetadataList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.VulnerabilityMetadataSpec
+	if tmp, ok := rawArgs["vulnerabilityMetadataSpec"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vulnerabilityMetadataSpec"))
+		arg0, err = ec.unmarshalNVulnerabilityMetadataSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vulnerabilityMetadataSpec"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -2036,6 +2895,233 @@ func (ec *executionContext) fieldContext_Artifact_digest(ctx context.Context, fi
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ArtifactConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ArtifactConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ArtifactConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ArtifactConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ArtifactConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ArtifactEdge)
+	fc.Result = res
+	return ec.marshalNArtifactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ArtifactConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_ArtifactEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_ArtifactEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ArtifactEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ArtifactEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ArtifactEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.ArtifactEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ArtifactEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Artifact)
+	fc.Result = res
+	return ec.marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifact(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ArtifactEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Artifact_id(ctx, field)
+			case "algorithm":
+				return ec.fieldContext_Artifact_algorithm(ctx, field)
+			case "digest":
+				return ec.fieldContext_Artifact_digest(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Artifact", field.Name)
 		},
 	}
 	return fc, nil
@@ -4541,6 +5627,63 @@ func (ec *executionContext) fieldContext_Query_artifacts(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_artifactsList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_artifactsList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ArtifactsList(rctx, fc.Args["artifactSpec"].(model.ArtifactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.ArtifactConnection)
+	fc.Result = res
+	return ec.marshalOArtifactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_artifactsList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_ArtifactConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_ArtifactConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_ArtifactConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ArtifactConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_artifactsList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_builders(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_builders(ctx, field)
 	if err != nil {
@@ -4599,6 +5742,63 @@ func (ec *executionContext) fieldContext_Query_builders(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_buildersList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_buildersList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BuildersList(rctx, fc.Args["builderSpec"].(model.BuilderSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.BuilderConnection)
+	fc.Result = res
+	return ec.marshalOBuilderConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐBuilderConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_buildersList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_BuilderConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_BuilderConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_BuilderConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BuilderConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_buildersList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_CertifyBad(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_CertifyBad(ctx, field)
 	if err != nil {
@@ -4641,12 +5841,14 @@ func (ec *executionContext) fieldContext_Query_CertifyBad(ctx context.Context, f
 				return ec.fieldContext_CertifyBad_subject(ctx, field)
 			case "justification":
 				return ec.fieldContext_CertifyBad_justification(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_CertifyBad_knownSince(ctx, field)
 			case "origin":
 				return ec.fieldContext_CertifyBad_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyBad_collector(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_CertifyBad_knownSince(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyBad_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyBad", field.Name)
 		},
@@ -4659,6 +5861,63 @@ func (ec *executionContext) fieldContext_Query_CertifyBad(ctx context.Context, f
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_CertifyBad_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_CertifyBadList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CertifyBadList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CertifyBadList(rctx, fc.Args["certifyBadSpec"].(model.CertifyBadSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyBadConnection)
+	fc.Result = res
+	return ec.marshalOCertifyBadConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyBadConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CertifyBadList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_CertifyBadConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_CertifyBadConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CertifyBadConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyBadConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CertifyBadList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4707,12 +5966,14 @@ func (ec *executionContext) fieldContext_Query_CertifyGood(ctx context.Context, 
 				return ec.fieldContext_CertifyGood_subject(ctx, field)
 			case "justification":
 				return ec.fieldContext_CertifyGood_justification(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_CertifyGood_knownSince(ctx, field)
 			case "origin":
 				return ec.fieldContext_CertifyGood_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyGood_collector(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_CertifyGood_knownSince(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyGood_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyGood", field.Name)
 		},
@@ -4725,6 +5986,63 @@ func (ec *executionContext) fieldContext_Query_CertifyGood(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_CertifyGood_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_CertifyGoodList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CertifyGoodList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CertifyGoodList(rctx, fc.Args["certifyGoodSpec"].(model.CertifyGoodSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyGoodConnection)
+	fc.Result = res
+	return ec.marshalOCertifyGoodConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyGoodConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CertifyGoodList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_CertifyGoodConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_CertifyGoodConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CertifyGoodConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyGoodConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CertifyGoodList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4789,6 +6107,8 @@ func (ec *executionContext) fieldContext_Query_CertifyLegal(ctx context.Context,
 				return ec.fieldContext_CertifyLegal_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyLegal_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyLegal_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyLegal", field.Name)
 		},
@@ -4801,6 +6121,63 @@ func (ec *executionContext) fieldContext_Query_CertifyLegal(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_CertifyLegal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_CertifyLegalList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CertifyLegalList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CertifyLegalList(rctx, fc.Args["certifyLegalSpec"].(model.CertifyLegalSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyLegalConnection)
+	fc.Result = res
+	return ec.marshalOCertifyLegalConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyLegalConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CertifyLegalList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_CertifyLegalConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_CertifyLegalConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CertifyLegalConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyLegalConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CertifyLegalList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4867,6 +6244,63 @@ func (ec *executionContext) fieldContext_Query_scorecards(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_scorecardsList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_scorecardsList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ScorecardsList(rctx, fc.Args["scorecardSpec"].(model.CertifyScorecardSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyScorecardConnection)
+	fc.Result = res
+	return ec.marshalOCertifyScorecardConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyScorecardConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_scorecardsList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_CertifyScorecardConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_CertifyScorecardConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CertifyScorecardConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyScorecardConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_scorecardsList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_CertifyVEXStatement(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_CertifyVEXStatement(ctx, field)
 	if err != nil {
@@ -4923,6 +6357,8 @@ func (ec *executionContext) fieldContext_Query_CertifyVEXStatement(ctx context.C
 				return ec.fieldContext_CertifyVEXStatement_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_CertifyVEXStatement_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_CertifyVEXStatement_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CertifyVEXStatement", field.Name)
 		},
@@ -4935,6 +6371,63 @@ func (ec *executionContext) fieldContext_Query_CertifyVEXStatement(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_CertifyVEXStatement_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_CertifyVEXStatementList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CertifyVEXStatementList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CertifyVEXStatementList(rctx, fc.Args["certifyVEXStatementSpec"].(model.CertifyVEXStatementSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VEXConnection)
+	fc.Result = res
+	return ec.marshalOVEXConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVEXConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CertifyVEXStatementList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_VEXConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_VEXConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_VEXConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VEXConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CertifyVEXStatementList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5003,6 +6496,63 @@ func (ec *executionContext) fieldContext_Query_CertifyVuln(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_CertifyVulnList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CertifyVulnList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CertifyVulnList(rctx, fc.Args["certifyVulnSpec"].(model.CertifyVulnSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyVulnConnection)
+	fc.Result = res
+	return ec.marshalOCertifyVulnConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CertifyVulnList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_CertifyVulnConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_CertifyVulnConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CertifyVulnConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyVulnConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CertifyVulnList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_PointOfContact(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_PointOfContact(ctx, field)
 	if err != nil {
@@ -5055,6 +6605,8 @@ func (ec *executionContext) fieldContext_Query_PointOfContact(ctx context.Contex
 				return ec.fieldContext_PointOfContact_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_PointOfContact_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_PointOfContact_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PointOfContact", field.Name)
 		},
@@ -5067,6 +6619,63 @@ func (ec *executionContext) fieldContext_Query_PointOfContact(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_PointOfContact_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_PointOfContactList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_PointOfContactList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PointOfContactList(rctx, fc.Args["pointOfContactSpec"].(model.PointOfContactSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PointOfContactConnection)
+	fc.Result = res
+	return ec.marshalOPointOfContactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPointOfContactConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_PointOfContactList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_PointOfContactConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_PointOfContactConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_PointOfContactConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PointOfContactConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_PointOfContactList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5121,12 +6730,14 @@ func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, fiel
 				return ec.fieldContext_HasSBOM_digest(ctx, field)
 			case "downloadLocation":
 				return ec.fieldContext_HasSBOM_downloadLocation(ctx, field)
+			case "knownSince":
+				return ec.fieldContext_HasSBOM_knownSince(ctx, field)
 			case "origin":
 				return ec.fieldContext_HasSBOM_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_HasSBOM_collector(ctx, field)
-			case "knownSince":
-				return ec.fieldContext_HasSBOM_knownSince(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_HasSBOM_documentRef(ctx, field)
 			case "includedSoftware":
 				return ec.fieldContext_HasSBOM_includedSoftware(ctx, field)
 			case "includedDependencies":
@@ -5145,6 +6756,63 @@ func (ec *executionContext) fieldContext_Query_HasSBOM(ctx context.Context, fiel
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_HasSBOM_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_HasSBOMList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_HasSBOMList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().HasSBOMList(rctx, fc.Args["hasSBOMSpec"].(model.HasSBOMSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.HasSBOMConnection)
+	fc.Result = res
+	return ec.marshalOHasSBOMConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSBOMConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_HasSBOMList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_HasSBOMConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_HasSBOMConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_HasSBOMConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HasSBOMConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_HasSBOMList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5211,6 +6879,63 @@ func (ec *executionContext) fieldContext_Query_HasSLSA(ctx context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_HasSLSAList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_HasSLSAList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().HasSLSAList(rctx, fc.Args["hasSLSASpec"].(model.HasSLSASpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.HasSLSAConnection)
+	fc.Result = res
+	return ec.marshalOHasSLSAConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSLSAConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_HasSLSAList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_HasSLSAConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_HasSLSAConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_HasSLSAConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HasSLSAConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_HasSLSAList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_HasSourceAt(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_HasSourceAt(ctx, field)
 	if err != nil {
@@ -5261,6 +6986,8 @@ func (ec *executionContext) fieldContext_Query_HasSourceAt(ctx context.Context, 
 				return ec.fieldContext_HasSourceAt_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_HasSourceAt_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_HasSourceAt_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HasSourceAt", field.Name)
 		},
@@ -5273,6 +7000,63 @@ func (ec *executionContext) fieldContext_Query_HasSourceAt(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_HasSourceAt_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_HasSourceAtList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_HasSourceAtList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().HasSourceAtList(rctx, fc.Args["hasSourceAtSpec"].(model.HasSourceAtSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.HasSourceAtConnection)
+	fc.Result = res
+	return ec.marshalOHasSourceAtConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasSourceAtConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_HasSourceAtList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_HasSourceAtConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_HasSourceAtConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_HasSourceAtConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HasSourceAtConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_HasSourceAtList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5325,6 +7109,8 @@ func (ec *executionContext) fieldContext_Query_HashEqual(ctx context.Context, fi
 				return ec.fieldContext_HashEqual_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_HashEqual_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_HashEqual_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HashEqual", field.Name)
 		},
@@ -5337,6 +7123,63 @@ func (ec *executionContext) fieldContext_Query_HashEqual(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_HashEqual_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_HashEqualList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_HashEqualList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().HashEqualList(rctx, fc.Args["hashEqualSpec"].(model.HashEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.HashEqualConnection)
+	fc.Result = res
+	return ec.marshalOHashEqualConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHashEqualConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_HashEqualList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_HashEqualConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_HashEqualConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_HashEqualConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HashEqualConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_HashEqualList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5395,6 +7238,8 @@ func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context,
 				return ec.fieldContext_IsDependency_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_IsDependency_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_IsDependency_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type IsDependency", field.Name)
 		},
@@ -5407,6 +7252,63 @@ func (ec *executionContext) fieldContext_Query_IsDependency(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_IsDependency_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_IsDependencyList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_IsDependencyList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().IsDependencyList(rctx, fc.Args["isDependencySpec"].(model.IsDependencySpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.IsDependencyConnection)
+	fc.Result = res
+	return ec.marshalOIsDependencyConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsDependencyConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_IsDependencyList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_IsDependencyConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_IsDependencyConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_IsDependencyConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsDependencyConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_IsDependencyList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5461,6 +7363,8 @@ func (ec *executionContext) fieldContext_Query_IsOccurrence(ctx context.Context,
 				return ec.fieldContext_IsOccurrence_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_IsOccurrence_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_IsOccurrence_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type IsOccurrence", field.Name)
 		},
@@ -5473,6 +7377,63 @@ func (ec *executionContext) fieldContext_Query_IsOccurrence(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_IsOccurrence_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_IsOccurrenceList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_IsOccurrenceList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().IsOccurrenceList(rctx, fc.Args["isOccurrenceSpec"].(model.IsOccurrenceSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.IsOccurrenceConnection)
+	fc.Result = res
+	return ec.marshalOIsOccurrenceConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIsOccurrenceConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_IsOccurrenceList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_IsOccurrenceConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_IsOccurrenceConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_IsOccurrenceConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type IsOccurrenceConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_IsOccurrenceList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5541,6 +7502,63 @@ func (ec *executionContext) fieldContext_Query_licenses(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_licenseList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_licenseList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().LicenseList(rctx, fc.Args["licenseSpec"].(model.LicenseSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.LicenseConnection)
+	fc.Result = res
+	return ec.marshalOLicenseConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐLicenseConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_licenseList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_LicenseConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_LicenseConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_LicenseConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LicenseConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_licenseList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_HasMetadata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_HasMetadata(ctx, field)
 	if err != nil {
@@ -5593,6 +7611,8 @@ func (ec *executionContext) fieldContext_Query_HasMetadata(ctx context.Context, 
 				return ec.fieldContext_HasMetadata_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_HasMetadata_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_HasMetadata_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HasMetadata", field.Name)
 		},
@@ -5605,6 +7625,63 @@ func (ec *executionContext) fieldContext_Query_HasMetadata(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_HasMetadata_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_HasMetadataList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_HasMetadataList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().HasMetadataList(rctx, fc.Args["hasMetadataSpec"].(model.HasMetadataSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.HasMetadataConnection)
+	fc.Result = res
+	return ec.marshalOHasMetadataConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐHasMetadataConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_HasMetadataList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_HasMetadataConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_HasMetadataConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_HasMetadataConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HasMetadataConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_HasMetadataList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5665,6 +7742,63 @@ func (ec *executionContext) fieldContext_Query_packages(ctx context.Context, fie
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_packages_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_packagesList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_packagesList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PackagesList(rctx, fc.Args["pkgSpec"].(model.PkgSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PackageConnection)
+	fc.Result = res
+	return ec.marshalOPackageConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPackageConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_packagesList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_PackageConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_PackageConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_PackageConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PackageConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_packagesList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5769,6 +7903,63 @@ func (ec *executionContext) fieldContext_Query_neighbors(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_neighbors_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_neighborsList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_neighborsList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().NeighborsList(rctx, fc.Args["node"].(string), fc.Args["usingOnly"].([]model.Edge), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.NeighborConnection)
+	fc.Result = res
+	return ec.marshalONeighborConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐNeighborConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_neighborsList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_NeighborConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_NeighborConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_NeighborConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type NeighborConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_neighborsList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5925,6 +8116,8 @@ func (ec *executionContext) fieldContext_Query_PkgEqual(ctx context.Context, fie
 				return ec.fieldContext_PkgEqual_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_PkgEqual_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_PkgEqual_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type PkgEqual", field.Name)
 		},
@@ -5937,6 +8130,63 @@ func (ec *executionContext) fieldContext_Query_PkgEqual(ctx context.Context, fie
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_PkgEqual_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_PkgEqualList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_PkgEqualList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().PkgEqualList(rctx, fc.Args["pkgEqualSpec"].(model.PkgEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.PkgEqualConnection)
+	fc.Result = res
+	return ec.marshalOPkgEqualConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPkgEqualConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_PkgEqualList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_PkgEqualConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_PkgEqualConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_PkgEqualConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PkgEqualConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_PkgEqualList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5989,6 +8239,63 @@ func (ec *executionContext) fieldContext_Query_findSoftware(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_findSoftware_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_findSoftwareList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_findSoftwareList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().FindSoftwareList(rctx, fc.Args["searchText"].(string), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.FindSoftwareConnection)
+	fc.Result = res
+	return ec.marshalOFindSoftwareConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐFindSoftwareConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_findSoftwareList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_FindSoftwareConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_FindSoftwareConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_FindSoftwareConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FindSoftwareConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_findSoftwareList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6055,6 +8362,63 @@ func (ec *executionContext) fieldContext_Query_sources(ctx context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_sourcesList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_sourcesList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().SourcesList(rctx, fc.Args["sourceSpec"].(model.SourceSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.SourceConnection)
+	fc.Result = res
+	return ec.marshalOSourceConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐSourceConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_sourcesList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_SourceConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_SourceConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_SourceConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SourceConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_sourcesList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_vulnEqual(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_vulnEqual(ctx, field)
 	if err != nil {
@@ -6101,6 +8465,8 @@ func (ec *executionContext) fieldContext_Query_vulnEqual(ctx context.Context, fi
 				return ec.fieldContext_VulnEqual_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_VulnEqual_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_VulnEqual_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VulnEqual", field.Name)
 		},
@@ -6113,6 +8479,63 @@ func (ec *executionContext) fieldContext_Query_vulnEqual(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_vulnEqual_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_vulnEqualList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_vulnEqualList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VulnEqualList(rctx, fc.Args["vulnEqualSpec"].(model.VulnEqualSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VulnEqualConnection)
+	fc.Result = res
+	return ec.marshalOVulnEqualConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnEqualConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_vulnEqualList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_VulnEqualConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_VulnEqualConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_VulnEqualConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VulnEqualConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_vulnEqualList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6169,6 +8592,8 @@ func (ec *executionContext) fieldContext_Query_vulnerabilityMetadata(ctx context
 				return ec.fieldContext_VulnerabilityMetadata_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_VulnerabilityMetadata_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_VulnerabilityMetadata_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetadata", field.Name)
 		},
@@ -6181,6 +8606,63 @@ func (ec *executionContext) fieldContext_Query_vulnerabilityMetadata(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_vulnerabilityMetadata_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_vulnerabilityMetadataList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_vulnerabilityMetadataList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VulnerabilityMetadataList(rctx, fc.Args["vulnerabilityMetadataSpec"].(model.VulnerabilityMetadataSpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VulnerabilityMetadataConnection)
+	fc.Result = res
+	return ec.marshalOVulnerabilityMetadataConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityMetadataConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_vulnerabilityMetadataList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_VulnerabilityMetadataConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_VulnerabilityMetadataConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_VulnerabilityMetadataConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityMetadataConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_vulnerabilityMetadataList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6241,6 +8723,63 @@ func (ec *executionContext) fieldContext_Query_vulnerabilities(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_vulnerabilities_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_vulnerabilityList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_vulnerabilityList(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VulnerabilityList(rctx, fc.Args["vulnSpec"].(model.VulnerabilitySpec), fc.Args["after"].(*string), fc.Args["first"].(*int))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VulnerabilityConnection)
+	fc.Result = res
+	return ec.marshalOVulnerabilityConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐVulnerabilityConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_vulnerabilityList(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalCount":
+				return ec.fieldContext_VulnerabilityConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_VulnerabilityConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_VulnerabilityConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type VulnerabilityConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_vulnerabilityList_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6514,6 +9053,99 @@ func (ec *executionContext) _Artifact(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "digest":
 			out.Values[i] = ec._Artifact_digest(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var artifactConnectionImplementors = []string{"ArtifactConnection"}
+
+func (ec *executionContext) _ArtifactConnection(ctx context.Context, sel ast.SelectionSet, obj *model.ArtifactConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, artifactConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ArtifactConnection")
+		case "totalCount":
+			out.Values[i] = ec._ArtifactConnection_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._ArtifactConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "edges":
+			out.Values[i] = ec._ArtifactConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var artifactEdgeImplementors = []string{"ArtifactEdge"}
+
+func (ec *executionContext) _ArtifactEdge(ctx context.Context, sel ast.SelectionSet, obj *model.ArtifactEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, artifactEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ArtifactEdge")
+		case "cursor":
+			out.Values[i] = ec._ArtifactEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "node":
+			out.Values[i] = ec._ArtifactEdge_node(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -6945,6 +9577,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "artifactsList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_artifactsList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "builders":
 			field := field
 
@@ -6958,6 +9609,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "buildersList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_buildersList(ctx, field)
 				return res
 			}
 
@@ -6989,6 +9659,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "CertifyBadList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CertifyBadList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "CertifyGood":
 			field := field
 
@@ -7002,6 +9691,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "CertifyGoodList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CertifyGoodList(ctx, field)
 				return res
 			}
 
@@ -7033,6 +9741,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "CertifyLegalList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CertifyLegalList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "scorecards":
 			field := field
 
@@ -7046,6 +9773,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "scorecardsList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_scorecardsList(ctx, field)
 				return res
 			}
 
@@ -7077,6 +9823,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "CertifyVEXStatementList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CertifyVEXStatementList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "CertifyVuln":
 			field := field
 
@@ -7090,6 +9855,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "CertifyVulnList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CertifyVulnList(ctx, field)
 				return res
 			}
 
@@ -7121,6 +9905,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "PointOfContactList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_PointOfContactList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "HasSBOM":
 			field := field
 
@@ -7134,6 +9937,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "HasSBOMList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_HasSBOMList(ctx, field)
 				return res
 			}
 
@@ -7165,6 +9987,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "HasSLSAList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_HasSLSAList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "HasSourceAt":
 			field := field
 
@@ -7178,6 +10019,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "HasSourceAtList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_HasSourceAtList(ctx, field)
 				return res
 			}
 
@@ -7209,6 +10069,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "HashEqualList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_HashEqualList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "IsDependency":
 			field := field
 
@@ -7222,6 +10101,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "IsDependencyList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_IsDependencyList(ctx, field)
 				return res
 			}
 
@@ -7253,6 +10151,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "IsOccurrenceList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_IsOccurrenceList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "licenses":
 			field := field
 
@@ -7266,6 +10183,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "licenseList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_licenseList(ctx, field)
 				return res
 			}
 
@@ -7297,6 +10233,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "HasMetadataList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_HasMetadataList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "packages":
 			field := field
 
@@ -7310,6 +10265,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "packagesList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_packagesList(ctx, field)
 				return res
 			}
 
@@ -7354,6 +10328,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "neighborsList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_neighborsList(ctx, field)
 				return res
 			}
 
@@ -7429,6 +10422,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "PkgEqualList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_PkgEqualList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "findSoftware":
 			field := field
 
@@ -7442,6 +10454,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "findSoftwareList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_findSoftwareList(ctx, field)
 				return res
 			}
 
@@ -7473,6 +10504,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "sourcesList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_sourcesList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "vulnEqual":
 			field := field
 
@@ -7486,6 +10536,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "vulnEqualList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_vulnEqualList(ctx, field)
 				return res
 			}
 
@@ -7517,6 +10586,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "vulnerabilityMetadataList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_vulnerabilityMetadataList(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "vulnerabilities":
 			field := field
 
@@ -7530,6 +10618,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "vulnerabilityList":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_vulnerabilityList(ctx, field)
 				return res
 			}
 
@@ -7628,6 +10735,60 @@ func (ec *executionContext) marshalNArtifact2ᚖgithubᚗcomᚋguacsecᚋguacᚋ
 	return ec._Artifact(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNArtifactEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ArtifactEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNArtifactEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNArtifactEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactEdge(ctx context.Context, sel ast.SelectionSet, v *model.ArtifactEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ArtifactEdge(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNArtifactSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactSpec(ctx context.Context, v interface{}) (model.ArtifactSpec, error) {
 	res, err := ec.unmarshalInputArtifactSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -7680,6 +10841,13 @@ func (ec *executionContext) unmarshalNIDorArtifactInput2ᚕᚖgithubᚗcomᚋgua
 func (ec *executionContext) unmarshalNIDorArtifactInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐIDorArtifactInput(ctx context.Context, v interface{}) (*model.IDorArtifactInput, error) {
 	res, err := ec.unmarshalInputIDorArtifactInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOArtifactConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactConnection(ctx context.Context, sel ast.SelectionSet, v *model.ArtifactConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ArtifactConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOArtifactInputSpec2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐArtifactInputSpec(ctx context.Context, v interface{}) (*model.ArtifactInputSpec, error) {

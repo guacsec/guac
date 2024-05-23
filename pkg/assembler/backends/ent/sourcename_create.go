@@ -12,7 +12,13 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifylegal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyscorecard"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/occurrence"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
 )
 
@@ -97,6 +103,96 @@ func (snc *SourceNameCreate) AddOccurrences(o ...*Occurrence) *SourceNameCreate 
 		ids[i] = o[i].ID
 	}
 	return snc.AddOccurrenceIDs(ids...)
+}
+
+// AddHasSourceAtIDs adds the "has_source_at" edge to the HasSourceAt entity by IDs.
+func (snc *SourceNameCreate) AddHasSourceAtIDs(ids ...uuid.UUID) *SourceNameCreate {
+	snc.mutation.AddHasSourceAtIDs(ids...)
+	return snc
+}
+
+// AddHasSourceAt adds the "has_source_at" edges to the HasSourceAt entity.
+func (snc *SourceNameCreate) AddHasSourceAt(h ...*HasSourceAt) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return snc.AddHasSourceAtIDs(ids...)
+}
+
+// AddScorecardIDs adds the "scorecard" edge to the CertifyScorecard entity by IDs.
+func (snc *SourceNameCreate) AddScorecardIDs(ids ...uuid.UUID) *SourceNameCreate {
+	snc.mutation.AddScorecardIDs(ids...)
+	return snc
+}
+
+// AddScorecard adds the "scorecard" edges to the CertifyScorecard entity.
+func (snc *SourceNameCreate) AddScorecard(c ...*CertifyScorecard) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return snc.AddScorecardIDs(ids...)
+}
+
+// AddCertificationIDs adds the "certification" edge to the Certification entity by IDs.
+func (snc *SourceNameCreate) AddCertificationIDs(ids ...uuid.UUID) *SourceNameCreate {
+	snc.mutation.AddCertificationIDs(ids...)
+	return snc
+}
+
+// AddCertification adds the "certification" edges to the Certification entity.
+func (snc *SourceNameCreate) AddCertification(c ...*Certification) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return snc.AddCertificationIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the HasMetadata entity by IDs.
+func (snc *SourceNameCreate) AddMetadatumIDs(ids ...uuid.UUID) *SourceNameCreate {
+	snc.mutation.AddMetadatumIDs(ids...)
+	return snc
+}
+
+// AddMetadata adds the "metadata" edges to the HasMetadata entity.
+func (snc *SourceNameCreate) AddMetadata(h ...*HasMetadata) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(h))
+	for i := range h {
+		ids[i] = h[i].ID
+	}
+	return snc.AddMetadatumIDs(ids...)
+}
+
+// AddPocIDs adds the "poc" edge to the PointOfContact entity by IDs.
+func (snc *SourceNameCreate) AddPocIDs(ids ...uuid.UUID) *SourceNameCreate {
+	snc.mutation.AddPocIDs(ids...)
+	return snc
+}
+
+// AddPoc adds the "poc" edges to the PointOfContact entity.
+func (snc *SourceNameCreate) AddPoc(p ...*PointOfContact) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return snc.AddPocIDs(ids...)
+}
+
+// AddCertifyLegalIDs adds the "certify_legal" edge to the CertifyLegal entity by IDs.
+func (snc *SourceNameCreate) AddCertifyLegalIDs(ids ...uuid.UUID) *SourceNameCreate {
+	snc.mutation.AddCertifyLegalIDs(ids...)
+	return snc
+}
+
+// AddCertifyLegal adds the "certify_legal" edges to the CertifyLegal entity.
+func (snc *SourceNameCreate) AddCertifyLegal(c ...*CertifyLegal) *SourceNameCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return snc.AddCertifyLegalIDs(ids...)
 }
 
 // Mutation returns the SourceNameMutation object of the builder.
@@ -216,6 +312,102 @@ func (snc *SourceNameCreate) createSpec() (*SourceName, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(occurrence.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := snc.mutation.HasSourceAtIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.HasSourceAtTable,
+			Columns: []string{sourcename.HasSourceAtColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hassourceat.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := snc.mutation.ScorecardIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.ScorecardTable,
+			Columns: []string{sourcename.ScorecardColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifyscorecard.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := snc.mutation.CertificationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.CertificationTable,
+			Columns: []string{sourcename.CertificationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := snc.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.MetadataTable,
+			Columns: []string{sourcename.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(hasmetadata.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := snc.mutation.PocIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.PocTable,
+			Columns: []string{sourcename.PocColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pointofcontact.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := snc.mutation.CertifyLegalIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   sourcename.CertifyLegalTable,
+			Columns: []string{sourcename.CertifyLegalColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(certifylegal.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

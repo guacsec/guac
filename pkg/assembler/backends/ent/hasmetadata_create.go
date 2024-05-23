@@ -120,6 +120,12 @@ func (hmc *HasMetadataCreate) SetCollector(s string) *HasMetadataCreate {
 	return hmc
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (hmc *HasMetadataCreate) SetDocumentRef(s string) *HasMetadataCreate {
+	hmc.mutation.SetDocumentRef(s)
+	return hmc
+}
+
 // SetID sets the "id" field.
 func (hmc *HasMetadataCreate) SetID(u uuid.UUID) *HasMetadataCreate {
 	hmc.mutation.SetID(u)
@@ -229,6 +235,9 @@ func (hmc *HasMetadataCreate) check() error {
 	if _, ok := hmc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "HasMetadata.collector"`)}
 	}
+	if _, ok := hmc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "HasMetadata.document_ref"`)}
+	}
 	return nil
 }
 
@@ -288,6 +297,10 @@ func (hmc *HasMetadataCreate) createSpec() (*HasMetadata, *sqlgraph.CreateSpec) 
 	if value, ok := hmc.mutation.Collector(); ok {
 		_spec.SetField(hasmetadata.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := hmc.mutation.DocumentRef(); ok {
+		_spec.SetField(hasmetadata.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if nodes := hmc.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -553,6 +566,18 @@ func (u *HasMetadataUpsert) UpdateCollector() *HasMetadataUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *HasMetadataUpsert) SetDocumentRef(v string) *HasMetadataUpsert {
+	u.Set(hasmetadata.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *HasMetadataUpsert) UpdateDocumentRef() *HasMetadataUpsert {
+	u.SetExcluded(hasmetadata.FieldDocumentRef)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -766,6 +791,20 @@ func (u *HasMetadataUpsertOne) SetCollector(v string) *HasMetadataUpsertOne {
 func (u *HasMetadataUpsertOne) UpdateCollector() *HasMetadataUpsertOne {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *HasMetadataUpsertOne) SetDocumentRef(v string) *HasMetadataUpsertOne {
+	return u.Update(func(s *HasMetadataUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *HasMetadataUpsertOne) UpdateDocumentRef() *HasMetadataUpsertOne {
+	return u.Update(func(s *HasMetadataUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -1149,6 +1188,20 @@ func (u *HasMetadataUpsertBulk) SetCollector(v string) *HasMetadataUpsertBulk {
 func (u *HasMetadataUpsertBulk) UpdateCollector() *HasMetadataUpsertBulk {
 	return u.Update(func(s *HasMetadataUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *HasMetadataUpsertBulk) SetDocumentRef(v string) *HasMetadataUpsertBulk {
+	return u.Update(func(s *HasMetadataUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *HasMetadataUpsertBulk) UpdateDocumentRef() *HasMetadataUpsertBulk {
+	return u.Update(func(s *HasMetadataUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

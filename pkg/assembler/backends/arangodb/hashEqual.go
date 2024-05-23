@@ -26,6 +26,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *arangoClient) HashEqualList(ctx context.Context, hashEqualSpec model.HashEqualSpec, after *string, first *int) (*model.HashEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: HashEqualList")
+}
+
 func (c *arangoClient) HashEqual(ctx context.Context, hashEqualSpec *model.HashEqualSpec) ([]*model.HashEqual, error) {
 
 	if hashEqualSpec != nil && hashEqualSpec.ID != nil {
@@ -127,7 +131,8 @@ func getHashEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuild
 				'hashEqual_id': hashEqual._id,
 				'justification': hashEqual.justification,
 				'collector': hashEqual.collector,
-				'origin': hashEqual.origin
+				'origin': hashEqual.origin,
+				'documentRef': hashEqual.documentRef
 			}`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HashEqual")
@@ -156,6 +161,10 @@ func setHashEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, hashEqualSp
 		arangoQueryBuilder.filter("hashEqual", collector, "==", "@"+collector)
 		queryValues[collector] = *hashEqualSpec.Collector
 	}
+	if hashEqualSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("hashEqual", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *hashEqualSpec.DocumentRef
+	}
 }
 
 func getHashEqualQueryValues(artifact *model.ArtifactInputSpec, equalArtifact *model.ArtifactInputSpec, hashEqual *model.HashEqualInputSpec) map[string]any {
@@ -173,6 +182,7 @@ func getHashEqualQueryValues(artifact *model.ArtifactInputSpec, equalArtifact *m
 	values["justification"] = strings.ToLower(hashEqual.Justification)
 	values["collector"] = strings.ToLower(hashEqual.Collector)
 	values["origin"] = strings.ToLower(hashEqual.Origin)
+	values[docRef] = hashEqual.DocumentRef
 
 	return values
 }
@@ -210,8 +220,8 @@ func (c *arangoClient) IngestHashEquals(ctx context.Context, artifacts []*model.
 	LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 	LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.equal_algorithm FILTER art.digest == doc.equal_digest RETURN art)
 	LET hashEqual = FIRST(
-		UPSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-			INSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+		UPSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+			INSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 			UPDATE {} IN hashEquals
 			RETURN {
 				'_id': NEW._id,
@@ -250,8 +260,8 @@ func (c *arangoClient) IngestHashEqual(ctx context.Context, artifact model.IDorA
 LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 LET equalArtifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @equal_algorithm FILTER art.digest == @equal_digest RETURN art)
 LET hashEqual = FIRST(
-	UPSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:@justification, collector:@collector, origin:@origin } 
-		INSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:@justification, collector:@collector, origin:@origin } 
+	UPSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+		INSERT { artifactID:artifact._id, equalArtifactID:equalArtifact._id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 		UPDATE {} IN hashEquals
 		RETURN {
 			'_id': NEW._id,
@@ -290,6 +300,7 @@ func getHashEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model
 		Justification string          `json:"justification"`
 		Collector     string          `json:"collector"`
 		Origin        string          `json:"origin"`
+		DocumentRef   string          `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -315,6 +326,7 @@ func getHashEqualFromCursor(ctx context.Context, cursor driver.Cursor) ([]*model
 			Justification: createdValue.Justification,
 			Origin:        createdValue.Origin,
 			Collector:     createdValue.Collector,
+			DocumentRef:   createdValue.DocumentRef,
 		}
 		hashEqualList = append(hashEqualList, hashEqual)
 	}
@@ -367,6 +379,7 @@ func (c *arangoClient) queryHashEqualNodeByID(ctx context.Context, filter *model
 		Justification   string `json:"justification"`
 		Collector       string `json:"collector"`
 		Origin          string `json:"origin"`
+		DocumentRef     string `json:"documentRef"`
 	}
 
 	var collectedValues []dbHashEqual
@@ -393,6 +406,7 @@ func (c *arangoClient) queryHashEqualNodeByID(ctx context.Context, filter *model
 		Justification: collectedValues[0].Justification,
 		Origin:        collectedValues[0].Origin,
 		Collector:     collectedValues[0].Collector,
+		DocumentRef:   collectedValues[0].DocumentRef,
 	}
 
 	builtArtifact, err := c.buildArtifactResponseByID(ctx, collectedValues[0].ArtifactID, nil)

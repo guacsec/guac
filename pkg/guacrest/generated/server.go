@@ -22,7 +22,7 @@ type ServerInterface interface {
 	// Health check the server
 	// (GET /healthz)
 	HealthCheck(w http.ResponseWriter, r *http.Request)
-	// Retrieve the dependencies of a package
+	// Retrieve transitive dependencies
 	// (GET /query/dependencies)
 	RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams)
 }
@@ -43,7 +43,7 @@ func (_ Unimplemented) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Retrieve the dependencies of a package
+// Retrieve transitive dependencies
 // (GET /query/dependencies)
 func (_ Unimplemented) RetrieveDependencies(w http.ResponseWriter, r *http.Request, params RetrieveDependenciesParams) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -67,11 +67,11 @@ func (siw *ServerInterfaceWrapper) AnalyzeDependencies(w http.ResponseWriter, r 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params AnalyzeDependenciesParams
 
-	// ------------- Optional query parameter "PaginationSpec" -------------
+	// ------------- Optional query parameter "paginationSpec" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "PaginationSpec", r.URL.Query(), &params.PaginationSpec)
+	err = runtime.BindQueryParameter("form", true, false, "paginationSpec", r.URL.Query(), &params.PaginationSpec)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "PaginationSpec", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "paginationSpec", Err: err})
 		return
 	}
 
@@ -125,26 +125,35 @@ func (siw *ServerInterfaceWrapper) RetrieveDependencies(w http.ResponseWriter, r
 	// Parameter object where we will unmarshal all parameters from the context
 	var params RetrieveDependenciesParams
 
-	// ------------- Optional query parameter "PaginationSpec" -------------
+	// ------------- Optional query parameter "paginationSpec" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "PaginationSpec", r.URL.Query(), &params.PaginationSpec)
+	err = runtime.BindQueryParameter("form", true, false, "paginationSpec", r.URL.Query(), &params.PaginationSpec)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "PaginationSpec", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "paginationSpec", Err: err})
 		return
 	}
 
-	// ------------- Required query parameter "purl" -------------
+	// ------------- Optional query parameter "linkCondition" -------------
 
-	if paramValue := r.URL.Query().Get("purl"); paramValue != "" {
-
-	} else {
-		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "purl"})
+	err = runtime.BindQueryParameter("form", true, false, "linkCondition", r.URL.Query(), &params.LinkCondition)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "linkCondition", Err: err})
 		return
 	}
 
-	err = runtime.BindQueryParameter("form", true, true, "purl", r.URL.Query(), &params.Purl)
+	// ------------- Optional query parameter "purl" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "purl", r.URL.Query(), &params.Purl)
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "purl", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "digest" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "digest", r.URL.Query(), &params.Digest)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "digest", Err: err})
 		return
 	}
 
@@ -413,7 +422,7 @@ type StrictServerInterface interface {
 	// Health check the server
 	// (GET /healthz)
 	HealthCheck(ctx context.Context, request HealthCheckRequestObject) (HealthCheckResponseObject, error)
-	// Retrieve the dependencies of a package
+	// Retrieve transitive dependencies
 	// (GET /query/dependencies)
 	RetrieveDependencies(ctx context.Context, request RetrieveDependenciesRequestObject) (RetrieveDependenciesResponseObject, error)
 }

@@ -33,6 +33,10 @@ const (
 	sinceStr string = "since"
 )
 
+func (c *arangoClient) PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
+	return nil, fmt.Errorf("not implemented: PointOfContactList")
+}
+
 func (c *arangoClient) PointOfContact(ctx context.Context, pointOfContactSpec *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
 
 	if pointOfContactSpec != nil && pointOfContactSpec.ID != nil {
@@ -183,7 +187,8 @@ func getSrcPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 		'since': pointOfContact.since,
 		'justification': pointOfContact.justification,
 		'collector': pointOfContact.collector,
-		'origin': pointOfContact.origin
+		'origin': pointOfContact.origin,
+		'documentRef': pointOfContact.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "PointOfContact")
@@ -209,7 +214,8 @@ func getArtPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 		'since': pointOfContact.since,
 		'justification': pointOfContact.justification,
 		'collector': pointOfContact.collector,
-		'origin': pointOfContact.origin
+		'origin': pointOfContact.origin,
+		'documentRef': pointOfContact.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "PointOfContact")
@@ -243,7 +249,8 @@ func getPkgPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 			'since': pointOfContact.since,
 			'justification': pointOfContact.justification,
 			'collector': pointOfContact.collector,
-			'origin': pointOfContact.origin
+			'origin': pointOfContact.origin,
+			'documentRef': pointOfContact.documentRef
 		  }`)
 	} else {
 		arangoQueryBuilder.query.WriteString("\n")
@@ -262,7 +269,8 @@ func getPkgPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 			'since': pointOfContact.since,
 			'justification': pointOfContact.justification,
 			'collector': pointOfContact.collector,
-			'origin': pointOfContact.origin
+			'origin': pointOfContact.origin,
+			'documentRef': pointOfContact.documentRef
 		  }`)
 	}
 
@@ -275,34 +283,38 @@ func getPkgPointOfContactForQuery(ctx context.Context, c *arangoClient, arangoQu
 	return getPointOfContactFromCursor(ctx, cursor, false)
 }
 
-func setPointOfContactMatchValues(arangoQueryBuilder *arangoQueryBuilder, PointOfContactSpec *model.PointOfContactSpec, queryValues map[string]any) {
-	if PointOfContactSpec.ID != nil {
+func setPointOfContactMatchValues(arangoQueryBuilder *arangoQueryBuilder, pointOfContactSpec *model.PointOfContactSpec, queryValues map[string]any) {
+	if pointOfContactSpec.ID != nil {
 		arangoQueryBuilder.filter("pointOfContact", "_id", "==", "@id")
-		queryValues["id"] = *PointOfContactSpec.ID
+		queryValues["id"] = *pointOfContactSpec.ID
 	}
-	if PointOfContactSpec.Email != nil {
+	if pointOfContactSpec.Email != nil {
 		arangoQueryBuilder.filter("pointOfContact", emailStr, "==", "@"+emailStr)
-		queryValues[emailStr] = *PointOfContactSpec.Email
+		queryValues[emailStr] = *pointOfContactSpec.Email
 	}
-	if PointOfContactSpec.Info != nil {
+	if pointOfContactSpec.Info != nil {
 		arangoQueryBuilder.filter("pointOfContact", infoStr, "==", "@"+infoStr)
-		queryValues[infoStr] = *PointOfContactSpec.Info
+		queryValues[infoStr] = *pointOfContactSpec.Info
 	}
-	if PointOfContactSpec.Since != nil {
+	if pointOfContactSpec.Since != nil {
 		arangoQueryBuilder.filter("pointOfContact", sinceStr, ">=", "@"+sinceStr)
-		queryValues[sinceStr] = PointOfContactSpec.Since.UTC()
+		queryValues[sinceStr] = pointOfContactSpec.Since.UTC()
 	}
-	if PointOfContactSpec.Justification != nil {
+	if pointOfContactSpec.Justification != nil {
 		arangoQueryBuilder.filter("pointOfContact", justification, "==", "@"+justification)
-		queryValues[justification] = *PointOfContactSpec.Justification
+		queryValues[justification] = *pointOfContactSpec.Justification
 	}
-	if PointOfContactSpec.Origin != nil {
+	if pointOfContactSpec.Origin != nil {
 		arangoQueryBuilder.filter("pointOfContact", origin, "==", "@"+origin)
-		queryValues[origin] = *PointOfContactSpec.Origin
+		queryValues[origin] = *pointOfContactSpec.Origin
 	}
-	if PointOfContactSpec.Collector != nil {
+	if pointOfContactSpec.Collector != nil {
 		arangoQueryBuilder.filter("pointOfContact", collector, "==", "@"+collector)
-		queryValues[collector] = *PointOfContactSpec.Collector
+		queryValues[collector] = *pointOfContactSpec.Collector
+	}
+	if pointOfContactSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("pointOfContact", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *pointOfContactSpec.DocumentRef
 	}
 }
 
@@ -330,6 +342,7 @@ func getPointOfContactQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.M
 	values[justification] = pointOfContact.Justification
 	values[origin] = pointOfContact.Origin
 	values[collector] = pointOfContact.Collector
+	values[docRef] = pointOfContact.DocumentRef
 
 	return values
 }
@@ -350,8 +363,8 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 		)
 		  
 		  LET pointOfContact = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
-				  INSERT {  packageID:firstPkg.version_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
+			  UPSERT {  packageID:firstPkg.version_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				  INSERT {  packageID:firstPkg.version_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				  UPDATE {} IN pointOfContacts
 				  RETURN {
 					'_id': NEW._id,
@@ -382,8 +395,8 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 			)
 			  
 			  LET pointOfContact = FIRST(
-				  UPSERT {  packageID:firstPkg.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
-					  INSERT {  packageID:firstPkg.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
+				  UPSERT {  packageID:firstPkg.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+					  INSERT {  packageID:firstPkg.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 					  UPDATE {} IN pointOfContacts
 					  RETURN {
 						'_id': NEW._id,
@@ -408,8 +421,8 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		LET pointOfContact = FIRST(
-			UPSERT { artifactID:artifact._id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
-				INSERT { artifactID:artifact._id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
+			UPSERT { artifactID:artifact._id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				INSERT { artifactID:artifact._id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				UPDATE {} IN pointOfContacts
 				RETURN {
 					'_id': NEW._id,
@@ -440,8 +453,8 @@ func (c *arangoClient) IngestPointOfContact(ctx context.Context, subject model.P
 		)
 		  
 		LET pointOfContact = FIRST(
-			UPSERT { sourceID:firstSrc.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
-				INSERT { sourceID:firstSrc.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin } 
+			UPSERT { sourceID:firstSrc.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				INSERT { sourceID:firstSrc.name_id, email:@email, info:@info, since:@since, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				UPDATE {} IN pointOfContacts
 				RETURN {
 					'_id': NEW._id,
@@ -519,8 +532,8 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 			)
 			  
 			  LET pointOfContact = FIRST(
-				  UPSERT {  packageID:firstPkg.version_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-					  INSERT {  packageID:firstPkg.version_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  UPSERT {  packageID:firstPkg.version_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+					  INSERT {  packageID:firstPkg.version_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 					  UPDATE {} IN pointOfContacts
 					  RETURN {
 						'_id': NEW._id,
@@ -553,8 +566,8 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 			)
 			  
 			  LET pointOfContact = FIRST(
-				  UPSERT {  packageID:firstPkg.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-					  INSERT {  packageID:firstPkg.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  UPSERT {  packageID:firstPkg.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+					  INSERT {  packageID:firstPkg.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 					  UPDATE {} IN pointOfContacts
 					  RETURN {
 						'_id': NEW._id,
@@ -609,8 +622,8 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		LET pointOfContact = FIRST(
-			UPSERT { artifactID:artifact._id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				INSERT { artifactID:artifact._id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			UPSERT { artifactID:artifact._id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				INSERT { artifactID:artifact._id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				UPDATE {} IN pointOfContacts
 				RETURN {
 					'_id': NEW._id,
@@ -671,8 +684,8 @@ func (c *arangoClient) IngestPointOfContacts(ctx context.Context, subjects model
 		)
 		  
 		LET pointOfContact = FIRST(
-			UPSERT { sourceID:firstSrc.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				INSERT { sourceID:firstSrc.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			UPSERT { sourceID:firstSrc.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				INSERT { sourceID:firstSrc.name_id, email:doc.email, info:doc.info, since:doc.since, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				UPDATE {} IN pointOfContacts
 				RETURN {
 					'_id': NEW._id,
@@ -721,6 +734,7 @@ func getPointOfContactFromCursor(ctx context.Context, cursor driver.Cursor, inge
 		Justification    string          `json:"justification"`
 		Collector        string          `json:"collector"`
 		Origin           string          `json:"origin"`
+		DocumentRef      string          `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -758,6 +772,7 @@ func getPointOfContactFromCursor(ctx context.Context, cursor driver.Cursor, inge
 			Justification: createdValue.Justification,
 			Origin:        createdValue.Origin,
 			Collector:     createdValue.Collector,
+			DocumentRef:   createdValue.DocumentRef,
 		}
 
 		if pkg != nil {
@@ -826,6 +841,7 @@ func (c *arangoClient) queryPointOfContactNodeByID(ctx context.Context, filter *
 		Justification    string    `json:"justification"`
 		Collector        string    `json:"collector"`
 		Origin           string    `json:"origin"`
+		DocumentRef      string    `json:"documentRef"`
 	}
 
 	var collectedValues []dbPointOfContact
@@ -855,6 +871,7 @@ func (c *arangoClient) queryPointOfContactNodeByID(ctx context.Context, filter *
 		Justification: collectedValues[0].Justification,
 		Origin:        collectedValues[0].Origin,
 		Collector:     collectedValues[0].Collector,
+		DocumentRef:   collectedValues[0].DocumentRef,
 	}
 
 	if collectedValues[0].PackageID != nil {

@@ -488,6 +488,31 @@ func TestLegal(t *testing.T) {
 					Justification:    "test justification special",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Dec: []*model.IDorLicenseInput{{LicenseInput: testdata.L1}},
+					Legal: &model.CertifyLegalInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.CertifyLegalSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpLegal: []*model.CertifyLegal{
+				{
+					Subject:          testdata.P1out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
+					DocumentRef:      "test",
+				},
+			},
 		},
 		// {
 		// 	Name: "Ingest without Package",
@@ -557,14 +582,20 @@ func TestLegal(t *testing.T) {
 					test.Query.ID = ptrfrom.String(clID)
 				}
 			}
-			got, err := b.CertifyLegal(ctx, test.Query)
+			got, err := b.CertifyLegalList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpLegal, got, commonOpts); diff != "" {
+			var returnedObjects []*model.CertifyLegal
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpLegal, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -624,6 +655,34 @@ func TestLegals(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			InLic: []*model.LicenseInputSpec{testdata.L1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInputs{
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+					},
+					Dec: [][]*model.IDorLicenseInput{{{LicenseInput: testdata.L1}}, {{LicenseInput: testdata.L1}}},
+					Dis: [][]*model.IDorLicenseInput{{}, {}},
+					Legal: []*model.CertifyLegalInputSpec{
+						{Justification: "test justification"},
+						{DocumentRef: "test"},
+					},
+				},
+			},
+			Query: &model.CertifyLegalSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpLegal: []*model.CertifyLegal{
+				{
+					Subject:          testdata.P2out,
+					DeclaredLicenses: []*model.License{testdata.L1out},
+					DocumentRef:      "test",
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
@@ -651,14 +710,20 @@ func TestLegals(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.CertifyLegal(ctx, test.Query)
+			got, err := b.CertifyLegalList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpLegal, got, commonOpts); diff != "" {
+			var returnedObjects []*model.CertifyLegal
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpLegal, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

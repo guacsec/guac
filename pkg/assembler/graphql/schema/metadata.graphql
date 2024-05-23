@@ -35,13 +35,22 @@ SourceName.
 """
 type HasMetadata {
   id: ID!
+  "The package, source or artifact that is attested"
   subject: PackageSourceOrArtifact!
+  "Key in the key value pair"
   key: String!
+  "Value in the key value pair"
   value: String!
+  "Timestamp when the certification was created (in RFC 3339 format)"
   timestamp: Time!
+  "The justification for the metadata"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -66,6 +75,7 @@ input HasMetadataSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -78,11 +88,41 @@ input HasMetadataInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
+}
+
+"""
+HasMetadataConnection returns the paginated results for HasMetadata.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasMetadataEdge which contains the current cursor
+and the HasMetadata node itself
+"""
+type HasMetadataConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasMetadataEdge!]!
+}
+
+"""
+HasMetadataEdge contains the cursor for the resulting node and
+the HasMetadata node itself.
+"""
+type HasMetadataEdge {
+  cursor: ID!
+  node: HasMetadata!
 }
 
 extend type Query {
   "Returns all HasMetdata attestations matching a filter."
   HasMetadata(hasMetadataSpec: HasMetadataSpec!): [HasMetadata!]!
+  "Returns a paginated results via HasMetadataConnection"
+  HasMetadataList(hasMetadataSpec: HasMetadataSpec!, after: ID, first: Int): HasMetadataConnection
 }
 
 extend type Mutation {

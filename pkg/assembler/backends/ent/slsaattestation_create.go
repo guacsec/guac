@@ -81,6 +81,12 @@ func (sac *SLSAAttestationCreate) SetCollector(s string) *SLSAAttestationCreate 
 	return sac
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (sac *SLSAAttestationCreate) SetDocumentRef(s string) *SLSAAttestationCreate {
+	sac.mutation.SetDocumentRef(s)
+	return sac
+}
+
 // SetBuiltFromHash sets the "built_from_hash" field.
 func (sac *SLSAAttestationCreate) SetBuiltFromHash(s string) *SLSAAttestationCreate {
 	sac.mutation.SetBuiltFromHash(s)
@@ -193,6 +199,9 @@ func (sac *SLSAAttestationCreate) check() error {
 	if _, ok := sac.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "SLSAAttestation.collector"`)}
 	}
+	if _, ok := sac.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "SLSAAttestation.document_ref"`)}
+	}
 	if _, ok := sac.mutation.BuiltFromHash(); !ok {
 		return &ValidationError{Name: "built_from_hash", err: errors.New(`ent: missing required field "SLSAAttestation.built_from_hash"`)}
 	}
@@ -265,6 +274,10 @@ func (sac *SLSAAttestationCreate) createSpec() (*SLSAAttestation, *sqlgraph.Crea
 	if value, ok := sac.mutation.Collector(); ok {
 		_spec.SetField(slsaattestation.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := sac.mutation.DocumentRef(); ok {
+		_spec.SetField(slsaattestation.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if value, ok := sac.mutation.BuiltFromHash(); ok {
 		_spec.SetField(slsaattestation.FieldBuiltFromHash, field.TypeString, value)
@@ -486,6 +499,18 @@ func (u *SLSAAttestationUpsert) UpdateCollector() *SLSAAttestationUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *SLSAAttestationUpsert) SetDocumentRef(v string) *SLSAAttestationUpsert {
+	u.Set(slsaattestation.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *SLSAAttestationUpsert) UpdateDocumentRef() *SLSAAttestationUpsert {
+	u.SetExcluded(slsaattestation.FieldDocumentRef)
+	return u
+}
+
 // SetBuiltFromHash sets the "built_from_hash" field.
 func (u *SLSAAttestationUpsert) SetBuiltFromHash(v string) *SLSAAttestationUpsert {
 	u.Set(slsaattestation.FieldBuiltFromHash, v)
@@ -676,6 +701,20 @@ func (u *SLSAAttestationUpsertOne) SetCollector(v string) *SLSAAttestationUpsert
 func (u *SLSAAttestationUpsertOne) UpdateCollector() *SLSAAttestationUpsertOne {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *SLSAAttestationUpsertOne) SetDocumentRef(v string) *SLSAAttestationUpsertOne {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *SLSAAttestationUpsertOne) UpdateDocumentRef() *SLSAAttestationUpsertOne {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -1038,6 +1077,20 @@ func (u *SLSAAttestationUpsertBulk) SetCollector(v string) *SLSAAttestationUpser
 func (u *SLSAAttestationUpsertBulk) UpdateCollector() *SLSAAttestationUpsertBulk {
 	return u.Update(func(s *SLSAAttestationUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *SLSAAttestationUpsertBulk) SetDocumentRef(v string) *SLSAAttestationUpsertBulk {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *SLSAAttestationUpsertBulk) UpdateDocumentRef() *SLSAAttestationUpsertBulk {
+	return u.Update(func(s *SLSAAttestationUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

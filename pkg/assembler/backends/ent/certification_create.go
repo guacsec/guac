@@ -104,6 +104,12 @@ func (cc *CertificationCreate) SetJustification(s string) *CertificationCreate {
 	return cc
 }
 
+// SetKnownSince sets the "known_since" field.
+func (cc *CertificationCreate) SetKnownSince(t time.Time) *CertificationCreate {
+	cc.mutation.SetKnownSince(t)
+	return cc
+}
+
 // SetOrigin sets the "origin" field.
 func (cc *CertificationCreate) SetOrigin(s string) *CertificationCreate {
 	cc.mutation.SetOrigin(s)
@@ -116,9 +122,9 @@ func (cc *CertificationCreate) SetCollector(s string) *CertificationCreate {
 	return cc
 }
 
-// SetKnownSince sets the "known_since" field.
-func (cc *CertificationCreate) SetKnownSince(t time.Time) *CertificationCreate {
-	cc.mutation.SetKnownSince(t)
+// SetDocumentRef sets the "document_ref" field.
+func (cc *CertificationCreate) SetDocumentRef(s string) *CertificationCreate {
+	cc.mutation.SetDocumentRef(s)
 	return cc
 }
 
@@ -228,14 +234,17 @@ func (cc *CertificationCreate) check() error {
 	if _, ok := cc.mutation.Justification(); !ok {
 		return &ValidationError{Name: "justification", err: errors.New(`ent: missing required field "Certification.justification"`)}
 	}
+	if _, ok := cc.mutation.KnownSince(); !ok {
+		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "Certification.known_since"`)}
+	}
 	if _, ok := cc.mutation.Origin(); !ok {
 		return &ValidationError{Name: "origin", err: errors.New(`ent: missing required field "Certification.origin"`)}
 	}
 	if _, ok := cc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "Certification.collector"`)}
 	}
-	if _, ok := cc.mutation.KnownSince(); !ok {
-		return &ValidationError{Name: "known_since", err: errors.New(`ent: missing required field "Certification.known_since"`)}
+	if _, ok := cc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "Certification.document_ref"`)}
 	}
 	return nil
 }
@@ -281,6 +290,10 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 		_spec.SetField(certification.FieldJustification, field.TypeString, value)
 		_node.Justification = value
 	}
+	if value, ok := cc.mutation.KnownSince(); ok {
+		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
+		_node.KnownSince = value
+	}
 	if value, ok := cc.mutation.Origin(); ok {
 		_spec.SetField(certification.FieldOrigin, field.TypeString, value)
 		_node.Origin = value
@@ -289,9 +302,9 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 		_spec.SetField(certification.FieldCollector, field.TypeString, value)
 		_node.Collector = value
 	}
-	if value, ok := cc.mutation.KnownSince(); ok {
-		_spec.SetField(certification.FieldKnownSince, field.TypeTime, value)
-		_node.KnownSince = value
+	if value, ok := cc.mutation.DocumentRef(); ok {
+		_spec.SetField(certification.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if nodes := cc.mutation.SourceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -509,6 +522,18 @@ func (u *CertificationUpsert) UpdateJustification() *CertificationUpsert {
 	return u
 }
 
+// SetKnownSince sets the "known_since" field.
+func (u *CertificationUpsert) SetKnownSince(v time.Time) *CertificationUpsert {
+	u.Set(certification.FieldKnownSince, v)
+	return u
+}
+
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateKnownSince() *CertificationUpsert {
+	u.SetExcluded(certification.FieldKnownSince)
+	return u
+}
+
 // SetOrigin sets the "origin" field.
 func (u *CertificationUpsert) SetOrigin(v string) *CertificationUpsert {
 	u.Set(certification.FieldOrigin, v)
@@ -533,15 +558,15 @@ func (u *CertificationUpsert) UpdateCollector() *CertificationUpsert {
 	return u
 }
 
-// SetKnownSince sets the "known_since" field.
-func (u *CertificationUpsert) SetKnownSince(v time.Time) *CertificationUpsert {
-	u.Set(certification.FieldKnownSince, v)
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertificationUpsert) SetDocumentRef(v string) *CertificationUpsert {
+	u.Set(certification.FieldDocumentRef, v)
 	return u
 }
 
-// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
-func (u *CertificationUpsert) UpdateKnownSince() *CertificationUpsert {
-	u.SetExcluded(certification.FieldKnownSince)
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateDocumentRef() *CertificationUpsert {
+	u.SetExcluded(certification.FieldDocumentRef)
 	return u
 }
 
@@ -705,6 +730,20 @@ func (u *CertificationUpsertOne) UpdateJustification() *CertificationUpsertOne {
 	})
 }
 
+// SetKnownSince sets the "known_since" field.
+func (u *CertificationUpsertOne) SetKnownSince(v time.Time) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetKnownSince(v)
+	})
+}
+
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateKnownSince() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateKnownSince()
+	})
+}
+
 // SetOrigin sets the "origin" field.
 func (u *CertificationUpsertOne) SetOrigin(v string) *CertificationUpsertOne {
 	return u.Update(func(s *CertificationUpsert) {
@@ -733,17 +772,17 @@ func (u *CertificationUpsertOne) UpdateCollector() *CertificationUpsertOne {
 	})
 }
 
-// SetKnownSince sets the "known_since" field.
-func (u *CertificationUpsertOne) SetKnownSince(v time.Time) *CertificationUpsertOne {
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertificationUpsertOne) SetDocumentRef(v string) *CertificationUpsertOne {
 	return u.Update(func(s *CertificationUpsert) {
-		s.SetKnownSince(v)
+		s.SetDocumentRef(v)
 	})
 }
 
-// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
-func (u *CertificationUpsertOne) UpdateKnownSince() *CertificationUpsertOne {
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateDocumentRef() *CertificationUpsertOne {
 	return u.Update(func(s *CertificationUpsert) {
-		s.UpdateKnownSince()
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -1074,6 +1113,20 @@ func (u *CertificationUpsertBulk) UpdateJustification() *CertificationUpsertBulk
 	})
 }
 
+// SetKnownSince sets the "known_since" field.
+func (u *CertificationUpsertBulk) SetKnownSince(v time.Time) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetKnownSince(v)
+	})
+}
+
+// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateKnownSince() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateKnownSince()
+	})
+}
+
 // SetOrigin sets the "origin" field.
 func (u *CertificationUpsertBulk) SetOrigin(v string) *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
@@ -1102,17 +1155,17 @@ func (u *CertificationUpsertBulk) UpdateCollector() *CertificationUpsertBulk {
 	})
 }
 
-// SetKnownSince sets the "known_since" field.
-func (u *CertificationUpsertBulk) SetKnownSince(v time.Time) *CertificationUpsertBulk {
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertificationUpsertBulk) SetDocumentRef(v string) *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
-		s.SetKnownSince(v)
+		s.SetDocumentRef(v)
 	})
 }
 
-// UpdateKnownSince sets the "known_since" field to the value that was provided on create.
-func (u *CertificationUpsertBulk) UpdateKnownSince() *CertificationUpsertBulk {
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateDocumentRef() *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
-		s.UpdateKnownSince()
+		s.UpdateDocumentRef()
 	})
 }
 

@@ -219,8 +219,239 @@ func (ec *executionContext) fieldContext_CertifyVuln_metadata(ctx context.Contex
 				return ec.fieldContext_ScanMetadata_origin(ctx, field)
 			case "collector":
 				return ec.fieldContext_ScanMetadata_collector(ctx, field)
+			case "documentRef":
+				return ec.fieldContext_ScanMetadata_documentRef(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ScanMetadata", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyVulnConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVulnConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVulnConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVulnConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVulnConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyVulnConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVulnConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVulnConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVulnConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVulnConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyVulnConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVulnConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVulnConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CertifyVulnEdge)
+	fc.Result = res
+	return ec.marshalNCertifyVulnEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVulnConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVulnConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_CertifyVulnEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_CertifyVulnEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyVulnEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyVulnEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVulnEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVulnEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVulnEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVulnEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CertifyVulnEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.CertifyVulnEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CertifyVulnEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CertifyVuln)
+	fc.Result = res
+	return ec.marshalNCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVuln(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CertifyVulnEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CertifyVulnEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CertifyVuln_id(ctx, field)
+			case "package":
+				return ec.fieldContext_CertifyVuln_package(ctx, field)
+			case "vulnerability":
+				return ec.fieldContext_CertifyVuln_vulnerability(ctx, field)
+			case "metadata":
+				return ec.fieldContext_CertifyVuln_metadata(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CertifyVuln", field.Name)
 		},
 	}
 	return fc, nil
@@ -513,6 +744,47 @@ func (ec *executionContext) fieldContext_ScanMetadata_collector(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _ScanMetadata_documentRef(ctx context.Context, field graphql.CollectedField, obj *model.ScanMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ScanMetadata_documentRef(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DocumentRef, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ScanMetadata_documentRef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScanMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -524,7 +796,7 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "package", "vulnerability", "timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
+	fieldsInOrder := [...]string{"id", "package", "vulnerability", "timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -601,6 +873,13 @@ func (ec *executionContext) unmarshalInputCertifyVulnSpec(ctx context.Context, o
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -614,7 +893,7 @@ func (ec *executionContext) unmarshalInputScanMetadataInput(ctx context.Context,
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector"}
+	fieldsInOrder := [...]string{"timeScanned", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "origin", "collector", "documentRef"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -670,6 +949,13 @@ func (ec *executionContext) unmarshalInputScanMetadataInput(ctx context.Context,
 				return it, err
 			}
 			it.Collector = data
+		case "documentRef":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("documentRef"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentRef = data
 		}
 	}
 
@@ -712,6 +998,99 @@ func (ec *executionContext) _CertifyVuln(ctx context.Context, sel ast.SelectionS
 			}
 		case "metadata":
 			out.Values[i] = ec._CertifyVuln_metadata(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var certifyVulnConnectionImplementors = []string{"CertifyVulnConnection"}
+
+func (ec *executionContext) _CertifyVulnConnection(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyVulnConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, certifyVulnConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CertifyVulnConnection")
+		case "totalCount":
+			out.Values[i] = ec._CertifyVulnConnection_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._CertifyVulnConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "edges":
+			out.Values[i] = ec._CertifyVulnConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var certifyVulnEdgeImplementors = []string{"CertifyVulnEdge"}
+
+func (ec *executionContext) _CertifyVulnEdge(ctx context.Context, sel ast.SelectionSet, obj *model.CertifyVulnEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, certifyVulnEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CertifyVulnEdge")
+		case "cursor":
+			out.Values[i] = ec._CertifyVulnEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "node":
+			out.Values[i] = ec._CertifyVulnEdge_node(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -781,6 +1160,11 @@ func (ec *executionContext) _ScanMetadata(ctx context.Context, sel ast.Selection
 			}
 		case "collector":
 			out.Values[i] = ec._ScanMetadata_collector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "documentRef":
+			out.Values[i] = ec._ScanMetadata_documentRef(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -865,6 +1249,60 @@ func (ec *executionContext) marshalNCertifyVuln2ᚖgithubᚗcomᚋguacsecᚋguac
 	return ec._CertifyVuln(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNCertifyVulnEdge2ᚕᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CertifyVulnEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCertifyVulnEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNCertifyVulnEdge2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnEdge(ctx context.Context, sel ast.SelectionSet, v *model.CertifyVulnEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CertifyVulnEdge(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNCertifyVulnSpec2githubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnSpec(ctx context.Context, v interface{}) (model.CertifyVulnSpec, error) {
 	res, err := ec.unmarshalInputCertifyVulnSpec(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -905,6 +1343,13 @@ func (ec *executionContext) unmarshalNScanMetadataInput2ᚕᚖgithubᚗcomᚋgua
 func (ec *executionContext) unmarshalNScanMetadataInput2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐScanMetadataInput(ctx context.Context, v interface{}) (*model.ScanMetadataInput, error) {
 	res, err := ec.unmarshalInputScanMetadataInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOCertifyVulnConnection2ᚖgithubᚗcomᚋguacsecᚋguacᚋpkgᚋassemblerᚋgraphqlᚋmodelᚐCertifyVulnConnection(ctx context.Context, sel ast.SelectionSet, v *model.CertifyVulnConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CertifyVulnConnection(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

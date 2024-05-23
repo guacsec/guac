@@ -50,7 +50,7 @@ func TestStringTree(t *testing.T) {
 				},
 				makeOverflow: false,
 			},
-			want: " { doc: {\"a\":\"b\"}, , test2, { }}\n- { doc: {\"c\":\"d\"}, , test, { }}",
+			want: " { doc: {\"a\":\"b\"}, , test2, {  }}\n- { doc: {\"c\":\"d\"}, , test, {  }}",
 		},
 		{
 			name: "stack overflow",
@@ -71,7 +71,7 @@ func TestStringTree(t *testing.T) {
 				},
 				makeOverflow: true,
 			},
-			want: " { doc: {\"a\":\"b\"}, , test1, { }}\n- { doc: {\"c\":\"d\"}, , test2, { }}",
+			want: " { doc: {\"a\":\"b\"}, , test1, {  }}\n- { doc: {\"c\":\"d\"}, , test2, {  }}",
 		},
 	}
 	for _, tt := range tests {

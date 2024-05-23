@@ -28,6 +28,11 @@ import (
 )
 
 // Query VulnEqual
+
+func (c *arangoClient) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: VulnEqualList")
+}
+
 func (c *arangoClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 
 	if vulnEqualSpec != nil && vulnEqualSpec.ID != nil {
@@ -153,7 +158,8 @@ func getVulnEqualForQuery(ctx context.Context, c *arangoClient, arangoQueryBuild
 		'vulnEqual_id': vulnEqual._id,
 		'justification': vulnEqual.justification,
 		'collector': vulnEqual.collector,
-		'origin': vulnEqual.origin
+		'origin': vulnEqual.origin,
+		'documentRef': vulnEqual.documentRef
 	}`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "vulnEqual")
@@ -182,6 +188,10 @@ func setVulnEqualMatchValues(arangoQueryBuilder *arangoQueryBuilder, vulnEqualSp
 		arangoQueryBuilder.filter("vulnEqual", collector, "==", "@"+collector)
 		queryValues[collector] = *vulnEqualSpec.Collector
 	}
+	if vulnEqualSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("vulnEqual", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *vulnEqualSpec.DocumentRef
+	}
 }
 
 func getVulnEqualQueryValues(vulnerability *model.VulnerabilityInputSpec, otherVulnerability *model.VulnerabilityInputSpec, vulnEqual *model.VulnEqualInputSpec) map[string]any {
@@ -201,6 +211,7 @@ func getVulnEqualQueryValues(vulnerability *model.VulnerabilityInputSpec, otherV
 	values[justification] = vulnEqual.Justification
 	values[origin] = vulnEqual.Origin
 	values[collector] = vulnEqual.Collector
+	values[docRef] = vulnEqual.DocumentRef
 
 	return values
 }
@@ -255,8 +266,8 @@ func (c *arangoClient) IngestVulnEquals(ctx context.Context, vulnerabilities []*
 	)
 	
 	LET vulnEqual = FIRST(
-		UPSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-			INSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+		UPSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+			INSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 			UPDATE {} IN vulnEquals
 			RETURN {
 				'_id': NEW._id,
@@ -311,8 +322,8 @@ func (c *arangoClient) IngestVulnEqual(ctx context.Context, vulnerability model.
 	)
 	
 	LET vulnEqual = FIRST(
-		UPSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:@justification, collector:@collector, origin:@origin } 
-			INSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:@justification, collector:@collector, origin:@origin } 
+		UPSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+			INSERT { vulnerabilityID:firstVuln.vuln_id, equalVulnerabilityID:equalVuln.vuln_id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 			UPDATE {} IN vulnEquals
 			RETURN {
 				'_id': NEW._id,
@@ -351,6 +362,7 @@ func getVulnEqualFromCursor(ctx context.Context, cursor driver.Cursor, ingestion
 		Justification      string    `json:"justification"`
 		Collector          string    `json:"collector"`
 		Origin             string    `json:"origin"`
+		DocumentRef        string    `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -400,6 +412,7 @@ func getVulnEqualFromCursor(ctx context.Context, cursor driver.Cursor, ingestion
 				Justification:   createdValue.Justification,
 				Origin:          createdValue.Origin,
 				Collector:       createdValue.Collector,
+				DocumentRef:     createdValue.DocumentRef,
 			}
 		} else {
 			vulnEqual = &model.VulnEqual{ID: createdValue.VulnEqualId}
@@ -455,6 +468,7 @@ func (c *arangoClient) queryVulnEqualNodeByID(ctx context.Context, filter *model
 		Justification        string `json:"justification"`
 		Collector            string `json:"collector"`
 		Origin               string `json:"origin"`
+		DocumentRef          string `json:"documentRef"`
 	}
 
 	var collectedValues []dbVulnEqual
@@ -491,6 +505,7 @@ func (c *arangoClient) queryVulnEqualNodeByID(ctx context.Context, filter *model
 		Justification:   collectedValues[0].Justification,
 		Origin:          collectedValues[0].Origin,
 		Collector:       collectedValues[0].Collector,
+		DocumentRef:     collectedValues[0].DocumentRef,
 	}, nil
 }
 

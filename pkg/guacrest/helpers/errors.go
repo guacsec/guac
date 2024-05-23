@@ -1,5 +1,5 @@
 //
-// Copyright 2023 The GUAC Authors.
+// Copyright 2024 The GUAC Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,18 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package backend
+package helpers
 
-import (
-	"context"
-	"fmt"
+import "errors"
 
-	"github.com/guacsec/guac/pkg/assembler/graphql/model"
-)
+// Err502 is used to surface errors from the graphql server.
+var Err502 error = errors.New("Error querying the graphql server. The error message should have been logged")
 
-// Remove the ebedded backends.Backend interface in the EntBackend struct so
-// that we know which methods are not implemented.
-
-func (b *EntBackend) Path(ctx context.Context, subject string, target string, maxPathLength int, usingOnly []model.Edge) ([]model.Node, error) {
-	return nil, fmt.Errorf("not implemented: Path")
-}
+// Err500 is used to surface generic internal errors, such as an unexpected response
+// from Graphql server.
+var Err500 error = errors.New("Internal Error. The error message should have been logged")

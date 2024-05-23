@@ -13,6 +13,27 @@ fragment allSrcTree on Source {
   }
 }
 
+fragment AllSourcePaginationTree on SourceConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query SourcePagination {
+  sourcesList(sourceSpec: {}, first: 10) {
+    ...AllSourcePaginationTree
+  }
+}
+
 query SrcQ1 {
   sources(sourceSpec: {}) {
     namespaces {

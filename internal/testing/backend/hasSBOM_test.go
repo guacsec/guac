@@ -2656,6 +2656,32 @@ func TestHasSBOM(t *testing.T) {
 			}},
 			Query: &model.HasSBOMSpec{IncludedOccurrences: []*model.IsOccurrenceSpec{{Collector: ptrfrom.String("invalid_collector")}}},
 			ExpHS: nil,
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					HS: &model.HasSBOMInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:          testdata.P1out,
+					DocumentRef:      "test",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -2776,14 +2802,20 @@ func TestHasSBOM(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.HasSBOM(ctx, test.Query)
+			got, err := b.HasSBOMList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHS, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasSbom
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -3032,6 +3064,34 @@ func TestIngestHasSBOMs(t *testing.T) {
 					}},
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			PkgArt: &model.PackageOrArtifactInputs{
+				Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+			},
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.HasSBOMSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHS: []*model.HasSbom{
+				{
+					Subject:          testdata.P1out,
+					DocumentRef:      "test",
+					IncludedSoftware: []model.PackageOrArtifact{testdata.P1out},
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -3090,14 +3150,20 @@ func TestIngestHasSBOMs(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.HasSBOM(ctx, test.Query)
+			got, err := b.HasSBOMList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHS, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasSbom
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

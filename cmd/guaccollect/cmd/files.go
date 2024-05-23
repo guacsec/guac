@@ -44,6 +44,8 @@ type filesOptions struct {
 	blobAddr string
 	// poll location
 	poll bool
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 var filesCmd = &cobra.Command{
@@ -70,6 +72,7 @@ you have access to read and write to the respective blob store.`,
 			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
 			viper.GetBool("service-poll"),
+			viper.GetBool("publish-to-queue"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -87,16 +90,17 @@ you have access to read and write to the respective blob store.`,
 			logger.Fatalf("unable to register file collector: %v", err)
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
-func validateFilesFlags(pubsubAddr string, blobAddr string, poll bool, args []string) (filesOptions, error) {
+func validateFilesFlags(pubsubAddr, blobAddr string, poll bool, pubToQueue bool, args []string) (filesOptions, error) {
 	var opts filesOptions
 
 	opts.pubsubAddr = pubsubAddr
 	opts.blobAddr = blobAddr
 	opts.poll = poll
+	opts.publishToQueue = pubToQueue
 
 	if len(args) != 1 {
 		return opts, fmt.Errorf("expected positional argument for file_path")
@@ -107,24 +111,14 @@ func validateFilesFlags(pubsubAddr string, blobAddr string, poll bool, args []st
 	return opts, nil
 }
 
-func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) (func(*processor.Document) error, error) {
+func getCollectorPublish(ctx context.Context, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub, publishToQueue bool) (func(*processor.Document) error, error) {
 	return func(d *processor.Document) error {
-		return collector.Publish(ctx, d, blobStore, pubsub)
+		return collector.Publish(ctx, d, blobStore, pubsub, publishToQueue)
 	}, nil
 }
 
-func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string) {
+func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr string, publishToQueue bool) {
 	logger := logging.FromContext(ctx)
-
-	if strings.HasPrefix(pubsubAddr, "nats://") {
-		// initialize jetstream
-		// TODO: pass in credentials file for NATS secure login
-		jetStream := emitter.NewJetStream(pubsubAddr, "", "")
-		if err := jetStream.JetStreamInit(ctx); err != nil {
-			logger.Fatalf("jetStream initialization failed with error: %v", err)
-		}
-		defer jetStream.Close()
-	}
 
 	// initialize blob store
 	blobStore, err := blob.NewBlobStore(ctx, blobAddr)
@@ -132,11 +126,23 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 		logger.Fatalf("unable to connect to blob store: %v", err)
 	}
 
-	// initialize pubsub
-	pubsub := emitter.NewEmitterPubSub(ctx, pubsubAddr)
+	var pubsub *emitter.EmitterPubSub
+	if publishToQueue {
+		if strings.HasPrefix(pubsubAddr, "nats://") {
+			// initialize jetstream
+			// TODO: pass in credentials file for NATS secure login
+			jetStream := emitter.NewJetStream(pubsubAddr, "", "")
+			if err := jetStream.JetStreamInit(ctx); err != nil {
+				logger.Fatalf("jetStream initialization failed with error: %v", err)
+			}
+			defer jetStream.Close()
+		}
+		// initialize pubsub
+		pubsub = emitter.NewEmitterPubSub(ctx, pubsubAddr)
+	}
 
 	// Get pipeline of components
-	collectorPubFunc, err := getCollectorPublish(ctx, blobStore, pubsub)
+	collectorPubFunc, err := getCollectorPublish(ctx, blobStore, pubsub, publishToQueue)
 	if err != nil {
 		logger.Errorf("error: %v", err)
 		os.Exit(1)
@@ -145,6 +151,8 @@ func initializeNATsandCollector(ctx context.Context, pubsubAddr string, blobAddr
 	// Set emit function to go through the entire pipeline
 	emit := func(d *processor.Document) error {
 		err = collectorPubFunc(d)
+		// updating the logger to the child logger so that if there is an error we which document has it
+		logger = d.ChildLogger
 		if err != nil {
 			logger.Fatalf("error publishing document from collector: %v", err)
 		}

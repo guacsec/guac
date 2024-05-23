@@ -22,6 +22,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 	purl "github.com/package-url/packageurl-go"
 )
@@ -40,6 +41,35 @@ func PurlToPkg(purlUri string) (*model.PkgInputSpec, error) {
 	}
 
 	return purlConvert(p)
+}
+
+// PurlToPkgFilter converts a purl URI string into a graphql package filter spec.
+// The result will only match the input purl, and no other packages. The filter
+// is created with Guac's purl special casing.
+func PurlToPkgFilter(purl string) (model.PkgSpec, error) {
+	inputSpec, err := PurlToPkg(purl)
+	if err != nil {
+		return model.PkgSpec{}, err
+	}
+
+	var qualifiers []model.PackageQualifierSpec
+	for _, q := range inputSpec.Qualifiers {
+		q := q
+		qualifiers = append(qualifiers, model.PackageQualifierSpec{
+			Key:   q.Key,
+			Value: &q.Value,
+		})
+	}
+
+	return model.PkgSpec{
+		Type:                     &inputSpec.Type,
+		Namespace:                ptrfrom.String(nilToEmpty(inputSpec.Namespace)),
+		Name:                     &inputSpec.Name,
+		Version:                  ptrfrom.String(nilToEmpty(inputSpec.Version)),
+		Qualifiers:               qualifiers,
+		Subpath:                  ptrfrom.String(nilToEmpty(inputSpec.Subpath)),
+		MatchOnlyEmptyQualifiers: ptrfrom.Bool(len(qualifiers) == 0),
+	}, nil
 }
 
 // AllPkgTreeToPurl takes one package trie evaluation and converts it into a PURL
@@ -137,7 +167,7 @@ func purlConvert(p purl.PackageURL) (*model.PkgInputSpec, error) {
 		purl.TypeDebian, purl.TypeGem, purl.TypeGithub,
 		purl.TypeGolang, purl.TypeHackage, purl.TypeHex, purl.TypeMaven,
 		purl.TypeNPM, purl.TypeNuget, purl.TypePyPi, purl.TypeRPM, purl.TypeSwift,
-		purl.TypeGeneric:
+		purl.TypeGeneric, purl.TypeYocto, purl.TypeCpan:
 		// some code
 		r := pkg(p.Type, p.Namespace, p.Name, p.Version, p.Subpath, p.Qualifiers.Map())
 		return r, nil
@@ -257,4 +287,11 @@ func GuacGenericPurl(s string) string {
 	} else {
 		return fmt.Sprintf("pkg:guac/generic/%s", sanitizedString)
 	}
+}
+
+func nilToEmpty(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }

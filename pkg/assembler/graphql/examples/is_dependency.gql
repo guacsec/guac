@@ -47,6 +47,28 @@ fragment allIsDependencyTree on IsDependency {
   versionRange
   origin
   collector
+  documentRef
+}
+
+fragment AllIsDependencyPaginationTree on IsDependencyConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query IsDependencyPagination {
+  IsDependencyList(isDependencySpec: {}, first: 10) {
+    ...AllIsDependencyPaginationTree
+  }
 }
 
 query IsDependencyQ1 {

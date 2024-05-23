@@ -19,8 +19,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
 	"reflect"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -521,6 +523,195 @@ func hashVersionHelper(version string, subpath string, qualifiers map[string]str
 }
 
 // Query Package
+
+func (c *demoClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+	if pkgSpec.ID != nil {
+		p, err := c.buildPackageResponse(ctx, *pkgSpec.ID, &pkgSpec)
+		if err != nil {
+			if errors.Is(err, errNotFound) {
+				// not found
+				return nil, nil
+			}
+			return nil, err
+		}
+
+		return &model.PackageConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(p.ID),
+				EndCursor:   ptrfrom.String(p.ID),
+			},
+			Edges: []*model.PackageEdge{
+				{
+					Cursor: p.ID,
+					Node:   p,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.PackageEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	if pkgSpec.Type != nil {
+		inType := &pkgType{
+			Type: *pkgSpec.Type,
+		}
+		pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, inType.Key(), c)
+		if err == nil {
+			pNamespaces := c.buildPkgNamespace(ctx, pkgTypeNode, &pkgSpec)
+			for _, namespace := range pNamespaces {
+				for _, name := range namespace.Names {
+					for _, version := range name.Versions {
+						p := &model.Package{
+							ID:   pkgTypeNode.ThisID,
+							Type: pkgTypeNode.Type,
+							Namespaces: []*model.PackageNamespace{
+								{
+									ID:        namespace.ID,
+									Namespace: namespace.Namespace,
+									Names: []*model.PackageName{
+										{
+											ID:   name.ID,
+											Name: name.Name,
+											Versions: []*model.PackageVersion{
+												version,
+											},
+										},
+									},
+								},
+							},
+						}
+
+						if (after != nil && pNamespaces[0].Names[0].Versions[0].ID > *after) || after == nil {
+							addToCount += 1
+
+							if first != nil {
+								if numNodes < *first {
+									edges = append(edges, &model.PackageEdge{
+										Cursor: pNamespaces[0].Names[0].Versions[0].ID,
+										Node:   p,
+									})
+									numNodes++
+								} else if numNodes == *first {
+									hasNextPage = true
+								}
+							} else {
+								edges = append(edges, &model.PackageEdge{
+									Cursor: pNamespaces[0].Names[0].Versions[0].ID,
+									Node:   p,
+								})
+							}
+						}
+					}
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(pkgTypeCol)
+		for !done {
+			var typeKeys []string
+			var err error
+			typeKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(typeKeys)
+			totalCount = len(typeKeys)
+
+			for i, tk := range typeKeys {
+				pkgTypeNode, err := byKeykv[*pkgType](ctx, pkgTypeCol, tk, c)
+				if err != nil {
+					return nil, err
+				}
+				pNamespaces := c.buildPkgNamespace(ctx, pkgTypeNode, &pkgSpec)
+				if len(pNamespaces) == 0 {
+					continue
+				}
+
+				for _, namespace := range pNamespaces {
+					for _, name := range namespace.Names {
+						for _, version := range name.Versions {
+							p := &model.Package{
+								ID:   pkgTypeNode.ThisID,
+								Type: pkgTypeNode.Type,
+								Namespaces: []*model.PackageNamespace{
+									{
+										ID:        namespace.ID,
+										Namespace: namespace.Namespace,
+										Names: []*model.PackageName{
+											{
+												ID:   name.ID,
+												Name: name.Name,
+												Versions: []*model.PackageVersion{
+													version,
+												},
+											},
+										},
+									},
+								},
+							}
+
+							if after != nil && !currentPage {
+								if p.Namespaces[0].Names[0].Versions[0].ID == *after {
+									totalCount = len(typeKeys) - (i + 1)
+									currentPage = true
+								}
+								continue
+							}
+
+							if first != nil {
+								if numNodes < *first {
+									edges = append(edges, &model.PackageEdge{
+										Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
+										Node:   p,
+									})
+									numNodes++
+								} else if numNodes == *first {
+									hasNextPage = true
+								}
+							} else {
+								edges = append(edges, &model.PackageEdge{
+									Cursor: p.Namespaces[0].Names[0].Versions[0].ID,
+									Node:   p,
+								})
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.PackageConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
+
 func (c *demoClient) Packages(ctx context.Context, filter *model.PkgSpec) ([]*model.Package, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()

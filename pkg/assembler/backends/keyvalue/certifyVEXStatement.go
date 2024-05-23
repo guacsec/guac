@@ -18,6 +18,8 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 	"time"
 
@@ -41,6 +43,7 @@ type vexLink struct {
 	Justification   model.VexJustification
 	Origin          string
 	Collector       string
+	DocumentRef     string
 }
 
 func (n *vexLink) ID() string { return n.ThisID }
@@ -57,6 +60,7 @@ func (n *vexLink) Key() string {
 		string(n.Justification),
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 	}, ":"))
 }
 
@@ -119,6 +123,7 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 		Justification: vexStatement.VexJustification,
 		Origin:        vexStatement.Origin,
 		Collector:     vexStatement.Collector,
+		DocumentRef:   vexStatement.DocumentRef,
 	}
 
 	lock(&c.m, readOnly)
@@ -188,6 +193,193 @@ func (c *demoClient) ingestVEXStatement(ctx context.Context, subject model.Packa
 }
 
 // Query CertifyVex
+
+func (c *demoClient) CertifyVEXStatementList(ctx context.Context, certifyVEXStatementSpec model.CertifyVEXStatementSpec, after *string, first *int) (*model.VEXConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+	funcName := "CertifyVEXStatement"
+
+	if certifyVEXStatementSpec.ID != nil {
+		link, err := byIDkv[*vexLink](ctx, *certifyVEXStatementSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		foundCertifyVex, err := c.buildCertifyVEXStatement(ctx, link, &certifyVEXStatementSpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+
+		return &model.VEXConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(foundCertifyVex.ID),
+				EndCursor:   ptrfrom.String(foundCertifyVex.ID),
+			},
+			Edges: []*model.VEXEdge{
+				{
+					Cursor: foundCertifyVex.ID,
+					Node:   foundCertifyVex,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.VEXEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	var search []string
+	foundOne := false
+
+	if certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Artifact != nil {
+		exactArtifact, err := c.artifactExact(ctx, certifyVEXStatementSpec.Subject.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactArtifact != nil {
+			search = append(search, exactArtifact.VexLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && certifyVEXStatementSpec.Subject != nil && certifyVEXStatementSpec.Subject.Package != nil {
+		pkgs, err := c.findPackageVersion(ctx, certifyVEXStatementSpec.Subject.Package)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.VexLinks...)
+		}
+	}
+	if !foundOne && certifyVEXStatementSpec.Vulnerability != nil {
+		exactVuln, err := c.exactVulnerability(ctx, certifyVEXStatementSpec.Vulnerability)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactVuln != nil {
+			search = append(search, exactVuln.VexLinks...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*vexLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			vex, err := c.vexIfMatch(ctx, &certifyVEXStatementSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if vex == nil {
+				continue
+			}
+
+			if (after != nil && vex.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.VEXEdge{
+							Cursor: vex.ID,
+							Node:   vex,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.VEXEdge{
+						Cursor: vex.ID,
+						Node:   vex,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(cVEXCol)
+
+		for !done {
+			var keys []string
+			var err error
+			keys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(keys)
+			totalCount = len(keys)
+
+			for i, key := range keys {
+				link, err := byKeykv[*vexLink](ctx, cVEXCol, key, c)
+				if err != nil {
+					return nil, err
+				}
+				vex, err := c.vexIfMatch(ctx, &certifyVEXStatementSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%vex :: %vex", funcName, err)
+				}
+
+				if vex == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if vex.ID == *after {
+						totalCount = len(keys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.VEXEdge{
+							Cursor: vex.ID,
+							Node:   vex,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.VEXEdge{
+						Cursor: vex.ID,
+						Node:   vex,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.VEXConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
+
 func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.CertifyVEXStatementSpec) ([]*model.CertifyVEXStatement, error) {
 	c.m.RLock()
 	defer c.m.RUnlock()
@@ -248,10 +440,16 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addVexIfMatch(ctx, out, filter, link)
+			v, err := c.vexIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if v == nil {
+				continue
+			}
+
+			out = append(out, v)
 		}
 	} else {
 		var done bool
@@ -268,40 +466,48 @@ func (c *demoClient) CertifyVEXStatement(ctx context.Context, filter *model.Cert
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addVexIfMatch(ctx, out, filter, link)
+				v, err := c.vexIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if v == nil {
+					continue
+				}
+
+				out = append(out, v)
 			}
 		}
 	}
 	return out, nil
 }
 
-func (c *demoClient) addVexIfMatch(ctx context.Context, out []*model.CertifyVEXStatement,
-	filter *model.CertifyVEXStatementSpec, link *vexLink) (
-	[]*model.CertifyVEXStatement, error) {
+func (c *demoClient) vexIfMatch(ctx context.Context, filter *model.CertifyVEXStatementSpec, link *vexLink) (
+	*model.CertifyVEXStatement, error) {
 
 	if filter != nil && filter.KnownSince != nil && !filter.KnownSince.Equal(link.KnownSince) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && filter.VexJustification != nil && *filter.VexJustification != link.Justification {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && filter.Status != nil && *filter.Status != link.Status {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Statement, link.Statement) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.StatusNotes, link.StatusNotes) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Collector, link.Collector) {
-		return out, nil
+		return nil, nil
 	}
 	if filter != nil && noMatch(filter.Origin, link.Origin) {
-		return out, nil
+		return nil, nil
+	}
+	if filter != nil && noMatch(filter.DocumentRef, link.DocumentRef) {
+		return nil, nil
 	}
 
 	foundCertifyVex, err := c.buildCertifyVEXStatement(ctx, link, filter, false)
@@ -309,9 +515,9 @@ func (c *demoClient) addVexIfMatch(ctx context.Context, out []*model.CertifyVEXS
 		return nil, err
 	}
 	if foundCertifyVex == nil {
-		return out, nil
+		return nil, nil
 	}
-	return append(out, foundCertifyVex), nil
+	return foundCertifyVex, nil
 
 }
 
@@ -401,5 +607,6 @@ func (c *demoClient) buildCertifyVEXStatement(ctx context.Context, link *vexLink
 		KnownSince:       link.KnownSince,
 		Origin:           link.Origin,
 		Collector:        link.Collector,
+		DocumentRef:      link.DocumentRef,
 	}, nil
 }

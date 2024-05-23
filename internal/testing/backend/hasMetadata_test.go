@@ -730,6 +730,37 @@ func TestHasMetadata(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HM: &model.HasMetadataInputSpec{
+						Key:         "key1",
+						Value:       "value1",
+						Timestamp:   time.Unix(1e9, 0),
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.HasMetadataSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHM: []*model.HasMetadata{
+				{
+					Subject:     testdata.P1out,
+					Key:         "key1",
+					Value:       "value1",
+					Timestamp:   time.Unix(1e9, 0),
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -793,14 +824,20 @@ func TestHasMetadata(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.HasMetadata(ctx, test.Query)
+			got, err := b.HasMetadataList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHM, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasMetadata
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHM, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -1062,6 +1099,33 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{&model.IDorPkgInput{PackageInput: testdata.P1}},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					HM: []*model.HasMetadataInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.HasMetadataSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHM: []*model.HasMetadata{
+				{
+					Subject:     testdata.P1out,
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -1090,14 +1154,20 @@ func TestIngestBulkHasMetadata(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.HasMetadata(ctx, test.Query)
+			got, err := b.HasMetadataList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHM, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasMetadata
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHM, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

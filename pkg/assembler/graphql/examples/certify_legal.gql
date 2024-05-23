@@ -1,0 +1,20 @@
+fragment AllCertifyLegalPaginationTree on CertifyLegalConnection {
+    totalCount
+    edges {
+        cursor
+        node {
+            id
+        }
+    }
+    pageInfo {
+        startCursor
+        endCursor
+        hasNextPage
+    }
+}
+
+query CertifyLegalPagination {
+    CertifyLegalList(certifyLegalSpec: {}, first: 10) {
+        ...AllCertifyLegalPaginationTree
+    }
+}

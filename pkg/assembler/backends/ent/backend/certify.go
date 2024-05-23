@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -30,30 +31,202 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+const (
+	certifyBadString  = "certify_bad"
+	certifyGoodString = "certify_good"
+)
+
 type certificationInputSpec interface {
 	model.CertifyGoodInputSpec | model.CertifyBadInputSpec
 }
 
-func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
-	records, err := queryCertifications(ctx, b.client, certification.TypeBAD, filter)
+func certifyBadGlobalID(id string) string {
+	return toGlobalID(certifyBadString, id)
+}
+
+func bulkCertifyBadGlobalID(ids []string) []string {
+	return toGlobalIDs(certifyBadString, ids)
+}
+
+func certifyGoodGlobalID(id string) string {
+	return toGlobalID(certifyGoodString, id)
+}
+
+func bulkCertifyGoodGlobalID(ids []string) []string {
+	return toGlobalIDs(certifyGoodString, ids)
+}
+
+func (b *EntBackend) CertifyBadList(ctx context.Context, filter model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyBadString {
+			return nil, fmt.Errorf("after cursor is not type certifyBad but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeBAD, &filter))
+
+	certBadConn, err := getCertificationObject(certQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed certifyBad query with error: %w", err)
+	}
+
+	var edges []*model.CertifyBadEdge
+	for _, edge := range certBadConn.Edges {
+		edges = append(edges, &model.CertifyBadEdge{
+			Cursor: certifyBadGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyBad(edge.Node),
+		})
+	}
+
+	if certBadConn.PageInfo.StartCursor != nil {
+		return &model.CertifyBadConnection{
+			TotalCount: certBadConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: certBadConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(certifyBadGlobalID(certBadConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(certifyBadGlobalID(certBadConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
+}
+
+func (b *EntBackend) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
+	if filter == nil {
+		filter = &model.CertifyBadSpec{}
+	}
+
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeBAD, filter))
+
+	records, err := getCertificationObject(certQuery).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyBad query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyBad), nil
 }
 
-func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
-	if filter == nil {
-		return nil, nil
+func (b *EntBackend) CertifyGoodList(ctx context.Context, filter model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyGoodString {
+			return nil, fmt.Errorf("after cursor is not type certifyGood but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
 	}
 
-	records, err := queryCertifications(ctx, b.client, certification.TypeGOOD, (*model.CertifyBadSpec)(filter))
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeGOOD, (*model.CertifyBadSpec)(&filter)))
+
+	certGoodConn, err := getCertificationObject(certQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed certifyGood query with error: %w", err)
+	}
+
+	var edges []*model.CertifyGoodEdge
+	for _, edge := range certGoodConn.Edges {
+		edges = append(edges, &model.CertifyGoodEdge{
+			Cursor: certifyGoodGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyGood(edge.Node),
+		})
+	}
+
+	if certGoodConn.PageInfo.StartCursor != nil {
+		return &model.CertifyGoodConnection{
+			TotalCount: certGoodConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: certGoodConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(certifyGoodGlobalID(certGoodConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(certifyGoodGlobalID(certGoodConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
+}
+
+func (b *EntBackend) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
+	if filter == nil {
+		filter = &model.CertifyGoodSpec{}
+	}
+
+	certQuery := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeGOOD, (*model.CertifyBadSpec)(filter)))
+
+	records, err := getCertificationObject(certQuery).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed certifyGood query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyGood), nil
+}
+
+// getCertificationObject is used recreate the certifyGood/certifyBad object be eager loading the edges
+func getCertificationObject(q *ent.CertificationQuery) *ent.CertificationQuery {
+	return q.
+		WithSource(withSourceNameTreeQuery()).
+		WithArtifact().
+		WithPackageVersion(withPackageVersionTree()).
+		WithAllVersions(withPackageNameTree())
+}
+
+func queryCertifications(typ certification.Type, filter *model.CertifyBadSpec) predicate.Certification {
+	predicates := []predicate.Certification{
+		certification.TypeEQ(typ),
+		optionalPredicate(filter.ID, IDEQ),
+		optionalPredicate(filter.Collector, certification.CollectorEQ),
+		optionalPredicate(filter.Origin, certification.OriginEQ),
+		optionalPredicate(filter.Justification, certification.JustificationEQ),
+		optionalPredicate(filter.KnownSince, certification.KnownSinceEQ),
+		optionalPredicate(filter.DocumentRef, certification.DocumentRef),
+	}
+
+	if filter.Subject != nil {
+		switch {
+		case filter.Subject.Artifact != nil:
+			predicates = append(predicates, certification.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
+		case filter.Subject.Package != nil:
+			predicates = append(predicates, certification.Or(
+				certification.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
+				certification.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
+			))
+		case filter.Subject.Source != nil:
+			predicates = append(predicates, certification.HasSourceWith(sourceQuery(filter.Subject.Source)))
+		}
+	}
+
+	return certification.And(predicates...)
 }
 
 func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyBadInputSpec) (string, error) {
@@ -64,8 +237,7 @@ func (b *EntBackend) IngestCertifyBad(ctx context.Context, subject model.Package
 		return "", txErr
 	}
 
-	//TODO optimize for only returning ID
-	return *certRecord, nil
+	return certifyBadGlobalID(*certRecord), nil
 }
 
 func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyBads []*model.CertifyBadInputSpec) ([]string, error) {
@@ -82,7 +254,7 @@ func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.Packa
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return bulkCertifyBadGlobalID(*ids), nil
 }
 
 func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.CertifyGoodInputSpec) (string, error) {
@@ -93,8 +265,7 @@ func (b *EntBackend) IngestCertifyGood(ctx context.Context, subject model.Packag
 		return "", txErr
 	}
 
-	//TODO optimize for only returning ID
-	return *certRecord, nil
+	return certifyGoodGlobalID(*certRecord), nil
 }
 
 func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, certifyGoods []*model.CertifyGoodInputSpec) ([]string, error) {
@@ -111,54 +282,24 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return bulkCertifyGoodGlobalID(*ids), nil
 }
 
-func queryCertifications(ctx context.Context, client *ent.Client, typ certification.Type, filter *model.CertifyBadSpec) ([]*ent.Certification, error) {
-
-	query := []predicate.Certification{
-		certification.TypeEQ(typ),
-		optionalPredicate(filter.ID, IDEQ),
-		optionalPredicate(filter.Collector, certification.CollectorEQ),
-		optionalPredicate(filter.Origin, certification.OriginEQ),
-		optionalPredicate(filter.Justification, certification.JustificationEQ),
-		optionalPredicate(filter.KnownSince, certification.KnownSinceEQ),
+func certifyConflictColumns() []string {
+	return []string{
+		certification.FieldType,
+		certification.FieldCollector,
+		certification.FieldOrigin,
+		certification.FieldJustification,
+		certification.FieldDocumentRef,
+		certification.FieldKnownSince,
 	}
-
-	if filter.Subject != nil {
-		switch {
-		case filter.Subject.Artifact != nil:
-			query = append(query, certification.HasArtifactWith(artifactQueryPredicates(filter.Subject.Artifact)))
-		case filter.Subject.Package != nil:
-			query = append(query, certification.Or(
-				certification.HasAllVersionsWith(packageNameQuery(pkgNameQueryFromPkgSpec(filter.Subject.Package))),
-				certification.HasPackageVersionWith(packageVersionQuery(filter.Subject.Package)),
-			))
-		case filter.Subject.Source != nil:
-			query = append(query, certification.HasSourceWith(sourceQuery(filter.Subject.Source)))
-		}
-	}
-
-	return client.Certification.Query().
-		Where(query...).
-		Limit(MaxPageSize).
-		WithSource(withSourceNameTreeQuery()).
-		WithArtifact().
-		WithPackageVersion(withPackageVersionTree()).
-		WithAllVersions(withPackageNameTree()).
-		All(ctx)
 }
 
 func upsertCertification[T certificationInputSpec](ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec T) (*string, error) {
 	var conflictWhere *sql.Predicate
 
-	conflictColumns := []string{
-		certification.FieldType,
-		certification.FieldCollector,
-		certification.FieldOrigin,
-		certification.FieldJustification,
-		certification.FieldKnownSince,
-	}
+	conflictColumns := certifyConflictColumns()
 
 	switch {
 	case subject.Artifact != nil:
@@ -238,16 +379,18 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 		certifyCreate.
 			SetType(certification.TypeBAD).
 			SetJustification(cb.Justification).
+			SetKnownSince(cb.KnownSince.UTC()).
 			SetOrigin(cb.Origin).
 			SetCollector(cb.Collector).
-			SetKnownSince(cb.KnownSince.UTC())
+			SetDocumentRef(cb.DocumentRef)
 	} else if cg != nil {
 		certifyCreate.
 			SetType(certification.TypeGOOD).
 			SetJustification(cg.Justification).
+			SetKnownSince(cg.KnownSince.UTC()).
 			SetOrigin(cg.Origin).
 			SetCollector(cg.Collector).
-			SetKnownSince(cg.KnownSince.UTC())
+			SetDocumentRef(cg.DocumentRef)
 	} else {
 		return nil, fmt.Errorf("must specify either certifyGood or certifyBad")
 	}
@@ -257,7 +400,8 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -274,7 +418,8 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 			var pkgVersionID uuid.UUID
 			if pkg.PackageVersionID != nil {
 				var err error
-				pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+				pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+				pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 				}
@@ -290,7 +435,8 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 			var pkgNameID uuid.UUID
 			if pkg.PackageNameID != nil {
 				var err error
-				pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+				pkgNameGlobalID := fromGlobalID(*pkg.PackageNameID)
+				pkgNameID, err = uuid.Parse(pkgNameGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 				}
@@ -307,7 +453,8 @@ func generateCertifyCreate(ctx context.Context, tx *ent.Tx, pkg *model.IDorPkgIn
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
@@ -328,13 +475,7 @@ func upsertBulkCertification[T certificationInputSpec](ctx context.Context, tx *
 
 	var conflictWhere *sql.Predicate
 
-	conflictColumns := []string{
-		certification.FieldType,
-		certification.FieldCollector,
-		certification.FieldOrigin,
-		certification.FieldJustification,
-		certification.FieldKnownSince,
-	}
+	conflictColumns := certifyConflictColumns()
 
 	switch {
 	case len(subjects.Artifacts) > 0:
@@ -484,6 +625,7 @@ func toModelCertifyBad(v *ent.Certification) *model.CertifyBad {
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 		Subject:       sub,
 		KnownSince:    v.KnownSince,
 	}
@@ -511,7 +653,93 @@ func toModelCertifyGood(v *ent.Certification) *model.CertifyGood {
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 		Subject:       sub,
 		KnownSince:    v.KnownSince,
 	}
+}
+
+func (b *EntBackend) certifyBadNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeBAD, &model.CertifyBadSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyBadPackage] {
+		query.
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions()
+	}
+	if allowedEdges[model.EdgeCertifyBadArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgeCertifyBadSource] {
+		query.
+			WithSource()
+	}
+
+	certifications, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyBad with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundCert := range certifications {
+		if foundCert.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundCert.Edges.PackageVersion)))
+		}
+		if foundCert.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(foundCert.Edges.AllVersions))
+		}
+		if foundCert.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(foundCert.Edges.Artifact))
+		}
+		if foundCert.Edges.Source != nil {
+			out = append(out, toModelSource(foundCert.Edges.Source))
+		}
+	}
+
+	return out, nil
+}
+
+func (b *EntBackend) certifyGoodNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.Certification.Query().
+		Where(queryCertifications(certification.TypeGOOD, &model.CertifyBadSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyGoodPackage] {
+		query.
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions()
+	}
+	if allowedEdges[model.EdgeCertifyGoodArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgeCertifyGoodSource] {
+		query.
+			WithSource()
+	}
+
+	certifications, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for certifyGood with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, foundCert := range certifications {
+		if foundCert.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(foundCert.Edges.PackageVersion)))
+		}
+		if foundCert.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(foundCert.Edges.AllVersions))
+		}
+		if foundCert.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(foundCert.Edges.Artifact))
+		}
+		if foundCert.Edges.Source != nil {
+			out = append(out, toModelSource(foundCert.Edges.Source))
+		}
+	}
+	return out, nil
 }

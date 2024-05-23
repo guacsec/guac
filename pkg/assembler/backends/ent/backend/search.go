@@ -17,6 +17,7 @@ package backend
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/ent"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/artifact"
@@ -57,10 +58,9 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 			packagename.NameContainsFold(searchText),
 		),
 	).WithName(func(q *ent.PackageNameQuery) {}).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed package version query with err: %w", err)
 	}
 
 	results = append(results, collect(packages, func(v *ent.PackageVersion) model.PackageSourceOrArtifact {
@@ -74,22 +74,20 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 			sourcename.NamespaceContainsFold(searchText),
 		),
 	).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed source name query with err: %w", err)
 	}
 	results = append(results, collect(sources, func(v *ent.SourceName) model.PackageSourceOrArtifact {
-		return toModelSourceName(v)
+		return toModelSource(v)
 	})...)
 
 	artifacts, err := b.client.Artifact.Query().Where(
 		artifact.DigestContains(searchText),
 	).
-		Limit(MaxPageSize).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed artifact query with err: %w", err)
 	}
 
 	results = append(results, collect(artifacts, func(v *ent.Artifact) model.PackageSourceOrArtifact {
@@ -97,4 +95,8 @@ func (b *EntBackend) FindSoftware(ctx context.Context, searchText string) ([]mod
 	})...)
 
 	return results, nil
+}
+
+func (b *EntBackend) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindSoftwareList")
 }

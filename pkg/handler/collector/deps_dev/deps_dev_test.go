@@ -23,12 +23,13 @@ import (
 	"testing"
 	"time"
 
-	pb "deps.dev/api/v3alpha"
+	pb "deps.dev/api/v3"
 	"github.com/google/go-cmp/cmp"
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
 	"github.com/guacsec/guac/pkg/collectsub/datasource/inmemsource"
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
@@ -262,6 +263,8 @@ func Test_depsCollector_RetrieveArtifacts(t *testing.T) {
 				t.Errorf("Wanted %v elements, but got %v", len(tt.want), len(collectedDocs))
 			}
 			for i := range collectedDocs {
+				tt.want[i].SourceInformation.DocumentRef = actualDocRef(collectedDocs[i].Blob)
+
 				collectedDocs[i].Blob, err = normalizeTimeStampAndScorecard(collectedDocs[i].Blob)
 				if err != nil {
 					t.Fatalf("unexpected error while normalizing: %v", err)
@@ -303,7 +306,7 @@ func TestPerformanceDepsCollector(t *testing.T) {
 			"pkg:golang/github.com/bradleyfalzon/ghinstallation/v2@v2.6.0",
 			"pkg:golang/github.com/go-git/go-git/v5@v5.8.1",
 			"pkg:golang/github.com/go-logr/logr@v1.2.4",
-			"pkg:golang/github.com/golang/mock@v1.6.0",
+			"pkg:golang/go.uber.org/mock/mockgen@v0.4.0",
 			"pkg:golang/github.com/google/go-cmp@v0.5.9",
 			"pkg:golang/github.com/google/go-containerregistry@v0.16.1",
 			"pkg:golang/github.com/grafeas/kritis@v0.2.3-0.20210120183821-faeba81c520c",
@@ -379,6 +382,14 @@ func TestPerformanceDepsCollector(t *testing.T) {
 	if len(collectedDocs) == 0 {
 		t.Errorf("g.RetrieveArtifacts() = %v", len(collectedDocs))
 	}
+}
+
+// The blob that we input into the test is not the final blob that
+// gets hashed to come up with the blob key; the final blob is
+// different. So we run the hashing function on the final blob and
+// then set it on our original want doc.
+func actualDocRef(blob []byte) string {
+	return events.GetDocRef(blob)
 }
 
 // Scorecard and timestamp data constantly changes, causing CI to keep erroring every few days.

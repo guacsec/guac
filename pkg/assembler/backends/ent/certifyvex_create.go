@@ -103,6 +103,12 @@ func (cvc *CertifyVexCreate) SetCollector(s string) *CertifyVexCreate {
 	return cvc
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (cvc *CertifyVexCreate) SetDocumentRef(s string) *CertifyVexCreate {
+	cvc.mutation.SetDocumentRef(s)
+	return cvc
+}
+
 // SetID sets the "id" field.
 func (cvc *CertifyVexCreate) SetID(u uuid.UUID) *CertifyVexCreate {
 	cvc.mutation.SetID(u)
@@ -199,6 +205,9 @@ func (cvc *CertifyVexCreate) check() error {
 	if _, ok := cvc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "CertifyVex.collector"`)}
 	}
+	if _, ok := cvc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "CertifyVex.document_ref"`)}
+	}
 	if _, ok := cvc.mutation.VulnerabilityID(); !ok {
 		return &ValidationError{Name: "vulnerability", err: errors.New(`ent: missing required edge "CertifyVex.vulnerability"`)}
 	}
@@ -265,6 +274,10 @@ func (cvc *CertifyVexCreate) createSpec() (*CertifyVex, *sqlgraph.CreateSpec) {
 	if value, ok := cvc.mutation.Collector(); ok {
 		_spec.SetField(certifyvex.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := cvc.mutation.DocumentRef(); ok {
+		_spec.SetField(certifyvex.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if nodes := cvc.mutation.PackageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -501,6 +514,18 @@ func (u *CertifyVexUpsert) UpdateCollector() *CertifyVexUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyVexUpsert) SetDocumentRef(v string) *CertifyVexUpsert {
+	u.Set(certifyvex.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyVexUpsert) UpdateDocumentRef() *CertifyVexUpsert {
+	u.SetExcluded(certifyvex.FieldDocumentRef)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -700,6 +725,20 @@ func (u *CertifyVexUpsertOne) SetCollector(v string) *CertifyVexUpsertOne {
 func (u *CertifyVexUpsertOne) UpdateCollector() *CertifyVexUpsertOne {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyVexUpsertOne) SetDocumentRef(v string) *CertifyVexUpsertOne {
+	return u.Update(func(s *CertifyVexUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyVexUpsertOne) UpdateDocumentRef() *CertifyVexUpsertOne {
+	return u.Update(func(s *CertifyVexUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -1069,6 +1108,20 @@ func (u *CertifyVexUpsertBulk) SetCollector(v string) *CertifyVexUpsertBulk {
 func (u *CertifyVexUpsertBulk) UpdateCollector() *CertifyVexUpsertBulk {
 	return u.Update(func(s *CertifyVexUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *CertifyVexUpsertBulk) SetDocumentRef(v string) *CertifyVexUpsertBulk {
+	return u.Update(func(s *CertifyVexUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *CertifyVexUpsertBulk) UpdateDocumentRef() *CertifyVexUpsertBulk {
+	return u.Update(func(s *CertifyVexUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

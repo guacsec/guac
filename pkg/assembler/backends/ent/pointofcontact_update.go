@@ -197,6 +197,20 @@ func (pocu *PointOfContactUpdate) SetNillableCollector(s *string) *PointOfContac
 	return pocu
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (pocu *PointOfContactUpdate) SetDocumentRef(s string) *PointOfContactUpdate {
+	pocu.mutation.SetDocumentRef(s)
+	return pocu
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (pocu *PointOfContactUpdate) SetNillableDocumentRef(s *string) *PointOfContactUpdate {
+	if s != nil {
+		pocu.SetDocumentRef(*s)
+	}
+	return pocu
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (pocu *PointOfContactUpdate) SetSource(s *SourceName) *PointOfContactUpdate {
 	return pocu.SetSourceID(s.ID)
@@ -313,6 +327,9 @@ func (pocu *PointOfContactUpdate) sqlSave(ctx context.Context) (n int, err error
 	}
 	if value, ok := pocu.mutation.Collector(); ok {
 		_spec.SetField(pointofcontact.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := pocu.mutation.DocumentRef(); ok {
+		_spec.SetField(pointofcontact.FieldDocumentRef, field.TypeString, value)
 	}
 	if pocu.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -614,6 +631,20 @@ func (pocuo *PointOfContactUpdateOne) SetNillableCollector(s *string) *PointOfCo
 	return pocuo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (pocuo *PointOfContactUpdateOne) SetDocumentRef(s string) *PointOfContactUpdateOne {
+	pocuo.mutation.SetDocumentRef(s)
+	return pocuo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (pocuo *PointOfContactUpdateOne) SetNillableDocumentRef(s *string) *PointOfContactUpdateOne {
+	if s != nil {
+		pocuo.SetDocumentRef(*s)
+	}
+	return pocuo
+}
+
 // SetSource sets the "source" edge to the SourceName entity.
 func (pocuo *PointOfContactUpdateOne) SetSource(s *SourceName) *PointOfContactUpdateOne {
 	return pocuo.SetSourceID(s.ID)
@@ -760,6 +791,9 @@ func (pocuo *PointOfContactUpdateOne) sqlSave(ctx context.Context) (_node *Point
 	}
 	if value, ok := pocuo.mutation.Collector(); ok {
 		_spec.SetField(pointofcontact.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := pocuo.mutation.DocumentRef(); ok {
+		_spec.SetField(pointofcontact.FieldDocumentRef, field.TypeString, value)
 	}
 	if pocuo.mutation.SourceCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -25,6 +25,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"go.uber.org/zap"
+
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/emitter"
@@ -83,12 +85,17 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	sub, err := emPubSub.Subscribe(ctx, uuidString)
+
+	sub, err := emPubSub.Subscribe(ctx)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to create new pubsub: %w", uuidString, err)
 	}
+
+	retries := 0
+
 	// should still continue if there are errors since problem is with individual documents
 	processFunc := func(d *pubsub.Message) error {
+		retries++
 
 		blobStoreKey, err := events.DecodeEventSubject(ctx, d.Body)
 		if err != nil {
@@ -96,30 +103,50 @@ func Subscribe(ctx context.Context, em collector.Emitter, blobStore *blob.BlobSt
 			return nil
 		}
 
+		// start up the child logger with the hash of the document
+		// this initializes a new logger instead of re-assigning to logger so that we don't add multiple values for a single key in the logs
+		childLogger := logger.With(zap.String(logging.DocumentHash, blobStoreKey))
+
+		childLogger.Debugf("[processor: %s] starting child logger", uuidString)
+
 		documentBytes, err := blobStore.Read(ctx, blobStoreKey)
 		if err != nil {
-			logger.Errorf("[processor: %s] failed read document to blob store: %v", uuidString, err)
+			childLogger.Errorf("[processor: %s] failed read document to blob store: %v", uuidString, err)
 			return nil
 		}
 
 		doc := processor.Document{}
 		if err = json.Unmarshal(documentBytes, &doc); err != nil {
-			logger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
+			childLogger.Errorf("[processor: %s] failed unmarshal the document bytes: %v", uuidString, err)
 			return nil
 		}
 
+		doc.ChildLogger = childLogger
+
 		if err := em(&doc); err != nil {
-			logger.Error("[processor: %s] failed transportFunc: %v", uuidString, err)
+			childLogger.Errorf("[processor: %s] failed transportFunc: %v", uuidString, err)
+			childLogger.Errorf("[processor: %s] message id: %s not acknowledged in pusbub", uuidString, d.LoggableID)
 			return nil
 		}
+
 		// ack the message from the queue once the ingestion has occurred via the Emitter (em) function specified above
 		d.Ack()
-		logger.Infof("[processor: %s] message acknowledged in pusbub", uuidString)
+		childLogger.Infof("[processor: %s] message acknowledged in pusbub", uuidString)
+
+		childLogger.Info("Processing complete",
+			zap.String("file_name", doc.SourceInformation.Source),
+			zap.String("document_hash", blobStoreKey),
+			zap.String("status", "success"),
+			zap.Int("file_size", len(d.Body)),
+			zap.Int("retries", retries-1),
+		)
+
+		retries = 0
 
 		return nil
 	}
 
-	err = sub.GetDataFromSubscriber(ctx, processFunc)
+	err = sub.GetDataFromSubscriber(ctx, processFunc, uuidString)
 	if err != nil {
 		return fmt.Errorf("[processor: %s] failed to get data from %s: %w", uuidString, emPubSub.ServiceURL, err)
 	}

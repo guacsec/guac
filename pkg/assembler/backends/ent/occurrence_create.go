@@ -51,6 +51,12 @@ func (oc *OccurrenceCreate) SetCollector(s string) *OccurrenceCreate {
 	return oc
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (oc *OccurrenceCreate) SetDocumentRef(s string) *OccurrenceCreate {
+	oc.mutation.SetDocumentRef(s)
+	return oc
+}
+
 // SetSourceID sets the "source_id" field.
 func (oc *OccurrenceCreate) SetSourceID(u uuid.UUID) *OccurrenceCreate {
 	oc.mutation.SetSourceID(u)
@@ -178,6 +184,9 @@ func (oc *OccurrenceCreate) check() error {
 	if _, ok := oc.mutation.Collector(); !ok {
 		return &ValidationError{Name: "collector", err: errors.New(`ent: missing required field "Occurrence.collector"`)}
 	}
+	if _, ok := oc.mutation.DocumentRef(); !ok {
+		return &ValidationError{Name: "document_ref", err: errors.New(`ent: missing required field "Occurrence.document_ref"`)}
+	}
 	if _, ok := oc.mutation.ArtifactID(); !ok {
 		return &ValidationError{Name: "artifact", err: errors.New(`ent: missing required edge "Occurrence.artifact"`)}
 	}
@@ -228,6 +237,10 @@ func (oc *OccurrenceCreate) createSpec() (*Occurrence, *sqlgraph.CreateSpec) {
 	if value, ok := oc.mutation.Collector(); ok {
 		_spec.SetField(occurrence.FieldCollector, field.TypeString, value)
 		_node.Collector = value
+	}
+	if value, ok := oc.mutation.DocumentRef(); ok {
+		_spec.SetField(occurrence.FieldDocumentRef, field.TypeString, value)
+		_node.DocumentRef = value
 	}
 	if nodes := oc.mutation.ArtifactIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -396,6 +409,18 @@ func (u *OccurrenceUpsert) UpdateCollector() *OccurrenceUpsert {
 	return u
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (u *OccurrenceUpsert) SetDocumentRef(v string) *OccurrenceUpsert {
+	u.Set(occurrence.FieldDocumentRef, v)
+	return u
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *OccurrenceUpsert) UpdateDocumentRef() *OccurrenceUpsert {
+	u.SetExcluded(occurrence.FieldDocumentRef)
+	return u
+}
+
 // SetSourceID sets the "source_id" field.
 func (u *OccurrenceUpsert) SetSourceID(v uuid.UUID) *OccurrenceUpsert {
 	u.Set(occurrence.FieldSourceID, v)
@@ -533,6 +558,20 @@ func (u *OccurrenceUpsertOne) SetCollector(v string) *OccurrenceUpsertOne {
 func (u *OccurrenceUpsertOne) UpdateCollector() *OccurrenceUpsertOne {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *OccurrenceUpsertOne) SetDocumentRef(v string) *OccurrenceUpsertOne {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *OccurrenceUpsertOne) UpdateDocumentRef() *OccurrenceUpsertOne {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 
@@ -846,6 +885,20 @@ func (u *OccurrenceUpsertBulk) SetCollector(v string) *OccurrenceUpsertBulk {
 func (u *OccurrenceUpsertBulk) UpdateCollector() *OccurrenceUpsertBulk {
 	return u.Update(func(s *OccurrenceUpsert) {
 		s.UpdateCollector()
+	})
+}
+
+// SetDocumentRef sets the "document_ref" field.
+func (u *OccurrenceUpsertBulk) SetDocumentRef(v string) *OccurrenceUpsertBulk {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.SetDocumentRef(v)
+	})
+}
+
+// UpdateDocumentRef sets the "document_ref" field to the value that was provided on create.
+func (u *OccurrenceUpsertBulk) UpdateDocumentRef() *OccurrenceUpsertBulk {
+	return u.Update(func(s *OccurrenceUpsert) {
+		s.UpdateDocumentRef()
 	})
 }
 

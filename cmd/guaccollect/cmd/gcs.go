@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
+	"os"
+
+	"cloud.google.com/go/storage"
 	"github.com/guacsec/guac/pkg/cli"
-	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/collector/gcs"
@@ -14,15 +15,15 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/api/option"
-	"os"
 )
 
 type gcsOptions struct {
 	pubSubAddr        string
 	blobAddr          string
-	graphqlEndpoint   string
-	csubClientOptions client.CsubClientOptions
+	csubClientOptions csub_client.CsubClientOptions
 	bucket            string
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 const gcsCredentialsPathFlag = "gcp-credentials-path"
@@ -39,11 +40,11 @@ var gcsCmd = &cobra.Command{
 		opts, err := validateGCSFlags(
 			viper.GetString("pubsub-addr"),
 			viper.GetString("blob-addr"),
-			viper.GetString("gql-addr"),
 			viper.GetString("csub-addr"),
+			viper.GetString(gcsCredentialsPathFlag),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
-			viper.GetString(gcsCredentialsPathFlag),
+			viper.GetBool("publish-to-queue"),
 			args)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -66,7 +67,7 @@ var gcsCmd = &cobra.Command{
 			logger.Fatalf("creating client: %v", err)
 		}
 
-		// Register collector by providing a new GCS Client and bucket name
+		// Register collector
 		gcsCollector, err := gcs.NewGCSCollector(gcs.WithBucket(opts.bucket), gcs.WithClient(client))
 		if err != nil {
 			logger.Fatalf("unable to create gcs client: %v", err)
@@ -86,18 +87,27 @@ var gcsCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		initializeNATsandCollector(ctx, opts.pubSubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubSubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
-func validateGCSFlags(pubSubAddr, blobAddr, gqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, credentialsPath string, args []string) (gcsOptions, error) {
+func validateGCSFlags(
+	pubSubAddr,
+	blobAddr,
+	csubAddr,
+	credentialsPath string,
+	csubTls,
+	csubTlsSkipVerify bool,
+	pubToQueue bool,
+	args []string,
+) (gcsOptions, error) {
 	opts := gcsOptions{
-		pubSubAddr:      pubSubAddr,
-		blobAddr:        blobAddr,
-		graphqlEndpoint: gqlEndpoint,
+		pubSubAddr:     pubSubAddr,
+		blobAddr:       blobAddr,
+		publishToQueue: pubToQueue,
 	}
 
-	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
+	csubOpts, err := csub_client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {
 		return opts, fmt.Errorf("unable to validate csub client flags: %w", err)
 	}

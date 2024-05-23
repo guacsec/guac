@@ -19,9 +19,13 @@ neptune-realm: neptune
 
 # pubsub setup
 pubsub-addr: nats://localhost:4222
+publish-to-queue: true
 
 # blob store setup. Setup with blob store of choice via https://gocloud.dev/howto/blob/
 blob-addr: file:///tmp/blobstore?no_tmp_dir=true
+
+# certifier interval
+interval: 20m
 
 # CSub setup
 csub-addr: localhost:2782

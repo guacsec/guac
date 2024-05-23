@@ -970,6 +970,40 @@ func TestIngestVulnMetadata(t *testing.T) {
 					Origin:     "test origin",
 				},
 			},
+		}, {
+			Name:   "docref",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.C1},
+			Calls: []call{
+				{
+					Vuln: testdata.C1,
+					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+						ScoreType:   model.VulnerabilityScoreTypeCVSSv2,
+						ScoreValue:  8.9,
+						Timestamp:   testdata.T1,
+						Collector:   "test collector",
+						Origin:      "test origin",
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.VulnerabilityMetadataSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVuln: []*model.VulnerabilityMetadata{
+				{
+					ID: "1",
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+					},
+					ScoreType:   model.VulnerabilityScoreTypeCVSSv2,
+					ScoreValue:  8.9,
+					Timestamp:   testdata.T1,
+					Collector:   "test collector",
+					Origin:      "test origin",
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -1012,14 +1046,20 @@ func TestIngestVulnMetadata(t *testing.T) {
 				}
 			}
 
-			got, err := b.VulnerabilityMetadata(ctx, test.Query)
+			got, err := b.VulnerabilityMetadataList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpVuln, got, commonOpts); diff != "" {
+			var returnedObjects []*model.VulnerabilityMetadata
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpVuln, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -1280,6 +1320,47 @@ func TestIngestVulnMetadatas(t *testing.T) {
 				},
 			},
 			ExpVuln: nil,
+		}, {
+			Name:   "docref",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.C1, testdata.C2},
+			Calls: []call{
+				{
+					Vulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
+					VulnMetadatas: []*model.VulnerabilityMetadataInputSpec{
+						{
+							ScoreType:  model.VulnerabilityScoreTypeCVSSv3,
+							ScoreValue: 7.9,
+							Timestamp:  testdata.T1,
+							Collector:  "test collector",
+							Origin:     "test origin",
+						},
+						{
+							ScoreType:   model.VulnerabilityScoreTypeCVSSv2,
+							ScoreValue:  8.9,
+							Timestamp:   testdata.T1,
+							DocumentRef: "test",
+							Origin:      "test origin",
+						},
+					},
+				},
+			},
+			Query: &model.VulnerabilityMetadataSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVuln: []*model.VulnerabilityMetadata{
+				{
+					ID: "10",
+					Vulnerability: &model.Vulnerability{
+						Type:             "cve",
+						VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
+					},
+					ScoreType:   model.VulnerabilityScoreTypeCVSSv2,
+					ScoreValue:  8.9,
+					Timestamp:   testdata.T1,
+					DocumentRef: "test",
+					Origin:      "test origin",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -1299,14 +1380,20 @@ func TestIngestVulnMetadatas(t *testing.T) {
 				}
 
 			}
-			got, err := b.VulnerabilityMetadata(ctx, test.Query)
+			got, err := b.VulnerabilityMetadataList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpVuln, got, commonOpts); diff != "" {
+			var returnedObjects []*model.VulnerabilityMetadata
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpVuln, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

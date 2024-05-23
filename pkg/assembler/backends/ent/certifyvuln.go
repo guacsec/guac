@@ -38,6 +38,8 @@ type CertifyVuln struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CertifyVulnQuery when eager-loading is set.
 	Edges        CertifyVulnEdges `json:"edges"`
@@ -88,7 +90,7 @@ func (*CertifyVuln) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case certifyvuln.FieldDbURI, certifyvuln.FieldDbVersion, certifyvuln.FieldScannerURI, certifyvuln.FieldScannerVersion, certifyvuln.FieldOrigin, certifyvuln.FieldCollector:
+		case certifyvuln.FieldDbURI, certifyvuln.FieldDbVersion, certifyvuln.FieldScannerURI, certifyvuln.FieldScannerVersion, certifyvuln.FieldOrigin, certifyvuln.FieldCollector, certifyvuln.FieldDocumentRef:
 			values[i] = new(sql.NullString)
 		case certifyvuln.FieldTimeScanned:
 			values[i] = new(sql.NullTime)
@@ -169,6 +171,12 @@ func (cv *CertifyVuln) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				cv.Collector = value.String
 			}
+		case certifyvuln.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				cv.DocumentRef = value.String
+			}
 		default:
 			cv.selectValues.Set(columns[i], values[i])
 		}
@@ -241,6 +249,9 @@ func (cv *CertifyVuln) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(cv.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(cv.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -29,6 +29,28 @@ fragment allCertifyScorecardTree on CertifyScorecard {
     scorecardCommit
     origin
     collector
+    documentRef
+  }
+}
+
+fragment allCertifyScorecardPaginationTree on CertifyScorecardConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query scorecardPagination {
+  scorecardsList(scorecardSpec: {}, first: 10) {
+    ...allCertifyScorecardPaginationTree
   }
 }
 

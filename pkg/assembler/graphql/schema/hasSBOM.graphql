@@ -29,12 +29,14 @@ type HasSBOM {
   digest: String!
   "Location from which the SBOM can be downloaded"
   downloadLocation: String!
+  "Timestamp for SBOM creation"
+  knownSince: Time!
   "Document from which this attestation is generated from"
   origin: String!
   "GUAC collector for the document"
   collector: String!
-  "Timestamp for SBOM creation"
-  knownSince: Time!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
   "Included packages and artifacts"
   includedSoftware: [PackageOrArtifact!]!
   "Included dependencies"
@@ -58,9 +60,10 @@ input HasSBOMSpec {
   algorithm: String
   digest: String
   downloadLocation: String
+  knownSince: Time
   origin: String
   collector: String
-  knownSince: Time
+  documentRef: String
   includedSoftware: [PackageOrArtifactSpec!]
   includedDependencies: [IsDependencySpec!]
   includedOccurrences: [IsOccurrenceSpec!]
@@ -79,14 +82,44 @@ input HasSBOMInputSpec {
   algorithm: String!
   digest: String!
   downloadLocation: String!
+  knownSince: Time!
   origin: String!
   collector: String!
-  knownSince: Time!
+  documentRef: String!
+}
+
+"""
+HasSBOMConnection returns the paginated results for HasSBOM.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the HasSBOMEdge which contains the current cursor
+and the HasSBOM node itself
+"""
+type HasSBOMConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [HasSBOMEdge!]!
+}
+
+"""
+HasSBOMEdge contains the cursor for the resulting node and
+the HasSBOMEdge node itself.
+"""
+type HasSBOMEdge {
+  cursor: ID!
+  node: HasSBOM!
 }
 
 extend type Query {
   "Returns all SBOM certifications."
   HasSBOM(hasSBOMSpec: HasSBOMSpec!): [HasSBOM!]!
+  "Returns a paginated results via HasSBOMConnection"
+  HasSBOMList(hasSBOMSpec: HasSBOMSpec!, after: ID, first: Int): HasSBOMConnection
 }
 
 extend type Mutation {

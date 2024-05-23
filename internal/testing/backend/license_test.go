@@ -109,7 +109,7 @@ func TestLicenses(t *testing.T) {
 					tt.Query.ID = ptrfrom.String(ingestedLicenseID)
 				}
 			}
-			got, err := b.Licenses(ctx, tt.Query)
+			got, err := b.LicenseList(ctx, *tt.Query, nil, nil)
 			if (err != nil) != tt.ExpQueryErr {
 				t.Errorf("arangoClient.Licenses() error = %v, wantErr %v", err, tt.ExpQueryErr)
 				return
@@ -117,7 +117,13 @@ func TestLicenses(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(tt.Exp, got, commonOpts); diff != "" {
+			var returnedObjects []*model.License
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(tt.Exp, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -175,7 +181,7 @@ func TestLicensesBulk(t *testing.T) {
 			if err != nil {
 				return
 			}
-			got, err := b.Licenses(ctx, tt.Query)
+			got, err := b.LicenseList(ctx, *tt.Query, nil, nil)
 			if (err != nil) != tt.ExpQueryErr {
 				t.Errorf("arangoClient.Licenses() error = %v, wantErr %v", err, tt.ExpQueryErr)
 				return
@@ -183,7 +189,13 @@ func TestLicensesBulk(t *testing.T) {
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(tt.Exp, got, commonOpts); diff != "" {
+			var returnedObjects []*model.License
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(tt.Exp, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

@@ -74,6 +74,11 @@ func Collector(v string) predicate.PkgEqual {
 	return predicate.PkgEqual(sql.FieldEQ(FieldCollector, v))
 }
 
+// DocumentRef applies equality check predicate on the "document_ref" field. It's identical to DocumentRefEQ.
+func DocumentRef(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldEQ(FieldDocumentRef, v))
+}
+
 // Justification applies equality check predicate on the "justification" field. It's identical to JustificationEQ.
 func Justification(v string) predicate.PkgEqual {
 	return predicate.PkgEqual(sql.FieldEQ(FieldJustification, v))
@@ -252,6 +257,71 @@ func CollectorEqualFold(v string) predicate.PkgEqual {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.PkgEqual {
 	return predicate.PkgEqual(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// DocumentRefEQ applies the EQ predicate on the "document_ref" field.
+func DocumentRefEQ(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefNEQ applies the NEQ predicate on the "document_ref" field.
+func DocumentRefNEQ(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldNEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefIn applies the In predicate on the "document_ref" field.
+func DocumentRefIn(vs ...string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefNotIn applies the NotIn predicate on the "document_ref" field.
+func DocumentRefNotIn(vs ...string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldNotIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefGT applies the GT predicate on the "document_ref" field.
+func DocumentRefGT(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldGT(FieldDocumentRef, v))
+}
+
+// DocumentRefGTE applies the GTE predicate on the "document_ref" field.
+func DocumentRefGTE(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldGTE(FieldDocumentRef, v))
+}
+
+// DocumentRefLT applies the LT predicate on the "document_ref" field.
+func DocumentRefLT(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldLT(FieldDocumentRef, v))
+}
+
+// DocumentRefLTE applies the LTE predicate on the "document_ref" field.
+func DocumentRefLTE(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldLTE(FieldDocumentRef, v))
+}
+
+// DocumentRefContains applies the Contains predicate on the "document_ref" field.
+func DocumentRefContains(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldContains(FieldDocumentRef, v))
+}
+
+// DocumentRefHasPrefix applies the HasPrefix predicate on the "document_ref" field.
+func DocumentRefHasPrefix(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldHasPrefix(FieldDocumentRef, v))
+}
+
+// DocumentRefHasSuffix applies the HasSuffix predicate on the "document_ref" field.
+func DocumentRefHasSuffix(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldHasSuffix(FieldDocumentRef, v))
+}
+
+// DocumentRefEqualFold applies the EqualFold predicate on the "document_ref" field.
+func DocumentRefEqualFold(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldEqualFold(FieldDocumentRef, v))
+}
+
+// DocumentRefContainsFold applies the ContainsFold predicate on the "document_ref" field.
+func DocumentRefContainsFold(v string) predicate.PkgEqual {
+	return predicate.PkgEqual(sql.FieldContainsFold(FieldDocumentRef, v))
 }
 
 // JustificationEQ applies the EQ predicate on the "justification" field.

@@ -18,6 +18,8 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 	"time"
 
@@ -38,6 +40,7 @@ type badLink struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 	KnownSince    time.Time
 }
 
@@ -51,6 +54,7 @@ func (n *badLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 		timeKey(n.KnownSince),
 	}, ":"))
 }
@@ -114,6 +118,7 @@ func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.Package
 		Justification: certifyBad.Justification,
 		Origin:        certifyBad.Origin,
 		Collector:     certifyBad.Collector,
+		DocumentRef:   certifyBad.DocumentRef,
 		KnownSince:    certifyBad.KnownSince.UTC(),
 	}
 
@@ -186,6 +191,184 @@ func (c *demoClient) ingestCertifyBad(ctx context.Context, subject model.Package
 }
 
 // Query CertifyBad
+
+func (c *demoClient) CertifyBadList(ctx context.Context, certifyBadSpec model.CertifyBadSpec, after *string, first *int) (*model.CertifyBadConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	funcName := "CertifyBad"
+
+	if certifyBadSpec.ID != nil {
+		link, err := byIDkv[*badLink](ctx, *certifyBadSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		foundCertifyBad, err := c.buildCertifyBad(ctx, link, &certifyBadSpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return &model.CertifyBadConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(foundCertifyBad.ID),
+				EndCursor:   ptrfrom.String(foundCertifyBad.ID),
+			},
+			Edges: []*model.CertifyBadEdge{
+				{
+					Cursor: foundCertifyBad.ID,
+					Node:   foundCertifyBad,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.CertifyBadEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	// Cant really search for an exact Pkg, as these can be linked to either
+	// names or versions, and version could be empty.
+	var search []string
+	foundOne := false
+	if certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Artifact != nil {
+		exactArtifact, err := c.artifactExact(ctx, certifyBadSpec.Subject.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactArtifact != nil {
+			search = append(search, exactArtifact.BadLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && certifyBadSpec.Subject != nil && certifyBadSpec.Subject.Source != nil {
+		exactSource, err := c.exactSource(ctx, certifyBadSpec.Subject.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.BadLinks...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*badLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			cb, err := c.CBIfMatch(ctx, &certifyBadSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if cb == nil {
+				continue
+			}
+
+			if (after != nil && cb.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyBadEdge{
+							Cursor: cb.ID,
+							Node:   cb,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyBadEdge{
+						Cursor: cb.ID,
+						Node:   cb,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(cbCol)
+		for !done {
+			var cbKeys []string
+			var err error
+
+			cbKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(cbKeys)
+
+			totalCount = len(cbKeys)
+
+			for i, cbk := range cbKeys {
+				link, err := byKeykv[*badLink](ctx, cbCol, cbk, c)
+				if err != nil {
+					return nil, err
+				}
+				cbOut, err := c.CBIfMatch(ctx, &certifyBadSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if cbOut == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if cbOut.ID == *after {
+						totalCount = len(cbKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first && currentPage {
+						edges = append(edges, &model.CertifyBadEdge{
+							Cursor: cbOut.ID,
+							Node:   cbOut,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyBadEdge{
+						Cursor: cbOut.ID,
+						Node:   cbOut,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.CertifyBadConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(0, numNodes-1)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
+
 func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpec) ([]*model.CertifyBad, error) {
 	funcName := "CertifyBad"
 
@@ -237,10 +420,16 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addCBIfMatch(ctx, out, filter, link)
+			cb, err := c.CBIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if cb == nil {
+				continue
+			}
+
+			out = append(out, cb)
 		}
 	} else {
 		var done bool
@@ -257,26 +446,27 @@ func (c *demoClient) CertifyBad(ctx context.Context, filter *model.CertifyBadSpe
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addCBIfMatch(ctx, out, filter, link)
+				cb, err := c.CBIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				out = append(out, cb)
 			}
 		}
 	}
 	return out, nil
 }
 
-func (c *demoClient) addCBIfMatch(ctx context.Context, out []*model.CertifyBad,
-	filter *model.CertifyBadSpec, link *badLink) (
-	[]*model.CertifyBad, error) {
+func (c *demoClient) CBIfMatch(ctx context.Context, filter *model.CertifyBadSpec, link *badLink) (*model.CertifyBad, error) {
 
 	if filter != nil {
 		if noMatch(filter.Justification, link.Justification) ||
 			noMatch(filter.Collector, link.Collector) ||
 			noMatch(filter.Origin, link.Origin) ||
+			noMatch(filter.DocumentRef, link.DocumentRef) ||
 			filter.KnownSince != nil && filter.KnownSince.After(link.KnownSince) {
-			return out, nil
+			return nil, nil
 		}
 	}
 
@@ -285,9 +475,9 @@ func (c *demoClient) addCBIfMatch(ctx context.Context, out []*model.CertifyBad,
 		return nil, err
 	}
 	if foundCertifyBad == nil {
-		return out, nil
+		return nil, nil
 	}
-	return append(out, foundCertifyBad), nil
+	return foundCertifyBad, nil
 }
 
 func (c *demoClient) buildCertifyBad(ctx context.Context, link *badLink, filter *model.CertifyBadSpec, ingestOrIDProvided bool) (*model.CertifyBad, error) {
@@ -367,6 +557,7 @@ func (c *demoClient) buildCertifyBad(ctx context.Context, link *badLink, filter 
 		Justification: link.Justification,
 		Origin:        link.Origin,
 		Collector:     link.Collector,
+		DocumentRef:   link.DocumentRef,
 		KnownSince:    link.KnownSince.UTC(),
 	}
 	return &certifyBad, nil

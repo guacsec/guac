@@ -15,6 +15,8 @@
 
 package processor
 
+import "go.uber.org/zap"
+
 type DocumentProcessor interface {
 	// ValidateSchema validates the schema of the document
 	ValidateSchema(i *Document) error
@@ -36,6 +38,7 @@ type Document struct {
 	Format            FormatType
 	Encoding          EncodingType
 	SourceInformation SourceInformation
+	ChildLogger       *zap.SugaredLogger
 }
 
 // DocumentTree describes the output of a document tree that resulted from
@@ -98,4 +101,6 @@ type SourceInformation struct {
 	Collector string
 	// Source describes the source which the collector got this information
 	Source string
+	// DocumentRef describes the location of the document in the blob store
+	DocumentRef string
 }

@@ -561,6 +561,36 @@ func TestVulnEqual(t *testing.T) {
 			},
 			ExpVulnEqual: nil,
 			ExpQueryErr:  false,
+		}, {
+			Name:   "docref",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1},
+			Calls: []call{
+				{
+					Vuln:      testdata.O1,
+					OtherVuln: testdata.C1,
+					In: &model.VulnEqualInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVulnEqual: []*model.VulnEqual{
+				{
+					Vulnerabilities: []*model.Vulnerability{
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+						},
+						{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C1out},
+						},
+					},
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -599,14 +629,20 @@ func TestVulnEqual(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.VulnEqual(ctx, test.Query)
+			got, err := b.VulnEqualList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpVulnEqual, got, commonOpts); diff != "" {
+			var returnedObjects []*model.VulnEqual
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpVulnEqual, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -768,6 +804,41 @@ func TestIngestVulnEquals(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:   "docref",
+			InVuln: []*model.VulnerabilityInputSpec{testdata.O1, testdata.C1, testdata.O1, testdata.C2},
+			Calls: []call{
+				{
+					Vulns:      []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.O1}, {VulnerabilityInput: testdata.O1}},
+					OtherVulns: []*model.IDorVulnerabilityInput{{VulnerabilityInput: testdata.C1}, {VulnerabilityInput: testdata.C2}},
+					Ins: []*model.VulnEqualInputSpec{
+						{
+							Justification: "test justification",
+						},
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.VulnEqualSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpVulnEqual: []*model.VulnEqual{
+				{
+					Vulnerabilities: []*model.Vulnerability{
+						{
+							Type:             "cve",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.C2out},
+						},
+						{
+							Type:             "osv",
+							VulnerabilityIDs: []*model.VulnerabilityID{testdata.O1out},
+						},
+					},
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -787,14 +858,20 @@ func TestIngestVulnEquals(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.VulnEqual(ctx, test.Query)
+			got, err := b.VulnEqualList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpVulnEqual, got, commonOpts); diff != "" {
+			var returnedObjects []*model.VulnEqual
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpVulnEqual, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

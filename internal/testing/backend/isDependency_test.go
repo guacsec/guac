@@ -815,6 +815,29 @@ func TestIsDependency(t *testing.T) {
 					DependencyPackage: testdata.P4out,
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					MF: mAll,
+					ID: &model.IsDependencyInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.IsDependencySpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpID: []*model.IsDependency{
+				{
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+					DocumentRef:       "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -853,14 +876,20 @@ func TestIsDependency(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.IsDependency(ctx, test.Query)
+			got, err := b.IsDependencyList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpID, got, commonOpts); diff != "" {
+			var returnedObjects []*model.IsDependency
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpID, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -931,6 +960,29 @@ func TestIsDependencies(t *testing.T) {
 					Justification:     "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2, testdata.P3, testdata.P4},
+			Calls: []call{{
+				P1s: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+				P2s: []*model.IDorPkgInput{{PackageInput: testdata.P2}, {PackageInput: testdata.P4}},
+				MF:  mAll,
+				IDs: []*model.IsDependencyInputSpec{
+					{
+						DocumentRef: "test",
+					},
+					{
+						Justification: "test justification",
+					},
+				},
+			}},
+			ExpID: []*model.IsDependency{
+				{
+					Package:           testdata.P1out,
+					DependencyPackage: testdata.P2outName,
+					DocumentRef:       "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -948,14 +1000,20 @@ func TestIsDependencies(t *testing.T) {
 				if err != nil {
 					return
 				}
-				got, err := b.IsDependency(ctx, &model.IsDependencySpec{ID: ptrfrom.String(depID[0])})
+				got, err := b.IsDependencyList(ctx, model.IsDependencySpec{ID: ptrfrom.String(depID[0])}, nil, nil)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
 				if err != nil {
 					return
 				}
-				if diff := cmp.Diff(test.ExpID, got, commonOpts); diff != "" {
+				var returnedObjects []*model.IsDependency
+				if got != nil {
+					for _, obj := range got.Edges {
+						returnedObjects = append(returnedObjects, obj.Node)
+					}
+				}
+				if diff := cmp.Diff(test.ExpID, returnedObjects, commonOpts); diff != "" {
 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}

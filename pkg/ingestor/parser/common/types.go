@@ -52,6 +52,8 @@ type IdentifierStrings struct {
 	VcsStrings []string
 	// PurlStrings should contain package url to specific packages
 	PurlStrings []string
+	// GithubReleaseStrings should contain url to specific GitHub releases
+	GithubReleaseStrings []string
 	// UnclassifiedStrings contains other strings that have identifiers that
 	// parsers may not be sure what category they fall under.
 	UnclassifiedStrings []string

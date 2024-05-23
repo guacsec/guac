@@ -124,9 +124,38 @@ input IDorSourceInput {
   sourceInput: SourceInputSpec
 }
 
+"""
+SourceConnection returns the paginated results for Source.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the SourceEdge which contains the current cursor
+and the Source node itself
+"""
+type SourceConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [SourceEdge!]!
+}
+
+"""
+SourceEdge contains the cursor for the resulting node and
+the Source node itself.
+"""
+type SourceEdge {
+  cursor: ID!
+  node: Source!
+}
+
 extend type Query {
   "Returns all sources matching a filter."
   sources(sourceSpec: SourceSpec!): [Source!]!
+  "Returns a paginated results via SourceConnection"
+  sourcesList(sourceSpec: SourceSpec!, after: ID, first: Int): SourceConnection
 }
 
 extend type Mutation {

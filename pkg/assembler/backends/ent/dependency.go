@@ -35,6 +35,8 @@ type Dependency struct {
 	Origin string `json:"origin,omitempty"`
 	// Collector holds the value of the "collector" field.
 	Collector string `json:"collector,omitempty"`
+	// DocumentRef holds the value of the "document_ref" field.
+	DocumentRef string `json:"document_ref,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DependencyQuery when eager-loading is set.
 	Edges        DependencyEdges `json:"edges"`
@@ -113,7 +115,7 @@ func (*Dependency) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case dependency.FieldVersionRange, dependency.FieldDependencyType, dependency.FieldJustification, dependency.FieldOrigin, dependency.FieldCollector:
+		case dependency.FieldVersionRange, dependency.FieldDependencyType, dependency.FieldJustification, dependency.FieldOrigin, dependency.FieldCollector, dependency.FieldDocumentRef:
 			values[i] = new(sql.NullString)
 		case dependency.FieldID, dependency.FieldPackageID, dependency.FieldDependentPackageNameID, dependency.FieldDependentPackageVersionID:
 			values[i] = new(uuid.UUID)
@@ -185,6 +187,12 @@ func (d *Dependency) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field collector", values[i])
 			} else if value.Valid {
 				d.Collector = value.String
+			}
+		case dependency.FieldDocumentRef:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_ref", values[i])
+			} else if value.Valid {
+				d.DocumentRef = value.String
 			}
 		default:
 			d.selectValues.Set(columns[i], values[i])
@@ -265,6 +273,9 @@ func (d *Dependency) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("collector=")
 	builder.WriteString(d.Collector)
+	builder.WriteString(", ")
+	builder.WriteString("document_ref=")
+	builder.WriteString(d.DocumentRef)
 	builder.WriteByte(')')
 	return builder.String()
 }

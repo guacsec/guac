@@ -67,6 +67,21 @@ func TestArtifacts(t *testing.T) {
 		}},
 		wantErr: false,
 	}, {
+		name: "sha-1",
+		artifactInput: &model.ArtifactInputSpec{
+			Algorithm: "SHA-1",
+			Digest:    "7A8F47318E4676DACB0142AFA0B83029CD7BEFD9",
+		},
+		artifactSpec: &model.ArtifactSpec{
+			Algorithm: ptrfrom.String("SHA-1"),
+			Digest:    ptrfrom.String("7A8F47318E4676DACB0142AFA0B83029CD7BEFD9"),
+		},
+		want: []*model.Artifact{{
+			Algorithm: "sha-1",
+			Digest:    "7a8f47318e4676dacb0142afa0b83029cd7befd9",
+		}},
+		wantErr: false,
+	}, {
 		name: "sha512",
 		artifactInput: &model.ArtifactInputSpec{
 			Algorithm: "sha512",
@@ -93,12 +108,18 @@ func TestArtifacts(t *testing.T) {
 			if tt.idInFilter {
 				tt.artifactSpec.ID = ptrfrom.String(ingestedArtID)
 			}
-			got, err := b.Artifacts(ctx, tt.artifactSpec)
+			got, err := b.ArtifactsList(ctx, *tt.artifactSpec, nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("arangoClient.Artifacts() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, commonOpts); diff != "" {
+			var returnedObjects []*model.Artifact
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(tt.want, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

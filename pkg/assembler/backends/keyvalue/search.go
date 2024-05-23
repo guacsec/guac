@@ -23,6 +23,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *demoClient) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindSoftwareList")
+}
+
 func (c *demoClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 	scanner := c.kv.Keys("artifacts")
 	var res []model.PackageSourceOrArtifact

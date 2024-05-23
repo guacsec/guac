@@ -368,6 +368,167 @@ func HasSbomWith(preds ...predicate.BillOfMaterials) predicate.PackageVersion {
 	})
 }
 
+// HasVuln applies the HasEdge predicate on the "vuln" edge.
+func HasVuln() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, VulnTable, VulnColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVulnWith applies the HasEdge predicate on the "vuln" edge with a given conditions (other predicates).
+func HasVulnWith(preds ...predicate.CertifyVuln) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newVulnStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVex applies the HasEdge predicate on the "vex" edge.
+func HasVex() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, VexTable, VexColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVexWith applies the HasEdge predicate on the "vex" edge with a given conditions (other predicates).
+func HasVexWith(preds ...predicate.CertifyVex) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newVexStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasHasSourceAt applies the HasEdge predicate on the "has_source_at" edge.
+func HasHasSourceAt() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, HasSourceAtTable, HasSourceAtColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasHasSourceAtWith applies the HasEdge predicate on the "has_source_at" edge with a given conditions (other predicates).
+func HasHasSourceAtWith(preds ...predicate.HasSourceAt) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newHasSourceAtStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCertification applies the HasEdge predicate on the "certification" edge.
+func HasCertification() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, CertificationTable, CertificationColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCertificationWith applies the HasEdge predicate on the "certification" edge with a given conditions (other predicates).
+func HasCertificationWith(preds ...predicate.Certification) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newCertificationStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMetadata applies the HasEdge predicate on the "metadata" edge.
+func HasMetadata() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, MetadataTable, MetadataColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMetadataWith applies the HasEdge predicate on the "metadata" edge with a given conditions (other predicates).
+func HasMetadataWith(preds ...predicate.HasMetadata) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newMetadataStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDependency applies the HasEdge predicate on the "dependency" edge.
+func HasDependency() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, DependencyTable, DependencyColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDependencyWith applies the HasEdge predicate on the "dependency" edge with a given conditions (other predicates).
+func HasDependencyWith(preds ...predicate.Dependency) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newDependencyStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDependencySubject applies the HasEdge predicate on the "dependency_subject" edge.
+func HasDependencySubject() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, DependencySubjectTable, DependencySubjectColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDependencySubjectWith applies the HasEdge predicate on the "dependency_subject" edge with a given conditions (other predicates).
+func HasDependencySubjectWith(preds ...predicate.Dependency) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newDependencySubjectStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasIncludedInSboms applies the HasEdge predicate on the "included_in_sboms" edge.
 func HasIncludedInSboms() predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {
@@ -429,6 +590,52 @@ func HasPkgEqualPkgB() predicate.PackageVersion {
 func HasPkgEqualPkgBWith(preds ...predicate.PkgEqual) predicate.PackageVersion {
 	return predicate.PackageVersion(func(s *sql.Selector) {
 		step := newPkgEqualPkgBStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPoc applies the HasEdge predicate on the "poc" edge.
+func HasPoc() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, PocTable, PocColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPocWith applies the HasEdge predicate on the "poc" edge with a given conditions (other predicates).
+func HasPocWith(preds ...predicate.PointOfContact) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newPocStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCertifyLegal applies the HasEdge predicate on the "certify_legal" edge.
+func HasCertifyLegal() predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, CertifyLegalTable, CertifyLegalColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCertifyLegalWith applies the HasEdge predicate on the "certify_legal" edge with a given conditions (other predicates).
+func HasCertifyLegalWith(preds ...predicate.CertifyLegal) predicate.PackageVersion {
+	return predicate.PackageVersion(func(s *sql.Selector) {
+		step := newCertifyLegalStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

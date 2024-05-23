@@ -16,12 +16,16 @@
 package collector
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"reflect"
 	"testing"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	uuid "github.com/gofrs/uuid"
 	"github.com/guacsec/guac/internal/testing/dochelper"
@@ -57,8 +61,9 @@ func TestCollect(t *testing.T) {
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(file.FileCollector),
-				Source:    "file:///testdata/hello",
+				Collector:   string(file.FileCollector),
+				Source:      "file:///testdata/hello",
+				DocumentRef: events.GetDocRef([]byte("hello\n")),
 			}},
 		},
 		wantErr: false,
@@ -83,7 +88,7 @@ func TestCollect(t *testing.T) {
 				t.Errorf("Collect() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if err == nil {
-				if !reflect.DeepEqual(collectedDoc, tt.want) {
+				if !checkWhileIgnoringLogger(collectedDoc, tt.want) {
 					t.Errorf("Collect() = %v, want %v", collectedDoc, tt.want)
 				}
 			}
@@ -91,7 +96,47 @@ func TestCollect(t *testing.T) {
 	}
 }
 
+// checkWhileIgnoringLogger works like a regular reflect.DeepEqual(), but ignores the loggers.
+func checkWhileIgnoringLogger(collectedDoc, want []*processor.Document) bool {
+	if len(collectedDoc) != len(want) {
+		return false
+	}
+
+	for i := 0; i < len(collectedDoc); i++ {
+		// Store the loggers, and then set the loggers to nil so that can ignore them.
+		a, b := collectedDoc[i].ChildLogger, want[i].ChildLogger
+		collectedDoc[i].ChildLogger, want[i].ChildLogger = nil, nil
+
+		if !reflect.DeepEqual(collectedDoc[i], want[i]) {
+			return false
+		}
+
+		// Re-assign the loggers so that they remain the same
+		collectedDoc[i].ChildLogger, want[i].ChildLogger = a, b
+	}
+
+	return true
+}
+
 func Test_Publish(t *testing.T) {
+	// Create a buffer to capture logs
+	var logBuffer bytes.Buffer
+	encoderConfig := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		zapcore.AddSync(&logBuffer),
+		zap.DebugLevel,
+	)
+	logger := zap.New(core).Sugar()
+
+	Ite6SLSADocWithLogger := processor.Document{
+		Blob:              testdata.Ite6SLSADoc.Blob,
+		Type:              testdata.Ite6SLSADoc.Type,
+		Format:            testdata.Ite6SLSADoc.Format,
+		SourceInformation: testdata.Ite6SLSADoc.SourceInformation,
+		ChildLogger:       logger,
+	}
+
 	expectedDocTree := dochelper.DocNode(&testdata.Ite6SLSADoc)
 
 	natsTest := nats_test.NewNatsTestServer()
@@ -102,6 +147,8 @@ func Test_Publish(t *testing.T) {
 	defer natsTest.Shutdown()
 
 	ctx := context.Background()
+	ctx = context.WithValue(ctx, logging.ChildLoggerKey, logger)
+
 	jetStream := emitter.NewJetStream(url, "", "")
 	if err := jetStream.JetStreamInit(ctx); err != nil {
 		t.Fatalf("unexpected error initializing jetstream: %v", err)
@@ -119,7 +166,9 @@ func Test_Publish(t *testing.T) {
 
 	pubsub := emitter.NewEmitterPubSub(ctx, url)
 
-	err = Publish(ctx, &testdata.Ite6SLSADoc, blobStore, pubsub)
+	logBuffer.Reset()
+
+	err = Publish(ctx, &Ite6SLSADocWithLogger, blobStore, pubsub, true)
 	if err != nil {
 		t.Fatalf("unexpected error on emit: %v", err)
 	}
@@ -138,7 +187,7 @@ func Test_Publish(t *testing.T) {
 
 	err = testSubscribe(ctx, transportFunc, blobStore, pubsub)
 	if err != nil {
-		if err != nil && !errors.Is(err, context.DeadlineExceeded) {
+		if !errors.Is(err, context.DeadlineExceeded) {
 			t.Errorf("nats emitter Subscribe test errored = %v", err)
 		}
 	}
@@ -152,7 +201,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return fmt.Errorf("failed to get uuid with the following error: %w", err)
 	}
 	uuidString := uuid.String()
-	sub, err := emPubSub.Subscribe(ctx, uuidString)
+	sub, err := emPubSub.Subscribe(ctx)
 	if err != nil {
 		return err
 	}
@@ -197,7 +246,7 @@ func testSubscribe(ctx context.Context, transportFunc func(processor.DocumentTre
 		return nil
 	}
 
-	if err := sub.GetDataFromSubscriber(ctx, processFunc); err != nil {
+	if err := sub.GetDataFromSubscriber(ctx, processFunc, uuidString); err != nil {
 		return fmt.Errorf("failed to get data from subscriber with error: %w", err)
 	}
 	if err := sub.CloseSubscriber(ctx); err != nil {

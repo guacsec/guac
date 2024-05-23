@@ -18,6 +18,8 @@ package keyvalue
 import (
 	"context"
 	"errors"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 	"time"
 
@@ -36,6 +38,7 @@ type goodLink struct {
 	Justification string
 	Origin        string
 	Collector     string
+	DocumentRef   string
 	KnownSince    time.Time
 }
 
@@ -49,6 +52,7 @@ func (n *goodLink) Key() string {
 		n.Justification,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 		timeKey(n.KnownSince),
 	}, ":"))
 }
@@ -113,6 +117,7 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 		Justification: certifyGood.Justification,
 		Origin:        certifyGood.Origin,
 		Collector:     certifyGood.Collector,
+		DocumentRef:   certifyGood.DocumentRef,
 		KnownSince:    certifyGood.KnownSince.UTC(),
 	}
 
@@ -185,6 +190,185 @@ func (c *demoClient) ingestCertifyGood(ctx context.Context, subject model.Packag
 }
 
 // Query CertifyGood
+
+func (c *demoClient) CertifyGoodList(ctx context.Context, certifyGoodSpec model.CertifyGoodSpec, after *string, first *int) (*model.CertifyGoodConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	funcName := "CertifyGood"
+
+	if certifyGoodSpec.ID != nil {
+		link, err := byIDkv[*goodLink](ctx, *certifyGoodSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+
+		foundCertifyGood, err := c.buildCertifyGood(ctx, link, &certifyGoodSpec, true)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+
+		return &model.CertifyGoodConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(foundCertifyGood.ID),
+				EndCursor:   ptrfrom.String(foundCertifyGood.ID),
+			},
+			Edges: []*model.CertifyGoodEdge{
+				{
+					Cursor: foundCertifyGood.ID,
+					Node:   foundCertifyGood,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.CertifyGoodEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	// Cant really search for an exact Pkg, as these can be linked to either
+	// names or versions, and version could be empty.
+	var search []string
+	foundOne := false
+	if certifyGoodSpec.Subject != nil && certifyGoodSpec.Subject.Artifact != nil {
+		exactArtifact, err := c.artifactExact(ctx, certifyGoodSpec.Subject.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactArtifact != nil {
+			search = append(search, exactArtifact.GoodLinks...)
+			foundOne = true
+		}
+	}
+	if !foundOne && certifyGoodSpec.Subject != nil && certifyGoodSpec.Subject.Source != nil {
+		exactSource, err := c.exactSource(ctx, certifyGoodSpec.Subject.Source)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactSource != nil {
+			search = append(search, exactSource.GoodLinks...)
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*goodLink](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			cg, err := c.CGIfMatch(ctx, &certifyGoodSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if cg == nil {
+				continue
+			}
+
+			if (after != nil && cg.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyGoodEdge{
+							Cursor: cg.ID,
+							Node:   cg,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyGoodEdge{
+						Cursor: cg.ID,
+						Node:   cg,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(cgCol)
+		for !done {
+			var cgKeys []string
+			var err error
+			cgKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(cgKeys)
+
+			totalCount = len(cgKeys)
+
+			for i, cgKey := range cgKeys {
+				link, err := byKeykv[*goodLink](ctx, cgCol, cgKey, c)
+				if err != nil {
+					return nil, err
+				}
+				cgOut, err := c.CGIfMatch(ctx, &certifyGoodSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if cgOut == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if cgOut.ID == *after {
+						totalCount = len(cgKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.CertifyGoodEdge{
+							Cursor: cgOut.ID,
+							Node:   cgOut,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.CertifyGoodEdge{
+						Cursor: cgOut.ID,
+						Node:   cgOut,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.CertifyGoodConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(0, numNodes-1)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
+
 func (c *demoClient) CertifyGood(ctx context.Context, filter *model.CertifyGoodSpec) ([]*model.CertifyGood, error) {
 	funcName := "CertifyGood"
 
@@ -236,10 +420,15 @@ func (c *demoClient) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addCGIfMatch(ctx, out, filter, link)
+			cg, err := c.CGIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+			if cg == nil {
+				continue
+			}
+
+			out = append(out, cg)
 		}
 	} else {
 		var done bool
@@ -256,26 +445,27 @@ func (c *demoClient) CertifyGood(ctx context.Context, filter *model.CertifyGoodS
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addCGIfMatch(ctx, out, filter, link)
+				cg, err := c.CGIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				out = append(out, cg)
 			}
 		}
 	}
 	return out, nil
 }
 
-func (c *demoClient) addCGIfMatch(ctx context.Context, out []*model.CertifyGood,
-	filter *model.CertifyGoodSpec, link *goodLink) (
-	[]*model.CertifyGood, error) {
+func (c *demoClient) CGIfMatch(ctx context.Context, filter *model.CertifyGoodSpec, link *goodLink) (*model.CertifyGood, error) {
 
 	if filter != nil {
 		if noMatch(filter.Justification, link.Justification) ||
 			noMatch(filter.Collector, link.Collector) ||
 			noMatch(filter.Origin, link.Origin) ||
+			noMatch(filter.DocumentRef, link.DocumentRef) ||
 			filter.KnownSince != nil && filter.KnownSince.After(link.KnownSince) {
-			return out, nil
+			return nil, nil
 		}
 	}
 
@@ -284,9 +474,9 @@ func (c *demoClient) addCGIfMatch(ctx context.Context, out []*model.CertifyGood,
 		return nil, err
 	}
 	if foundCertifyGood == nil {
-		return out, nil
+		return nil, nil
 	}
-	return append(out, foundCertifyGood), nil
+	return foundCertifyGood, nil
 }
 
 func (c *demoClient) buildCertifyGood(ctx context.Context, link *goodLink, filter *model.CertifyGoodSpec, ingestOrIDProvided bool) (*model.CertifyGood, error) {
@@ -366,6 +556,7 @@ func (c *demoClient) buildCertifyGood(ctx context.Context, link *goodLink, filte
 		Justification: link.Justification,
 		Origin:        link.Origin,
 		Collector:     link.Collector,
+		DocumentRef:   link.DocumentRef,
 		KnownSince:    link.KnownSince.UTC(),
 	}
 	return &certifyGood, nil

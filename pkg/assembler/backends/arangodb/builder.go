@@ -25,6 +25,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *arangoClient) BuildersList(ctx context.Context, builderSpec model.BuilderSpec, after *string, first *int) (*model.BuilderConnection, error) {
+	return nil, fmt.Errorf("not implemented: BuildersList")
+}
+
 func (c *arangoClient) Builders(ctx context.Context, builderSpec *model.BuilderSpec) ([]*model.Builder, error) {
 	values := map[string]any{}
 	arangoQueryBuilder := setBuilderMatchValues(builderSpec, values)

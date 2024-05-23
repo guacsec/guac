@@ -27,6 +27,7 @@ import (
 
 	"github.com/Khan/genqlient/graphql"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/ingestor"
@@ -43,6 +44,7 @@ import (
 
 type scorecardOptions struct {
 	graphqlEndpoint   string
+	headerFile        string
 	poll              bool
 	interval          time.Duration
 	csubClientOptions client.CsubClientOptions
@@ -52,26 +54,27 @@ var scorecardCmd = &cobra.Command{
 	Use:   "scorecard [flags]",
 	Short: "runs the scorecard certifier",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateScorecardFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetString("csub-addr"),
+			viper.GetString("interval"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
 			viper.GetBool("poll"),
-			viper.GetString("interval"),
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
 		// scorecard runner is the scorecard library that runs the scorecard checks
 		scorecardRunner, err := scorecard.NewScorecardRunner(ctx)
-
 		if err != nil {
 			fmt.Printf("unable to create scorecard runner: %v\n", err)
 			_ = cmd.Help()
@@ -87,7 +90,7 @@ var scorecardCmd = &cobra.Command{
 			defer csubClient.Close()
 		}
 
-		httpClient := http.Client{}
+		httpClient := http.Client{Transport: transport}
 		gqlclient := graphql.NewClient(opts.graphqlEndpoint, &httpClient)
 
 		// running and getting the scorecard checks
@@ -121,7 +124,7 @@ var scorecardCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient)
 
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
@@ -170,9 +173,18 @@ var scorecardCmd = &cobra.Command{
 	},
 }
 
-func validateScorecardFlags(graphqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, poll bool, interval string) (scorecardOptions, error) {
+func validateScorecardFlags(
+	graphqlEndpoint,
+	headerFile,
+	csubAddr,
+	interval string,
+	csubTls,
+	csubTlsSkipVerify,
+	poll bool,
+) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 
 	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {

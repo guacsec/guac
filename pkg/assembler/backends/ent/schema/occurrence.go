@@ -46,6 +46,7 @@ func (Occurrence) Fields() []ent.Field {
 		field.String("justification").Comment("Justification for the attested relationship"),
 		field.String("origin").Comment("Document from which this attestation is generated from"),
 		field.String("collector").Comment("GUAC collector for the document"),
+		field.String("document_ref"),
 		field.UUID("source_id", getUUIDv7()).Optional().Nillable(),
 		field.UUID("package_id", getUUIDv7()).Optional().Nillable(),
 	}
@@ -64,14 +65,9 @@ func (Occurrence) Edges() []ent.Edge {
 // Indexes of the Occurrence.
 func (Occurrence) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("justification", "origin", "collector").Edges("artifact", "package").Unique().
-			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")).StorageKey("occurrence_unique_package"),
-		index.Fields("justification", "origin", "collector").Edges("artifact", "source").Unique().
-			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")).StorageKey("occurrence_unique_source"),
-
-		// index.Fields("justification", "origin", "collector").Edges("source", "artifact").Unique().
-		// Annotations(entsql.IndexWhere("source_id <> NULL AND package_id is NULL")).
-		// StorageKey("occurrence_unique_source"),
-		//index.Fields("justification", "origin", "collector").Edges("package", "source", "artifact").Unique(),
+		index.Fields("justification", "origin", "collector", "document_ref").Edges("artifact", "package").Unique().
+			Annotations(entsql.IndexWhere("package_id IS NOT NULL AND source_id IS NULL")).StorageKey("occurrence_package_id"),
+		index.Fields("justification", "origin", "collector", "document_ref").Edges("artifact", "source").Unique().
+			Annotations(entsql.IndexWhere("package_id IS NULL AND source_id IS NOT NULL")).StorageKey("occurrence_source_id"),
 	}
 }

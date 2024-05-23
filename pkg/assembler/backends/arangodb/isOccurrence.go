@@ -28,6 +28,11 @@ import (
 )
 
 // Query IsOccurrence
+
+func (c *arangoClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error) {
+	return nil, fmt.Errorf("not implemented: IsOccurrenceList")
+}
+
 func (c *arangoClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
 	if isOccurrenceSpec != nil && isOccurrenceSpec.ID != nil {
@@ -127,7 +132,8 @@ func getSrcOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'isOccurrence_id': isOccurrence._id,
 		'justification': isOccurrence.justification,
 		'collector': isOccurrence.collector,
-		'origin': isOccurrence.origin
+		'origin': isOccurrence.origin,
+		'documentRef': isOccurrence.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsOccurrence")
@@ -162,7 +168,8 @@ func getPkgOccurrencesForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'isOccurrence_id': isOccurrence._id,
 		'justification': isOccurrence.justification,
 		'collector': isOccurrence.collector,
-		'origin': isOccurrence.origin
+		'origin': isOccurrence.origin,
+		'documentRef': isOccurrence.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "IsOccurrence")
@@ -190,6 +197,10 @@ func queryIsOccurrenceBasedOnFilter(arangoQueryBuilder *arangoQueryBuilder, isOc
 	if isOccurrenceSpec.Collector != nil {
 		arangoQueryBuilder.filter("isOccurrence", collector, "==", "@"+collector)
 		queryValues[collector] = *isOccurrenceSpec.Collector
+	}
+	if isOccurrenceSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("isOccurrence", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *isOccurrenceSpec.DocumentRef
 	}
 }
 
@@ -230,6 +241,7 @@ func getOccurrenceQueryValues(pkg *model.PkgInputSpec, src *model.SourceInputSpe
 	values[justification] = occurrence.Justification
 	values[origin] = occurrence.Origin
 	values[collector] = occurrence.Collector
+	values[docRef] = occurrence.DocumentRef
 
 	return values
 }
@@ -279,8 +291,8 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		  LET isOccurrence = FIRST(
-			  UPSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				  INSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			  UPSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				  INSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				  UPDATE {} IN isOccurrences
 				  RETURN {
 					'_id': NEW._id,
@@ -342,8 +354,8 @@ func (c *arangoClient) IngestOccurrences(ctx context.Context, subjects model.Pac
 		  LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		  LET isOccurrence = FIRST(
-			  UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				  INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			  UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				  INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				  UPDATE {} IN isOccurrences
 				  RETURN {
 					'_id': NEW._id,
@@ -395,8 +407,8 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 	LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 	  
 	LET isOccurrence = FIRST(
-		  UPSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
-			  INSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+		  UPSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+			  INSERT { packageID:firstPkg.version_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 			  UPDATE {} IN isOccurrences
 			  RETURN {
 				'_id': NEW._id,
@@ -428,8 +440,8 @@ func (c *arangoClient) IngestOccurrence(ctx context.Context, subject model.Packa
 		LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		LET isOccurrence = FIRST(
-			UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
-			INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin } 
+			UPSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+			INSERT { sourceID:firstSrc.name_id, artifactID:artifact._id, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 			UPDATE {} IN isOccurrences
 			RETURN {
 				'_id': NEW._id,
@@ -471,6 +483,7 @@ func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor, ingest
 		Justification  string          `json:"justification"`
 		Collector      string          `json:"collector"`
 		Origin         string          `json:"origin"`
+		DocumentRef    string          `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -510,6 +523,7 @@ func getIsOccurrenceFromCursor(ctx context.Context, cursor driver.Cursor, ingest
 				Justification: createdValue.Justification,
 				Origin:        createdValue.Origin,
 				Collector:     createdValue.Collector,
+				DocumentRef:   createdValue.DocumentRef,
 			}
 			if pkg != nil {
 				isOccurrence.Subject = pkg
@@ -573,6 +587,7 @@ func (c *arangoClient) queryIsOccurrenceNodeByID(ctx context.Context, filter *mo
 		Justification  string  `json:"justification"`
 		Collector      string  `json:"collector"`
 		Origin         string  `json:"origin"`
+		DocumentRef    string  `json:"documentRef"`
 	}
 
 	var collectedValues []dbIsOccurrence
@@ -599,6 +614,7 @@ func (c *arangoClient) queryIsOccurrenceNodeByID(ctx context.Context, filter *mo
 		Justification: collectedValues[0].Justification,
 		Origin:        collectedValues[0].Origin,
 		Collector:     collectedValues[0].Collector,
+		DocumentRef:   collectedValues[0].DocumentRef,
 	}
 
 	builtArtifact, err := c.buildArtifactResponseByID(ctx, collectedValues[0].ArtifactID, filter.Artifact)

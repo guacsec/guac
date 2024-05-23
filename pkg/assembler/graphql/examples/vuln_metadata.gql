@@ -13,6 +13,28 @@ fragment allVulnMetadataTree on VulnerabilityMetadata {
   timestamp
   origin
   collector
+  documentRef
+}
+
+fragment AllVulnerabilityMetadataPaginationTree on VulnerabilityMetadataConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query VulnerabilityMetadataPagination {
+  vulnerabilityMetadataList(vulnerabilityMetadataSpec: {}, first: 10) {
+    ...AllVulnerabilityMetadataPaginationTree
+  }
 }
 
 query VulnMetadataQ1 {

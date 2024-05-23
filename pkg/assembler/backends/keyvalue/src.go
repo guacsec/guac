@@ -19,6 +19,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -310,6 +312,174 @@ func (c *demoClient) IngestSource(ctx context.Context, input model.IDorSourceInp
 }
 
 // Query Source
+
+func (c *demoClient) SourcesList(ctx context.Context, sourceSpec model.SourceSpec, after *string, first *int) (*model.SourceConnection, error) {
+	c.m.RLock()
+	defer c.m.RUnlock()
+	if sourceSpec.ID != nil {
+		s, err := c.buildSourceResponse(ctx, *sourceSpec.ID, &sourceSpec)
+		if err != nil {
+			if errors.Is(err, errNotFound) {
+				// not found
+				return nil, nil
+			}
+			return nil, err
+		}
+
+		return &model.SourceConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(s.ID),
+				EndCursor:   ptrfrom.String(s.ID),
+			},
+			Edges: []*model.SourceEdge{
+				{
+					Cursor: s.ID,
+					Node:   s,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.SourceEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	if sourceSpec.Type != nil {
+		inType := &srcType{
+			Type: *sourceSpec.Type,
+		}
+		srcTypeNode, err := byKeykv[*srcType](ctx, srcTypeCol, inType.Key(), c)
+		if err == nil {
+			sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, &sourceSpec)
+			for _, namespace := range sNamespaces {
+				for _, name := range namespace.Names {
+					s := &model.Source{
+						ID:   srcTypeNode.ThisID,
+						Type: srcTypeNode.Type,
+						Namespaces: []*model.SourceNamespace{
+							{
+								ID:        namespace.ID,
+								Namespace: namespace.Namespace,
+								Names: []*model.SourceName{
+									name,
+								},
+							},
+						},
+					}
+
+					if (after != nil && sNamespaces[0].Names[0].ID > *after) || after == nil {
+						addToCount += 1
+
+						if first != nil {
+							if numNodes < *first {
+								edges = append(edges, &model.SourceEdge{
+									Cursor: sNamespaces[0].Names[0].ID,
+									Node:   s,
+								})
+								numNodes++
+							} else if numNodes == *first {
+								hasNextPage = true
+							}
+						} else {
+							edges = append(edges, &model.SourceEdge{
+								Cursor: sNamespaces[0].Names[0].ID,
+								Node:   s,
+							})
+						}
+					}
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(srcTypeCol)
+		for !done {
+			var typeKeys []string
+			var err error
+			typeKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(typeKeys)
+			totalCount = len(typeKeys)
+
+			for i, tk := range typeKeys {
+				srcTypeNode, err := byKeykv[*srcType](ctx, srcTypeCol, tk, c)
+				if err != nil {
+					return nil, err
+				}
+				sNamespaces := c.buildSourceNamespace(ctx, srcTypeNode, &sourceSpec)
+				for _, namespace := range sNamespaces {
+					for _, name := range namespace.Names {
+						s := &model.Source{
+							ID:   srcTypeNode.ThisID,
+							Type: srcTypeNode.Type,
+							Namespaces: []*model.SourceNamespace{
+								{
+									ID:        namespace.ID,
+									Namespace: namespace.Namespace,
+									Names: []*model.SourceName{
+										name,
+									},
+								},
+							},
+						}
+
+						if after != nil && !currentPage {
+							if s.Namespaces[0].Names[0].ID == *after {
+								totalCount = len(typeKeys) - (i + 1)
+								currentPage = true
+							}
+							continue
+						}
+
+						if first != nil {
+							if numNodes < *first {
+								edges = append(edges, &model.SourceEdge{
+									Cursor: s.Namespaces[0].Names[0].ID,
+									Node:   s,
+								})
+								numNodes++
+							} else if numNodes == *first {
+								hasNextPage = true
+							}
+						} else {
+							edges = append(edges, &model.SourceEdge{
+								Cursor: s.Namespaces[0].Names[0].ID,
+								Node:   s,
+							})
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.SourceConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
 
 func (c *demoClient) Sources(ctx context.Context, filter *model.SourceSpec) ([]*model.Source, error) {
 	c.m.RLock()

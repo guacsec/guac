@@ -25,6 +25,10 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 
+func (c *neo4jClient) PackagesList(ctx context.Context, pkgSpec model.PkgSpec, after *string, first *int) (*model.PackageConnection, error) {
+	return nil, fmt.Errorf("not implemented: PackagesList")
+}
+
 func (c *neo4jClient) Packages(ctx context.Context, pkgSpec *model.PkgSpec) ([]*model.Package, error) {
 	// fields: [type namespaces namespaces.namespace namespaces.names namespaces.names.name namespaces.names.versions
 	// namespaces.names.versions.version namespaces.names.versions.qualifiers namespaces.names.versions.qualifiers.key

@@ -22,6 +22,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *neo4jClient) PointOfContactList(ctx context.Context, pointOfContactSpec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
+	return nil, fmt.Errorf("not implemented: PointOfContactList")
+}
+
 func (c *neo4jClient) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
 	return "", fmt.Errorf("not implemented: IngestPointOfContact")
 }

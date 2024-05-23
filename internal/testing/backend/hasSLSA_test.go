@@ -513,14 +513,14 @@ func TestHasSLSA(t *testing.T) {
 			QueryBuilderID: true,
 			ExpHS: []*model.HasSlsa{
 				{
-					Subject: testdata.A1out,
+					Subject: testdata.A3out,
 					Slsa: &model.Slsa{
 						BuiltBy:   testdata.B2out,
 						BuiltFrom: []*model.Artifact{testdata.A2out},
 					},
 				},
 				{
-					Subject: testdata.A3out,
+					Subject: testdata.A1out,
 					Slsa: &model.Slsa{
 						BuiltBy:   testdata.B2out,
 						BuiltFrom: []*model.Artifact{testdata.A2out},
@@ -581,6 +581,35 @@ func TestHasSLSA(t *testing.T) {
 				},
 			},
 			ExpHS: nil,
+		}, {
+			Name:  "docref",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: testdata.A1,
+					BF:  []*model.IDorArtifactInput{&model.IDorArtifactInput{ArtifactInput: testdata.A2}},
+					BB:  testdata.B1,
+					SLSA: &model.SLSAInputSpec{
+						BuildType:   "test type",
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:     testdata.B1out,
+						BuiltFrom:   []*model.Artifact{testdata.A2out},
+						BuildType:   "test type",
+						DocumentRef: "test",
+					},
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -625,14 +654,20 @@ func TestHasSLSA(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.HasSlsa(ctx, test.Query)
+			got, err := b.HasSLSAList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHS, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasSlsa
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -817,6 +852,37 @@ func TestIngestHasSLSAs(t *testing.T) {
 					},
 				},
 			},
+		}, {
+			Name:  "docref",
+			InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+			InBld: []*model.BuilderInputSpec{testdata.B1},
+			Calls: []call{
+				{
+					Sub: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}},
+					BF:  [][]*model.IDorArtifactInput{{{ArtifactInput: testdata.A2}}},
+					BB:  []*model.IDorBuilderInput{{BuilderInput: testdata.B1}},
+					SLSA: []*model.SLSAInputSpec{
+						{
+							BuildType:   "test type",
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.HasSLSASpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpHS: []*model.HasSlsa{
+				{
+					Subject: testdata.A1out,
+					Slsa: &model.Slsa{
+						BuiltBy:     testdata.B1out,
+						BuiltFrom:   []*model.Artifact{testdata.A2out},
+						BuildType:   "test type",
+						DocumentRef: "test",
+					},
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -840,14 +906,20 @@ func TestIngestHasSLSAs(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.HasSlsa(ctx, test.Query)
+			got, err := b.HasSLSAList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpHS, got, commonOpts); diff != "" {
+			var returnedObjects []*model.HasSlsa
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpHS, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

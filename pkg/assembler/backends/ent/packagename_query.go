@@ -12,22 +12,37 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/certification"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagename"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/predicate"
 )
 
 // PackageNameQuery is the builder for querying PackageName entities.
 type PackageNameQuery struct {
 	config
-	ctx               *QueryContext
-	order             []packagename.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.PackageName
-	withVersions      *PackageVersionQuery
-	modifiers         []func(*sql.Selector)
-	loadTotal         []func(context.Context, []*PackageName) error
-	withNamedVersions map[string]*PackageVersionQuery
+	ctx                    *QueryContext
+	order                  []packagename.OrderOption
+	inters                 []Interceptor
+	predicates             []predicate.PackageName
+	withVersions           *PackageVersionQuery
+	withHasSourceAt        *HasSourceAtQuery
+	withDependency         *DependencyQuery
+	withCertification      *CertificationQuery
+	withMetadata           *HasMetadataQuery
+	withPoc                *PointOfContactQuery
+	modifiers              []func(*sql.Selector)
+	loadTotal              []func(context.Context, []*PackageName) error
+	withNamedVersions      map[string]*PackageVersionQuery
+	withNamedHasSourceAt   map[string]*HasSourceAtQuery
+	withNamedDependency    map[string]*DependencyQuery
+	withNamedCertification map[string]*CertificationQuery
+	withNamedMetadata      map[string]*HasMetadataQuery
+	withNamedPoc           map[string]*PointOfContactQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,6 +94,116 @@ func (pnq *PackageNameQuery) QueryVersions() *PackageVersionQuery {
 			sqlgraph.From(packagename.Table, packagename.FieldID, selector),
 			sqlgraph.To(packageversion.Table, packageversion.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, packagename.VersionsTable, packagename.VersionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryHasSourceAt chains the current query on the "has_source_at" edge.
+func (pnq *PackageNameQuery) QueryHasSourceAt() *HasSourceAtQuery {
+	query := (&HasSourceAtClient{config: pnq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pnq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pnq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, selector),
+			sqlgraph.To(hassourceat.Table, hassourceat.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.HasSourceAtTable, packagename.HasSourceAtColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDependency chains the current query on the "dependency" edge.
+func (pnq *PackageNameQuery) QueryDependency() *DependencyQuery {
+	query := (&DependencyClient{config: pnq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pnq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pnq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, selector),
+			sqlgraph.To(dependency.Table, dependency.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.DependencyTable, packagename.DependencyColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCertification chains the current query on the "certification" edge.
+func (pnq *PackageNameQuery) QueryCertification() *CertificationQuery {
+	query := (&CertificationClient{config: pnq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pnq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pnq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, selector),
+			sqlgraph.To(certification.Table, certification.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.CertificationTable, packagename.CertificationColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMetadata chains the current query on the "metadata" edge.
+func (pnq *PackageNameQuery) QueryMetadata() *HasMetadataQuery {
+	query := (&HasMetadataClient{config: pnq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pnq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pnq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, selector),
+			sqlgraph.To(hasmetadata.Table, hasmetadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.MetadataTable, packagename.MetadataColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPoc chains the current query on the "poc" edge.
+func (pnq *PackageNameQuery) QueryPoc() *PointOfContactQuery {
+	query := (&PointOfContactClient{config: pnq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pnq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pnq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagename.Table, packagename.FieldID, selector),
+			sqlgraph.To(pointofcontact.Table, pointofcontact.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, packagename.PocTable, packagename.PocColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pnq.driver.Dialect(), step)
 		return fromU, nil
@@ -273,12 +398,17 @@ func (pnq *PackageNameQuery) Clone() *PackageNameQuery {
 		return nil
 	}
 	return &PackageNameQuery{
-		config:       pnq.config,
-		ctx:          pnq.ctx.Clone(),
-		order:        append([]packagename.OrderOption{}, pnq.order...),
-		inters:       append([]Interceptor{}, pnq.inters...),
-		predicates:   append([]predicate.PackageName{}, pnq.predicates...),
-		withVersions: pnq.withVersions.Clone(),
+		config:            pnq.config,
+		ctx:               pnq.ctx.Clone(),
+		order:             append([]packagename.OrderOption{}, pnq.order...),
+		inters:            append([]Interceptor{}, pnq.inters...),
+		predicates:        append([]predicate.PackageName{}, pnq.predicates...),
+		withVersions:      pnq.withVersions.Clone(),
+		withHasSourceAt:   pnq.withHasSourceAt.Clone(),
+		withDependency:    pnq.withDependency.Clone(),
+		withCertification: pnq.withCertification.Clone(),
+		withMetadata:      pnq.withMetadata.Clone(),
+		withPoc:           pnq.withPoc.Clone(),
 		// clone intermediate query.
 		sql:  pnq.sql.Clone(),
 		path: pnq.path,
@@ -293,6 +423,61 @@ func (pnq *PackageNameQuery) WithVersions(opts ...func(*PackageVersionQuery)) *P
 		opt(query)
 	}
 	pnq.withVersions = query
+	return pnq
+}
+
+// WithHasSourceAt tells the query-builder to eager-load the nodes that are connected to
+// the "has_source_at" edge. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithHasSourceAt(opts ...func(*HasSourceAtQuery)) *PackageNameQuery {
+	query := (&HasSourceAtClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pnq.withHasSourceAt = query
+	return pnq
+}
+
+// WithDependency tells the query-builder to eager-load the nodes that are connected to
+// the "dependency" edge. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithDependency(opts ...func(*DependencyQuery)) *PackageNameQuery {
+	query := (&DependencyClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pnq.withDependency = query
+	return pnq
+}
+
+// WithCertification tells the query-builder to eager-load the nodes that are connected to
+// the "certification" edge. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithCertification(opts ...func(*CertificationQuery)) *PackageNameQuery {
+	query := (&CertificationClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pnq.withCertification = query
+	return pnq
+}
+
+// WithMetadata tells the query-builder to eager-load the nodes that are connected to
+// the "metadata" edge. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithMetadata(opts ...func(*HasMetadataQuery)) *PackageNameQuery {
+	query := (&HasMetadataClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pnq.withMetadata = query
+	return pnq
+}
+
+// WithPoc tells the query-builder to eager-load the nodes that are connected to
+// the "poc" edge. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithPoc(opts ...func(*PointOfContactQuery)) *PackageNameQuery {
+	query := (&PointOfContactClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pnq.withPoc = query
 	return pnq
 }
 
@@ -374,8 +559,13 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	var (
 		nodes       = []*PackageName{}
 		_spec       = pnq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [6]bool{
 			pnq.withVersions != nil,
+			pnq.withHasSourceAt != nil,
+			pnq.withDependency != nil,
+			pnq.withCertification != nil,
+			pnq.withMetadata != nil,
+			pnq.withPoc != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -406,10 +596,80 @@ func (pnq *PackageNameQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 			return nil, err
 		}
 	}
+	if query := pnq.withHasSourceAt; query != nil {
+		if err := pnq.loadHasSourceAt(ctx, query, nodes,
+			func(n *PackageName) { n.Edges.HasSourceAt = []*HasSourceAt{} },
+			func(n *PackageName, e *HasSourceAt) { n.Edges.HasSourceAt = append(n.Edges.HasSourceAt, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pnq.withDependency; query != nil {
+		if err := pnq.loadDependency(ctx, query, nodes,
+			func(n *PackageName) { n.Edges.Dependency = []*Dependency{} },
+			func(n *PackageName, e *Dependency) { n.Edges.Dependency = append(n.Edges.Dependency, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pnq.withCertification; query != nil {
+		if err := pnq.loadCertification(ctx, query, nodes,
+			func(n *PackageName) { n.Edges.Certification = []*Certification{} },
+			func(n *PackageName, e *Certification) { n.Edges.Certification = append(n.Edges.Certification, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pnq.withMetadata; query != nil {
+		if err := pnq.loadMetadata(ctx, query, nodes,
+			func(n *PackageName) { n.Edges.Metadata = []*HasMetadata{} },
+			func(n *PackageName, e *HasMetadata) { n.Edges.Metadata = append(n.Edges.Metadata, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pnq.withPoc; query != nil {
+		if err := pnq.loadPoc(ctx, query, nodes,
+			func(n *PackageName) { n.Edges.Poc = []*PointOfContact{} },
+			func(n *PackageName, e *PointOfContact) { n.Edges.Poc = append(n.Edges.Poc, e) }); err != nil {
+			return nil, err
+		}
+	}
 	for name, query := range pnq.withNamedVersions {
 		if err := pnq.loadVersions(ctx, query, nodes,
 			func(n *PackageName) { n.appendNamedVersions(name) },
 			func(n *PackageName, e *PackageVersion) { n.appendNamedVersions(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pnq.withNamedHasSourceAt {
+		if err := pnq.loadHasSourceAt(ctx, query, nodes,
+			func(n *PackageName) { n.appendNamedHasSourceAt(name) },
+			func(n *PackageName, e *HasSourceAt) { n.appendNamedHasSourceAt(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pnq.withNamedDependency {
+		if err := pnq.loadDependency(ctx, query, nodes,
+			func(n *PackageName) { n.appendNamedDependency(name) },
+			func(n *PackageName, e *Dependency) { n.appendNamedDependency(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pnq.withNamedCertification {
+		if err := pnq.loadCertification(ctx, query, nodes,
+			func(n *PackageName) { n.appendNamedCertification(name) },
+			func(n *PackageName, e *Certification) { n.appendNamedCertification(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pnq.withNamedMetadata {
+		if err := pnq.loadMetadata(ctx, query, nodes,
+			func(n *PackageName) { n.appendNamedMetadata(name) },
+			func(n *PackageName, e *HasMetadata) { n.appendNamedMetadata(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range pnq.withNamedPoc {
+		if err := pnq.loadPoc(ctx, query, nodes,
+			func(n *PackageName) { n.appendNamedPoc(name) },
+			func(n *PackageName, e *PointOfContact) { n.appendNamedPoc(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -446,6 +706,168 @@ func (pnq *PackageNameQuery) loadVersions(ctx context.Context, query *PackageVer
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "name_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pnq *PackageNameQuery) loadHasSourceAt(ctx context.Context, query *HasSourceAtQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *HasSourceAt)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*PackageName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(hassourceat.FieldPackageNameID)
+	}
+	query.Where(predicate.HasSourceAt(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packagename.HasSourceAtColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PackageNameID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "package_name_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "package_name_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pnq *PackageNameQuery) loadDependency(ctx context.Context, query *DependencyQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *Dependency)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*PackageName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(dependency.FieldDependentPackageNameID)
+	}
+	query.Where(predicate.Dependency(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packagename.DependencyColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.DependentPackageNameID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "dependent_package_name_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pnq *PackageNameQuery) loadCertification(ctx context.Context, query *CertificationQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *Certification)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*PackageName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(certification.FieldPackageNameID)
+	}
+	query.Where(predicate.Certification(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packagename.CertificationColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PackageNameID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "package_name_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "package_name_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pnq *PackageNameQuery) loadMetadata(ctx context.Context, query *HasMetadataQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *HasMetadata)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*PackageName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(hasmetadata.FieldPackageNameID)
+	}
+	query.Where(predicate.HasMetadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packagename.MetadataColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PackageNameID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "package_name_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "package_name_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pnq *PackageNameQuery) loadPoc(ctx context.Context, query *PointOfContactQuery, nodes []*PackageName, init func(*PackageName), assign func(*PackageName, *PointOfContact)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*PackageName)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pointofcontact.FieldPackageNameID)
+	}
+	query.Where(predicate.PointOfContact(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(packagename.PocColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PackageNameID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "package_name_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "package_name_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -547,6 +969,76 @@ func (pnq *PackageNameQuery) WithNamedVersions(name string, opts ...func(*Packag
 		pnq.withNamedVersions = make(map[string]*PackageVersionQuery)
 	}
 	pnq.withNamedVersions[name] = query
+	return pnq
+}
+
+// WithNamedHasSourceAt tells the query-builder to eager-load the nodes that are connected to the "has_source_at"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithNamedHasSourceAt(name string, opts ...func(*HasSourceAtQuery)) *PackageNameQuery {
+	query := (&HasSourceAtClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pnq.withNamedHasSourceAt == nil {
+		pnq.withNamedHasSourceAt = make(map[string]*HasSourceAtQuery)
+	}
+	pnq.withNamedHasSourceAt[name] = query
+	return pnq
+}
+
+// WithNamedDependency tells the query-builder to eager-load the nodes that are connected to the "dependency"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithNamedDependency(name string, opts ...func(*DependencyQuery)) *PackageNameQuery {
+	query := (&DependencyClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pnq.withNamedDependency == nil {
+		pnq.withNamedDependency = make(map[string]*DependencyQuery)
+	}
+	pnq.withNamedDependency[name] = query
+	return pnq
+}
+
+// WithNamedCertification tells the query-builder to eager-load the nodes that are connected to the "certification"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithNamedCertification(name string, opts ...func(*CertificationQuery)) *PackageNameQuery {
+	query := (&CertificationClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pnq.withNamedCertification == nil {
+		pnq.withNamedCertification = make(map[string]*CertificationQuery)
+	}
+	pnq.withNamedCertification[name] = query
+	return pnq
+}
+
+// WithNamedMetadata tells the query-builder to eager-load the nodes that are connected to the "metadata"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithNamedMetadata(name string, opts ...func(*HasMetadataQuery)) *PackageNameQuery {
+	query := (&HasMetadataClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pnq.withNamedMetadata == nil {
+		pnq.withNamedMetadata = make(map[string]*HasMetadataQuery)
+	}
+	pnq.withNamedMetadata[name] = query
+	return pnq
+}
+
+// WithNamedPoc tells the query-builder to eager-load the nodes that are connected to the "poc"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (pnq *PackageNameQuery) WithNamedPoc(name string, opts ...func(*PointOfContactQuery)) *PackageNameQuery {
+	query := (&PointOfContactClient{config: pnq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if pnq.withNamedPoc == nil {
+		pnq.withNamedPoc = make(map[string]*PointOfContactQuery)
+	}
+	pnq.withNamedPoc[name] = query
 	return pnq
 }
 

@@ -25,3 +25,7 @@ import (
 func (c *neo4jClient) FindSoftware(ctx context.Context, searchText string) ([]model.PackageSourceOrArtifact, error) {
 	return []model.PackageSourceOrArtifact{}, fmt.Errorf("not implemented: FindSoftware")
 }
+
+func (c *neo4jClient) FindSoftwareList(ctx context.Context, searchText string, after *string, first *int) (*model.FindSoftwareConnection, error) {
+	return nil, fmt.Errorf("not implemented: FindSoftwareList")
+}

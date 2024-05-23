@@ -41,11 +41,8 @@ type EmitterPubSub struct {
 // DataFunc determines how the data return from the pubsub is transformed based on implementation per module
 type DataFunc func(*pubsub.Message) error
 
-// subscriber provides dataChan to read the collected data from the stream, errChan for any error that return and
-// the pubsub.Subscription to close the subscription once complete
+// subscriber contains the pubsub.Subscription for relieving and closing the subscription once complete
 type subscriber struct {
-	dataChan     <-chan *pubsub.Message
-	errChan      <-chan error
 	subscription *pubsub.Subscription
 }
 
@@ -103,7 +100,7 @@ func (e *EmitterPubSub) Publish(ctx context.Context, data []byte) error {
 }
 
 // Subscribe subscribes to the pubsub stream and receives events as they flow through
-func (e *EmitterPubSub) Subscribe(ctx context.Context, id string) (*subscriber, error) {
+func (e *EmitterPubSub) Subscribe(ctx context.Context) (*subscriber, error) {
 	subscriptionURL := buildSubscriptionURL(e.ServiceURL)
 
 	// Initialize a subscription
@@ -112,41 +109,30 @@ func (e *EmitterPubSub) Subscribe(ctx context.Context, id string) (*subscriber, 
 		return nil, fmt.Errorf("failed to open subscription with url: %s, with error: %w", subscriptionURL, err)
 	}
 
-	dataChan, errchan, err := createSubscriber(ctx, subscription, id)
-	if err != nil {
-		return nil, err
-	}
 	return &subscriber{
-		dataChan:     dataChan,
-		errChan:      errchan,
 		subscription: subscription,
 	}, nil
 }
 
 // GetDataFromSubscriber retrieves the data from the channels and transforms it via the DataFunc defined per module
-func (s *subscriber) GetDataFromSubscriber(ctx context.Context, dataFunc DataFunc) error {
+func (s *subscriber) GetDataFromSubscriber(ctx context.Context, dataFunc DataFunc, id string) error {
 	for {
-		select {
-		case d := <-s.dataChan:
-			if err := dataFunc(d); err != nil {
-				return err
-			}
-		case err := <-s.errChan:
-			for len(s.dataChan) > 0 {
-				d := <-s.dataChan
-				if err := dataFunc(d); err != nil {
-					return err
+		msg, err := s.subscription.Receive(ctx)
+		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				// if we get a timeout, we want to try again
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case <-time.After(backOffTimer):
 				}
+				continue
+			} else {
+				return fmt.Errorf("[%s: %s] unexpected Receive error: %w", durableProcessor, id, err)
 			}
+		}
+		if err := dataFunc(msg); err != nil {
 			return err
-		case <-ctx.Done():
-			for len(s.dataChan) > 0 {
-				d := <-s.dataChan
-				if err := dataFunc(d); err != nil {
-					return err
-				}
-			}
-			return ctx.Err()
 		}
 	}
 }
@@ -154,39 +140,4 @@ func (s *subscriber) GetDataFromSubscriber(ctx context.Context, dataFunc DataFun
 // CloseSubscriber closes the pubsub.Subscription
 func (s *subscriber) CloseSubscriber(ctx context.Context) error {
 	return s.subscription.Shutdown(ctx)
-}
-
-// createSubscriber receives from the subscription and use the dataChan and errChan to continuously send collected data or errors
-func createSubscriber(ctx context.Context, subscription *pubsub.Subscription, id string) (<-chan *pubsub.Message, <-chan error, error) {
-	// docChan to collect artifacts
-	dataChan := make(chan *pubsub.Message, bufferChannelSize)
-	// errChan to receive error from collectors
-	errChan := make(chan error, 1)
-	go func() {
-		for {
-			// if the context is canceled we want to break out of the loop
-			if ctx.Err() != nil {
-				errChan <- ctx.Err()
-				return
-			}
-			msg, err := subscription.Receive(ctx)
-			if err != nil {
-				if errors.Is(err, context.DeadlineExceeded) {
-					// if we get a timeout, we want to try again
-					select {
-					case <-ctx.Done():
-						errChan <- ctx.Err()
-						return
-					case <-time.After(backOffTimer):
-					}
-					continue
-				} else {
-					errChan <- fmt.Errorf("[%s: %s] unexpected Receive error: %w", durableProcessor, id, err)
-					return
-				}
-			}
-			dataChan <- msg
-		}
-	}()
-	return dataChan, errChan, nil
 }

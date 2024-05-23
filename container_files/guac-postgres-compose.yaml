@@ -1,0 +1,129 @@
+version: "3.8"
+
+services:
+
+  postgres:
+    image: docker.io/library/postgres:16
+    environment:
+      POSTGRES_USER: guac
+      POSTGRES_PASSWORD: guac
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data:z
+    healthcheck:
+      test: ["CMD", "pg_isready", "--username=guac", "--dbname=guac"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  graphql:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacgql --gql-debug --gql-backend=ent --db-address=postgres://guac:guac@postgres:5432/guac?sslmode=disable"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  nats:
+    image: "docker.io/library/nats:2.9.17-alpine"
+    command: "--jetstream -m 8222"
+    ports:
+      - "4222:4222"
+      # monitoring port
+      - "8222:8222"
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:8222/healthz" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  ingestor:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacingest --blob-addr=file:///tmp/blobstore?no_tmp_dir=true --csub-addr=collectsub:2782 --gql-addr=http://graphql:8080/query --pubsub-addr=nats://nats:4222"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      collectsub:
+        condition: service_healthy
+      graphql:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    volumes:
+      - ./blobstore:/tmp/blobstore:z
+
+
+  collectsub:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guaccsub"
+    working_dir: /guac
+    restart: on-failure
+    ports:
+      - "2782:2782"
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://localhost:2782" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  depsdev-collector:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guaccollect deps_dev --csub-addr=collectsub:2782 --blob-addr=file:///tmp/blobstore?no_tmp_dir=true  --pubsub-addr=nats://nats:4222"
+    working_dir: /guac
+    restart: on-failure
+    environment:
+      - DEPS_DEV_APIKEY
+    depends_on:
+      collectsub:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    volumes:
+      - ./blobstore:/tmp/blobstore:z
+
+  oci-collector:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guaccollect image --csub-addr=collectsub:2782 --blob-addr=file:///tmp/blobstore?no_tmp_dir=true  --pubsub-addr=nats://nats:4222"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      collectsub:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    volumes:
+      - ./blobstore:/tmp/blobstore:z
+
+  osv-certifier:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacone certifier osv -p --csub-addr=collectsub:2782 --gql-addr=http://graphql:8080/query"
+    working_dir: /guac
+    restart: on-failure
+    depends_on:
+      collectsub:
+        condition: service_healthy
+      graphql:
+        condition: service_healthy
+
+  guac-rest:
+    image: $GUAC_IMAGE
+    command: "/opt/guac/guacrest --rest-api-server-port=8081 --gql-addr=http://graphql:8080/query"
+    working_dir: /guac
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    depends_on:
+      graphql:
+        condition: service_healthy

@@ -79,6 +79,11 @@ func Collector(v string) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldEQ(FieldCollector, v))
 }
 
+// DocumentRef applies equality check predicate on the "document_ref" field. It's identical to DocumentRefEQ.
+func DocumentRef(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEQ(FieldDocumentRef, v))
+}
+
 // VulnerabilitiesHash applies equality check predicate on the "vulnerabilities_hash" field. It's identical to VulnerabilitiesHashEQ.
 func VulnerabilitiesHash(v string) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldEQ(FieldVulnerabilitiesHash, v))
@@ -317,6 +322,71 @@ func CollectorEqualFold(v string) predicate.VulnEqual {
 // CollectorContainsFold applies the ContainsFold predicate on the "collector" field.
 func CollectorContainsFold(v string) predicate.VulnEqual {
 	return predicate.VulnEqual(sql.FieldContainsFold(FieldCollector, v))
+}
+
+// DocumentRefEQ applies the EQ predicate on the "document_ref" field.
+func DocumentRefEQ(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefNEQ applies the NEQ predicate on the "document_ref" field.
+func DocumentRefNEQ(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldNEQ(FieldDocumentRef, v))
+}
+
+// DocumentRefIn applies the In predicate on the "document_ref" field.
+func DocumentRefIn(vs ...string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefNotIn applies the NotIn predicate on the "document_ref" field.
+func DocumentRefNotIn(vs ...string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldNotIn(FieldDocumentRef, vs...))
+}
+
+// DocumentRefGT applies the GT predicate on the "document_ref" field.
+func DocumentRefGT(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldGT(FieldDocumentRef, v))
+}
+
+// DocumentRefGTE applies the GTE predicate on the "document_ref" field.
+func DocumentRefGTE(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldGTE(FieldDocumentRef, v))
+}
+
+// DocumentRefLT applies the LT predicate on the "document_ref" field.
+func DocumentRefLT(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldLT(FieldDocumentRef, v))
+}
+
+// DocumentRefLTE applies the LTE predicate on the "document_ref" field.
+func DocumentRefLTE(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldLTE(FieldDocumentRef, v))
+}
+
+// DocumentRefContains applies the Contains predicate on the "document_ref" field.
+func DocumentRefContains(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldContains(FieldDocumentRef, v))
+}
+
+// DocumentRefHasPrefix applies the HasPrefix predicate on the "document_ref" field.
+func DocumentRefHasPrefix(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldHasPrefix(FieldDocumentRef, v))
+}
+
+// DocumentRefHasSuffix applies the HasSuffix predicate on the "document_ref" field.
+func DocumentRefHasSuffix(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldHasSuffix(FieldDocumentRef, v))
+}
+
+// DocumentRefEqualFold applies the EqualFold predicate on the "document_ref" field.
+func DocumentRefEqualFold(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldEqualFold(FieldDocumentRef, v))
+}
+
+// DocumentRefContainsFold applies the ContainsFold predicate on the "document_ref" field.
+func DocumentRefContainsFold(v string) predicate.VulnEqual {
+	return predicate.VulnEqual(sql.FieldContainsFold(FieldDocumentRef, v))
 }
 
 // VulnerabilitiesHashEQ applies the EQ predicate on the "vulnerabilities_hash" field.

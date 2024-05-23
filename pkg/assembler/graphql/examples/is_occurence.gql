@@ -46,6 +46,28 @@ fragment allIsOccurrencesTree on IsOccurrence {
   justification
   origin
   collector
+  documentRef
+}
+
+fragment AllIsOccurrencePaginationTree on IsOccurrenceConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query IsOccurrencePagination {
+  IsOccurrenceList(isOccurrenceSpec: {}, first: 10) {
+    ...AllIsOccurrencePaginationTree
+  }
 }
 
 query IsOccurrenceQ1 {

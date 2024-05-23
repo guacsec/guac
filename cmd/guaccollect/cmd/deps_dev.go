@@ -49,6 +49,8 @@ type depsDevOptions struct {
 	enablePrometheus bool
 	// prometheus address
 	prometheusPort int
+	// enable/disable message publish to queue
+	publishToQueue bool
 }
 
 var depsDevCmd = &cobra.Command{
@@ -82,9 +84,10 @@ you have access to read and write to the respective blob store.`,
 			viper.GetBool("use-csub"),
 			viper.GetBool("service-poll"),
 			viper.GetBool("retrieve-dependencies"),
-			args,
 			viper.GetBool("enable-prometheus"),
-			viper.GetInt("prometheus-addr"),
+			viper.GetInt("prometheus-port"),
+			viper.GetBool("publish-to-queue"),
+			args,
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -110,12 +113,23 @@ you have access to read and write to the respective blob store.`,
 			}()
 		}
 
-		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr)
+		initializeNATsandCollector(ctx, opts.pubsubAddr, opts.blobAddr, opts.publishToQueue)
 	},
 }
 
-func validateDepsDevFlags(pubsubAddr string, blobAddr string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, useCsub bool, poll bool, retrieveDependencies bool, args []string,
-	enablePrometheus bool, prometheusPort int,
+func validateDepsDevFlags(
+	pubsubAddr,
+	blobAddr,
+	csubAddr string,
+	csubTls,
+	csubTlsSkipVerify,
+	useCsub,
+	poll,
+	retrieveDependencies,
+	enablePrometheus bool,
+	prometheusPort int,
+	pubToQueue bool,
+	args []string,
 ) (depsDevOptions, error) {
 	var opts depsDevOptions
 	opts.pubsubAddr = pubsubAddr
@@ -124,6 +138,7 @@ func validateDepsDevFlags(pubsubAddr string, blobAddr string, csubAddr string, c
 	opts.retrieveDependencies = retrieveDependencies
 	opts.enablePrometheus = enablePrometheus
 	opts.prometheusPort = prometheusPort
+	opts.publishToQueue = pubToQueue
 	if useCsub {
 		csubOpts, err := csubclient.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 		if err != nil {
@@ -159,7 +174,7 @@ func validateDepsDevFlags(pubsubAddr string, blobAddr string, csubAddr string, c
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"retrieve-dependencies"})
+	set, err := cli.BuildFlags([]string{"retrieve-dependencies", "prometheus-port"})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

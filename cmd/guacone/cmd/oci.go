@@ -18,9 +18,11 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/guacsec/guac/pkg/cli"
 	"github.com/guacsec/guac/pkg/collectsub/client"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
 	"github.com/guacsec/guac/pkg/collectsub/datasource"
@@ -37,6 +39,7 @@ import (
 
 type ociOptions struct {
 	graphqlEndpoint   string
+	headerFile        string
 	dataSource        datasource.CollectSource
 	csubClientOptions client.CsubClientOptions
 }
@@ -46,11 +49,9 @@ var ociCmd = &cobra.Command{
 	Short: "takes images to download sbom and attestation stored in OCI to add to GUAC graph, this command talks directly to the graphQL endpoint",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateOCIFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetString("csub-addr"),
 			viper.GetBool("csub-tls"),
 			viper.GetBool("csub-tls-skip-verify"),
@@ -60,6 +61,10 @@ var ociCmd = &cobra.Command{
 			_ = cmd.Help()
 			os.Exit(1)
 		}
+
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
 
 		// Register collector
 		ociCollector := oci.NewOCICollector(ctx, opts.dataSource, false, 10*time.Minute)
@@ -82,7 +87,7 @@ var ociCmd = &cobra.Command{
 		// Set emit function to go through the entire pipeline
 		emit := func(d *processor.Document) error {
 			totalNum += 1
-			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, csubClient)
+			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient)
 
 			if err != nil {
 				gotErr = true
@@ -112,9 +117,10 @@ var ociCmd = &cobra.Command{
 	},
 }
 
-func validateOCIFlags(gqlEndpoint string, csubAddr string, csubTls bool, csubTlsSkipVerify bool, args []string) (ociOptions, error) {
+func validateOCIFlags(gqlEndpoint, headerFile, csubAddr string, csubTls, csubTlsSkipVerify bool, args []string) (ociOptions, error) {
 	var opts ociOptions
 	opts.graphqlEndpoint = gqlEndpoint
+	opts.headerFile = headerFile
 
 	csubOpts, err := client.ValidateCsubClientFlags(csubAddr, csubTls, csubTlsSkipVerify)
 	if err != nil {

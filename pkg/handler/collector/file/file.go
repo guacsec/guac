@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/guacsec/guac/pkg/events"
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -92,8 +93,9 @@ func (f *fileCollector) RetrieveArtifacts(ctx context.Context, docChannel chan<-
 			Type:   processor.DocumentUnknown,
 			Format: processor.FormatUnknown,
 			SourceInformation: processor.SourceInformation{
-				Collector: string(FileCollector),
-				Source:    fmt.Sprintf("file:///%s", path),
+				Collector:   string(FileCollector),
+				Source:      fmt.Sprintf("file:///%s", path),
+				DocumentRef: events.GetDocRef(blob),
 			},
 		}
 

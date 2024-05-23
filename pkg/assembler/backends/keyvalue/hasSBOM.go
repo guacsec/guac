@@ -19,6 +19,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/guacsec/guac/internal/testing/ptrfrom"
+	"sort"
 	"strings"
 	"time"
 
@@ -39,6 +41,7 @@ type hasSBOMStruct struct {
 	DownloadLocation     string
 	Origin               string
 	Collector            string
+	DocumentRef          string
 	KnownSince           time.Time
 	IncludedSoftware     []string
 	IncludedDependencies []string
@@ -56,6 +59,7 @@ func (n *hasSBOMStruct) Key() string {
 		n.DownloadLocation,
 		n.Origin,
 		n.Collector,
+		n.DocumentRef,
 		timeKey(n.KnownSince),
 		fmt.Sprint(n.IncludedSoftware),
 		fmt.Sprint(n.IncludedDependencies),
@@ -179,6 +183,7 @@ func (c *demoClient) ingestHasSbom(ctx context.Context, subject model.PackageOrA
 		DownloadLocation:     input.DownloadLocation,
 		Origin:               input.Origin,
 		Collector:            input.Collector,
+		DocumentRef:          input.DocumentRef,
 		KnownSince:           input.KnownSince.UTC(),
 		IncludedSoftware:     includedSoftware,
 		IncludedDependencies: includedDependencies,
@@ -254,6 +259,7 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 		DownloadLocation: in.DownloadLocation,
 		Origin:           in.Origin,
 		Collector:        in.Collector,
+		DocumentRef:      in.DocumentRef,
 		KnownSince:       in.KnownSince.UTC(),
 	}
 	if in.Pkg != "" {
@@ -317,6 +323,179 @@ func (c *demoClient) convHasSBOM(ctx context.Context, in *hasSBOMStruct) (*model
 
 // Query HasSBOM
 
+func (c *demoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error) {
+	funcName := "HasSBOM"
+	c.m.RLock()
+	defer c.m.RUnlock()
+
+	if hasSBOMSpec.ID != nil {
+		link, err := byIDkv[*hasSBOMStruct](ctx, *hasSBOMSpec.ID, c)
+		if err != nil {
+			// Not found
+			return nil, nil
+		}
+		// If found by id, ignore rest of fields in spec and return as a match
+		hs, err := c.convHasSBOM(ctx, link)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		return &model.HasSBOMConnection{
+			TotalCount: 1,
+			PageInfo: &model.PageInfo{
+				HasNextPage: false,
+				StartCursor: ptrfrom.String(hs.ID),
+				EndCursor:   ptrfrom.String(hs.ID),
+			},
+			Edges: []*model.HasSBOMEdge{
+				{
+					Cursor: hs.ID,
+					Node:   hs,
+				},
+			},
+		}, nil
+	}
+
+	edges := make([]*model.HasSBOMEdge, 0)
+	hasNextPage := false
+	numNodes := 0
+	totalCount := 0
+	addToCount := 0
+
+	var search []string
+	foundOne := false
+	if hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Package != nil {
+		pkgs, err := c.findPackageVersion(ctx, hasSBOMSpec.Subject.Package)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		foundOne = len(pkgs) > 0
+		for _, pkg := range pkgs {
+			search = append(search, pkg.HasSBOMs...)
+		}
+	}
+	if !foundOne && hasSBOMSpec.Subject != nil && hasSBOMSpec.Subject.Artifact != nil {
+		exactArt, err := c.artifactExact(ctx, hasSBOMSpec.Subject.Artifact)
+		if err != nil {
+			return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+		}
+		if exactArt != nil {
+			search = exactArt.HasSBOMs
+			foundOne = true
+		}
+	}
+
+	if foundOne {
+		for _, id := range search {
+			link, err := byIDkv[*hasSBOMStruct](ctx, id, c)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link)
+			if err != nil {
+				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+			}
+			if hs == nil {
+				continue
+			}
+
+			if (after != nil && hs.ID > *after) || after == nil {
+				addToCount += 1
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasSBOMEdge{
+							Cursor: hs.ID,
+							Node:   hs,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasSBOMEdge{
+						Cursor: hs.ID,
+						Node:   hs,
+					})
+				}
+			}
+		}
+	} else {
+		currentPage := false
+
+		// If no cursor present start from the top
+		if after == nil {
+			currentPage = true
+		}
+
+		var done bool
+		scn := c.kv.Keys(hasSBOMCol)
+		for !done {
+			var hsKeys []string
+			var err error
+			hsKeys, done, err = scn.Scan(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			sort.Strings(hsKeys)
+			totalCount = len(hsKeys)
+
+			for i, hsKey := range hsKeys {
+				link, err := byKeykv[*hasSBOMStruct](ctx, hasSBOMCol, hsKey, c)
+				if err != nil {
+					return nil, err
+				}
+				hs, err := c.hasSBOMIfMatch(ctx, &hasSBOMSpec, link)
+				if err != nil {
+					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
+				}
+
+				if hs == nil {
+					continue
+				}
+
+				if after != nil && !currentPage {
+					if hs.ID == *after {
+						totalCount = len(hsKeys) - (i + 1)
+						currentPage = true
+					}
+					continue
+				}
+
+				if first != nil {
+					if numNodes < *first {
+						edges = append(edges, &model.HasSBOMEdge{
+							Cursor: hs.ID,
+							Node:   hs,
+						})
+						numNodes++
+					} else if numNodes == *first {
+						hasNextPage = true
+					}
+				} else {
+					edges = append(edges, &model.HasSBOMEdge{
+						Cursor: hs.ID,
+						Node:   hs,
+					})
+				}
+			}
+		}
+	}
+
+	if len(edges) != 0 {
+		return &model.HasSBOMConnection{
+			TotalCount: totalCount + addToCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: hasNextPage,
+				StartCursor: ptrfrom.String(edges[0].Node.ID),
+				EndCursor:   ptrfrom.String(edges[max(numNodes-1, 0)].Node.ID),
+			},
+			Edges: edges,
+		}, nil
+	}
+	return nil, nil
+}
+
 func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 	funcName := "HasSBOM"
 	c.m.RLock()
@@ -366,10 +545,16 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
-			out, err = c.addHasSBOMIfMatch(ctx, out, filter, link)
+			hs, err := c.hasSBOMIfMatch(ctx, filter, link)
 			if err != nil {
 				return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 			}
+
+			if hs == nil {
+				continue
+			}
+
+			out = append(out, hs)
 		}
 	} else {
 		var done bool
@@ -386,10 +571,16 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 				if err != nil {
 					return nil, err
 				}
-				out, err = c.addHasSBOMIfMatch(ctx, out, filter, link)
+				hs, err := c.hasSBOMIfMatch(ctx, filter, link)
 				if err != nil {
 					return nil, gqlerror.Errorf("%v :: %v", funcName, err)
 				}
+
+				if hs == nil {
+					continue
+				}
+
+				out = append(out, hs)
 			}
 		}
 	}
@@ -397,9 +588,8 @@ func (c *demoClient) HasSBOM(ctx context.Context, filter *model.HasSBOMSpec) ([]
 	return out, nil
 }
 
-func (c *demoClient) addHasSBOMIfMatch(ctx context.Context, out []*model.HasSbom,
-	filter *model.HasSBOMSpec, link *hasSBOMStruct) (
-	[]*model.HasSbom, error) {
+func (c *demoClient) hasSBOMIfMatch(ctx context.Context, filter *model.HasSBOMSpec, link *hasSBOMStruct) (
+	*model.HasSbom, error) {
 
 	if filter != nil {
 		if noMatch(filter.URI, link.URI) ||
@@ -408,40 +598,41 @@ func (c *demoClient) addHasSBOMIfMatch(ctx context.Context, out []*model.HasSbom
 			noMatch(filter.DownloadLocation, link.DownloadLocation) ||
 			noMatch(filter.Origin, link.Origin) ||
 			noMatch(filter.Collector, link.Collector) ||
+			noMatch(filter.DocumentRef, link.DocumentRef) ||
 			(filter.KnownSince != nil && filter.KnownSince.After(link.KnownSince)) {
-			return out, nil
+			return nil, nil
 		}
 		// collect packages and artifacts from included software
 		pkgs, artifacts, err := c.getPackageVersionAndArtifacts(ctx, link.IncludedSoftware)
 		if err != nil {
-			return out, err
+			return nil, err
 		}
 
 		pkgFilters, artFilters := helper.GetPackageAndArtifactFilters(filter.IncludedSoftware)
 		if !c.matchPackages(ctx, pkgFilters, pkgs) || !c.matchArtifacts(ctx, artFilters, artifacts) ||
 			!c.matchDependencies(ctx, filter.IncludedDependencies, link.IncludedDependencies) ||
 			!c.matchOccurrences(ctx, filter.IncludedOccurrences, link.IncludedOccurrences) {
-			return out, nil
+			return nil, nil
 		}
 
 		if filter.Subject != nil {
 			if filter.Subject.Package != nil {
 				if link.Pkg == "" {
-					return out, nil
+					return nil, nil
 				}
 				p, err := c.buildPackageResponse(ctx, link.Pkg, filter.Subject.Package)
 				if err != nil {
 					return nil, err
 				}
 				if p == nil {
-					return out, nil
+					return nil, nil
 				}
 			} else if filter.Subject.Artifact != nil {
 				if link.Artifact == "" {
-					return out, nil
+					return nil, nil
 				}
 				if !c.artifactMatch(ctx, link.Artifact, filter.Subject.Artifact) {
-					return out, nil
+					return nil, nil
 				}
 			}
 		}
@@ -450,5 +641,5 @@ func (c *demoClient) addHasSBOMIfMatch(ctx context.Context, out []*model.HasSbom
 	if err != nil {
 		return nil, err
 	}
-	return append(out, sb), nil
+	return sb, nil
 }

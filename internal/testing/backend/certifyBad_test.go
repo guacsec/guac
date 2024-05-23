@@ -749,6 +749,32 @@ func TestCertifyBad(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: &model.CertifyBadInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:     testdata.P1out,
+					DocumentRef: "test",
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
@@ -811,16 +837,22 @@ func TestCertifyBad(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.CertifyBad(ctx, test.Query)
+			got, err := b.CertifyBadList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			slices.SortFunc(got, cmpCB)
+			var returnedObjects []*model.CertifyBad
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			slices.SortFunc(returnedObjects, cmpCB)
 			slices.SortFunc(test.ExpCB, cmpCB)
-			if diff := cmp.Diff(test.ExpCB, got, commonOpts); diff != "" {
+			if diff := cmp.Diff(test.ExpCB, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -990,8 +1022,7 @@ func TestIngestCertifyBads(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
-		},
-		{
+		}, {
 			Name:  "Query on Source",
 			InPkg: []*model.PkgInputSpec{testdata.P1},
 			InSrc: []*model.SourceInputSpec{testdata.S1, testdata.S2},
@@ -1079,6 +1110,33 @@ func TestIngestCertifyBads(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docRef",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			Calls: []call{
+				{
+					Sub: model.PackageSourceOrArtifactInputs{
+						Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}},
+					},
+					Match: &model.MatchFlags{
+						Pkg: model.PkgMatchTypeSpecificVersion,
+					},
+					CB: []*model.CertifyBadInputSpec{
+						{
+							DocumentRef: "test",
+						},
+					},
+				},
+			},
+			Query: &model.CertifyBadSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpCB: []*model.CertifyBad{
+				{
+					Subject:     testdata.P1out,
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -1107,16 +1165,22 @@ func TestIngestCertifyBads(t *testing.T) {
 					return
 				}
 			}
-			got, err := b.CertifyBad(ctx, test.Query)
+			got, err := b.CertifyBadList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			slices.SortFunc(got, cmpCB)
+			var returnedObjects []*model.CertifyBad
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			slices.SortFunc(returnedObjects, cmpCB)
 			slices.SortFunc(test.ExpCB, cmpCB)
-			if diff := cmp.Diff(test.ExpCB, got, commonOpts); diff != "" {
+			if diff := cmp.Diff(test.ExpCB, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})

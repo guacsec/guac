@@ -20,17 +20,11 @@ import (
 	"fmt"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
-	"github.com/guacsec/guac/pkg/blob"
 	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/guacsec/guac/pkg/emitter"
-	"github.com/guacsec/guac/pkg/events"
+	"github.com/guacsec/guac/pkg/handler/collector"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
 )
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const (
 	BufferChannelSize int = 1000
@@ -144,8 +138,10 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 	for certifiersDone < numCertifiers {
 		select {
 		case d := <-docChan:
+			collector.AddChildLogger(logger, d)
+			logger.Debugf("starting up the child logger: %+v", d.SourceInformation.Source)
 			if err := emitter(d); err != nil {
-				logger.Errorf("emit error: %v", err)
+				d.ChildLogger.Errorf("emit error: %v", err)
 			}
 		case err := <-errChan:
 			if !handleErr(err) {
@@ -158,43 +154,11 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 	}
 	for len(docChan) > 0 {
 		d := <-docChan
+		collector.AddChildLogger(logger, d)
+		logger.Debugf("starting up the child logger: %+v", d.SourceInformation.Source)
 		if err := emitter(d); err != nil {
-			logger.Errorf("emit error: %v", err)
+			d.ChildLogger.Errorf("emit error: %v", err)
 		}
 	}
-	return nil
-}
-
-// Publish is used by NATS JetStream to stream the documents and send them to the processor
-func Publish(ctx context.Context, d *processor.Document, blobStore *blob.BlobStore, pubsub *emitter.EmitterPubSub) error {
-	logger := logging.FromContext(ctx)
-
-	docByte, err := json.Marshal(d)
-	if err != nil {
-		return fmt.Errorf("failed marshal of document: %w", err)
-	}
-
-	key := events.GetKey(d.Blob)
-
-	if err = blobStore.Write(ctx, key, docByte); err != nil {
-		return fmt.Errorf("failed write document to blob store: %w", err)
-	}
-
-	cdEvent, err := events.CreateArtifactPubEvent(ctx, key)
-	if err != nil {
-		return fmt.Errorf("failed create an event: %w", err)
-	}
-
-	keyByte, err := json.Marshal(cdEvent)
-	if err != nil {
-		return fmt.Errorf("failed marshal of document key: %w", err)
-	}
-
-	if err := pubsub.Publish(ctx, keyByte); err != nil {
-		if err != nil {
-			return fmt.Errorf("failed to publish event with error: %w", err)
-		}
-	}
-	logger.Debugf("doc published: %+v", d.SourceInformation.Source)
 	return nil
 }

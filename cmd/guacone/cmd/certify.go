@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -35,6 +36,7 @@ import (
 type certifyOptions struct {
 	// gql endpoint
 	graphqlEndpoint string
+	headerFile      string
 	// // certifyBad/certifyGood
 	good          bool
 	certifyType   string
@@ -53,23 +55,24 @@ var certifyCmd = &cobra.Command{
   <subject> is in the form of "<purl>" for package, "<vcs_tool>+<transport>" for source, or "<algorithm>:<digest>" for artifact.`,
 	TraverseChildren: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := logging.WithLogger(context.Background())
-		logger := logging.FromContext(ctx)
-
 		opts, err := validateCertifyFlags(
 			viper.GetString("gql-addr"),
+			viper.GetString("header-file"),
 			viper.GetBool("cert-good"),
 			viper.GetBool("package-name"),
 			args,
 		)
-
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
 			_ = cmd.Help()
 			os.Exit(1)
 		}
 
-		assemblerFunc := ingestor.GetAssembler(ctx, opts.graphqlEndpoint)
+		ctx := logging.WithLogger(context.Background())
+		logger := logging.FromContext(ctx)
+		transport := cli.HTTPHeaderTransport(ctx, opts.headerFile, http.DefaultTransport)
+
+		assemblerFunc := ingestor.GetAssembler(ctx, logger, opts.graphqlEndpoint, transport)
 
 		preds := &assembler.IngestPredicates{}
 		var pkgInput *model.PkgInputSpec
@@ -156,9 +159,10 @@ var certifyCmd = &cobra.Command{
 	},
 }
 
-func validateCertifyFlags(graphqlEndpoint string, good, pkgName bool, args []string) (certifyOptions, error) {
+func validateCertifyFlags(graphqlEndpoint, headerFile string, good, pkgName bool, args []string) (certifyOptions, error) {
 	var opts certifyOptions
 	opts.graphqlEndpoint = graphqlEndpoint
+	opts.headerFile = headerFile
 	opts.good = good
 	opts.pkgName = pkgName
 	if len(args) != 3 {

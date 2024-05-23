@@ -64,7 +64,7 @@ func init() {
 
 func initIndex(name string, fields []string, unique bool) index {
 	return index{
-		name: name,
+		name:   name,
 		fields: fields,
 		unique: unique,
 	}
@@ -514,7 +514,6 @@ func getCollectionIndexMap() map[string][]index {
 	collectionIndexMap := make(map[string][]index)
 
 	collectionIndexMap[artifactsStr] = []index{
-		initIndex("byDigest", []string{"digest"}, true),
 		initIndex("byArtAndDigest", []string{"algorithm", "digest"}, true),
 	}
 
@@ -571,82 +570,82 @@ func getCollectionIndexMap() map[string][]index {
 	}
 
 	collectionIndexMap[isDependenciesStr] = []index{
-		initIndex("byPkgIDDepPkgIDversionRangeOrigin", []string{"packageID", "depPackageID", "versionRange", "origin"}, false),
+		initIndex("byPkgIDDepPkgIDversionRangeOrigin", []string{"packageID", "depPackageID", "versionRange", "origin", docRef}, false),
 	}
 
 	collectionIndexMap[isOccurrencesStr] = []index{
-		initIndex("byPkgIDArtIDOriginJust", []string{"packageID", "artifactID", "justification", "origin"}, true),
+		initIndex("byPkgIDArtIDOriginJust", []string{"packageID", "artifactID", "justification", "origin", docRef}, true),
 	}
 
 	collectionIndexMap[certifyBadsStr] = []index{
-		initIndex("certifyBadArtifactID", []string{"artifactID", "justification", "knownSince"}, false),
-		initIndex("certifyBadPackageID", []string{"packageID", "justification", "knownSince"}, false),
-		initIndex("certifyBadSourceID", []string{"sourceID", "justification", "knownSince"}, false),
+		initIndex("certifyBadArtifactID", []string{"artifactID", "justification", "knownSince", docRef}, false),
+		initIndex("certifyBadPackageID", []string{"packageID", "justification", "knownSince", docRef}, false),
+		initIndex("certifyBadSourceID", []string{"sourceID", "justification", "knownSince", docRef}, false),
 	}
 
 	collectionIndexMap[certifyGoodsStr] = []index{
-		initIndex("certifyGoodArtifactID", []string{"artifactID", "justification", "knownSince"}, false),
-		initIndex("certifyGoodPackageID", []string{"packageID", "justification", "knownSince"}, false),
-		initIndex("certifyGoodSourceID", []string{"sourceID", "justification", "knownSince"}, false),
+		initIndex("certifyGoodArtifactID", []string{"artifactID", "justification", "knownSince", docRef}, false),
+		initIndex("certifyGoodPackageID", []string{"packageID", "justification", "knownSince", docRef}, false),
+		initIndex("certifyGoodSourceID", []string{"sourceID", "justification", "knownSince", docRef}, false),
 	}
 
 	collectionIndexMap[certifyLegalsStr] = []index{
-		initIndex("certifyLegalPackageID", []string{"packageID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false),
-		initIndex("certifyLegalSourceID", []string{"sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin"}, false),
+		initIndex("certifyLegalPackageID", []string{"packageID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin", docRef}, false),
+		initIndex("certifyLegalSourceID", []string{"sourceID", "declaredLicense", "declaredLicenses", "discoveredLicense", "discoveredLicenses", "attribution", "justification", "timeScanned", "origin", docRef}, false),
 	}
 
 	collectionIndexMap[scorecardStr] = []index{
-		initIndex("certifyScorecard", []string{"sourceID", "checks", "aggregateScore", "timeScanned", "origin"}, true),
+		initIndex("certifyScorecard", []string{"sourceID", "checks", "aggregateScore", "timeScanned", "origin", docRef}, true),
 	}
 
 	collectionIndexMap[certifyVEXsStr] = []index{
-		initIndex("certifyVexPackageID", []string{"packageID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false),
-		initIndex("certifyVexArtifactID", []string{"artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin"}, false),
+		initIndex("certifyVexPackageID", []string{"packageID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin", docRef}, false),
+		initIndex("certifyVexArtifactID", []string{"artifactID", "vulnerabilityID", "status", "vexJustification", "statement", "statusNotes", "knownSince", "origin", docRef}, false),
 	}
 
 	collectionIndexMap[certifyVulnsStr] = []index{
-		initIndex("certifyVuln", []string{"packageID", "vulnerabilityID", "ScannerVersion", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "timeScanned", "origin"}, true),
+		initIndex("certifyVuln", []string{"packageID", "vulnerabilityID", "ScannerVersion", "dbUri", "dbVersion", "scannerUri", "scannerVersion", "timeScanned", "origin", docRef}, true),
 	}
 
 	collectionIndexMap[hashEqualsStr] = []index{
-		initIndex("hashEquals", []string{"artifactID", "equalArtifactID", "justification", "origin"}, true),
+		initIndex("hashEquals", []string{"artifactID", "equalArtifactID", "justification", "origin", docRef}, true),
 	}
 
 	collectionIndexMap[hasMetadataStr] = []index{
-		initIndex("hashMetadataArtifactID", []string{"artifactID", "key", "value", "timestamp", "justification", "origin"}, false),
-		initIndex("hashMetadataPackageID", []string{"packageID", "key", "value", "timestamp", "justification", "origin"}, false),
-		initIndex("hashMetadataSourceID", []string{"sourceID", "key", "value", "timestamp", "justification", "origin"}, false),
+		initIndex("hashMetadataArtifactID", []string{"artifactID", "key", "value", "timestamp", "justification", "origin", docRef}, false),
+		initIndex("hashMetadataPackageID", []string{"packageID", "key", "value", "timestamp", "justification", "origin", docRef}, false),
+		initIndex("hashMetadataSourceID", []string{"sourceID", "key", "value", "timestamp", "justification", "origin", docRef}, false),
 	}
 
 	collectionIndexMap[hasSBOMsStr] = []index{
-		initIndex("hasSbomArtifactID", []string{"artifactID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false),
-		initIndex("hasSbomPackageID", []string{"packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin"}, false),
+		initIndex("hasSbomArtifactID", []string{"artifactID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin", docRef}, false),
+		initIndex("hasSbomPackageID", []string{"packageID", "uri", "algorithm", "digest", "knownSince", "downloadLocation", "origin", docRef}, false),
 	}
 
 	collectionIndexMap[hasSLSAsStr] = []index{
-		initIndex("hasSlsa", []string{"subjectID", "builtByID", "buildType", "builtFrom", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin"}, true),
+		initIndex("hasSlsa", []string{"subjectID", "builtByID", "buildType", "builtFrom", "slsaPredicate", "slsaVersion", "startedOn", "finishedOn", "origin", docRef}, true),
 	}
 
 	collectionIndexMap[hasSourceAtsStr] = []index{
-		initIndex("hasSourceAt", []string{"packageID", "sourceID", "justification", "knownSince", "origin"}, true),
+		initIndex("hasSourceAt", []string{"packageID", "sourceID", "justification", "knownSince", "origin", docRef}, true),
 	}
 
 	collectionIndexMap[pkgEqualsStr] = []index{
-		initIndex("pkgEqual", []string{"packageID", "equalPackageID", "justification", "origin"}, true),
+		initIndex("pkgEqual", []string{"packageID", "equalPackageID", "justification", "origin", docRef}, true),
 	}
 
 	collectionIndexMap[pointOfContactStr] = []index{
-		initIndex("pointOfContactArtifactID", []string{"artifactID", "email", "info", "since", "justification", "origin"}, false),
-		initIndex("pointOfContactPackageID", []string{"packageID", "email", "info", "since", "justification", "origin"}, false),
-		initIndex("pointOfContactSourceID", []string{"sourceID", "email", "info", "since", "justification", "origin"}, false),
+		initIndex("pointOfContactArtifactID", []string{"artifactID", "email", "info", "since", "justification", "origin", docRef}, false),
+		initIndex("pointOfContactPackageID", []string{"packageID", "email", "info", "since", "justification", "origin", docRef}, false),
+		initIndex("pointOfContactSourceID", []string{"sourceID", "email", "info", "since", "justification", "origin", docRef}, false),
 	}
 
 	collectionIndexMap[vulnEqualsStr] = []index{
-		initIndex("vulnEqual", []string{"vulnerabilityID", "equalVulnerabilityID", "justification", "origin"}, true),
+		initIndex("vulnEqual", []string{"vulnerabilityID", "equalVulnerabilityID", "justification", "origin", docRef}, true),
 	}
 
 	collectionIndexMap[vulnMetadataStr] = []index{
-		initIndex("vulnMetadata", []string{"vulnerabilityID", "scoreType", "scoreValue", "timestamp", "origin"}, true),
+		initIndex("vulnMetadata", []string{"vulnerabilityID", "scoreType", "scoreValue", "timestamp", "origin", docRef}, true),
 	}
 
 	return collectionIndexMap

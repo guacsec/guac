@@ -68,12 +68,17 @@ func (v *AllBuilderTree) GetUri() string { return v.Uri }
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type AllCertifyBad struct {
-	Id            string                                      `json:"id"`
-	Justification string                                      `json:"justification"`
-	KnownSince    time.Time                                   `json:"knownSince"`
-	Subject       AllCertifyBadSubjectPackageSourceOrArtifact `json:"-"`
-	Origin        string                                      `json:"origin"`
-	Collector     string                                      `json:"collector"`
+	Id string `json:"id"`
+	// The justification for the subject being certified bad
+	Justification string `json:"justification"`
+	// Timestamp when the certification was created (in RFC 3339 format)
+	KnownSince time.Time `json:"knownSince"`
+	// The package, source or artifact that is attested
+	Subject AllCertifyBadSubjectPackageSourceOrArtifact `json:"-"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 // GetId returns AllCertifyBad.Id, and is useful for accessing the field via an interface.
@@ -544,12 +549,17 @@ func (v *AllCertifyBadSubjectSource) __premarshalJSON() (*__premarshalAllCertify
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type AllCertifyGood struct {
-	Id            string                                       `json:"id"`
-	Justification string                                       `json:"justification"`
-	KnownSince    time.Time                                    `json:"knownSince"`
-	Subject       AllCertifyGoodSubjectPackageSourceOrArtifact `json:"-"`
-	Origin        string                                       `json:"origin"`
-	Collector     string                                       `json:"collector"`
+	Id string `json:"id"`
+	// The justification for the subject being certified good
+	Justification string `json:"justification"`
+	// Timestamp when the certification was created (in RFC 3339 format)
+	KnownSince time.Time `json:"knownSince"`
+	// The package, source or artifact that is attested
+	Subject AllCertifyGoodSubjectPackageSourceOrArtifact `json:"-"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 // GetId returns AllCertifyGood.Id, and is useful for accessing the field via an interface.
@@ -2582,14 +2592,21 @@ func (v *AllCertifyVulnVulnerability) __premarshalJSON() (*__premarshalAllCertif
 // PackageVersion. If the attestation targets a source, it must target a
 // SourceName.
 type AllHasMetadata struct {
-	Id            string                                       `json:"id"`
-	Subject       AllHasMetadataSubjectPackageSourceOrArtifact `json:"-"`
-	Key           string                                       `json:"key"`
-	Value         string                                       `json:"value"`
-	Timestamp     time.Time                                    `json:"timestamp"`
-	Justification string                                       `json:"justification"`
-	Origin        string                                       `json:"origin"`
-	Collector     string                                       `json:"collector"`
+	Id string `json:"id"`
+	// The package, source or artifact that is attested
+	Subject AllHasMetadataSubjectPackageSourceOrArtifact `json:"-"`
+	// Key in the key value pair
+	Key string `json:"key"`
+	// Value in the key value pair
+	Value string `json:"value"`
+	// Timestamp when the certification was created (in RFC 3339 format)
+	Timestamp time.Time `json:"timestamp"`
+	// The justification for the metadata
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 // GetId returns AllHasMetadata.Id, and is useful for accessing the field via an interface.
@@ -4195,12 +4212,12 @@ func (v *AllHasSourceAtSource) __premarshalJSON() (*__premarshalAllHasSourceAtSo
 // AllHashEqualTree includes the GraphQL fields of HashEqual requested by the fragment AllHashEqualTree.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type AllHashEqualTree struct {
 	Id string `json:"id"`
 	// Justification for the claim that the artifacts are similar
 	Justification string `json:"justification"`
-	// Collection of artifacts that are similar
+	// Two artifacts that are similar
 	Artifacts []AllHashEqualTreeArtifactsArtifact `json:"artifacts"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
@@ -5008,12 +5025,12 @@ func (v *AllLicenseTree) GetListVersion() *string { return v.ListVersion }
 // AllPkgEqual includes the GraphQL fields of PkgEqual requested by the fragment AllPkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type AllPkgEqual struct {
 	Id string `json:"id"`
 	// Justification for the claim that the packages are similar
 	Justification string `json:"justification"`
-	// Collection of packages that are similar
+	// Two packages that are similar
 	Packages []AllPkgEqualPackagesPackage `json:"packages"`
 	// Document from which this attestation is generated from
 	Origin string `json:"origin"`
@@ -5307,14 +5324,21 @@ func (v *AllPkgTreeNamespacesPackageNamespaceNamesPackageNameVersionsPackageVers
 // hierarchy. However, until the use case arises, PointOfContact will be a flat
 // reference to the contact details.
 type AllPointOfContact struct {
-	Id            string                                          `json:"id"`
-	Subject       AllPointOfContactSubjectPackageSourceOrArtifact `json:"-"`
-	Email         string                                          `json:"email"`
-	Info          string                                          `json:"info"`
-	Since         time.Time                                       `json:"since"`
-	Justification string                                          `json:"justification"`
-	Origin        string                                          `json:"origin"`
-	Collector     string                                          `json:"collector"`
+	Id string `json:"id"`
+	// The package, source or artifact that is attested
+	Subject AllPointOfContactSubjectPackageSourceOrArtifact `json:"-"`
+	// Email for the POC
+	Email string `json:"email"`
+	// Generic info for the POC
+	Info string `json:"info"`
+	// Timestamp when the certification for POC was created (in RFC 3339 format)
+	Since time.Time `json:"since"`
+	// The justification for the POC attestation
+	Justification string `json:"justification"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 // GetId returns AllPointOfContact.Id, and is useful for accessing the field via an interface.
@@ -6162,7 +6186,7 @@ func (v *AllSourceTreeNamespacesSourceNamespaceNamesSourceName) GetCommit() *str
 // Note that setting noVuln vulnerability type is invalid for VulnEqual!
 type AllVulnEqual struct {
 	Id string `json:"id"`
-	// Collection of vulnerabilities that are similar
+	// Two vulnerabilities that are similar
 	Vulnerabilities []AllVulnEqualVulnerabilitiesVulnerability `json:"vulnerabilities"`
 	// Justification for the attested relationship
 	Justification string `json:"justification"`
@@ -6309,13 +6333,19 @@ func (v *AllVulnEqualVulnerabilitiesVulnerability) __premarshalJSON() (*__premar
 //
 // The timestamp is used to determine when the score was evaluated for the specific vulnerability.
 type AllVulnMetadataTree struct {
-	Id            string                           `json:"id"`
+	Id string `json:"id"`
+	// The subject vulnerability that the metadata applies to
 	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
-	ScoreType     VulnerabilityScoreType           `json:"scoreType"`
-	ScoreValue    float64                          `json:"scoreValue"`
-	Timestamp     time.Time                        `json:"timestamp"`
-	Origin        string                           `json:"origin"`
-	Collector     string                           `json:"collector"`
+	// The specific score type for the score value
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+	// The score value based on the score type
+	ScoreValue float64 `json:"scoreValue"`
+	// Timestamp when the certification was created (in RFC 3339 format)
+	Timestamp time.Time `json:"timestamp"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
 }
 
 // GetId returns AllVulnMetadataTree.Id, and is useful for accessing the field via an interface.
@@ -6599,13 +6629,17 @@ func (v *BuilderInputSpec) GetUri() string { return v.Uri }
 // evidence.
 type CertifyBadInputSpec struct {
 	Justification string    `json:"justification"`
+	KnownSince    time.Time `json:"knownSince"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
-	KnownSince    time.Time `json:"knownSince"`
+	DocumentRef   string    `json:"documentRef"`
 }
 
 // GetJustification returns CertifyBadInputSpec.Justification, and is useful for accessing the field via an interface.
 func (v *CertifyBadInputSpec) GetJustification() string { return v.Justification }
+
+// GetKnownSince returns CertifyBadInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // GetOrigin returns CertifyBadInputSpec.Origin, and is useful for accessing the field via an interface.
 func (v *CertifyBadInputSpec) GetOrigin() string { return v.Origin }
@@ -6613,8 +6647,8 @@ func (v *CertifyBadInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns CertifyBadInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyBadInputSpec) GetCollector() string { return v.Collector }
 
-// GetKnownSince returns CertifyBadInputSpec.KnownSince, and is useful for accessing the field via an interface.
-func (v *CertifyBadInputSpec) GetKnownSince() time.Time { return v.KnownSince }
+// GetDocumentRef returns CertifyBadInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyBadInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
 // query.
@@ -6632,9 +6666,10 @@ type CertifyBadSpec struct {
 	Id            *string                      `json:"id"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
 	Justification *string                      `json:"justification"`
+	KnownSince    *time.Time                   `json:"knownSince"`
 	Origin        *string                      `json:"origin"`
 	Collector     *string                      `json:"collector"`
-	KnownSince    *time.Time                   `json:"knownSince"`
+	DocumentRef   *string                      `json:"documentRef"`
 }
 
 // GetId returns CertifyBadSpec.Id, and is useful for accessing the field via an interface.
@@ -6646,14 +6681,17 @@ func (v *CertifyBadSpec) GetSubject() *PackageSourceOrArtifactSpec { return v.Su
 // GetJustification returns CertifyBadSpec.Justification, and is useful for accessing the field via an interface.
 func (v *CertifyBadSpec) GetJustification() *string { return v.Justification }
 
+// GetKnownSince returns CertifyBadSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadSpec) GetKnownSince() *time.Time { return v.KnownSince }
+
 // GetOrigin returns CertifyBadSpec.Origin, and is useful for accessing the field via an interface.
 func (v *CertifyBadSpec) GetOrigin() *string { return v.Origin }
 
 // GetCollector returns CertifyBadSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyBadSpec) GetCollector() *string { return v.Collector }
 
-// GetKnownSince returns CertifyBadSpec.KnownSince, and is useful for accessing the field via an interface.
-func (v *CertifyBadSpec) GetKnownSince() *time.Time { return v.KnownSince }
+// GetDocumentRef returns CertifyBadSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyBadSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // CertifyBadsCertifyBad includes the requested fields of the GraphQL type CertifyBad.
 // The GraphQL type's documentation follows.
@@ -6775,13 +6813,17 @@ func (v *CertifyBadsResponse) GetCertifyBad() []CertifyBadsCertifyBad { return v
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
 	Justification string    `json:"justification"`
+	KnownSince    time.Time `json:"knownSince"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
-	KnownSince    time.Time `json:"knownSince"`
+	DocumentRef   string    `json:"documentRef"`
 }
 
 // GetJustification returns CertifyGoodInputSpec.Justification, and is useful for accessing the field via an interface.
 func (v *CertifyGoodInputSpec) GetJustification() string { return v.Justification }
+
+// GetKnownSince returns CertifyGoodInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // GetOrigin returns CertifyGoodInputSpec.Origin, and is useful for accessing the field via an interface.
 func (v *CertifyGoodInputSpec) GetOrigin() string { return v.Origin }
@@ -6789,8 +6831,8 @@ func (v *CertifyGoodInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns CertifyGoodInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyGoodInputSpec) GetCollector() string { return v.Collector }
 
-// GetKnownSince returns CertifyGoodInputSpec.KnownSince, and is useful for accessing the field via an interface.
-func (v *CertifyGoodInputSpec) GetKnownSince() time.Time { return v.KnownSince }
+// GetDocumentRef returns CertifyGoodInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyGoodInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
 // CertifyLegalInputSpec represents the input for certifying legal information in
 // mutations.
@@ -6802,6 +6844,7 @@ type CertifyLegalInputSpec struct {
 	TimeScanned       time.Time `json:"timeScanned"`
 	Origin            string    `json:"origin"`
 	Collector         string    `json:"collector"`
+	DocumentRef       string    `json:"documentRef"`
 }
 
 // GetDeclaredLicense returns CertifyLegalInputSpec.DeclaredLicense, and is useful for accessing the field via an interface.
@@ -6825,6 +6868,9 @@ func (v *CertifyLegalInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns CertifyLegalInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyLegalInputSpec) GetCollector() string { return v.Collector }
 
+// GetDocumentRef returns CertifyLegalInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyLegalInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
 // CertifyLegalSpec allows filtering the list of legal certifications to
 // return in a query.
 //
@@ -6842,6 +6888,7 @@ type CertifyLegalSpec struct {
 	TimeScanned        *time.Time           `json:"timeScanned"`
 	Origin             *string              `json:"origin"`
 	Collector          *string              `json:"collector"`
+	DocumentRef        *string              `json:"documentRef"`
 }
 
 // GetId returns CertifyLegalSpec.Id, and is useful for accessing the field via an interface.
@@ -6876,6 +6923,9 @@ func (v *CertifyLegalSpec) GetOrigin() *string { return v.Origin }
 
 // GetCollector returns CertifyLegalSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyLegalSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns CertifyLegalSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyLegalSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // CertifyLegalsCertifyLegal includes the requested fields of the GraphQL type CertifyLegal.
 // The GraphQL type's documentation follows.
@@ -7050,6 +7100,7 @@ type CertifyScorecardSpec struct {
 	ScorecardCommit  *string              `json:"scorecardCommit"`
 	Origin           *string              `json:"origin"`
 	Collector        *string              `json:"collector"`
+	DocumentRef      *string              `json:"documentRef"`
 }
 
 // GetId returns CertifyScorecardSpec.Id, and is useful for accessing the field via an interface.
@@ -7078,6 +7129,9 @@ func (v *CertifyScorecardSpec) GetOrigin() *string { return v.Origin }
 
 // GetCollector returns CertifyScorecardSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyScorecardSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns CertifyScorecardSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyScorecardSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // DependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
 // The GraphQL type's documentation follows.
@@ -7776,6 +7830,7 @@ type HasMetadataInputSpec struct {
 	Justification string    `json:"justification"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
+	DocumentRef   string    `json:"documentRef"`
 }
 
 // GetKey returns HasMetadataInputSpec.Key, and is useful for accessing the field via an interface.
@@ -7795,6 +7850,9 @@ func (v *HasMetadataInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns HasMetadataInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HasMetadataInputSpec) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns HasMetadataInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasMetadataInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
 type HasSBOMIncludesInputSpec struct {
 	Packages     []string `json:"packages"`
@@ -7821,9 +7879,10 @@ type HasSBOMInputSpec struct {
 	Algorithm        string    `json:"algorithm"`
 	Digest           string    `json:"digest"`
 	DownloadLocation string    `json:"downloadLocation"`
+	KnownSince       time.Time `json:"knownSince"`
 	Origin           string    `json:"origin"`
 	Collector        string    `json:"collector"`
-	KnownSince       time.Time `json:"knownSince"`
+	DocumentRef      string    `json:"documentRef"`
 }
 
 // GetUri returns HasSBOMInputSpec.Uri, and is useful for accessing the field via an interface.
@@ -7838,14 +7897,277 @@ func (v *HasSBOMInputSpec) GetDigest() string { return v.Digest }
 // GetDownloadLocation returns HasSBOMInputSpec.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetDownloadLocation() string { return v.DownloadLocation }
 
+// GetKnownSince returns HasSBOMInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSBOMInputSpec) GetKnownSince() time.Time { return v.KnownSince }
+
 // GetOrigin returns HasSBOMInputSpec.Origin, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns HasSBOMInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetCollector() string { return v.Collector }
 
-// GetKnownSince returns HasSBOMInputSpec.KnownSince, and is useful for accessing the field via an interface.
-func (v *HasSBOMInputSpec) GetKnownSince() time.Time { return v.KnownSince }
+// GetDocumentRef returns HasSBOMInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSBOMInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// HasSBOMListHasSBOMListHasSBOMConnection includes the requested fields of the GraphQL type HasSBOMConnection.
+// The GraphQL type's documentation follows.
+//
+// HasSBOMConnection returns the paginated results for HasSBOM.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSBOMEdge which contains the current cursor
+// and the HasSBOM node itself
+type HasSBOMListHasSBOMListHasSBOMConnection struct {
+	TotalCount int                                                       `json:"totalCount"`
+	Edges      []HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge `json:"edges"`
+	PageInfo   HasSBOMListHasSBOMListHasSBOMConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns HasSBOMListHasSBOMListHasSBOMConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns HasSBOMListHasSBOMListHasSBOMConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnection) GetEdges() []HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HasSBOMListHasSBOMListHasSBOMConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnection) GetPageInfo() HasSBOMListHasSBOMListHasSBOMConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge includes the requested fields of the GraphQL type HasSBOMEdge.
+// The GraphQL type's documentation follows.
+//
+// HasSBOMEdge contains the cursor for the resulting node and
+// the HasSBOMEdge node itself.
+type HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge struct {
+	Cursor string                                                             `json:"cursor"`
+	Node   HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM `json:"node"`
+}
+
+// GetCursor returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge) GetCursor() string { return v.Cursor }
+
+// GetNode returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge.Node, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdge) GetNode() HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM {
+	return v.Node
+}
+
+// HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM includes the requested fields of the GraphQL type HasSBOM.
+type HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM struct {
+	AllHasSBOMTree `json:"-"`
+}
+
+// GetId returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Id, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetId() string {
+	return v.AllHasSBOMTree.Id
+}
+
+// GetSubject returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Subject, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetSubject() AllHasSBOMTreeSubjectPackageOrArtifact {
+	return v.AllHasSBOMTree.Subject
+}
+
+// GetUri returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Uri, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetUri() string {
+	return v.AllHasSBOMTree.Uri
+}
+
+// GetAlgorithm returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Algorithm, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetAlgorithm() string {
+	return v.AllHasSBOMTree.Algorithm
+}
+
+// GetDigest returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Digest, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetDigest() string {
+	return v.AllHasSBOMTree.Digest
+}
+
+// GetDownloadLocation returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.DownloadLocation, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetDownloadLocation() string {
+	return v.AllHasSBOMTree.DownloadLocation
+}
+
+// GetOrigin returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Origin, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetOrigin() string {
+	return v.AllHasSBOMTree.Origin
+}
+
+// GetCollector returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.Collector, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetCollector() string {
+	return v.AllHasSBOMTree.Collector
+}
+
+// GetKnownSince returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetKnownSince() time.Time {
+	return v.AllHasSBOMTree.KnownSince
+}
+
+// GetIncludedSoftware returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
+	return v.AllHasSBOMTree.IncludedSoftware
+}
+
+// GetIncludedDependencies returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.IncludedDependencies, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetIncludedDependencies() []AllHasSBOMTreeIncludedDependenciesIsDependency {
+	return v.AllHasSBOMTree.IncludedDependencies
+}
+
+// GetIncludedOccurrences returns HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.IncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) GetIncludedOccurrences() []AllHasSBOMTreeIncludedOccurrencesIsOccurrence {
+	return v.AllHasSBOMTree.IncludedOccurrences
+}
+
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSBOMTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Uri string `json:"uri"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+
+	DownloadLocation string `json:"downloadLocation"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
+
+	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
+
+	IncludedOccurrences []AllHasSBOMTreeIncludedOccurrencesIsOccurrence `json:"includedOccurrences"`
+}
+
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM) __premarshalJSON() (*__premarshalHasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM, error) {
+	var retval __premarshalHasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM
+
+	retval.Id = v.AllHasSBOMTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasSBOMTree.Subject
+		var err error
+		*dst, err = __marshalAllHasSBOMTreeSubjectPackageOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.AllHasSBOMTree.Subject: %w", err)
+		}
+	}
+	retval.Uri = v.AllHasSBOMTree.Uri
+	retval.Algorithm = v.AllHasSBOMTree.Algorithm
+	retval.Digest = v.AllHasSBOMTree.Digest
+	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
+	retval.Origin = v.AllHasSBOMTree.Origin
+	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	{
+
+		dst := &retval.IncludedSoftware
+		src := v.AllHasSBOMTree.IncludedSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal HasSBOMListHasSBOMListHasSBOMConnectionEdgesHasSBOMEdgeNodeHasSBOM.AllHasSBOMTree.IncludedSoftware: %w", err)
+			}
+		}
+	}
+	retval.IncludedDependencies = v.AllHasSBOMTree.IncludedDependencies
+	retval.IncludedOccurrences = v.AllHasSBOMTree.IncludedOccurrences
+	return &retval, nil
+}
+
+// HasSBOMListHasSBOMListHasSBOMConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HasSBOMListHasSBOMListHasSBOMConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HasSBOMListHasSBOMListHasSBOMConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HasSBOMListHasSBOMListHasSBOMConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// GetHasNextPage returns HasSBOMListHasSBOMListHasSBOMConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HasSBOMListHasSBOMListHasSBOMConnectionPageInfo) GetHasNextPage() bool { return v.HasNextPage }
+
+// HasSBOMListResponse is returned by HasSBOMList on success.
+type HasSBOMListResponse struct {
+	// Returns a paginated results via HasSBOMConnection
+	HasSBOMList *HasSBOMListHasSBOMListHasSBOMConnection `json:"HasSBOMList"`
+}
+
+// GetHasSBOMList returns HasSBOMListResponse.HasSBOMList, and is useful for accessing the field via an interface.
+func (v *HasSBOMListResponse) GetHasSBOMList() *HasSBOMListHasSBOMListHasSBOMConnection {
+	return v.HasSBOMList
+}
 
 // HasSBOMSpec allows filtering the list of HasSBOM to return.
 //
@@ -7860,9 +8182,10 @@ type HasSBOMSpec struct {
 	Algorithm            *string                 `json:"algorithm"`
 	Digest               *string                 `json:"digest"`
 	DownloadLocation     *string                 `json:"downloadLocation"`
+	KnownSince           *time.Time              `json:"knownSince"`
 	Origin               *string                 `json:"origin"`
 	Collector            *string                 `json:"collector"`
-	KnownSince           *time.Time              `json:"knownSince"`
+	DocumentRef          *string                 `json:"documentRef"`
 	IncludedSoftware     []PackageOrArtifactSpec `json:"includedSoftware"`
 	IncludedDependencies []IsDependencySpec      `json:"includedDependencies"`
 	IncludedOccurrences  []IsOccurrenceSpec      `json:"includedOccurrences"`
@@ -7886,14 +8209,17 @@ func (v *HasSBOMSpec) GetDigest() *string { return v.Digest }
 // GetDownloadLocation returns HasSBOMSpec.DownloadLocation, and is useful for accessing the field via an interface.
 func (v *HasSBOMSpec) GetDownloadLocation() *string { return v.DownloadLocation }
 
+// GetKnownSince returns HasSBOMSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetKnownSince() *time.Time { return v.KnownSince }
+
 // GetOrigin returns HasSBOMSpec.Origin, and is useful for accessing the field via an interface.
 func (v *HasSBOMSpec) GetOrigin() *string { return v.Origin }
 
 // GetCollector returns HasSBOMSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HasSBOMSpec) GetCollector() *string { return v.Collector }
 
-// GetKnownSince returns HasSBOMSpec.KnownSince, and is useful for accessing the field via an interface.
-func (v *HasSBOMSpec) GetKnownSince() *time.Time { return v.KnownSince }
+// GetDocumentRef returns HasSBOMSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSBOMSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // GetIncludedSoftware returns HasSBOMSpec.IncludedSoftware, and is useful for accessing the field via an interface.
 func (v *HasSBOMSpec) GetIncludedSoftware() []PackageOrArtifactSpec { return v.IncludedSoftware }
@@ -8073,6 +8399,7 @@ type HasSourceAtInputSpec struct {
 	Justification string    `json:"justification"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
+	DocumentRef   string    `json:"documentRef"`
 }
 
 // GetKnownSince returns HasSourceAtInputSpec.KnownSince, and is useful for accessing the field via an interface.
@@ -8087,11 +8414,15 @@ func (v *HasSourceAtInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns HasSourceAtInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HasSourceAtInputSpec) GetCollector() string { return v.Collector }
 
+// GetDocumentRef returns HasSourceAtInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSourceAtInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
 // HashEqualInputSpec represents the input to certify that packages are similar.
 type HashEqualInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
+	DocumentRef   string `json:"documentRef"`
 }
 
 // GetJustification returns HashEqualInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -8102,6 +8433,131 @@ func (v *HashEqualInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns HashEqualInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HashEqualInputSpec) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns HashEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HashEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// HashEqualSpec allows filtering the list of artifact equality statements to
+// return in a query.
+//
+// Specifying just one artifact allows to query for all similar artifacts (if any
+// exists).
+type HashEqualSpec struct {
+	Id            *string         `json:"id"`
+	Artifacts     []*ArtifactSpec `json:"artifacts"`
+	Justification *string         `json:"justification"`
+	Origin        *string         `json:"origin"`
+	Collector     *string         `json:"collector"`
+	DocumentRef   *string         `json:"documentRef"`
+}
+
+// GetId returns HashEqualSpec.Id, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetId() *string { return v.Id }
+
+// GetArtifacts returns HashEqualSpec.Artifacts, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetArtifacts() []*ArtifactSpec { return v.Artifacts }
+
+// GetJustification returns HashEqualSpec.Justification, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns HashEqualSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns HashEqualSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns HashEqualSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HashEqualSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// HashEqualsHashEqual includes the requested fields of the GraphQL type HashEqual.
+// The GraphQL type's documentation follows.
+//
+// HashEqual is an attestation that two artifacts are identical.
+type HashEqualsHashEqual struct {
+	AllHashEqualTree `json:"-"`
+}
+
+// GetId returns HashEqualsHashEqual.Id, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetId() string { return v.AllHashEqualTree.Id }
+
+// GetJustification returns HashEqualsHashEqual.Justification, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetJustification() string { return v.AllHashEqualTree.Justification }
+
+// GetArtifacts returns HashEqualsHashEqual.Artifacts, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetArtifacts() []AllHashEqualTreeArtifactsArtifact {
+	return v.AllHashEqualTree.Artifacts
+}
+
+// GetOrigin returns HashEqualsHashEqual.Origin, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetOrigin() string { return v.AllHashEqualTree.Origin }
+
+// GetCollector returns HashEqualsHashEqual.Collector, and is useful for accessing the field via an interface.
+func (v *HashEqualsHashEqual) GetCollector() string { return v.AllHashEqualTree.Collector }
+
+func (v *HashEqualsHashEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HashEqualsHashEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HashEqualsHashEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHashEqualTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHashEqualsHashEqual struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Artifacts []AllHashEqualTreeArtifactsArtifact `json:"artifacts"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HashEqualsHashEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HashEqualsHashEqual) __premarshalJSON() (*__premarshalHashEqualsHashEqual, error) {
+	var retval __premarshalHashEqualsHashEqual
+
+	retval.Id = v.AllHashEqualTree.Id
+	retval.Justification = v.AllHashEqualTree.Justification
+	retval.Artifacts = v.AllHashEqualTree.Artifacts
+	retval.Origin = v.AllHashEqualTree.Origin
+	retval.Collector = v.AllHashEqualTree.Collector
+	return &retval, nil
+}
+
+// HashEqualsResponse is returned by HashEquals on success.
+type HashEqualsResponse struct {
+	// Returns all artifact equality statements matching a filter.
+	HashEqual []HashEqualsHashEqual `json:"HashEqual"`
+}
+
+// GetHashEqual returns HashEqualsResponse.HashEqual, and is useful for accessing the field via an interface.
+func (v *HashEqualsResponse) GetHashEqual() []HashEqualsHashEqual { return v.HashEqual }
 
 // IDorArtifactInput allows for specifying either the artifact ID or the ArtifactInputSpec.
 //
@@ -9043,6 +9499,7 @@ type IsDependencyInputSpec struct {
 	Justification  string         `json:"justification"`
 	Origin         string         `json:"origin"`
 	Collector      string         `json:"collector"`
+	DocumentRef    string         `json:"documentRef"`
 }
 
 // GetVersionRange returns IsDependencyInputSpec.VersionRange, and is useful for accessing the field via an interface.
@@ -9060,6 +9517,9 @@ func (v *IsDependencyInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns IsDependencyInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *IsDependencyInputSpec) GetCollector() string { return v.Collector }
 
+// GetDocumentRef returns IsDependencyInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *IsDependencyInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
 // IsDependencySpec allows filtering the list of dependencies to return.
 //
 // To obtain the list of dependency packages, caller must fill in the package
@@ -9075,6 +9535,7 @@ type IsDependencySpec struct {
 	Justification     *string         `json:"justification"`
 	Origin            *string         `json:"origin"`
 	Collector         *string         `json:"collector"`
+	DocumentRef       *string         `json:"documentRef"`
 }
 
 // GetId returns IsDependencySpec.Id, and is useful for accessing the field via an interface.
@@ -9101,11 +9562,15 @@ func (v *IsDependencySpec) GetOrigin() *string { return v.Origin }
 // GetCollector returns IsDependencySpec.Collector, and is useful for accessing the field via an interface.
 func (v *IsDependencySpec) GetCollector() *string { return v.Collector }
 
+// GetDocumentRef returns IsDependencySpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *IsDependencySpec) GetDocumentRef() *string { return v.DocumentRef }
+
 // IsOccurrenceInputSpec represents the input to record an artifact's origin.
 type IsOccurrenceInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
+	DocumentRef   string `json:"documentRef"`
 }
 
 // GetJustification returns IsOccurrenceInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -9117,6 +9582,9 @@ func (v *IsOccurrenceInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns IsOccurrenceInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *IsOccurrenceInputSpec) GetCollector() string { return v.Collector }
 
+// GetDocumentRef returns IsOccurrenceInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
 // IsOccurrenceSpec allows filtering the list of artifact occurences to return in
 // a query.
 type IsOccurrenceSpec struct {
@@ -9126,6 +9594,7 @@ type IsOccurrenceSpec struct {
 	Justification *string              `json:"justification"`
 	Origin        *string              `json:"origin"`
 	Collector     *string              `json:"collector"`
+	DocumentRef   *string              `json:"documentRef"`
 }
 
 // GetId returns IsOccurrenceSpec.Id, and is useful for accessing the field via an interface.
@@ -9145,6 +9614,122 @@ func (v *IsOccurrenceSpec) GetOrigin() *string { return v.Origin }
 
 // GetCollector returns IsOccurrenceSpec.Collector, and is useful for accessing the field via an interface.
 func (v *IsOccurrenceSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns IsOccurrenceSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *IsOccurrenceSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// IsOccurrencesIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrence is an attestation to link an artifact to a package or source.
+//
+// Attestation must occur at the PackageVersion or at the SourceName.
+type IsOccurrencesIsOccurrence struct {
+	AllIsOccurrencesTree `json:"-"`
+}
+
+// GetId returns IsOccurrencesIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetId() string { return v.AllIsOccurrencesTree.Id }
+
+// GetSubject returns IsOccurrencesIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
+	return v.AllIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns IsOccurrencesIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
+	return v.AllIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns IsOccurrencesIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetJustification() string {
+	return v.AllIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns IsOccurrencesIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetOrigin() string { return v.AllIsOccurrencesTree.Origin }
+
+// GetCollector returns IsOccurrencesIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesIsOccurrence) GetCollector() string { return v.AllIsOccurrencesTree.Collector }
+
+func (v *IsOccurrencesIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsOccurrencesIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsOccurrencesIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsOccurrencesIsOccurrence struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *IsOccurrencesIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsOccurrencesIsOccurrence) __premarshalJSON() (*__premarshalIsOccurrencesIsOccurrence, error) {
+	var retval __premarshalIsOccurrencesIsOccurrence
+
+	retval.Id = v.AllIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal IsOccurrencesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.AllIsOccurrencesTree.Artifact
+	retval.Justification = v.AllIsOccurrencesTree.Justification
+	retval.Origin = v.AllIsOccurrencesTree.Origin
+	retval.Collector = v.AllIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// IsOccurrencesResponse is returned by IsOccurrences on success.
+type IsOccurrencesResponse struct {
+	// Returns all artifacts-source/package mappings that match a filter.
+	IsOccurrence []IsOccurrencesIsOccurrence `json:"IsOccurrence"`
+}
+
+// GetIsOccurrence returns IsOccurrencesResponse.IsOccurrence, and is useful for accessing the field via an interface.
+func (v *IsOccurrencesResponse) GetIsOccurrence() []IsOccurrencesIsOccurrence { return v.IsOccurrence }
 
 // LicenseInputSpec specifies an license for mutations. One of inline or
 // listVersion should be empty or missing.
@@ -10638,7 +11223,7 @@ func (v *NeighborsNeighborsHasSourceAt) __premarshalJSON() (*__premarshalNeighbo
 // NeighborsNeighborsHashEqual includes the requested fields of the GraphQL type HashEqual.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type NeighborsNeighborsHashEqual struct {
 	Typename         *string `json:"__typename"`
 	AllHashEqualTree `json:"-"`
@@ -11594,7 +12179,7 @@ func (v *NeighborsNeighborsPackage) __premarshalJSON() (*__premarshalNeighborsNe
 // NeighborsNeighborsPkgEqual includes the requested fields of the GraphQL type PkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type NeighborsNeighborsPkgEqual struct {
 	Typename    *string `json:"__typename"`
 	AllPkgEqual `json:"-"`
@@ -14069,7 +14654,7 @@ func (v *NodeNodeHasSourceAt) __premarshalJSON() (*__premarshalNodeNodeHasSource
 // NodeNodeHashEqual includes the requested fields of the GraphQL type HashEqual.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type NodeNodeHashEqual struct {
 	Typename         *string `json:"__typename"`
 	AllHashEqualTree `json:"-"`
@@ -14569,7 +15154,7 @@ func (v *NodeNodePackage) __premarshalJSON() (*__premarshalNodeNodePackage, erro
 // NodeNodePkgEqual includes the requested fields of the GraphQL type PkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type NodeNodePkgEqual struct {
 	Typename    *string `json:"__typename"`
 	AllPkgEqual `json:"-"`
@@ -16578,7 +17163,7 @@ func (v *NodesNodesHasSourceAt) __premarshalJSON() (*__premarshalNodesNodesHasSo
 // NodesNodesHashEqual includes the requested fields of the GraphQL type HashEqual.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type NodesNodesHashEqual struct {
 	Typename         *string `json:"__typename"`
 	AllHashEqualTree `json:"-"`
@@ -17525,7 +18110,7 @@ func (v *NodesNodesPackage) __premarshalJSON() (*__premarshalNodesNodesPackage, 
 // NodesNodesPkgEqual includes the requested fields of the GraphQL type PkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type NodesNodesPkgEqual struct {
 	Typename    *string `json:"__typename"`
 	AllPkgEqual `json:"-"`
@@ -20104,7 +20689,7 @@ func (v *PathPathHasSourceAt) __premarshalJSON() (*__premarshalPathPathHasSource
 // PathPathHashEqual includes the requested fields of the GraphQL type HashEqual.
 // The GraphQL type's documentation follows.
 //
-// HashEqual is an attestation that a set of artifacts are identical.
+// HashEqual is an attestation that two artifacts are identical.
 type PathPathHashEqual struct {
 	Typename         *string `json:"__typename"`
 	AllHashEqualTree `json:"-"`
@@ -21047,7 +21632,7 @@ func (v *PathPathPackage) __premarshalJSON() (*__premarshalPathPathPackage, erro
 // PathPathPkgEqual includes the requested fields of the GraphQL type PkgEqual.
 // The GraphQL type's documentation follows.
 //
-// PkgEqual is an attestation that a set of packages are similar.
+// PkgEqual is an attestation that two packages are similar.
 type PathPathPkgEqual struct {
 	Typename    *string `json:"__typename"`
 	AllPkgEqual `json:"-"`
@@ -21764,6 +22349,7 @@ type PkgEqualInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
+	DocumentRef   string `json:"documentRef"`
 }
 
 // GetJustification returns PkgEqualInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -21774,6 +22360,9 @@ func (v *PkgEqualInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns PkgEqualInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *PkgEqualInputSpec) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns PkgEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *PkgEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
 // PkgInputSpec specifies a package for mutations.
 //
@@ -21873,6 +22462,7 @@ type PointOfContactInputSpec struct {
 	Justification string    `json:"justification"`
 	Origin        string    `json:"origin"`
 	Collector     string    `json:"collector"`
+	DocumentRef   string    `json:"documentRef"`
 }
 
 // GetEmail returns PointOfContactInputSpec.Email, and is useful for accessing the field via an interface.
@@ -21893,6 +22483,9 @@ func (v *PointOfContactInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns PointOfContactInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *PointOfContactInputSpec) GetCollector() string { return v.Collector }
 
+// GetDocumentRef returns PointOfContactInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *PointOfContactInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
 // SLSAInputSpec is the same as SLSA but for mutation input.
 type SLSAInputSpec struct {
 	BuildType     string                   `json:"buildType"`
@@ -21902,6 +22495,7 @@ type SLSAInputSpec struct {
 	FinishedOn    *time.Time               `json:"finishedOn"`
 	Origin        string                   `json:"origin"`
 	Collector     string                   `json:"collector"`
+	DocumentRef   string                   `json:"documentRef"`
 }
 
 // GetBuildType returns SLSAInputSpec.BuildType, and is useful for accessing the field via an interface.
@@ -21925,6 +22519,9 @@ func (v *SLSAInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns SLSAInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *SLSAInputSpec) GetCollector() string { return v.Collector }
 
+// GetDocumentRef returns SLSAInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *SLSAInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
 // SLSAPredicateInputSpec allows ingesting SLSAPredicateSpec.
 type SLSAPredicateInputSpec struct {
 	Key   string `json:"key"`
@@ -21947,6 +22544,7 @@ type ScanMetadataInput struct {
 	ScannerVersion string    `json:"scannerVersion"`
 	Origin         string    `json:"origin"`
 	Collector      string    `json:"collector"`
+	DocumentRef    string    `json:"documentRef"`
 }
 
 // GetTimeScanned returns ScanMetadataInput.TimeScanned, and is useful for accessing the field via an interface.
@@ -21969,6 +22567,9 @@ func (v *ScanMetadataInput) GetOrigin() string { return v.Origin }
 
 // GetCollector returns ScanMetadataInput.Collector, and is useful for accessing the field via an interface.
 func (v *ScanMetadataInput) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns ScanMetadataInput.DocumentRef, and is useful for accessing the field via an interface.
+func (v *ScanMetadataInput) GetDocumentRef() string { return v.DocumentRef }
 
 // ScorecardCheckInputSpec represents the mutation input for a Scorecard check.
 type ScorecardCheckInputSpec struct {
@@ -22003,6 +22604,7 @@ type ScorecardInputSpec struct {
 	ScorecardCommit  string                    `json:"scorecardCommit"`
 	Origin           string                    `json:"origin"`
 	Collector        string                    `json:"collector"`
+	DocumentRef      string                    `json:"documentRef"`
 }
 
 // GetChecks returns ScorecardInputSpec.Checks, and is useful for accessing the field via an interface.
@@ -22025,6 +22627,9 @@ func (v *ScorecardInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns ScorecardInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *ScorecardInputSpec) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns ScorecardInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *ScorecardInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
 // ScorecardsResponse is returned by Scorecards on success.
 type ScorecardsResponse struct {
@@ -22284,6 +22889,7 @@ type VexStatementInputSpec struct {
 	KnownSince       time.Time        `json:"knownSince"`
 	Origin           string           `json:"origin"`
 	Collector        string           `json:"collector"`
+	DocumentRef      string           `json:"documentRef"`
 }
 
 // GetStatus returns VexStatementInputSpec.Status, and is useful for accessing the field via an interface.
@@ -22307,6 +22913,9 @@ func (v *VexStatementInputSpec) GetOrigin() string { return v.Origin }
 // GetCollector returns VexStatementInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *VexStatementInputSpec) GetCollector() string { return v.Collector }
 
+// GetDocumentRef returns VexStatementInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *VexStatementInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
 // Records the status of a VEX statement subject.
 type VexStatus string
 
@@ -22322,6 +22931,7 @@ type VulnEqualInputSpec struct {
 	Justification string `json:"justification"`
 	Origin        string `json:"origin"`
 	Collector     string `json:"collector"`
+	DocumentRef   string `json:"documentRef"`
 }
 
 // GetJustification returns VulnEqualInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -22332,6 +22942,9 @@ func (v *VulnEqualInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns VulnEqualInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *VulnEqualInputSpec) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns VulnEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *VulnEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
 // VulnerabilitiesResponse is returned by Vulnerabilities on success.
 type VulnerabilitiesResponse struct {
@@ -22456,13 +23069,209 @@ func (v *VulnerabilityInputSpec) GetType() string { return v.Type }
 // GetVulnerabilityID returns VulnerabilityInputSpec.VulnerabilityID, and is useful for accessing the field via an interface.
 func (v *VulnerabilityInputSpec) GetVulnerabilityID() string { return v.VulnerabilityID }
 
+// VulnerabilityListResponse is returned by VulnerabilityList on success.
+type VulnerabilityListResponse struct {
+	// Returns a paginated results via VulnerabilityConnection
+	VulnerabilityList *VulnerabilityListVulnerabilityListVulnerabilityConnection `json:"vulnerabilityList"`
+}
+
+// GetVulnerabilityList returns VulnerabilityListResponse.VulnerabilityList, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListResponse) GetVulnerabilityList() *VulnerabilityListVulnerabilityListVulnerabilityConnection {
+	return v.VulnerabilityList
+}
+
+// VulnerabilityListVulnerabilityListVulnerabilityConnection includes the requested fields of the GraphQL type VulnerabilityConnection.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityConnection returns the paginated results for Vulnerability.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VulnerabilityEdge which contains the current cursor
+// and the Vulnerability node itself
+type VulnerabilityListVulnerabilityListVulnerabilityConnection struct {
+	TotalCount int                                                                               `json:"totalCount"`
+	Edges      []VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge `json:"edges"`
+	PageInfo   VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo                 `json:"pageInfo"`
+}
+
+// GetTotalCount returns VulnerabilityListVulnerabilityListVulnerabilityConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns VulnerabilityListVulnerabilityListVulnerabilityConnection.Edges, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnection) GetEdges() []VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns VulnerabilityListVulnerabilityListVulnerabilityConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnection) GetPageInfo() VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo {
+	return v.PageInfo
+}
+
+// VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge includes the requested fields of the GraphQL type VulnerabilityEdge.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityEdge contains the cursor for the resulting node and
+// the Vulnerability node itself.
+type VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge struct {
+	Cursor string                                                                                           `json:"cursor"`
+	Node   VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability `json:"node"`
+}
+
+// GetCursor returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge.Node, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdge) GetNode() VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability {
+	return v.Node
+}
+
+// VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability includes the requested fields of the GraphQL type Vulnerability.
+// The GraphQL type's documentation follows.
+//
+// Vulnerability represents the root of the vulnerability trie/tree.
+//
+// We map vulnerability information to a trie, as a derivative of the pURL specification:
+// each path in the trie represents a type and a vulnerability ID. This allows for generic
+// representation of the various vulnerabilities and does not limit to just cve, ghsa or osv.
+// This would be in the general format: vuln://<general-type>/<vuln-id>
+//
+// Examples:
+//
+// CVE, using path separator: vuln://cve/cve-2023-20753
+// OSV, representing its knowledge of a GHSA: vuln://osv/ghsa-205hk
+// Random vendor: vuln://snyk/sn-whatever
+// NoVuln: vuln://novuln/
+//
+// This node represents the type part of the trie path. It is used to represent
+// the specific type of the vulnerability: cve, ghsa, osv or some other vendor specific
+//
+// Since this node is at the root of the vulnerability trie, it is named Vulnerability, not
+// VulnerabilityType.
+//
+// NoVuln is a special vulnerability node to attest that no vulnerability has been
+// found during a vulnerability scan. It will have the type "novuln" and contain an empty string
+// for vulnerabilityID
+//
+// The resolvers will enforce that both the type and vulnerability IDs are lower case.
+type VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability struct {
+	AllVulnerabilityTree `json:"-"`
+}
+
+// GetId returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability.Id, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) GetId() string {
+	return v.AllVulnerabilityTree.Id
+}
+
+// GetType returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability.Type, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) GetType() string {
+	return v.AllVulnerabilityTree.Type
+}
+
+// GetVulnerabilityIDs returns VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability.VulnerabilityIDs, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) GetVulnerabilityIDs() []AllVulnerabilityTreeVulnerabilityIDsVulnerabilityID {
+	return v.AllVulnerabilityTree.VulnerabilityIDs
+}
+
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnerabilityTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	VulnerabilityIDs []AllVulnerabilityTreeVulnerabilityIDsVulnerabilityID `json:"vulnerabilityIDs"`
+}
+
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability) __premarshalJSON() (*__premarshalVulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability, error) {
+	var retval __premarshalVulnerabilityListVulnerabilityListVulnerabilityConnectionEdgesVulnerabilityEdgeNodeVulnerability
+
+	retval.Id = v.AllVulnerabilityTree.Id
+	retval.Type = v.AllVulnerabilityTree.Type
+	retval.VulnerabilityIDs = v.AllVulnerabilityTree.VulnerabilityIDs
+	return &retval, nil
+}
+
+// VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *VulnerabilityListVulnerabilityListVulnerabilityConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
 // VulnerabilityMetadataInputSpec represents the mutation input to ingest a vulnerability metadata.
 type VulnerabilityMetadataInputSpec struct {
-	ScoreType  VulnerabilityScoreType `json:"scoreType"`
-	ScoreValue float64                `json:"scoreValue"`
-	Timestamp  time.Time              `json:"timestamp"`
-	Origin     string                 `json:"origin"`
-	Collector  string                 `json:"collector"`
+	ScoreType   VulnerabilityScoreType `json:"scoreType"`
+	ScoreValue  float64                `json:"scoreValue"`
+	Timestamp   time.Time              `json:"timestamp"`
+	Origin      string                 `json:"origin"`
+	Collector   string                 `json:"collector"`
+	DocumentRef string                 `json:"documentRef"`
 }
 
 // GetScoreType returns VulnerabilityMetadataInputSpec.ScoreType, and is useful for accessing the field via an interface.
@@ -22479,6 +23288,9 @@ func (v *VulnerabilityMetadataInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns VulnerabilityMetadataInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *VulnerabilityMetadataInputSpec) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns VulnerabilityMetadataInputSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
 // Records the type of the score being captured by the score node
 type VulnerabilityScoreType string
@@ -22564,6 +23376,22 @@ type __FindSoftwareInput struct {
 // GetSearchText returns __FindSoftwareInput.SearchText, and is useful for accessing the field via an interface.
 func (v *__FindSoftwareInput) GetSearchText() string { return v.SearchText }
 
+// __HasSBOMListInput is used internally by genqlient
+type __HasSBOMListInput struct {
+	Filter HasSBOMSpec `json:"filter"`
+	After  *string     `json:"after"`
+	First  *int        `json:"first"`
+}
+
+// GetFilter returns __HasSBOMListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSBOMListInput) GetFilter() HasSBOMSpec { return v.Filter }
+
+// GetAfter returns __HasSBOMListInput.After, and is useful for accessing the field via an interface.
+func (v *__HasSBOMListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HasSBOMListInput.First, and is useful for accessing the field via an interface.
+func (v *__HasSBOMListInput) GetFirst() *int { return v.First }
+
 // __HasSBOMsInput is used internally by genqlient
 type __HasSBOMsInput struct {
 	Filter HasSBOMSpec `json:"filter"`
@@ -22571,6 +23399,14 @@ type __HasSBOMsInput struct {
 
 // GetFilter returns __HasSBOMsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__HasSBOMsInput) GetFilter() HasSBOMSpec { return v.Filter }
+
+// __HashEqualsInput is used internally by genqlient
+type __HashEqualsInput struct {
+	Filter HashEqualSpec `json:"filter"`
+}
+
+// GetFilter returns __HashEqualsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HashEqualsInput) GetFilter() HashEqualSpec { return v.Filter }
 
 // __IngestArtifactInput is used internally by genqlient
 type __IngestArtifactInput struct {
@@ -23642,6 +24478,14 @@ type __IngestVulnerabilityInput struct {
 // GetVuln returns __IngestVulnerabilityInput.Vuln, and is useful for accessing the field via an interface.
 func (v *__IngestVulnerabilityInput) GetVuln() IDorVulnerabilityInput { return v.Vuln }
 
+// __IsOccurrencesInput is used internally by genqlient
+type __IsOccurrencesInput struct {
+	Filter IsOccurrenceSpec `json:"filter"`
+}
+
+// GetFilter returns __IsOccurrencesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__IsOccurrencesInput) GetFilter() IsOccurrenceSpec { return v.Filter }
+
 // __LicensesInput is used internally by genqlient
 type __LicensesInput struct {
 	Filter LicenseSpec `json:"filter"`
@@ -23761,6 +24605,22 @@ type __VulnerabilitiesInput struct {
 
 // GetFilter returns __VulnerabilitiesInput.Filter, and is useful for accessing the field via an interface.
 func (v *__VulnerabilitiesInput) GetFilter() VulnerabilitySpec { return v.Filter }
+
+// __VulnerabilityListInput is used internally by genqlient
+type __VulnerabilityListInput struct {
+	Filter VulnerabilitySpec `json:"filter"`
+	After  *string           `json:"after"`
+	First  *int              `json:"first"`
+}
+
+// GetFilter returns __VulnerabilityListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityListInput) GetFilter() VulnerabilitySpec { return v.Filter }
+
+// GetAfter returns __VulnerabilityListInput.After, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __VulnerabilityListInput.First, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityListInput) GetFirst() *int { return v.First }
 
 // The query or mutation executed by Artifacts.
 const Artifacts_Operation = `
@@ -24151,6 +25011,162 @@ func FindSoftware(
 	return &data_, err_
 }
 
+// The query or mutation executed by HasSBOMList.
+const HasSBOMList_Operation = `
+query HasSBOMList ($filter: HasSBOMSpec!, $after: ID, $first: Int) {
+	HasSBOMList(hasSBOMSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHasSBOMTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHasSBOMTree on HasSBOM {
+	id
+	subject {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	uri
+	algorithm
+	digest
+	downloadLocation
+	origin
+	collector
+	knownSince
+	includedSoftware {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	includedDependencies {
+		... AllIsDependencyTree
+	}
+	includedOccurrences {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... AllPkgTree
+	}
+	dependencyPackage {
+		... AllPkgTree
+	}
+	dependencyType
+	versionRange
+	origin
+	collector
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func HasSBOMList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSBOMSpec,
+	after *string,
+	first *int,
+) (*HasSBOMListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSBOMList",
+		Query:  HasSBOMList_Operation,
+		Variables: &__HasSBOMListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HasSBOMListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by HasSBOMs.
 const HasSBOMs_Operation = `
 query HasSBOMs ($filter: HasSBOMSpec!) {
@@ -24281,6 +25297,55 @@ func HasSBOMs(
 	var err_ error
 
 	var data_ HasSBOMsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HashEquals.
+const HashEquals_Operation = `
+query HashEquals ($filter: HashEqualSpec!) {
+	HashEqual(hashEqualSpec: $filter) {
+		... AllHashEqualTree
+	}
+}
+fragment AllHashEqualTree on HashEqual {
+	id
+	justification
+	artifacts {
+		... AllArtifactTree
+	}
+	origin
+	collector
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HashEquals(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HashEqualSpec,
+) (*HashEqualsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HashEquals",
+		Query:  HashEquals_Operation,
+		Variables: &__HashEqualsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ HashEqualsResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -26838,6 +27903,99 @@ func IngestVulnerability(
 	return &data_, err_
 }
 
+// The query or mutation executed by IsOccurrences.
+const IsOccurrences_Operation = `
+query IsOccurrences ($filter: IsOccurrenceSpec!) {
+	IsOccurrence(isOccurrenceSpec: $filter) {
+		... AllIsOccurrencesTree
+	}
+}
+fragment AllIsOccurrencesTree on IsOccurrence {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+	}
+	artifact {
+		... AllArtifactTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func IsOccurrences(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter IsOccurrenceSpec,
+) (*IsOccurrencesResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "IsOccurrences",
+		Query:  IsOccurrences_Operation,
+		Variables: &__IsOccurrencesInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ IsOccurrencesResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by Licenses.
 const Licenses_Operation = `
 query Licenses ($filter: LicenseSpec!) {
@@ -29164,6 +30322,64 @@ func Vulnerabilities(
 	var err_ error
 
 	var data_ VulnerabilitiesResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VulnerabilityList.
+const VulnerabilityList_Operation = `
+query VulnerabilityList ($filter: VulnerabilitySpec!, $after: ID, $first: Int) {
+	vulnerabilityList(vulnSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllVulnerabilityTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VulnerabilityList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnerabilitySpec,
+	after *string,
+	first *int,
+) (*VulnerabilityListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnerabilityList",
+		Query:  VulnerabilityList_Operation,
+		Variables: &__VulnerabilityListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ VulnerabilityListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

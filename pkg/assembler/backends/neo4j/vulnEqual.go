@@ -22,6 +22,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/graphql/model"
 )
 
+func (c *neo4jClient) VulnEqualList(ctx context.Context, vulnEqualSpec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
+	return nil, fmt.Errorf("not implemented: VulnEqualList")
+}
+
 // TODO (pxp928): fix for new vulnerability
 func (c *neo4jClient) VulnEqual(ctx context.Context, vulnEqualSpec *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
 

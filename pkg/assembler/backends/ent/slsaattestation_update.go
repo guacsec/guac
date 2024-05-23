@@ -163,6 +163,20 @@ func (sau *SLSAAttestationUpdate) SetNillableCollector(s *string) *SLSAAttestati
 	return sau
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (sau *SLSAAttestationUpdate) SetDocumentRef(s string) *SLSAAttestationUpdate {
+	sau.mutation.SetDocumentRef(s)
+	return sau
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (sau *SLSAAttestationUpdate) SetNillableDocumentRef(s *string) *SLSAAttestationUpdate {
+	if s != nil {
+		sau.SetDocumentRef(*s)
+	}
+	return sau
+}
+
 // SetBuiltFromHash sets the "built_from_hash" field.
 func (sau *SLSAAttestationUpdate) SetBuiltFromHash(s string) *SLSAAttestationUpdate {
 	sau.mutation.SetBuiltFromHash(s)
@@ -318,6 +332,9 @@ func (sau *SLSAAttestationUpdate) sqlSave(ctx context.Context) (n int, err error
 	}
 	if value, ok := sau.mutation.Collector(); ok {
 		_spec.SetField(slsaattestation.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := sau.mutation.DocumentRef(); ok {
+		_spec.SetField(slsaattestation.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := sau.mutation.BuiltFromHash(); ok {
 		_spec.SetField(slsaattestation.FieldBuiltFromHash, field.TypeString, value)
@@ -575,6 +592,20 @@ func (sauo *SLSAAttestationUpdateOne) SetNillableCollector(s *string) *SLSAAttes
 	return sauo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (sauo *SLSAAttestationUpdateOne) SetDocumentRef(s string) *SLSAAttestationUpdateOne {
+	sauo.mutation.SetDocumentRef(s)
+	return sauo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (sauo *SLSAAttestationUpdateOne) SetNillableDocumentRef(s *string) *SLSAAttestationUpdateOne {
+	if s != nil {
+		sauo.SetDocumentRef(*s)
+	}
+	return sauo
+}
+
 // SetBuiltFromHash sets the "built_from_hash" field.
 func (sauo *SLSAAttestationUpdateOne) SetBuiltFromHash(s string) *SLSAAttestationUpdateOne {
 	sauo.mutation.SetBuiltFromHash(s)
@@ -760,6 +791,9 @@ func (sauo *SLSAAttestationUpdateOne) sqlSave(ctx context.Context) (_node *SLSAA
 	}
 	if value, ok := sauo.mutation.Collector(); ok {
 		_spec.SetField(slsaattestation.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := sauo.mutation.DocumentRef(); ok {
+		_spec.SetField(slsaattestation.FieldDocumentRef, field.TypeString, value)
 	}
 	if value, ok := sauo.mutation.BuiltFromHash(); ok {
 		_spec.SetField(slsaattestation.FieldBuiltFromHash, field.TypeString, value)

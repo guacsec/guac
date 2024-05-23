@@ -37,7 +37,7 @@ jobs:
       digest: ${{ steps.hash.outputs.digest }}
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           fetch-depth: 0
       - name: Login to GitHub Container Registry
@@ -47,13 +47,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
         with:
           go-version: '1.21'
       - name: Install cosign
-        uses:  sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # main
+        uses:  sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # main
       - name: Install syft
-        uses: anchore/sbom-action/download-syft@ab5d7b5f48981941c4c5d6bf33aeb98fe3bae38c # v0.15.10
+        uses: anchore/sbom-action/download-syft@e8d2a6937ecead383dfe75190d104edd1f9c5751 # v0.16.0
 
       - name: Run GoReleaser Snapshot
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -62,7 +62,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean --snapshot --skip-sign
+          args: release --clean --snapshot --skip=sign
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GORELEASER_CURRENT_TAG: v0.0.0-snapshot-tag
@@ -108,7 +108,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout code
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # tag=v3
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # tag=v3
       - name: Login to GitHub Container Registry
         uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
@@ -116,13 +116,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Trivy in fs mode to generate SBOM
-        uses: aquasecurity/trivy-action@d710430a6722f083d3b36b8339ff66b32f22ee55 # master
+        uses: aquasecurity/trivy-action@b2933f565dbc598b29947660e66259e3c7bc8561 # master
         with:
           scan-type: 'fs'
           format: 'spdx-json'
           output: 'spdx.sbom.json'
       - name: Install cosign
-        uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # main
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # main
       - name: Sign image and sbom
         run: |
           #!/usr/bin/env bash
@@ -137,7 +137,7 @@ jobs:
     name: generate provenance for binaries
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0 # must use semver here
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0 # must use semver here
     with:
       base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
       upload-assets: true
@@ -146,7 +146,7 @@ jobs:
     name: generate provenance for container
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.10.0 # must use semver here
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0 # must use semver here
     with:
       image: ${{ needs.goreleaser.outputs.image }}
       digest: ${{ needs.goreleaser.outputs.digest }}
@@ -161,7 +161,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout code
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # tag=v3
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # tag=v3
       - name: Create and publish compose tarball
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -188,4 +188,15 @@ jobs:
           sed -i s/\$GUAC_IMAGE/ghcr.io\\/${{ github.repository_owner }}\\/guac:${{ github.ref_name }}/ guac-demo-compose.yaml
           gh release upload ${{ github.ref_name }} guac-demo-compose.yaml
           rm guac-demo-compose.yaml
+        shell: bash
+      - name: Modify and publish postgres compose yaml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          cp container_files/guac-postgres-compose.yaml .
+          sed -i s/\$GUAC_IMAGE/ghcr.io\\/${{ github.repository_owner }}\\/guac:${{ github.ref_name }}/ guac-postgres-compose.yaml
+          gh release upload ${{ github.ref_name }} guac-postgres-compose.yaml
+          rm guac-postgres-compose.yaml
         shell: bash

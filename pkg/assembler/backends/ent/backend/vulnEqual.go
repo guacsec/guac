@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sort"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -34,22 +35,89 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
+func vulnEqualGlobalID(id string) string {
+	return toGlobalID(vulnequal.Table, id)
+}
 
+func bulkVulnEqualGlobalID(ids []string) []string {
+	return toGlobalIDs(vulnequal.Table, ids)
+}
+
+func (b *EntBackend) VulnEqualList(ctx context.Context, spec model.VulnEqualSpec, after *string, first *int) (*model.VulnEqualConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != vulnequal.Table {
+			return nil, fmt.Errorf("after cursor is not type vulnEqual but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	veQuery := b.client.VulnEqual.Query().
+		Where(vulnEqualQuery(&spec))
+
+	veConn, err := getVulnEqualObject(veQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed vulnEqual query with error: %w", err)
+	}
+
+	var edges []*model.VulnEqualEdge
+	for _, edge := range veConn.Edges {
+		edges = append(edges, &model.VulnEqualEdge{
+			Cursor: vulnEqualGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelVulnEqual(edge.Node),
+		})
+	}
+
+	if veConn.PageInfo.StartCursor != nil {
+		return &model.VulnEqualConnection{
+			TotalCount: veConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: veConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(vulnEqualGlobalID(veConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(vulnEqualGlobalID(veConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
+}
+
+func (b *EntBackend) VulnEqual(ctx context.Context, filter *model.VulnEqualSpec) ([]*model.VulnEqual, error) {
+	if filter == nil {
+		filter = &model.VulnEqualSpec{}
+	}
 	if len(filter.Vulnerabilities) > 2 {
 		return nil, fmt.Errorf("too many vulnerability specified in vuln equal filter")
 	}
 
-	query := b.client.VulnEqual.Query().
-		Where(vulnEqualQuery(filter)).
-		WithVulnerabilityA(func(query *ent.VulnerabilityIDQuery) {}).
-		WithVulnerabilityB(func(query *ent.VulnerabilityIDQuery) {})
-	results, err := query.Limit(MaxPageSize).All(ctx)
+	veQuery := b.client.VulnEqual.Query().
+		Where(vulnEqualQuery(filter))
+
+	query, err := getVulnEqualObject(veQuery).
+		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed vulnEqual query with error: %w", err)
 	}
 
-	return collect(results, toModelVulnEqual), nil
+	return collect(query, toModelVulnEqual), nil
+}
+
+// getVulnEqualObject is used recreate the vulnEqual object be eager loading the edges
+func getVulnEqualObject(q *ent.VulnEqualQuery) *ent.VulnEqualQuery {
+	return q.
+		WithVulnerabilityA(func(query *ent.VulnerabilityIDQuery) {}).
+		WithVulnerabilityB(func(query *ent.VulnerabilityIDQuery) {})
 }
 
 func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
@@ -61,11 +129,12 @@ func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
 		optionalPredicate(filter.Justification, vulnequal.JustificationEQ),
 		optionalPredicate(filter.Origin, vulnequal.OriginEQ),
 		optionalPredicate(filter.Collector, vulnequal.CollectorEQ),
+		optionalPredicate(filter.DocumentRef, vulnequal.DocumentRefEQ),
 	}
 
 	if len(filter.Vulnerabilities) == 1 {
-		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
-			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold))))
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityQueryPredicates(*filter.Vulnerabilities[0])...),
+			vulnequal.HasVulnerabilityBWith(vulnerabilityQueryPredicates(*filter.Vulnerabilities[0])...)))
 
 		if filter.Vulnerabilities[0].NoVuln != nil {
 			if *filter.Vulnerabilities[0].NoVuln {
@@ -75,28 +144,12 @@ func vulnEqualQuery(filter *model.VulnEqualSpec) predicate.VulnEqual {
 			}
 		}
 	} else if len(filter.Vulnerabilities) == 2 {
-		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[0].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold)),
-			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[0].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[0].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[0].Type, vulnerabilityid.TypeEqualFold))))
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityQueryPredicates(*filter.Vulnerabilities[0])...),
+			vulnequal.HasVulnerabilityBWith(vulnerabilityQueryPredicates(*filter.Vulnerabilities[0])...)))
 
-		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(optionalPredicate(filter.Vulnerabilities[1].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[1].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[1].Type, vulnerabilityid.TypeEqualFold)),
-			vulnequal.HasVulnerabilityBWith(optionalPredicate(filter.Vulnerabilities[1].ID, IDEQ), optionalPredicate(filter.Vulnerabilities[1].VulnerabilityID, vulnerabilityid.VulnerabilityIDEqualFold), optionalPredicate(filter.Vulnerabilities[1].Type, vulnerabilityid.TypeEqualFold))))
+		where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityQueryPredicates(*filter.Vulnerabilities[1])...),
+			vulnequal.HasVulnerabilityBWith(vulnerabilityQueryPredicates(*filter.Vulnerabilities[1])...)))
 
-		if filter.Vulnerabilities[0].NoVuln != nil {
-			if *filter.Vulnerabilities[0].NoVuln {
-				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeEqualFold(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeEqualFold(NoVuln))))
-			} else {
-				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeNEQ(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeNEQ(NoVuln))))
-			}
-
-		}
-
-		if filter.Vulnerabilities[1].NoVuln != nil {
-			if *filter.Vulnerabilities[1].NoVuln {
-				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeEqualFold(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeEqualFold(NoVuln))))
-			} else {
-				where = append(where, vulnequal.Or(vulnequal.HasVulnerabilityAWith(vulnerabilityid.TypeNEQ(NoVuln)), vulnequal.HasVulnerabilityBWith(vulnerabilityid.TypeNEQ(NoVuln))))
-			}
-		}
 	}
 
 	return vulnequal.And(where...)
@@ -116,7 +169,7 @@ func (b *EntBackend) IngestVulnEquals(ctx context.Context, vulnerabilities []*mo
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return bulkVulnEqualGlobalID(*ids), nil
 }
 
 func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.IDorVulnerabilityInput, otherVulnerability model.IDorVulnerabilityInput, vulnEqual model.VulnEqualInputSpec) (string, error) {
@@ -129,20 +182,23 @@ func (b *EntBackend) IngestVulnEqual(ctx context.Context, vulnerability model.ID
 		return "", txErr
 	}
 
-	return *id, nil
+	return vulnEqualGlobalID(*id), nil
 }
 
-func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func vulnEqualConflictColumns() []string {
+	return []string{
 		vulnequal.FieldVulnerabilitiesHash,
 		vulnequal.FieldVulnID,
 		vulnequal.FieldEqualVulnID,
 		vulnequal.FieldOrigin,
 		vulnequal.FieldCollector,
 		vulnequal.FieldJustification,
+		vulnequal.FieldDocumentRef,
 	}
+}
+
+func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*model.IDorVulnerabilityInput, otherVulnerabilities []*model.IDorVulnerabilityInput, vulnEquals []*model.VulnEqualInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	batches := chunk(vulnEquals, MaxBatchSize)
 
@@ -162,7 +218,7 @@ func upsertBulkVulnEquals(ctx context.Context, tx *ent.Tx, vulnerabilities []*mo
 
 		err := tx.VulnEqual.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(vulnEqualConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -185,7 +241,8 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 	vulnEqualCreate := tx.VulnEqual.Create().
 		SetCollector(ve.Collector).
 		SetJustification(ve.Justification).
-		SetOrigin(ve.Origin)
+		SetOrigin(ve.Origin).
+		SetDocumentRef(ve.DocumentRef)
 
 	if vulnerability.VulnerabilityNodeID == nil {
 		foundVulnID, err := tx.VulnerabilityID.Query().
@@ -197,7 +254,7 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if err != nil {
 			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
 		}
-		vulnerability.VulnerabilityNodeID = ptrfrom.String(foundVulnID.String())
+		vulnerability.VulnerabilityNodeID = ptrfrom.String(vulnIDGlobalID(foundVulnID.String()))
 	}
 
 	if otherVulnerability.VulnerabilityNodeID == nil {
@@ -210,7 +267,7 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if err != nil {
 			return nil, Errorf("%v ::  %s", "generateVexCreate", err)
 		}
-		otherVulnerability.VulnerabilityNodeID = ptrfrom.String(foundVulnID.String())
+		otherVulnerability.VulnerabilityNodeID = ptrfrom.String(vulnIDGlobalID(foundVulnID.String()))
 	}
 
 	sortedVulns := []model.IDorVulnerabilityInput{*vulnerability, *otherVulnerability}
@@ -222,7 +279,8 @@ func generateVulnEqualCreate(ctx context.Context, tx *ent.Tx, vulnerability *mod
 		if vuln.VulnerabilityNodeID == nil {
 			return nil, fmt.Errorf("VulnerabilityNodeID not specified in IDorVulnerabilityInput")
 		}
-		vulnID, err := uuid.Parse(*vuln.VulnerabilityNodeID)
+		vulnGlobalID := fromGlobalID(*vuln.VulnerabilityNodeID)
+		vulnID, err := uuid.Parse(vulnGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from VulnerabilityNodeID failed with error: %w", err)
 		}
@@ -254,14 +312,7 @@ func upsertVulnEquals(ctx context.Context, tx *ent.Tx, vulnerability model.IDorV
 
 	if id, err := vulnEqualCreate.
 		OnConflict(
-			sql.ConflictColumns(
-				vulnequal.FieldVulnerabilitiesHash,
-				vulnequal.FieldVulnID,
-				vulnequal.FieldEqualVulnID,
-				vulnequal.FieldOrigin,
-				vulnequal.FieldCollector,
-				vulnequal.FieldJustification,
-			),
+			sql.ConflictColumns(vulnEqualConflictColumns()...),
 		).
 		Ignore().
 		ID(ctx); err != nil {
@@ -291,24 +342,25 @@ func toModelVulnEqual(record *ent.VulnEqual) *model.VulnEqual {
 	vulnerabilities := []*ent.VulnerabilityID{record.Edges.VulnerabilityA, record.Edges.VulnerabilityB}
 
 	return &model.VulnEqual{
-		ID:              record.ID.String(),
+		ID:              vulnEqualGlobalID(record.ID.String()),
 		Vulnerabilities: collect(vulnerabilities, toModelVulnerabilityFromVulnerabilityID),
 		Justification:   record.Justification,
 		Origin:          record.Origin,
 		Collector:       record.Collector,
+		DocumentRef:     record.DocumentRef,
 	}
 }
 
 func toModelVulnerabilityFromVulnerabilityID(vulnID *ent.VulnerabilityID) *model.Vulnerability {
 	return &model.Vulnerability{
-		ID:               fmt.Sprintf("%s:%s", vulnTypeString, vulnID.ID.String()),
+		ID:               vulnTypeGlobalID(vulnID.ID.String()),
 		Type:             vulnID.Type,
 		VulnerabilityIDs: []*model.VulnerabilityID{toModelVulnerabilityID(vulnID)},
 	}
 }
 
 func canonicalVulnEqualString(ve *model.VulnEqualInputSpec) string {
-	return fmt.Sprintf("%s::%s::%s", ve.Justification, ve.Origin, ve.Collector)
+	return fmt.Sprintf("%s::%s::%s:%s", ve.Justification, ve.Origin, ve.Collector, ve.DocumentRef)
 }
 
 // guacVulnEqualKey generates an uuid based on the hash of the inputspec and inputs. vulnEqual ID has to be set for bulk ingestion
@@ -320,4 +372,33 @@ func guacVulnEqualKey(sortedVulnHash string, veInput *model.VulnEqualInputSpec) 
 
 	veID := generateUUIDKey([]byte(veIDString))
 	return &veID, nil
+}
+
+func (b *EntBackend) vulnEqualNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.VulnEqual.Query().
+		Where(vulnEqualQuery(&model.VulnEqualSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeVulnEqualVulnerability] {
+		query.
+			WithVulnerabilityA().
+			WithVulnerabilityB()
+	}
+
+	vulnEquals, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for vulnEquals with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, ve := range vulnEquals {
+		if ve.Edges.VulnerabilityA != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(ve.Edges.VulnerabilityA))
+		}
+		if ve.Edges.VulnerabilityB != nil {
+			out = append(out, toModelVulnerabilityFromVulnerabilityID(ve.Edges.VulnerabilityB))
+		}
+	}
+
+	return out, nil
 }

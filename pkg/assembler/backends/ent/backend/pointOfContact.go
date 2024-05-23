@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -30,21 +31,87 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
-	records, err := b.client.PointOfContact.Query().
-		Where(pointOfContactPredicate(filter)).
-		Limit(MaxPageSize).
-		WithSource(withSourceNameTreeQuery()).
-		WithArtifact().
-		WithPackageVersion(withPackageVersionTree()).
-		WithAllVersions(withPackageNameTree()).
-		All(ctx)
+func pointOfContactGlobalID(id string) string {
+	return toGlobalID(pointofcontact.Table, id)
+}
 
+func bulkPointOfContactGlobalID(ids []string) []string {
+	return toGlobalIDs(pointofcontact.Table, ids)
+}
+
+func (b *EntBackend) PointOfContactList(ctx context.Context, spec model.PointOfContactSpec, after *string, first *int) (*model.PointOfContactConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != pointofcontact.Table {
+			return nil, fmt.Errorf("after cursor is not type Point of Contact but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
+	}
+
+	pocQuery := b.client.PointOfContact.Query().
+		Where(pointOfContactPredicate(&spec))
+
+	pocConn, err := getPointOfContactObject(pocQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve PointOfContact :: %s", err)
+		return nil, fmt.Errorf("failed PointOfContact query with error: %w", err)
+	}
+
+	var edges []*model.PointOfContactEdge
+	for _, edge := range pocConn.Edges {
+		edges = append(edges, &model.PointOfContactEdge{
+			Cursor: pointOfContactGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelPointOfContact(edge.Node),
+		})
+	}
+
+	if pocConn.PageInfo.StartCursor != nil {
+		return &model.PointOfContactConnection{
+			TotalCount: pocConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: pocConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(pointOfContactGlobalID(pocConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(pointOfContactGlobalID(pocConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
+}
+
+func (b *EntBackend) PointOfContact(ctx context.Context, filter *model.PointOfContactSpec) ([]*model.PointOfContact, error) {
+	if filter == nil {
+		filter = &model.PointOfContactSpec{}
+	}
+	pocQuery := b.client.PointOfContact.Query().
+		Where(pointOfContactPredicate(filter))
+
+	records, err := getPointOfContactObject(pocQuery).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed PointOfContact query with error: %w", err)
 	}
 
 	return collect(records, toModelPointOfContact), nil
+}
+
+// getPointOfContactObject is used recreate the PointOfContact object be eager loading the edges
+func getPointOfContactObject(q *ent.PointOfContactQuery) *ent.PointOfContactQuery {
+	return q.
+		WithSource(withSourceNameTreeQuery()).
+		WithArtifact().
+		WithPackageVersion(withPackageVersionTree()).
+		WithAllVersions(withPackageNameTree())
 }
 
 func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, pointOfContact model.PointOfContactInputSpec) (string, error) {
@@ -55,7 +122,7 @@ func (b *EntBackend) IngestPointOfContact(ctx context.Context, subject model.Pac
 		return "", fmt.Errorf("failed to execute IngestPointOfContact :: %s", txErr)
 	}
 
-	return *recordID, nil
+	return pointOfContactGlobalID(*recordID), nil
 }
 
 func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) ([]string, error) {
@@ -72,7 +139,7 @@ func (b *EntBackend) IngestPointOfContacts(ctx context.Context, subjects model.P
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return bulkPointOfContactGlobalID(*ids), nil
 }
 
 func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOfContact {
@@ -84,6 +151,7 @@ func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOf
 		optionalPredicate(filter.Justification, pointofcontact.JustificationEQ),
 		optionalPredicate(filter.Origin, pointofcontact.OriginEQ),
 		optionalPredicate(filter.Collector, pointofcontact.CollectorEQ),
+		optionalPredicate(filter.DocumentRef, pointofcontact.DocumentRefEQ),
 	}
 
 	if filter.Subject != nil {
@@ -102,17 +170,22 @@ func pointOfContactPredicate(filter *model.PointOfContactSpec) predicate.PointOf
 	return pointofcontact.And(predicates...)
 }
 
-func upsertBulkPointOfContact(ctx context.Context, tx *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func pocConflictColumns() []string {
+	return []string{
 		pointofcontact.FieldEmail,
 		pointofcontact.FieldInfo,
 		pointofcontact.FieldSince,
 		pointofcontact.FieldJustification,
 		pointofcontact.FieldOrigin,
 		pointofcontact.FieldCollector,
+		pointofcontact.FieldDocumentRef,
 	}
+}
+
+func upsertBulkPointOfContact(ctx context.Context, tx *ent.Tx, subjects model.PackageSourceOrArtifactInputs, pkgMatchType *model.MatchFlags, pointOfContactList []*model.PointOfContactInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
+
+	conflictColumns := pocConflictColumns()
 	var conflictWhere *sql.Predicate
 
 	switch {
@@ -207,14 +280,16 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 		SetSince(poc.Since.UTC()).
 		SetJustification(poc.Justification).
 		SetOrigin(poc.Origin).
-		SetCollector(poc.Collector)
+		SetCollector(poc.Collector).
+		SetDocumentRef(poc.DocumentRef)
 
 	switch {
 	case art != nil:
 		var artID uuid.UUID
 		if art.ArtifactID != nil {
 			var err error
-			artID, err = uuid.Parse(*art.ArtifactID)
+			artGlobalID := fromGlobalID(*art.ArtifactID)
+			artID, err = uuid.Parse(artGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from ArtifactID failed with error: %w", err)
 			}
@@ -231,7 +306,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 			var pkgVersionID uuid.UUID
 			if pkg.PackageVersionID != nil {
 				var err error
-				pkgVersionID, err = uuid.Parse(*pkg.PackageVersionID)
+				pkgVersionGlobalID := fromGlobalID(*pkg.PackageVersionID)
+				pkgVersionID, err = uuid.Parse(pkgVersionGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from packageVersionID failed with error: %w", err)
 				}
@@ -247,7 +323,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 			var pkgNameID uuid.UUID
 			if pkg.PackageNameID != nil {
 				var err error
-				pkgNameID, err = uuid.Parse(*pkg.PackageNameID)
+				pkgNameGlobalID := fromGlobalID(*pkg.PackageNameID)
+				pkgNameID, err = uuid.Parse(pkgNameGlobalID.id)
 				if err != nil {
 					return nil, fmt.Errorf("uuid conversion from PackageNameID failed with error: %w", err)
 				}
@@ -264,7 +341,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 		var sourceID uuid.UUID
 		if src.SourceNameID != nil {
 			var err error
-			sourceID, err = uuid.Parse(*src.SourceNameID)
+			srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+			sourceID, err = uuid.Parse(srcNameGlobalID.id)
 			if err != nil {
 				return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 			}
@@ -282,14 +360,8 @@ func generatePointOfContactCreate(ctx context.Context, tx *ent.Tx, pkg *model.ID
 
 func upsertPointOfContact(ctx context.Context, tx *ent.Tx, subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, spec model.PointOfContactInputSpec) (*string, error) {
 
-	conflictColumns := []string{
-		pointofcontact.FieldEmail,
-		pointofcontact.FieldInfo,
-		pointofcontact.FieldSince,
-		pointofcontact.FieldJustification,
-		pointofcontact.FieldOrigin,
-		pointofcontact.FieldCollector,
-	}
+	conflictColumns := pocConflictColumns()
+
 	var conflictWhere *sql.Predicate
 
 	switch {
@@ -366,7 +438,7 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 	}
 
 	return &model.PointOfContact{
-		ID:            v.ID.String(),
+		ID:            pointOfContactGlobalID(v.ID.String()),
 		Subject:       sub,
 		Email:         v.Email,
 		Info:          v.Info,
@@ -374,34 +446,49 @@ func toModelPointOfContact(v *ent.PointOfContact) *model.PointOfContact {
 		Justification: v.Justification,
 		Origin:        v.Origin,
 		Collector:     v.Collector,
+		DocumentRef:   v.DocumentRef,
 	}
 }
 
-// func pointOfContactInputPredicate(subject model.PackageSourceOrArtifactInput, pkgMatchType *model.MatchFlags, filter model.PointOfContactInputSpec) predicate.PointOfContact {
-// 	var subjectSpec *model.PackageSourceOrArtifactSpec
-// 	if subject.Package != nil {
-// 		if pkgMatchType != nil && pkgMatchType.Pkg == model.PkgMatchTypeAllVersions {
-// 			subject.Package.PackageInput.Version = nil
-// 		}
-// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-// 			Package: helper.ConvertPkgInputSpecToPkgSpec(subject.Package.PackageInput),
-// 		}
-// 	} else if subject.Artifact != nil {
-// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-// 			Artifact: helper.ConvertArtInputSpecToArtSpec(subject.Artifact.ArtifactInput),
-// 		}
-// 	} else {
-// 		subjectSpec = &model.PackageSourceOrArtifactSpec{
-// 			Source: helper.ConvertSrcInputSpecToSrcSpec(subject.Source.SourceInput),
-// 		}
-// 	}
-// 	return pointOfContactPredicate(&model.PointOfContactSpec{
-// 		Subject:       subjectSpec,
-// 		Email:         &filter.Email,
-// 		Info:          &filter.Info,
-// 		Since:         &filter.Since,
-// 		Justification: &filter.Justification,
-// 		Origin:        &filter.Origin,
-// 		Collector:     &filter.Collector,
-// 	})
-// }
+func (b *EntBackend) pointOfContactNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.PointOfContact.Query().
+		Where(pointOfContactPredicate(&model.PointOfContactSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgePointOfContactPackage] {
+		query.
+			WithPackageVersion(withPackageVersionTree()).
+			WithAllVersions()
+	}
+	if allowedEdges[model.EdgePointOfContactArtifact] {
+		query.
+			WithArtifact()
+	}
+	if allowedEdges[model.EdgePointOfContactSource] {
+		query.
+			WithSource()
+	}
+
+	pocs, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for point of contact with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, poc := range pocs {
+		if poc.Edges.PackageVersion != nil {
+			out = append(out, toModelPackage(backReferencePackageVersion(poc.Edges.PackageVersion)))
+		}
+		if poc.Edges.AllVersions != nil {
+			out = append(out, toModelPackage(poc.Edges.AllVersions))
+		}
+		if poc.Edges.Artifact != nil {
+			out = append(out, toModelArtifact(poc.Edges.Artifact))
+		}
+		if poc.Edges.Source != nil {
+			out = append(out, toModelSource(poc.Edges.Source))
+		}
+	}
+
+	return out, nil
+}

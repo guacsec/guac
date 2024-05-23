@@ -35,7 +35,6 @@ func init() {
 
 	// Set of all flags used across GUAC clis and subcommands. Use consistent
 	// names for config file.
-	set.String("pubsub-addr", "nats://127.0.0.1:4222", "gocloud connection string for pubsub configured via https://gocloud.dev/howto/pubsub/ (default is nats://127.0.0.1:4222)")
 	set.String("csub-addr", "localhost:2782", "address to connect to collect-sub service")
 	set.Bool("csub-tls", false, "enable tls connection to the server")
 	set.Bool("csub-tls-skip-verify", false, "skip verifying server certificate (for self-signed certificates for example)")
@@ -59,6 +58,12 @@ func init() {
 
 	// blob store address
 	set.String("blob-addr", "file:///tmp/blobstore?no_tmp_dir=true", "gocloud connection string for blob store configured via https://gocloud.dev/howto/blob/ (default: filesystem)")
+
+	// pubsub address
+	set.String("pubsub-addr", "nats://127.0.0.1:4222", "gocloud connection string for pubsub configured via https://gocloud.dev/howto/pubsub/ (default is nats://127.0.0.1:4222)")
+
+	// enable/disable publish to queue
+	set.Bool("publish-to-queue", true, "enable/disable message publish to queue")
 
 	set.String("neptune-endpoint", "localhost", "address to neptune db")
 	set.Int("neptune-port", 8182, "port used for neptune db connection")
@@ -91,12 +96,14 @@ func init() {
 
 	set.Bool("enable-prometheus", true, "enable prometheus metrics")
 
-	set.Int("prometheus-addr", 9091, "port to listen to on prometheus server")
+	set.Int("prometheus-port", 9091, "port to listen to on prometheus server")
 
 	set.StringP("interval", "i", "5m", "if polling set interval, m, h, s, etc.")
 
 	set.BoolP("cert-good", "g", false, "enable to certifyGood, otherwise defaults to certifyBad")
 	set.BoolP("package-name", "n", false, "if type is package, enable if attestation is at package-name level (for all versions), defaults to specific version")
+
+	set.StringP("justification", "j", "", "justification for the metadata")
 
 	set.IntP("search-depth", "d", 0, "depth to search, 0 has no limit")
 
@@ -112,6 +119,7 @@ func init() {
 
 	// S3 flags
 	set.String("s3-url", "", "url of the s3 endpoint")
+	set.String("s3-path", "", "path to folder containing documents in the s3 bucket")
 	set.String("s3-bucket", "", "bucket in the s3 provider")
 	set.String("s3-item", "", "item in the s3 provider")
 	set.String("s3-mp", "kafka", "message provider (sqs or kafka)")
@@ -128,6 +136,8 @@ func init() {
 	set.String("github-mode", "release", "mode to run github collector in: [release | workflow]")
 	set.String("github-sbom", "", "name of sbom file to look for in github release.")
 	set.String("github-workflow-file", "", "name of workflow file to look for in github workflow. \nThis will be the name of the actual file, not the workflow name (i.e. ci.yaml).")
+
+	set.String("header-file", "", "a text file containing HTTP headers to send to the GQL server, in RFC 822 format")
 
 	set.VisitAll(func(f *pflag.Flag) {
 		flagStore[f.Name] = f

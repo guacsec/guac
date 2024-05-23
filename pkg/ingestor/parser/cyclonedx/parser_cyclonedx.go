@@ -234,16 +234,18 @@ func (c *cyclonedxParser) GetIdentifiers(ctx context.Context) (*common.Identifie
 func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPredicates {
 	logger := logging.FromContext(ctx)
 	preds := &assembler.IngestPredicates{}
-	var toplevel []*model.PkgInputSpec
+	var topLevelArts []*model.ArtifactInputSpec
+	var topLevelPkgs []*model.PkgInputSpec
 
 	if c.cdxBom.Metadata != nil && c.cdxBom.Metadata.Component != nil {
-		toplevel = c.getPackageElement(c.cdxBom.Metadata.Component.BOMRef)
+		topLevelArts = c.packageArtifacts[c.cdxBom.Metadata.Component.BOMRef]
+		topLevelPkgs = c.packagePackages[c.cdxBom.Metadata.Component.BOMRef]
 	}
 
 	// adding top level package edge manually for all depends on package
 	// TODO: This is not based on the relationship so that can be inaccurate (can capture both direct and in-direct)...Remove this and be done below by the *c.cdxBom.Dependencies?
 	// see https://github.com/CycloneDX/specification/issues/33
-	if toplevel != nil {
+	if len(topLevelArts) > 0 || len(topLevelPkgs) > 0 {
 		var timestamp time.Time
 		var err error
 		if c.cdxBom.Metadata.Timestamp == "" {
@@ -257,8 +259,15 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 			}
 		}
 
-		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(toplevel[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
-		preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(toplevel[0], c.doc, c.cdxBom.SerialNumber, timestamp))
+		preds.IsDependency = append(preds.IsDependency, common.CreateTopLevelIsDeps(topLevelPkgs[0], c.packagePackages, nil, "top-level package GUAC heuristic connecting to each file/package")...)
+
+		if len(topLevelArts) > 0 {
+			for _, topLevelArt := range topLevelArts {
+				preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromArtifact(topLevelArt, c.doc, c.cdxBom.SerialNumber, timestamp))
+			}
+		} else {
+			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOMFromPkg(topLevelPkgs[0], c.doc, c.cdxBom.SerialNumber, timestamp))
+		}
 	}
 
 	for id := range c.packagePackages {
@@ -287,7 +296,7 @@ func (c *cyclonedxParser) GetPredicates(ctx context.Context) *assembler.IngestPr
 		if !found {
 			continue
 		}
-		if reflect.DeepEqual(currPkg, toplevel) {
+		if reflect.DeepEqual(currPkg, topLevelPkgs) {
 			continue
 		}
 		if deps.Dependencies != nil {
@@ -317,49 +326,55 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 		logger.Debugf("no vulnerabilities found in CycloneDX BOM")
 		return nil
 	}
-
-	var status model.VexStatus
-	var justification model.VexJustification
-	var publishedTime time.Time
 	for _, vulnerability := range *c.cdxBom.Vulnerabilities {
 		vuln, err := asmhelpers.CreateVulnInput(vulnerability.ID)
 		if err != nil {
 			return fmt.Errorf("failed to create vuln input spec %v", err)
 		}
-
-		if vexStatus, ok := vexStatusMap[vulnerability.Analysis.State]; ok {
-			status = vexStatus
-		} else {
-			return fmt.Errorf("unknown vulnerability status %s", vulnerability.Analysis.State)
-		}
-
-		if vexJustification, ok := justificationsMap[vulnerability.Analysis.Justification]; ok {
-			justification = vexJustification
-		} else {
-			justification = model.VexJustificationNotProvided
-		}
-
-		if vulnerability.Published != "" {
-			publishedTime, _ = time.Parse(time.RFC3339, vulnerability.Published)
-		} else {
-			publishedTime = time.Unix(0, 0)
-		}
-
-		vd := model.VexStatementInputSpec{
-			Status:           status,
-			VexJustification: justification,
-			KnownSince:       publishedTime,
-			StatusNotes:      fmt.Sprintf("%s:%s", string(status), string(justification)),
-		}
-
-		if vulnerability.Analysis.Detail != "" {
-			vd.Statement = vulnerability.Analysis.Detail
-		} else if vulnerability.Analysis.Response != nil {
-			var response []string
-			for _, res := range *vulnerability.Analysis.Response {
-				response = append(response, string(res))
+		var vd model.VexStatementInputSpec
+		publishedTime := time.Unix(0, 0)
+		if vulnerability.Analysis != nil {
+			if vexStatus, ok := vexStatusMap[vulnerability.Analysis.State]; ok {
+				vd.Status = vexStatus
+			} else {
+				return fmt.Errorf("unknown vulnerability status %s", vulnerability.Analysis.State)
 			}
-			vd.Statement = strings.Join(response, ",")
+
+			if vexJustification, ok := justificationsMap[vulnerability.Analysis.Justification]; ok {
+				vd.VexJustification = vexJustification
+			} else {
+				vd.VexJustification = model.VexJustificationNotProvided
+			}
+
+			if vulnerability.Published != "" {
+				publishedTime, err = time.Parse(time.RFC3339, vulnerability.Published)
+				if err != nil {
+					return fmt.Errorf("failed to pase time: %s, with error: %w", vulnerability.Published, err)
+				}
+			}
+			vd.KnownSince = publishedTime
+			vd.Statement = vulnerability.Description
+
+			if vulnerability.Analysis.Detail != "" {
+				vd.StatusNotes = vulnerability.Analysis.Detail
+			} else if vulnerability.Analysis.Response != nil {
+				var response []string
+				for _, res := range *vulnerability.Analysis.Response {
+					response = append(response, string(res))
+				}
+				vd.StatusNotes = strings.Join(response, ",")
+			} else {
+				vd.StatusNotes = vulnerability.Detail
+			}
+		} else {
+			vd = model.VexStatementInputSpec{
+				// if status not specified, assume affected
+				Status:           model.VexStatusAffected,
+				VexJustification: model.VexJustificationNotProvided,
+				KnownSince:       publishedTime,
+				StatusNotes:      vulnerability.Detail,
+				Statement:        vulnerability.Description,
+			}
 		}
 
 		for _, affect := range *vulnerability.Affects {
@@ -370,11 +385,11 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 			c.vulnData.vex = append(c.vulnData.vex, *vi...)
 
 			for _, v := range *vi {
-				if status == model.VexStatusAffected || status == model.VexStatusUnderInvestigation {
+				if v.VexData.Status == model.VexStatusAffected || v.VexData.Status == model.VexStatusUnderInvestigation {
 					cv := assembler.CertifyVulnIngest{
 						Vulnerability: vuln,
 						VulnData: &model.ScanMetadataInput{
-							TimeScanned: publishedTime,
+							TimeScanned: v.VexData.KnownSince,
 						},
 						Pkg: v.Pkg,
 					}
@@ -384,18 +399,21 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 		}
 
 		for _, vulnRating := range *vulnerability.Ratings {
-			vm := assembler.VulnMetadataIngest{
-				Vulnerability: vuln,
-				VulnMetadata: &model.VulnerabilityMetadataInputSpec{
-					ScoreType:  model.VulnerabilityScoreType(vulnRating.Method),
-					ScoreValue: *vulnRating.Score,
-					Timestamp:  publishedTime,
-				},
+			if vulnRating.Method != "" {
+				vm := assembler.VulnMetadataIngest{
+					Vulnerability: vuln,
+					VulnMetadata: &model.VulnerabilityMetadataInputSpec{
+						ScoreType:  model.VulnerabilityScoreType(vulnRating.Method),
+						ScoreValue: *vulnRating.Score,
+						Timestamp:  publishedTime,
+					},
+				}
+				c.vulnData.vulnMetadata = append(c.vulnData.vulnMetadata, vm)
+			} else {
+				logger.Debugf("vulnerability method not specified in cdx sbom: %s, skipping", c.doc.SourceInformation.DocumentRef)
 			}
-			c.vulnData.vulnMetadata = append(c.vulnData.vulnMetadata, vm)
 		}
 	}
-
 	return nil
 }
 
@@ -403,6 +421,16 @@ func (c *cyclonedxParser) getVulnerabilities(ctx context.Context) error {
 func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *model.VulnerabilityInputSpec, vexData model.VexStatementInputSpec, affectsObj cdx.Affects) (*[]assembler.VexIngest, error) {
 	logger := logging.FromContext(ctx)
 	pkgRef := affectsObj.Ref
+
+	var foundVexIngest []assembler.VexIngest
+
+	for _, foundPkgElement := range c.packagePackages[affectsObj.Ref] {
+		foundVexIngest = append(foundVexIngest, assembler.VexIngest{VexData: &vexData, Vulnerability: vulnInput, Pkg: foundPkgElement})
+	}
+
+	if len(foundVexIngest) > 0 {
+		return &foundVexIngest, nil
+	}
 
 	// split ref using # as delimiter.
 	pkgRefInfo := strings.Split(pkgRef, "#")
@@ -452,13 +480,6 @@ func (c *cyclonedxParser) getAffectedPackages(ctx context.Context, vulnInput *mo
 	}
 
 	return &viList, nil
-}
-
-func (c *cyclonedxParser) getPackageElement(elementID string) []*model.PkgInputSpec {
-	if packNode, ok := c.packagePackages[elementID]; ok {
-		return packNode
-	}
-	return nil
 }
 
 func guacCDXFilePurl(fileName string, version string, topLevel bool) string {

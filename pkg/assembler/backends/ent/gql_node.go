@@ -40,74 +40,120 @@ type Noder interface {
 	IsNode()
 }
 
-// IsNode implements the Node interface check for GQLGen.
-func (n *Artifact) IsNode() {}
+var artifactImplementors = []string{"Artifact", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *BillOfMaterials) IsNode() {}
+func (*Artifact) IsNode() {}
+
+var billofmaterialsImplementors = []string{"BillOfMaterials", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *Builder) IsNode() {}
+func (*BillOfMaterials) IsNode() {}
+
+var builderImplementors = []string{"Builder", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *Certification) IsNode() {}
+func (*Builder) IsNode() {}
+
+var certificationImplementors = []string{"Certification", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *CertifyLegal) IsNode() {}
+func (*Certification) IsNode() {}
+
+var certifylegalImplementors = []string{"CertifyLegal", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *CertifyScorecard) IsNode() {}
+func (*CertifyLegal) IsNode() {}
+
+var certifyscorecardImplementors = []string{"CertifyScorecard", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *CertifyVex) IsNode() {}
+func (*CertifyScorecard) IsNode() {}
+
+var certifyvexImplementors = []string{"CertifyVex", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *CertifyVuln) IsNode() {}
+func (*CertifyVex) IsNode() {}
+
+var certifyvulnImplementors = []string{"CertifyVuln", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *Dependency) IsNode() {}
+func (*CertifyVuln) IsNode() {}
+
+var dependencyImplementors = []string{"Dependency", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *HasMetadata) IsNode() {}
+func (*Dependency) IsNode() {}
+
+var hasmetadataImplementors = []string{"HasMetadata", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *HasSourceAt) IsNode() {}
+func (*HasMetadata) IsNode() {}
+
+var hassourceatImplementors = []string{"HasSourceAt", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *HashEqual) IsNode() {}
+func (*HasSourceAt) IsNode() {}
+
+var hashequalImplementors = []string{"HashEqual", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *License) IsNode() {}
+func (*HashEqual) IsNode() {}
+
+var licenseImplementors = []string{"License", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *Occurrence) IsNode() {}
+func (*License) IsNode() {}
+
+var occurrenceImplementors = []string{"Occurrence", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *PackageName) IsNode() {}
+func (*Occurrence) IsNode() {}
+
+var packagenameImplementors = []string{"PackageName", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *PackageVersion) IsNode() {}
+func (*PackageName) IsNode() {}
+
+var packageversionImplementors = []string{"PackageVersion", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *PkgEqual) IsNode() {}
+func (*PackageVersion) IsNode() {}
+
+var pkgequalImplementors = []string{"PkgEqual", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *PointOfContact) IsNode() {}
+func (*PkgEqual) IsNode() {}
+
+var pointofcontactImplementors = []string{"PointOfContact", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *SLSAAttestation) IsNode() {}
+func (*PointOfContact) IsNode() {}
+
+var slsaattestationImplementors = []string{"SLSAAttestation", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *SourceName) IsNode() {}
+func (*SLSAAttestation) IsNode() {}
+
+var sourcenameImplementors = []string{"SourceName", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *VulnEqual) IsNode() {}
+func (*SourceName) IsNode() {}
+
+var vulnequalImplementors = []string{"VulnEqual", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *VulnerabilityID) IsNode() {}
+func (*VulnEqual) IsNode() {}
+
+var vulnerabilityidImplementors = []string{"VulnerabilityID", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
-func (n *VulnerabilityMetadata) IsNode() {}
+func (*VulnerabilityID) IsNode() {}
+
+var vulnerabilitymetadataImplementors = []string{"VulnerabilityMetadata", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*VulnerabilityMetadata) IsNode() {}
 
 var errNodeInvalidID = &NotFoundError{"node"}
 
@@ -170,279 +216,210 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 	case artifact.Table:
 		query := c.Artifact.Query().
 			Where(artifact.ID(id))
-		query, err := query.CollectFields(ctx, "Artifact")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, artifactImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case billofmaterials.Table:
 		query := c.BillOfMaterials.Query().
 			Where(billofmaterials.ID(id))
-		query, err := query.CollectFields(ctx, "BillOfMaterials")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, billofmaterialsImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case builder.Table:
 		query := c.Builder.Query().
 			Where(builder.ID(id))
-		query, err := query.CollectFields(ctx, "Builder")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, builderImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case certification.Table:
 		query := c.Certification.Query().
 			Where(certification.ID(id))
-		query, err := query.CollectFields(ctx, "Certification")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, certificationImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case certifylegal.Table:
 		query := c.CertifyLegal.Query().
 			Where(certifylegal.ID(id))
-		query, err := query.CollectFields(ctx, "CertifyLegal")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, certifylegalImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case certifyscorecard.Table:
 		query := c.CertifyScorecard.Query().
 			Where(certifyscorecard.ID(id))
-		query, err := query.CollectFields(ctx, "CertifyScorecard")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, certifyscorecardImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case certifyvex.Table:
 		query := c.CertifyVex.Query().
 			Where(certifyvex.ID(id))
-		query, err := query.CollectFields(ctx, "CertifyVex")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, certifyvexImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case certifyvuln.Table:
 		query := c.CertifyVuln.Query().
 			Where(certifyvuln.ID(id))
-		query, err := query.CollectFields(ctx, "CertifyVuln")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, certifyvulnImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case dependency.Table:
 		query := c.Dependency.Query().
 			Where(dependency.ID(id))
-		query, err := query.CollectFields(ctx, "Dependency")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, dependencyImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case hasmetadata.Table:
 		query := c.HasMetadata.Query().
 			Where(hasmetadata.ID(id))
-		query, err := query.CollectFields(ctx, "HasMetadata")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, hasmetadataImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case hassourceat.Table:
 		query := c.HasSourceAt.Query().
 			Where(hassourceat.ID(id))
-		query, err := query.CollectFields(ctx, "HasSourceAt")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, hassourceatImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case hashequal.Table:
 		query := c.HashEqual.Query().
 			Where(hashequal.ID(id))
-		query, err := query.CollectFields(ctx, "HashEqual")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, hashequalImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case license.Table:
 		query := c.License.Query().
 			Where(license.ID(id))
-		query, err := query.CollectFields(ctx, "License")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, licenseImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case occurrence.Table:
 		query := c.Occurrence.Query().
 			Where(occurrence.ID(id))
-		query, err := query.CollectFields(ctx, "Occurrence")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, occurrenceImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case packagename.Table:
 		query := c.PackageName.Query().
 			Where(packagename.ID(id))
-		query, err := query.CollectFields(ctx, "PackageName")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, packagenameImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case packageversion.Table:
 		query := c.PackageVersion.Query().
 			Where(packageversion.ID(id))
-		query, err := query.CollectFields(ctx, "PackageVersion")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, packageversionImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case pkgequal.Table:
 		query := c.PkgEqual.Query().
 			Where(pkgequal.ID(id))
-		query, err := query.CollectFields(ctx, "PkgEqual")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, pkgequalImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case pointofcontact.Table:
 		query := c.PointOfContact.Query().
 			Where(pointofcontact.ID(id))
-		query, err := query.CollectFields(ctx, "PointOfContact")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, pointofcontactImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case slsaattestation.Table:
 		query := c.SLSAAttestation.Query().
 			Where(slsaattestation.ID(id))
-		query, err := query.CollectFields(ctx, "SLSAAttestation")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, slsaattestationImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case sourcename.Table:
 		query := c.SourceName.Query().
 			Where(sourcename.ID(id))
-		query, err := query.CollectFields(ctx, "SourceName")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, sourcenameImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case vulnequal.Table:
 		query := c.VulnEqual.Query().
 			Where(vulnequal.ID(id))
-		query, err := query.CollectFields(ctx, "VulnEqual")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, vulnequalImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case vulnerabilityid.Table:
 		query := c.VulnerabilityID.Query().
 			Where(vulnerabilityid.ID(id))
-		query, err := query.CollectFields(ctx, "VulnerabilityID")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, vulnerabilityidImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	case vulnerabilitymetadata.Table:
 		query := c.VulnerabilityMetadata.Query().
 			Where(vulnerabilitymetadata.ID(id))
-		query, err := query.CollectFields(ctx, "VulnerabilityMetadata")
-		if err != nil {
-			return nil, err
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, vulnerabilitymetadataImplementors...); err != nil {
+				return nil, err
+			}
 		}
-		n, err := query.Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
+		return query.Only(ctx)
 	default:
 		return nil, fmt.Errorf("cannot resolve noder from table %q: %w", table, errNodeInvalidID)
 	}
@@ -519,7 +496,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case artifact.Table:
 		query := c.Artifact.Query().
 			Where(artifact.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "Artifact")
+		query, err := query.CollectFields(ctx, artifactImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -535,7 +512,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case billofmaterials.Table:
 		query := c.BillOfMaterials.Query().
 			Where(billofmaterials.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "BillOfMaterials")
+		query, err := query.CollectFields(ctx, billofmaterialsImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -551,7 +528,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case builder.Table:
 		query := c.Builder.Query().
 			Where(builder.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "Builder")
+		query, err := query.CollectFields(ctx, builderImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -567,7 +544,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case certification.Table:
 		query := c.Certification.Query().
 			Where(certification.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "Certification")
+		query, err := query.CollectFields(ctx, certificationImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -583,7 +560,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case certifylegal.Table:
 		query := c.CertifyLegal.Query().
 			Where(certifylegal.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "CertifyLegal")
+		query, err := query.CollectFields(ctx, certifylegalImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -599,7 +576,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case certifyscorecard.Table:
 		query := c.CertifyScorecard.Query().
 			Where(certifyscorecard.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "CertifyScorecard")
+		query, err := query.CollectFields(ctx, certifyscorecardImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -615,7 +592,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case certifyvex.Table:
 		query := c.CertifyVex.Query().
 			Where(certifyvex.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "CertifyVex")
+		query, err := query.CollectFields(ctx, certifyvexImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -631,7 +608,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case certifyvuln.Table:
 		query := c.CertifyVuln.Query().
 			Where(certifyvuln.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "CertifyVuln")
+		query, err := query.CollectFields(ctx, certifyvulnImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -647,7 +624,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case dependency.Table:
 		query := c.Dependency.Query().
 			Where(dependency.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "Dependency")
+		query, err := query.CollectFields(ctx, dependencyImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -663,7 +640,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case hasmetadata.Table:
 		query := c.HasMetadata.Query().
 			Where(hasmetadata.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "HasMetadata")
+		query, err := query.CollectFields(ctx, hasmetadataImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -679,7 +656,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case hassourceat.Table:
 		query := c.HasSourceAt.Query().
 			Where(hassourceat.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "HasSourceAt")
+		query, err := query.CollectFields(ctx, hassourceatImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -695,7 +672,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case hashequal.Table:
 		query := c.HashEqual.Query().
 			Where(hashequal.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "HashEqual")
+		query, err := query.CollectFields(ctx, hashequalImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -711,7 +688,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case license.Table:
 		query := c.License.Query().
 			Where(license.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "License")
+		query, err := query.CollectFields(ctx, licenseImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -727,7 +704,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case occurrence.Table:
 		query := c.Occurrence.Query().
 			Where(occurrence.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "Occurrence")
+		query, err := query.CollectFields(ctx, occurrenceImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -743,7 +720,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case packagename.Table:
 		query := c.PackageName.Query().
 			Where(packagename.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "PackageName")
+		query, err := query.CollectFields(ctx, packagenameImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -759,7 +736,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case packageversion.Table:
 		query := c.PackageVersion.Query().
 			Where(packageversion.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "PackageVersion")
+		query, err := query.CollectFields(ctx, packageversionImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -775,7 +752,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case pkgequal.Table:
 		query := c.PkgEqual.Query().
 			Where(pkgequal.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "PkgEqual")
+		query, err := query.CollectFields(ctx, pkgequalImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -791,7 +768,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case pointofcontact.Table:
 		query := c.PointOfContact.Query().
 			Where(pointofcontact.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "PointOfContact")
+		query, err := query.CollectFields(ctx, pointofcontactImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -807,7 +784,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case slsaattestation.Table:
 		query := c.SLSAAttestation.Query().
 			Where(slsaattestation.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "SLSAAttestation")
+		query, err := query.CollectFields(ctx, slsaattestationImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -823,7 +800,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case sourcename.Table:
 		query := c.SourceName.Query().
 			Where(sourcename.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "SourceName")
+		query, err := query.CollectFields(ctx, sourcenameImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -839,7 +816,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case vulnequal.Table:
 		query := c.VulnEqual.Query().
 			Where(vulnequal.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "VulnEqual")
+		query, err := query.CollectFields(ctx, vulnequalImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -855,7 +832,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case vulnerabilityid.Table:
 		query := c.VulnerabilityID.Query().
 			Where(vulnerabilityid.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "VulnerabilityID")
+		query, err := query.CollectFields(ctx, vulnerabilityidImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -871,7 +848,7 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 	case vulnerabilitymetadata.Table:
 		query := c.VulnerabilityMetadata.Query().
 			Where(vulnerabilitymetadata.IDIn(ids...))
-		query, err := query.CollectFields(ctx, "VulnerabilityMetadata")
+		query, err := query.CollectFields(ctx, vulnerabilitymetadataImplementors...)
 		if err != nil {
 			return nil, err
 		}

@@ -27,6 +27,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
+func (c *arangoClient) CertifyLegalList(ctx context.Context, certifyLegalSpec model.CertifyLegalSpec, after *string, first *int) (*model.CertifyLegalConnection, error) {
+	return nil, fmt.Errorf("not implemented: CertifyLegalList")
+}
+
 func (c *arangoClient) CertifyLegal(ctx context.Context, certifyLegalSpec *model.CertifyLegalSpec) ([]*model.CertifyLegal, error) {
 
 	if certifyLegalSpec != nil && certifyLegalSpec.ID != nil {
@@ -132,7 +136,8 @@ func getSrcCertifyLegalForQuery(ctx context.Context, c *arangoClient,
   'justification': certifyLegal.justification,
   'timeScanned': certifyLegal.timeScanned,
   'collector': certifyLegal.collector,
-  'origin': certifyLegal.origin
+  'origin': certifyLegal.origin,
+  'documentRef': certifyLegal.documentRef
 }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, aqb.string(), values, "CertifyLegal")
@@ -170,7 +175,8 @@ func getPkgCertifyLegalForQuery(ctx context.Context, c *arangoClient,
   'justification': certifyLegal.justification,
   'timeScanned': certifyLegal.timeScanned,
   'collector': certifyLegal.collector,
-  'origin': certifyLegal.origin
+  'origin': certifyLegal.origin,
+  'documentRef': certifyLegal.documentRef
 }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, aqb.string(), values, "CertifyLegal")
@@ -202,6 +208,10 @@ func setCertifyLegalMatchValues(aqb *arangoQueryBuilder, certifyLegalSpec *model
 	if certifyLegalSpec.Justification != nil {
 		aqb.filter("certifyLegal", justification, "==", "@"+justification)
 		queryValues[justification] = *certifyLegalSpec.Justification
+	}
+	if certifyLegalSpec.DocumentRef != nil {
+		aqb.filter("certifyLegal", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *certifyLegalSpec.DocumentRef
 	}
 	if certifyLegalSpec.TimeScanned != nil {
 		aqb.filter("certifyLegal", "timeScanned", "==", "@timeScanned")
@@ -256,6 +266,7 @@ func getCertifyLegalQueryValues(pkg *model.PkgInputSpec, source *model.SourceInp
 	values["timeScanned"] = certifyLegal.TimeScanned.UTC()
 	values["origin"] = certifyLegal.Origin
 	values["collector"] = certifyLegal.Collector
+	values[docRef] = certifyLegal.DocumentRef
 
 	return values
 }
@@ -299,7 +310,8 @@ LET certifyLegal = FIRST(
     justification:@justification,
     timeScanned:@timeScanned,
     collector:@collector,
-    origin:@origin
+    origin:@origin,
+	documentRef:@documentRef
   }
   INSERT {
     packageID:firstPkg.version_id,
@@ -311,7 +323,8 @@ LET certifyLegal = FIRST(
     justification:@justification,
     timeScanned:@timeScanned,
     collector:@collector,
-    origin:@origin
+    origin:@origin,
+	documentRef:@documentRef
   }
   UPDATE {} IN certifyLegals
   RETURN {
@@ -373,7 +386,8 @@ LET certifyLegal = FIRST(
     justification:@justification,
     timeScanned:@timeScanned,
     collector:@collector,
-    origin:@origin
+    origin:@origin,
+	documentRef:@documentRef
   }
   INSERT {
     sourceID:firstSrc.name_id,
@@ -385,7 +399,8 @@ LET certifyLegal = FIRST(
     justification:@justification,
     timeScanned:@timeScanned,
     collector:@collector,
-    origin:@origin
+    origin:@origin,
+	documentRef:@documentRef
   }
   UPDATE {} IN certifyLegals
   RETURN {
@@ -494,7 +509,8 @@ LET certifyLegal = FIRST(
     justification:doc.justification,
     timeScanned:doc.timeScanned,
     collector:doc.collector,
-    origin:doc.origin
+    origin:doc.origin,
+	documentRef:doc.documentRef
   }
   INSERT {
     packageID:firstPkg.version_id,
@@ -506,7 +522,8 @@ LET certifyLegal = FIRST(
     justification:doc.justification,
     timeScanned:doc.timeScanned,
     collector:doc.collector,
-    origin:doc.origin
+    origin:doc.origin,
+	documentRef:doc.documentRef
   }
   UPDATE {} IN certifyLegals
   RETURN {
@@ -609,7 +626,8 @@ LET certifyLegal = FIRST(
     justification:doc.justification,
     timeScanned:doc.timeScanned,
     collector:doc.collector,
-    origin:doc.origin
+    origin:doc.origin,
+	documentRef:doc.documentRef
   }
   INSERT {
     sourceID:firstSrc.name_id,
@@ -621,7 +639,8 @@ LET certifyLegal = FIRST(
     justification:doc.justification,
     timeScanned:doc.timeScanned,
     collector:doc.collector,
-    origin:doc.origin
+    origin:doc.origin,
+	documentRef:doc.documentRef
   }
   UPDATE {} IN certifyLegals
   RETURN {
@@ -683,6 +702,7 @@ func (c *arangoClient) getCertifyLegalFromCursor(ctx context.Context,
 		TimeScanned        time.Time     `json:"timeScanned"`
 		Collector          string        `json:"collector"`
 		Origin             string        `json:"origin"`
+		DocumentRef        string        `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -737,6 +757,7 @@ func (c *arangoClient) getCertifyLegalFromCursor(ctx context.Context,
 			TimeScanned:       createdValue.TimeScanned,
 			Origin:            createdValue.Origin,
 			Collector:         createdValue.Collector,
+			DocumentRef:       createdValue.DocumentRef,
 		}
 
 		dec, err := c.getLicensesByID(ctx, createdValue.DeclaredLicenses)
@@ -823,6 +844,7 @@ func (c *arangoClient) queryCertifyLegalNodeByID(ctx context.Context, filter *mo
 		TimeScanned        time.Time `json:"timeScanned"`
 		Collector          string    `json:"collector"`
 		Origin             string    `json:"origin"`
+		DocumentRef        string    `json:"documentRef"`
 	}
 
 	var collectedValues []dbCertifyLegal
@@ -853,6 +875,7 @@ func (c *arangoClient) queryCertifyLegalNodeByID(ctx context.Context, filter *mo
 		TimeScanned:       collectedValues[0].TimeScanned,
 		Origin:            collectedValues[0].Origin,
 		Collector:         collectedValues[0].Collector,
+		DocumentRef:       collectedValues[0].DocumentRef,
 	}
 
 	dec, err := c.getLicensesByID(ctx, collectedValues[0].DeclaredLicenses)

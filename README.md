@@ -44,7 +44,7 @@ by the following [docs github repository](https://github.com/guacsec/guac-docs).
 
 Here is an overview of the architecture of GUAC:
 
-![image](https://user-images.githubusercontent.com/3060102/235186368-995784eb-7ef2-43e6-b560-17d6014553ca.png)
+![guac_api](https://github.com/guacsec/guac/assets/42319948/db573e4e-f493-4df5-b1bb-fec6307643dd)
 
 For an in-depth view and explanation of components of the GUAC Beta, please
 refer to [how GUAC works](https://docs.guac.sh/how-guac-works/).
@@ -71,13 +71,22 @@ if you encounter any errors or bugs with ingestion.
 
 ## GraphQL backends
 
-The following are [GraphQL backends](pkg/assembler/backends) that are implemented for GUAC. The backends are categorized into:
+GUAC supports multiple [backends](pkg/assembler/backends) behind a software
+abstraction layer. The GraphQL API is always the same and clients should be
+unaffected by which backend is in use. The backends are categorized into:
 
-1. Supported/Unsupported: Supported backends are those that will be maintained by the project. Unsupported backends are not actively maintained by the project but will accept community contributions.
-2. Complete/Incomplete: Complete backends support all mandatory GraphQL APIs. Incomplete backends support a subset of those APIs and may not be feature complete.
-3. Optimized: The backend has gone through a level of optimization to help improve performance.
+1. Supported/Unsupported: Supported backends are those which the GUAC project
+   is committed to actively maintain. Unsupported backends are not actively
+   maintained but will accept community contributions.
 
-The enumerated backends are:
+2. Complete/Incomplete: Complete backends support all mandatory GraphQL
+   APIs. Incomplete backends support a subset of those APIs and may not be
+   feature complete.
+
+3. Optimized: The backend has gone through a level of optimization to help
+   improve performance.
+
+The two backend that are Supported, Complete, and Optimized are:
 
 - [keyvalue (supported, complete,
   optimized)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/keyvalue):
@@ -86,16 +95,19 @@ The enumerated backends are:
   implementations. We recommend starting with this if you're just starting with
   GUAC!
 
-- [arangoDB (supported, incomplete,
+- [ent (supported, complete
+  optimized)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/ent)
+  with [PostgreSQL](https://www.postgresql.org/): a persistent backend based on
+  [Entity Framework for Go](https://entgo.io/) that can run on various SQL
+  backends. GUAC only supports ent with PostgreSQL. Other ent backends such as
+  [MySQL](https://www.mysql.com/) and
+  [SQLite](https://www.sqlite.org/index.html) are unsupported.
+
+The other backends are:
+
+- [arangoDB (unsupported, incomplete,
   optimized)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/arangodb):
   a persistent backend based on [ArangoDB](https://arangodb.com/)
-
-- [ent (supported,
-  incomplete)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/ent):
-  a persistent backend based on [ent](https://entgo.io/) that can run on
-  various SQL backends such as [PostgreSQL](https://www.postgresql.org/),
-  [MySQL](https://www.mysql.com/) and
-  [SQLite](https://www.sqlite.org/index.html).
 
 - [neo4j/openCypher (unsupported,
   incomplete)](https://github.com/guacsec/guac/tree/main/pkg/assembler/backends/neo4j):

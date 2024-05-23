@@ -54,6 +54,7 @@ func (SLSAAttestation) Fields() []ent.Field {
 		field.Time("finished_on").Comment("Timestamp of build end time"),
 		field.String("origin").Comment("Document from which this attestation is generated from"),
 		field.String("collector").Comment("GUAC collector for the document"),
+		field.String("document_ref"),
 		field.String("built_from_hash").Comment("Hash of the artifacts that was built"),
 	}
 }
@@ -71,6 +72,7 @@ func (SLSAAttestation) Edges() []ent.Edge {
 
 func (SLSAAttestation) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("subject_id", "origin", "collector", "build_type", "slsa_version", "built_by_id", "built_from_hash", "started_on", "finished_on").Unique(),
+		index.Fields("subject_id", "origin", "collector", "document_ref", "build_type",
+			"slsa_version", "built_by_id", "built_from_hash", "started_on", "finished_on").Unique(),
 	}
 }

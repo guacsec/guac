@@ -37,11 +37,12 @@ type MockGithubClient struct {
 }
 
 const (
-	mockTag               = "mockTag"
-	mockCommit            = "mockCommit"
-	mockReleaseUrlLatest  = "https://github.com/mock/repo/releases"
-	mockReleaseUrlWithTag = "https://github.com/mock/repo/releases/v1"
-	mockAssetUrl          = "https://github.com/mock/repo/releases/releaseAsset.json"
+	mockTag                       = "mockTag"
+	mockCommit                    = "mockCommit"
+	mockReleaseUrlLatest          = "https://github.com/mock/repo/releases"
+	mockReleaseUrlWithTag         = "https://github.com/mock/repo/releases/v1"
+	mockReleaseUrlWithTagFullPath = "https://github.com/mock/repo/releases/tag/v1"
+	mockAssetUrl                  = "https://github.com/mock/repo/releases/releaseAsset.json"
 )
 
 func mockReleaseAsset() client.ReleaseAsset {
@@ -144,14 +145,17 @@ func (m *MockGithubClient) GetReleaseAsset(asset client.ReleaseAsset) (*client.R
 	return &rac, nil
 }
 
+// TODO: implement this stub.
 func (m *MockGithubClient) GetWorkflow(ctx context.Context, owner string, repo string, githubWorkflowName string) ([]*client.Workflow, error) {
 	return nil, nil
 }
 
+// TODO: implement this stub.
 func (m *MockGithubClient) GetLatestWorkflowRun(ctx context.Context, owner, repo string, workflowId int64) (*client.WorkflowRun, error) {
 	return nil, nil
 }
 
+// TODO: implement this stub.
 func (m *MockGithubClient) GetWorkflowRunArtifacts(ctx context.Context, owner, repo, githubSBOMName string, runID int64) ([]*client.WorkflowArtifactContent, error) {
 	return nil, nil
 }
@@ -280,6 +284,9 @@ func TestNewGithubCollector(t *testing.T) {
 func Test_githubCollector_RetrieveArtifacts(t *testing.T) {
 	mockClient := &MockGithubClient{}
 	mockData := mockDataSource()
+
+	// TODO: Currently, len(collectedDocs) == 0. Fix this, and implement a
+	// more robust doc comparison, like assert from github.com/stretchr/testify
 
 	type fields struct {
 		poll              bool
@@ -580,6 +587,20 @@ func TestParseGithubReleaseDataSource(t *testing.T) {
 			args: args{
 				source: datasource.Source{
 					Value: mockReleaseUrlWithTag,
+				},
+			},
+			want: &client.Repo{
+				Owner: "mock",
+				Repo:  "repo",
+			},
+			want1:   "v1",
+			wantErr: false,
+		},
+		{
+			name: "parse valid tag github url with full path",
+			args: args{
+				source: datasource.Source{
+					Value: mockReleaseUrlWithTagFullPath,
 				},
 			},
 			want: &client.Repo{

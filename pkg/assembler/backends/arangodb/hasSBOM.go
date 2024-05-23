@@ -29,6 +29,10 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/helpers"
 )
 
+func (c *arangoClient) HasSBOMList(ctx context.Context, hasSBOMSpec model.HasSBOMSpec, after *string, first *int) (*model.HasSBOMConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasSBOMList")
+}
+
 func (c *arangoClient) HasSBOM(ctx context.Context, hasSBOMSpec *model.HasSBOMSpec) ([]*model.HasSbom, error) {
 
 	if hasSBOMSpec != nil && hasSBOMSpec.ID != nil {
@@ -125,6 +129,7 @@ func getPkgHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQueryBuil
 		'collector': hasSBOM.collector,
 		'knownSince': hasSBOM.knownSince,
 		'origin': hasSBOM.origin,
+		'documentRef': hasSBOM.documentRef,
 		'includedSoftware': hasSBOM.includedSoftware,
 		'includedDependencies': hasSBOM.includedDependencies,
 		'includesOccurrences': hasSBOM.includesOccurrences
@@ -155,6 +160,7 @@ func getArtifactHasSBOMForQuery(ctx context.Context, c *arangoClient, arangoQuer
 		'collector': hasSBOM.collector,
 		'knownSince': hasSBOM.knownSince,
 		'origin': hasSBOM.origin,
+		'documentRef': hasSBOM.documentRef,
 		'includedSoftware': hasSBOM.includedSoftware,
 		'includedDependencies': hasSBOM.includedDependencies,
 		'includesOccurrences': hasSBOM.includesOccurrences
@@ -197,6 +203,10 @@ func setHasSBOMMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasSBOMSpec *
 	if hasSBOMSpec.Collector != nil {
 		arangoQueryBuilder.filter("hasSBOM", collector, "==", "@"+collector)
 		queryValues[collector] = *hasSBOMSpec.Collector
+	}
+	if hasSBOMSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("hasSBOM", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *hasSBOMSpec.DocumentRef
 	}
 	if hasSBOMSpec.KnownSince != nil {
 		hasSBOMKnownSince := *hasSBOMSpec.KnownSince
@@ -273,6 +283,7 @@ func getHasSBOMQueryValues(pkg *model.PkgInputSpec, artifact *model.ArtifactInpu
 	values["origin"] = hasSbom.Origin
 	values["collector"] = hasSbom.Collector
 	values[knownSince] = hasSbom.KnownSince.UTC()
+	values[docRef] = hasSbom.DocumentRef
 
 	return values
 }
@@ -320,8 +331,8 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		)
 		  
 		 LET hasSBOM = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, includedSoftware:doc.includedSoftware, includedDependencies:doc.includedDependencies, includesOccurrences:doc.includesOccurrences, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
-				  INSERT {  packageID:firstPkg.version_id, includedSoftware:doc.includedSoftware, includedDependencies:doc.includedDependencies, includesOccurrences:doc.includesOccurrences, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+			  UPSERT {  packageID:firstPkg.version_id, includedSoftware:doc.includedSoftware, includedDependencies:doc.includedDependencies, includesOccurrences:doc.includesOccurrences, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince, documentRef:doc.documentRef } 
+				  INSERT {  packageID:firstPkg.version_id, includedSoftware:doc.includedSoftware, includedDependencies:doc.includedDependencies, includesOccurrences:doc.includesOccurrences, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince, documentRef:doc.documentRef } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN {
 					'_id': NEW._id,
@@ -391,8 +402,8 @@ func (c *arangoClient) IngestHasSBOMs(ctx context.Context, subjects model.Packag
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		LET hasSBOM = FIRST(
-			UPSERT { artifactID:artifact._id, includedSoftware:doc.includedSoftware, includedDependencies:doc.includedDependencies, includesOccurrences:doc.includesOccurrences, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
-				INSERT { artifactID:artifact._id, includedSoftware:doc.includedSoftware, includedDependencies:doc.includedDependencies, includesOccurrences:doc.includesOccurrences, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince } 
+			UPSERT { artifactID:artifact._id, includedSoftware:doc.includedSoftware, includedDependencies:doc.includedDependencies, includesOccurrences:doc.includesOccurrences, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince, documentRef:doc.documentRef } 
+				INSERT { artifactID:artifact._id, includedSoftware:doc.includedSoftware, includedDependencies:doc.includedDependencies, includesOccurrences:doc.includesOccurrences, uri:doc.uri, algorithm:doc.algorithm, digest:doc.digest, downloadLocation:doc.downloadLocation, collector:doc.collector, origin:doc.origin, knownSince:doc.knownSince, documentRef:doc.documentRef } 
 				UPDATE {} IN hasSBOMs
 				RETURN {
 					'_id': NEW._id,
@@ -453,8 +464,8 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		  LET hasSBOM = FIRST(
-			  UPSERT { artifactID:artifact._id, includedSoftware:@includedSoftware, includedDependencies:@includedDependencies, includesOccurrences:@includesOccurrences, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
-				  INSERT { artifactID:artifact._id, includedSoftware:@includedSoftware, includedDependencies:@includedDependencies, includesOccurrences:@includesOccurrences, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
+			  UPSERT { artifactID:artifact._id, includedSoftware:@includedSoftware, includedDependencies:@includedDependencies, includesOccurrences:@includesOccurrences, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince, documentRef:@documentRef } 
+				  INSERT { artifactID:artifact._id, includedSoftware:@includedSoftware, includedDependencies:@includedDependencies, includesOccurrences:@includesOccurrences, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince, documentRef:@documentRef } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN {
 					'_id': NEW._id,
@@ -511,8 +522,8 @@ func (c *arangoClient) IngestHasSbom(ctx context.Context, subject model.PackageO
 		)
 		  
 		LET hasSBOM = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, includedSoftware:@includedSoftware, includedDependencies:@includedDependencies, includesOccurrences:@includesOccurrences, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
-				  INSERT {  packageID:firstPkg.version_id, includedSoftware:@includedSoftware, includedDependencies:@includedDependencies, includesOccurrences:@includesOccurrences, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince } 
+			  UPSERT {  packageID:firstPkg.version_id, includedSoftware:@includedSoftware, includedDependencies:@includedDependencies, includesOccurrences:@includesOccurrences, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince, documentRef:@documentRef } 
+				  INSERT {  packageID:firstPkg.version_id, includedSoftware:@includedSoftware, includedDependencies:@includedDependencies, includesOccurrences:@includesOccurrences, uri:@uri, algorithm:@algorithm, digest:@digest, downloadLocation:@downloadLocation, collector:@collector, origin:@origin, knownSince:@knownSince, documentRef:@documentRef } 
 				  UPDATE {} IN hasSBOMs
 				  RETURN {
 					'_id': NEW._id,
@@ -573,6 +584,7 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 		DownloadLocation     string          `json:"downloadLocation"`
 		Collector            string          `json:"collector"`
 		Origin               string          `json:"origin"`
+		DocumentRef          string          `json:"documentRef"`
 		KnownSince           time.Time       `json:"knownSince"`
 		IncludedSoftware     []string        `json:"includedSoftware"`
 		IncludedDependencies []string        `json:"includedDependencies"`
@@ -632,6 +644,7 @@ func (c *arangoClient) getHasSBOMFromCursor(ctx context.Context, cursor driver.C
 				DownloadLocation:     createdValue.DownloadLocation,
 				Origin:               createdValue.Origin,
 				Collector:            createdValue.Collector,
+				DocumentRef:          createdValue.DocumentRef,
 				KnownSince:           createdValue.KnownSince,
 				IncludedSoftware:     collectedSoftware,
 				IncludedDependencies: collectedDeps,
@@ -847,6 +860,7 @@ func (c *arangoClient) queryHasSbomNodeByID(ctx context.Context, filter *model.H
 		DownloadLocation     string   `json:"downloadLocation"`
 		Collector            string   `json:"collector"`
 		Origin               string   `json:"origin"`
+		DocumentRef          string   `json:"documentRef"`
 		IncludedSoftware     []string `json:"includedSoftware"`
 		IncludedDependencies []string `json:"includedDependencies"`
 		IncludesOccurrences  []string `json:"includesOccurrences"`
@@ -900,6 +914,7 @@ func (c *arangoClient) queryHasSbomNodeByID(ctx context.Context, filter *model.H
 		DownloadLocation:     collectedValues[0].DownloadLocation,
 		Origin:               collectedValues[0].Origin,
 		Collector:            collectedValues[0].Collector,
+		DocumentRef:          collectedValues[0].DocumentRef,
 		IncludedSoftware:     collectedSoftware,
 		IncludedDependencies: collectedDeps,
 		IncludedOccurrences:  collectedOccurs,

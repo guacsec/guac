@@ -40,13 +40,22 @@ reference to the contact details.
 """
 type PointOfContact {
   id: ID!
+  "The package, source or artifact that is attested"
   subject: PackageSourceOrArtifact!
+  "Email for the POC"
   email: String!
+  "Generic info for the POC"
   info: String!
+  "Timestamp when the certification for POC was created (in RFC 3339 format)"
   since: Time!
+  "The justification for the POC attestation"
   justification: String!
+  "Document from which this attestation is generated from"
   origin: String!
+  "GUAC collector for the document"
   collector: String!
+  "Reference location of the document in the persistent blob store (if that is configured)"
+  documentRef: String!
 }
 
 """
@@ -71,6 +80,7 @@ input PointOfContactSpec {
   justification: String
   origin: String
   collector: String
+  documentRef: String
 }
 
 """
@@ -83,11 +93,41 @@ input PointOfContactInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  documentRef: String!
+}
+
+"""
+PointOfContactConnection returns the paginated results for PointOfContact.
+
+totalCount is the total number of results returned.
+
+pageInfo provides information to the client if there is
+a next page of results and the starting and
+ending cursor for the current set.
+
+edges contains the PointOfContactEdge which contains the current cursor
+and the PointOfContact node itself
+"""
+type PointOfContactConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [PointOfContactEdge!]!
+}
+
+"""
+PointOfContactEdge contains the cursor for the resulting node and
+the PointOfContact node itself.
+"""
+type PointOfContactEdge {
+  cursor: ID!
+  node: PointOfContact!
 }
 
 extend type Query {
   "Returns all PointOfContact attestations matching a filter."
   PointOfContact(pointOfContactSpec: PointOfContactSpec!): [PointOfContact!]!
+  "Returns a paginated results via PointOfContactConnection"
+  PointOfContactList(pointOfContactSpec: PointOfContactSpec!, after: ID, first: Int): PointOfContactConnection
 }
 
 extend type Mutation {

@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strconv"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/guacsec/guac/internal/testing/ptrfrom"
@@ -34,20 +35,85 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
-	if filter == nil {
-		return nil, nil
+func scorecardGlobalID(id string) string {
+	return toGlobalID(certifyscorecard.Table, id)
+}
+
+func bulkScorecardGlobalID(ids []string) []string {
+	return toGlobalIDs(certifyscorecard.Table, ids)
+}
+
+func (b *EntBackend) ScorecardsList(ctx context.Context, spec model.CertifyScorecardSpec, after *string, first *int) (*model.CertifyScorecardConnection, error) {
+	var afterCursor *entgql.Cursor[uuid.UUID]
+
+	if after != nil {
+		globalID := fromGlobalID(*after)
+		if globalID.nodeType != certifyscorecard.Table {
+			return nil, fmt.Errorf("after cursor is not type Scorecard but type: %s", globalID.nodeType)
+		}
+		afterUUID, err := uuid.Parse(globalID.id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse global ID with error: %w", err)
+		}
+		afterCursor = &ent.Cursor{ID: afterUUID}
+	} else {
+		afterCursor = nil
 	}
 
-	records, err := b.client.CertifyScorecard.Query().
-		Where(certifyScorecardQuery(filter)).
-		WithSource(func(q *ent.SourceNameQuery) {}).
+	scorecardQuery := b.client.CertifyScorecard.Query().
+		Where(certifyScorecardQuery(&spec))
+
+	scorecardConn, err := getScorecardObject(scorecardQuery).
+		Paginate(ctx, afterCursor, first, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed scorecard query with error: %w", err)
+	}
+
+	var edges []*model.CertifyScorecardEdge
+	for _, edge := range scorecardConn.Edges {
+		edges = append(edges, &model.CertifyScorecardEdge{
+			Cursor: scorecardGlobalID(edge.Cursor.ID.String()),
+			Node:   toModelCertifyScorecard(edge.Node),
+		})
+	}
+
+	if scorecardConn.PageInfo.StartCursor != nil {
+		return &model.CertifyScorecardConnection{
+			TotalCount: scorecardConn.TotalCount,
+			PageInfo: &model.PageInfo{
+				HasNextPage: scorecardConn.PageInfo.HasNextPage,
+				StartCursor: ptrfrom.String(scorecardGlobalID(scorecardConn.PageInfo.StartCursor.ID.String())),
+				EndCursor:   ptrfrom.String(scorecardGlobalID(scorecardConn.PageInfo.EndCursor.ID.String())),
+			},
+			Edges: edges,
+		}, nil
+	} else {
+		// if not found return nil
+		return nil, nil
+	}
+}
+
+func (b *EntBackend) Scorecards(ctx context.Context, filter *model.CertifyScorecardSpec) ([]*model.CertifyScorecard, error) {
+	if filter == nil {
+		filter = &model.CertifyScorecardSpec{}
+	}
+
+	scorecardQuery := b.client.CertifyScorecard.Query().
+		Where(certifyScorecardQuery(filter))
+
+	records, err := getScorecardObject(scorecardQuery).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed scorecard query with error: %w", err)
 	}
 
 	return collect(records, toModelCertifyScorecard), nil
+}
+
+// getPkgEqualObject is used recreate the pkgEqual object be eager loading the edges
+func getScorecardObject(q *ent.CertifyScorecardQuery) *ent.CertifyScorecardQuery {
+	return q.
+		WithSource(func(q *ent.SourceNameQuery) {})
 }
 
 func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.CertifyScorecard {
@@ -63,6 +129,7 @@ func certifyScorecardQuery(filter *model.CertifyScorecardSpec) predicate.Certify
 		optionalPredicate(filter.ScorecardCommit, certifyscorecard.ScorecardCommitEqualFold),
 		optionalPredicate(filter.Origin, certifyscorecard.OriginEQ),
 		optionalPredicate(filter.Collector, certifyscorecard.CollectorEQ),
+		optionalPredicate(filter.DocumentRef, certifyscorecard.DocumentRef),
 	}
 
 	if len(filter.Checks) > 0 {
@@ -97,7 +164,7 @@ func (b *EntBackend) IngestScorecard(ctx context.Context, source model.IDorSourc
 	if txErr != nil {
 		return "", txErr
 	}
-	return *cscID, nil
+	return scorecardGlobalID(*cscID), nil
 }
 
 func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) ([]string, error) {
@@ -114,7 +181,7 @@ func (b *EntBackend) IngestScorecards(ctx context.Context, sources []*model.IDor
 		return nil, gqlerror.Errorf("%v :: %s", funcName, txErr)
 	}
 
-	return *ids, nil
+	return bulkScorecardGlobalID(*ids), nil
 }
 
 func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSourceInput, scorecard *model.ScorecardInputSpec) (*ent.CertifyScorecardCreate, error) {
@@ -132,7 +199,8 @@ func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSou
 	var sourceID uuid.UUID
 	if src.SourceNameID != nil {
 		var err error
-		sourceID, err = uuid.Parse(*src.SourceNameID)
+		srcNameGlobalID := fromGlobalID(*src.SourceNameID)
+		sourceID, err = uuid.Parse(srcNameGlobalID.id)
 		if err != nil {
 			return nil, fmt.Errorf("uuid conversion from SourceNameID failed with error: %w", err)
 		}
@@ -155,15 +223,14 @@ func generateScorecardCreate(ctx context.Context, tx *ent.Tx, src *model.IDorSou
 		SetScorecardVersion(scorecard.ScorecardVersion).
 		SetScorecardCommit(scorecard.ScorecardCommit).
 		SetOrigin(scorecard.Origin).
-		SetCollector(scorecard.Collector)
+		SetCollector(scorecard.Collector).
+		SetDocumentRef(scorecard.DocumentRef)
 
 	return scorecardCreate, nil
 }
 
-func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) (*[]string, error) {
-	ids := make([]string, 0)
-
-	conflictColumns := []string{
+func scorecardConflictColumns() []string {
+	return []string{
 		certifyscorecard.FieldSourceID,
 		certifyscorecard.FieldOrigin,
 		certifyscorecard.FieldCollector,
@@ -171,7 +238,13 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 		certifyscorecard.FieldScorecardVersion,
 		certifyscorecard.FieldTimeScanned,
 		certifyscorecard.FieldAggregateScore,
-		certifyscorecard.FieldChecksHash}
+		certifyscorecard.FieldChecksHash,
+		certifyscorecard.FieldDocumentRef,
+	}
+}
+
+func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorSourceInput, scorecards []*model.ScorecardInputSpec) (*[]string, error) {
+	ids := make([]string, 0)
 
 	batches := chunk(scorecards, MaxBatchSize)
 
@@ -190,7 +263,7 @@ func upsertBulkScorecard(ctx context.Context, tx *ent.Tx, sources []*model.IDorS
 
 		err := tx.CertifyScorecard.CreateBulk(creates...).
 			OnConflict(
-				sql.ConflictColumns(conflictColumns...),
+				sql.ConflictColumns(scorecardConflictColumns()...),
 			).
 			DoNothing().
 			Exec(ctx)
@@ -210,15 +283,7 @@ func upsertScorecard(ctx context.Context, tx *ent.Tx, source model.IDorSourceInp
 	}
 	if id, err := scorecardCreate.
 		OnConflict(
-			sql.ConflictColumns(
-				certifyscorecard.FieldSourceID,
-				certifyscorecard.FieldOrigin,
-				certifyscorecard.FieldCollector,
-				certifyscorecard.FieldScorecardCommit,
-				certifyscorecard.FieldScorecardVersion,
-				certifyscorecard.FieldTimeScanned,
-				certifyscorecard.FieldAggregateScore,
-				certifyscorecard.FieldChecksHash),
+			sql.ConflictColumns(scorecardConflictColumns()...),
 		).
 		Ignore().
 		ID(ctx); err != nil {
@@ -245,6 +310,7 @@ func hashSortedScorecardChecks(checks []*model.ScorecardCheck) string {
 
 func toModelCertifyScorecard(record *ent.CertifyScorecard) *model.CertifyScorecard {
 	return &model.CertifyScorecard{
+		ID:        scorecardGlobalID(record.ID.String()),
 		Source:    toModelSource(record.Edges.Source),
 		Scorecard: toModelScorecard(record),
 	}
@@ -259,5 +325,31 @@ func toModelScorecard(record *ent.CertifyScorecard) *model.Scorecard {
 		ScorecardCommit:  record.ScorecardCommit,
 		Origin:           record.Origin,
 		Collector:        record.Collector,
+		DocumentRef:      record.DocumentRef,
 	}
+}
+
+func (b *EntBackend) certifyScorecardNeighbors(ctx context.Context, nodeID string, allowedEdges edgeMap) ([]model.Node, error) {
+	var out []model.Node
+
+	query := b.client.CertifyScorecard.Query().
+		Where(certifyScorecardQuery(&model.CertifyScorecardSpec{ID: &nodeID}))
+
+	if allowedEdges[model.EdgeCertifyScorecardSource] {
+		query.
+			WithSource()
+	}
+
+	scorecards, err := query.All(ctx)
+	if err != nil {
+		return []model.Node{}, fmt.Errorf("failed to query for scorecard with node ID: %s with error: %w", nodeID, err)
+	}
+
+	for _, s := range scorecards {
+		if s.Edges.Source != nil {
+			out = append(out, toModelSource(s.Edges.Source))
+		}
+	}
+
+	return out, nil
 }

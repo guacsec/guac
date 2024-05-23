@@ -29,6 +29,10 @@ import (
 
 // Query IsOccurrence
 
+func (c *neo4jClient) IsOccurrenceList(ctx context.Context, isOccurrenceSpec model.IsOccurrenceSpec, after *string, first *int) (*model.IsOccurrenceConnection, error) {
+	return nil, fmt.Errorf("not implemented: IsOccurrenceList")
+}
+
 func (c *neo4jClient) IsOccurrence(ctx context.Context, isOccurrenceSpec *model.IsOccurrenceSpec) ([]*model.IsOccurrence, error) {
 
 	session := c.driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})

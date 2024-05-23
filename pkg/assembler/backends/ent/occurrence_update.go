@@ -88,6 +88,20 @@ func (ou *OccurrenceUpdate) SetNillableCollector(s *string) *OccurrenceUpdate {
 	return ou
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (ou *OccurrenceUpdate) SetDocumentRef(s string) *OccurrenceUpdate {
+	ou.mutation.SetDocumentRef(s)
+	return ou
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (ou *OccurrenceUpdate) SetNillableDocumentRef(s *string) *OccurrenceUpdate {
+	if s != nil {
+		ou.SetDocumentRef(*s)
+	}
+	return ou
+}
+
 // SetSourceID sets the "source_id" field.
 func (ou *OccurrenceUpdate) SetSourceID(u uuid.UUID) *OccurrenceUpdate {
 	ou.mutation.SetSourceID(u)
@@ -257,6 +271,9 @@ func (ou *OccurrenceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := ou.mutation.Collector(); ok {
 		_spec.SetField(occurrence.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := ou.mutation.DocumentRef(); ok {
+		_spec.SetField(occurrence.FieldDocumentRef, field.TypeString, value)
 	}
 	if ou.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -466,6 +483,20 @@ func (ouo *OccurrenceUpdateOne) SetNillableCollector(s *string) *OccurrenceUpdat
 	return ouo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (ouo *OccurrenceUpdateOne) SetDocumentRef(s string) *OccurrenceUpdateOne {
+	ouo.mutation.SetDocumentRef(s)
+	return ouo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (ouo *OccurrenceUpdateOne) SetNillableDocumentRef(s *string) *OccurrenceUpdateOne {
+	if s != nil {
+		ouo.SetDocumentRef(*s)
+	}
+	return ouo
+}
+
 // SetSourceID sets the "source_id" field.
 func (ouo *OccurrenceUpdateOne) SetSourceID(u uuid.UUID) *OccurrenceUpdateOne {
 	ouo.mutation.SetSourceID(u)
@@ -665,6 +696,9 @@ func (ouo *OccurrenceUpdateOne) sqlSave(ctx context.Context) (_node *Occurrence,
 	}
 	if value, ok := ouo.mutation.Collector(); ok {
 		_spec.SetField(occurrence.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := ouo.mutation.DocumentRef(); ok {
+		_spec.SetField(occurrence.FieldDocumentRef, field.TypeString, value)
 	}
 	if ouo.mutation.ArtifactCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -158,7 +158,7 @@ func NewAnalyzeDependenciesRequest(server string, params *AnalyzeDependenciesPar
 
 		if params.PaginationSpec != nil {
 
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "PaginationSpec", runtime.ParamLocationQuery, *params.PaginationSpec); err != nil {
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "paginationSpec", runtime.ParamLocationQuery, *params.PaginationSpec); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -246,7 +246,7 @@ func NewRetrieveDependenciesRequest(server string, params *RetrieveDependenciesP
 
 		if params.PaginationSpec != nil {
 
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "PaginationSpec", runtime.ParamLocationQuery, *params.PaginationSpec); err != nil {
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "paginationSpec", runtime.ParamLocationQuery, *params.PaginationSpec); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -260,16 +260,52 @@ func NewRetrieveDependenciesRequest(server string, params *RetrieveDependenciesP
 
 		}
 
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "purl", runtime.ParamLocationQuery, params.Purl); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
+		if params.LinkCondition != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "linkCondition", runtime.ParamLocationQuery, *params.LinkCondition); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
 				}
 			}
+
+		}
+
+		if params.Purl != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "purl", runtime.ParamLocationQuery, *params.Purl); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Digest != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "digest", runtime.ParamLocationQuery, *params.Digest); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
 		}
 
 		queryURL.RawQuery = queryValues.Encode()

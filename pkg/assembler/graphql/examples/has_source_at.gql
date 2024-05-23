@@ -39,6 +39,28 @@ fragment allHasSourceAtTree on HasSourceAt {
   }
   origin
   collector
+  documentRef
+}
+
+fragment AllHasSourceAtPaginationTree on HasSourceAtConnection {
+  totalCount
+  edges {
+    cursor
+    node {
+      id
+    }
+  }
+  pageInfo {
+    startCursor
+    endCursor
+    hasNextPage
+  }
+}
+
+query HasSourceAtPagination {
+  HasSourceAtList(hasSourceAtSpec: {}, first: 10) {
+    ...AllHasSourceAtPaginationTree
+  }
 }
 
 query HasSourceAtQ1 {

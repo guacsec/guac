@@ -28,6 +28,7 @@ import (
 
 var flags = struct {
 	gqlServerAddress  string
+	headerFile        string
 	restAPIServerPort int
 
 	tlsCertFile string
@@ -44,6 +45,7 @@ var rootCmd = &cobra.Command{
 	Run: func(command *cobra.Command, args []string) {
 		flags.restAPIServerPort = viper.GetInt("rest-api-server-port")
 		flags.gqlServerAddress = viper.GetString("gql-addr")
+		flags.headerFile = viper.GetString("header-file")
 		flags.tlsCertFile = viper.GetString("rest-api-tls-cert-file")
 		flags.tlsKeyFile = viper.GetString("rest-api-tls-key-file")
 
@@ -60,7 +62,13 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(cli.InitConfig)
-	set, err := cli.BuildFlags([]string{"gql-addr", "rest-api-server-port", "rest-api-tls-cert-file", "rest-api-tls-key-file"})
+	set, err := cli.BuildFlags([]string{
+		"gql-addr",
+		"header-file",
+		"rest-api-server-port",
+		"rest-api-tls-cert-file",
+		"rest-api-tls-key-file",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

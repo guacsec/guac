@@ -142,6 +142,20 @@ func (hsau *HasSourceAtUpdate) SetNillableCollector(s *string) *HasSourceAtUpdat
 	return hsau
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (hsau *HasSourceAtUpdate) SetDocumentRef(s string) *HasSourceAtUpdate {
+	hsau.mutation.SetDocumentRef(s)
+	return hsau
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (hsau *HasSourceAtUpdate) SetNillableDocumentRef(s *string) *HasSourceAtUpdate {
+	if s != nil {
+		hsau.SetDocumentRef(*s)
+	}
+	return hsau
+}
+
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
 func (hsau *HasSourceAtUpdate) SetPackageVersion(p *PackageVersion) *HasSourceAtUpdate {
 	return hsau.SetPackageVersionID(p.ID)
@@ -252,6 +266,9 @@ func (hsau *HasSourceAtUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := hsau.mutation.Collector(); ok {
 		_spec.SetField(hassourceat.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := hsau.mutation.DocumentRef(); ok {
+		_spec.SetField(hassourceat.FieldDocumentRef, field.TypeString, value)
 	}
 	if hsau.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -470,6 +487,20 @@ func (hsauo *HasSourceAtUpdateOne) SetNillableCollector(s *string) *HasSourceAtU
 	return hsauo
 }
 
+// SetDocumentRef sets the "document_ref" field.
+func (hsauo *HasSourceAtUpdateOne) SetDocumentRef(s string) *HasSourceAtUpdateOne {
+	hsauo.mutation.SetDocumentRef(s)
+	return hsauo
+}
+
+// SetNillableDocumentRef sets the "document_ref" field if the given value is not nil.
+func (hsauo *HasSourceAtUpdateOne) SetNillableDocumentRef(s *string) *HasSourceAtUpdateOne {
+	if s != nil {
+		hsauo.SetDocumentRef(*s)
+	}
+	return hsauo
+}
+
 // SetPackageVersion sets the "package_version" edge to the PackageVersion entity.
 func (hsauo *HasSourceAtUpdateOne) SetPackageVersion(p *PackageVersion) *HasSourceAtUpdateOne {
 	return hsauo.SetPackageVersionID(p.ID)
@@ -610,6 +641,9 @@ func (hsauo *HasSourceAtUpdateOne) sqlSave(ctx context.Context) (_node *HasSourc
 	}
 	if value, ok := hsauo.mutation.Collector(); ok {
 		_spec.SetField(hassourceat.FieldCollector, field.TypeString, value)
+	}
+	if value, ok := hsauo.mutation.DocumentRef(); ok {
+		_spec.SetField(hassourceat.FieldDocumentRef, field.TypeString, value)
 	}
 	if hsauo.mutation.PackageVersionCleared() {
 		edge := &sqlgraph.EdgeSpec{

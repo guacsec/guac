@@ -32,6 +32,10 @@ const (
 	valueStr string = "value"
 )
 
+func (c *arangoClient) HasMetadataList(ctx context.Context, hasMetadataSpec model.HasMetadataSpec, after *string, first *int) (*model.HasMetadataConnection, error) {
+	return nil, fmt.Errorf("not implemented: HasMetadataList")
+}
+
 func (c *arangoClient) HasMetadata(ctx context.Context, hasMetadataSpec *model.HasMetadataSpec) ([]*model.HasMetadata, error) {
 
 	if hasMetadataSpec != nil && hasMetadataSpec.ID != nil {
@@ -182,7 +186,8 @@ func getSrcHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'timestamp': hasMetadata.timestamp,
 		'justification': hasMetadata.justification,
 		'collector': hasMetadata.collector,
-		'origin': hasMetadata.origin  
+		'origin': hasMetadata.origin,
+		'documentRef': hasMetadata.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasMetadata")
@@ -208,7 +213,8 @@ func getArtHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 		'timestamp': hasMetadata.timestamp,
 		'justification': hasMetadata.justification,
 		'collector': hasMetadata.collector,
-		'origin': hasMetadata.origin
+		'origin': hasMetadata.origin,
+		'documentRef': hasMetadata.documentRef
 	  }`)
 
 	cursor, err := executeQueryWithRetry(ctx, c.db, arangoQueryBuilder.string(), values, "HasMetadata")
@@ -242,7 +248,8 @@ func getPkgHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 			'timestamp': hasMetadata.timestamp,
 			'justification': hasMetadata.justification,
 			'collector': hasMetadata.collector,
-			'origin': hasMetadata.origin
+			'origin': hasMetadata.origin,
+			'documentRef': hasMetadata.documentRef
 		  }`)
 	} else {
 		arangoQueryBuilder.query.WriteString("\n")
@@ -261,7 +268,8 @@ func getPkgHasMetadataForQuery(ctx context.Context, c *arangoClient, arangoQuery
 			'timestamp': hasMetadata.timestamp,
 			'justification': hasMetadata.justification,
 			'collector': hasMetadata.collector,
-			'origin': hasMetadata.origin
+			'origin': hasMetadata.origin,
+			'documentRef': hasMetadata.documentRef
 		  }`)
 	}
 
@@ -303,6 +311,10 @@ func setHasMetadataMatchValues(arangoQueryBuilder *arangoQueryBuilder, hasMetada
 		arangoQueryBuilder.filter("hasMetadata", collector, "==", "@"+collector)
 		queryValues[collector] = *hasMetadataSpec.Collector
 	}
+	if hasMetadataSpec.DocumentRef != nil {
+		arangoQueryBuilder.filter("hasMetadata", docRef, "==", "@"+docRef)
+		queryValues[docRef] = *hasMetadataSpec.DocumentRef
+	}
 }
 
 func getHasMetadataQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.MatchFlags, artifact *model.ArtifactInputSpec, source *model.SourceInputSpec, hasMetadata *model.HasMetadataInputSpec) map[string]any {
@@ -329,6 +341,7 @@ func getHasMetadataQueryValues(pkg *model.PkgInputSpec, pkgMatchType *model.Matc
 	values[justification] = hasMetadata.Justification
 	values[origin] = hasMetadata.Origin
 	values[collector] = hasMetadata.Collector
+	values[docRef] = hasMetadata.DocumentRef
 
 	return values
 }
@@ -349,8 +362,8 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 		)
 		  
 		  LET hasMetadata = FIRST(
-			  UPSERT {  packageID:firstPkg.version_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
-				  INSERT {  packageID:firstPkg.version_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
+			  UPSERT {  packageID:firstPkg.version_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				  INSERT {  packageID:firstPkg.version_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				  UPDATE {} IN hasMetadataCollection
 				  RETURN {
 					'_id': NEW._id,
@@ -382,8 +395,8 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 			)
 			  
 			  LET hasMetadata = FIRST(
-				  UPSERT {  packageID:firstPkg.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
-					  INSERT {  packageID:firstPkg.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
+				  UPSERT {  packageID:firstPkg.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+					  INSERT {  packageID:firstPkg.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 					  UPDATE {} IN hasMetadataCollection
 					  RETURN {
 						'_id': NEW._id,
@@ -407,8 +420,8 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == @art_algorithm FILTER art.digest == @art_digest RETURN art)
 		  
 		LET hasMetadata = FIRST(
-			UPSERT { artifactID:artifact._id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
-				INSERT { artifactID:artifact._id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
+			UPSERT { artifactID:artifact._id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				INSERT { artifactID:artifact._id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				UPDATE {} IN hasMetadataCollection
 				RETURN {
 					'_id': NEW._id,
@@ -439,8 +452,8 @@ func (c *arangoClient) IngestHasMetadata(ctx context.Context, subject model.Pack
 		)
 		  
 		LET hasMetadata = FIRST(
-			UPSERT { sourceID:firstSrc.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
-				INSERT { sourceID:firstSrc.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin } 
+			UPSERT { sourceID:firstSrc.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
+				INSERT { sourceID:firstSrc.name_id, key:@key, value:@value, timestamp:@timestamp, justification:@justification, collector:@collector, origin:@origin, documentRef:@documentRef } 
 				UPDATE {} IN hasMetadataCollection
 				RETURN {
 					'_id': NEW._id,
@@ -519,8 +532,8 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 			)
 			  
 			  LET hasMetadata = FIRST(
-				  UPSERT {  packageID:firstPkg.version_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-					  INSERT {  packageID:firstPkg.version_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  UPSERT {  packageID:firstPkg.version_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+					  INSERT {  packageID:firstPkg.version_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 					  UPDATE {} IN hasMetadataCollection
 					  RETURN {
 						'_id': NEW._id,
@@ -554,8 +567,8 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 			)
 			  
 			  LET hasMetadata = FIRST(
-				  UPSERT {  packageID:firstPkg.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-					  INSERT {  packageID:firstPkg.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+				  UPSERT {  packageID:firstPkg.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+					  INSERT {  packageID:firstPkg.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 					  UPDATE {} IN hasMetadataCollection
 					  RETURN {
 						'_id': NEW._id,
@@ -609,8 +622,8 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 		query := `LET artifact = FIRST(FOR art IN artifacts FILTER art.algorithm == doc.art_algorithm FILTER art.digest == doc.art_digest RETURN art)
 		  
 		LET hasMetadata = FIRST(
-			UPSERT { artifactID:artifact._id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				INSERT { artifactID:artifact._id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			UPSERT { artifactID:artifact._id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				INSERT { artifactID:artifact._id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				UPDATE {} IN hasMetadataCollection
 				RETURN {
 					'_id': NEW._id,
@@ -671,8 +684,8 @@ func (c *arangoClient) IngestBulkHasMetadata(ctx context.Context, subjects model
 		)
 		  
 		LET hasMetadata = FIRST(
-			UPSERT { sourceID:firstSrc.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
-				INSERT { sourceID:firstSrc.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin } 
+			UPSERT { sourceID:firstSrc.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
+				INSERT { sourceID:firstSrc.name_id, key:doc.key, value:doc.value, timestamp:doc.timestamp, justification:doc.justification, collector:doc.collector, origin:doc.origin, documentRef:doc.documentRef } 
 				UPDATE {} IN hasMetadataCollection
 				RETURN {
 					'_id': NEW._id,
@@ -722,6 +735,7 @@ func getHasMetadataFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 		Justification string          `json:"justification"`
 		Collector     string          `json:"collector"`
 		Origin        string          `json:"origin"`
+		DocumentRef   string          `json:"documentRef"`
 	}
 
 	var createdValues []collectedData
@@ -759,6 +773,7 @@ func getHasMetadataFromCursor(ctx context.Context, cursor driver.Cursor, ingesti
 			Justification: createdValue.Justification,
 			Origin:        createdValue.Origin,
 			Collector:     createdValue.Collector,
+			DocumentRef:   createdValue.DocumentRef,
 		}
 
 		if pkg != nil {
@@ -827,6 +842,7 @@ func (c *arangoClient) queryHasMetadataNodeByID(ctx context.Context, filter *mod
 		Justification string    `json:"justification"`
 		Collector     string    `json:"collector"`
 		Origin        string    `json:"origin"`
+		DocumentRef   string    `json:"documentRef"`
 	}
 
 	var collectedValues []dbHasMetadata
@@ -856,6 +872,7 @@ func (c *arangoClient) queryHasMetadataNodeByID(ctx context.Context, filter *mod
 		Justification: collectedValues[0].Justification,
 		Origin:        collectedValues[0].Origin,
 		Collector:     collectedValues[0].Collector,
+		DocumentRef:   collectedValues[0].DocumentRef,
 	}
 
 	if collectedValues[0].PackageID != nil {

@@ -52,12 +52,18 @@ func (PackageVersion) Edges() []ent.Edge {
 		edge.From("name", PackageName.Type).Required().Field("name_id").Ref("versions").Unique(),
 		edge.From("occurrences", Occurrence.Type).Ref("package"),
 		edge.From("sbom", BillOfMaterials.Type).Ref("package"),
-
-		// edge.To("equal_packages", PackageVersion.Type).Through("equals", PkgEqual.Type),
-		// edge.From("pkg_equal_dependant", PkgEqual.Type).Ref("dependant_package"),
+		edge.From("vuln", CertifyVuln.Type).Ref("package"),
+		edge.From("vex", CertifyVex.Type).Ref("package"),
+		edge.From("has_source_at", HasSourceAt.Type).Ref("package_version"),
+		edge.From("certification", Certification.Type).Ref("package_version"),
+		edge.From("metadata", HasMetadata.Type).Ref("package_version"),
+		edge.From("dependency", Dependency.Type).Ref("dependent_package_version"),
+		edge.From("dependency_subject", Dependency.Type).Ref("package"),
 		edge.From("included_in_sboms", BillOfMaterials.Type).Ref("included_software_packages"),
 		edge.From("pkg_equal_pkg_a", PkgEqual.Type).Ref("package_a"),
 		edge.From("pkg_equal_pkg_b", PkgEqual.Type).Ref("package_b"),
+		edge.From("poc", PointOfContact.Type).Ref("package_version"),
+		edge.From("certify_legal", CertifyLegal.Type).Ref("package"),
 	}
 }
 

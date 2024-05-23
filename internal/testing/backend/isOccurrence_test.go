@@ -451,6 +451,31 @@ func TestOccurrence(t *testing.T) {
 					Justification: "test justification",
 				},
 			},
+		}, {
+			Name:  "docref",
+			InPkg: []*model.PkgInputSpec{testdata.P1},
+			InArt: []*model.ArtifactInputSpec{testdata.A1},
+			Calls: []call{
+				{
+					PkgSrc: model.PackageOrSourceInput{
+						Package: &model.IDorPkgInput{PackageInput: testdata.P1},
+					},
+					Artifact: testdata.A1,
+					Occurrence: &model.IsOccurrenceInputSpec{
+						DocumentRef: "test",
+					},
+				},
+			},
+			Query: &model.IsOccurrenceSpec{
+				DocumentRef: ptrfrom.String("test"),
+			},
+			ExpOcc: []*model.IsOccurrence{
+				{
+					Subject:     testdata.P1out,
+					Artifact:    testdata.A1out,
+					DocumentRef: "test",
+				},
+			},
 		},
 	}
 	for _, test := range tests {
@@ -513,14 +538,20 @@ func TestOccurrence(t *testing.T) {
 					}
 				}
 			}
-			got, err := b.IsOccurrence(ctx, test.Query)
+			got, err := b.IsOccurrenceList(ctx, *test.Query, nil, nil)
 			if (err != nil) != test.ExpQueryErr {
 				t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 			}
 			if err != nil {
 				return
 			}
-			if diff := cmp.Diff(test.ExpOcc, got, commonOpts); diff != "" {
+			var returnedObjects []*model.IsOccurrence
+			if got != nil {
+				for _, obj := range got.Edges {
+					returnedObjects = append(returnedObjects, obj.Node)
+				}
+			}
+			if diff := cmp.Diff(test.ExpOcc, returnedObjects, commonOpts); diff != "" {
 				t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 			}
 		})
@@ -590,6 +621,30 @@ func TestIngestOccurrences(t *testing.T) {
 				Justification: "test justification",
 			},
 		},
+	}, {
+		Name:  "docref",
+		InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+		InArt: []*model.ArtifactInputSpec{testdata.A1, testdata.A2},
+		Calls: []call{
+			{
+				PkgSrcs: model.PackageOrSourceInputs{
+					Packages: []*model.IDorPkgInput{{PackageInput: testdata.P1}, {PackageInput: testdata.P2}},
+				},
+				Artifacts: []*model.IDorArtifactInput{{ArtifactInput: testdata.A1}, {ArtifactInput: testdata.A2}},
+				Occurrences: []*model.IsOccurrenceInputSpec{{
+					DocumentRef: "test",
+				}, {
+					Justification: "test justification",
+				}},
+			},
+		},
+		ExpOcc: []*model.IsOccurrence{
+			{
+				Subject:     testdata.P1out,
+				Artifact:    testdata.A1out,
+				DocumentRef: "test",
+			},
+		},
 	}}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
@@ -616,14 +671,20 @@ func TestIngestOccurrences(t *testing.T) {
 				if err != nil {
 					return
 				}
-				got, err := b.IsOccurrence(ctx, &model.IsOccurrenceSpec{ID: ptrfrom.String(ocurID[0])})
+				got, err := b.IsOccurrenceList(ctx, model.IsOccurrenceSpec{ID: ptrfrom.String(ocurID[0])}, nil, nil)
 				if (err != nil) != test.ExpQueryErr {
 					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
 				}
 				if err != nil {
 					return
 				}
-				if diff := cmp.Diff(test.ExpOcc, got, commonOpts); diff != "" {
+				var returnedObjects []*model.IsOccurrence
+				if got != nil {
+					for _, obj := range got.Edges {
+						returnedObjects = append(returnedObjects, obj.Node)
+					}
+				}
+				if diff := cmp.Diff(test.ExpOcc, returnedObjects, commonOpts); diff != "" {
 					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
 				}
 			}
