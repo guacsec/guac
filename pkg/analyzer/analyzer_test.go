@@ -17,9 +17,9 @@ package analyzer_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
-	"os"
+	"net/http"
+
 	"testing"
 
 	"github.com/dominikbraun/graph"
@@ -27,7 +27,23 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
-var diffTestFile = "test_HasSBOMs_diff.json"
+var diffTestFile = "https://raw.githubusercontent.com/guacsec/guac-test/main/hasSbom-pairs/hasSBOM-syft-spdx-k8s.gcr.io-kube-apiserver.v1.24.1.json"
+
+func readTestFileFromHub(fileUrl string) ([]byte, error){
+
+	resp, err := http.Get(fileUrl)
+    if err != nil {
+        return nil, err
+    }
+    defer resp.Body.Close()
+
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
+
+    return body, nil
+}
 
 func TestSetGetNodeAttribute(t *testing.T) {
 	g := graph.New(analyzer.NodeHash, graph.Directed())
@@ -50,12 +66,28 @@ func TestSetGetNodeAttribute(t *testing.T) {
 }
 
 func TestHighlightAnalysis(t *testing.T) {
-	graphs, err := readTwoSBOM(diffTestFile)
+
+	data, err  := readTestFileFromHub(diffTestFile)
 	if err != nil {
-		t.Errorf("Error making graph %v ", err.Error())
+		t.Errorf("Error reading test JSON")
 	}
 
-	one, two,err := analyzer.HighlightAnalysis(graphs[0], graphs[1], 0)
+	var sboms []model.HasSBOMsHasSBOM
+
+	err = json.Unmarshal(data, &sboms)
+	if err != nil {
+		t.Errorf("Error unmarshaling JSON")
+	}
+
+	graphOne, errOne := analyzer.MakeGraph(sboms[0], false, false, false, false, false)
+
+	graphTwo, errTwo := analyzer.MakeGraph(sboms[1], false, false, false, false, false)
+
+	if errOne != nil || errTwo != nil {
+		t.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
+	}
+
+	one, two,err := analyzer.HighlightAnalysis(graphOne, graphTwo, 0)
 
 	if err != nil {
 		t.Errorf("Error highlighting diff %v", err.Error())
@@ -84,49 +116,11 @@ func TestAddGraphEdge(t *testing.T) {
 	}
 }
 
-
-
-func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error opening rearranged test file")
-	}
-	defer file.Close()
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error reading test file")
-	}
-	var sboms []model.HasSBOMsHasSBOM
-
-	err = json.Unmarshal(data, &sboms)
-	if err != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error unmarshaling JSON")
-	}
-
-	graphOne, errOne := analyzer.MakeGraph(sboms[0], false, false, false, false, false)
-
-	graphTwo, errTwo := analyzer.MakeGraph(sboms[1], false, false, false, false, false)
-
-	if errOne != nil || errTwo != nil {
-		return []graph.Graph[string, *analyzer.Node]{}, fmt.Errorf("Error making graph %v %v", errOne.Error(), errTwo.Error())
-	}
-
-	return []graph.Graph[string, *analyzer.Node]{graphOne, graphTwo}, nil
-
-}
 func TestEquivalence(t *testing.T){
-	file, err := os.Open(diffTestFile)
+	data, err  := readTestFileFromHub(diffTestFile)
 	if err != nil {
-		t.Errorf("Error opening hasSBOMs test file")
+		t.Errorf("Error reading test file %v", err.Error())
 	}
-	
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		t.Errorf("Error reading test file")
-	}
-	file.Close()
 
 	var sboms []model.HasSBOMsHasSBOM
 
