@@ -81,10 +81,6 @@ var analyzeCmd = &cobra.Command{
 		httpClient := http.Client{}
 		gqlclient := graphql.NewClient(viper.GetString("gql-addr"), &httpClient)
 
-		//get necessary flags
-		// all, _ := cmd.Flags().GetBool("all")
-		// maxprint, _ := cmd.Flags().GetInt("maxprint")
-
 		slsas, errSlsa := cmd.Flags().GetStringSlice("slsa")
 		sboms, errSbom := cmd.Flags().GetStringSlice("sboms")
 		uri, _ := cmd.Flags().GetBool("uri")

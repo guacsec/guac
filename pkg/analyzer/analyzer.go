@@ -900,10 +900,6 @@ func CompareAllPaths(listOne, listTwo [][]*Node) ([]DiffedPath, error) {
 			if err != nil {
 				return results, fmt.Errorf(err.Error())
 			}
-
-			// if diffNum > //some number {
-			// 	continue
-			// }
 			
 
 			if diffNum < min {
