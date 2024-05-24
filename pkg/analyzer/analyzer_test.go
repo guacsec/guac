@@ -27,7 +27,6 @@ import (
 	model "github.com/guacsec/guac/pkg/assembler/clients/generated"
 )
 
-var testfile = "hasSBOMs.json"
 var diffTestFile = "test_HasSBOMs_diff.json"
 
 func TestSetGetNodeAttribute(t *testing.T) {
@@ -117,7 +116,7 @@ func readTwoSBOM(filename string) ([]graph.Graph[string, *analyzer.Node], error)
 
 }
 func TestEquivalence(t *testing.T){
-	file, err := os.Open(testfile)
+	file, err := os.Open(diffTestFile)
 	if err != nil {
 		t.Errorf("Error opening hasSBOMs test file")
 	}
