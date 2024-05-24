@@ -300,6 +300,8 @@ type BadRequestJSONResponse Error
 
 type InternalServerErrorJSONResponse Error
 
+type PackageNameListJSONResponse []PackageName
+
 type PurlListJSONResponse struct {
 	// PaginationInfo Contains the cursor to retrieve more pages. If there are no more,  NextCursor will be nil.
 	PaginationInfo PaginationInfo `json:"PaginationInfo"`
@@ -314,7 +316,7 @@ type AnalyzeDependenciesResponseObject interface {
 	VisitAnalyzeDependenciesResponse(w http.ResponseWriter) error
 }
 
-type AnalyzeDependencies200JSONResponse struct{ PurlListJSONResponse }
+type AnalyzeDependencies200JSONResponse struct{ PackageNameListJSONResponse }
 
 func (response AnalyzeDependencies200JSONResponse) VisitAnalyzeDependenciesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
