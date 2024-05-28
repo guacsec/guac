@@ -85,6 +85,7 @@ func init() {
 	set.String("rest-api-server-port", "8081", "port to serve the REST API from")
 	set.String("rest-api-tls-cert-file", "", "path to the TLS certificate in PEM format for rest api server")
 	set.String("rest-api-tls-key-file", "", "path to the TLS key in PEM format for rest api server")
+	set.Bool("db-direct-connection", false, "[experimental] connect directly to the database that backs the gql API for optimized endpoint implementations")
 
 	set.String("verifier-key-path", "", "path to pem file to verify dsse")
 	set.String("verifier-key-id", "", "ID of the key to be stored")
