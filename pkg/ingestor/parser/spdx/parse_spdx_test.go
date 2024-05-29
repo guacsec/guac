@@ -517,7 +517,7 @@ func Test_spdxParser(t *testing.T) {
 					{
 						Pkg:             pUrlToPkgDiscardError("pkg:guac/spdx/testsbom"),
 						DepPkg:          pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63?filename=./include-file"),
-						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeAllVersions},
+						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
 						IsDependency: &generated.IsDependencyInputSpec{
 							DependencyType: generated.DependencyTypeUnknown,
 							Justification:  "top-level package GUAC heuristic connecting to each file/package",
@@ -780,7 +780,7 @@ func Test_spdxParser(t *testing.T) {
 					{
 						Pkg:             pUrlToPkgDiscardError("pkg:guac/spdx/testsbom"),
 						DepPkg:          pUrlToPkgDiscardError("pkg:guac/files/sha1:ba1c68d88439599dcca7594d610030a19eda4f63?filename=./include-file"),
-						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeAllVersions},
+						DepPkgMatchFlag: generated.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
 						IsDependency: &generated.IsDependencyInputSpec{
 							DependencyType: generated.DependencyTypeUnknown,
 							Justification:  "top-level package GUAC heuristic connecting to each file/package",

@@ -677,7 +677,7 @@ var (
 		{
 			Pkg:             topLevelPack,
 			DepPkg:          worldFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -687,7 +687,7 @@ var (
 		{
 			Pkg:             topLevelPack,
 			DepPkg:          rootFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -697,7 +697,7 @@ var (
 		{
 			Pkg:             topLevelPack,
 			DepPkg:          triggersFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -707,7 +707,7 @@ var (
 		{
 			Pkg:             topLevelPack,
 			DepPkg:          rsaPubFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -727,7 +727,7 @@ var (
 		{
 			Pkg:             rootFilePack,
 			DepPkg:          rsaPubFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -737,7 +737,7 @@ var (
 		{
 			Pkg:             baselayoutPack,
 			DepPkg:          rootFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
@@ -747,7 +747,7 @@ var (
 		{
 			Pkg:             keysPack,
 			DepPkg:          rsaPubFilePack,
-			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeAllVersions},
+			DepPkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
 			IsDependency: &model.IsDependencyInputSpec{
 				DependencyType: model.DependencyTypeUnknown,
 				VersionRange:   "",
