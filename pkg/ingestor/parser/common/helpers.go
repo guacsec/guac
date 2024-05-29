@@ -27,7 +27,7 @@ import (
 )
 
 // TODO: change the DependencyType based on the relationship, currently set to unknown
-func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputSpec, relatedFileNodes []*model.PkgInputSpec, justification string) (*assembler.IsDependencyIngest, error) {
+func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputSpec, relatedFileNodes []*model.PkgInputSpec, justification string, dependency model.DependencyType) (*assembler.IsDependencyIngest, error) {
 	if len(relatedFileNodes) > 0 {
 		for _, rfileNode := range relatedFileNodes {
 
@@ -37,7 +37,7 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 				DepPkg:          rfileNode,
 				DepPkgMatchFlag: GetMatchFlagsFromPkgInput(rfileNode),
 				IsDependency: &model.IsDependencyInputSpec{
-					DependencyType: model.DependencyTypeUnknown,
+					DependencyType: dependency,
 					Justification:  justification,
 					VersionRange:   *rfileNode.Version,
 				},
@@ -50,7 +50,7 @@ func GetIsDep(foundNode *model.PkgInputSpec, relatedPackNodes []*model.PkgInputS
 				DepPkg:          rpackNode,
 				DepPkgMatchFlag: GetMatchFlagsFromPkgInput(rpackNode),
 				IsDependency: &model.IsDependencyInputSpec{
-					DependencyType: model.DependencyTypeUnknown,
+					DependencyType: dependency,
 					Justification:  justification,
 					VersionRange:   *rpackNode.Version,
 				},
