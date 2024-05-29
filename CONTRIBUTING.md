@@ -44,7 +44,7 @@ We are excited that you want to contribute to GUAC! This contributor ladder
 outlines different contributor roles within the project, along with
 responsibilities and privileges that come with them.
 
-Since GUAC is a complex project, there are 5 topic areas of interest:
+Since GUAC is a complex project, there are 5 software topic areas of interest:
 
 - Ingestion: ingest software security metadata. Needs to write parsers for
   documents, maintain ingestion logic, write new collectors, etc.
@@ -55,7 +55,18 @@ Since GUAC is a complex project, there are 5 topic areas of interest:
 - Front-end: GUAC visualisation libraries, Javascript, CSS
 - Clients: GUAC CLI, CI Checks, Policy Engines, IDE Plugins, etc.
 
-The contribution ladder is summarized in the table below:
+In addition, there are 2 non-code topic areas:
+
+- Documentation: Maintaining docs and examples
+    - Repositories:
+        - guacsec/guac-docs
+- Web and marketing: Maintain GUAC’s public presence
+    - Repositories:
+        - guacsec/guac-landing
+        - (eventual social media accounts)
+
+The contribution ladder is summarized in the table below.
+All software and non-code topic areas use this latter.
 
 | Role                  | Responsibilities                                                                       | Requirements                                                                     | Privileges                                    | GitHub access level |
 | --------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------- | ------------------- |
@@ -105,7 +116,7 @@ touch their area of interest.
 ### Maintainer
 
 An owner that gains a deep understanding of GUAC architecture and design and can
-prove this by being an OWNER in at least 3 topic areas will be promoted to
+prove this by being an OWNER in at least 3 topic areas (including both software and non-code topic areas) will be promoted to
 maintainer, after a n-1 approval vote from the other maintainers, according to
 the processes specified in [the governance document](./GOVERNANCE.md).
 
