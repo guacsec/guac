@@ -23,14 +23,13 @@ import (
 	"time"
 
 	osv_scanner "github.com/google/osv-scanner/pkg/osv"
-	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
-	"github.com/guacsec/guac/pkg/certifier/components/root_package"
-	intoto "github.com/in-toto/in-toto-golang/in_toto"
-
 	"github.com/guacsec/guac/internal/testing/dochelper"
 	"github.com/guacsec/guac/internal/testing/testdata"
+	attestation_vuln "github.com/guacsec/guac/pkg/certifier/attestation"
+	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/logging"
+	intoto "github.com/in-toto/in-toto-golang/in_toto"
 )
 
 func TestOSVCertifier_CertifyVulns(t *testing.T) {
@@ -150,7 +149,7 @@ func TestOSVCertifier_CertifyVulns(t *testing.T) {
 			defer close(docChan)
 			defer close(errChan)
 			go func() {
-				errChan <- o.CertifyComponent(ctx, tt.rootComponent, docChan)
+				errChan <- o.CertifyComponent(ctx, tt.rootComponent, docChan, false)
 			}()
 			numCollectors := 1
 			certifiersDone := 0

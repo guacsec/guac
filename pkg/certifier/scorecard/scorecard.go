@@ -16,7 +16,6 @@
 package scorecard
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -24,9 +23,6 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/events"
-	"github.com/ossf/scorecard/v4/docs/checks"
-	"github.com/ossf/scorecard/v4/log"
-
 	"github.com/guacsec/guac/pkg/handler/processor"
 )
 
@@ -39,7 +35,7 @@ type scorecard struct {
 var ErrArtifactNodeTypeMismatch = fmt.Errorf("rootComponent type is not *source.SourceNode")
 
 // CertifyComponent is a certifier that generates scorecard attestations
-func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}, docChannel chan<- *processor.Document) error {
+func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}, docChannel chan<- *processor.Document, useScorecardAPI bool) error {
 	if docChannel == nil {
 		return fmt.Errorf("docChannel cannot be nil")
 	}
@@ -63,29 +59,19 @@ func (s scorecard) CertifyComponent(_ context.Context, rootComponent interface{}
 		return fmt.Errorf("source repo cannot be empty")
 	}
 
-	score, err := s.scorecard.GetScore(sourceNode.Repo, sourceNode.Commit, sourceNode.Tag)
+	score, err := s.scorecard.GetScore(sourceNode.Repo, sourceNode.Commit, sourceNode.Tag, useScorecardAPI)
 	if err != nil {
 		return fmt.Errorf("error getting scorecard result: %w", err)
 	}
 
-	var scorecardResults bytes.Buffer
-	docs, err := checks.Read()
-	if err != nil {
-		return fmt.Errorf("error getting scorecard docs: %w", err)
-	}
-
-	if err = score.AsJSON2(true, log.DefaultLevel, docs, &scorecardResults); err != nil {
-		return fmt.Errorf("error getting scorecard results: %w", err)
-	}
-
 	res := processor.Document{
-		Blob:   scorecardResults.Bytes(),
+		Blob:   score.Bytes(),
 		Format: processor.FormatJSON,
 		Type:   processor.DocumentScorecard,
 		SourceInformation: processor.SourceInformation{
 			Collector:   "scorecard",
 			Source:      "scorecard",
-			DocumentRef: events.GetDocRef(scorecardResults.Bytes()),
+			DocumentRef: events.GetDocRef(score.Bytes()),
 		},
 	}
 	if sourceNode.Commit != "" {

@@ -26,7 +26,7 @@ type Certifier interface {
 	// push to the docChannel to be ingested.
 	// Note: there is an implicit contract with "QueryComponents" where the compChan type must be the same as
 	// the one used by "components"
-	CertifyComponent(ctx context.Context, components interface{}, docChannel chan<- *processor.Document) error
+	CertifyComponent(ctx context.Context, components interface{}, docChannel chan<- *processor.Document, useScorecardAPI bool) error
 }
 
 type QueryComponents interface {

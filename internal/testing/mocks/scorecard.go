@@ -10,9 +10,9 @@
 package mocks
 
 import (
+	bytes "bytes"
 	reflect "reflect"
 
-	pkg "github.com/ossf/scorecard/v4/pkg"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -40,16 +40,16 @@ func (m *MockScorecard) EXPECT() *MockScorecardMockRecorder {
 }
 
 // GetScore mocks base method.
-func (m *MockScorecard) GetScore(repoName, commitSHA, tag string) (*pkg.ScorecardResult, error) {
+func (m *MockScorecard) GetScore(repoName, commitSHA, tag string, useScorecardAPI bool) (*bytes.Buffer, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetScore", repoName, commitSHA, tag)
-	ret0, _ := ret[0].(*pkg.ScorecardResult)
+	ret := m.ctrl.Call(m, "GetScore", repoName, commitSHA, tag, useScorecardAPI)
+	ret0, _ := ret[0].(*bytes.Buffer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetScore indicates an expected call of GetScore.
-func (mr *MockScorecardMockRecorder) GetScore(repoName, commitSHA, tag any) *gomock.Call {
+func (mr *MockScorecardMockRecorder) GetScore(repoName, commitSHA, tag, useScorecardAPI any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScore", reflect.TypeOf((*MockScorecard)(nil).GetScore), repoName, commitSHA, tag)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScore", reflect.TypeOf((*MockScorecard)(nil).GetScore), repoName, commitSHA, tag, useScorecardAPI)
 }

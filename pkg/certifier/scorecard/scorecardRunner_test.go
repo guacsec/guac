@@ -26,24 +26,26 @@ import (
 func Test_scorecardRunner_GetScore(t *testing.T) {
 	newsc, _ := NewScorecardRunner(context.Background())
 	tests := []struct {
-		name     string
-		sc       Scorecard
-		repoName string
-		commit   string
-		tag      string
-		wantErr  bool
+		name            string
+		sc              Scorecard
+		repoName        string
+		commit          string
+		tag             string
+		wantErr         bool
+		useScorecardAPI bool
 	}{{
-		name:     "actual test",
+		name:     "with the scorecard library/github auth token",
 		sc:       newsc,
 		repoName: "github.com/ossf/scorecard",
 		commit:   "98316298749fdd62d3cc99423baec45ae11af662",
 		tag:      "",
 	}, {
-		name:     "actual test",
-		sc:       newsc,
-		repoName: "github.com/ossf/scorecard",
-		commit:   "HEAD",
-		tag:      "v4.10.4",
+		name:            "with the scorecard API",
+		sc:              newsc,
+		repoName:        "github.com/ossf/scorecard",
+		commit:          "HEAD",
+		tag:             "v4.10.4",
+		useScorecardAPI: true,
 	}}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -55,12 +57,12 @@ func Test_scorecardRunner_GetScore(t *testing.T) {
 				t.Fatalf("GITHUB_AUTH_TOKEN is not set")
 			}
 			t.Setenv("GITHUB_AUTH_TOKEN", ghToken)
-			got, err := test.sc.GetScore(test.repoName, test.commit, test.tag)
+			got, err := test.sc.GetScore(test.repoName, test.commit, test.tag, test.useScorecardAPI)
 			if (err != nil) != test.wantErr {
 				t.Errorf("GetScore() error = %v, wantErr %v", err, test.wantErr)
 				return
 			}
-			t.Logf("scorecard result: %v", got.Repo.Name)
+			t.Logf("scorecard result: %v", got)
 		})
 	}
 }

@@ -187,7 +187,7 @@ var osvCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := certify.Certify(ctx, packageQuery, emit, errHandler, opts.poll, opts.interval); err != nil {
+			if err := certify.Certify(ctx, packageQuery, emit, errHandler, opts.poll, opts.interval, false); err != nil {
 				logger.Errorf("Unhandled error in the certifier: %s", err)
 			}
 			done <- true
@@ -258,8 +258,10 @@ func validateOSVFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"certifier-latency",
-		"certifier-batch-size"})
+	set, err := cli.BuildFlags([]string{
+		"certifier-latency",
+		"certifier-batch-size",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)

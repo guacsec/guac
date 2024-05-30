@@ -52,8 +52,7 @@ func RegisterCertifier(c func() certifier.Certifier, certifierType certifier.Cer
 
 // Certify queries the graph DB to get the components to scan. Utilizing the registered certifiers,
 // it generates new nodes and attestations.
-func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler, poll bool, interval time.Duration) error {
-
+func Certify(ctx context.Context, query certifier.QueryComponents, emitter certifier.Emitter, handleErr certifier.ErrHandler, poll bool, interval time.Duration, useScorecardAPI bool) error {
 	runCertifier := func() error {
 		// compChan to collect query components
 		compChan := make(chan interface{}, BufferChannelSize)
@@ -70,7 +69,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		for !componentsCaptured {
 			select {
 			case d := <-compChan:
-				if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
+				if err := generateDocuments(ctx, d, emitter, handleErr, useScorecardAPI); err != nil {
 					return fmt.Errorf("generate certifier documents error: %w", err)
 				}
 			case err := <-errChan:
@@ -84,7 +83,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 		}
 		for len(compChan) > 0 {
 			d := <-compChan
-			if err := generateDocuments(ctx, d, emitter, handleErr); err != nil {
+			if err := generateDocuments(ctx, d, emitter, handleErr, useScorecardAPI); err != nil {
 				logger.Errorf("generate certifier documents error: %v", err)
 			}
 		}
@@ -118,7 +117,7 @@ func Certify(ctx context.Context, query certifier.QueryComponents, emitter certi
 
 // generateDocuments runs CertifyVulns as a goroutine to scan and generates attestations that
 // are emitted as processor documents to be ingested
-func generateDocuments(ctx context.Context, collectedComponent interface{}, emitter certifier.Emitter, handleErr certifier.ErrHandler) error {
+func generateDocuments(ctx context.Context, collectedComponent interface{}, emitter certifier.Emitter, handleErr certifier.ErrHandler, useScorecardAPI bool) error {
 	// docChan to collect artifacts
 	docChan := make(chan *processor.Document, BufferChannelSize)
 	// errChan to receive error from collectors
@@ -129,7 +128,7 @@ func generateDocuments(ctx context.Context, collectedComponent interface{}, emit
 	for _, certifier := range documentCertifier {
 		c := certifier()
 		go func() {
-			errChan <- c.CertifyComponent(ctx, collectedComponent, docChan)
+			errChan <- c.CertifyComponent(ctx, collectedComponent, docChan, useScorecardAPI)
 		}()
 	}
 

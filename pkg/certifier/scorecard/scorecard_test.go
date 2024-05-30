@@ -16,9 +16,11 @@
 package scorecard
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -26,14 +28,13 @@ import (
 	"github.com/guacsec/guac/pkg/certifier"
 	"github.com/guacsec/guac/pkg/certifier/components/source"
 	"github.com/guacsec/guac/pkg/handler/processor"
-	"github.com/ossf/scorecard/v4/pkg"
 	"go.uber.org/mock/gomock"
 )
 
 type mockScorecard struct{}
 
-func (m mockScorecard) GetScore(repoName, commitSHA, tag string) (*pkg.ScorecardResult, error) {
-	return &pkg.ScorecardResult{}, nil
+func (m mockScorecard) GetScore(repoName, commitSHA, tag string, useScorecardAPI bool) (*bytes.Buffer, error) {
+	return &bytes.Buffer{}, nil
 }
 
 func TestNewScorecard(t *testing.T) {
@@ -91,8 +92,9 @@ func Test_CertifyComponent(t *testing.T) {
 		sourceNode *source.SourceNode
 	}
 	type args struct {
-		rootComponent interface{}
-		docChannel    chan<- *processor.Document
+		rootComponent   interface{}
+		docChannel      chan<- *processor.Document
+		useScorecardAPI bool
 	}
 	tests := []struct {
 		name                    string
@@ -184,8 +186,8 @@ func Test_CertifyComponent(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			sc := mocks.NewMockScorecard(ctrl)
-			sc.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
-				DoAndReturn(func(a, b, c string) (*pkg.ScorecardResult, error) {
+			sc.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				DoAndReturn(func(a, b, c string, d bool) (*bytes.Buffer, error) {
 					if test.getScoreShouldReturnErr {
 						return nil, fmt.Errorf("error")
 					}
@@ -196,7 +198,7 @@ func Test_CertifyComponent(t *testing.T) {
 				scorecard: sc,
 				ghToken:   test.fields.ghToken,
 			}
-			if err := s.CertifyComponent(ctx, test.args.rootComponent, test.args.docChannel); (err != nil) != test.wantErr {
+			if err := s.CertifyComponent(ctx, test.args.rootComponent, test.args.docChannel, test.args.useScorecardAPI); (err != nil) != test.wantErr {
 				t.Errorf("CertifyComponent() error = %v, wantErr %v", err, test.wantErr)
 			}
 		})
@@ -209,9 +211,11 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	scMock := mocks.NewMockScorecard(ctrl)
-	scMock.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any()).
-		DoAndReturn(func(a, b, c string) (*pkg.ScorecardResult, error) {
-			return &pkg.ScorecardResult{}, nil
+	scMock.EXPECT().GetScore(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		DoAndReturn(func(a, b, c string, d bool) (*bytes.Buffer, error) {
+			buf := &bytes.Buffer{}
+			buf.WriteString(strings.Repeat("a", 101))
+			return buf, nil
 		}).AnyTimes()
 
 	// Create a mock source.SourceNode to use as input
@@ -231,7 +235,7 @@ func TestCertifyComponentDefaultCase(t *testing.T) {
 	// valid input
 	docChannel := make(chan *processor.Document, 2)
 
-	err := sc.CertifyComponent(ctx, source, docChannel)
+	err := sc.CertifyComponent(ctx, source, docChannel, false)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

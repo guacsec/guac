@@ -26,16 +26,14 @@ import (
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
+	"github.com/guacsec/guac/pkg/certifier"
+	"github.com/guacsec/guac/pkg/certifier/certify"
 	sc "github.com/guacsec/guac/pkg/certifier/components/source"
+	"github.com/guacsec/guac/pkg/certifier/scorecard"
 	"github.com/guacsec/guac/pkg/cli"
 	csub_client "github.com/guacsec/guac/pkg/collectsub/client"
-	"github.com/guacsec/guac/pkg/ingestor"
-
-	"github.com/guacsec/guac/pkg/certifier"
-	"github.com/guacsec/guac/pkg/certifier/scorecard"
-
-	"github.com/guacsec/guac/pkg/certifier/certify"
 	"github.com/guacsec/guac/pkg/handler/processor"
+	"github.com/guacsec/guac/pkg/ingestor"
 	"github.com/guacsec/guac/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -51,7 +49,8 @@ type scorecardOptions struct {
 	// sets artificial latency on the certifier (default to nil)
 	addedLatency *time.Duration
 	// sets the batch size for pagination query for the certifier
-	batchSize int
+	batchSize       int
+	useScorecardAPI bool
 }
 
 var scorecardCmd = &cobra.Command{
@@ -69,6 +68,7 @@ var scorecardCmd = &cobra.Command{
 			viper.GetBool("add-vuln-on-ingest"),
 			viper.GetString("certifier-latency"),
 			viper.GetInt("certifier-batch-size"),
+			viper.GetBool("use-scorecard-api"),
 		)
 		if err != nil {
 			fmt.Printf("unable to validate flags: %v\n", err)
@@ -102,7 +102,6 @@ var scorecardCmd = &cobra.Command{
 
 		// running and getting the scorecard checks
 		scorecardCertifier, err := scorecard.NewScorecardCertifier(scorecardRunner)
-
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
 			_ = cmd.Help()
@@ -112,7 +111,6 @@ var scorecardCmd = &cobra.Command{
 		// scorecard certifier is the certifier that gets the scorecard data graphQL
 		// setting "daysSinceLastScan" to 0 does not check the timestamp on the scorecard that exist
 		query, err := sc.NewCertifier(gqlclient, 0, opts.batchSize, opts.addedLatency)
-
 		if err != nil {
 			fmt.Printf("unable to create scorecard certifier: %v\n", err)
 			_ = cmd.Help()
@@ -132,7 +130,6 @@ var scorecardCmd = &cobra.Command{
 		emit := func(d *processor.Document) error {
 			totalNum += 1
 			err := ingestor.Ingest(ctx, d, opts.graphqlEndpoint, transport, csubClient, opts.queryVulnOnIngestion)
-
 			if err != nil {
 				return fmt.Errorf("unable to ingest document: %v", err)
 			}
@@ -156,7 +153,7 @@ var scorecardCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := certify.Certify(ctx, query, emit, errHandler, opts.poll, opts.interval); err != nil {
+			if err := certify.Certify(ctx, query, emit, errHandler, opts.poll, opts.interval, opts.useScorecardAPI); err != nil {
 				logger.Errorf("Unhandled error in the certifier: %s", err)
 			}
 			done <- true
@@ -191,6 +188,7 @@ func validateScorecardFlags(
 	queryVulnIngestion bool,
 	certifierLatencyStr string,
 	batchSize int,
+	useScorecardAPI bool,
 ) (scorecardOptions, error) {
 	var opts scorecardOptions
 	opts.graphqlEndpoint = graphqlEndpoint
@@ -215,6 +213,7 @@ func validateScorecardFlags(
 	opts.csubClientOptions = csubOpts
 
 	opts.poll = poll
+	opts.useScorecardAPI = useScorecardAPI
 	i, err := time.ParseDuration(interval)
 	if err != nil {
 		return opts, err
@@ -225,8 +224,10 @@ func validateScorecardFlags(
 }
 
 func init() {
-	set, err := cli.BuildFlags([]string{"certifier-latency",
-		"certifier-batch-size"})
+	set, err := cli.BuildFlags([]string{
+		"certifier-latency",
+		"certifier-batch-size",
+	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to setup flag: %v", err)
 		os.Exit(1)
@@ -237,4 +238,6 @@ func init() {
 		os.Exit(1)
 	}
 	certifierCmd.AddCommand(scorecardCmd)
+	scorecardCmd.Flags().Bool("use-scorecard-api", false, "use the scorecard API")
+	viper.BindPFlag("use-scorecard-api", scorecardCmd.Flags().Lookup("use-scorecard-api"))
 }
