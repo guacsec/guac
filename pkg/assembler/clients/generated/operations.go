@@ -4007,6 +4007,345 @@ func __marshalAllHasSBOMTreeSubjectPackageOrArtifact(v *AllHasSBOMTreeSubjectPac
 	}
 }
 
+// AllHasSLSATree includes the GraphQL fields of HasSLSA requested by the fragment AllHasSLSATree.
+// The GraphQL type's documentation follows.
+//
+// HasSLSA records that a subject node has a SLSA attestation.
+type AllHasSLSATree struct {
+	Id string `json:"id"`
+	// The subject of SLSA attestation
+	Subject AllHasSLSATreeSubjectArtifact `json:"subject"`
+	// The SLSA attestation
+	Slsa AllHasSLSATreeSlsaSLSA `json:"slsa"`
+}
+
+// GetId returns AllHasSLSATree.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATree) GetId() string { return v.Id }
+
+// GetSubject returns AllHasSLSATree.Subject, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATree) GetSubject() AllHasSLSATreeSubjectArtifact { return v.Subject }
+
+// GetSlsa returns AllHasSLSATree.Slsa, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATree) GetSlsa() AllHasSLSATreeSlsaSLSA { return v.Slsa }
+
+// AllHasSLSATreeSlsaSLSA includes the requested fields of the GraphQL type SLSA.
+// The GraphQL type's documentation follows.
+//
+// SLSA contains all of the fields present in a SLSA attestation.
+//
+// The materials and builders are objects of the HasSLSA predicate, everything
+// else are properties extracted from the attestation.
+//
+// We also include fields to specify under what conditions the check was performed
+// (time of scan, version of scanners, etc.) as well as how this information got
+// included into GUAC (origin document and the collector for that document).
+type AllHasSLSATreeSlsaSLSA struct {
+	// Materials of the build resulting in subject
+	BuiltFrom []AllHasSLSATreeSlsaSLSABuiltFromArtifact `json:"builtFrom"`
+	// Builder performing the build
+	BuiltBy AllHasSLSATreeSlsaSLSABuiltByBuilder `json:"builtBy"`
+	// Type of the builder
+	BuildType string `json:"buildType"`
+	// Individual predicates found in the attestation
+	SlsaPredicate []AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate `json:"slsaPredicate"`
+	// Version of the SLSA predicate
+	SlsaVersion string `json:"slsaVersion"`
+	// Timestamp (RFC3339Nano format) of build start time
+	StartedOn *time.Time `json:"startedOn"`
+	// Timestamp (RFC3339Nano format) of build end time
+	FinishedOn *time.Time `json:"finishedOn"`
+	// Document from which this attestation is generated from
+	Origin string `json:"origin"`
+	// GUAC collector for the document
+	Collector string `json:"collector"`
+	// Reference location of the document in the persistent blob store (if that is configured)
+	DocumentRef string `json:"documentRef"`
+}
+
+// GetBuiltFrom returns AllHasSLSATreeSlsaSLSA.BuiltFrom, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetBuiltFrom() []AllHasSLSATreeSlsaSLSABuiltFromArtifact {
+	return v.BuiltFrom
+}
+
+// GetBuiltBy returns AllHasSLSATreeSlsaSLSA.BuiltBy, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetBuiltBy() AllHasSLSATreeSlsaSLSABuiltByBuilder { return v.BuiltBy }
+
+// GetBuildType returns AllHasSLSATreeSlsaSLSA.BuildType, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetBuildType() string { return v.BuildType }
+
+// GetSlsaPredicate returns AllHasSLSATreeSlsaSLSA.SlsaPredicate, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetSlsaPredicate() []AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate {
+	return v.SlsaPredicate
+}
+
+// GetSlsaVersion returns AllHasSLSATreeSlsaSLSA.SlsaVersion, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetSlsaVersion() string { return v.SlsaVersion }
+
+// GetStartedOn returns AllHasSLSATreeSlsaSLSA.StartedOn, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetStartedOn() *time.Time { return v.StartedOn }
+
+// GetFinishedOn returns AllHasSLSATreeSlsaSLSA.FinishedOn, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetFinishedOn() *time.Time { return v.FinishedOn }
+
+// GetOrigin returns AllHasSLSATreeSlsaSLSA.Origin, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetOrigin() string { return v.Origin }
+
+// GetCollector returns AllHasSLSATreeSlsaSLSA.Collector, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetCollector() string { return v.Collector }
+
+// GetDocumentRef returns AllHasSLSATreeSlsaSLSA.DocumentRef, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSA) GetDocumentRef() string { return v.DocumentRef }
+
+// AllHasSLSATreeSlsaSLSABuiltByBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
+//
+// Currently builders are identified by the uri field.
+type AllHasSLSATreeSlsaSLSABuiltByBuilder struct {
+	AllBuilderTree `json:"-"`
+}
+
+// GetId returns AllHasSLSATreeSlsaSLSABuiltByBuilder.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) GetId() string { return v.AllBuilderTree.Id }
+
+// GetUri returns AllHasSLSATreeSlsaSLSABuiltByBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) GetUri() string { return v.AllBuilderTree.Uri }
+
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSLSATreeSlsaSLSABuiltByBuilder
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSLSATreeSlsaSLSABuiltByBuilder = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllBuilderTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSLSATreeSlsaSLSABuiltByBuilder struct {
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+}
+
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSLSATreeSlsaSLSABuiltByBuilder) __premarshalJSON() (*__premarshalAllHasSLSATreeSlsaSLSABuiltByBuilder, error) {
+	var retval __premarshalAllHasSLSATreeSlsaSLSABuiltByBuilder
+
+	retval.Id = v.AllBuilderTree.Id
+	retval.Uri = v.AllBuilderTree.Uri
+	return &retval, nil
+}
+
+// AllHasSLSATreeSlsaSLSABuiltFromArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type AllHasSLSATreeSlsaSLSABuiltFromArtifact struct {
+	AllArtifactTree `json:"-"`
+}
+
+// GetId returns AllHasSLSATreeSlsaSLSABuiltFromArtifact.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns AllHasSLSATreeSlsaSLSABuiltFromArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) GetAlgorithm() string {
+	return v.AllArtifactTree.Algorithm
+}
+
+// GetDigest returns AllHasSLSATreeSlsaSLSABuiltFromArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSLSATreeSlsaSLSABuiltFromArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSLSATreeSlsaSLSABuiltFromArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSLSATreeSlsaSLSABuiltFromArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSLSATreeSlsaSLSABuiltFromArtifact) __premarshalJSON() (*__premarshalAllHasSLSATreeSlsaSLSABuiltFromArtifact, error) {
+	var retval __premarshalAllHasSLSATreeSlsaSLSABuiltFromArtifact
+
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate includes the requested fields of the GraphQL type SLSAPredicate.
+// The GraphQL type's documentation follows.
+//
+// SLSAPredicate are the values from the SLSA predicate in key-value pair form.
+//
+// # For example, given the following predicate
+//
+// ```
+// "predicate": {
+// "buildDefinition": {
+// "externalParameters": {
+// "repository": "https://github.com/octocat/hello-world",
+// ...
+// },
+// ...
+// },
+// ...
+// }
+// ```
+//
+// we have
+//
+// ```
+// key   = "buildDefinition.externalParameters.repository"
+// value = "https://github.com/octocat/hello-world"
+// ```
+//
+// This node cannot be directly referred by other parts of GUAC.
+type AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// GetKey returns AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate.Key, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate) GetKey() string { return v.Key }
+
+// GetValue returns AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate.Value, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSlsaSLSASlsaPredicateSLSAPredicate) GetValue() string { return v.Value }
+
+// AllHasSLSATreeSubjectArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type AllHasSLSATreeSubjectArtifact struct {
+	AllArtifactTree `json:"-"`
+}
+
+// GetId returns AllHasSLSATreeSubjectArtifact.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSubjectArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns AllHasSLSATreeSubjectArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSubjectArtifact) GetAlgorithm() string { return v.AllArtifactTree.Algorithm }
+
+// GetDigest returns AllHasSLSATreeSubjectArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *AllHasSLSATreeSubjectArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *AllHasSLSATreeSubjectArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSLSATreeSubjectArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSLSATreeSubjectArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSLSATreeSubjectArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *AllHasSLSATreeSubjectArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSLSATreeSubjectArtifact) __premarshalJSON() (*__premarshalAllHasSLSATreeSubjectArtifact, error) {
+	var retval __premarshalAllHasSLSATreeSubjectArtifact
+
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
 // AllHasSourceAt includes the GraphQL fields of HasSourceAt requested by the fragment AllHasSourceAt.
 // The GraphQL type's documentation follows.
 //
@@ -6625,6 +6964,18 @@ type BuilderInputSpec struct {
 // GetUri returns BuilderInputSpec.Uri, and is useful for accessing the field via an interface.
 func (v *BuilderInputSpec) GetUri() string { return v.Uri }
 
+// BuilderSpec allows filtering the list of builders to return in a query.
+type BuilderSpec struct {
+	Id  *string `json:"id"`
+	Uri *string `json:"uri"`
+}
+
+// GetId returns BuilderSpec.Id, and is useful for accessing the field via an interface.
+func (v *BuilderSpec) GetId() *string { return v.Id }
+
+// GetUri returns BuilderSpec.Uri, and is useful for accessing the field via an interface.
+func (v *BuilderSpec) GetUri() *string { return v.Uri }
+
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
 type CertifyBadInputSpec struct {
@@ -7132,6 +7483,334 @@ func (v *CertifyScorecardSpec) GetCollector() *string { return v.Collector }
 
 // GetDocumentRef returns CertifyScorecardSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyScorecardSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// CertifyVulnCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
+// The GraphQL type's documentation follows.
+//
+// CertifyVuln is an attestation to attach vulnerability information to a package.
+//
+// This information is obtained via a scanner. If there is no vulnerability
+// detected, we attach the a vulnerability with "NoVuln" type and an empty string
+// for the vulnerability ID.
+type CertifyVulnCertifyVuln struct {
+	AllCertifyVuln `json:"-"`
+}
+
+// GetId returns CertifyVulnCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVulnCertifyVuln) GetId() string { return v.AllCertifyVuln.Id }
+
+// GetPackage returns CertifyVulnCertifyVuln.Package, and is useful for accessing the field via an interface.
+func (v *CertifyVulnCertifyVuln) GetPackage() AllCertifyVulnPackage { return v.AllCertifyVuln.Package }
+
+// GetVulnerability returns CertifyVulnCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVulnCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
+	return v.AllCertifyVuln.Vulnerability
+}
+
+// GetMetadata returns CertifyVulnCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *CertifyVulnCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
+	return v.AllCertifyVuln.Metadata
+}
+
+func (v *CertifyVulnCertifyVuln) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyVulnCertifyVuln
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyVulnCertifyVuln = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVuln)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyVulnCertifyVuln struct {
+	Id string `json:"id"`
+
+	Package AllCertifyVulnPackage `json:"package"`
+
+	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
+
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
+}
+
+func (v *CertifyVulnCertifyVuln) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyVulnCertifyVuln) __premarshalJSON() (*__premarshalCertifyVulnCertifyVuln, error) {
+	var retval __premarshalCertifyVulnCertifyVuln
+
+	retval.Id = v.AllCertifyVuln.Id
+	retval.Package = v.AllCertifyVuln.Package
+	retval.Vulnerability = v.AllCertifyVuln.Vulnerability
+	retval.Metadata = v.AllCertifyVuln.Metadata
+	return &retval, nil
+}
+
+// CertifyVulnListCertifyVulnListCertifyVulnConnection includes the requested fields of the GraphQL type CertifyVulnConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyVulnConnection returns the paginated results for CertifyVuln.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyVulnEdge which contains the current cursor
+// and the CertifyVuln node itself
+type CertifyVulnListCertifyVulnListCertifyVulnConnection struct {
+	TotalCount int                                                                       `json:"totalCount"`
+	Edges      []CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge `json:"edges"`
+	PageInfo   CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo               `json:"pageInfo"`
+}
+
+// GetTotalCount returns CertifyVulnListCertifyVulnListCertifyVulnConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns CertifyVulnListCertifyVulnListCertifyVulnConnection.Edges, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnection) GetEdges() []CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns CertifyVulnListCertifyVulnListCertifyVulnConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnection) GetPageInfo() CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo {
+	return v.PageInfo
+}
+
+// CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge includes the requested fields of the GraphQL type CertifyVulnEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyVulnEdge contains the cursor for the resulting node and
+// the CertifyVuln node itself.
+type CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge struct {
+	Cursor string                                                                                 `json:"cursor"`
+	Node   CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln `json:"node"`
+}
+
+// GetCursor returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge.Node, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdge) GetNode() CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln {
+	return v.Node
+}
+
+// CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln includes the requested fields of the GraphQL type CertifyVuln.
+// The GraphQL type's documentation follows.
+//
+// CertifyVuln is an attestation to attach vulnerability information to a package.
+//
+// This information is obtained via a scanner. If there is no vulnerability
+// detected, we attach the a vulnerability with "NoVuln" type and an empty string
+// for the vulnerability ID.
+type CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln struct {
+	AllCertifyVuln `json:"-"`
+}
+
+// GetId returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) GetId() string {
+	return v.AllCertifyVuln.Id
+}
+
+// GetPackage returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln.Package, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) GetPackage() AllCertifyVulnPackage {
+	return v.AllCertifyVuln.Package
+}
+
+// GetVulnerability returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) GetVulnerability() AllCertifyVulnVulnerability {
+	return v.AllCertifyVuln.Vulnerability
+}
+
+// GetMetadata returns CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln.Metadata, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) GetMetadata() AllCertifyVulnMetadataScanMetadata {
+	return v.AllCertifyVuln.Metadata
+}
+
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyVuln)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln struct {
+	Id string `json:"id"`
+
+	Package AllCertifyVulnPackage `json:"package"`
+
+	Vulnerability AllCertifyVulnVulnerability `json:"vulnerability"`
+
+	Metadata AllCertifyVulnMetadataScanMetadata `json:"metadata"`
+}
+
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln) __premarshalJSON() (*__premarshalCertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln, error) {
+	var retval __premarshalCertifyVulnListCertifyVulnListCertifyVulnConnectionEdgesCertifyVulnEdgeNodeCertifyVuln
+
+	retval.Id = v.AllCertifyVuln.Id
+	retval.Package = v.AllCertifyVuln.Package
+	retval.Vulnerability = v.AllCertifyVuln.Vulnerability
+	retval.Metadata = v.AllCertifyVuln.Metadata
+	return &retval, nil
+}
+
+// CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListCertifyVulnListCertifyVulnConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// CertifyVulnListResponse is returned by CertifyVulnList on success.
+type CertifyVulnListResponse struct {
+	// Returns a paginated results via CertifyVulnConnection
+	CertifyVulnList *CertifyVulnListCertifyVulnListCertifyVulnConnection `json:"CertifyVulnList"`
+}
+
+// GetCertifyVulnList returns CertifyVulnListResponse.CertifyVulnList, and is useful for accessing the field via an interface.
+func (v *CertifyVulnListResponse) GetCertifyVulnList() *CertifyVulnListCertifyVulnListCertifyVulnConnection {
+	return v.CertifyVulnList
+}
+
+// CertifyVulnResponse is returned by CertifyVuln on success.
+type CertifyVulnResponse struct {
+	// Returns all vulnerability certifications matching the input filter.
+	CertifyVuln []CertifyVulnCertifyVuln `json:"CertifyVuln"`
+}
+
+// GetCertifyVuln returns CertifyVulnResponse.CertifyVuln, and is useful for accessing the field via an interface.
+func (v *CertifyVulnResponse) GetCertifyVuln() []CertifyVulnCertifyVuln { return v.CertifyVuln }
+
+// CertifyVulnSpec allows filtering the list of vulnerability certifications to
+// return in a query.
+//
+// Specifying just the package allows to query for all vulnerabilities associated
+// with the package.
+//
+// Only one vulnerability (or NoVuln vulnerability type) may be
+// specified.
+type CertifyVulnSpec struct {
+	Id             *string            `json:"id"`
+	Package        *PkgSpec           `json:"package"`
+	Vulnerability  *VulnerabilitySpec `json:"vulnerability"`
+	TimeScanned    *time.Time         `json:"timeScanned"`
+	DbUri          *string            `json:"dbUri"`
+	DbVersion      *string            `json:"dbVersion"`
+	ScannerUri     *string            `json:"scannerUri"`
+	ScannerVersion *string            `json:"scannerVersion"`
+	Origin         *string            `json:"origin"`
+	Collector      *string            `json:"collector"`
+	DocumentRef    *string            `json:"documentRef"`
+}
+
+// GetId returns CertifyVulnSpec.Id, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetId() *string { return v.Id }
+
+// GetPackage returns CertifyVulnSpec.Package, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetPackage() *PkgSpec { return v.Package }
+
+// GetVulnerability returns CertifyVulnSpec.Vulnerability, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetVulnerability() *VulnerabilitySpec { return v.Vulnerability }
+
+// GetTimeScanned returns CertifyVulnSpec.TimeScanned, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetTimeScanned() *time.Time { return v.TimeScanned }
+
+// GetDbUri returns CertifyVulnSpec.DbUri, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetDbUri() *string { return v.DbUri }
+
+// GetDbVersion returns CertifyVulnSpec.DbVersion, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetDbVersion() *string { return v.DbVersion }
+
+// GetScannerUri returns CertifyVulnSpec.ScannerUri, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetScannerUri() *string { return v.ScannerUri }
+
+// GetScannerVersion returns CertifyVulnSpec.ScannerVersion, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetScannerVersion() *string { return v.ScannerVersion }
+
+// GetOrigin returns CertifyVulnSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns CertifyVulnSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns CertifyVulnSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyVulnSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // DependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
 // The GraphQL type's documentation follows.
@@ -8392,6 +9071,297 @@ type HasSBOMsResponse struct {
 
 // GetHasSBOM returns HasSBOMsResponse.HasSBOM, and is useful for accessing the field via an interface.
 func (v *HasSBOMsResponse) GetHasSBOM() []HasSBOMsHasSBOM { return v.HasSBOM }
+
+// HasSLSAHasSLSA includes the requested fields of the GraphQL type HasSLSA.
+// The GraphQL type's documentation follows.
+//
+// HasSLSA records that a subject node has a SLSA attestation.
+type HasSLSAHasSLSA struct {
+	AllHasSLSATree `json:"-"`
+}
+
+// GetId returns HasSLSAHasSLSA.Id, and is useful for accessing the field via an interface.
+func (v *HasSLSAHasSLSA) GetId() string { return v.AllHasSLSATree.Id }
+
+// GetSubject returns HasSLSAHasSLSA.Subject, and is useful for accessing the field via an interface.
+func (v *HasSLSAHasSLSA) GetSubject() AllHasSLSATreeSubjectArtifact { return v.AllHasSLSATree.Subject }
+
+// GetSlsa returns HasSLSAHasSLSA.Slsa, and is useful for accessing the field via an interface.
+func (v *HasSLSAHasSLSA) GetSlsa() AllHasSLSATreeSlsaSLSA { return v.AllHasSLSATree.Slsa }
+
+func (v *HasSLSAHasSLSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSLSAHasSLSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSLSAHasSLSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSLSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSLSAHasSLSA struct {
+	Id string `json:"id"`
+
+	Subject AllHasSLSATreeSubjectArtifact `json:"subject"`
+
+	Slsa AllHasSLSATreeSlsaSLSA `json:"slsa"`
+}
+
+func (v *HasSLSAHasSLSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSLSAHasSLSA) __premarshalJSON() (*__premarshalHasSLSAHasSLSA, error) {
+	var retval __premarshalHasSLSAHasSLSA
+
+	retval.Id = v.AllHasSLSATree.Id
+	retval.Subject = v.AllHasSLSATree.Subject
+	retval.Slsa = v.AllHasSLSATree.Slsa
+	return &retval, nil
+}
+
+// HasSLSAListHasSLSAListHasSLSAConnection includes the requested fields of the GraphQL type HasSLSAConnection.
+// The GraphQL type's documentation follows.
+//
+// HasSLSAConnection returns the paginated results for HasSLSA.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSLSAEdge which contains the current cursor
+// and the HasSLSA node itself
+type HasSLSAListHasSLSAListHasSLSAConnection struct {
+	TotalCount int                                                       `json:"totalCount"`
+	Edges      []HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge `json:"edges"`
+	PageInfo   HasSLSAListHasSLSAListHasSLSAConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns HasSLSAListHasSLSAListHasSLSAConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns HasSLSAListHasSLSAListHasSLSAConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnection) GetEdges() []HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HasSLSAListHasSLSAListHasSLSAConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnection) GetPageInfo() HasSLSAListHasSLSAListHasSLSAConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge includes the requested fields of the GraphQL type HasSLSAEdge.
+// The GraphQL type's documentation follows.
+//
+// HasSLSAEdge contains the cursor for the resulting node and
+// the HasSLSA node itself.
+type HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge struct {
+	Cursor string                                                             `json:"cursor"`
+	Node   HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA `json:"node"`
+}
+
+// GetCursor returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge) GetCursor() string { return v.Cursor }
+
+// GetNode returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge.Node, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdge) GetNode() HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA {
+	return v.Node
+}
+
+// HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA includes the requested fields of the GraphQL type HasSLSA.
+// The GraphQL type's documentation follows.
+//
+// HasSLSA records that a subject node has a SLSA attestation.
+type HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA struct {
+	AllHasSLSATree `json:"-"`
+}
+
+// GetId returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA.Id, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) GetId() string {
+	return v.AllHasSLSATree.Id
+}
+
+// GetSubject returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA.Subject, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) GetSubject() AllHasSLSATreeSubjectArtifact {
+	return v.AllHasSLSATree.Subject
+}
+
+// GetSlsa returns HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA.Slsa, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) GetSlsa() AllHasSLSATreeSlsaSLSA {
+	return v.AllHasSLSATree.Slsa
+}
+
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSLSATree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA struct {
+	Id string `json:"id"`
+
+	Subject AllHasSLSATreeSubjectArtifact `json:"subject"`
+
+	Slsa AllHasSLSATreeSlsaSLSA `json:"slsa"`
+}
+
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA) __premarshalJSON() (*__premarshalHasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA, error) {
+	var retval __premarshalHasSLSAListHasSLSAListHasSLSAConnectionEdgesHasSLSAEdgeNodeHasSLSA
+
+	retval.Id = v.AllHasSLSATree.Id
+	retval.Subject = v.AllHasSLSATree.Subject
+	retval.Slsa = v.AllHasSLSATree.Slsa
+	return &retval, nil
+}
+
+// HasSLSAListHasSLSAListHasSLSAConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HasSLSAListHasSLSAListHasSLSAConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HasSLSAListHasSLSAListHasSLSAConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HasSLSAListHasSLSAListHasSLSAConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// GetHasNextPage returns HasSLSAListHasSLSAListHasSLSAConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HasSLSAListHasSLSAListHasSLSAConnectionPageInfo) GetHasNextPage() bool { return v.HasNextPage }
+
+// HasSLSAListResponse is returned by HasSLSAList on success.
+type HasSLSAListResponse struct {
+	// Returns a paginated results via HasSLSAConnection
+	HasSLSAList *HasSLSAListHasSLSAListHasSLSAConnection `json:"HasSLSAList"`
+}
+
+// GetHasSLSAList returns HasSLSAListResponse.HasSLSAList, and is useful for accessing the field via an interface.
+func (v *HasSLSAListResponse) GetHasSLSAList() *HasSLSAListHasSLSAListHasSLSAConnection {
+	return v.HasSLSAList
+}
+
+// HasSLSAResponse is returned by HasSLSA on success.
+type HasSLSAResponse struct {
+	// Returns all SLSA attestations matching the filter.
+	HasSLSA []HasSLSAHasSLSA `json:"HasSLSA"`
+}
+
+// GetHasSLSA returns HasSLSAResponse.HasSLSA, and is useful for accessing the field via an interface.
+func (v *HasSLSAResponse) GetHasSLSA() []HasSLSAHasSLSA { return v.HasSLSA }
+
+// HasSLSASpec allows filtering the list of HasSLSA to return.
+type HasSLSASpec struct {
+	Id          *string             `json:"id"`
+	Subject     *ArtifactSpec       `json:"subject"`
+	BuiltFrom   []ArtifactSpec      `json:"builtFrom"`
+	BuiltBy     *BuilderSpec        `json:"builtBy"`
+	BuildType   *string             `json:"buildType"`
+	Predicate   []SLSAPredicateSpec `json:"predicate"`
+	SlsaVersion *string             `json:"slsaVersion"`
+	StartedOn   *time.Time          `json:"startedOn"`
+	FinishedOn  *time.Time          `json:"finishedOn"`
+	Origin      *string             `json:"origin"`
+	Collector   *string             `json:"collector"`
+	DocumentRef *string             `json:"documentRef"`
+}
+
+// GetId returns HasSLSASpec.Id, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetId() *string { return v.Id }
+
+// GetSubject returns HasSLSASpec.Subject, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetSubject() *ArtifactSpec { return v.Subject }
+
+// GetBuiltFrom returns HasSLSASpec.BuiltFrom, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetBuiltFrom() []ArtifactSpec { return v.BuiltFrom }
+
+// GetBuiltBy returns HasSLSASpec.BuiltBy, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetBuiltBy() *BuilderSpec { return v.BuiltBy }
+
+// GetBuildType returns HasSLSASpec.BuildType, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetBuildType() *string { return v.BuildType }
+
+// GetPredicate returns HasSLSASpec.Predicate, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetPredicate() []SLSAPredicateSpec { return v.Predicate }
+
+// GetSlsaVersion returns HasSLSASpec.SlsaVersion, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetSlsaVersion() *string { return v.SlsaVersion }
+
+// GetStartedOn returns HasSLSASpec.StartedOn, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetStartedOn() *time.Time { return v.StartedOn }
+
+// GetFinishedOn returns HasSLSASpec.FinishedOn, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetFinishedOn() *time.Time { return v.FinishedOn }
+
+// GetOrigin returns HasSLSASpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns HasSLSASpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns HasSLSASpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSLSASpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
 type HasSourceAtInputSpec struct {
@@ -22534,6 +23504,18 @@ func (v *SLSAPredicateInputSpec) GetKey() string { return v.Key }
 // GetValue returns SLSAPredicateInputSpec.Value, and is useful for accessing the field via an interface.
 func (v *SLSAPredicateInputSpec) GetValue() string { return v.Value }
 
+// SLSAPredicateSpec is the same as SLSAPredicate, but usable as query input.
+type SLSAPredicateSpec struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// GetKey returns SLSAPredicateSpec.Key, and is useful for accessing the field via an interface.
+func (v *SLSAPredicateSpec) GetKey() string { return v.Key }
+
+// GetValue returns SLSAPredicateSpec.Value, and is useful for accessing the field via an interface.
+func (v *SLSAPredicateSpec) GetValue() string { return v.Value }
+
 // ScanMetadataInput represents the input for certifying vulnerability
 // scans in mutations.
 type ScanMetadataInput struct {
@@ -23360,6 +24342,30 @@ type __CertifyLegalsInput struct {
 // GetFilter returns __CertifyLegalsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__CertifyLegalsInput) GetFilter() CertifyLegalSpec { return v.Filter }
 
+// __CertifyVulnInput is used internally by genqlient
+type __CertifyVulnInput struct {
+	Filter CertifyVulnSpec `json:"filter"`
+}
+
+// GetFilter returns __CertifyVulnInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnInput) GetFilter() CertifyVulnSpec { return v.Filter }
+
+// __CertifyVulnListInput is used internally by genqlient
+type __CertifyVulnListInput struct {
+	Filter CertifyVulnSpec `json:"filter"`
+	After  *string         `json:"after"`
+	First  *int            `json:"first"`
+}
+
+// GetFilter returns __CertifyVulnListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnListInput) GetFilter() CertifyVulnSpec { return v.Filter }
+
+// GetAfter returns __CertifyVulnListInput.After, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __CertifyVulnListInput.First, and is useful for accessing the field via an interface.
+func (v *__CertifyVulnListInput) GetFirst() *int { return v.First }
+
 // __DependenciesInput is used internally by genqlient
 type __DependenciesInput struct {
 	Filter IsDependencySpec `json:"filter"`
@@ -23399,6 +24405,30 @@ type __HasSBOMsInput struct {
 
 // GetFilter returns __HasSBOMsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__HasSBOMsInput) GetFilter() HasSBOMSpec { return v.Filter }
+
+// __HasSLSAInput is used internally by genqlient
+type __HasSLSAInput struct {
+	Filter HasSLSASpec `json:"filter"`
+}
+
+// GetFilter returns __HasSLSAInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSLSAInput) GetFilter() HasSLSASpec { return v.Filter }
+
+// __HasSLSAListInput is used internally by genqlient
+type __HasSLSAListInput struct {
+	Filter HasSLSASpec `json:"filter"`
+	After  *string     `json:"after"`
+	First  *int        `json:"first"`
+}
+
+// GetFilter returns __HasSLSAListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSLSAListInput) GetFilter() HasSLSASpec { return v.Filter }
+
+// GetAfter returns __HasSLSAListInput.After, and is useful for accessing the field via an interface.
+func (v *__HasSLSAListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HasSLSAListInput.First, and is useful for accessing the field via an interface.
+func (v *__HasSLSAListInput) GetFirst() *int { return v.First }
 
 // __HashEqualsInput is used internally by genqlient
 type __HashEqualsInput struct {
@@ -24857,6 +25887,185 @@ func CertifyLegals(
 	return &data_, err_
 }
 
+// The query or mutation executed by CertifyVuln.
+const CertifyVuln_Operation = `
+query CertifyVuln ($filter: CertifyVulnSpec!) {
+	CertifyVuln(certifyVulnSpec: $filter) {
+		... AllCertifyVuln
+	}
+}
+fragment AllCertifyVuln on CertifyVuln {
+	id
+	package {
+		... AllPkgTree
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func CertifyVuln(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVulnSpec,
+) (*CertifyVulnResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyVuln",
+		Query:  CertifyVuln_Operation,
+		Variables: &__CertifyVulnInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyVulnResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyVulnList.
+const CertifyVulnList_Operation = `
+query CertifyVulnList ($filter: CertifyVulnSpec!, $after: ID, $first: Int) {
+	CertifyVulnList(certifyVulnSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyVuln
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyVuln on CertifyVuln {
+	id
+	package {
+		... AllPkgTree
+	}
+	vulnerability {
+		... AllVulnerabilityTree
+	}
+	metadata {
+		dbUri
+		dbVersion
+		scannerUri
+		scannerVersion
+		timeScanned
+		origin
+		collector
+	}
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func CertifyVulnList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyVulnSpec,
+	after *string,
+	first *int,
+) (*CertifyVulnListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyVulnList",
+		Query:  CertifyVulnList_Operation,
+		Variables: &__CertifyVulnListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyVulnListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by Dependencies.
 const Dependencies_Operation = `
 query Dependencies ($filter: IsDependencySpec!) {
@@ -25297,6 +26506,159 @@ func HasSBOMs(
 	var err_ error
 
 	var data_ HasSBOMsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasSLSA.
+const HasSLSA_Operation = `
+query HasSLSA ($filter: HasSLSASpec!) {
+	HasSLSA(hasSLSASpec: $filter) {
+		... AllHasSLSATree
+	}
+}
+fragment AllHasSLSATree on HasSLSA {
+	id
+	subject {
+		... AllArtifactTree
+	}
+	slsa {
+		builtFrom {
+			... AllArtifactTree
+		}
+		builtBy {
+			... AllBuilderTree
+		}
+		buildType
+		slsaPredicate {
+			key
+			value
+		}
+		slsaVersion
+		startedOn
+		finishedOn
+		origin
+		collector
+		documentRef
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllBuilderTree on Builder {
+	id
+	uri
+}
+`
+
+func HasSLSA(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSLSASpec,
+) (*HasSLSAResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSLSA",
+		Query:  HasSLSA_Operation,
+		Variables: &__HasSLSAInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ HasSLSAResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasSLSAList.
+const HasSLSAList_Operation = `
+query HasSLSAList ($filter: HasSLSASpec!, $after: ID, $first: Int) {
+	HasSLSAList(hasSLSASpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHasSLSATree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHasSLSATree on HasSLSA {
+	id
+	subject {
+		... AllArtifactTree
+	}
+	slsa {
+		builtFrom {
+			... AllArtifactTree
+		}
+		builtBy {
+			... AllBuilderTree
+		}
+		buildType
+		slsaPredicate {
+			key
+			value
+		}
+		slsaVersion
+		startedOn
+		finishedOn
+		origin
+		collector
+		documentRef
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+fragment AllBuilderTree on Builder {
+	id
+	uri
+}
+`
+
+func HasSLSAList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSLSASpec,
+	after *string,
+	first *int,
+) (*HasSLSAListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSLSAList",
+		Query:  HasSLSAList_Operation,
+		Variables: &__HasSLSAListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HasSLSAListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

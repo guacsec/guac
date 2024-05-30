@@ -298,7 +298,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		justification := getJustification(rel)
 
 		for _, packNode := range foundPackNodes {
-			p, err := common.GetIsDep(packNode, relatedPackNodes, relatedFileNodes, justification)
+			p, err := common.GetIsDep(packNode, relatedPackNodes, relatedFileNodes, justification, model.DependencyTypeUnknown)
 			if err != nil {
 				logger.Errorf("error generating spdx edge %v", err)
 				continue
@@ -308,7 +308,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 			}
 		}
 		for _, fileNode := range foundFileNodes {
-			p, err := common.GetIsDep(fileNode, relatedPackNodes, relatedFileNodes, justification)
+			p, err := common.GetIsDep(fileNode, relatedPackNodes, relatedFileNodes, justification, model.DependencyTypeUnknown)
 			if err != nil {
 				logger.Errorf("error generating spdx edge %v", err)
 				continue

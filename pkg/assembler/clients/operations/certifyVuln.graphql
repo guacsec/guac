@@ -42,3 +42,28 @@ mutation IngestCertifyVulnPkgs(
     certifyVulns: $certifyVulns
   )
 }
+
+# Exposes GraphQL queries to retrieve GUAC CertifyVulns
+
+query CertifyVuln($filter: CertifyVulnSpec!) {
+  CertifyVuln(certifyVulnSpec: $filter) {
+    ...AllCertifyVuln
+  }
+}
+
+query CertifyVulnList($filter: CertifyVulnSpec!, $after: ID, $first: Int) {
+  CertifyVulnList(certifyVulnSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllCertifyVuln
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}
