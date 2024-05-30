@@ -46,3 +46,28 @@ mutation IngestSLSAForArtifacts(
     slsaList: $slsaList
   )
 }
+
+# Exposes GraphQL queries to retrieve GUAC CertifyVulns
+
+query HasSLSA($filter: HasSLSASpec!) {
+  HasSLSA(hasSLSASpec: $filter) {
+    ...AllHasSLSATree
+  }
+}
+
+query HasSLSAList($filter: HasSLSASpec!, $after: ID, $first: Int) {
+  HasSLSAList(hasSLSASpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllHasSLSATree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

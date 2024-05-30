@@ -411,3 +411,29 @@ fragment AllPointOfContact on PointOfContact {
   origin
   collector
 }
+
+fragment AllHasSLSATree on HasSLSA {
+  id
+  subject {
+    ...AllArtifactTree
+  }
+  slsa {
+    builtFrom {
+      ...AllArtifactTree
+    }
+    builtBy {
+      ...AllBuilderTree
+    }
+    buildType
+    slsaPredicate {
+      key
+      value
+    }
+    slsaVersion
+    startedOn
+    finishedOn
+    origin
+    collector
+    documentRef
+  }
+}
