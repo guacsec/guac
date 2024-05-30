@@ -54,3 +54,43 @@ func TestCreateEvent(t *testing.T) {
 		})
 	}
 }
+
+func Test_GetKey(t *testing.T) {
+	tests := []struct {
+		name string
+		key  string
+		want string
+	}{{
+		name: "blob",
+		key:  "testKey",
+		want: "sha256_15291f67d99ea7bc578c3544dadfbb991e66fa69cb36ff70fe30e798e111ff5f",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			getKey := GetKey([]byte(tt.key))
+			if getKey != tt.want {
+				t.Errorf("GetKey() = %v, want %v", getKey, tt.want)
+			}
+		})
+	}
+}
+
+func Test_GetDocRef(t *testing.T) {
+	tests := []struct {
+		name string
+		key  string
+		want string
+	}{{
+		name: "blob",
+		key:  "testKey",
+		want: "sha256_15291f67d99ea7bc578c3544dadfbb991e66fa69cb36ff70fe30e798e111ff5f",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			getKey := GetDocRef([]byte(tt.key))
+			if getKey != tt.want {
+				t.Errorf("GetDocRef() = %v, want %v", getKey, tt.want)
+			}
+		})
+	}
+}
