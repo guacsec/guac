@@ -19,12 +19,10 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"sort"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/guacsec/guac/pkg/assembler/clients/generated"
-	"github.com/guacsec/guac/pkg/assembler/helpers"
 	"github.com/guacsec/guac/pkg/certifier"
 )
 
@@ -41,12 +39,12 @@ type packageQuery struct {
 	daysSinceLastScan int
 }
 
-var getPackages func(ctx context.Context, client graphql.Client, filter generated.PkgSpec) (*generated.PackagesResponse, error)
+var getPackages func(ctx context.Context, client graphql.Client, filter generated.PkgSpec, after *string, first *int) (*generated.PackagesListResponse, error)
 var getNeighbors func(ctx context.Context, client graphql.Client, node string, usingOnly []generated.Edge) (*generated.NeighborsResponse, error)
 
 // NewPackageQuery initializes the packageQuery to query from the graph database
 func NewPackageQuery(client graphql.Client, daysSinceLastScan int) certifier.QueryComponents {
-	getPackages = generated.Packages
+	getPackages = generated.PackagesList
 	getNeighbors = generated.Neighbors
 	return &packageQuery{
 		client:            client,
@@ -63,17 +61,15 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 	tickInterval := 5 * time.Second
 
 	// nodeChan to receive components
-	nodeChan := make(chan *PackageNode, 10000)
+	nodeChan := make(chan *PackageNode, 1)
 	// errChan to receive error from collectors
 	errChan := make(chan error, 1)
 
-	response, err := getPackages(ctx, p.client, generated.PkgSpec{})
-	if err != nil {
-		return fmt.Errorf("failed sources query: %w", err)
-	}
+	defer close(nodeChan)
+	defer close(errChan)
 
 	go func() {
-		errChan <- p.getPackageNodes(ctx, response, nodeChan)
+		errChan <- p.getPackageNodes(ctx, nodeChan)
 	}()
 
 	packNodes := []*PackageNode{}
@@ -124,61 +120,62 @@ func (p *packageQuery) GetComponents(ctx context.Context, compChan chan<- interf
 	return nil
 }
 
-func (p *packageQuery) getPackageNodes(ctx context.Context, response *generated.PackagesResponse, nodeChan chan<- *PackageNode) error {
-	packages := response.GetPackages()
-	for _, pkgType := range packages {
-		if pkgType.Type == guacType {
-			continue
+func (p *packageQuery) getPackageNodes(ctx context.Context, nodeChan chan<- *PackageNode) error {
+	var afterCursor *string
+	first := 60000
+	for {
+		pkgConn, err := getPackages(ctx, p.client, generated.PkgSpec{}, afterCursor, &first)
+		if err != nil {
+			return fmt.Errorf("failed to query packages with error: %w", err)
 		}
-		for _, namespace := range pkgType.Namespaces {
-			for _, name := range namespace.Names {
-				for _, version := range name.Versions {
-					response, err := getNeighbors(ctx, p.client, version.Id, []generated.Edge{generated.EdgePackageCertifyVuln})
-					if err != nil {
-						return fmt.Errorf("failed neighbors query: %w", err)
-					}
-					vulnList := []*generated.NeighborsNeighborsCertifyVuln{}
-					certifyVulnFound := false
-					for _, neighbor := range response.Neighbors {
-						if certifyVuln, ok := neighbor.(*generated.NeighborsNeighborsCertifyVuln); ok {
-							vulnList = append(vulnList, certifyVuln)
+		pkgEdges := pkgConn.PackagesList.Edges
+
+		for _, pkgNode := range pkgEdges {
+			if pkgNode.Node.Type == guacType {
+				continue
+			}
+			for _, namespace := range pkgNode.Node.Namespaces {
+				for _, name := range namespace.Names {
+					for _, version := range name.Versions {
+						response, err := getNeighbors(ctx, p.client, version.Id, []generated.Edge{generated.EdgePackageCertifyVuln})
+						if err != nil {
+							return fmt.Errorf("failed neighbors query: %w", err)
 						}
-					}
-					// collect all certifyVulnerability and then check timestamp else if not checking timestamp,
-					// if a certifyVulnerability is found break out
-					for _, vulns := range vulnList {
-						if p.daysSinceLastScan != 0 {
-							now := time.Now()
-							difference := vulns.Metadata.TimeScanned.Sub(now)
-							if math.Abs(difference.Hours()) < float64(p.daysSinceLastScan*24) {
-								certifyVulnFound = true
+						vulnList := []*generated.NeighborsNeighborsCertifyVuln{}
+						certifyVulnFound := false
+						for _, neighbor := range response.Neighbors {
+							if certifyVuln, ok := neighbor.(*generated.NeighborsNeighborsCertifyVuln); ok {
+								vulnList = append(vulnList, certifyVuln)
 							}
-						} else {
-							certifyVulnFound = true
-							break
 						}
-					}
-					if !certifyVulnFound {
-						qualifiersMap := map[string]string{}
-						keys := []string{}
-						for _, kv := range version.Qualifiers {
-							qualifiersMap[kv.Key] = kv.Value
-							keys = append(keys, kv.Key)
+						// collect all certifyVulnerability and then check timestamp else if not checking timestamp,
+						// if a certifyVulnerability is found break out
+						for _, vulns := range vulnList {
+							if p.daysSinceLastScan != 0 {
+								now := time.Now()
+								difference := vulns.Metadata.TimeScanned.Sub(now)
+								if math.Abs(difference.Hours()) < float64(p.daysSinceLastScan*24) {
+									certifyVulnFound = true
+								}
+							} else {
+								certifyVulnFound = true
+								break
+							}
 						}
-						sort.Strings(keys)
-						qualifiers := []string{}
-						for _, k := range keys {
-							qualifiers = append(qualifiers, k, qualifiersMap[k])
+						if !certifyVulnFound {
+							packNode := PackageNode{
+								Purl: version.Purl,
+							}
+							nodeChan <- &packNode
 						}
-						purl := helpers.PkgToPurl(pkgType.Type, namespace.Namespace, name.Name, version.Version, version.Subpath, qualifiers)
-						packNode := PackageNode{
-							Purl: purl,
-						}
-						nodeChan <- &packNode
 					}
 				}
 			}
 		}
+		if !pkgConn.PackagesList.PageInfo.HasNextPage {
+			break
+		}
+		afterCursor = pkgConn.PackagesList.PageInfo.EndCursor
 	}
 	return nil
 }
