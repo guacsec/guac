@@ -100,7 +100,7 @@ func ingest(cmd *cobra.Command, args []string) {
 			if errors.As(err, &urlErr) {
 				return fmt.Errorf("unable to ingest document due to connection error with graphQL %q : %w", d.SourceInformation.Source, urlErr)
 			}
-			logger.Errorf("unable to ingest document %q : %v", d.SourceInformation.Source, err)
+			d.ChildLogger.Errorf("unable to ingest document %q : %v", d.SourceInformation.Source, err)
 		}
 		return nil
 	}
