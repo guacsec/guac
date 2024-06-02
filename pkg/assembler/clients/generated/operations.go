@@ -26318,6 +26318,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -26411,6 +26412,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
@@ -26685,6 +26687,7 @@ fragment AllPkgTree on Package {
 			name
 			versions {
 				id
+				purl
 				version
 				qualifiers {
 					key
