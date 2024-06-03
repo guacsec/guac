@@ -42,3 +42,28 @@ mutation IngestVulnEquals(
     vulnEquals: $vulnEquals
   )
 }
+
+# Exposes GraphQL queries to retrieve GUAC VulnEqual
+
+query VulnEquals($filter: VulnEqualSpec!) {
+  vulnEqual(vulnEqualSpec: $filter) {
+    ...AllVulnEqual
+  }
+}
+
+query VulnEqualList($filter: VulnEqualSpec!, $after: ID, $first: Int) {
+  vulnEqualList(vulnEqualSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllVulnEqual
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

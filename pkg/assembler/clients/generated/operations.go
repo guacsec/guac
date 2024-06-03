@@ -9130,6 +9130,17 @@ func (v *CertifyVulnSpec) GetCollector() *string { return v.Collector }
 // GetDocumentRef returns CertifyVulnSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyVulnSpec) GetDocumentRef() *string { return v.DocumentRef }
 
+// The Comparator is used by the vulnerability score filter on ranges
+type Comparator string
+
+const (
+	ComparatorGreater      Comparator = "GREATER"
+	ComparatorEqual        Comparator = "EQUAL"
+	ComparatorLess         Comparator = "LESS"
+	ComparatorGreaterEqual Comparator = "GREATER_EQUAL"
+	ComparatorLessEqual    Comparator = "LESS_EQUAL"
+)
+
 // DependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
 // The GraphQL type's documentation follows.
 //
@@ -26389,6 +26400,311 @@ func (v *PkgEqualInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns PkgEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *PkgEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// PkgEqualListPkgEqualListPkgEqualConnection includes the requested fields of the GraphQL type PkgEqualConnection.
+// The GraphQL type's documentation follows.
+//
+// PkgEqualConnection returns the paginated results for PkgEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the PkgEqualEdge which contains the current cursor
+// and the PkgEqual node itself
+type PkgEqualListPkgEqualListPkgEqualConnection struct {
+	TotalCount int                                                           `json:"totalCount"`
+	Edges      []PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge `json:"edges"`
+	PageInfo   PkgEqualListPkgEqualListPkgEqualConnectionPageInfo            `json:"pageInfo"`
+}
+
+// GetTotalCount returns PkgEqualListPkgEqualListPkgEqualConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns PkgEqualListPkgEqualListPkgEqualConnection.Edges, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnection) GetEdges() []PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns PkgEqualListPkgEqualListPkgEqualConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnection) GetPageInfo() PkgEqualListPkgEqualListPkgEqualConnectionPageInfo {
+	return v.PageInfo
+}
+
+// PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge includes the requested fields of the GraphQL type PkgEqualEdge.
+// The GraphQL type's documentation follows.
+//
+// PkgEqualEdge contains the cursor for the resulting node and
+// the PkgEqual node itself.
+type PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge struct {
+	Cursor string                                                                  `json:"cursor"`
+	Node   PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual `json:"node"`
+}
+
+// GetCursor returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge.Node, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdge) GetNode() PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual {
+	return v.Node
+}
+
+// PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual includes the requested fields of the GraphQL type PkgEqual.
+// The GraphQL type's documentation follows.
+//
+// PkgEqual is an attestation that two packages are similar.
+type PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual struct {
+	AllPkgEqual `json:"-"`
+}
+
+// GetId returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Id, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetId() string {
+	return v.AllPkgEqual.Id
+}
+
+// GetJustification returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Justification, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetJustification() string {
+	return v.AllPkgEqual.Justification
+}
+
+// GetPackages returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Packages, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetPackages() []AllPkgEqualPackagesPackage {
+	return v.AllPkgEqual.Packages
+}
+
+// GetOrigin returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Origin, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetOrigin() string {
+	return v.AllPkgEqual.Origin
+}
+
+// GetCollector returns PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual.Collector, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) GetCollector() string {
+	return v.AllPkgEqual.Collector
+}
+
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgEqual)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Packages []AllPkgEqualPackagesPackage `json:"packages"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual) __premarshalJSON() (*__premarshalPkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual, error) {
+	var retval __premarshalPkgEqualListPkgEqualListPkgEqualConnectionEdgesPkgEqualEdgeNodePkgEqual
+
+	retval.Id = v.AllPkgEqual.Id
+	retval.Justification = v.AllPkgEqual.Justification
+	retval.Packages = v.AllPkgEqual.Packages
+	retval.Origin = v.AllPkgEqual.Origin
+	retval.Collector = v.AllPkgEqual.Collector
+	return &retval, nil
+}
+
+// PkgEqualListPkgEqualListPkgEqualConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type PkgEqualListPkgEqualListPkgEqualConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns PkgEqualListPkgEqualListPkgEqualConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns PkgEqualListPkgEqualListPkgEqualConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns PkgEqualListPkgEqualListPkgEqualConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *PkgEqualListPkgEqualListPkgEqualConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// PkgEqualListResponse is returned by PkgEqualList on success.
+type PkgEqualListResponse struct {
+	// Returns a paginated results via PkgEqualConnection
+	PkgEqualList *PkgEqualListPkgEqualListPkgEqualConnection `json:"PkgEqualList"`
+}
+
+// GetPkgEqualList returns PkgEqualListResponse.PkgEqualList, and is useful for accessing the field via an interface.
+func (v *PkgEqualListResponse) GetPkgEqualList() *PkgEqualListPkgEqualListPkgEqualConnection {
+	return v.PkgEqualList
+}
+
+// PkgEqualSpec allows filtering the list of package equality statements to return
+// in a query.
+//
+// Specifying just one package allows to query for all similar packages (if any
+// exists).
+type PkgEqualSpec struct {
+	Id            *string    `json:"id"`
+	Packages      []*PkgSpec `json:"packages"`
+	Justification *string    `json:"justification"`
+	Origin        *string    `json:"origin"`
+	Collector     *string    `json:"collector"`
+	DocumentRef   *string    `json:"documentRef"`
+}
+
+// GetId returns PkgEqualSpec.Id, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetId() *string { return v.Id }
+
+// GetPackages returns PkgEqualSpec.Packages, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetPackages() []*PkgSpec { return v.Packages }
+
+// GetJustification returns PkgEqualSpec.Justification, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns PkgEqualSpec.Origin, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns PkgEqualSpec.Collector, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns PkgEqualSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *PkgEqualSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// PkgEqualsPkgEqual includes the requested fields of the GraphQL type PkgEqual.
+// The GraphQL type's documentation follows.
+//
+// PkgEqual is an attestation that two packages are similar.
+type PkgEqualsPkgEqual struct {
+	AllPkgEqual `json:"-"`
+}
+
+// GetId returns PkgEqualsPkgEqual.Id, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetId() string { return v.AllPkgEqual.Id }
+
+// GetJustification returns PkgEqualsPkgEqual.Justification, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetJustification() string { return v.AllPkgEqual.Justification }
+
+// GetPackages returns PkgEqualsPkgEqual.Packages, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetPackages() []AllPkgEqualPackagesPackage { return v.AllPkgEqual.Packages }
+
+// GetOrigin returns PkgEqualsPkgEqual.Origin, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetOrigin() string { return v.AllPkgEqual.Origin }
+
+// GetCollector returns PkgEqualsPkgEqual.Collector, and is useful for accessing the field via an interface.
+func (v *PkgEqualsPkgEqual) GetCollector() string { return v.AllPkgEqual.Collector }
+
+func (v *PkgEqualsPkgEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*PkgEqualsPkgEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.PkgEqualsPkgEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgEqual)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalPkgEqualsPkgEqual struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Packages []AllPkgEqualPackagesPackage `json:"packages"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *PkgEqualsPkgEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *PkgEqualsPkgEqual) __premarshalJSON() (*__premarshalPkgEqualsPkgEqual, error) {
+	var retval __premarshalPkgEqualsPkgEqual
+
+	retval.Id = v.AllPkgEqual.Id
+	retval.Justification = v.AllPkgEqual.Justification
+	retval.Packages = v.AllPkgEqual.Packages
+	retval.Origin = v.AllPkgEqual.Origin
+	retval.Collector = v.AllPkgEqual.Collector
+	return &retval, nil
+}
+
+// PkgEqualsResponse is returned by PkgEquals on success.
+type PkgEqualsResponse struct {
+	// Returns all package equality statements matching a filter.
+	PkgEqual []PkgEqualsPkgEqual `json:"PkgEqual"`
+}
+
+// GetPkgEqual returns PkgEqualsResponse.PkgEqual, and is useful for accessing the field via an interface.
+func (v *PkgEqualsResponse) GetPkgEqual() []PkgEqualsPkgEqual { return v.PkgEqual }
+
 // PkgInputSpec specifies a package for mutations.
 //
 // This is different than PkgSpec because we want to encode mandatory fields:
@@ -28150,6 +28466,314 @@ func (v *VulnEqualInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns VulnEqualInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *VulnEqualInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// VulnEqualListResponse is returned by VulnEqualList on success.
+type VulnEqualListResponse struct {
+	// Returns a paginated results via VulnEqualConnection
+	VulnEqualList *VulnEqualListVulnEqualListVulnEqualConnection `json:"vulnEqualList"`
+}
+
+// GetVulnEqualList returns VulnEqualListResponse.VulnEqualList, and is useful for accessing the field via an interface.
+func (v *VulnEqualListResponse) GetVulnEqualList() *VulnEqualListVulnEqualListVulnEqualConnection {
+	return v.VulnEqualList
+}
+
+// VulnEqualListVulnEqualListVulnEqualConnection includes the requested fields of the GraphQL type VulnEqualConnection.
+// The GraphQL type's documentation follows.
+//
+// VulnEqualConnection returns the paginated results for VulnEqual.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VulnEqualEdge which contains the current cursor
+// and the VulnEqual node itself
+type VulnEqualListVulnEqualListVulnEqualConnection struct {
+	TotalCount int                                                               `json:"totalCount"`
+	Edges      []VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge `json:"edges"`
+	PageInfo   VulnEqualListVulnEqualListVulnEqualConnectionPageInfo             `json:"pageInfo"`
+}
+
+// GetTotalCount returns VulnEqualListVulnEqualListVulnEqualConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns VulnEqualListVulnEqualListVulnEqualConnection.Edges, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnection) GetEdges() []VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns VulnEqualListVulnEqualListVulnEqualConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnection) GetPageInfo() VulnEqualListVulnEqualListVulnEqualConnectionPageInfo {
+	return v.PageInfo
+}
+
+// VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge includes the requested fields of the GraphQL type VulnEqualEdge.
+// The GraphQL type's documentation follows.
+//
+// VulnEqualEdge contains the cursor for the resulting node and
+// the VulnEqual node itself.
+type VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge struct {
+	Cursor string                                                                       `json:"cursor"`
+	Node   VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual `json:"node"`
+}
+
+// GetCursor returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge.Node, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdge) GetNode() VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual {
+	return v.Node
+}
+
+// VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual includes the requested fields of the GraphQL type VulnEqual.
+// The GraphQL type's documentation follows.
+//
+// VulnEqual is an attestation to link two vulnerabilities together as being equal"
+//
+// Note that setting noVuln vulnerability type is invalid for VulnEqual!
+type VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual struct {
+	AllVulnEqual `json:"-"`
+}
+
+// GetId returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Id, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetId() string {
+	return v.AllVulnEqual.Id
+}
+
+// GetVulnerabilities returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetVulnerabilities() []AllVulnEqualVulnerabilitiesVulnerability {
+	return v.AllVulnEqual.Vulnerabilities
+}
+
+// GetJustification returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Justification, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetJustification() string {
+	return v.AllVulnEqual.Justification
+}
+
+// GetOrigin returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Origin, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetOrigin() string {
+	return v.AllVulnEqual.Origin
+}
+
+// GetCollector returns VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual.Collector, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) GetCollector() string {
+	return v.AllVulnEqual.Collector
+}
+
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnEqual)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual struct {
+	Id string `json:"id"`
+
+	Vulnerabilities []AllVulnEqualVulnerabilitiesVulnerability `json:"vulnerabilities"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual) __premarshalJSON() (*__premarshalVulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual, error) {
+	var retval __premarshalVulnEqualListVulnEqualListVulnEqualConnectionEdgesVulnEqualEdgeNodeVulnEqual
+
+	retval.Id = v.AllVulnEqual.Id
+	retval.Vulnerabilities = v.AllVulnEqual.Vulnerabilities
+	retval.Justification = v.AllVulnEqual.Justification
+	retval.Origin = v.AllVulnEqual.Origin
+	retval.Collector = v.AllVulnEqual.Collector
+	return &retval, nil
+}
+
+// VulnEqualListVulnEqualListVulnEqualConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type VulnEqualListVulnEqualListVulnEqualConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns VulnEqualListVulnEqualListVulnEqualConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns VulnEqualListVulnEqualListVulnEqualConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns VulnEqualListVulnEqualListVulnEqualConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *VulnEqualListVulnEqualListVulnEqualConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// VulnEqualSpec allows filtering the list of vulnerability links to return
+// in a query.
+type VulnEqualSpec struct {
+	Id              *string              `json:"id"`
+	Vulnerabilities []*VulnerabilitySpec `json:"vulnerabilities"`
+	Justification   *string              `json:"justification"`
+	Origin          *string              `json:"origin"`
+	Collector       *string              `json:"collector"`
+	DocumentRef     *string              `json:"documentRef"`
+}
+
+// GetId returns VulnEqualSpec.Id, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetId() *string { return v.Id }
+
+// GetVulnerabilities returns VulnEqualSpec.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetVulnerabilities() []*VulnerabilitySpec { return v.Vulnerabilities }
+
+// GetJustification returns VulnEqualSpec.Justification, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns VulnEqualSpec.Origin, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns VulnEqualSpec.Collector, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns VulnEqualSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *VulnEqualSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// VulnEqualsResponse is returned by VulnEquals on success.
+type VulnEqualsResponse struct {
+	// Returns all equal vulnerability mappings that match a filter.
+	VulnEqual []VulnEqualsVulnEqual `json:"vulnEqual"`
+}
+
+// GetVulnEqual returns VulnEqualsResponse.VulnEqual, and is useful for accessing the field via an interface.
+func (v *VulnEqualsResponse) GetVulnEqual() []VulnEqualsVulnEqual { return v.VulnEqual }
+
+// VulnEqualsVulnEqual includes the requested fields of the GraphQL type VulnEqual.
+// The GraphQL type's documentation follows.
+//
+// VulnEqual is an attestation to link two vulnerabilities together as being equal"
+//
+// Note that setting noVuln vulnerability type is invalid for VulnEqual!
+type VulnEqualsVulnEqual struct {
+	AllVulnEqual `json:"-"`
+}
+
+// GetId returns VulnEqualsVulnEqual.Id, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetId() string { return v.AllVulnEqual.Id }
+
+// GetVulnerabilities returns VulnEqualsVulnEqual.Vulnerabilities, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetVulnerabilities() []AllVulnEqualVulnerabilitiesVulnerability {
+	return v.AllVulnEqual.Vulnerabilities
+}
+
+// GetJustification returns VulnEqualsVulnEqual.Justification, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetJustification() string { return v.AllVulnEqual.Justification }
+
+// GetOrigin returns VulnEqualsVulnEqual.Origin, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetOrigin() string { return v.AllVulnEqual.Origin }
+
+// GetCollector returns VulnEqualsVulnEqual.Collector, and is useful for accessing the field via an interface.
+func (v *VulnEqualsVulnEqual) GetCollector() string { return v.AllVulnEqual.Collector }
+
+func (v *VulnEqualsVulnEqual) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnEqualsVulnEqual
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnEqualsVulnEqual = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnEqual)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnEqualsVulnEqual struct {
+	Id string `json:"id"`
+
+	Vulnerabilities []AllVulnEqualVulnerabilitiesVulnerability `json:"vulnerabilities"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VulnEqualsVulnEqual) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnEqualsVulnEqual) __premarshalJSON() (*__premarshalVulnEqualsVulnEqual, error) {
+	var retval __premarshalVulnEqualsVulnEqual
+
+	retval.Id = v.AllVulnEqual.Id
+	retval.Vulnerabilities = v.AllVulnEqual.Vulnerabilities
+	retval.Justification = v.AllVulnEqual.Justification
+	retval.Origin = v.AllVulnEqual.Origin
+	retval.Collector = v.AllVulnEqual.Collector
+	return &retval, nil
+}
+
 // VulnerabilitiesResponse is returned by Vulnerabilities on success.
 type VulnerabilitiesResponse struct {
 	// Returns all vulnerabilities matching a filter.
@@ -28495,6 +29119,409 @@ func (v *VulnerabilityMetadataInputSpec) GetCollector() string { return v.Collec
 
 // GetDocumentRef returns VulnerabilityMetadataInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *VulnerabilityMetadataInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// VulnerabilityMetadataListResponse is returned by VulnerabilityMetadataList on success.
+type VulnerabilityMetadataListResponse struct {
+	// Returns a paginated results via VulnerabilityMetadataConnection
+	VulnerabilityMetadataList *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection `json:"vulnerabilityMetadataList"`
+}
+
+// GetVulnerabilityMetadataList returns VulnerabilityMetadataListResponse.VulnerabilityMetadataList, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListResponse) GetVulnerabilityMetadataList() *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection {
+	return v.VulnerabilityMetadataList
+}
+
+// VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection includes the requested fields of the GraphQL type VulnerabilityMetadataConnection.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadataConnection returns the paginated results for VulnerabilityMetadata.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the VulnerabilityMetadataEdge which contains the current cursor
+// and the VulnerabilityMetadata node itself
+type VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection struct {
+	TotalCount int                                                                                                               `json:"totalCount"`
+	Edges      []VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge `json:"edges"`
+	PageInfo   VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo                         `json:"pageInfo"`
+}
+
+// GetTotalCount returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection.Edges, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection) GetEdges() []VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnection) GetPageInfo() VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo {
+	return v.PageInfo
+}
+
+// VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge includes the requested fields of the GraphQL type VulnerabilityMetadataEdge.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadataEdge contains the cursor for the resulting node and
+// the VulnerabilityMetadata node itself.
+type VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge struct {
+	Cursor string                                                                                                                                   `json:"cursor"`
+	Node   VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata `json:"node"`
+}
+
+// GetCursor returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge.Node, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdge) GetNode() VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata {
+	return v.Node
+}
+
+// VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata includes the requested fields of the GraphQL type VulnerabilityMetadata.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata struct {
+	AllVulnMetadataTree `json:"-"`
+}
+
+// GetId returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetId() string {
+	return v.AllVulnMetadataTree.Id
+}
+
+// GetVulnerability returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetOrigin() string {
+	return v.AllVulnMetadataTree.Origin
+}
+
+// GetCollector returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) GetCollector() string {
+	return v.AllVulnMetadataTree.Collector
+}
+
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata struct {
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata) __premarshalJSON() (*__premarshalVulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata, error) {
+	var retval __premarshalVulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionEdgesVulnerabilityMetadataEdgeNodeVulnerabilityMetadata
+
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
+
+// VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataListVulnerabilityMetadataListVulnerabilityMetadataConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// VulnerabilityMetadataResponse is returned by VulnerabilityMetadata on success.
+type VulnerabilityMetadataResponse struct {
+	// Returns all vulnerabilityMetadata attestations matching a filter.
+	VulnerabilityMetadata []VulnerabilityMetadataVulnerabilityMetadata `json:"vulnerabilityMetadata"`
+}
+
+// GetVulnerabilityMetadata returns VulnerabilityMetadataResponse.VulnerabilityMetadata, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataResponse) GetVulnerabilityMetadata() []VulnerabilityMetadataVulnerabilityMetadata {
+	return v.VulnerabilityMetadata
+}
+
+// VulnerabilityMetadataSpec allows filtering the list of VulnerabilityMetadata evidence
+// to return in a query.
+//
+// Comparator field is an enum that be set to filter the score and return a
+// range that matches. If the comparator is not specified, it will default to equal operation.
+//
+// Timestamp specified indicates filtering timestamps after the specified time
+type VulnerabilityMetadataSpec struct {
+	Id            *string                 `json:"id"`
+	Vulnerability *VulnerabilitySpec      `json:"vulnerability"`
+	ScoreType     *VulnerabilityScoreType `json:"scoreType"`
+	ScoreValue    *float64                `json:"scoreValue"`
+	Comparator    *Comparator             `json:"comparator"`
+	Timestamp     *time.Time              `json:"timestamp"`
+	Origin        *string                 `json:"origin"`
+	Collector     *string                 `json:"collector"`
+	DocumentRef   *string                 `json:"documentRef"`
+}
+
+// GetId returns VulnerabilityMetadataSpec.Id, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetId() *string { return v.Id }
+
+// GetVulnerability returns VulnerabilityMetadataSpec.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetVulnerability() *VulnerabilitySpec { return v.Vulnerability }
+
+// GetScoreType returns VulnerabilityMetadataSpec.ScoreType, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetScoreType() *VulnerabilityScoreType { return v.ScoreType }
+
+// GetScoreValue returns VulnerabilityMetadataSpec.ScoreValue, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetScoreValue() *float64 { return v.ScoreValue }
+
+// GetComparator returns VulnerabilityMetadataSpec.Comparator, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetComparator() *Comparator { return v.Comparator }
+
+// GetTimestamp returns VulnerabilityMetadataSpec.Timestamp, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetTimestamp() *time.Time { return v.Timestamp }
+
+// GetOrigin returns VulnerabilityMetadataSpec.Origin, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns VulnerabilityMetadataSpec.Collector, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns VulnerabilityMetadataSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataSpec) GetDocumentRef() *string { return v.DocumentRef }
+
+// VulnerabilityMetadataVulnerabilityMetadata includes the requested fields of the GraphQL type VulnerabilityMetadata.
+// The GraphQL type's documentation follows.
+//
+// VulnerabilityMetadata is an attestation that a vulnerability has a related score
+// associated with it.
+//
+// The intent of this evidence tree predicate is to allow extensibility of vulnerability
+// score (one-to-one mapping) with a specific vulnerability ID.
+//
+// A vulnerability ID can have a one-to-many relationship with the VulnerabilityMetadata
+// node as a vulnerability ID can have multiple scores (in various frameworks).
+//
+// Examples:
+//
+// scoreType: EPSSv1
+// scoreValue: 0.960760000
+//
+// scoreType: CVSSv2
+// scoreValue: 5.0
+//
+// scoreType: CVSSv3
+// scoreValue: 7.5
+//
+// The timestamp is used to determine when the score was evaluated for the specific vulnerability.
+type VulnerabilityMetadataVulnerabilityMetadata struct {
+	AllVulnMetadataTree `json:"-"`
+}
+
+// GetId returns VulnerabilityMetadataVulnerabilityMetadata.Id, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetId() string { return v.AllVulnMetadataTree.Id }
+
+// GetVulnerability returns VulnerabilityMetadataVulnerabilityMetadata.Vulnerability, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetVulnerability() AllVulnMetadataTreeVulnerability {
+	return v.AllVulnMetadataTree.Vulnerability
+}
+
+// GetScoreType returns VulnerabilityMetadataVulnerabilityMetadata.ScoreType, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetScoreType() VulnerabilityScoreType {
+	return v.AllVulnMetadataTree.ScoreType
+}
+
+// GetScoreValue returns VulnerabilityMetadataVulnerabilityMetadata.ScoreValue, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetScoreValue() float64 {
+	return v.AllVulnMetadataTree.ScoreValue
+}
+
+// GetTimestamp returns VulnerabilityMetadataVulnerabilityMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetTimestamp() time.Time {
+	return v.AllVulnMetadataTree.Timestamp
+}
+
+// GetOrigin returns VulnerabilityMetadataVulnerabilityMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetOrigin() string {
+	return v.AllVulnMetadataTree.Origin
+}
+
+// GetCollector returns VulnerabilityMetadataVulnerabilityMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *VulnerabilityMetadataVulnerabilityMetadata) GetCollector() string {
+	return v.AllVulnMetadataTree.Collector
+}
+
+func (v *VulnerabilityMetadataVulnerabilityMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*VulnerabilityMetadataVulnerabilityMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.VulnerabilityMetadataVulnerabilityMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllVulnMetadataTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalVulnerabilityMetadataVulnerabilityMetadata struct {
+	Id string `json:"id"`
+
+	Vulnerability AllVulnMetadataTreeVulnerability `json:"vulnerability"`
+
+	ScoreType VulnerabilityScoreType `json:"scoreType"`
+
+	ScoreValue float64 `json:"scoreValue"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *VulnerabilityMetadataVulnerabilityMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *VulnerabilityMetadataVulnerabilityMetadata) __premarshalJSON() (*__premarshalVulnerabilityMetadataVulnerabilityMetadata, error) {
+	var retval __premarshalVulnerabilityMetadataVulnerabilityMetadata
+
+	retval.Id = v.AllVulnMetadataTree.Id
+	retval.Vulnerability = v.AllVulnMetadataTree.Vulnerability
+	retval.ScoreType = v.AllVulnMetadataTree.ScoreType
+	retval.ScoreValue = v.AllVulnMetadataTree.ScoreValue
+	retval.Timestamp = v.AllVulnMetadataTree.Timestamp
+	retval.Origin = v.AllVulnMetadataTree.Origin
+	retval.Collector = v.AllVulnMetadataTree.Collector
+	return &retval, nil
+}
 
 // Records the type of the score being captured by the score node
 type VulnerabilityScoreType string
@@ -30058,6 +31085,30 @@ func (v *__PathInput) GetMaxPathLength() int { return v.MaxPathLength }
 // GetUsingOnly returns __PathInput.UsingOnly, and is useful for accessing the field via an interface.
 func (v *__PathInput) GetUsingOnly() []Edge { return v.UsingOnly }
 
+// __PkgEqualListInput is used internally by genqlient
+type __PkgEqualListInput struct {
+	Filter PkgEqualSpec `json:"filter"`
+	After  *string      `json:"after"`
+	First  *int         `json:"first"`
+}
+
+// GetFilter returns __PkgEqualListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PkgEqualListInput) GetFilter() PkgEqualSpec { return v.Filter }
+
+// GetAfter returns __PkgEqualListInput.After, and is useful for accessing the field via an interface.
+func (v *__PkgEqualListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __PkgEqualListInput.First, and is useful for accessing the field via an interface.
+func (v *__PkgEqualListInput) GetFirst() *int { return v.First }
+
+// __PkgEqualsInput is used internally by genqlient
+type __PkgEqualsInput struct {
+	Filter PkgEqualSpec `json:"filter"`
+}
+
+// GetFilter returns __PkgEqualsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__PkgEqualsInput) GetFilter() PkgEqualSpec { return v.Filter }
+
 // __PointOfContactListInput is used internally by genqlient
 type __PointOfContactListInput struct {
 	Filter PointOfContactSpec `json:"filter"`
@@ -30154,6 +31205,30 @@ type __VEXStatementsInput struct {
 // GetFilter returns __VEXStatementsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__VEXStatementsInput) GetFilter() CertifyVEXStatementSpec { return v.Filter }
 
+// __VulnEqualListInput is used internally by genqlient
+type __VulnEqualListInput struct {
+	Filter VulnEqualSpec `json:"filter"`
+	After  *string       `json:"after"`
+	First  *int          `json:"first"`
+}
+
+// GetFilter returns __VulnEqualListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnEqualListInput) GetFilter() VulnEqualSpec { return v.Filter }
+
+// GetAfter returns __VulnEqualListInput.After, and is useful for accessing the field via an interface.
+func (v *__VulnEqualListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __VulnEqualListInput.First, and is useful for accessing the field via an interface.
+func (v *__VulnEqualListInput) GetFirst() *int { return v.First }
+
+// __VulnEqualsInput is used internally by genqlient
+type __VulnEqualsInput struct {
+	Filter VulnEqualSpec `json:"filter"`
+}
+
+// GetFilter returns __VulnEqualsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnEqualsInput) GetFilter() VulnEqualSpec { return v.Filter }
+
 // __VulnerabilitiesInput is used internally by genqlient
 type __VulnerabilitiesInput struct {
 	Filter VulnerabilitySpec `json:"filter"`
@@ -30177,6 +31252,30 @@ func (v *__VulnerabilityListInput) GetAfter() *string { return v.After }
 
 // GetFirst returns __VulnerabilityListInput.First, and is useful for accessing the field via an interface.
 func (v *__VulnerabilityListInput) GetFirst() *int { return v.First }
+
+// __VulnerabilityMetadataInput is used internally by genqlient
+type __VulnerabilityMetadataInput struct {
+	Filter VulnerabilityMetadataSpec `json:"filter"`
+}
+
+// GetFilter returns __VulnerabilityMetadataInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityMetadataInput) GetFilter() VulnerabilityMetadataSpec { return v.Filter }
+
+// __VulnerabilityMetadataListInput is used internally by genqlient
+type __VulnerabilityMetadataListInput struct {
+	Filter VulnerabilityMetadataSpec `json:"filter"`
+	After  *string                   `json:"after"`
+	First  *int                      `json:"first"`
+}
+
+// GetFilter returns __VulnerabilityMetadataListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityMetadataListInput) GetFilter() VulnerabilityMetadataSpec { return v.Filter }
+
+// GetAfter returns __VulnerabilityMetadataListInput.After, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityMetadataListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __VulnerabilityMetadataListInput.First, and is useful for accessing the field via an interface.
+func (v *__VulnerabilityMetadataListInput) GetFirst() *int { return v.First }
 
 // The query or mutation executed by Artifacts.
 const Artifacts_Operation = `
@@ -37435,6 +38534,153 @@ func Path(
 	return &data_, err_
 }
 
+// The query or mutation executed by PkgEqualList.
+const PkgEqualList_Operation = `
+query PkgEqualList ($filter: PkgEqualSpec!, $after: ID, $first: Int) {
+	PkgEqualList(pkgEqualSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllPkgEqual
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllPkgEqual on PkgEqual {
+	id
+	justification
+	packages {
+		... AllPkgTree
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func PkgEqualList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PkgEqualSpec,
+	after *string,
+	first *int,
+) (*PkgEqualListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "PkgEqualList",
+		Query:  PkgEqualList_Operation,
+		Variables: &__PkgEqualListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ PkgEqualListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by PkgEquals.
+const PkgEquals_Operation = `
+query PkgEquals ($filter: PkgEqualSpec!) {
+	PkgEqual(pkgEqualSpec: $filter) {
+		... AllPkgEqual
+	}
+}
+fragment AllPkgEqual on PkgEqual {
+	id
+	justification
+	packages {
+		... AllPkgTree
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func PkgEquals(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter PkgEqualSpec,
+) (*PkgEqualsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "PkgEquals",
+		Query:  PkgEquals_Operation,
+		Variables: &__PkgEqualsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ PkgEqualsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by PointOfContactList.
 const PointOfContactList_Operation = `
 query PointOfContactList ($filter: PointOfContactSpec!, $after: ID, $first: Int) {
@@ -38105,6 +39351,125 @@ func VEXStatements(
 	return &data_, err_
 }
 
+// The query or mutation executed by VulnEqualList.
+const VulnEqualList_Operation = `
+query VulnEqualList ($filter: VulnEqualSpec!, $after: ID, $first: Int) {
+	vulnEqualList(vulnEqualSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllVulnEqual
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllVulnEqual on VulnEqual {
+	id
+	vulnerabilities {
+		... AllVulnerabilityTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VulnEqualList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnEqualSpec,
+	after *string,
+	first *int,
+) (*VulnEqualListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnEqualList",
+		Query:  VulnEqualList_Operation,
+		Variables: &__VulnEqualListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ VulnEqualListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VulnEquals.
+const VulnEquals_Operation = `
+query VulnEquals ($filter: VulnEqualSpec!) {
+	vulnEqual(vulnEqualSpec: $filter) {
+		... AllVulnEqual
+	}
+}
+fragment AllVulnEqual on VulnEqual {
+	id
+	vulnerabilities {
+		... AllVulnerabilityTree
+	}
+	justification
+	origin
+	collector
+}
+fragment AllVulnerabilityTree on Vulnerability {
+	id
+	type
+	vulnerabilityIDs {
+		id
+		vulnerabilityID
+	}
+}
+`
+
+func VulnEquals(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnEqualSpec,
+) (*VulnEqualsResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnEquals",
+		Query:  VulnEquals_Operation,
+		Variables: &__VulnEqualsInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ VulnEqualsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by Vulnerabilities.
 const Vulnerabilities_Operation = `
 query Vulnerabilities ($filter: VulnerabilitySpec!) {
@@ -38195,6 +39560,123 @@ func VulnerabilityList(
 	var err_ error
 
 	var data_ VulnerabilityListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VulnerabilityMetadata.
+const VulnerabilityMetadata_Operation = `
+query VulnerabilityMetadata ($filter: VulnerabilityMetadataSpec!) {
+	vulnerabilityMetadata(vulnerabilityMetadataSpec: $filter) {
+		... AllVulnMetadataTree
+	}
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
+	origin
+	collector
+}
+`
+
+func VulnerabilityMetadata(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnerabilityMetadataSpec,
+) (*VulnerabilityMetadataResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnerabilityMetadata",
+		Query:  VulnerabilityMetadata_Operation,
+		Variables: &__VulnerabilityMetadataInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ VulnerabilityMetadataResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by VulnerabilityMetadataList.
+const VulnerabilityMetadataList_Operation = `
+query VulnerabilityMetadataList ($filter: VulnerabilityMetadataSpec!, $after: ID, $first: Int) {
+	vulnerabilityMetadataList(vulnerabilityMetadataSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllVulnMetadataTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllVulnMetadataTree on VulnerabilityMetadata {
+	id
+	vulnerability {
+		id
+		type
+		vulnerabilityIDs {
+			id
+			vulnerabilityID
+		}
+	}
+	scoreType
+	scoreValue
+	timestamp
+	origin
+	collector
+}
+`
+
+func VulnerabilityMetadataList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter VulnerabilityMetadataSpec,
+	after *string,
+	first *int,
+) (*VulnerabilityMetadataListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "VulnerabilityMetadataList",
+		Query:  VulnerabilityMetadataList_Operation,
+		Variables: &__VulnerabilityMetadataListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ VulnerabilityMetadataListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
