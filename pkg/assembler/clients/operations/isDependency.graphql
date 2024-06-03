@@ -55,7 +55,7 @@ query Dependencies($filter: IsDependencySpec!) {
   }
 }
 
-query IsDependencyList($filter: IsDependencySpec!, $after: ID, $first: Int) {
+query DependencyList($filter: IsDependencySpec!, $after: ID, $first: Int) {
   IsDependencyList(isDependencySpec: $filter, after: $after, first: $first) {
     totalCount
     edges {

@@ -17,12 +17,6 @@
 
 # Defines the GraphQL operations to ingest occurrence information into GUAC
 
-query IsOccurrences($filter: IsOccurrenceSpec!) {
-  IsOccurrence(isOccurrenceSpec: $filter) {
-    ...AllIsOccurrencesTree
-  }
-}
-
 mutation IngestIsOccurrencePkg(
   $pkg: IDorPkgInput!
   $artifact: IDorArtifactInput!
@@ -72,3 +66,30 @@ mutation IngestIsOccurrencesSrc(
     occurrences: $occurrences
   )
 }
+
+# Exposes GraphQL queries to retrieve IsOccurrences
+
+query Occurrences($filter: IsOccurrenceSpec!) {
+  IsOccurrence(isOccurrenceSpec: $filter) {
+    ...AllIsOccurrencesTree
+  }
+}
+
+
+query OccurrenceList($filter: IsOccurrenceSpec!, $after: ID, $first: Int) {
+  IsOccurrenceList(isOccurrenceSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllIsOccurrencesTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}
+

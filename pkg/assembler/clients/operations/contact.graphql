@@ -87,7 +87,6 @@ mutation IngestPointOfContactArtifacts(
   )
 }
 
-
 # Exposes GraphQL queries to retrieve GUAC Point of Contact
 
 query PointOfContacts($filter: PointOfContactSpec!) {
