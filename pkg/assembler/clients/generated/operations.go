@@ -10030,6 +10030,129 @@ func (v *FindSoftwareResponse) __premarshalJSON() (*__premarshalFindSoftwareResp
 	return &retval, nil
 }
 
+// HasMetadataHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type HasMetadataHasMetadata struct {
+	AllHasMetadata `json:"-"`
+}
+
+// GetId returns HasMetadataHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetId() string { return v.AllHasMetadata.Id }
+
+// GetSubject returns HasMetadataHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetSubject() AllHasMetadataSubjectPackageSourceOrArtifact {
+	return v.AllHasMetadata.Subject
+}
+
+// GetKey returns HasMetadataHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetKey() string { return v.AllHasMetadata.Key }
+
+// GetValue returns HasMetadataHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetValue() string { return v.AllHasMetadata.Value }
+
+// GetTimestamp returns HasMetadataHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetTimestamp() time.Time { return v.AllHasMetadata.Timestamp }
+
+// GetJustification returns HasMetadataHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetJustification() string { return v.AllHasMetadata.Justification }
+
+// GetOrigin returns HasMetadataHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetOrigin() string { return v.AllHasMetadata.Origin }
+
+// GetCollector returns HasMetadataHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataHasMetadata) GetCollector() string { return v.AllHasMetadata.Collector }
+
+func (v *HasMetadataHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasMetadataHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasMetadataHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasMetadataHasMetadata struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasMetadataHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasMetadataHasMetadata) __premarshalJSON() (*__premarshalHasMetadataHasMetadata, error) {
+	var retval __premarshalHasMetadataHasMetadata
+
+	retval.Id = v.AllHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasMetadata.Subject
+		var err error
+		*dst, err = __marshalAllHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasMetadataHasMetadata.AllHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.AllHasMetadata.Key
+	retval.Value = v.AllHasMetadata.Value
+	retval.Timestamp = v.AllHasMetadata.Timestamp
+	retval.Justification = v.AllHasMetadata.Justification
+	retval.Origin = v.AllHasMetadata.Origin
+	retval.Collector = v.AllHasMetadata.Collector
+	return &retval, nil
+}
+
 // HasMetadataInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type HasMetadataInputSpec struct {
 	Key           string    `json:"key"`
@@ -10061,6 +10184,300 @@ func (v *HasMetadataInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns HasMetadataInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *HasMetadataInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// HasMetadataListHasMetadataListHasMetadataConnection includes the requested fields of the GraphQL type HasMetadataConnection.
+// The GraphQL type's documentation follows.
+//
+// HasMetadataConnection returns the paginated results for HasMetadata.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasMetadataEdge which contains the current cursor
+// and the HasMetadata node itself
+type HasMetadataListHasMetadataListHasMetadataConnection struct {
+	TotalCount int                                                                       `json:"totalCount"`
+	Edges      []HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge `json:"edges"`
+	PageInfo   HasMetadataListHasMetadataListHasMetadataConnectionPageInfo               `json:"pageInfo"`
+}
+
+// GetTotalCount returns HasMetadataListHasMetadataListHasMetadataConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns HasMetadataListHasMetadataListHasMetadataConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnection) GetEdges() []HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HasMetadataListHasMetadataListHasMetadataConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnection) GetPageInfo() HasMetadataListHasMetadataListHasMetadataConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge includes the requested fields of the GraphQL type HasMetadataEdge.
+// The GraphQL type's documentation follows.
+//
+// HasMetadataEdge contains the cursor for the resulting node and
+// the HasMetadata node itself.
+type HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge struct {
+	Cursor string                                                                                 `json:"cursor"`
+	Node   HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata `json:"node"`
+}
+
+// GetCursor returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge.Node, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdge) GetNode() HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata {
+	return v.Node
+}
+
+// HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata includes the requested fields of the GraphQL type HasMetadata.
+// The GraphQL type's documentation follows.
+//
+// HasMetadata is an attestation that a package, source, or artifact has a certain
+// attested property (key) with value (value). For example, a source may have
+// metadata "SourceRepo2FAEnabled=true".
+//
+// The intent of this evidence tree predicate is to allow extensibility of metadata
+// expressible within the GUAC ontology. Metadata that is commonly used will then
+// be promoted to a predicate on its own.
+//
+// Justification indicates how the metadata was determined.
+//
+// The metadata applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata struct {
+	AllHasMetadata `json:"-"`
+}
+
+// GetId returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Id, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetId() string {
+	return v.AllHasMetadata.Id
+}
+
+// GetSubject returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Subject, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetSubject() AllHasMetadataSubjectPackageSourceOrArtifact {
+	return v.AllHasMetadata.Subject
+}
+
+// GetKey returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetKey() string {
+	return v.AllHasMetadata.Key
+}
+
+// GetValue returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetValue() string {
+	return v.AllHasMetadata.Value
+}
+
+// GetTimestamp returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Timestamp, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetTimestamp() time.Time {
+	return v.AllHasMetadata.Timestamp
+}
+
+// GetJustification returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetJustification() string {
+	return v.AllHasMetadata.Justification
+}
+
+// GetOrigin returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetOrigin() string {
+	return v.AllHasMetadata.Origin
+}
+
+// GetCollector returns HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) GetCollector() string {
+	return v.AllHasMetadata.Collector
+}
+
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasMetadata)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Key string `json:"key"`
+
+	Value string `json:"value"`
+
+	Timestamp time.Time `json:"timestamp"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata) __premarshalJSON() (*__premarshalHasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata, error) {
+	var retval __premarshalHasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata
+
+	retval.Id = v.AllHasMetadata.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllHasMetadata.Subject
+		var err error
+		*dst, err = __marshalAllHasMetadataSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal HasMetadataListHasMetadataListHasMetadataConnectionEdgesHasMetadataEdgeNodeHasMetadata.AllHasMetadata.Subject: %w", err)
+		}
+	}
+	retval.Key = v.AllHasMetadata.Key
+	retval.Value = v.AllHasMetadata.Value
+	retval.Timestamp = v.AllHasMetadata.Timestamp
+	retval.Justification = v.AllHasMetadata.Justification
+	retval.Origin = v.AllHasMetadata.Origin
+	retval.Collector = v.AllHasMetadata.Collector
+	return &retval, nil
+}
+
+// HasMetadataListHasMetadataListHasMetadataConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HasMetadataListHasMetadataListHasMetadataConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HasMetadataListHasMetadataListHasMetadataConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HasMetadataListHasMetadataListHasMetadataConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns HasMetadataListHasMetadataListHasMetadataConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HasMetadataListHasMetadataListHasMetadataConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// HasMetadataListResponse is returned by HasMetadataList on success.
+type HasMetadataListResponse struct {
+	// Returns a paginated results via HasMetadataConnection
+	HasMetadataList *HasMetadataListHasMetadataListHasMetadataConnection `json:"HasMetadataList"`
+}
+
+// GetHasMetadataList returns HasMetadataListResponse.HasMetadataList, and is useful for accessing the field via an interface.
+func (v *HasMetadataListResponse) GetHasMetadataList() *HasMetadataListHasMetadataListHasMetadataConnection {
+	return v.HasMetadataList
+}
+
+// HasMetadataResponse is returned by HasMetadata on success.
+type HasMetadataResponse struct {
+	// Returns all HasMetdata attestations matching a filter.
+	HasMetadata []HasMetadataHasMetadata `json:"HasMetadata"`
+}
+
+// GetHasMetadata returns HasMetadataResponse.HasMetadata, and is useful for accessing the field via an interface.
+func (v *HasMetadataResponse) GetHasMetadata() []HasMetadataHasMetadata { return v.HasMetadata }
+
+// HasMetadataSpec allows filtering the list of HasMetadata evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// since specified indicates filtering timestamps after the specified time
+type HasMetadataSpec struct {
+	Id            *string                      `json:"id"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
+	Since         *time.Time                   `json:"since"`
+	Key           *string                      `json:"key"`
+	Value         *string                      `json:"value"`
+	Justification *string                      `json:"justification"`
+	Origin        *string                      `json:"origin"`
+	Collector     *string                      `json:"collector"`
+	DocumentRef   *string                      `json:"documentRef"`
+}
+
+// GetId returns HasMetadataSpec.Id, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetId() *string { return v.Id }
+
+// GetSubject returns HasMetadataSpec.Subject, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetSubject() *PackageSourceOrArtifactSpec { return v.Subject }
+
+// GetSince returns HasMetadataSpec.Since, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetSince() *time.Time { return v.Since }
+
+// GetKey returns HasMetadataSpec.Key, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetKey() *string { return v.Key }
+
+// GetValue returns HasMetadataSpec.Value, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetValue() *string { return v.Value }
+
+// GetJustification returns HasMetadataSpec.Justification, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns HasMetadataSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns HasMetadataSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns HasMetadataSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasMetadataSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 type HasSBOMIncludesInputSpec struct {
 	Packages     []string `json:"packages"`
@@ -28299,6 +28716,30 @@ type __FindSoftwareInput struct {
 // GetSearchText returns __FindSoftwareInput.SearchText, and is useful for accessing the field via an interface.
 func (v *__FindSoftwareInput) GetSearchText() string { return v.SearchText }
 
+// __HasMetadataInput is used internally by genqlient
+type __HasMetadataInput struct {
+	Filter HasMetadataSpec `json:"filter"`
+}
+
+// GetFilter returns __HasMetadataInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasMetadataInput) GetFilter() HasMetadataSpec { return v.Filter }
+
+// __HasMetadataListInput is used internally by genqlient
+type __HasMetadataListInput struct {
+	Filter HasMetadataSpec `json:"filter"`
+	After  *string         `json:"after"`
+	First  *int            `json:"first"`
+}
+
+// GetFilter returns __HasMetadataListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasMetadataListInput) GetFilter() HasMetadataSpec { return v.Filter }
+
+// GetAfter returns __HasMetadataListInput.After, and is useful for accessing the field via an interface.
+func (v *__HasMetadataListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HasMetadataListInput.First, and is useful for accessing the field via an interface.
+func (v *__HasMetadataListInput) GetFirst() *int { return v.First }
+
 // __HasSBOMListInput is used internally by genqlient
 type __HasSBOMListInput struct {
 	Filter HasSBOMSpec `json:"filter"`
@@ -30966,6 +31407,215 @@ func FindSoftware(
 	var err_ error
 
 	var data_ FindSoftwareResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasMetadata.
+const HasMetadata_Operation = `
+query HasMetadata ($filter: HasMetadataSpec!) {
+	HasMetadata(hasMetadataSpec: $filter) {
+		... AllHasMetadata
+	}
+}
+fragment AllHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HasMetadata(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasMetadataSpec,
+) (*HasMetadataResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasMetadata",
+		Query:  HasMetadata_Operation,
+		Variables: &__HasMetadataInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ HasMetadataResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasMetadataList.
+const HasMetadataList_Operation = `
+query HasMetadataList ($filter: HasMetadataSpec!, $after: ID, $first: Int) {
+	HasMetadataList(hasMetadataSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHasMetadata
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHasMetadata on HasMetadata {
+	id
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	key
+	value
+	timestamp
+	justification
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func HasMetadataList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasMetadataSpec,
+	after *string,
+	first *int,
+) (*HasMetadataListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasMetadataList",
+		Query:  HasMetadataList_Operation,
+		Variables: &__HasMetadataListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HasMetadataListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
