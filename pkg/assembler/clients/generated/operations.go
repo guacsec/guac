@@ -10681,6 +10681,97 @@ func (v *HasSLSASpec) GetCollector() *string { return v.Collector }
 // GetDocumentRef returns HasSLSASpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *HasSLSASpec) GetDocumentRef() *string { return v.DocumentRef }
 
+// HasSourceAtHasSourceAt includes the requested fields of the GraphQL type HasSourceAt.
+// The GraphQL type's documentation follows.
+//
+// HasSourceAt records that a package's repository is a given source.
+type HasSourceAtHasSourceAt struct {
+	AllHasSourceAt `json:"-"`
+}
+
+// GetId returns HasSourceAtHasSourceAt.Id, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetId() string { return v.AllHasSourceAt.Id }
+
+// GetJustification returns HasSourceAtHasSourceAt.Justification, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetJustification() string { return v.AllHasSourceAt.Justification }
+
+// GetKnownSince returns HasSourceAtHasSourceAt.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetKnownSince() time.Time { return v.AllHasSourceAt.KnownSince }
+
+// GetPackage returns HasSourceAtHasSourceAt.Package, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetPackage() AllHasSourceAtPackage { return v.AllHasSourceAt.Package }
+
+// GetSource returns HasSourceAtHasSourceAt.Source, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetSource() AllHasSourceAtSource { return v.AllHasSourceAt.Source }
+
+// GetOrigin returns HasSourceAtHasSourceAt.Origin, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetOrigin() string { return v.AllHasSourceAt.Origin }
+
+// GetCollector returns HasSourceAtHasSourceAt.Collector, and is useful for accessing the field via an interface.
+func (v *HasSourceAtHasSourceAt) GetCollector() string { return v.AllHasSourceAt.Collector }
+
+func (v *HasSourceAtHasSourceAt) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSourceAtHasSourceAt
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSourceAtHasSourceAt = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSourceAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSourceAtHasSourceAt struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Package AllHasSourceAtPackage `json:"package"`
+
+	Source AllHasSourceAtSource `json:"source"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasSourceAtHasSourceAt) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSourceAtHasSourceAt) __premarshalJSON() (*__premarshalHasSourceAtHasSourceAt, error) {
+	var retval __premarshalHasSourceAtHasSourceAt
+
+	retval.Id = v.AllHasSourceAt.Id
+	retval.Justification = v.AllHasSourceAt.Justification
+	retval.KnownSince = v.AllHasSourceAt.KnownSince
+	retval.Package = v.AllHasSourceAt.Package
+	retval.Source = v.AllHasSourceAt.Source
+	retval.Origin = v.AllHasSourceAt.Origin
+	retval.Collector = v.AllHasSourceAt.Collector
+	return &retval, nil
+}
+
 // HasSourceAtInputSpec is the same as HasSourceAt but for mutation input.
 type HasSourceAtInputSpec struct {
 	KnownSince    time.Time `json:"knownSince"`
@@ -10704,6 +10795,254 @@ func (v *HasSourceAtInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns HasSourceAtInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *HasSourceAtInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// HasSourceAtListHasSourceAtListHasSourceAtConnection includes the requested fields of the GraphQL type HasSourceAtConnection.
+// The GraphQL type's documentation follows.
+//
+// HasSourceAtConnection returns the paginated results for HasSourceAt.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the HasSourceAtEdge which contains the current cursor
+// and the HasSourceAt node itself
+type HasSourceAtListHasSourceAtListHasSourceAtConnection struct {
+	TotalCount int                                                                       `json:"totalCount"`
+	Edges      []HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge `json:"edges"`
+	PageInfo   HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo               `json:"pageInfo"`
+}
+
+// GetTotalCount returns HasSourceAtListHasSourceAtListHasSourceAtConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns HasSourceAtListHasSourceAtListHasSourceAtConnection.Edges, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnection) GetEdges() []HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns HasSourceAtListHasSourceAtListHasSourceAtConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnection) GetPageInfo() HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo {
+	return v.PageInfo
+}
+
+// HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge includes the requested fields of the GraphQL type HasSourceAtEdge.
+// The GraphQL type's documentation follows.
+//
+// HasSourceAtEdge contains the cursor for the resulting node and
+// the HasSourceAt node itself.
+type HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge struct {
+	Cursor string                                                                                 `json:"cursor"`
+	Node   HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt `json:"node"`
+}
+
+// GetCursor returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge.Node, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdge) GetNode() HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt {
+	return v.Node
+}
+
+// HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt includes the requested fields of the GraphQL type HasSourceAt.
+// The GraphQL type's documentation follows.
+//
+// HasSourceAt records that a package's repository is a given source.
+type HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt struct {
+	AllHasSourceAt `json:"-"`
+}
+
+// GetId returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Id, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetId() string {
+	return v.AllHasSourceAt.Id
+}
+
+// GetJustification returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Justification, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetJustification() string {
+	return v.AllHasSourceAt.Justification
+}
+
+// GetKnownSince returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetKnownSince() time.Time {
+	return v.AllHasSourceAt.KnownSince
+}
+
+// GetPackage returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Package, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetPackage() AllHasSourceAtPackage {
+	return v.AllHasSourceAt.Package
+}
+
+// GetSource returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Source, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetSource() AllHasSourceAtSource {
+	return v.AllHasSourceAt.Source
+}
+
+// GetOrigin returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Origin, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetOrigin() string {
+	return v.AllHasSourceAt.Origin
+}
+
+// GetCollector returns HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt.Collector, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) GetCollector() string {
+	return v.AllHasSourceAt.Collector
+}
+
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllHasSourceAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalHasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Package AllHasSourceAtPackage `json:"package"`
+
+	Source AllHasSourceAtSource `json:"source"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt) __premarshalJSON() (*__premarshalHasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt, error) {
+	var retval __premarshalHasSourceAtListHasSourceAtListHasSourceAtConnectionEdgesHasSourceAtEdgeNodeHasSourceAt
+
+	retval.Id = v.AllHasSourceAt.Id
+	retval.Justification = v.AllHasSourceAt.Justification
+	retval.KnownSince = v.AllHasSourceAt.KnownSince
+	retval.Package = v.AllHasSourceAt.Package
+	retval.Source = v.AllHasSourceAt.Source
+	retval.Origin = v.AllHasSourceAt.Origin
+	retval.Collector = v.AllHasSourceAt.Collector
+	return &retval, nil
+}
+
+// HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListHasSourceAtListHasSourceAtConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// HasSourceAtListResponse is returned by HasSourceAtList on success.
+type HasSourceAtListResponse struct {
+	// Returns a paginated results via HasSourceAtConnection
+	HasSourceAtList *HasSourceAtListHasSourceAtListHasSourceAtConnection `json:"HasSourceAtList"`
+}
+
+// GetHasSourceAtList returns HasSourceAtListResponse.HasSourceAtList, and is useful for accessing the field via an interface.
+func (v *HasSourceAtListResponse) GetHasSourceAtList() *HasSourceAtListHasSourceAtListHasSourceAtConnection {
+	return v.HasSourceAtList
+}
+
+// HasSourceAtResponse is returned by HasSourceAt on success.
+type HasSourceAtResponse struct {
+	// Returns all source mappings that match the filter.
+	HasSourceAt []HasSourceAtHasSourceAt `json:"HasSourceAt"`
+}
+
+// GetHasSourceAt returns HasSourceAtResponse.HasSourceAt, and is useful for accessing the field via an interface.
+func (v *HasSourceAtResponse) GetHasSourceAt() []HasSourceAtHasSourceAt { return v.HasSourceAt }
+
+// HasSourceAtSpec allows filtering the list of HasSourceAt to return.
+type HasSourceAtSpec struct {
+	Id            *string     `json:"id"`
+	Package       *PkgSpec    `json:"package"`
+	Source        *SourceSpec `json:"source"`
+	KnownSince    *time.Time  `json:"knownSince"`
+	Justification *string     `json:"justification"`
+	Origin        *string     `json:"origin"`
+	Collector     *string     `json:"collector"`
+	DocumentRef   *string     `json:"documentRef"`
+}
+
+// GetId returns HasSourceAtSpec.Id, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetId() *string { return v.Id }
+
+// GetPackage returns HasSourceAtSpec.Package, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetPackage() *PkgSpec { return v.Package }
+
+// GetSource returns HasSourceAtSpec.Source, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetSource() *SourceSpec { return v.Source }
+
+// GetKnownSince returns HasSourceAtSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetKnownSince() *time.Time { return v.KnownSince }
+
+// GetJustification returns HasSourceAtSpec.Justification, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetJustification() *string { return v.Justification }
+
+// GetOrigin returns HasSourceAtSpec.Origin, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns HasSourceAtSpec.Collector, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns HasSourceAtSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *HasSourceAtSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // HashEqualInputSpec represents the input to certify that packages are similar.
 type HashEqualInputSpec struct {
@@ -11992,6 +12331,217 @@ func (v *IsDependencyInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns IsDependencyInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *IsDependencyInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// IsDependencyListIsDependencyListIsDependencyConnection includes the requested fields of the GraphQL type IsDependencyConnection.
+// The GraphQL type's documentation follows.
+//
+// IsDependencyConnection returns the paginated results for IsDependency.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the IsDependencyEdge which contains the current cursor
+// and the IsDependency node itself
+type IsDependencyListIsDependencyListIsDependencyConnection struct {
+	TotalCount int                                                                           `json:"totalCount"`
+	Edges      []IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge `json:"edges"`
+	PageInfo   IsDependencyListIsDependencyListIsDependencyConnectionPageInfo                `json:"pageInfo"`
+}
+
+// GetTotalCount returns IsDependencyListIsDependencyListIsDependencyConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns IsDependencyListIsDependencyListIsDependencyConnection.Edges, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnection) GetEdges() []IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns IsDependencyListIsDependencyListIsDependencyConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnection) GetPageInfo() IsDependencyListIsDependencyListIsDependencyConnectionPageInfo {
+	return v.PageInfo
+}
+
+// IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge includes the requested fields of the GraphQL type IsDependencyEdge.
+// The GraphQL type's documentation follows.
+//
+// IsDependencyEdge contains the cursor for the resulting node and
+// the IsDependency node itself.
+type IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge struct {
+	Cursor string                                                                                      `json:"cursor"`
+	Node   IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency `json:"node"`
+}
+
+// GetCursor returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge.Node, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdge) GetNode() IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency {
+	return v.Node
+}
+
+// IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency includes the requested fields of the GraphQL type IsDependency.
+// The GraphQL type's documentation follows.
+//
+// IsDependency is an attestation to record that a package depends on another.
+type IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency struct {
+	AllIsDependencyTree `json:"-"`
+}
+
+// GetId returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Id, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetId() string {
+	return v.AllIsDependencyTree.Id
+}
+
+// GetJustification returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Justification, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetJustification() string {
+	return v.AllIsDependencyTree.Justification
+}
+
+// GetPackage returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Package, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetPackage() AllIsDependencyTreePackage {
+	return v.AllIsDependencyTree.Package
+}
+
+// GetDependencyPackage returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetDependencyPackage() AllIsDependencyTreeDependencyPackage {
+	return v.AllIsDependencyTree.DependencyPackage
+}
+
+// GetDependencyType returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetDependencyType() DependencyType {
+	return v.AllIsDependencyTree.DependencyType
+}
+
+// GetVersionRange returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.VersionRange, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetVersionRange() string {
+	return v.AllIsDependencyTree.VersionRange
+}
+
+// GetOrigin returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Origin, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetOrigin() string {
+	return v.AllIsDependencyTree.Origin
+}
+
+// GetCollector returns IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency.Collector, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) GetCollector() string {
+	return v.AllIsDependencyTree.Collector
+}
+
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsDependencyTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Package AllIsDependencyTreePackage `json:"package"`
+
+	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
+
+	DependencyType DependencyType `json:"dependencyType"`
+
+	VersionRange string `json:"versionRange"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency) __premarshalJSON() (*__premarshalIsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency, error) {
+	var retval __premarshalIsDependencyListIsDependencyListIsDependencyConnectionEdgesIsDependencyEdgeNodeIsDependency
+
+	retval.Id = v.AllIsDependencyTree.Id
+	retval.Justification = v.AllIsDependencyTree.Justification
+	retval.Package = v.AllIsDependencyTree.Package
+	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
+	retval.DependencyType = v.AllIsDependencyTree.DependencyType
+	retval.VersionRange = v.AllIsDependencyTree.VersionRange
+	retval.Origin = v.AllIsDependencyTree.Origin
+	retval.Collector = v.AllIsDependencyTree.Collector
+	return &retval, nil
+}
+
+// IsDependencyListIsDependencyListIsDependencyConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type IsDependencyListIsDependencyListIsDependencyConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns IsDependencyListIsDependencyListIsDependencyConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns IsDependencyListIsDependencyListIsDependencyConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns IsDependencyListIsDependencyListIsDependencyConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *IsDependencyListIsDependencyListIsDependencyConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// IsDependencyListResponse is returned by IsDependencyList on success.
+type IsDependencyListResponse struct {
+	// Returns a paginated results via IsDependencyConnection
+	IsDependencyList *IsDependencyListIsDependencyListIsDependencyConnection `json:"IsDependencyList"`
+}
+
+// GetIsDependencyList returns IsDependencyListResponse.IsDependencyList, and is useful for accessing the field via an interface.
+func (v *IsDependencyListResponse) GetIsDependencyList() *IsDependencyListIsDependencyListIsDependencyConnection {
+	return v.IsDependencyList
+}
 
 // IsDependencySpec allows filtering the list of dependencies to return.
 //
@@ -27378,6 +27928,30 @@ func (v *__HasSLSAListInput) GetAfter() *string { return v.After }
 // GetFirst returns __HasSLSAListInput.First, and is useful for accessing the field via an interface.
 func (v *__HasSLSAListInput) GetFirst() *int { return v.First }
 
+// __HasSourceAtInput is used internally by genqlient
+type __HasSourceAtInput struct {
+	Filter HasSourceAtSpec `json:"filter"`
+}
+
+// GetFilter returns __HasSourceAtInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtInput) GetFilter() HasSourceAtSpec { return v.Filter }
+
+// __HasSourceAtListInput is used internally by genqlient
+type __HasSourceAtListInput struct {
+	Filter HasSourceAtSpec `json:"filter"`
+	After  *string         `json:"after"`
+	First  *int            `json:"first"`
+}
+
+// GetFilter returns __HasSourceAtListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtListInput) GetFilter() HasSourceAtSpec { return v.Filter }
+
+// GetAfter returns __HasSourceAtListInput.After, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __HasSourceAtListInput.First, and is useful for accessing the field via an interface.
+func (v *__HasSourceAtListInput) GetFirst() *int { return v.First }
+
 // __HashEqualListInput is used internally by genqlient
 type __HashEqualListInput struct {
 	Filter HashEqualSpec `json:"filter"`
@@ -28471,6 +29045,22 @@ type __IngestVulnerabilityInput struct {
 
 // GetVuln returns __IngestVulnerabilityInput.Vuln, and is useful for accessing the field via an interface.
 func (v *__IngestVulnerabilityInput) GetVuln() IDorVulnerabilityInput { return v.Vuln }
+
+// __IsDependencyListInput is used internally by genqlient
+type __IsDependencyListInput struct {
+	Filter IsDependencySpec `json:"filter"`
+	After  *string          `json:"after"`
+	First  *int             `json:"first"`
+}
+
+// GetFilter returns __IsDependencyListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__IsDependencyListInput) GetFilter() IsDependencySpec { return v.Filter }
+
+// GetAfter returns __IsDependencyListInput.After, and is useful for accessing the field via an interface.
+func (v *__IsDependencyListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __IsDependencyListInput.First, and is useful for accessing the field via an interface.
+func (v *__IsDependencyListInput) GetFirst() *int { return v.First }
 
 // __IsOccurrencesInput is used internally by genqlient
 type __IsOccurrencesInput struct {
@@ -30307,6 +30897,189 @@ func HasSLSAList(
 	var err_ error
 
 	var data_ HasSLSAListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasSourceAt.
+const HasSourceAt_Operation = `
+query HasSourceAt ($filter: HasSourceAtSpec!) {
+	HasSourceAt(hasSourceAtSpec: $filter) {
+		... AllHasSourceAt
+	}
+}
+fragment AllHasSourceAt on HasSourceAt {
+	id
+	justification
+	knownSince
+	package {
+		... AllPkgTree
+	}
+	source {
+		... AllSourceTree
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func HasSourceAt(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSourceAtSpec,
+) (*HasSourceAtResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSourceAt",
+		Query:  HasSourceAt_Operation,
+		Variables: &__HasSourceAtInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ HasSourceAtResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by HasSourceAtList.
+const HasSourceAtList_Operation = `
+query HasSourceAtList ($filter: HasSourceAtSpec!, $after: ID, $first: Int) {
+	HasSourceAtList(hasSourceAtSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllHasSourceAt
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllHasSourceAt on HasSourceAt {
+	id
+	justification
+	knownSince
+	package {
+		... AllPkgTree
+	}
+	source {
+		... AllSourceTree
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+`
+
+func HasSourceAtList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter HasSourceAtSpec,
+	after *string,
+	first *int,
+) (*HasSourceAtListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "HasSourceAtList",
+		Query:  HasSourceAtList_Operation,
+		Variables: &__HasSourceAtListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ HasSourceAtListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
@@ -32966,6 +33739,92 @@ func IngestVulnerability(
 	var err_ error
 
 	var data_ IngestVulnerabilityResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by IsDependencyList.
+const IsDependencyList_Operation = `
+query IsDependencyList ($filter: IsDependencySpec!, $after: ID, $first: Int) {
+	IsDependencyList(isDependencySpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllIsDependencyTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllIsDependencyTree on IsDependency {
+	id
+	justification
+	package {
+		... AllPkgTree
+	}
+	dependencyPackage {
+		... AllPkgTree
+	}
+	dependencyType
+	versionRange
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+`
+
+func IsDependencyList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter IsDependencySpec,
+	after *string,
+	first *int,
+) (*IsDependencyListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "IsDependencyList",
+		Query:  IsDependencyList_Operation,
+		Variables: &__IsDependencyListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ IsDependencyListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
