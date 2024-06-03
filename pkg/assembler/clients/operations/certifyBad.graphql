@@ -94,3 +94,20 @@ query CertifyBads($filter: CertifyBadSpec!) {
     ...AllCertifyBad
   }
 }
+
+query CertifyBadList($filter: CertifyBadSpec!, $after: ID, $first: Int) {
+  CertifyBadList(certifyBadSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllCertifyBad
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}

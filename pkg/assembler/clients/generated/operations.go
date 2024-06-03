@@ -7417,6 +7417,220 @@ func (v *CertifyBadInputSpec) GetCollector() string { return v.Collector }
 // GetDocumentRef returns CertifyBadInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyBadInputSpec) GetDocumentRef() string { return v.DocumentRef }
 
+// CertifyBadListCertifyBadListCertifyBadConnection includes the requested fields of the GraphQL type CertifyBadConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyBadConnection returns the paginated results for CertifyBad.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyBadEdge which contains the current cursor
+// and the CertifyBad node itself
+type CertifyBadListCertifyBadListCertifyBadConnection struct {
+	TotalCount int                                                                   `json:"totalCount"`
+	Edges      []CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge `json:"edges"`
+	PageInfo   CertifyBadListCertifyBadListCertifyBadConnectionPageInfo              `json:"pageInfo"`
+}
+
+// GetTotalCount returns CertifyBadListCertifyBadListCertifyBadConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns CertifyBadListCertifyBadListCertifyBadConnection.Edges, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnection) GetEdges() []CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns CertifyBadListCertifyBadListCertifyBadConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnection) GetPageInfo() CertifyBadListCertifyBadListCertifyBadConnectionPageInfo {
+	return v.PageInfo
+}
+
+// CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge includes the requested fields of the GraphQL type CertifyBadEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyBadEdge contains the cursor for the resulting node and
+// the CertifyBad node itself.
+type CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge struct {
+	Cursor string                                                                            `json:"cursor"`
+	Node   CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad `json:"node"`
+}
+
+// GetCursor returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge.Node, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdge) GetNode() CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad {
+	return v.Node
+}
+
+// CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad includes the requested fields of the GraphQL type CertifyBad.
+// The GraphQL type's documentation follows.
+//
+// CertifyBad is an attestation that a package, source, or artifact is considered
+// bad.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad struct {
+	AllCertifyBad `json:"-"`
+}
+
+// GetId returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Id, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetId() string {
+	return v.AllCertifyBad.Id
+}
+
+// GetJustification returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetJustification() string {
+	return v.AllCertifyBad.Justification
+}
+
+// GetKnownSince returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetKnownSince() time.Time {
+	return v.AllCertifyBad.KnownSince
+}
+
+// GetSubject returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
+	return v.AllCertifyBad.Subject
+}
+
+// GetOrigin returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetOrigin() string {
+	return v.AllCertifyBad.Origin
+}
+
+// GetCollector returns CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) GetCollector() string {
+	return v.AllCertifyBad.Collector
+}
+
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyBad)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad) __premarshalJSON() (*__premarshalCertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad, error) {
+	var retval __premarshalCertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad
+
+	retval.Id = v.AllCertifyBad.Id
+	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyBad.Subject
+		var err error
+		*dst, err = __marshalAllCertifyBadSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyBadListCertifyBadListCertifyBadConnectionEdgesCertifyBadEdgeNodeCertifyBad.AllCertifyBad.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyBad.Origin
+	retval.Collector = v.AllCertifyBad.Collector
+	return &retval, nil
+}
+
+// CertifyBadListCertifyBadListCertifyBadConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type CertifyBadListCertifyBadListCertifyBadConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns CertifyBadListCertifyBadListCertifyBadConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns CertifyBadListCertifyBadListCertifyBadConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns CertifyBadListCertifyBadListCertifyBadConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *CertifyBadListCertifyBadListCertifyBadConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// CertifyBadListResponse is returned by CertifyBadList on success.
+type CertifyBadListResponse struct {
+	// Returns a paginated results via CertifyBadConnection
+	CertifyBadList *CertifyBadListCertifyBadListCertifyBadConnection `json:"CertifyBadList"`
+}
+
+// GetCertifyBadList returns CertifyBadListResponse.CertifyBadList, and is useful for accessing the field via an interface.
+func (v *CertifyBadListResponse) GetCertifyBadList() *CertifyBadListCertifyBadListCertifyBadConnection {
+	return v.CertifyBadList
+}
+
 // CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
 // query.
 //
@@ -7577,6 +7791,114 @@ type CertifyBadsResponse struct {
 // GetCertifyBad returns CertifyBadsResponse.CertifyBad, and is useful for accessing the field via an interface.
 func (v *CertifyBadsResponse) GetCertifyBad() []CertifyBadsCertifyBad { return v.CertifyBad }
 
+// CertifyGoodCertifyGood includes the requested fields of the GraphQL type CertifyGood.
+// The GraphQL type's documentation follows.
+//
+// CertifyGood is an attestation that a package, source, or artifact is considered
+// good.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyGoodCertifyGood struct {
+	AllCertifyGood `json:"-"`
+}
+
+// GetId returns CertifyGoodCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetId() string { return v.AllCertifyGood.Id }
+
+// GetJustification returns CertifyGoodCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetJustification() string { return v.AllCertifyGood.Justification }
+
+// GetKnownSince returns CertifyGoodCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
+
+// GetSubject returns CertifyGoodCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.AllCertifyGood.Subject
+}
+
+// GetOrigin returns CertifyGoodCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetOrigin() string { return v.AllCertifyGood.Origin }
+
+// GetCollector returns CertifyGoodCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyGoodCertifyGood) GetCollector() string { return v.AllCertifyGood.Collector }
+
+func (v *CertifyGoodCertifyGood) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyGoodCertifyGood
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyGoodCertifyGood = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyGood)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyGoodCertifyGood struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyGoodCertifyGood) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyGoodCertifyGood) __premarshalJSON() (*__premarshalCertifyGoodCertifyGood, error) {
+	var retval __premarshalCertifyGoodCertifyGood
+
+	retval.Id = v.AllCertifyGood.Id
+	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyGood.Subject
+		var err error
+		*dst, err = __marshalAllCertifyGoodSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyGoodCertifyGood.AllCertifyGood.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyGood.Origin
+	retval.Collector = v.AllCertifyGood.Collector
+	return &retval, nil
+}
+
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
 	Justification string    `json:"justification"`
@@ -7600,6 +7922,274 @@ func (v *CertifyGoodInputSpec) GetCollector() string { return v.Collector }
 
 // GetDocumentRef returns CertifyGoodInputSpec.DocumentRef, and is useful for accessing the field via an interface.
 func (v *CertifyGoodInputSpec) GetDocumentRef() string { return v.DocumentRef }
+
+// CertifyGoodListCertifyGoodListCertifyGoodConnection includes the requested fields of the GraphQL type CertifyGoodConnection.
+// The GraphQL type's documentation follows.
+//
+// CertifyGoodConnection returns the paginated results for CertifyGood.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the CertifyGoodEdge which contains the current cursor
+// and the CertifyGood node itself
+type CertifyGoodListCertifyGoodListCertifyGoodConnection struct {
+	TotalCount int                                                                       `json:"totalCount"`
+	Edges      []CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge `json:"edges"`
+	PageInfo   CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo               `json:"pageInfo"`
+}
+
+// GetTotalCount returns CertifyGoodListCertifyGoodListCertifyGoodConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnection) GetTotalCount() int {
+	return v.TotalCount
+}
+
+// GetEdges returns CertifyGoodListCertifyGoodListCertifyGoodConnection.Edges, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnection) GetEdges() []CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns CertifyGoodListCertifyGoodListCertifyGoodConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnection) GetPageInfo() CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo {
+	return v.PageInfo
+}
+
+// CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge includes the requested fields of the GraphQL type CertifyGoodEdge.
+// The GraphQL type's documentation follows.
+//
+// CertifyGoodEdge contains the cursor for the resulting node and
+// the CertifyGood node itself.
+type CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge struct {
+	Cursor string                                                                                 `json:"cursor"`
+	Node   CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood `json:"node"`
+}
+
+// GetCursor returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge.Node, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdge) GetNode() CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood {
+	return v.Node
+}
+
+// CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood includes the requested fields of the GraphQL type CertifyGood.
+// The GraphQL type's documentation follows.
+//
+// CertifyGood is an attestation that a package, source, or artifact is considered
+// good.
+//
+// All evidence trees record a justification for the property they represent as
+// well as the document that contains the attestation (origin) and the collector
+// that collected the document (collector).
+//
+// The certification applies to a subject which is a package, source, or artifact.
+// If the attestation targets a package, it must target a PackageName or a
+// PackageVersion. If the attestation targets a source, it must target a
+// SourceName.
+type CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood struct {
+	AllCertifyGood `json:"-"`
+}
+
+// GetId returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetId() string {
+	return v.AllCertifyGood.Id
+}
+
+// GetJustification returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetJustification() string {
+	return v.AllCertifyGood.Justification
+}
+
+// GetKnownSince returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetKnownSince() time.Time {
+	return v.AllCertifyGood.KnownSince
+}
+
+// GetSubject returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
+	return v.AllCertifyGood.Subject
+}
+
+// GetOrigin returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetOrigin() string {
+	return v.AllCertifyGood.Origin
+}
+
+// GetCollector returns CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) GetCollector() string {
+	return v.AllCertifyGood.Collector
+}
+
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllCertifyGood)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood) __premarshalJSON() (*__premarshalCertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood, error) {
+	var retval __premarshalCertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood
+
+	retval.Id = v.AllCertifyGood.Id
+	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
+	{
+
+		dst := &retval.Subject
+		src := v.AllCertifyGood.Subject
+		var err error
+		*dst, err = __marshalAllCertifyGoodSubjectPackageSourceOrArtifact(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal CertifyGoodListCertifyGoodListCertifyGoodConnectionEdgesCertifyGoodEdgeNodeCertifyGood.AllCertifyGood.Subject: %w", err)
+		}
+	}
+	retval.Origin = v.AllCertifyGood.Origin
+	retval.Collector = v.AllCertifyGood.Collector
+	return &retval, nil
+}
+
+// CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListCertifyGoodListCertifyGoodConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// CertifyGoodListResponse is returned by CertifyGoodList on success.
+type CertifyGoodListResponse struct {
+	// Returns a paginated results via CertifyGoodConnection
+	CertifyGoodList *CertifyGoodListCertifyGoodListCertifyGoodConnection `json:"CertifyGoodList"`
+}
+
+// GetCertifyGoodList returns CertifyGoodListResponse.CertifyGoodList, and is useful for accessing the field via an interface.
+func (v *CertifyGoodListResponse) GetCertifyGoodList() *CertifyGoodListCertifyGoodListCertifyGoodConnection {
+	return v.CertifyGoodList
+}
+
+// CertifyGoodResponse is returned by CertifyGood on success.
+type CertifyGoodResponse struct {
+	// Returns all CertifyGood attestations matching a filter.
+	CertifyGood []CertifyGoodCertifyGood `json:"CertifyGood"`
+}
+
+// GetCertifyGood returns CertifyGoodResponse.CertifyGood, and is useful for accessing the field via an interface.
+func (v *CertifyGoodResponse) GetCertifyGood() []CertifyGoodCertifyGood { return v.CertifyGood }
+
+// CertifyBadSpec allows filtering the list of CertifyBad evidence to return in a
+// query.
+//
+// If a package is specified in the subject filter, then it must be specified up
+// to PackageName or PackageVersion. That is, user must specify package name, or
+// name and one of version, qualifiers, or subpath.
+//
+// If a source is specified in the subject filter, then it must specify a name,
+// and optionally a tag and a commit.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
+type CertifyGoodSpec struct {
+	Id            *string                      `json:"id"`
+	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
+	Justification *string                      `json:"justification"`
+	KnownSince    *time.Time                   `json:"knownSince"`
+	Origin        *string                      `json:"origin"`
+	Collector     *string                      `json:"collector"`
+	DocumentRef   *string                      `json:"documentRef"`
+}
+
+// GetId returns CertifyGoodSpec.Id, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetId() *string { return v.Id }
+
+// GetSubject returns CertifyGoodSpec.Subject, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetSubject() *PackageSourceOrArtifactSpec { return v.Subject }
+
+// GetJustification returns CertifyGoodSpec.Justification, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetJustification() *string { return v.Justification }
+
+// GetKnownSince returns CertifyGoodSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetKnownSince() *time.Time { return v.KnownSince }
+
+// GetOrigin returns CertifyGoodSpec.Origin, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetOrigin() *string { return v.Origin }
+
+// GetCollector returns CertifyGoodSpec.Collector, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetCollector() *string { return v.Collector }
+
+// GetDocumentRef returns CertifyGoodSpec.DocumentRef, and is useful for accessing the field via an interface.
+func (v *CertifyGoodSpec) GetDocumentRef() *string { return v.DocumentRef }
 
 // CertifyLegalInputSpec represents the input for certifying legal information in
 // mutations.
@@ -25137,6 +25727,22 @@ func (v *__BuildersListInput) GetAfter() *string { return v.After }
 // GetFirst returns __BuildersListInput.First, and is useful for accessing the field via an interface.
 func (v *__BuildersListInput) GetFirst() *int { return v.First }
 
+// __CertifyBadListInput is used internally by genqlient
+type __CertifyBadListInput struct {
+	Filter CertifyBadSpec `json:"filter"`
+	After  *string        `json:"after"`
+	First  *int           `json:"first"`
+}
+
+// GetFilter returns __CertifyBadListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyBadListInput) GetFilter() CertifyBadSpec { return v.Filter }
+
+// GetAfter returns __CertifyBadListInput.After, and is useful for accessing the field via an interface.
+func (v *__CertifyBadListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __CertifyBadListInput.First, and is useful for accessing the field via an interface.
+func (v *__CertifyBadListInput) GetFirst() *int { return v.First }
+
 // __CertifyBadsInput is used internally by genqlient
 type __CertifyBadsInput struct {
 	Filter CertifyBadSpec `json:"filter"`
@@ -25144,6 +25750,30 @@ type __CertifyBadsInput struct {
 
 // GetFilter returns __CertifyBadsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__CertifyBadsInput) GetFilter() CertifyBadSpec { return v.Filter }
+
+// __CertifyGoodInput is used internally by genqlient
+type __CertifyGoodInput struct {
+	Filter CertifyGoodSpec `json:"filter"`
+}
+
+// GetFilter returns __CertifyGoodInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodInput) GetFilter() CertifyGoodSpec { return v.Filter }
+
+// __CertifyGoodListInput is used internally by genqlient
+type __CertifyGoodListInput struct {
+	Filter CertifyGoodSpec `json:"filter"`
+	After  *string         `json:"after"`
+	First  *int            `json:"first"`
+}
+
+// GetFilter returns __CertifyGoodListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodListInput) GetFilter() CertifyGoodSpec { return v.Filter }
+
+// GetAfter returns __CertifyGoodListInput.After, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __CertifyGoodListInput.First, and is useful for accessing the field via an interface.
+func (v *__CertifyGoodListInput) GetFirst() *int { return v.First }
 
 // __CertifyLegalsInput is used internally by genqlient
 type __CertifyLegalsInput struct {
@@ -26683,6 +27313,116 @@ func BuildersList(
 	return &data_, err_
 }
 
+// The query or mutation executed by CertifyBadList.
+const CertifyBadList_Operation = `
+query CertifyBadList ($filter: CertifyBadSpec!, $after: ID, $first: Int) {
+	CertifyBadList(certifyBadSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyBad
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyBad on CertifyBad {
+	id
+	justification
+	knownSince
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyBadList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyBadSpec,
+	after *string,
+	first *int,
+) (*CertifyBadListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyBadList",
+		Query:  CertifyBadList_Operation,
+		Variables: &__CertifyBadListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyBadListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
 // The query or mutation executed by CertifyBads.
 const CertifyBads_Operation = `
 query CertifyBads ($filter: CertifyBadSpec!) {
@@ -26767,6 +27507,211 @@ func CertifyBads(
 	var err_ error
 
 	var data_ CertifyBadsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyGood.
+const CertifyGood_Operation = `
+query CertifyGood ($filter: CertifyGoodSpec!) {
+	CertifyGood(certifyGoodSpec: $filter) {
+		... AllCertifyGood
+	}
+}
+fragment AllCertifyGood on CertifyGood {
+	id
+	justification
+	knownSince
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyGood(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyGoodSpec,
+) (*CertifyGoodResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyGood",
+		Query:  CertifyGood_Operation,
+		Variables: &__CertifyGoodInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyGoodResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by CertifyGoodList.
+const CertifyGoodList_Operation = `
+query CertifyGoodList ($filter: CertifyGoodSpec!, $after: ID, $first: Int) {
+	CertifyGoodList(certifyGoodSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllCertifyGood
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllCertifyGood on CertifyGood {
+	id
+	justification
+	knownSince
+	subject {
+		__typename
+		... on Package {
+			... AllPkgTree
+		}
+		... on Source {
+			... AllSourceTree
+		}
+		... on Artifact {
+			... AllArtifactTree
+		}
+	}
+	origin
+	collector
+}
+fragment AllPkgTree on Package {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			versions {
+				id
+				purl
+				version
+				qualifiers {
+					key
+					value
+				}
+				subpath
+			}
+		}
+	}
+}
+fragment AllSourceTree on Source {
+	id
+	type
+	namespaces {
+		id
+		namespace
+		names {
+			id
+			name
+			tag
+			commit
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func CertifyGoodList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter CertifyGoodSpec,
+	after *string,
+	first *int,
+) (*CertifyGoodListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "CertifyGoodList",
+		Query:  CertifyGoodList_Operation,
+		Variables: &__CertifyGoodListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ CertifyGoodListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(
