@@ -6953,6 +6953,181 @@ func (v *ArtifactsArtifactsArtifact) __premarshalJSON() (*__premarshalArtifactsA
 	return &retval, nil
 }
 
+// ArtifactsListArtifactsListArtifactConnection includes the requested fields of the GraphQL type ArtifactConnection.
+// The GraphQL type's documentation follows.
+//
+// ArtifactConnection returns the paginated results for artifact.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the ArtifactEdge which contains the current cursor
+// and the artifact node itself
+type ArtifactsListArtifactsListArtifactConnection struct {
+	TotalCount int                                                             `json:"totalCount"`
+	Edges      []ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge `json:"edges"`
+	PageInfo   ArtifactsListArtifactsListArtifactConnectionPageInfo            `json:"pageInfo"`
+}
+
+// GetTotalCount returns ArtifactsListArtifactsListArtifactConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns ArtifactsListArtifactsListArtifactConnection.Edges, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnection) GetEdges() []ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns ArtifactsListArtifactsListArtifactConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnection) GetPageInfo() ArtifactsListArtifactsListArtifactConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge includes the requested fields of the GraphQL type ArtifactEdge.
+// The GraphQL type's documentation follows.
+//
+// ArtifactEdge contains the cursor for the resulting node and
+// the artifact node itself.
+type ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge struct {
+	Cursor string                                                                    `json:"cursor"`
+	Node   ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact `json:"node"`
+}
+
+// GetCursor returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge.Node, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdge) GetNode() ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact {
+	return v.Node
+}
+
+// ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact struct {
+	AllArtifactTree `json:"-"`
+}
+
+// GetId returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact.Id, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) GetId() string {
+	return v.AllArtifactTree.Id
+}
+
+// GetAlgorithm returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) GetAlgorithm() string {
+	return v.AllArtifactTree.Algorithm
+}
+
+// GetDigest returns ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) GetDigest() string {
+	return v.AllArtifactTree.Digest
+}
+
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact struct {
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact) __premarshalJSON() (*__premarshalArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact, error) {
+	var retval __premarshalArtifactsListArtifactsListArtifactConnectionEdgesArtifactEdgeNodeArtifact
+
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// ArtifactsListArtifactsListArtifactConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type ArtifactsListArtifactsListArtifactConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns ArtifactsListArtifactsListArtifactConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns ArtifactsListArtifactsListArtifactConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns ArtifactsListArtifactsListArtifactConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ArtifactsListArtifactsListArtifactConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// ArtifactsListResponse is returned by ArtifactsList on success.
+type ArtifactsListResponse struct {
+	// Returns a paginated results via ArtifactConnection
+	ArtifactsList *ArtifactsListArtifactsListArtifactConnection `json:"artifactsList"`
+}
+
+// GetArtifactsList returns ArtifactsListResponse.ArtifactsList, and is useful for accessing the field via an interface.
+func (v *ArtifactsListResponse) GetArtifactsList() *ArtifactsListArtifactsListArtifactConnection {
+	return v.ArtifactsList
+}
+
 // ArtifactsResponse is returned by Artifacts on success.
 type ArtifactsResponse struct {
 	// Returns all artifacts matching a filter.
@@ -6981,6 +7156,241 @@ func (v *BuilderSpec) GetId() *string { return v.Id }
 
 // GetUri returns BuilderSpec.Uri, and is useful for accessing the field via an interface.
 func (v *BuilderSpec) GetUri() *string { return v.Uri }
+
+// BuildersBuildersBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
+//
+// Currently builders are identified by the uri field.
+type BuildersBuildersBuilder struct {
+	AllBuilderTree `json:"-"`
+}
+
+// GetId returns BuildersBuildersBuilder.Id, and is useful for accessing the field via an interface.
+func (v *BuildersBuildersBuilder) GetId() string { return v.AllBuilderTree.Id }
+
+// GetUri returns BuildersBuildersBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *BuildersBuildersBuilder) GetUri() string { return v.AllBuilderTree.Uri }
+
+func (v *BuildersBuildersBuilder) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*BuildersBuildersBuilder
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.BuildersBuildersBuilder = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllBuilderTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalBuildersBuildersBuilder struct {
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+}
+
+func (v *BuildersBuildersBuilder) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *BuildersBuildersBuilder) __premarshalJSON() (*__premarshalBuildersBuildersBuilder, error) {
+	var retval __premarshalBuildersBuildersBuilder
+
+	retval.Id = v.AllBuilderTree.Id
+	retval.Uri = v.AllBuilderTree.Uri
+	return &retval, nil
+}
+
+// BuildersListBuildersListBuilderConnection includes the requested fields of the GraphQL type BuilderConnection.
+// The GraphQL type's documentation follows.
+//
+// BuilderConnection returns the paginated results for builder.
+//
+// totalCount is the total number of results returned.
+//
+// pageInfo provides information to the client if there is
+// a next page of results and the starting and
+// ending cursor for the current set.
+//
+// edges contains the BuilderEdge which contains the current cursor
+// and the Builder node itself
+type BuildersListBuildersListBuilderConnection struct {
+	TotalCount int                                                         `json:"totalCount"`
+	Edges      []BuildersListBuildersListBuilderConnectionEdgesBuilderEdge `json:"edges"`
+	PageInfo   BuildersListBuildersListBuilderConnectionPageInfo           `json:"pageInfo"`
+}
+
+// GetTotalCount returns BuildersListBuildersListBuilderConnection.TotalCount, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnection) GetTotalCount() int { return v.TotalCount }
+
+// GetEdges returns BuildersListBuildersListBuilderConnection.Edges, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnection) GetEdges() []BuildersListBuildersListBuilderConnectionEdgesBuilderEdge {
+	return v.Edges
+}
+
+// GetPageInfo returns BuildersListBuildersListBuilderConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnection) GetPageInfo() BuildersListBuildersListBuilderConnectionPageInfo {
+	return v.PageInfo
+}
+
+// BuildersListBuildersListBuilderConnectionEdgesBuilderEdge includes the requested fields of the GraphQL type BuilderEdge.
+// The GraphQL type's documentation follows.
+//
+// BuilderEdge contains the cursor for the resulting node and
+// the Builder node itself.
+type BuildersListBuildersListBuilderConnectionEdgesBuilderEdge struct {
+	Cursor string                                                               `json:"cursor"`
+	Node   BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder `json:"node"`
+}
+
+// GetCursor returns BuildersListBuildersListBuilderConnectionEdgesBuilderEdge.Cursor, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdge) GetCursor() string {
+	return v.Cursor
+}
+
+// GetNode returns BuildersListBuildersListBuilderConnectionEdgesBuilderEdge.Node, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdge) GetNode() BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder {
+	return v.Node
+}
+
+// BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder includes the requested fields of the GraphQL type Builder.
+// The GraphQL type's documentation follows.
+//
+// Builder represents the builder (e.g., FRSCA or GitHub Actions).
+//
+// Currently builders are identified by the uri field.
+type BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder struct {
+	AllBuilderTree `json:"-"`
+}
+
+// GetId returns BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder.Id, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) GetId() string {
+	return v.AllBuilderTree.Id
+}
+
+// GetUri returns BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder.Uri, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) GetUri() string {
+	return v.AllBuilderTree.Uri
+}
+
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllBuilderTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalBuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder struct {
+	Id string `json:"id"`
+
+	Uri string `json:"uri"`
+}
+
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *BuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder) __premarshalJSON() (*__premarshalBuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder, error) {
+	var retval __premarshalBuildersListBuildersListBuilderConnectionEdgesBuilderEdgeNodeBuilder
+
+	retval.Id = v.AllBuilderTree.Id
+	retval.Uri = v.AllBuilderTree.Uri
+	return &retval, nil
+}
+
+// BuildersListBuildersListBuilderConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+// The GraphQL type's documentation follows.
+//
+// PageInfo serves the client information about the paginated query results.
+//
+// hasNextPage is true when there are results to be returned.
+//
+// hasPreviousPage is true when there is a previous page to return to.
+//
+// startCursor is the ID where the query started from.
+//
+// endCursor is where the query ended.
+type BuildersListBuildersListBuilderConnectionPageInfo struct {
+	StartCursor *string `json:"startCursor"`
+	EndCursor   *string `json:"endCursor"`
+	HasNextPage bool    `json:"hasNextPage"`
+}
+
+// GetStartCursor returns BuildersListBuildersListBuilderConnectionPageInfo.StartCursor, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionPageInfo) GetStartCursor() *string {
+	return v.StartCursor
+}
+
+// GetEndCursor returns BuildersListBuildersListBuilderConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// GetHasNextPage returns BuildersListBuildersListBuilderConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *BuildersListBuildersListBuilderConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// BuildersListResponse is returned by BuildersList on success.
+type BuildersListResponse struct {
+	// Returns a paginated results via BuilderConnection
+	BuildersList *BuildersListBuildersListBuilderConnection `json:"buildersList"`
+}
+
+// GetBuildersList returns BuildersListResponse.BuildersList, and is useful for accessing the field via an interface.
+func (v *BuildersListResponse) GetBuildersList() *BuildersListBuildersListBuilderConnection {
+	return v.BuildersList
+}
+
+// BuildersResponse is returned by Builders on success.
+type BuildersResponse struct {
+	// Returns all builders matching a filter.
+	Builders []BuildersBuildersBuilder `json:"builders"`
+}
+
+// GetBuilders returns BuildersResponse.Builders, and is useful for accessing the field via an interface.
+func (v *BuildersResponse) GetBuilders() []BuildersBuildersBuilder { return v.Builders }
 
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
@@ -24687,6 +25097,46 @@ type __ArtifactsInput struct {
 // GetFilter returns __ArtifactsInput.Filter, and is useful for accessing the field via an interface.
 func (v *__ArtifactsInput) GetFilter() ArtifactSpec { return v.Filter }
 
+// __ArtifactsListInput is used internally by genqlient
+type __ArtifactsListInput struct {
+	Filter ArtifactSpec `json:"filter"`
+	After  *string      `json:"after"`
+	First  *int         `json:"first"`
+}
+
+// GetFilter returns __ArtifactsListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ArtifactsListInput) GetFilter() ArtifactSpec { return v.Filter }
+
+// GetAfter returns __ArtifactsListInput.After, and is useful for accessing the field via an interface.
+func (v *__ArtifactsListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __ArtifactsListInput.First, and is useful for accessing the field via an interface.
+func (v *__ArtifactsListInput) GetFirst() *int { return v.First }
+
+// __BuildersInput is used internally by genqlient
+type __BuildersInput struct {
+	Filter BuilderSpec `json:"filter"`
+}
+
+// GetFilter returns __BuildersInput.Filter, and is useful for accessing the field via an interface.
+func (v *__BuildersInput) GetFilter() BuilderSpec { return v.Filter }
+
+// __BuildersListInput is used internally by genqlient
+type __BuildersListInput struct {
+	Filter BuilderSpec `json:"filter"`
+	After  *string     `json:"after"`
+	First  *int        `json:"first"`
+}
+
+// GetFilter returns __BuildersListInput.Filter, and is useful for accessing the field via an interface.
+func (v *__BuildersListInput) GetFilter() BuilderSpec { return v.Filter }
+
+// GetAfter returns __BuildersListInput.After, and is useful for accessing the field via an interface.
+func (v *__BuildersListInput) GetAfter() *string { return v.After }
+
+// GetFirst returns __BuildersListInput.First, and is useful for accessing the field via an interface.
+func (v *__BuildersListInput) GetFirst() *int { return v.First }
+
 // __CertifyBadsInput is used internally by genqlient
 type __CertifyBadsInput struct {
 	Filter CertifyBadSpec `json:"filter"`
@@ -26074,6 +26524,154 @@ func Artifacts(
 	var err_ error
 
 	var data_ ArtifactsResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by ArtifactsList.
+const ArtifactsList_Operation = `
+query ArtifactsList ($filter: ArtifactSpec!, $after: ID, $first: Int) {
+	artifactsList(artifactSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllArtifactTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllArtifactTree on Artifact {
+	id
+	algorithm
+	digest
+}
+`
+
+func ArtifactsList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter ArtifactSpec,
+	after *string,
+	first *int,
+) (*ArtifactsListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "ArtifactsList",
+		Query:  ArtifactsList_Operation,
+		Variables: &__ArtifactsListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ ArtifactsListResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by Builders.
+const Builders_Operation = `
+query Builders ($filter: BuilderSpec!) {
+	builders(builderSpec: $filter) {
+		... AllBuilderTree
+	}
+}
+fragment AllBuilderTree on Builder {
+	id
+	uri
+}
+`
+
+func Builders(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter BuilderSpec,
+) (*BuildersResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "Builders",
+		Query:  Builders_Operation,
+		Variables: &__BuildersInput{
+			Filter: filter,
+		},
+	}
+	var err_ error
+
+	var data_ BuildersResponse
+	resp_ := &graphql.Response{Data: &data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return &data_, err_
+}
+
+// The query or mutation executed by BuildersList.
+const BuildersList_Operation = `
+query BuildersList ($filter: BuilderSpec!, $after: ID, $first: Int) {
+	buildersList(builderSpec: $filter, after: $after, first: $first) {
+		totalCount
+		edges {
+			cursor
+			node {
+				... AllBuilderTree
+			}
+		}
+		pageInfo {
+			startCursor
+			endCursor
+			hasNextPage
+		}
+	}
+}
+fragment AllBuilderTree on Builder {
+	id
+	uri
+}
+`
+
+func BuildersList(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter BuilderSpec,
+	after *string,
+	first *int,
+) (*BuildersListResponse, error) {
+	req_ := &graphql.Request{
+		OpName: "BuildersList",
+		Query:  BuildersList_Operation,
+		Variables: &__BuildersListInput{
+			Filter: filter,
+			After:  after,
+			First:  first,
+		},
+	}
+	var err_ error
+
+	var data_ BuildersListResponse
 	resp_ := &graphql.Response{Data: &data_}
 
 	err_ = client_.MakeRequest(

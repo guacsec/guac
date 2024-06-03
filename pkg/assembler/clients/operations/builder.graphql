@@ -26,3 +26,29 @@ mutation IngestBuilder($builder: IDorBuilderInput!) {
 mutation IngestBuilders($builders: [IDorBuilderInput!]!) {
   ingestBuilders(builders: $builders)
 }
+
+
+# Exposes GraphQL queries to retrieve GUAC builders
+
+query Builders($filter: BuilderSpec!) {
+  builders(builderSpec: $filter) {
+    ...AllBuilderTree
+  }
+}
+
+query BuildersList($filter: BuilderSpec!, $after: ID, $first: Int) {
+  buildersList(builderSpec: $filter, after: $after, first: $first) {
+    totalCount
+    edges {
+      cursor
+      node {
+        ...AllBuilderTree
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+    }
+  }
+}
